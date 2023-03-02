@@ -153,8 +153,6 @@ void filter_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   BAND *band=band_get_band(vfo[active_receiver->id].band);
-  BANDSTACK *bandstack=band->bandstack;
-  BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[active_receiver->id].bandstack];
   FILTER* band_filters=filters[vfo[active_receiver->id].mode];
   FILTER* band_filter=&band_filters[vfo[active_receiver->id].filter];
 
@@ -188,7 +186,6 @@ void filter_menu(GtkWidget *parent) {
 
     default:
       for(i=0;i<FILTERS-2;i++) {
-        FILTER* band_filter=&band_filters[i];
         GtkWidget *b=gtk_button_new_with_label(band_filters[i].title);
         if(i==vfo[active_receiver->id].filter) {
           set_button_text_color(b,"orange");

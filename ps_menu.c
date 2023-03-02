@@ -512,7 +512,6 @@ void ps_menu(GtkWidget *parent) {
   gtk_widget_show(ps_ant_ext2);
   gtk_grid_attach(GTK_GRID(grid), ps_ant_ext2, col, row, 1, 1);
   g_signal_connect(ps_ant_ext2,"toggled", G_CALLBACK(ps_ant_cb), (gpointer) (long) 7);
-  col++;
 
   row++;
 

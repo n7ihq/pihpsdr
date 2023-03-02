@@ -34,7 +34,7 @@ static void get_info(char *driver) {
   int i;
   SoapySDRKwargs args={};
   int software_version=0;
-  char *version;
+  //char *version;
   char *address=NULL;
   int rtlsdr_val=0;
   int sdrplay_val=0;
@@ -85,18 +85,18 @@ static void get_info(char *driver) {
     if(strcmp(info.keys[i],"firmwareVersion")==0) {
       strcpy(fw_version,info.vals[i]);
     }
-    if(strcmp(info.keys[i],"fw_version")==0) {
-      version=info.vals[i];
-    }
+    //if(strcmp(info.keys[i],"fw_version")==0) {
+    //  version=info.vals[i];
+    //}
     if(strcmp(info.keys[i],"gatewareVersion")==0) {
       strcpy(gw_version,info.vals[i]);
       software_version=(int)(atof(info.vals[i])*100.0);
     }
-    if(strcmp(info.keys[i],"sdrplay_api_api_version")==0) {
-      /* take just the first 4 characters here */
-      info.vals[i][4]='\0';
-      version=info.vals[i];
-    }
+    //if(strcmp(info.keys[i],"sdrplay_api_api_version")==0) {
+    //  /* take just the first 4 characters here */
+    //  info.vals[i][4]='\0';
+    //  version=info.vals[i];
+    //}
     if(strcmp(info.keys[i],"hardwareVersion")==0) {
       strcpy(hw_version,info.vals[i]);
     }
@@ -209,12 +209,11 @@ static void get_info(char *driver) {
   size_t sensors;
   char **sensor = SoapySDRDevice_listSensors(sdr, &sensors);
   gboolean has_temp=FALSE;
-  char *ptr;
   fprintf(stderr, "Sensors:\n");
   for (size_t i = 0; i < sensors; i++) {
     char *value=SoapySDRDevice_readSensor(sdr, sensor[i]);
     fprintf(stderr, "    %s=%s\n", sensor[i],value);
-    if((ptr=strstr(sensor[i],"temp"))!=NULL) {
+    if((strstr(sensor[i],"temp"))!=NULL) {
       has_temp=TRUE;
     }
   }

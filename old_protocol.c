@@ -166,7 +166,7 @@ static int command=1;
 
 static GThread *receive_thread_id;
 static gpointer receive_thread(gpointer arg);
-static void process_ozy_input_buffer(unsigned char  *buffer);
+static void process_ozy_input_buffer(unsigned const char  *buffer);
 static void process_bandscope_buffer(char  *buffer);
 void ozy_send_buffer();
 
@@ -174,7 +174,7 @@ static unsigned char metis_buffer[1032];
 static uint32_t send_sequence=0;
 static int metis_offset=8;
 
-static int metis_write(unsigned char ep,unsigned char* buffer,int length);
+static int metis_write(unsigned char ep,unsigned const char* buffer,int length);
 static void metis_start_stop(int command);
 static void metis_send_buffer(unsigned char* buffer,int length);
 static void metis_restart();
@@ -1212,7 +1212,7 @@ static void process_ozy_byte(int b) {
   }
 }
 
-static void process_ozy_input_buffer(unsigned char  *buffer) {
+static void process_ozy_input_buffer(unsigned const char  *buffer) {
   int i;
   num_hpsdr_receivers=how_many_receivers();
   rxfdbk = rx_feedback_channel();
@@ -2098,7 +2098,7 @@ static void ozyusb_write(unsigned char* buffer,int length)
 }
 #endif
 
-static int metis_write(unsigned char ep,unsigned char* buffer,int length) {
+static int metis_write(unsigned char ep,unsigned const char* buffer,int length) {
   int i;
 
   // copy the buffer over

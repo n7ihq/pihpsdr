@@ -71,6 +71,8 @@
 //#define OZY_IO_TIMEOUT 2000
 #define MAX_EPO_PACKET_SIZE 64
 
+#define USB_TIMEOUT -7
+
 static int init=0;
 extern unsigned char penny_fw, mercury_fw;
 extern unsigned short penny_fp, penny_rp, penny_alc;
@@ -160,14 +162,12 @@ int ozy_write(int ep,unsigned char* buffer,int buffer_size) {
 
 	bytes=0;
 	rc = libusb_bulk_transfer(ozy_handle,(unsigned char)ep,buffer,buffer_size,&bytes,OZY_IO_TIMEOUT);
-	if(rc==0) {
-		rc=bytes;
-	} else if(rc==-7) {
+	if(rc == USB_TIMEOUT) {
 	  g_print("%s: timeout bytes=%d ep=%d\n",__FUNCTION__,bytes,ep);
 	  libusb_clear_halt(ozy_handle,(unsigned char)ep);
 	}
-        rc=buffer_size;
-	return rc;
+        // this returns OK in all cases (?)
+	return buffer_size;
 }
 
 int ozy_read(int ep,unsigned char* buffer,int buffer_size) {
@@ -595,7 +595,7 @@ int filePath (char *sOut, const char *sIn) {
 		char xPath [PATH_MAX] = {0};
 		char *p;
 
-		int  rc = readlink ("/proc/self/exe", xPath, sizeof(xPath)); // rc SHADOWED
+		rc = readlink ("/proc/self/exe", xPath, sizeof(xPath));
 
 		// try to detect the directory from which the executable has been loaded
 		if (rc >= 0) {

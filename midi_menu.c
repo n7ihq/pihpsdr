@@ -1014,7 +1014,6 @@ void midi_menu(GtkWidget *parent) {
   set_delay = gtk_spin_button_new_with_range(0.0, 500.0, 10.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_delay, col, row, 1, 1);
   g_signal_connect(set_delay, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(1));
-  col++;
 
   row++;
   col=0;
@@ -1031,7 +1030,6 @@ void midi_menu(GtkWidget *parent) {
   set_vfl2 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_vfl2, col, row, 1, 1);
   g_signal_connect(set_vfl2, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(3));
-  col++;
 
   row++;
   col=0;
@@ -1049,10 +1047,10 @@ void midi_menu(GtkWidget *parent) {
   set_fl2 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_fl2, col, row, 1, 1);
   g_signal_connect(set_fl2, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(5));
-  col++;
 
   row++;
   col=0;
+
   lbl=gtk_label_new("Left <");
   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(WheelGrid), lbl, col, row, 1, 1);
@@ -1066,10 +1064,10 @@ void midi_menu(GtkWidget *parent) {
   set_lft2 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_lft2, col, row, 1, 1);
   g_signal_connect(set_lft2, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(7));
-  col++;
 
   row++;
   col=0;
+
   lbl=gtk_label_new("Right >");
   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(WheelGrid), lbl, col, row, 1, 1);
@@ -1083,10 +1081,10 @@ void midi_menu(GtkWidget *parent) {
   set_rgt2 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_rgt2, col, row, 1, 1);
   g_signal_connect(set_rgt2, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(9));
-  col++;
 
   row++;
   col=0;
+
   lbl=gtk_label_new("Right >>");
   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(WheelGrid), lbl, col, row, 1, 1);
@@ -1100,10 +1098,10 @@ void midi_menu(GtkWidget *parent) {
   set_fr2 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_fr2, col, row, 1, 1);
   g_signal_connect(set_fr2, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(11));
-  col++;
 
   row++;
   col=0;
+
   lbl=gtk_label_new("Right >>>");
   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(WheelGrid), lbl, col, row, 1, 1);
@@ -1117,7 +1115,6 @@ void midi_menu(GtkWidget *parent) {
   set_vfr2 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_vfr2, col, row, 1, 1);
   g_signal_connect(set_vfr2, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(13));
-  col++;
 
   gtk_container_add(GTK_CONTAINER(content),grid);
   gtk_container_add(GTK_CONTAINER(WheelContainer), WheelGrid);
@@ -1134,7 +1131,6 @@ void midi_menu(GtkWidget *parent) {
 static int update(void *data) {
   int state=GPOINTER_TO_INT(data);
   gchar text[32];
-  gint i=1;
 
   switch(state) {
     case UPDATE_NEW:
@@ -1622,14 +1618,14 @@ void midi_restore_state() {
 	  }
           sprintf(name,"midi[%d].entry[%d].channel[%d].action",i,entry,channel);
           value=getProperty(name);
-          // convert '$' back to '\n' in action name before comparing
-          cp=value;
-          while (*cp) {
-            if (*cp == '$') *cp='\n';
-            cp++;
-          }
 	  action=NO_ACTION;
           if(value) {
+            // convert '$' back to '\n' in action name before comparing
+            cp=value;
+            while (*cp) {
+              if (*cp == '$') *cp='\n';
+              cp++;
+            }
 	    for(j=0;j<ACTIONS;j++) {
               if(strcmp(value,ActionTable[j].str)==0) {
                 action=ActionTable[j].action;

@@ -196,7 +196,7 @@ static int init(void *data) {
   // Depending on the WDSP version, the file is wdspWisdom or wdspWisdom00.
   // sem_trywait() is not elegant, replaced this with wisdom_running variable.
   //
-  char *c=getcwd(wisdom_directory, sizeof(wisdom_directory));
+  (void) getcwd(wisdom_directory, sizeof(wisdom_directory));
   strcpy(&wisdom_directory[strlen(wisdom_directory)],"/");
   fprintf(stderr,"Securing wisdom file in directory: %s\n", wisdom_directory);
   status_text("Checking FFTW Wisdom file ...");

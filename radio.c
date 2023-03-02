@@ -668,7 +668,6 @@ if(!radio_is_remote) {
   if(display_toolbar) {
     toolbar = toolbar_init(display_width,TOOLBAR_HEIGHT,top_window);
     gtk_fixed_put(GTK_FIXED(fixed),toolbar,0,y);
-    y+=TOOLBAR_HEIGHT;
   }
 
 //
@@ -2852,7 +2851,7 @@ int remote_start(void *data) {
   g_idle_add(ext_vfo_update,(gpointer)NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_ARROW));
   for(int i=0;i<receivers;i++) {
-    gint timer_id=gdk_threads_add_timeout_full(G_PRIORITY_DEFAULT_IDLE,100, start_spectrum, receiver[i], NULL);
+    (void) gdk_threads_add_timeout_full(G_PRIORITY_DEFAULT_IDLE,100, start_spectrum, receiver[i], NULL);
   }
   start_vfo_timer();
   remote_started=TRUE;

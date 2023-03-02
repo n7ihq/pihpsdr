@@ -1549,7 +1549,6 @@ void vfo_set_frequency(int v,long long f) {
 // Set CTUN state of a VFO
 //
 void vfo_ctun_update(int id,int state) {
-  long long f;
   //
   // Note: if this VFO does not control a (running) receiver,
   //       receiver_set_frequency is *not* called therefore

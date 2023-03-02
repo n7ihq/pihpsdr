@@ -421,16 +421,6 @@ static gboolean ps_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) 
 }
 #endif
 
-void start_test() {
-  cleanup();
-  test_menu(top_window);
-}
-
-static gboolean test_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_test();
-  return TRUE;
-}
-
 #ifdef CLIENT_SERVER
 void start_server() {
   cleanup();
@@ -678,7 +668,6 @@ void new_menu()
     GtkWidget *about_b=gtk_button_new_with_label("About");
     g_signal_connect (about_b, "button-press-event", G_CALLBACK(about_b_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid),about_b,(i%5),i/5,1,1);
-    i++;
 
     gtk_container_add(GTK_CONTAINER(content),grid);
 

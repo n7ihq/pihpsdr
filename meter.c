@@ -269,17 +269,16 @@ if(analog_meter) {
       double angle;
       double radians;
       double cx=(double)meter_width/2.0;
-      double cy=(double)meter_width/2.0;
-      double radius=cy-20.0;
+      double radius=cx-20.0;
 
       cairo_set_line_width(cr, 1.0);
       cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-      cairo_arc(cr, cx, cy, radius, 216.0*M_PI/180.0, 324.0*M_PI/180.0);
+      cairo_arc(cr, cx, cx, radius, 216.0*M_PI/180.0, 324.0*M_PI/180.0);
       cairo_stroke(cr);
 
       cairo_set_line_width(cr, 2.0);
       cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-      cairo_arc(cr, cx, cy, radius+2, 264.0*M_PI/180.0, 324.0*M_PI/180.0);
+      cairo_arc(cr, cx, cx, radius+2, 264.0*M_PI/180.0, 324.0*M_PI/180.0);
       cairo_stroke(cr);
 
       cairo_set_line_width(cr, 1.0);
@@ -290,23 +289,23 @@ if(analog_meter) {
         radians=angle*M_PI/180.0;
 
         if((i%2)==1) {
-          cairo_arc(cr, cx, cy, radius+4, radians, radians);
+          cairo_arc(cr, cx, cx, radius+4, radians, radians);
           cairo_get_current_point(cr, &x, &y);
-          cairo_arc(cr, cx, cy, radius, radians, radians);
+          cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
 
           sprintf(sf,"%d",i);
-          cairo_arc(cr, cx, cy, radius+5, radians, radians);
+          cairo_arc(cr, cx, cx, radius+5, radians, radians);
           cairo_get_current_point(cr, &x, &y);
           cairo_new_path(cr);
           x-=4.0;
           cairo_move_to(cr, x, y);
           cairo_show_text(cr, sf);
         } else {
-          cairo_arc(cr, cx, cy, radius+2, radians, radians);
+          cairo_arc(cr, cx, cx, radius+2, radians, radians);
           cairo_get_current_point(cr, &x, &y);
-          cairo_arc(cr, cx, cy, radius, radians, radians);
+          cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
         }
@@ -316,14 +315,14 @@ if(analog_meter) {
       for(i=20;i<=60;i+=20) {
         angle=((double)i+54.0)+offset;
         radians=angle*M_PI/180.0;
-        cairo_arc(cr, cx, cy, radius+4, radians, radians);
+        cairo_arc(cr, cx, cx, radius+4, radians, radians);
         cairo_get_current_point(cr, &x, &y);
-        cairo_arc(cr, cx, cy, radius, radians, radians);
+        cairo_arc(cr, cx, cx, radius, radians, radians);
         cairo_line_to(cr, x, y);
         cairo_stroke(cr);
 
         sprintf(sf,"+%d",i);
-        cairo_arc(cr, cx, cy, radius+5, radians, radians);
+        cairo_arc(cr, cx, cx, radius+5, radians, radians);
         cairo_get_current_point(cr, &x, &y);
         cairo_new_path(cr);
         x-=4.0;
@@ -343,8 +342,8 @@ if(analog_meter) {
       }
      
       radians=angle*M_PI/180.0;
-      cairo_arc(cr, cx, cy, radius+8, radians, radians);
-      cairo_line_to(cr, cx, cy);
+      cairo_arc(cr, cx, cx, radius+8, radians, radians);
+      cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
@@ -364,12 +363,11 @@ if(analog_meter) {
       double angle;
       double radians;
       double cx=(double)meter_width/2.0;
-      double cy=(double)meter_width/2.0;
-      double radius=cy-20.0;
+      double radius=cx-20.0;
 
       cairo_set_line_width(cr, 1.0);
       cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-      cairo_arc(cr, cx, cy, radius, 220.0*M_PI/180.0, 320.0*M_PI/180.0);
+      cairo_arc(cr, cx, cx, radius, 220.0*M_PI/180.0, 320.0*M_PI/180.0);
       cairo_stroke(cr);
 
       cairo_set_line_width(cr, 1.0);
@@ -412,15 +410,15 @@ if(analog_meter) {
         angle=(double)i+offset;
         radians=angle*M_PI/180.0;
         if((i%10)==0) {
-          cairo_arc(cr, cx, cy, radius+4, radians, radians);
+          cairo_arc(cr, cx, cx, radius+4, radians, radians);
           cairo_get_current_point(cr, &x, &y);
-          cairo_arc(cr, cx, cy, radius, radians, radians);
+          cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
 
           if((i%20)==0) {
             sprintf(sf,"%d",(i/10)*(int)interval);
-            cairo_arc(cr, cx, cy, radius+5, radians, radians);
+            cairo_arc(cr, cx, cx, radius+5, radians, radians);
             cairo_get_current_point(cr, &x, &y);
             cairo_new_path(cr);
             x-=6.0;
@@ -436,8 +434,8 @@ if(analog_meter) {
 
       angle=(max_pwr*10.0/(double)interval)+offset;
       radians=angle*M_PI/180.0;
-      cairo_arc(cr, cx, cy, radius+8, radians, radians);
-      cairo_line_to(cr, cx, cy);
+      cairo_arc(cr, cx, cx, radius+8, radians, radians);
+      cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
 
 

@@ -251,7 +251,6 @@ int pa_out_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
   float *out = (float *)outputBuffer;
   RECEIVER *rx = (RECEIVER *)userdata;
   int i, newpt;
-  int avail;  // only used for debug
 
   if (out == NULL) {
     g_print("%s: bogus audio buffer in callback\n", __FUNCTION__);

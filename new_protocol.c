@@ -461,7 +461,6 @@ void update_action_table() {
 
 void new_protocol_init(int pixels) {
     int i;
-    int rc;
     spectrumWIDTH=pixels;
 
     //
@@ -1717,27 +1716,28 @@ static gpointer iq_thread(gpointer data) {
 }
 
 static void process_iq_data(unsigned char *buffer, RECEIVER *rx) {
-  //long long timestamp;   // never used
-  int bitspersample;       // used in debug code
-  int samplesperframe;
   int b;
   int leftsample;
   int rightsample;
   double leftsampledouble;
   double rightsampledouble;
 
-  //timestamp=((long long)(buffer[4]&0xFF)<<56)
-  //         +((long long)(buffer[5]&0xFF)<<48)
-  //         +((long long)(buffer[6]&0xFF)<<40)
-  //         +((long long)(buffer[7]&0xFF)<<32)
-  //         +((long long)(buffer[8]&0xFF)<<24)
-  //         +((long long)(buffer[9]&0xFF)<<16)
-  //         +((long long)(buffer[10]&0xFF)<<8)
-  //         +((long long)(buffer[11]&0xFF)   );
-  bitspersample=((buffer[12]&0xFF)<<8)+(buffer[13]&0xFF);   // used in debug code
-  samplesperframe=((buffer[14]&0xFF)<<8)+(buffer[15]&0xFF);
+  int samplesperframe=((buffer[14]&0xFF)<<8)+(buffer[15]&0xFF);
 
-//g_print("process_iq_data: rx=%d bitspersample=%d samplesperframe=%d\n",rx->id, bitspersample,samplesperframe);
+#ifdef P2IQDEBUG
+  long long timestamp=
+            ((long long)(buffer[4]&0xFF)<<56)
+           +((long long)(buffer[5]&0xFF)<<48)
+           +((long long)(buffer[6]&0xFF)<<40)
+           +((long long)(buffer[7]&0xFF)<<32)
+           +((long long)(buffer[8]&0xFF)<<24)
+           +((long long)(buffer[9]&0xFF)<<16)
+           +((long long)(buffer[10]&0xFF)<<8)
+           +((long long)(buffer[11]&0xFF)   );
+  int bitspersample=((buffer[12]&0xFF)<<8)+(buffer[13]&0xFF);
+  g_print("%s: rx=%d bitspersample=%d samplesperframe=%d\n",__FUNCTION__,rx->id, bitspersample,samplesperframe);
+#endif
+
   b=16;
   int i;
   for(i=0;i<samplesperframe;i++) {
@@ -1762,9 +1762,6 @@ static void process_iq_data(unsigned char *buffer, RECEIVER *rx) {
 // at the end
 //
 static void process_div_iq_data(unsigned char*buffer) {
-  // long long timestamp; // never used
-  // int bitspersample;   // never used
-  int samplesperframe;
   int b;
   int leftsample0;
   int rightsample0;
@@ -1774,18 +1771,22 @@ static void process_div_iq_data(unsigned char*buffer) {
   int rightsample1;
   double leftsampledouble1;
   double rightsampledouble1;
-  
-  //timestamp=((long long)(buffer[ 4]&0xFF)<<56)
-  //         +((long long)(buffer[ 5]&0xFF)<<48)
-  //         +((long long)(buffer[ 6]&0xFF)<<40)
-  //         +((long long)(buffer[ 7]&0xFF)<<32)
-  //         +((long long)(buffer[ 8]&0xFF)<<24)
-  //         +((long long)(buffer[ 9]&0xFF)<<16)
-  //         +((long long)(buffer[10]&0xFF)<< 8)
-  //         +((long long)(buffer[11]&0xFF)    );
+  int samplesperframe=((buffer[14]&0xFF)<<8)+(buffer[15]&0xFF);
 
-  //bitspersample=((buffer[12]&0xFF)<<8)+(buffer[13]&0xFF);
-  samplesperframe=((buffer[14]&0xFF)<<8)+(buffer[15]&0xFF);
+#ifdef P2IQDEBUG
+  long long timestamp=
+            ((long long)(buffer[ 4]&0xFF)<<56)
+           +((long long)(buffer[ 5]&0xFF)<<48)
+           +((long long)(buffer[ 6]&0xFF)<<40)
+           +((long long)(buffer[ 7]&0xFF)<<32)
+           +((long long)(buffer[ 8]&0xFF)<<24)
+           +((long long)(buffer[ 9]&0xFF)<<16)
+           +((long long)(buffer[10]&0xFF)<< 8)
+           +((long long)(buffer[11]&0xFF)    );
+
+  int bitspersample=((buffer[12]&0xFF)<<8)+(buffer[13]&0xFF);
+  g_print("%s: rx=%d bitspersample=%d samplesperframe=%d\n",__FUNCTION__,rx->id, bitspersample,samplesperframe);
+#endif
 
   b=16;
   int i;

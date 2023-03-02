@@ -113,10 +113,10 @@ static void waterfall_automatic_cb(GtkWidget *widget, gpointer data) {
   active_receiver->waterfall_automatic=active_receiver->waterfall_automatic==1?0:1;
 }
 
-static void display_panadapter_cb(GtkWidget *widget, gpointer data) {
-  active_receiver->display_panadapter=active_receiver->display_panadapter==1?0:1;
-  reconfigure_radio();
-}
+//static void display_panadapter_cb(GtkWidget *widget, gpointer data) {
+//  active_receiver->display_panadapter=active_receiver->display_panadapter==1?0:1;
+//  reconfigure_radio();
+//}
 
 static void display_waterfall_cb(GtkWidget *widget, gpointer data) {
   active_receiver->display_waterfall=active_receiver->display_waterfall==1?0:1;

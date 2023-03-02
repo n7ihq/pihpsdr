@@ -177,7 +177,6 @@ void configure_protocols(GtkWidget *parent) {
   gtk_widget_show(b_autostart);
   g_signal_connect(b_autostart,"toggled",G_CALLBACK(autostart_cb),NULL);
   gtk_grid_attach(GTK_GRID(grid),b_autostart,0,row,1,1);
-  row++;
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

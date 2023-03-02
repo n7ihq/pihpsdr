@@ -1390,8 +1390,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             sprintf(reply,"ZZFJ%02d;",vfo[VFO_B].filter);
             send_resp(client->fd,reply) ;
           } else if(command[6]==';') {
-            int filter=atoi(&command[4]);
             // update RX2 filter
+            // int filter=atoi(&command[4]);
           }
           break;
         case 'L': //ZZFL
@@ -2009,7 +2009,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
         case 'M': //ZZRM
           // read meter value
           if(command[5]==';') {
-            int m=atoi(&command[4]);
+            int m=atoi(&command[4]);  // should have receiver[m] next line?
             sprintf(reply,"ZZRM%d%20d;",smeter,(int)receiver[0]->meter);
             send_resp(client->fd,reply);
           }
@@ -2414,8 +2414,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
         case 'N': //ZZXN
           // read combined RX1 status
           if(command[4]==';') {
-            int status=0;
-            status=status|((receiver[0]->agc)&0x03);
+            int status=((receiver[0]->agc)&0x03);
             int a=adc[receiver[0]->adc].attenuation;
             if(a==0) {
               a=1;
@@ -2444,8 +2443,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           // read combined RX2 status
           if(receivers==2) {
             if(command[4]==';') {
-              int status=0;
-              status=status|((receiver[1]->agc)&0x03);
+              int status=((receiver[1]->agc)&0x03);
               int a=adc[receiver[1]->adc].attenuation;
               if(a==0) {
                 a=1;
@@ -2580,7 +2578,6 @@ int parse_cmd(void *data) {
   char reply[80];
   reply[0]='\0';
   gboolean implemented=TRUE;
-  gboolean errord=FALSE;
 
   switch(command[0]) {
     case 'A':

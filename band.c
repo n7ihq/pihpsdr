@@ -635,6 +635,7 @@ int get_band_from_frequency(long long f) {
   return found;
 }
 
+#if 0
 char* getFrequencyInfo(long long frequency,int filter_low,int filter_high) {
     char* result=outOfBand;
     int i;
@@ -674,6 +675,7 @@ g_print("getFrequencyInfo %lld is %s\n",frequency,result);
 
     return result;
 }
+#endif
 
 int canTransmit() {
     int result;
