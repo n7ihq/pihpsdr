@@ -498,10 +498,8 @@ void new_protocol_init(int pixels) {
     response_sem=sem_open("RESPONSE", O_CREAT | O_EXCL, 0700, 0);
     if (response_sem == SEM_FAILED) perror("ResponseSemaphore");
 #else
-    rc=sem_init(&response_sem, 0, 0); // check return value!
+    (void)sem_init(&response_sem, 0, 0); // check return value!
 #endif
-    //rc=sem_init(&send_high_priority_sem, 0, 1); // check return value!
-    //rc=sem_init(&send_general_sem, 0, 1); // check return value!
 
 #ifdef __APPLE__
     sem_unlink("COMMRESREADY");
@@ -511,8 +509,8 @@ void new_protocol_init(int pixels) {
     command_response_sem_buffer=sem_open("COMMRESBUF", O_CREAT | O_EXCL, 0700, 0);
     if (command_response_sem_buffer == SEM_FAILED) perror("CommandResponseBufferSemaphore");
 #else
-    rc=sem_init(&command_response_sem_ready, 0, 0); // check return value!
-    rc=sem_init(&command_response_sem_buffer, 0, 0); // check return value!
+    (void)sem_init(&command_response_sem_ready, 0, 0); // check return value!
+    (void)sem_init(&command_response_sem_buffer, 0, 0); // check return value!
 #endif
     command_response_thread_id = g_thread_new( "command_response thread",command_response_thread, NULL);
     if( ! command_response_thread_id ) {
@@ -528,8 +526,8 @@ void new_protocol_init(int pixels) {
     high_priority_sem_buffer=sem_open("HIGHBUF",   O_CREAT | O_EXCL, 0700, 0);
     if (high_priority_sem_buffer == SEM_FAILED) perror("HIGHPriorityBufferSemaphore");
 #else
-    rc=sem_init(&high_priority_sem_ready, 0, 0); // check return value!
-    rc=sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
+    (void)sem_init(&high_priority_sem_ready, 0, 0); // check return value!
+    (void)sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
 #endif
     high_priority_thread_id = g_thread_new( "high_priority thread", high_priority_thread, NULL);
     if( ! high_priority_thread_id ) {
@@ -545,8 +543,8 @@ void new_protocol_init(int pixels) {
     mic_line_sem_buffer=sem_open("MICBUF",   O_CREAT | O_EXCL, 0700, 0);
     if (mic_line_sem_buffer == SEM_FAILED) perror("MicLineBufferSemaphore");
 #else
-    rc=sem_init(&mic_line_sem_ready, 0, 0); // check return value!
-    rc=sem_init(&mic_line_sem_buffer, 0, 0); // check return value!
+    (void)sem_init(&mic_line_sem_ready, 0, 0); // check return value!
+    (void)sem_init(&mic_line_sem_buffer, 0, 0); // check return value!
 #endif
     mic_line_thread_id = g_thread_new( "mic_line thread", mic_line_thread, NULL);
     if( ! mic_line_thread_id ) {
@@ -578,8 +576,8 @@ void new_protocol_init(int pixels) {
         perror("IQbufferSemaphore");
       }
 #else
-      rc=sem_init(&iq_sem_ready[i], 0, 0); // check return value!
-      rc=sem_init(&iq_sem_buffer[i], 0, 0); // check return value!
+      (void)sem_init(&iq_sem_ready[i], 0, 0); // check return value!
+      (void)sem_init(&iq_sem_buffer[i], 0, 0); // check return value!
 #endif
       iq_thread_id[i] = g_thread_new( "iq thread", iq_thread, GINT_TO_POINTER(i));
     }
