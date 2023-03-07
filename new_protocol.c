@@ -723,8 +723,11 @@ static void new_protocol_general() {
 static void new_protocol_high_priority() {
     int i;
     BAND *band;
-    long long rxFrequency;
+    long long rx1Frequency;
+    long long rx2Frequency;
     long long txFrequency;
+    long long HPFfreq;  // frequency determining the HPF filters
+    long long LPFfreq;  // frequency determining the LPF filters
     long phase;
     int ddc;
     int xmit, txvfo, txmode;
@@ -761,27 +764,38 @@ static void new_protocol_high_priority() {
 //  Set DDC frequencies
 //
 
+    rx1Frequency=vfo[0].frequency-vfo[0].lo;
+    rx2Frequency=vfo[1].frequency-vfo[1].lo;
+
+    if(vfo[0].rit_enabled) {
+      rx1Frequency+=vfo[0].rit;
+    }
+    if(vfo[1].rit_enabled) {
+      rx2Frequency+=vfo[1].rit;
+    }
+
+    if (cw_is_on_vfo_freq) {
+      if(vfo[0].mode==modeCWU) {
+        rx1Frequency-=(long long)cw_keyer_sidetone_frequency;
+      } else if(vfo[0].mode==modeCWL) {
+        rx1Frequency+=(long long)cw_keyer_sidetone_frequency;
+      }
+      if(vfo[1].mode==modeCWU) {
+        rx2Frequency-=(long long)cw_keyer_sidetone_frequency;
+      } else if(vfo[1].mode==modeCWL) {
+        rx2Frequency+=(long long)cw_keyer_sidetone_frequency;
+      }
+    }
+
+    rx1Frequency+=calibration;
+    rx2Frequency+=calibration;
+
     if (diversity_enabled && !xmit) {
 	//
 	// Use frequency of first receiver for both DDC0 and DDC1
 	// This is overridden later if we do PURESIGNAL TX
 	//
-        rxFrequency=vfo[0].frequency-vfo[0].lo;
-        if(vfo[0].rit_enabled) {
-          rxFrequency+=vfo[0].rit;
-        }
-
-        if (cw_is_on_vfo_freq) {
-          if(vfo[0].mode==modeCWU) {
-            rxFrequency-=(long long)cw_keyer_sidetone_frequency;
-          } else if(vfo[0].mode==modeCWL) {
-            rxFrequency+=(long long)cw_keyer_sidetone_frequency;
-          }
-        }
-
-	rxFrequency+=calibration;
-
-        phase=(long)((4294967296.0*(double)rxFrequency)/122880000.0);
+        phase=(long)((4294967296.0*(double)rx1Frequency)/122880000.0);
         high_priority_buffer_to_radio[ 9]=phase>>24;
         high_priority_buffer_to_radio[10]=phase>>16;
         high_priority_buffer_to_radio[11]=phase>>8;
@@ -794,31 +808,23 @@ static void new_protocol_high_priority() {
 	//
 	// Set frequencies for all receivers
 	//
-	for(i=0;i<receivers;i++) {
-          // note that for HERMES, receiver[i] is associated with DDC(i) but beyond
-          // (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
-          ddc=i;
-          if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2+i;
-          int v=receiver[i]->id;
-          rxFrequency=vfo[v].frequency-vfo[v].lo;
-          if(vfo[v].rit_enabled) {
-            rxFrequency+=vfo[v].rit;
-          }
-          if (cw_is_on_vfo_freq) {
-            if(vfo[v].mode==modeCWU) {
-              rxFrequency-=(long long)cw_keyer_sidetone_frequency;
-            } else if(vfo[v].mode==modeCWL) {
-              rxFrequency+=(long long)cw_keyer_sidetone_frequency;
-            }
-          }
+        // note that for HERMES, receiver[i] is associated with DDC(i) but beyond
+        // (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
+        ddc=0;
+        if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2;
 
-	  rxFrequency+=calibration;
+	phase=(long)((4294967296.0*(double)rx1Frequency)/122880000.0);
+	high_priority_buffer_to_radio[ 9+(ddc*4)]=phase>>24;
+	high_priority_buffer_to_radio[10+(ddc*4)]=phase>>16;
+	high_priority_buffer_to_radio[11+(ddc*4)]=phase>>8;
+	high_priority_buffer_to_radio[12+(ddc*4)]=phase;
 
-	  phase=(long)((4294967296.0*(double)rxFrequency)/122880000.0);
-	  high_priority_buffer_to_radio[9+(ddc*4)]=phase>>24;
-	  high_priority_buffer_to_radio[10+(ddc*4)]=phase>>16;
-	  high_priority_buffer_to_radio[11+(ddc*4)]=phase>>8;
-	  high_priority_buffer_to_radio[12+(ddc*4)]=phase;
+        if (receivers > 1) {
+	  phase=(long)((4294967296.0*(double)rx2Frequency)/122880000.0);
+	  high_priority_buffer_to_radio[13+(ddc*4)]=phase>>24;
+	  high_priority_buffer_to_radio[14+(ddc*4)]=phase>>16;
+	  high_priority_buffer_to_radio[15+(ddc*4)]=phase>>8;
+	  high_priority_buffer_to_radio[16+(ddc*4)]=phase;
         }
     }
 
@@ -848,7 +854,7 @@ static void new_protocol_high_priority() {
       //
       // Set DDC0 and DDC1 (synchronized) to the transmit frequency
       //
-      high_priority_buffer_to_radio[9]=phase>>24;
+      high_priority_buffer_to_radio[ 9]=phase>>24;
       high_priority_buffer_to_radio[10]=phase>>16;
       high_priority_buffer_to_radio[11]=phase>>8;
       high_priority_buffer_to_radio[12]=phase;
@@ -952,8 +958,7 @@ static void new_protocol_high_priority() {
 //  frequency of VFO_B can safely be used to control the
 //  filters of ADC1 (if there are any).
 //  
-//
-    rxFrequency=vfo[VFO_A].frequency-vfo[VFO_A].lo;
+
     switch(device) {
       case NEW_DEVICE_ORION2:
 //
@@ -964,43 +969,84 @@ static void new_protocol_high_priority() {
 //	but this causes unnecessary "relay chatter" on ANAN-7000
 //	So if it should be done, 20 lines below it is shown how.
 //
-        if(rxFrequency<1500000L) {
+        if(rx1Frequency<1500000LL) {
           alex0|=ALEX_ANAN7000_RX_BYPASS_BPF;
-        } else if(rxFrequency<2100000L) {
+        } else if(rx1Frequency<2100000LL) {
           alex0|=ALEX_ANAN7000_RX_160_BPF;
-        } else if(rxFrequency<5500000L) {
+        } else if(rx1Frequency<5500000LL) {
           alex0|=ALEX_ANAN7000_RX_80_60_BPF;
-        } else if(rxFrequency<11000000L) {
+        } else if(rx1Frequency<11000000LL) {
           alex0|=ALEX_ANAN7000_RX_40_30_BPF;
-        } else if(rxFrequency<22000000L) {
+        } else if(rx1Frequency<22000000LL) {
           alex0|=ALEX_ANAN7000_RX_20_15_BPF;
-        } else if(rxFrequency<35000000L) {
+        } else if(rx1Frequency<35000000LL) {
           alex0|=ALEX_ANAN7000_RX_12_10_BPF;
         } else {
           alex0|=ALEX_ANAN7000_RX_6_PRE_BPF;
         }
+        //
+        // Note that while using DIVERSITY, the second RX filter settings must match
+        // those of the first RX
+        //
+        if (diversity_enabled) {
+          rx2Frequency=rx1Frequency;
+        }
+//
+//      new ANAN-7000/8000 "Alex1" band-pass RX filters
+//
+        if(rx2Frequency<1500000LL) {
+          alex1|=ALEX_ANAN7000_RX_BYPASS_BPF;
+        } else if(rx2Frequency<2100000LL) {
+          alex1|=ALEX_ANAN7000_RX_160_BPF;
+        } else if(rx2Frequency<5500000LL) {
+          alex1|=ALEX_ANAN7000_RX_80_60_BPF;
+        } else if(rx2Frequency<11000000LL) {
+          alex1|=ALEX_ANAN7000_RX_40_30_BPF;
+        } else if(rx2Frequency<22000000LL) {
+          alex1|=ALEX_ANAN7000_RX_20_15_BPF;
+        } else if(rx2Frequency<35000000LL) {
+          alex1|=ALEX_ANAN7000_RX_12_10_BPF;
+        } else {
+          alex1|=ALEX_ANAN7000_RX_6_PRE_BPF;
+        }
+//
+//      The main purpose of RX2 is DIVERSITY. Therefore,
+//      ground RX2 upon TX *always*
+//
+	if (xmit) {
+	  alex1|=ALEX1_ANAN7000_RX_GNDonTX;
+	}
+
         break;
       default:
 //
 //	Old (ANAN-100/200) high-pass filters
+//      If the second RX is active, and its ADC is ADC0, then
+//      RX HPF filter settings depend on MIN(rx1freq,rx2freq)
 //
+        HPFfreq=rx1Frequency;
+        if (receivers > 1) {
+          if (receiver[1]->adc == 0 && rx2Frequency < rx1Frequency) {
+            HPFfreq=rx2Frequency;
+          }
+        }
 	i=0;  // flag used here for "filter bypass"
-	if (rxFrequency<1800000L) i=1;
+	if (HPFfreq<1800000L) i=1;
 #ifdef PURESIGNAL
 	// Bypass HPFs if using EXT1 for PURESIGNAL feedback!
 	if (xmit && transmitter->puresignal && receiver[PS_RX_FEEDBACK]->alex_antenna == 6) i=1;
 #endif
         if (i) {
           alex0|=ALEX_BYPASS_HPF;
-        } else if(rxFrequency<6500000L) {
+        } else if(HPFfreq<6500000LL) {
           alex0|=ALEX_1_5MHZ_HPF;
-        } else if(rxFrequency<9500000L) {
+        } else if(HPFfreq<9500000LL) {
           alex0|=ALEX_6_5MHZ_HPF;
-        } else if(rxFrequency<13000000L) {
+        } else if(HPFfreq<13000000LL) {
           alex0|=ALEX_9_5MHZ_HPF;
-        } else if(rxFrequency<20000000L) {
+        } else if(HPFfreq<20000000LL) {
           alex0|=ALEX_13MHZ_HPF;
-        } else if(rxFrequency<50000000L) {
+        } else if(HPFfreq<50000000LL) {
           alex0|=ALEX_20MHZ_HPF;
         } else {
           alex0|=ALEX_6M_PREAMP;
@@ -1011,22 +1057,30 @@ static void new_protocol_high_priority() {
 //
 //   Pre-Orion2 boards: If using Ant1/2/3, the RX signal goes through the TX low-pass
 //                      filters. Therefore we must set these according to the ADC0
-//			(receive) frequency while RXing.
+//			(receive) frequency while RXing, according  to the Max
+//                      of rx1freq and rx2freq. If TXing, the TX freq governs the LPF
+//                      in either case.
 //
+    LPFfreq=txFrequency;
     if (!xmit && device != NEW_DEVICE_ORION2 && receiver[0]->alex_antenna < 3) {
-	txFrequency = rxFrequency;
+	LPFfreq = rx1Frequency;
+        if (receivers > 1) {
+          if (receiver[1]->adc == 0 && rx2Frequency > rx1Frequency) {
+            LPFfreq=rx2Frequency;
+          }
+        }
     }
-    if(txFrequency>35600000L) {
+    if(LPFfreq>35600000LL) {
       alex0|=ALEX_6_BYPASS_LPF;
-    } else if(txFrequency>24000000L) {
+    } else if(LPFfreq>24000000LL) {
       alex0|=ALEX_12_10_LPF;
-    } else if(txFrequency>16500000L) {
+    } else if(LPFfreq>16500000LL) {
       alex0|=ALEX_17_15_LPF;
-    } else if(txFrequency>8000000L) {
+    } else if(LPFfreq>8000000LL) {
       alex0|=ALEX_30_20_LPF;
-    } else if(txFrequency>5000000L) {
+    } else if(LPFfreq>5000000LL) {
       alex0|=ALEX_60_40_LPF;
-    } else if(txFrequency>2500000L) {
+    } else if(LPFfreq>2500000LL) {
       alex0|=ALEX_80_LPF;
     } else {
       alex0|=ALEX_160_LPF;
@@ -1139,45 +1193,7 @@ static void new_protocol_high_priority() {
 
 //g_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1432],high_priority_buffer_to_radio[1433],high_priority_buffer_to_radio[1434],high_priority_buffer_to_radio[1435],rxFrequency,txFrequency);
 
-//
-//  Orion2 boards: set RX2 filters according to VFOB frequency
-//
     if (device == NEW_DEVICE_ORION2) {
-	//
-	// Note that while using DIVERSITY, the second RX filter settings must match
-	// those of the first RX
-	//
-	if (diversity_enabled) {
-          rxFrequency=vfo[VFO_A].frequency-vfo[VFO_A].lo;
-	} else {
-          rxFrequency=vfo[VFO_B].frequency-vfo[VFO_B].lo;
-	}
-//
-//      new ANAN-7000/8000 "Alex1" band-pass RX filters
-//
-        if(rxFrequency<1500000L) {
-          alex1|=ALEX_ANAN7000_RX_BYPASS_BPF;
-        } else if(rxFrequency<2100000L) {
-          alex1|=ALEX_ANAN7000_RX_160_BPF;
-        } else if(rxFrequency<5500000L) {
-          alex1|=ALEX_ANAN7000_RX_80_60_BPF;
-        } else if(rxFrequency<11000000L) {
-          alex1|=ALEX_ANAN7000_RX_40_30_BPF;
-        } else if(rxFrequency<22000000L) {
-          alex1|=ALEX_ANAN7000_RX_20_15_BPF;
-        } else if(rxFrequency<35000000L) {
-          alex1|=ALEX_ANAN7000_RX_12_10_BPF;
-        } else {
-          alex1|=ALEX_ANAN7000_RX_6_PRE_BPF;
-        }
-
-//
-//      The main purpose of RX2 is DIVERSITY. Therefore,
-//      ground RX2 upon TX *always*
-//
-	if (xmit) {
-	  alex1|=ALEX1_ANAN7000_RX_GNDonTX;
-	}
 
         high_priority_buffer_to_radio[1430]=(alex1>>8)&0xFF;
         high_priority_buffer_to_radio[1431]=alex1&0xFF;
