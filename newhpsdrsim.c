@@ -555,6 +555,7 @@ void *highprio_thread(void *data) {
   int rc;
   unsigned long freq;
   int i;
+  int alex0_mod, alex1_mod, hp_mod;
 
   sock=socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0) {
@@ -590,6 +591,7 @@ void *highprio_thread(void *data) {
        fprintf(stderr,"Received HighPrio packet with incorrect length");
        break;
      }
+     hp_mod=0;
      seqold = seqnum;
      seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
      if (seqnum != 0 &&seqnum != seqold+1 ) {
@@ -598,6 +600,7 @@ void *highprio_thread(void *data) {
      rc=(buffer[4] >> 0) & 0x01;
      if (rc != run) {
 	run=rc;
+        hp_mod=1;
 	fprintf(stderr,"HP: Run=%d\n", rc);
         // if run=0, wait for threads to complete, otherwise spawn them off
         if (run) {
@@ -643,6 +646,7 @@ void *highprio_thread(void *data) {
      rc=(buffer[4] >> 1) & 0x01;
      if (rc != ptt) {
        ptt=rc;
+       hp_mod=1;
        fprintf(stderr,"HP: PTT=%d\n", rc);
        if (ptt == 0) {
 	 memset(isample, 0, sizeof(float)*NEWRTXLEN);
@@ -651,18 +655,21 @@ void *highprio_thread(void *data) {
      }
      rc=(buffer[5] >> 0) & 0x01;
      if (rc != cwx) {
-	cwx=rc;
-	fprintf(stderr,"HP: CWX=%d\n", rc);
+       hp_mod=1;
+       cwx=rc;
+       fprintf(stderr,"HP: CWX=%d\n", rc);
      }
      rc=(buffer[5] >> 1) & 0x01;
      if (rc != dot) {
-	dot=rc;
-	fprintf(stderr,"HP: DOT=%d\n", rc);
+       hp_mod=1;
+       dot=rc;
+       fprintf(stderr,"HP: DOT=%d\n", rc);
      }
      rc=(buffer[5] >> 2) & 0x01;
      if (rc != dash) {
-	dash=rc;
-	fprintf(stderr,"HP: DASH=%d\n", rc);
+       hp_mod=1;
+       dash=rc;
+       fprintf(stderr,"HP: DASH=%d\n", rc);
      }
      for (i=0; i<NUMRECEIVERS; i++) {
 	freq=(buffer[ 9+4*i] << 24) + (buffer[10+4*i] << 16) + (buffer[11+4*i] << 8) + buffer[12+4*i];
@@ -685,54 +692,72 @@ void *highprio_thread(void *data) {
      rc=buffer[345];
      if (rc != txdrive) {
 	txdrive=rc;
+        hp_mod=1;
 	txdrv_dbl=(double) txdrive * 0.003921568627;
 	fprintf(stderr,"HP: TX drive= %d (%f)\n", txdrive,txdrv_dbl);
      }
      rc=buffer[1400];
      if (rc != w1400) {
 	w1400=rc;
+        hp_mod=1;
 	fprintf(stderr,"HP: Xvtr/Audio enable=%x\n", rc);
      }
      rc=buffer[1401];
      if (rc != ocout) {
+        hp_mod=1;
 	ocout=rc;
 	fprintf(stderr,"HP: OC outputs=%x\n", rc);
      }
      rc=buffer[1402];
      if (rc != db9) {
+        hp_mod=1;
 	db9=rc;
 	fprintf(stderr,"HP: Outputs DB9=%x\n", rc);
      }
      rc=buffer[1403];
      if (rc != mercury_atts) {
+        hp_mod=1;
 	mercury_atts=rc;
 	fprintf(stderr,"HP: MercuryAtts=%x\n", rc);
      }
      // Store Alex0 and Alex1 bits in separate ints
+     alex0_mod=alex1_mod=0;
      freq=(buffer[1428] << 24) + (buffer[1429] << 16) + (buffer[1430] << 8) + buffer[1431];
      for (i=0; i<32; i++) {
 	rc=(freq >> i) & 0x01;
 	if (rc != alex1[i]) {
 	    alex1[i]=rc;
+            alex1_mod=1;
+            hp_mod=1;
 	    fprintf(stderr,"HP: ALEX1 bit%d set to %d\n", i, rc);
 	}
+     }
+     if (alex1_mod) {
+      fprintf(stderr,"HP: ALEX1 bits=0x%08lx\n", freq);
      }
      freq=(buffer[1432] << 24) + (buffer[1433] << 16) + (buffer[1434] << 8) + buffer[1435];
      for (i=0; i<32; i++) {
 	rc=(freq >> i) & 0x01;
 	if (rc != alex0[i]) {
 	    alex0[i]=rc;
+            alex0_mod=1;
+            hp_mod=1;
 	    fprintf(stderr,"HP: ALEX0 bit%d set to %d\n", i, rc);
 	}
      }
+     if (alex0_mod) {
+      fprintf(stderr,"HP: ALEX0 bits=0x%08lx\n", freq);
+     }
      rc=buffer[1442];
      if (rc != stepatt1) {
+        hp_mod=1;
 	stepatt1=rc;
 	rxatt1_dbl=pow(10.0, -0.05*stepatt1);
 	fprintf(stderr,"HP: StepAtt1 = %d\n", rc);
      }
      rc=buffer[1443];
      if (rc != stepatt0) {
+        hp_mod=1;
 	stepatt0=rc;
 	fprintf(stderr,"HP: StepAtt0 = %d\n", stepatt0);
      }
@@ -742,6 +767,9 @@ void *highprio_thread(void *data) {
 	rxatt0_dbl=pow(10.0, -0.05*stepatt0);
      } else {
 	rxatt0_dbl=pow(10.0, -0.05*(stepatt0+10*alex0[14]+20*alex0[13]));
+     }
+     if (hp_mod) {
+       fprintf(stderr,"HP-----------------------------------HP\n");
      }
   }
   close(sock);
