@@ -32,6 +32,7 @@
 
 #include <wdsp.h>
 
+#include "appearance.h"
 #include "adc.h"
 #include "dac.h"
 #include "audio.h"
@@ -95,6 +96,8 @@
 #define SLIDERS_HEIGHT (100)
 #define TOOLBAR_HEIGHT (30)
 #define WATERFALL_HEIGHT (105)
+
+GdkRGBA MenuBackground = {COLOUR_MENU_BACKGND};
 
 gint controller=NO_CONTROLLER;
 

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "appearance.h"
 #include "main.h"
 #include "receiver.h"
 #include "radio.h"
@@ -46,9 +47,6 @@ static GtkWidget *pan_label;
 static GtkWidget *pan_scale;
 static gulong pan_signal_id;
 static GMutex pan_zoom_mutex;
-
-static GdkRGBA white;
-static GdkRGBA gray;
 
 int zoompan_active_receiver_changed(void *data) {
   if(display_zoompan) {

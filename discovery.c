@@ -295,12 +295,7 @@ void discovery() {
     //gtk_widget_override_font(discovery_dialog, pango_font_description_from_string("FreeMono 16"));
     g_signal_connect(discovery_dialog, "delete_event", G_CALLBACK(delete_event_cb), NULL);
 
-    GdkRGBA color;
-    color.red = 1.0;
-    color.green = 1.0;
-    color.blue = 1.0;
-    color.alpha = 1.0;
-    gtk_widget_override_background_color(discovery_dialog,GTK_STATE_FLAG_NORMAL,&color);
+    gtk_widget_override_background_color(discovery_dialog,GTK_STATE_FLAG_NORMAL,&MenuBackground);
 
     GtkWidget *content;
 

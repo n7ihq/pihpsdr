@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "appearance.h"
 #include "receiver.h"
 #include "sliders.h"
 #include "mode.h"
@@ -86,9 +87,6 @@ static GtkWidget *filter_width_scale;
 static GtkWidget *filter_shift_scale;
 static GtkWidget *diversity_gain_scale;
 static GtkWidget *diversity_phase_scale;
-
-static GdkRGBA white;
-static GdkRGBA gray;
 
 void sliders_update() {
   if(display_sliders) {

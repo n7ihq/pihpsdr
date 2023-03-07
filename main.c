@@ -17,12 +17,6 @@
 *
 */
 
-// Define maximum window size. 
-// Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
-
-#define MAX_DISPLAY_WIDTH  800
-#define MAX_DISPLAY_HEIGHT 480
-
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <math.h>
@@ -35,6 +29,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "appearance.h"
 #include "audio.h"
 #include "band.h"
 #include "bandstack.h"

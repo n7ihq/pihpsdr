@@ -25,6 +25,8 @@
 #include <string.h>
 #include <semaphore.h>
 #include <wdsp.h>
+
+#include "appearance.h"
 #include "agc.h"
 #include "band.h"
 #include "channel.h"
@@ -72,7 +74,7 @@ tx_panadapter_configure_event_cb (GtkWidget         *widget,
                                        display_height);
 
   cairo_t *cr=cairo_create(tx->panadapter_surface);
-  cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_paint(cr);
   cairo_destroy(cr);
   return TRUE;
@@ -197,13 +199,13 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   //clear_panadater_surface();
   cairo_t *cr;
   cr = cairo_create (tx->panadapter_surface);
-  cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_paint (cr);
 
   
   // filter
   if (txmode != modeCWU && txmode != modeCWL) {
-    cairo_set_source_rgb (cr, 0.25, 0.25, 0.25);
+    cairo_set_source_rgba(cr, COLOUR_PAN_FILTER);
     filter_left=(double)display_width/2.0+((double)tx->filter_low/hz_per_pixel);
     filter_right=(double)display_width/2.0+((double)tx->filter_high/hz_per_pixel);
     cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);
@@ -216,7 +218,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   // (dark turquoise line without label)
 
   double dbm_per_line=(double)display_height/((double)tx->panadapter_high-(double)tx->panadapter_low);
-  cairo_set_source_rgb (cr, 0.00, 1.00, 1.00);
+  cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
   cairo_set_line_width(cr, 1.0);
   cairo_select_font_face(cr, DISPLAY_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
@@ -226,7 +228,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     if((abs(i)%tx->panadapter_step) ==0) {
       double y = (double)(tx->panadapter_high-i)*dbm_per_line;
       if ((abs(i) % 20) == 0) {
-        cairo_set_source_rgb (cr, 0.00, 1.00, 1.00);
+        cairo_set_source_rgba(cr, COLOUR_PAN_LINE_WEAK);
         cairo_move_to(cr,0.0,y);
         cairo_line_to(cr,(double)display_width,y);
 
@@ -235,7 +237,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         cairo_show_text(cr, v);
         cairo_stroke(cr);
       } else {
-        cairo_set_source_rgb (cr, 0.00, 0.50, 0.50);
+        cairo_set_source_rgba(cr, COLOUR_PAN_LINE_WEAK);
         cairo_move_to(cr,0.0,y);
         cairo_line_to(cr,(double)display_width,y);
         cairo_stroke(cr);
@@ -270,12 +272,12 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     f = frequency - half + (long) (hz_per_pixel * i);
     if (f > 0) {
       if ((f % divisor) < (long) hz_per_pixel) {
-        cairo_set_source_rgb (cr, 0.0, 1.0, 1.0);
+        cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
         cairo_set_line_width(cr, 1.0);
         cairo_move_to(cr,(double)i,10.0);
         cairo_line_to(cr,(double)i,(double)display_height);
 
-        cairo_set_source_rgb (cr, 0.0, 1.0, 1.0);
+        cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
         cairo_select_font_face(cr, DISPLAY_FONT,
                             CAIRO_FONT_SLANT_NORMAL,
                             CAIRO_FONT_WEIGHT_BOLD);
@@ -298,7 +300,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   int b=vfo[txvfo].band;
   BAND *band=band_get_band(b);
   if(band->frequencyMin!=0LL) {
-    cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+    cairo_set_source_rgba(cr, COLOUR_ALARM);
     cairo_set_line_width(cr, 2.0);
     if((min_display<band->frequencyMin)&&(max_display>band->frequencyMin)) {
       i=(band->frequencyMin-min_display)/(long long)hz_per_pixel;
@@ -315,7 +317,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   }
             
   // cursor
-  cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+  cairo_set_source_rgba(cr, COLOUR_ALARM);
   cairo_set_line_width(cr, 1.0);
 //fprintf(stderr,"cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
   //cairo_move_to(cr,vfofreq+(vfo[id].offset/hz_per_pixel),0.0);
@@ -346,10 +348,10 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   if(display_filled) {
     cairo_close_path (cr);
-    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0,0.5);
+    cairo_set_source_rgba(cr, COLOUR_PAN_FILL2);
     cairo_fill_preserve (cr);
   }
-  cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_set_line_width(cr, 1.0);
   cairo_stroke(cr);
 
@@ -358,7 +360,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   if(controller==CONTROLLER1 && tx->dialog == NULL) {
     char text[64];
 
-    cairo_set_source_rgb(cr,1.0,1.0,0.0);
+    cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
     if(ENABLE_E2_ENCODER) {
       cairo_move_to(cr, display_width-200,70);
@@ -383,7 +385,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
 #ifdef PURESIGNAL
   if(tx->puresignal) {
-    cairo_set_source_rgb(cr,0.0,1.0,0.0);
+    cairo_set_source_rgba(cr,COLOUR_OK);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE2);
     cairo_move_to(cr,display_width/2,display_height-10);
     cairo_show_text(cr, "PureSignal");
@@ -391,9 +393,9 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     int info[16];
     GetPSInfo(tx->id,&info[0]);
     if(info[14]==0) {
-      cairo_set_source_rgb(cr,1.0,0.0,0.0);
+      cairo_set_source_rgba(cr,COLOUR_ALARM);
     } else {
-      cairo_set_source_rgb(cr,0.0,1.0,0.0);
+      cairo_set_source_rgba(cr,COLOUR_OK);
     }
     cairo_move_to(cr,(display_width/2)+100,display_height-10);
     cairo_show_text(cr, "Correcting");
@@ -402,7 +404,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   if(tx->dialog) {
     char text[64];
-    cairo_set_source_rgb(cr,1.0,0.2,0.0);
+    cairo_set_source_rgba(cr,COLOUR_ALARM);
     cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
     int row=0;
 
@@ -447,7 +449,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   //
   if (tx->dialog==NULL && display_swr_protection) {
     char text[64];
-    cairo_set_source_rgb(cr,1.0,0.2,0.0);
+    cairo_set_source_rgba(cr,COLOUR_ALARM);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
     cairo_move_to(cr, 260.0, 30.0);
     sprintf(text,"! High SWR > %2.1f", tx->swr_alarm);
@@ -463,7 +465,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   if(tx->dialog==NULL && protocol==ORIGINAL_PROTOCOL && device==DEVICE_HERMES_LITE2) {
     char text[64];
-    cairo_set_source_rgb(cr,1.0,1.0,0.0);
+    cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
 
     double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
@@ -477,7 +479,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     cairo_show_text(cr, text);
 
     if (tx_fifo_overrun || tx_fifo_underrun) {
-      cairo_set_source_rgb(cr,1.0,0.0,0.0);
+      cairo_set_source_rgba(cr,COLOUR_ALARM);
       if (tx_fifo_underrun) {
         cairo_move_to(cr, 220.0, 30.0);
         cairo_show_text(cr, "Underrun");

@@ -74,9 +74,6 @@ static GtkWidget *last_bandstack;
 static GtkWidget *last_mode;
 static GtkWidget *last_filter;
 
-static GdkRGBA white;
-static GdkRGBA gray;
-
 static gint rit_plus_timer=-1;
 static gint rit_minus_timer=-1;
 static gint xit_plus_timer=-1;
@@ -156,16 +153,6 @@ GtkWidget *toolbar_init(int my_width, int my_height, GtkWidget* parent) {
     int button_width=width/8;
 
     fprintf(stderr,"toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
-
-    white.red=1.0;
-    white.green=1.0;
-    white.blue=1.0;
-    white.alpha=0.0;
-
-    gray.red=0.25;
-    gray.green=0.25;
-    gray.blue=0.25;
-    gray.alpha=0.0;
 
     toolbar=gtk_grid_new();
     gtk_widget_set_size_request (toolbar, width, height);

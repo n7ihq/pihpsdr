@@ -28,6 +28,7 @@
 
 #include <wdsp.h>
 
+#include "appearance.h"
 #include "agc.h"
 #include "band.h"
 #include "channel.h"
@@ -80,7 +81,7 @@ panadapter_configure_event_cb (GtkWidget         *widget,
                                        display_height);
 
   cairo_t *cr=cairo_create(rx->panadapter_surface);
-  cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_paint(cr);
   cairo_destroy(cr);
   return TRUE;
@@ -141,7 +142,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_t *cr;
   cr = cairo_create (rx->panadapter_surface);
   cairo_set_line_width(cr, LINE_THIN);
-  cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_rectangle(cr,0,0,display_width,display_height);
   cairo_fill(cr);
   //cairo_paint (cr);
@@ -195,14 +196,14 @@ void rx_panadapter_update(RECEIVER *rx) {
       long long hi_freq=band_channels_60m[i].frequency+(band_channels_60m[i].width/(long long)2);
       x1=(low_freq-min_display)/(long long)HzPerPixel;
       x2=(hi_freq-min_display)/(long long)HzPerPixel;
-      cairo_set_source_rgb (cr, 0.6, 0.3, 0.3);
+      cairo_set_source_rgba(cr, COLOUR_PAN_60M);
       cairo_rectangle(cr, x1, 0.0, x2-x1, (double)display_height);
       cairo_fill(cr);
     }
   }
 
   // filter
-  cairo_set_source_rgba (cr, 0.25, 0.25, 0.25, 0.75);
+  cairo_set_source_rgba (cr, COLOUR_PAN_FILTER);
   //filter_left =(double)display_width*0.5 +(((double)rx->filter_low+offset)/HzPerPixel);
   //filter_right=(double)display_width*0.5 +(((double)rx->filter_high+offset)/HzPerPixel);
   filter_left =((double)rx->pixels*0.5)-(double)rx->pan +(((double)rx->filter_low+offset)/HzPerPixel);
@@ -216,9 +217,9 @@ void rx_panadapter_update(RECEIVER *rx) {
   //
   if (!cw_is_on_vfo_freq && (mode==modeCWU || mode==modeCWL)) {
     if(active) {
-      cairo_set_source_rgb (cr, 1.0, 1.0, 0.0);
+      cairo_set_source_rgba(cr, COLOUR_ATTN);
     } else {
-      cairo_set_source_rgb (cr, 0.25, 0.25, 0.0);
+      cairo_set_source_rgba(cr, COLOUR_ATTN_WEAK);
     }
     cw_frequency=filter_left+((filter_right-filter_left)/2.0);
     cairo_move_to(cr,cw_frequency,10.0);
@@ -229,9 +230,9 @@ void rx_panadapter_update(RECEIVER *rx) {
 
   // plot the levels
   if(active) {
-    cairo_set_source_rgb (cr, 0.0, 1.0, 1.0);
+    cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
   } else {
-    cairo_set_source_rgb (cr, 0.0, 0.5, 0.5);
+    cairo_set_source_rgba(cr, COLOUR_PAN_LINE_WEAK);
   }
 
   double dbm_per_line=(double)display_height/((double)rx->panadapter_high-(double)rx->panadapter_low);
@@ -390,7 +391,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   if(vfoband!=band60) {
     // band edges
     if(band->frequencyMin!=0LL) {
-      cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+      cairo_set_source_rgba(cr, COLOUR_ALARM);
       cairo_set_line_width(cr, LINE_THICK);
       if((min_display<band->frequencyMin)&&(max_display>band->frequencyMin)) {
         i=(band->frequencyMin-min_display)/(long long)HzPerPixel;
@@ -414,7 +415,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_select_font_face(cr, DISPLAY_FONT,
               CAIRO_FONT_SLANT_NORMAL,
               CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+    cairo_set_source_rgba(cr, COLOUR_SHADE);
     cairo_set_font_size(cr, DISPLAY_FONT_SIZE4);
     inet_ntop(AF_INET, &(((struct sockaddr_in *)&clients->address)->sin_addr),text,64);
     cairo_text_extents(cr, text, &extents);
@@ -449,9 +450,9 @@ void rx_panadapter_update(RECEIVER *rx) {
 
     if(rx->agc!=AGC_MEDIUM && rx->agc!=AGC_FAST) {
       if(active) {
-        cairo_set_source_rgb (cr, 1.0, 1.0, 0.0);
+        cairo_set_source_rgba(cr, COLOUR_ATTN);
       } else {
-        cairo_set_source_rgb (cr, 0.5, 0.5, 0.0);
+        cairo_set_source_rgba(cr, COLOUR_ATTN_WEAK);
       }
       cairo_move_to(cr,40.0,hang_y-8.0);
       cairo_rectangle(cr, 40, hang_y-8.0,8.0,8.0);
@@ -465,9 +466,9 @@ void rx_panadapter_update(RECEIVER *rx) {
     }
 
     if(active) {
-      cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
+      cairo_set_source_rgba(cr, COLOUR_OK);
     } else {
-      cairo_set_source_rgb (cr, 0.0, 0.5, 0.0);
+      cairo_set_source_rgba(cr, COLOUR_OK_WEAK);
     }
     cairo_move_to(cr,40.0,knee_y-8.0);
     cairo_rectangle(cr, 40, knee_y-8.0,8.0,8.0);
@@ -483,9 +484,9 @@ void rx_panadapter_update(RECEIVER *rx) {
 
   // cursor
   if(active) {
-    cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+    cairo_set_source_rgba(cr, COLOUR_ALARM);
   } else {
-    cairo_set_source_rgb (cr, 0.5, 0.0, 0.0);
+    cairo_set_source_rgba(cr, COLOUR_ALARM_WEAK);
   }
   cairo_move_to(cr,vfofreq+(offset/HzPerPixel),0.0);
   cairo_line_to(cr,vfofreq+(offset/HzPerPixel),(double)display_height);
@@ -547,26 +548,30 @@ void rx_panadapter_update(RECEIVER *rx) {
     S9 = 1.0-(S9/(double)display_height);
   
     if(active) {
-      cairo_pattern_add_color_stop_rgb (gradient,0.0,0.0,1.0,0.0); // Green
-      cairo_pattern_add_color_stop_rgb (gradient,S9/3.0,1.0,0.65,0.0); // Orange
-      cairo_pattern_add_color_stop_rgb (gradient,(S9/3.0)*2.0,1.0,1.0,0.0); // Yellow
-      cairo_pattern_add_color_stop_rgb (gradient,S9,1.0,0.0,0.0); // Red
+      cairo_pattern_add_color_stop_rgba(gradient,0.0,         COLOUR_GRAD1);
+      cairo_pattern_add_color_stop_rgba(gradient,S9/3.0,      COLOUR_GRAD2);
+      cairo_pattern_add_color_stop_rgba(gradient,(S9/3.0)*2.0,COLOUR_GRAD3);
+      cairo_pattern_add_color_stop_rgba(gradient,S9,          COLOUR_GRAD4);
     } else {
-      cairo_pattern_add_color_stop_rgb (gradient,0.0,0.0,0.5,0.0); // Green
-      cairo_pattern_add_color_stop_rgb (gradient,S9/3.0,0.5,0.325,0.0); // Orange
-      cairo_pattern_add_color_stop_rgb (gradient,(S9/3.0)*2.0,0.5,0.5,0.0); // Yellow
-      cairo_pattern_add_color_stop_rgb (gradient,S9,0.5,0.0,0.0); // Red
+      cairo_pattern_add_color_stop_rgba(gradient,0.0,         COLOUR_GRAD1_WEAK);
+      cairo_pattern_add_color_stop_rgba(gradient,S9/3.0,      COLOUR_GRAD2_WEAK);
+      cairo_pattern_add_color_stop_rgba(gradient,(S9/3.0)*2.0,COLOUR_GRAD3_WEAK);
+      cairo_pattern_add_color_stop_rgba(gradient,S9,          COLOUR_GRAD4_WEAK);
     }
     cairo_set_source(cr, gradient);
   } else {
     //
-    // if filled, use 0.5 (active) and 0.25 (inactive)
-    // if only drawing the line, use 0.75 for active RX
+    // Different shades of white
     //
-    double brightness=0.25;
-    if (active) brightness = 0.50;
-    if (!display_filled && active) brightness =0.75;
-    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, brightness);
+    if (active) {
+      if (!display_filled) {
+        cairo_set_source_rgba(cr, COLOUR_PAN_FILL3);
+      } else {
+        cairo_set_source_rgba(cr, COLOUR_PAN_FILL2);
+      }
+    } else {
+      cairo_set_source_rgba(cr, COLOUR_PAN_FILL1);
+    }
   }
 
   if(display_filled) {
@@ -589,7 +594,7 @@ void rx_panadapter_update(RECEIVER *rx) {
 #ifdef GPIO
   if(rx->id==0 && controller==CONTROLLER1) {
 
-    cairo_set_source_rgb(cr,1.0,1.0,0.0);
+    cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
     if(ENABLE_E2_ENCODER) {
       cairo_move_to(cr, display_width-200,70);
@@ -615,7 +620,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   if(display_sequence_errors) {
     if(sequence_errors!=0) {
       cairo_move_to(cr,100.0,50.0);
-      cairo_set_source_rgb(cr,1.0,0.0,0.0);
+      cairo_set_source_rgba(cr,COLOUR_ALARM);
       cairo_set_font_size(cr,DISPLAY_FONT_SIZE2);
       cairo_show_text(cr, "Sequence Error");
       sequence_error_count++;
@@ -628,7 +633,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   }
 
   if(rx->id==0 && protocol==ORIGINAL_PROTOCOL && device==DEVICE_HERMES_LITE2) {
-    cairo_set_source_rgb(cr,1.0,1.0,0.0);
+    cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
 
     double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;

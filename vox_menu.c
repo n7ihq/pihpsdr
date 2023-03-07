@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "appearance.h"
 #include "led.h"
 #include "new_menu.h"
 #include "radio.h"
@@ -39,11 +40,9 @@ static GtkWidget *dialog=NULL;
 static GtkWidget *level;
 
 static GtkWidget *led;
-static GdkRGBA led_color={0.0,0.0,0.0,1.0};
-
-static GdkRGBA white={1.0,1.0,1.0,1.0};
-static GdkRGBA red={1.0,0.0,0.0,1.0};
-static GdkRGBA green={0.0,1.0,0.1,1.0};
+static GdkRGBA led_color={COLOUR_OK};
+static GdkRGBA led_red  ={COLOUR_ALARM};
+static GdkRGBA led_green={COLOUR_OK};
 
 static GThread *level_thread_id;
 static int run_level=0;
@@ -62,10 +61,8 @@ static int level_update(void *data) {
 
     if(peak>vox_threshold) {
       // red indicator
-      led_color.red=1.0;
-      led_color.green=0.0;
-      led_color.blue=0.0;
-      led_set_color(led); // red
+      led_color=led_red;
+      led_set_color(led);
       if(hold==0) {
         hold=1;
       } else {
@@ -75,10 +72,8 @@ static int level_update(void *data) {
     } else {
       // green indicator
       if(hold==0) {
-        led_color.red=0.0;
-        led_color.green=1.0;
-        led_color.blue=0.0;
-        led_set_color(led); // green
+        led_color=led_green;
+        led_set_color(led);
       }
     }
   }
@@ -155,7 +150,7 @@ void vox_menu(GtkWidget *parent) {
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - VOX");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
 
-  gtk_widget_override_background_color(dialog,GTK_STATE_FLAG_NORMAL,&white);
+  gtk_widget_override_background_color(dialog,GTK_STATE_FLAG_NORMAL,&MenuBackground);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
@@ -202,7 +197,7 @@ void vox_menu(GtkWidget *parent) {
   g_signal_connect(G_OBJECT(vox_scale),"value_changed",G_CALLBACK(vox_value_changed_cb),NULL);
   
   GtkWidget *hang_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(hang_label), "<b>VOX Hand (ms):</b>");
+  gtk_label_set_markup(GTK_LABEL(hang_label), "<b>VOX Hang (ms):</b>");
   gtk_misc_set_alignment (GTK_MISC(hang_label), 0, 0);
   gtk_widget_show(hang_label);
   gtk_grid_attach(GTK_GRID(grid),hang_label,0,4,1,1);
