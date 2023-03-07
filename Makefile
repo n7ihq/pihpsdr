@@ -277,7 +277,6 @@ fft_menu.c \
 diversity_menu.c \
 tx_menu.c \
 vfo_menu.c \
-test_menu.c \
 meter.c \
 mode.c \
 old_discovery.c \
@@ -300,7 +299,6 @@ vfo.c \
 waterfall.c \
 button_text.c \
 vox.c \
-update.c \
 store.c \
 store_menu.c \
 memory.c \
@@ -358,7 +356,6 @@ fft_menu.h \
 diversity_menu.h \
 tx_menu.h \
 vfo_menu.h \
-test_menu.h \
 meter.h \
 mode.h \
 old_discovery.h \
@@ -381,7 +378,6 @@ vfo.h \
 waterfall.h \
 button_text.h \
 vox.h \
-update.h \
 store.h \
 store_menu.h \
 memory.h \
@@ -436,7 +432,6 @@ fft_menu.o \
 diversity_menu.o \
 tx_menu.o \
 vfo_menu.o \
-test_menu.o \
 meter.o \
 mode.o \
 old_discovery.o \
@@ -458,7 +453,6 @@ vfo.o \
 waterfall.o \
 button_text.o \
 vox.o \
-update.o \
 store.o \
 store_menu.o \
 memory.o \
