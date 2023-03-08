@@ -97,6 +97,7 @@ void toolbar_menu(GtkWidget *parent) {
 
 
   dialog=gtk_dialog_new_with_buttons("piHPSDR - Toolbar Actions",GTK_WINDOW(parent),GTK_DIALOG_DESTROY_WITH_PARENT,"_OK",GTK_RESPONSE_ACCEPT,NULL);
+  gtk_widget_override_background_color(dialog,GTK_STATE_FLAG_NORMAL,&MenuBackground);
   g_signal_connect (dialog, "response", G_CALLBACK (response_event), NULL);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -104,6 +105,7 @@ void toolbar_menu(GtkWidget *parent) {
   function=0;
 
   notebook=gtk_notebook_new();
+  gtk_widget_override_background_color(notebook,GTK_STATE_FLAG_NORMAL,&MenuBackground);
  
 next_function_set:
 

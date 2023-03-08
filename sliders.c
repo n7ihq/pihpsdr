@@ -811,6 +811,7 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
   gtk_widget_set_size_request (sliders, width, height);
   gtk_grid_set_row_homogeneous(GTK_GRID(sliders), FALSE);
   gtk_grid_set_column_homogeneous(GTK_GRID(sliders),TRUE);
+  gtk_widget_override_background_color(sliders,GTK_STATE_FLAG_NORMAL,&MenuBackground);
 
   af_gain_label=gtk_label_new("AF:");
   gtk_widget_override_font(af_gain_label, pango_font_description_from_string(SLIDERS_FONT));

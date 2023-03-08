@@ -62,7 +62,7 @@ meter_clear_surface (void)
   cairo_t *cr;
   cr = cairo_create (meter_surface);
 
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_fill (cr);
 
   cairo_destroy (cr);
@@ -84,7 +84,7 @@ meter_configure_event_cb (GtkWidget         *widget,
   /* Initialize the surface to black */
   cairo_t *cr;
   cr = cairo_create (meter_surface);
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_paint (cr);
   cairo_destroy (cr);
 
@@ -254,7 +254,7 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   //
 
 if(analog_meter) {
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_paint (cr);
 
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
@@ -505,7 +505,7 @@ if(analog_meter) {
 } else {
   // Section for the digital meter
   // clear the meter
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_paint (cr);
 
   cairo_select_font_face(cr, DISPLAY_FONT,
@@ -543,7 +543,7 @@ if(analog_meter) {
     }
 
     cairo_set_source_rgba(cr, COLOUR_ATTN);
-    cairo_move_to(cr, 115.0, 15.0);
+    cairo_move_to(cr, 120.0, 15.0);
     cairo_show_text(cr, "Mic Level");
   }
 
@@ -601,12 +601,13 @@ if(analog_meter) {
           l=max_rxlvl+20.0;
         }
         
-	// use gradient to draw green below S9 else red
+	// use colours from the "gradient" panadapter display,
+        // but use no gradient: S0-S9 first colour, <S9 last colour
 	cairo_pattern_t *pat=cairo_pattern_create_linear(0.0,0.0,114.0,0.0);
-	cairo_pattern_add_color_stop_rgba(pat,0.0,COLOUR_OK); // Green
-	cairo_pattern_add_color_stop_rgba(pat,0.5,COLOUR_OK); // Green
-	cairo_pattern_add_color_stop_rgba(pat,0.5,COLOUR_ALARM); // Red
-	cairo_pattern_add_color_stop_rgba(pat,0.5,COLOUR_ALARM); // Red
+	cairo_pattern_add_color_stop_rgba(pat,0.00,COLOUR_GRAD1);
+	cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD1);
+	cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD4);
+	cairo_pattern_add_color_stop_rgba(pat,1.00,COLOUR_GRAD4);
         cairo_set_source(cr, pat);
 
         cairo_rectangle(cr, offset+0.0, (double)(meter_height-40), (double)((l+127.0)*db), 20.0);
@@ -614,6 +615,9 @@ if(analog_meter) {
 	cairo_pattern_destroy(pat);
 
         if(l!=0) {
+          //
+          // Mark right edge of S-meter bar with a line in ATTN colour
+          //
           cairo_set_source_rgba(cr, COLOUR_ATTN);
           cairo_move_to(cr,offset+(double)((max_rxlvl+127.0)*db),(double)meter_height-20);
           cairo_line_to(cr,offset+(double)((max_rxlvl+127.0)*db),(double)(meter_height-40));
@@ -622,7 +626,7 @@ if(analog_meter) {
 
         cairo_stroke(cr);
 
-        text_location=offset+(db*114)+5;
+        text_location=offset+(db*114)+10;
       }
 
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);

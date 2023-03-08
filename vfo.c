@@ -1032,7 +1032,7 @@ static gboolean vfo_configure_event_cb (GtkWidget         *widget,
   /* Initialize the surface to black */
   cairo_t *cr;
   cr = cairo_create (vfo_surface);
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_paint (cr);
   cairo_destroy(cr);
   g_idle_add(ext_vfo_update,NULL);
@@ -1059,7 +1059,7 @@ void vfo_update() {
         char temp_text[32];
         cairo_t *cr;
         cr = cairo_create (vfo_surface);
-        cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+        cairo_set_source_rgba(cr, COLOUR_BACKGND);
         cairo_paint (cr);
 
         cairo_select_font_face(cr, DISPLAY_FONT,

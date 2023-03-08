@@ -926,7 +926,7 @@ void midi_menu(GtkWidget *parent) {
 
   scrolled_window=gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),GTK_POLICY_AUTOMATIC,GTK_POLICY_ALWAYS);
-  gtk_widget_set_size_request(scrolled_window,400,200);
+  gtk_widget_set_size_request(scrolled_window,400,300-15*((n_midi_devices+1)/3));
 
   view=gtk_tree_view_new();
 
@@ -934,7 +934,7 @@ void midi_menu(GtkWidget *parent) {
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view), -1, "Event", renderer, "text", EVENT_COLUMN, NULL);
 
   renderer=gtk_cell_renderer_text_new();
-  gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view), -1, "CHANNEL", renderer, "text", CHANNEL_COLUMN, NULL);
+  gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view), -1, "Channel", renderer, "text", CHANNEL_COLUMN, NULL);
 
   renderer=gtk_cell_renderer_text_new();
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view), -1, "NOTE", renderer, "text", NOTE_COLUMN, NULL);

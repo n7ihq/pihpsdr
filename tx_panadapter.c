@@ -74,7 +74,7 @@ tx_panadapter_configure_event_cb (GtkWidget         *widget,
                                        display_height);
 
   cairo_t *cr=cairo_create(tx->panadapter_surface);
-  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_paint(cr);
   cairo_destroy(cr);
   return TRUE;
@@ -199,7 +199,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   //clear_panadater_surface();
   cairo_t *cr;
   cr = cairo_create (tx->panadapter_surface);
-  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_paint (cr);
 
   
@@ -351,7 +351,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     cairo_set_source_rgba(cr, COLOUR_PAN_FILL2);
     cairo_fill_preserve (cr);
   }
-  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_BACKGND);
   cairo_set_line_width(cr, 1.0);
   cairo_stroke(cr);
 

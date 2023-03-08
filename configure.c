@@ -68,6 +68,7 @@ void configure_gpio(GtkWidget *parent) {
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
   GtkWidget *notebook=gtk_notebook_new();
+  gtk_widget_override_background_color(notebook,GTK_STATE_FLAG_NORMAL,&MenuBackground);
 
   // Encoders
   gint max_encoders=MAX_ENCODERS;
