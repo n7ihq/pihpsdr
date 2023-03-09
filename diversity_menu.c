@@ -178,6 +178,7 @@ void diversity_menu(GtkWidget *parent) {
   //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Diversity");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
+  set_backgnd(dialog);
 
   //
   // set coarse/fine values from "sanitized" actual values
@@ -192,7 +193,6 @@ void diversity_menu(GtkWidget *parent) {
   gain_fine=div_gain-gain_coarse;
   phase_coarse=4.0*round(div_phase*0.25);
   phase_fine=div_phase-phase_coarse;
-  gtk_widget_override_background_color(dialog,GTK_STATE_FLAG_NORMAL,&MenuBackground);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 

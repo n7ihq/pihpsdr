@@ -104,7 +104,7 @@ void switch_menu(GtkWidget *parent) {
 
   if(controller==NO_CONTROLLER || controller==CONTROLLER1) {
     notebook=gtk_notebook_new();
-    gtk_widget_override_background_color(notebook,GTK_STATE_FLAG_NORMAL,&MenuBackground);
+    set_backgnd(notebook);
   }
  
 next_function_set:

@@ -266,7 +266,7 @@ fprintf(stderr,"display_width=%d display_height=%d\n", display_width, display_he
 
   fprintf(stderr,"create top level window\n");
   top_window = gtk_application_window_new (app);
-  gtk_widget_override_background_color(top_window,GTK_STATE_FLAG_NORMAL,&MenuBackground);
+  set_backgnd(top_window);
   if(full_screen) {
     fprintf(stderr,"full screen\n");
     gtk_window_fullscreen(GTK_WINDOW(top_window));

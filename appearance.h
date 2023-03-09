@@ -15,6 +15,12 @@
  *            and then decide to re-use an existing one.
  */
 
+//
+// if ALLOW_DARK_THEME is defined, menu background colours will NOT
+// be set, and when specifying "black" for the button text, the default
+// colour will be used instead.
+//
+#define ALLOW_DARK_THEME 1
 
 // Define maximum window size.
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
@@ -44,7 +50,7 @@
 //
 // There are three "traffic light" colors ALARM, ATTN, OK (default: red, yellow, green)
 // that are used in various places. All three colours should be clearly readable
-// when written on a BACKGND.
+// when written on a (usually dark) background.
 //
 #define COLOUR_ALARM         1.00, 0.00, 0.00, 1.00 // Default: 1.00, 0.00, 0.00, 1.00
 #define COLOUR_ALARM_WEAK    0.50, 0.00, 0.00, 1.00 // Default: 0.50, 0.00, 0.00, 1.00
@@ -67,18 +73,21 @@
 #define COLOUR_PAN_60M       0.60, 0.30, 0.30, 1.00 // Default: 0.60, 0.30, 0.30, 1.00
 
 //
-// Main background colours.
+// Main background colours, allowing different colors for the panadapters and 
+// the VFO/meter bar.
 // Writing with SHADE on a BACKGND should be visible,
 // but need not be "alerting"
 // METER is a special colour for data/ticks in the "meter" surface
 //
 // MENU_BACKGND is used for all menus, the top window, the zoom/pan and slider area.
-// Note that explicit settings of the menu background is deprecated in GTK, since
-// this should be done via CSS.
+// If ALLOW_DARK_THEME is set, then the background is never set, since then
+// GTK will print in white and this is not visible on a white (or nearly white)
+// background.
 //
 
 #define COLOUR_MENU_BACKGND  1.00, 1.00, 0.95, 1.00 // Default: 1.00, 1.00, 1.00, 1.00 
-#define COLOUR_BACKGND       0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
+#define COLOUR_PAN_BACKGND   0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
+#define COLOUR_VFO_BACKGND   0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
 #define COLOUR_SHADE         0.70, 0.70, 0.70, 1.00 // Default: 0.70, 0.70, 0.70, 1.00
 #define COLOUR_METER         1.00, 1.00, 1.00, 1.00 // Default: 1.00, 1.00, 1.00, 1.00
 

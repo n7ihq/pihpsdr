@@ -62,7 +62,7 @@ meter_clear_surface (void)
   cairo_t *cr;
   cr = cairo_create (meter_surface);
 
-  cairo_set_source_rgba(cr, COLOUR_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
   cairo_fill (cr);
 
   cairo_destroy (cr);
@@ -84,7 +84,7 @@ meter_configure_event_cb (GtkWidget         *widget,
   /* Initialize the surface to black */
   cairo_t *cr;
   cr = cairo_create (meter_surface);
-  cairo_set_source_rgba(cr, COLOUR_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
   cairo_paint (cr);
   cairo_destroy (cr);
 
@@ -254,7 +254,7 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   //
 
 if(analog_meter) {
-  cairo_set_source_rgba(cr, COLOUR_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
   cairo_paint (cr);
 
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
@@ -505,7 +505,7 @@ if(analog_meter) {
 } else {
   // Section for the digital meter
   // clear the meter
-  cairo_set_source_rgba(cr, COLOUR_BACKGND);
+  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
   cairo_paint (cr);
 
   cairo_select_font_face(cr, DISPLAY_FONT,

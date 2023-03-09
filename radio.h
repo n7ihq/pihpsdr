@@ -61,8 +61,6 @@ extern DISCOVERED *radio;
 extern gboolean radio_is_remote;
 #endif
 
-extern GdkRGBA MenuBackground;
-
 extern GtkWidget *fixed;
 
 extern long long calibration;
@@ -363,6 +361,8 @@ extern void set_filter_size(int filter_size);
 extern void radio_change_region(int region);
 
 extern void disable_rigctl(void);
+
+extern void set_backgnd(GtkWidget *widget);
 
 #ifdef CLIENT_SERVER
 extern int remote_start(void *data);

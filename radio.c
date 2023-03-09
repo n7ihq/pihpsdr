@@ -97,8 +97,6 @@
 #define TOOLBAR_HEIGHT (30)
 #define WATERFALL_HEIGHT (105)
 
-GdkRGBA MenuBackground = {COLOUR_MENU_BACKGND};
-
 gint controller=NO_CONTROLLER;
 
 GtkWidget *fixed;
@@ -373,6 +371,17 @@ gboolean display_swr_protection=FALSE;
 gint sequence_errors=0;
 
 gint rx_height;
+
+//
+// This is used to over-ride the background of a widget.
+// If ALLOW_DARK_THEME is set, don't do that!
+// 
+void set_backgnd(GtkWidget *widget) {
+   static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
+#ifndef ALLOW_DARK_THEME
+   gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColour);
+#endif
+}
 
 void radio_stop() {
   if(can_transmit) {

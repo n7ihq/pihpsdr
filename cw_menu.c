@@ -144,8 +144,7 @@ void cw_menu(GtkWidget *parent) {
   //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - CW");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-
-  gtk_widget_override_background_color(dialog,GTK_STATE_FLAG_NORMAL,&MenuBackground);
+  set_backgnd(dialog);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 

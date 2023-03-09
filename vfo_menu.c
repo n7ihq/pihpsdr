@@ -219,8 +219,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   sprintf(title,"piHPSDR - VFO %s",vfo==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-
-  gtk_widget_override_background_color(dialog,GTK_STATE_FLAG_NORMAL,&MenuBackground);
+  set_backgnd(dialog);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
