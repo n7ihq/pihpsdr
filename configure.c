@@ -28,6 +28,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "appearance.h"
 #include "main.h"
 #include "channel.h"
 #include "discovered.h"
