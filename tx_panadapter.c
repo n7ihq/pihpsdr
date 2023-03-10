@@ -347,12 +347,15 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   }
 
   if(display_filled) {
-    cairo_close_path (cr);
     cairo_set_source_rgba(cr, COLOUR_PAN_FILL2);
+    cairo_close_path (cr);
     cairo_fill_preserve (cr);
+    cairo_fill_preserve (cr);
+    cairo_set_line_width(cr, 0.5);
+  } else {
+    cairo_set_source_rgba(cr, COLOUR_PAN_FILL3);
+    cairo_set_line_width(cr, 1.0);
   }
-  cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
-  cairo_set_line_width(cr, 1.0);
   cairo_stroke(cr);
 
 /*
