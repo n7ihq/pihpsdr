@@ -15,13 +15,6 @@
  *            and then decide to re-use an existing one.
  */
 
-//
-// if ALLOW_DARK_THEME is defined, menu background colours will NOT
-// be set, and when specifying "black" for the button text, the default
-// colour will be used instead.
-//
-#define ALLOW_DARK_THEME 1
-
 // Define maximum window size.
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
 
@@ -79,10 +72,9 @@
 // but need not be "alerting"
 // METER is a special colour for data/ticks in the "meter" surface
 //
-// MENU_BACKGND is used for all menus, the top window, the zoom/pan and slider area.
-// If ALLOW_DARK_THEME is set, then the background is never set, since then
-// GTK will print in white and this is not visible on a white (or nearly white)
-// background.
+// MENU_BACKGND *was* used for all menus, the top window, the zoom/pan and slider area.
+// howewer, meanwhile this is de-activated since the background color must be compatible
+// with the GTK theme the user chose.
 //
 
 #define COLOUR_MENU_BACKGND  1.00, 1.00, 0.95, 1.00 // Default: 1.00, 1.00, 1.00, 1.00 
