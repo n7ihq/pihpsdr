@@ -374,13 +374,13 @@ gint rx_height;
 
 //
 // This is used to over-ride the background of a widget.
-// If ALLOW_DARK_THEME is set, don't do that!
+// TRANSFORMED TO A NO-OP, since a fixed background color
+// implicitly makes an illegal assumption about the GTK
+// theme in use.
 // 
 void set_backgnd(GtkWidget *widget) {
    static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
-#ifndef ALLOW_DARK_THEME
-   gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColour);
-#endif
+   //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColour);
 }
 
 void radio_stop() {
