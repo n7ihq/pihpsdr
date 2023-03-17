@@ -63,7 +63,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 
 gboolean band_select_cb (GtkWidget *widget, gpointer        data) {
   int b=GPOINTER_TO_UINT(data);
-  set_button_text_color(last_band,"black");
+  set_button_text_color(last_band,"default");
   last_band=widget;
   //fprintf(stderr,"%s: %d\n",__FUNCTION__,b);
   set_button_text_color(last_band,"orange");
@@ -123,7 +123,7 @@ void band_menu(GtkWidget *parent) {
         }
       }
       GtkWidget *b=gtk_button_new_with_label(band->title);
-      set_button_text_color(b,"black");
+      set_button_text_color(b,"default");
       if(i==vfo[active_receiver->id].band) {
         set_button_text_color(b,"orange");
         last_band=b;

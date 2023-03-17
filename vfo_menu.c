@@ -246,7 +246,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
 
   for (i=0; i<16; i++) {
     btn[i]=gtk_button_new_with_label(btn_labels[i]);
-    set_button_text_color(btn[i],"black");
+    set_button_text_color(btn[i],"default");
     gtk_widget_show(btn[i]);
     gtk_grid_attach(GTK_GRID(grid),btn[i],i%3,2+(i/3),1,1);
     g_signal_connect(btn[i],"pressed",G_CALLBACK(freqent_select_cb),(gpointer *)btn_labels[i]);

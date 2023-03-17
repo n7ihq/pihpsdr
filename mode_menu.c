@@ -61,7 +61,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 
 static gboolean mode_select_cb (GtkWidget *widget, gpointer        data) {
   int m=GPOINTER_TO_UINT(data);
-  set_button_text_color(last_mode,"black");
+  set_button_text_color(last_mode,"default");
   last_mode=widget;
   set_button_text_color(last_mode,"orange");
   vfo_mode_changed(m);
@@ -103,7 +103,7 @@ void mode_menu(GtkWidget *parent) {
       set_button_text_color(b,"orange");
       last_mode=b;
     } else {
-      set_button_text_color(b,"black");
+      set_button_text_color(b,"default");
     }
     gtk_widget_show(b);
     gtk_grid_attach(GTK_GRID(grid),b,i%5,1+(i/5),1,1);

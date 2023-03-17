@@ -364,7 +364,7 @@ static void feedback_cb(GtkWidget *widget, gpointer data) {
     set_button_text_color(widget,"red");
   } else {
     transmitter->feedback=0;
-    set_button_text_color(widget,"black");
+    set_button_text_color(widget,"default");
   }
 }
 
@@ -380,7 +380,7 @@ static void twotone_cb(GtkWidget *widget, gpointer data) {
   if(state) {
     set_button_text_color(widget,"red");
   } else {
-    set_button_text_color(widget,"black");
+    set_button_text_color(widget,"default");
   }
 }
 
