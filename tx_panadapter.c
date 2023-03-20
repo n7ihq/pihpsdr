@@ -387,7 +387,11 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 */
 
 #ifdef PURESIGNAL
-  if(tx->puresignal) {
+  //
+  // When doing CW, the signal is produced outside WDSP, so
+  // it makes no sense to display a PURESIGNAL status.
+  //
+  if(tx->puresignal && (txmode != modeCWU) && (txmode != modeCWL)) {
     cairo_set_source_rgba(cr,COLOUR_OK);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE2);
     cairo_move_to(cr,display_width/2,display_height-10);
