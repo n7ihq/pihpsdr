@@ -110,7 +110,7 @@ int sliders_active_receiver_changed(void *data) {
     // Change sliders and check-boxes to reflect the state of the
     // new active receiver
     //
-    gtk_range_set_value(GTK_RANGE(af_gain_scale),active_receiver->volume*100.0);
+    gtk_range_set_value(GTK_RANGE(af_gain_scale),active_receiver->volume);
     gtk_range_set_value (GTK_RANGE(agc_scale),active_receiver->agc_gain);
     //
     // need block/unblock so setting the value of the receivers does not
@@ -326,15 +326,20 @@ void update_agc_gain(double gain) {
 }
 
 static void afgain_value_changed_cb(GtkWidget *widget, gpointer data) {
-    active_receiver->volume=gtk_range_get_value(GTK_RANGE(af_gain_scale))/100.0;
+    double amplitude;
+    active_receiver->volume=gtk_range_get_value(GTK_RANGE(af_gain_scale));
 
 #ifdef CLIENT_SERVER
     if(radio_is_remote) {
-      int v=(int)(active_receiver->volume*100.0);
-      send_volume(client_socket,active_receiver->id,v);
+      send_volume(client_socket,active_receiver->id,active_receiver->volume);
     } else {
 #endif
-      SetRXAPanelGain1 (active_receiver->id, active_receiver->volume);
+      if (active_receiver->volume < -39.5) {
+        amplitude=0.0;
+      } else {
+        amplitude=pow(10.0,0.05*active_receiver->volume);
+      }
+      SetRXAPanelGain1 (active_receiver->id, amplitude);
 #ifdef CLIENT_SERVER
     }
 #endif
@@ -345,11 +350,17 @@ void update_af_gain() {
 }
 
 void set_af_gain(int rx,double value) {
+  double amplitude;
   if (rx >= receivers) return;
   receiver[rx]->volume=value;
-  SetRXAPanelGain1 (receiver[rx]->id, receiver[rx]->volume);
+  if (value < -39.5) {
+    amplitude=0.0;
+  } else {
+    amplitude=pow(10.0,0.05*value);
+  }
+  SetRXAPanelGain1 (receiver[rx]->id, amplitude);
   if(display_sliders) {
-    gtk_range_set_value (GTK_RANGE(af_gain_scale),receiver[rx]->volume*100.0);
+    gtk_range_set_value (GTK_RANGE(af_gain_scale),value);
   } else {
     if(scale_status!=AF_GAIN || scale_rx!=rx) {
       if(scale_status!=NO_ACTION) {
@@ -365,9 +376,9 @@ void set_af_gain(int rx,double value) {
       sprintf(title,"AF Gain RX %d",rx);
       scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
       GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
-      af_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 100.0, 1.00);
+      af_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,-40.0, 0.0, 1.00);
       gtk_widget_set_size_request (af_gain_scale, 400, 30);
-      gtk_range_set_value (GTK_RANGE(af_gain_scale),receiver[rx]->volume*100.0);
+      gtk_range_set_value (GTK_RANGE(af_gain_scale),value);
       gtk_widget_show(af_gain_scale);
       gtk_container_add(GTK_CONTAINER(content),af_gain_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
@@ -375,7 +386,7 @@ void set_af_gain(int rx,double value) {
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
-      gtk_range_set_value (GTK_RANGE(af_gain_scale),receiver[rx]->volume*100.0);
+      gtk_range_set_value (GTK_RANGE(af_gain_scale),value);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
   }
@@ -818,10 +829,10 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
   gtk_widget_show(af_gain_label);
   gtk_grid_attach(GTK_GRID(sliders),af_gain_label,0,0,1,1);
 
-  af_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 100.0, 1.00);
+  af_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,-40.0, 0.0, 1.00);
   gtk_widget_override_font(af_gain_scale, pango_font_description_from_string(SLIDERS_FONT));
   gtk_range_set_increments (GTK_RANGE(af_gain_scale),1.0,1.0);
-  gtk_range_set_value (GTK_RANGE(af_gain_scale),active_receiver->volume*100.0);
+  gtk_range_set_value (GTK_RANGE(af_gain_scale),active_receiver->volume);
   gtk_widget_show(af_gain_scale);
   gtk_grid_attach(GTK_GRID(sliders),af_gain_scale,1,0,2,1);
   g_signal_connect(G_OBJECT(af_gain_scale),"value_changed",G_CALLBACK(afgain_value_changed_cb),NULL);

@@ -1234,15 +1234,14 @@ g_print("send_pan rx=%d pan=%d\n",rx,pan);
   }
 }
 
-void send_volume(int s,int rx,int volume) {
+void send_volume(int s,int rx,double volume) {
   VOLUME_COMMAND command;
-  short v=(short)volume;
-g_print("send_volume rx=%d volume=%d\n",rx,volume);
+g_print("send_volume rx=%d volume=%f\n",rx,volume);
   command.header.sync=REMOTE_SYNC;
   command.header.data_type=htons(CMD_RESP_RX_VOLUME);
   command.header.version=htonl(CLIENT_SERVER_VERSION);
   command.id=rx;
-  command.volume=htons(v);
+  command.volume=htond(volume);
   int bytes_sent=send_bytes(s,(char *)&command,sizeof(command));
   if(bytes_sent<0) {
     perror("send_command");
@@ -2179,9 +2178,9 @@ g_print("CMD_RESP_RX_PAN: pan=%d rx[%d]->pan=%d\n",pan,rx,receiver[rx]->pan);
           return NULL;
         }
         int rx=volume_cmd.id;
-        short volume=ntohs(volume_cmd.volume);
-g_print("CMD_RESP_RX_VOLUME: volume=%d rx[%d]->volume=%f\n",volume,rx,receiver[rx]->volume);
-        receiver[rx]->volume=(double)volume/100.0;
+        double volume=ntohd(volume_cmd.volume);
+g_print("CMD_RESP_RX_VOLUME: volume=%f rx[%d]->volume=%f\n",volume,rx,receiver[rx]->volume);
+        receiver[rx]->volume=volume;
         }
         break;
       case CMD_RESP_RX_AGC:
@@ -2564,6 +2563,7 @@ static int remote_command(void *data) {
   HEADER *header=(HEADER *)data;
   REMOTE_CLIENT *client=header->context.client;
   int temp;
+  double dtmp;
   switch(ntohs(header->data_type)) {
     case CMD_RESP_RX_FREQ:
       {
@@ -2639,8 +2639,8 @@ static int remote_command(void *data) {
     case CMD_RESP_RX_VOLUME:
       {
       VOLUME_COMMAND *volume_command=(VOLUME_COMMAND *)data;
-      temp=ntohs(volume_command->volume);
-      set_af_gain(volume_command->id,(double)temp/100.0);
+      dtmp=ntohd(volume_command->volume);
+      set_af_gain(volume_command->id,dtmp);
       }
       break;
     case CMD_RESP_RX_AGC:

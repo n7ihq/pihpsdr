@@ -498,7 +498,7 @@ extern void send_vfo_step(int s,int rx,int steps);
 extern void update_vfo_step(int rx,int steps);
 extern void send_zoom(int s,int rx,int zoom);
 extern void send_pan(int s,int rx,int pan);
-extern void send_volume(int s,int rx,int volume);
+extern void send_volume(int s,int rx,double volume);
 extern void send_agc(int s,int rx,int agc);
 extern void send_agc_gain(int s,int rx,int gain,int hang,int thresh);
 extern void send_attenuation(int s,int rx,int attenuation);

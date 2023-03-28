@@ -939,7 +939,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->panadapter_low=-140;
   rx->panadapter_step=20;
 
-  rx->volume=5.0;
+  rx->volume=-40.0;
 
   rx->squelch_enable=0;
   rx->squelch=0;
@@ -1005,6 +1005,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
 RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int fps, int width, int height) {
 g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,id,buffer_size, fft_size, pixels, fps);
   RECEIVER *rx=malloc(sizeof(RECEIVER));
+  double amplitude;
   rx->id=id;
   g_mutex_init(&rx->mutex);
   g_mutex_init(&rx->display_mutex);
@@ -1078,7 +1079,7 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->waterfall_low=-140;
   rx->waterfall_automatic=1;
 
-  rx->volume=0.1;
+  rx->volume=-20.0;
 
   rx->dither=0;
   rx->random=0;
@@ -1211,7 +1212,12 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   SetRXASNBARun(rx->id, rx->snb);
 
 
-  SetRXAPanelGain1(rx->id, rx->volume);
+  if (rx->volume < -39.5) {
+    amplitude = 0.0;
+  } else {
+    amplitude=pow(10.0, 0.05*rx->volume);
+  }
+  SetRXAPanelGain1(rx->id, amplitude);
   SetRXAPanelBinaural(rx->id, binaural);
   SetRXAPanelRun(rx->id, 1);
 
