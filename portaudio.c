@@ -288,6 +288,7 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
 {
   float *in = (float *)inputBuffer;
   int i, newpt;
+  static int last_was_tx=0;
 
   if (in == NULL) {
     // This should not happen, so we do not send silence etc.
@@ -299,6 +300,32 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
     //
     // mutex protected: ring buffer cannot vanish
     //
+    // Normally there is a slight mis-match between the 48kHz sample
+    // rate of the "microphone device" and the 48kHz rate of the
+    // HPSDR device. Thus, the mic buffer tends to either slowly
+    // drain or slowly become full (which leads to large TX delays).
+    //
+    // The TX/RX transition seems to be the best moment to "reset"
+    // the mic input buffer, and fill it with a little bit (20 msec)
+    // of silence and the current batch of mic samples. During normal
+    // RX operation, one cannot fiddle around with the mic samples since
+    // VOX might be active.
+    //
+    // The (static) variable last_was_tx is used to "detect" the
+    // TX/RX transition.
+    //
+    //
+    if (!isTransmitting()) {
+      if (last_was_tx) {
+        last_was_tx=0;
+        mic_ring_outpt = 0;
+        mic_ring_inpt  = 960;
+        bzero(mic_ring_buffer, 960*sizeof(float));
+      }
+    } else {
+     last_was_tx=1;
+    }
+
     for (i=0; i<framesPerBuffer; i++) {
       //
       // put sample into ring buffer
@@ -313,6 +340,10 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
       }
     }
   }
+  // print mic input buffer water mark for debugging
+  // i=mic_ring_inpt - mic_ring_outpt;
+  // if (mic_ring_inpt < mic_ring_outpt) i +=MY_RING_BUFFER_SIZE;
+  // g_print("MIC IN BUF=%d\n", i);
   g_mutex_unlock(&audio_mutex);
   return paContinue;
 }
