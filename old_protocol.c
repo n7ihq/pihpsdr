@@ -684,6 +684,7 @@ static int rx_feedback_channel() {
       break;
     case DEVICE_HERMES:
     case DEVICE_STEMLAB:
+    case DEVICE_STEMLAB_Z20:
     case DEVICE_HERMES_LITE2:
       ret=2;
       break;
@@ -718,6 +719,7 @@ static int tx_feedback_channel() {
       break;
     case DEVICE_HERMES:
     case DEVICE_STEMLAB:
+    case DEVICE_STEMLAB_Z20:
     case DEVICE_HERMES_LITE2:
       ret=3;
       break;
@@ -857,6 +859,7 @@ static int how_many_receivers() {
 	break;
       case DEVICE_HERMES:
       case DEVICE_STEMLAB:
+      case DEVICE_STEMLAB_Z20:
       case DEVICE_HERMES_LITE2:
 	ret=4;  // TX feedback hard-wired to RX4
 	break;

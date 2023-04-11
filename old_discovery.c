@@ -372,6 +372,15 @@ g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9]
                             discovered[devices].frequency_min=0.0;
                             discovered[devices].frequency_max=61440000.0;
                             break;
+			case DEVICE_STEMLAB_Z20:
+			    // This is in principle the same as HERMES but has two ADCs
+			    // (and therefore, can do DIVERSITY).
+			    // There are some problems with the 6m band on the RedPitaya
+			    // but with additional filtering it can be used.
+                            strcpy(discovered[devices].name,"STEMlab-Zync7020");
+                            discovered[devices].frequency_min=0.0;
+                            discovered[devices].frequency_max=61440000.0;
+                            break;
                         default:
                             strcpy(discovered[devices].name,"Unknown");
                             discovered[devices].frequency_min=0.0;

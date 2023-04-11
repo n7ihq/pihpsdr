@@ -517,6 +517,7 @@ static gboolean update_display(gpointer data) {
             break;
           case DEVICE_HERMES:
           case DEVICE_STEMLAB:
+          case DEVICE_STEMLAB_Z20:
             constant1=3.3;
             constant2=0.095;
             break;
