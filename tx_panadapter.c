@@ -394,7 +394,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   if(tx->puresignal && (txmode != modeCWU) && (txmode != modeCWL)) {
     cairo_set_source_rgba(cr,COLOUR_OK);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE2);
-    cairo_move_to(cr,display_width/2,display_height-10);
+    cairo_move_to(cr,display_width/2+10,display_height-10);
     cairo_show_text(cr, "PureSignal");
 
     int info[16];
@@ -404,7 +404,11 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     } else {
       cairo_set_source_rgba(cr,COLOUR_OK);
     }
-    cairo_move_to(cr,(display_width/2)+100,display_height-10);
+    if (tx->dialog) {
+      cairo_move_to(cr,(display_width/2)+10,display_height-30);
+    } else {
+      cairo_move_to(cr,(display_width/2)+110,display_height-10);
+    }
     cairo_show_text(cr, "Correcting");
   }
 #endif
