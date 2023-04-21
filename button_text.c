@@ -1,44 +1,40 @@
 #include <gtk/gtk.h>
 
 //
+// set_button_default_color:
+// The actual text color of the button is recorded and stored
+// in the static string "default_color".
+
+// set_button_text_color:
 // Set the color of a widget using a style provider.
 // This is normally used for button texts.
-// Upon the first call, the actual color is queried
-// and stored, and assumed to be the default color for
-// the GTK theme actually in use.
-//
-// Later, if the argument "color" equals "default", then
-// this default color is used.
+// If the color equals "default", then the color stored
+// in default_color is used.
 //
 // The idea of this is that it works both with a normal
 // (default = black) and dark (default = white) GTK theme.
 //
 // There is still an implicit assumption in piHPSDR, namely
-// that orange and red button texts are compativle with the
+// that orange and red button texts are compatible with the
 // GTK theme.
 //
+// TODO: change this to adding and removing classes.
+//
 
-void set_button_text_color(GtkWidget *widget,char *color) {
-  GtkStyleContext *style_context;
-  GtkCssProvider *provider = gtk_css_provider_new ();
-  gchar tmp[64];
+static char default_color[128] = "green";
 
-  GdkRGBA RGBA;
-  static int first=1;
-  static char default_color[128];
-
-  style_context = gtk_widget_get_style_context(widget);
-
-  if (first) {
+void set_button_default_color(GtkWidget *widget) {
+    GtkStyleContext *style_context;
+    GdkRGBA RGBA;
     int alpha1,alpha2;
     //
-    // In the very first call to this function, probe the button
-    // colour since this is the default one for the GTK theme in use.
+    // Call this on the very first button that is generated.
+    // The colour is probed and remembered since it depends on the GTK theme in use.
     // From then on, always use default_color when "default" is requested
     // This way, piHPSDR works with the "dark" GTK theme.
     //
+    style_context = gtk_widget_get_style_context(widget);
     gtk_style_context_get_color(style_context, GTK_STATE_FLAG_NORMAL ,&RGBA);
-    first=0;
     //
     // This is now really odd. Some systems with national language support
     // (e.g. in Germany) print floating point constants with a decimal comma
@@ -51,12 +47,19 @@ void set_button_text_color(GtkWidget *widget,char *color) {
       alpha2 = 0;
     }
     g_snprintf(default_color, sizeof(default_color), "rgba(%d,%d,%d,%d.%03d)",
-		    (int) (RGBA.red   * 255),
-		    (int) (RGBA.green * 255),
-		    (int) (RGBA.blue  * 255),
-		    alpha1,alpha2);
+                    (int) (RGBA.red   * 255),
+                    (int) (RGBA.green * 255),
+                    (int) (RGBA.blue  * 255),
+                    alpha1,alpha2);
     g_print("Default Color Probed: %s\n",default_color);
-  }  
+}
+
+void set_button_text_color(GtkWidget *widget,char *color) {
+  GtkStyleContext *style_context;
+  GtkCssProvider *provider = gtk_css_provider_new ();
+  gchar tmp[64];
+
+  style_context = gtk_widget_get_style_context(widget);
 
   //
   // Replace "default" by the default color

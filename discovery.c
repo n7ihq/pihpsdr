@@ -53,6 +53,7 @@
 #include "client_server.h"
 #endif
 #include "property.h"
+#include "button_text.h"
 
 static GtkWidget *discovery_dialog;
 static DISCOVERED *d;
@@ -290,9 +291,7 @@ void discovery() {
     discovery_dialog = gtk_dialog_new();
     gtk_window_set_transient_for(GTK_WINDOW(discovery_dialog),GTK_WINDOW(top_window));
     gtk_window_set_title(GTK_WINDOW(discovery_dialog),"piHPSDR - Discovery");
-    //gtk_window_set_decorated(GTK_WINDOW(discovery_dialog),FALSE);
 
-    //gtk_widget_override_font(discovery_dialog, pango_font_description_from_string("FreeMono 16"));
     g_signal_connect(discovery_dialog, "delete_event", G_CALLBACK(delete_event_cb), NULL);
     set_backgnd(discovery_dialog);
 
@@ -302,7 +301,6 @@ void discovery() {
 
     GtkWidget *grid=gtk_grid_new();
     gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-    //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
     gtk_grid_set_row_spacing (GTK_GRID(grid),10);
 
     int row=0;
@@ -502,6 +500,12 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 #endif
 
     GtkWidget *discover_b=gtk_button_new_with_label("Discover");
+    //
+    // This call records the colour of the label and stores it.
+    // Subsequent calls to set_button_text_color() with color == "default"
+    // will then use that color.
+    //
+    set_button_default_color(discover_b);
     g_signal_connect (discover_b, "button-press-event", G_CALLBACK(discover_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid),discover_b,1,row,1,1);
 
