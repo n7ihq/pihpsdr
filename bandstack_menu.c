@@ -39,7 +39,7 @@ static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_bandstack;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;

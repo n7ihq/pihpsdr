@@ -426,7 +426,7 @@ g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, disco
     return NULL;
 }
 
-void old_discovery() {
+void old_discovery(void) {
     struct ifaddrs *addrs,*ifa;
     int i, is_local;
 

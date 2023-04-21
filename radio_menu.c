@@ -61,7 +61,7 @@ static GtkWidget *rsat_b;
 static GtkWidget *duplex_b;
 static GtkWidget *mute_rx_b;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -229,7 +229,7 @@ static void split_cb(GtkWidget *widget, gpointer data) {
 //
 // call-able from outside, e.g. toolbar or MIDI, through g_idle_add
 //
-void setDuplex() {
+void setDuplex(void) {
   if(duplex) {
     gtk_container_remove(GTK_CONTAINER(fixed),transmitter->panel);
     reconfigure_transmitter(transmitter,display_width/4,display_height/2);

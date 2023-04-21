@@ -194,7 +194,7 @@ g_print("connect_cb: %s:%d\n",host_addr,host_port);
 }
 #endif
 
-void discovery() {
+void discovery(void) {
 //fprintf(stderr,"discovery\n");
 
   //

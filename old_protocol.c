@@ -168,7 +168,7 @@ static GThread *receive_thread_id;
 static gpointer receive_thread(gpointer arg);
 static void process_ozy_input_buffer(unsigned const char  *buffer);
 static void process_bandscope_buffer(char  *buffer);
-void ozy_send_buffer();
+void ozy_send_buffer(void);
 
 static unsigned char metis_buffer[1032];
 static uint32_t send_sequence=0;
@@ -177,11 +177,11 @@ static int metis_offset=8;
 static int metis_write(unsigned char ep,unsigned const char* buffer,int length);
 static void metis_start_stop(int command);
 static void metis_send_buffer(unsigned char* buffer,int length);
-static void metis_restart();
+static void metis_restart(void);
 
 static void open_tcp_socket(void);
 static void open_udp_socket(void);
-static int how_many_receivers();
+static int how_many_receivers(void);
 
 #define COMMON_MERCURY_FREQUENCY 0x80
 #define PENELOPE_MIC 0x80
@@ -196,7 +196,7 @@ static GThread *ozy_EP4_rx_thread_id;
 static GThread *ozy_EP6_rx_thread_id;
 static gpointer ozy_ep4_rx_thread(gpointer arg);
 static gpointer ozy_ep6_rx_thread(gpointer arg);
-static void start_usb_receive_threads();
+static void start_usb_receive_threads(void);
 static void ozyusb_write(unsigned char* buffer,int length);
 #define EP6_IN_ID  0x86                         // end point = 6, direction toward PC
 #define EP2_OUT_ID  0x02                        // end point = 2, direction from PC
@@ -281,7 +281,7 @@ void dump_buffer(unsigned char *buffer,int length,const char *who) {
   g_mutex_unlock(&dump_mutex);
 }
 
-void old_protocol_stop() {
+void old_protocol_stop(void) {
   //
   // Mutex is needed since in the TCP case, sending TX IQ packets
   // must not occur while the "stop" packet is sent.
@@ -298,7 +298,7 @@ void old_protocol_stop() {
   pthread_mutex_unlock(&send_ozy_mutex);
 }
 
-void old_protocol_run() {
+void old_protocol_run(void) {
     g_print("%s\n",__FUNCTION__);
     pthread_mutex_lock(&send_ozy_mutex);
     metis_restart();
@@ -431,7 +431,7 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
 }
 #endif
 
-static void open_udp_socket() {
+static void open_udp_socket(void) {
     int tmp;
 
     if (data_socket >= 0) {
@@ -494,7 +494,7 @@ g_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_
     g_print("%s: UDP socket established: %d for %s:%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
 }
 
-static void open_tcp_socket() {
+static void open_tcp_socket(void) {
     int tmp;
 
     if (tcp_socket >= 0) {
@@ -668,7 +668,7 @@ static gpointer receive_thread(gpointer arg) {
 //
 //
 
-static int rx_feedback_channel() {
+static int rx_feedback_channel(void) {
   //
   // For radios with small FPGAS only supporting 2 RX, use RX1.
   // Else, use the last RX before the TX feedback channel.
@@ -700,7 +700,7 @@ static int rx_feedback_channel() {
   return ret;
 }
 
-static int tx_feedback_channel() {
+static int tx_feedback_channel(void) {
   //
   // Radios with small FPGAs use RX2
   // HERMES uses RX4,
@@ -735,11 +735,11 @@ static int tx_feedback_channel() {
   return ret;
 }
 
-static int first_receiver_channel() {
+static int first_receiver_channel(void) {
   return 0;
 }
 
-static int second_receiver_channel() {
+static int second_receiver_channel(void) {
   return 1;
 }
 
@@ -822,7 +822,7 @@ static long long channel_freq(int chan) {
   return freq;
 }
 
-static int how_many_receivers() {
+static int how_many_receivers(void) {
   //
   // For DIVERSITY, we need at least two RX channels
   // When PURESIGNAL is active, we need to include the TX DAC channel.
@@ -895,7 +895,7 @@ double right_sample_double_aux;
 static int nsamples;
 static int iq_samples;
 
-static void process_control_bytes() {
+static void process_control_bytes(void) {
   int previous_ptt;
   int previous_dot;
   int previous_dash;
@@ -1109,7 +1109,7 @@ static void process_ozy_byte(int b) {
       break;
     case LEFT_SAMPLE_LOW:
       left_sample|=(int)((unsigned char)b&0xFF);
-      left_sample_double=(double)left_sample/8388607.0; // 24 bit sample 2^23-1
+      left_sample_double=(double)left_sample*1.1920928955078125E-7;
       state++;
       break;
     case RIGHT_SAMPLE_HI:
@@ -1122,7 +1122,7 @@ static void process_ozy_byte(int b) {
       break;
     case RIGHT_SAMPLE_LOW:
       right_sample|=(int)((unsigned char)b&0xFF);
-      right_sample_double=(double)right_sample/8388607.0; // 24 bit sample 2^23-1
+      right_sample_double=(double)right_sample*1.1920928955078125E-7;
 
       if (isTransmitting() && transmitter->puresignal) {
         //
@@ -1343,7 +1343,7 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
   }
 }
 
-void ozy_send_buffer() {
+void ozy_send_buffer(void) {
 
 
   int txmode=get_tx_mode();
@@ -2131,7 +2131,7 @@ static int metis_write(unsigned char ep,unsigned const char* buffer,int length) 
   return length;
 }
 
-static void metis_restart() {
+static void metis_restart(void) {
   int i;
 
   g_print("%s\n",__FUNCTION__);

@@ -116,7 +116,7 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
 gchar *midi_types[] = {"NONE","KEY","KNOB/SLIDER","*INVALID*","WHEEL"};
 gchar *midi_events[] = {"NONE","NOTE","CTRL","PITCH"};
 
-int MIDIstop() {
+int MIDIstop(void) {
   for (int i=0; i<n_midi_devices; i++) {
     if (midi_devices[i].active) {
       close_midi_device(i);
@@ -129,7 +129,7 @@ int MIDIstop() {
  * Release data from MidiCommandsTable
  */
 
-void MidiReleaseCommands() {
+void MidiReleaseCommands(void) {
   int i;
   struct desc *loop, *new;
   for (i=0; i<129; i++) {

@@ -112,9 +112,9 @@ enum {
 };
 
 static int update(void *data);
-static void load_store();
+static void load_store(void);
 
-static void cleanup() {
+static void cleanup(void) {
   configure_midi_device(FALSE);
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
@@ -301,7 +301,7 @@ static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer dat
   }
 }
 
-static void find_current_cmd() {
+static void find_current_cmd(void) {
   struct desc *cmd;
   cmd=MidiCommandsTable[thisNote];
   while(cmd!=NULL) {
@@ -534,7 +534,7 @@ static void add_store(int key,struct desc *cmd) {
   }
 }
 
-static void load_store() {
+static void load_store(void) {
   struct desc *cmd;
   gtk_list_store_clear(store);
   for(int i=127;i>=0;i--) {
@@ -1418,7 +1418,7 @@ void NewMidiConfigureEvent(enum MIDIevent event, int channel, int note, int val)
   g_idle_add(ProcessNewMidiConfigureEvent, data);
 }
 
-void midi_save_state() {
+void midi_save_state(void) {
   char name[80];
   char value[80];
   struct desc *cmd;
@@ -1535,7 +1535,7 @@ void midi_save_state() {
     }
 }
 
-void midi_restore_state() {
+void midi_restore_state(void) {
   char name[80];
   char *value;
   gint entries;

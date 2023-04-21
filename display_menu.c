@@ -37,7 +37,7 @@ static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -112,11 +112,6 @@ static void waterfall_low_value_changed_cb(GtkWidget *widget, gpointer data) {
 static void waterfall_automatic_cb(GtkWidget *widget, gpointer data) {
   active_receiver->waterfall_automatic=active_receiver->waterfall_automatic==1?0:1;
 }
-
-//static void display_panadapter_cb(GtkWidget *widget, gpointer data) {
-//  active_receiver->display_panadapter=active_receiver->display_panadapter==1?0:1;
-//  reconfigure_radio();
-//}
 
 static void display_waterfall_cb(GtkWidget *widget, gpointer data) {
   active_receiver->display_waterfall=active_receiver->display_waterfall==1?0:1;

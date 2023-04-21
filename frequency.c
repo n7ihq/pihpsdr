@@ -520,7 +520,7 @@ g_print("getBand for %lld is %s (%d)\n",frequency,info->info,info->band);
 #include "vfo.h"
 #include "band.h"
 
-int canTransmit() {
+int canTransmit(void) {
     int result;
     long long txfreq, flow, fhigh;
     int txb, txvfo, txmode;

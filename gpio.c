@@ -342,14 +342,14 @@ static GThread *rotary_encoder_thread_id;
 static uint64_t epochMilli;
 
 #ifdef GPIO
-static void initialiseEpoch() {
+static void initialiseEpoch(void) {
   struct timespec ts ;
 
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
   epochMilli = (uint64_t)ts.tv_sec * (uint64_t)1000    + (uint64_t)(ts.tv_nsec / 1000000L) ;
 }
 
-static unsigned int millis () {
+static unsigned int millis (void) {
   uint64_t now ;
   struct  timespec ts ;
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
@@ -651,7 +651,7 @@ void gpio_set_defaults(int ctrlr) {
   }
 }
 
-void gpio_restore_state() {
+void gpio_restore_state(void) {
   char* value;
   char name[80];
 
@@ -726,7 +726,7 @@ void gpio_restore_state() {
   }
 }
 
-void gpio_save_state() {
+void gpio_save_state(void) {
   char value[80];
   char name[80];
 
@@ -807,7 +807,7 @@ void gpio_save_state() {
   saveProperties("gpio.props");
 }
 
-void gpio_restore_actions() {
+void gpio_restore_actions(void) {
   char name[80];
   char *value;
   int previous_controller=NO_CONTROLLER;
@@ -848,7 +848,7 @@ void gpio_restore_actions() {
   }
 }
 
-void gpio_save_actions() {
+void gpio_save_actions(void) {
   char value[80];
   char name[80];
 
@@ -970,7 +970,7 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
 }
 #endif
 
-int gpio_init() {
+int gpio_init(void) {
 
 #ifdef GPIO
   int ret=0;
@@ -1091,7 +1091,7 @@ g_print("%s: err\n",__FUNCTION__);
 #endif
 }
 
-void gpio_close() {
+void gpio_close(void) {
 #ifdef GPIO
   if(chip!=NULL) gpiod_chip_close(chip);
 #endif
@@ -1113,7 +1113,7 @@ void gpio_cw_sidetone_set(int level) {
 #endif
 }
 
-int  gpio_cw_sidetone_enabled() {
+int  gpio_cw_sidetone_enabled(void) {
   return ENABLE_GPIO_SIDETONE;
 }
 

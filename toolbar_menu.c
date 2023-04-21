@@ -46,7 +46,7 @@ static GtkWidget *dialog=NULL;
 static SWITCH *temp_switches;
 
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;

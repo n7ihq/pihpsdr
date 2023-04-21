@@ -130,7 +130,7 @@ int ozy_open(void) {
 	return 0;
 }
 
-int ozy_close() {
+int ozy_close(void) {
 	int rc;
 
 	rc=libusb_attach_kernel_driver(ozy_handle,0);
@@ -479,7 +479,7 @@ void ozy_i2c_readpwr(int addr) {
 	}
 }
 
-void ozy_i2c_readvars() {
+void ozy_i2c_readvars(void) {
 	int rc = 0;
 	unsigned char buffer[8];
 
@@ -634,7 +634,7 @@ int filePath (char *sOut, const char *sIn) {
 // initialise a USB ozy device. 
 // renamed as "initialise" and combined with the "ozyinit" code
 //
-int ozy_initialise() 
+int ozy_initialise(void) 
 {
 	int rc;
 

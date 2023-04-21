@@ -119,7 +119,7 @@ g_print("audio: state_cb: PA_CONTEXT_READY\n");
   }
 }
 
-void audio_get_cards() {
+void audio_get_cards(void) {
   g_mutex_init(&audio_mutex);
   g_mutex_lock(&audio_mutex);
   main_loop=pa_glib_mainloop_new(NULL);
@@ -209,7 +209,7 @@ static void *mic_read_thread(gpointer arg) {
   g_print("%s: exit\n",__FUNCTION__);
 }
 
-int audio_open_input() {
+int audio_open_input(void) {
   pa_sample_spec sample_spec;
   int result=0;
   int err;
@@ -288,7 +288,7 @@ void audio_close_output(RECEIVER *rx) {
   g_mutex_unlock(&rx->local_audio_mutex);
 }
 
-void audio_close_input() {
+void audio_close_input(void) {
   running=FALSE;
   g_mutex_lock(&audio_mutex);
 
@@ -320,7 +320,7 @@ g_print("%s: wait for mic thread to complete\n", __FUNCTION__);
 // Utility function for retrieving mic samples
 // from ring buffer
 //
-float audio_get_next_mic_sample() {
+float audio_get_next_mic_sample(void) {
   int newpt;
   float sample;
   g_mutex_lock(&audio_mutex);

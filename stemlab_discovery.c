@@ -513,7 +513,7 @@ void stemlab_discovery(void) {
 //
 
 
-void stemlab_discovery() {
+void stemlab_discovery(void) {
   char txt[150];
   CURL *curl_handle;
   CURLcode curl_error;

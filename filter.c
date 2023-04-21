@@ -229,7 +229,7 @@ FILTER *filters[]={
 
 gint filter_step=5;
 
-void filterSaveState() {
+void filterSaveState(void) {
     char value[128];
 
     // save the Var1 and Var2 settings
@@ -325,7 +325,7 @@ void filterSaveState() {
     
 }
 
-void filterRestoreState() {
+void filterRestoreState(void) {
     char* value;
 
     value=getProperty("filter.lsb.var1.low");

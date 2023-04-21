@@ -83,7 +83,7 @@ static void destroy_cb(GtkWidget *widget, gpointer data) {
   usleep(100000);
 }
 
-static void cleanup() {
+static void cleanup(void) {
   running=0;
   // wait for one instance of info_thread to complete
   usleep(100000);
@@ -359,13 +359,8 @@ static void resume_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void feedback_cb(GtkWidget *widget, gpointer data) {
-  if(transmitter->feedback==0)  {
-    transmitter->feedback=1;
-    set_button_text_color(widget,"red");
-  } else {
-    transmitter->feedback=0;
-    set_button_text_color(widget,"default");
-  }
+  transmitter->feedback = transmitter->feedback ? 0 : 1;
+  set_button_text_color(widget,transmitter->feedback ? "red" : "default");
 }
 
 static void reset_cb(GtkWidget *widget, gpointer data) {
@@ -377,11 +372,7 @@ static void reset_cb(GtkWidget *widget, gpointer data) {
 static void twotone_cb(GtkWidget *widget, gpointer data) {
   int state=transmitter->twotone?0:1;
   tx_set_twotone(transmitter,state);
-  if(state) {
-    set_button_text_color(widget,"red");
-  } else {
-    set_button_text_color(widget,"default");
-  }
+  set_button_text_color(widget,state ? "red" : "default");
 }
 
 void ps_menu(GtkWidget *parent) {
@@ -412,6 +403,7 @@ void ps_menu(GtkWidget *parent) {
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
+  set_button_text_color(close_b, "default");
 
   row++;
   col=0;
@@ -427,9 +419,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_widget_show(twotone_b);
   gtk_grid_attach(GTK_GRID(grid),twotone_b,col,row,1,1);
   g_signal_connect(twotone_b,"pressed",G_CALLBACK(twotone_cb),NULL);
-  if(transmitter->twotone) {
-    set_button_text_color(twotone_b,"red");
-  }
+  set_button_text_color(twotone_b,transmitter->twotone ? "red" : "default");
 
   col++;
 
@@ -444,12 +434,14 @@ void ps_menu(GtkWidget *parent) {
   gtk_widget_show(reset_b);
   gtk_grid_attach(GTK_GRID(grid),reset_b,col,row,1,1);
   g_signal_connect(reset_b,"pressed",G_CALLBACK(reset_cb),NULL);
+  set_button_text_color(reset_b, "default");
 
   col++;
 
   GtkWidget *resume_b=gtk_button_new_with_label("Restart");
   gtk_grid_attach(GTK_GRID(grid),resume_b,col,row,1,1);
   g_signal_connect(resume_b,"pressed",G_CALLBACK(resume_cb),NULL);
+  set_button_text_color(resume_b, "default");
 
   col++;
 
@@ -457,9 +449,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_widget_show(feedback_b);
   gtk_grid_attach(GTK_GRID(grid),feedback_b,col,row,1,1);
   g_signal_connect(feedback_b,"pressed",G_CALLBACK(feedback_cb),NULL);
-  if(transmitter->feedback)  {
-    set_button_text_color(feedback_b,"red");
-  }
+  set_button_text_color(feedback_b,transmitter->feedback ? "red" : "default");
 
   row++;
   col=0;

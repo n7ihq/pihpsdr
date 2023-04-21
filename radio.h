@@ -327,7 +327,7 @@ extern void radio_change_receivers(int r);
 extern void radio_change_sample_rate(int rate);
 extern void set_alex_antennas(void);
 extern void tx_vfo_changed(void);
-extern void radio_split_toggle();
+extern void radio_split_toggle(void);
 extern void radio_set_split(int v);
 extern void setMox(int state);
 extern int getMox(void);

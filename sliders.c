@@ -88,7 +88,7 @@ static GtkWidget *filter_shift_scale;
 static GtkWidget *diversity_gain_scale;
 static GtkWidget *diversity_phase_scale;
 
-void sliders_update() {
+void sliders_update(void) {
   if(display_sliders) {
     if(can_transmit) {
       if(mic_linein) {
@@ -345,7 +345,7 @@ static void afgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #endif
 }
 
-void update_af_gain() {
+void update_af_gain(void) {
   set_af_gain(active_receiver->id,active_receiver->volume);
 }
 
@@ -411,7 +411,7 @@ static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
     }
 }
 
-void update_rf_gain() {
+void update_rf_gain(void) {
   //set_rf_gain(active_receiver->id,active_receiver->rf_gain);
   set_rf_gain(active_receiver->id,adc[active_receiver->id].gain);
 }
@@ -755,7 +755,7 @@ void set_compression(TRANSMITTER* tx) {
     }
 }
 
-void show_diversity_gain() {
+void show_diversity_gain(void) {
   g_print("%s\n",__FUNCTION__);
     if(scale_status!=DIV_GAIN) {
       if(scale_status!=NO_ACTION) {
@@ -783,7 +783,7 @@ void show_diversity_gain() {
     }
 }
 
-void show_diversity_phase() {
+void show_diversity_phase(void) {
   g_print("%s\n",__FUNCTION__);
     if(scale_status!=DIV_PHASE) {
       if(scale_status!=NO_ACTION) {

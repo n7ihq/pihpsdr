@@ -40,7 +40,7 @@ static GtkWidget *dialog=NULL;
 static GtkWidget *local_audio_b=NULL;
 static GtkWidget *output=NULL;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;

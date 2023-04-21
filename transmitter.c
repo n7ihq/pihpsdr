@@ -745,23 +745,23 @@ static void init_analyzer(TRANSMITTER *tx) {
 
     SetAnalyzer(tx->id,
             n_pixout,
-            spur_elimination_ffts, //number of LO frequencies = number of ffts used in elimination
-            data_type, //0 for real input data (I only); 1 for complex input data (I & Q)
-            flp, //vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
-            fft_size, //size of the fft, i.e., number of input samples
-            tx->output_samples, //number of samples transferred for each OpenBuffer()/CloseBuffer()
-            window_type, //integer specifying which window function to use
-            kaiser_pi, //PiAlpha parameter for Kaiser window
-            overlap, //number of samples each fft (other than the first) is to re-use from the previous
-            clip, //number of fft output bins to be clipped from EACH side of each sub-span
-            span_clip_l, //number of bins to clip from low end of entire span
-            span_clip_h, //number of bins to clip from high end of entire span
-            pixels, //number of pixel values to return.  may be either <= or > number of bins
-            stitches, //number of sub-spans to concatenate to form a complete span
-            calibration_data_set, //identifier of which set of calibration data to use
-            span_min_freq, //frequency at first pixel value8192
-            span_max_freq, //frequency at last pixel value
-            max_w //max samples to hold in input ring buffers
+            spur_elimination_ffts, // number of LO frequencies = number of ffts used in elimination
+            data_type,             // 0 for real input data (I only); 1 for complex input data (I & Q)
+            flp,                   // vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
+            fft_size,              // size of the fft, i.e., number of input samples
+            tx->output_samples,    // number of samples transferred for each OpenBuffer()/CloseBuffer()
+            window_type,           // integer specifying which window function to use
+            kaiser_pi,             // PiAlpha parameter for Kaiser window
+            overlap,               // number of samples each fft (other than the first) is to re-use from the previous
+            clip,                  // number of fft output bins to be clipped from EACH side of each sub-span
+            span_clip_l,           // number of bins to clip from low end of entire span
+            span_clip_h,           // number of bins to clip from high end of entire span
+            pixels,                // number of pixel values to return.  may be either <= or > number of bins
+            stitches,              // number of sub-spans to concatenate to form a complete span
+            calibration_data_set,  // identifier of which set of calibration data to use
+            span_min_freq,         // frequency at first pixel value8192
+            span_max_freq,         // frequency at last pixel value
+            max_w                  //max samples to hold in input ring buffers
     );
    //
    // This cannot be changed for the TX panel,
@@ -998,7 +998,7 @@ fprintf(stderr,"transmitter: allocate buffers: mic_input_buffer=%d iq_output_buf
   SetTXAPostGenToneFreq(tx->id, 0.0);
   SetTXAPostGenRun(tx->id, 0);
 
-  SetTXAPanelGain1(tx->id,pow(10.0, mic_gain/20.0));
+  SetTXAPanelGain1(tx->id,pow(10.0, mic_gain*0.05));
   SetTXAPanelRun(tx->id, 1);
 
   SetTXAFMDeviation(tx->id, (double)tx->deviation);
@@ -1334,7 +1334,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 		    break;
 #ifdef SOAPYSDR
                 case SOAPYSDR_PROTOCOL:
-                    // SOAPY: just convert the double IQ sampels (is,qs) to float.
+                    // SOAPY: just convert the double IQ samples (is,qs) to float.
                     soapy_protocol_iq_samples((float)is,(float)qs);
                     break;
 #endif
@@ -1691,7 +1691,7 @@ void tx_set_ps_sample_rate(TRANSMITTER *tx,int rate) {
 // - it does not depend on an external sin function
 // - it does not do much floating point
 // - many sine generators can run in parallel, with their "own"
-//   phase words and frequency
+//   phase words and frequencies
 // - the phase is always continuous, even if there are frequency jumps
 ///////////////////////////////////////////////////////////////////////////
 

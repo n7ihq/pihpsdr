@@ -353,13 +353,13 @@ BANDSTACK_ENTRY *bandstack_get_bandstack_entry(int band,int entry) {
     return &bandstack->entry[entry];
 }
 
-BANDSTACK_ENTRY *bandstack_entry_get_current() {
+BANDSTACK_ENTRY *bandstack_entry_get_current(void) {
     BANDSTACK *bandstack=bands[current_band].bandstack;
     BANDSTACK_ENTRY *entry=&bandstack->entry[bandstack->current_entry];
     return entry;
 }
 
-BANDSTACK_ENTRY *bandstack_entry_next() {
+BANDSTACK_ENTRY *bandstack_entry_next(void) {
     BANDSTACK *bandstack=bands[current_band].bandstack;
     bandstack->current_entry++;
     if(bandstack->current_entry>=bandstack->entries) {
@@ -369,7 +369,7 @@ BANDSTACK_ENTRY *bandstack_entry_next() {
     return entry;
 }
 
-BANDSTACK_ENTRY *bandstack_entry_previous() {
+BANDSTACK_ENTRY *bandstack_entry_previous(void) {
     BANDSTACK *bandstack=bands[current_band].bandstack;
     bandstack->current_entry--;
     if(bandstack->current_entry<0) {
@@ -380,11 +380,11 @@ BANDSTACK_ENTRY *bandstack_entry_previous() {
 }
 
 
-int band_get_current() {
+int band_get_current(void) {
     return current_band;
 }
 
-BAND *band_get_current_band() {
+BAND *band_get_current_band(void) {
     BAND *b=&bands[current_band];
     return b;
 }
@@ -399,7 +399,7 @@ BAND *band_set_current(int b) {
     return &bands[b];
 }
 
-void bandSaveState() {
+void bandSaveState(void) {
     char name[128];
     char value[128];
     BANDSTACK_ENTRY* entry;
@@ -499,7 +499,7 @@ void bandSaveState() {
     setProperty("band",value);
 }
 
-void bandRestoreState() {
+void bandRestoreState(void) {
     char* value;
     int v;
     int b;
@@ -677,7 +677,7 @@ g_print("getFrequencyInfo %lld is %s\n",frequency,result);
 }
 #endif
 
-int canTransmit() {
+int canTransmit(void) {
     int result;
     long long txfreq, flow, fhigh;
     int txb, txvfo, txmode;
@@ -763,22 +763,6 @@ if(info_band!=bandGen
     return result;
 }
 
-
-/*
-int canTransmit() {
-    int result=FALSE;
-    if (tx_out_of_band) return TRUE;
-    if(info_band!=bandGen
-       && info_band!=bandWWV 
-#ifdef SOAPYSDR
-       && info_band!=bandAIR
-#endif
-      ) {
-        result=TRUE;
-    }
-    return result;
-}
-*/
 
 void band_plus(int id) {
   long long frequency_min=radio->frequency_min;

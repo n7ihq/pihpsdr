@@ -43,6 +43,12 @@ static GtkWidget *label;
 
 #define BUF_SIZE 88
 
+//
+// Note that the decimal point is hard-wired to a point,
+// which may be incompatible with the LOCALE setting
+// such that atof() and friends do not understand it.
+// This is taken care of below
+//
 static char *btn_labels[] = {"1","2","3",
                "4","5","6",
                "7","8","9",
@@ -53,7 +59,7 @@ static char *btn_labels[] = {"1","2","3",
 
 static GtkWidget *btn[16];
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -192,7 +198,7 @@ static void enable_ps_cb(GtkWidget *widget, gpointer data) {
 }
 #endif
 
-static void set_btn_state() {
+static void set_btn_state(void) {
   int i;
 
   for(i=0;i<16;i++) {
@@ -214,7 +220,6 @@ void vfo_menu(GtkWidget *parent,int vfo) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   sprintf(title,"piHPSDR - VFO %s",vfo==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);

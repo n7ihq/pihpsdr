@@ -36,7 +36,7 @@ static GtkWidget *dialog=NULL;
 
 GtkWidget *store_button[NUM_OF_MEMORYS];
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;

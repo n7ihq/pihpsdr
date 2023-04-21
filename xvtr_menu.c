@@ -43,7 +43,7 @@ static GtkWidget *tx_lo_frequency[BANDS+XVTRS];
 static GtkWidget *tx_lo_error[BANDS+XVTRS];
 static GtkWidget *disable_pa[BANDS+XVTRS];
 
-static void save_xvtr () {
+static void save_xvtr (void) {
   int i;
   int b;
   if(dialog!=NULL) {
@@ -161,7 +161,7 @@ void lo_error_update(RECEIVER *rx,long long offset) {
   update_receiver(vfo[0].band,TRUE);
 }
 
-static void cleanup() {
+static void cleanup(void) {
   save_xvtr();
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);

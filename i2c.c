@@ -85,7 +85,7 @@ static void frequencyStep(int pos) {
   vfo_step(pos);
 }
 
-void i2c_interrupt() {
+void i2c_interrupt(void) {
   unsigned int flags;
   unsigned int ints;
   int i;
@@ -117,7 +117,7 @@ void i2c_interrupt() {
   g_mutex_unlock(&i2c_mutex);
 }
 
-void i2c_init() {
+void i2c_init(void) {
 
   int flags, ints;
 

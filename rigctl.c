@@ -77,8 +77,8 @@ int rigctl_enable=0;
 int parse_cmd (void *data);
 int connect_cnt = 0;
 
-int rigctlGetFilterLow();
-int rigctlGetFilterHigh();
+int rigctlGetFilterLow(void);
+int rigctlGetFilterHigh(void);
 int new_level;
 int active_transmitter = 0;
 int rigctl_busy = 0;  // Used to tell rigctl_menu that launch has already occured
@@ -132,7 +132,7 @@ static CLIENT serial_client;       // serial lines must pass a valid CLIENT to p
 
 static gpointer rigctl_client (gpointer data);
 
-void close_rigctl_ports() {
+void close_rigctl_ports(void) {
   int i;
   struct linger linger = { 0 };
   linger.l_onoff = 1;
@@ -186,7 +186,7 @@ static int dashsamples;
 // problem, and without too much "busy waiting". We just take a nap until 10 msec
 // before we have to act, and then wait several times for 1 msec until we can shoot.
 //
-void send_dash() {
+void send_dash(void) {
   int TimeToGo;
   for(;;) {
     TimeToGo=cw_key_up+cw_key_down;
@@ -204,7 +204,7 @@ void send_dash() {
   cw_key_up   = dotsamples;
 }
 
-void send_dot() {
+void send_dot(void) {
   int TimeToGo;
   for(;;) {
     TimeToGo=cw_key_up+cw_key_down;
@@ -684,13 +684,13 @@ static gpointer rigctl_client (gpointer data) {
 // 
 // FT command intepret vfo_sm state - used by IF command
 //
-int ft_read() {
+int ft_read(void) {
    return(active_transmitter);
 }
 // 
 // Determines RIT state - used by IF command
 //
-int rit_on () {
+int rit_on (void) {
   if(receivers == 1) { // Worry about 1 versus 2 radios
       if(vfo[VFO_A].rit != 0) {
          return 1;
@@ -3978,7 +3978,7 @@ static gpointer serial_server(gpointer data) {
      return NULL;
 }
 
-int launch_serial () {
+int launch_serial (void) {
      int fd;
      g_print("RIGCTL: Launch Serial port %s\n",ser_port);
 
@@ -4017,7 +4017,7 @@ int launch_serial () {
 }
 
 // Serial Port close
-void disable_serial () {
+void disable_serial (void) {
      g_print("RIGCTL: Disable Serial port %s\n",ser_port);
      serial_running=FALSE;
      if (serial_client.fifo) {
@@ -4041,7 +4041,7 @@ void disable_serial () {
 // 2-25-17 - K5JAE - create each thread with the pointer to the port number  
 //                   (Port numbers now const ints instead of defines..) 
 //
-void launch_rigctl () {
+void launch_rigctl (void) {
    
    g_print( "LAUNCHING RIGCTL!!\n");
 

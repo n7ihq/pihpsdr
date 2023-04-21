@@ -383,7 +383,7 @@ void set_backgnd(GtkWidget *widget) {
    //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColour);
 }
 
-void radio_stop() {
+void radio_stop(void) {
   if(can_transmit) {
 g_print("radio_stop: TX: CloseChannel: %d\n",transmitter->id);
     CloseChannel(transmitter->id);
@@ -398,7 +398,7 @@ g_print("radio_stop: RX1: CloseChannel: %d\n",receiver[1]->id);
   }
 }
 
-void reconfigure_radio() {
+void reconfigure_radio(void) {
   int i;
   int y;
 g_print("reconfigure_radio: receivers=%d\n",receivers);
@@ -492,7 +492,7 @@ static gboolean menu_cb (GtkWidget *widget, GdkEventButton *event, gpointer data
   return TRUE;
 }
 
-static void create_visual() {
+static void create_visual(void) {
   int y=0;
 
   fixed=gtk_fixed_new();
@@ -701,7 +701,7 @@ g_print("create_visual: calling radio_change_receivers: receivers=%d r=%d\n",rec
 
 }
   
-void start_radio() {
+void start_radio(void) {
   int i;
 //g_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_WATCH));
@@ -1425,7 +1425,7 @@ void start_radio() {
 #endif
 }
 
-void disable_rigctl() {
+void disable_rigctl(void) {
    g_print("RIGCTL: disable_rigctl()\n");
    close_rigctl_ports();
 }
@@ -1668,7 +1668,7 @@ void setMox(int state) {
   }
 }
 
-int getMox() {
+int getMox(void) {
     return mox;
 }
 
@@ -1856,15 +1856,15 @@ void setTune(int state) {
   }
 }
 
-int getTune() {
+int getTune(void) {
   return tune;
 }
 
-int isTransmitting() {
+int isTransmitting(void) {
   return mox | vox | tune;
 }
 
-double getDrive() {
+double getDrive(void) {
     return transmitter->drive;
 }
 
@@ -1891,7 +1891,7 @@ static int calcLevel(double d) {
   return level;
 }
 
-void calcDriveLevel() {
+void calcDriveLevel(void) {
   if (tune && !transmitter->tune_use_drive) {
     transmitter->drive_level=calcLevel(transmitter->tune_drive);
 g_print("calcDriveLevel: tune=%d drive_level=%d\n",transmitter->tune_drive,transmitter->drive_level);
@@ -1919,7 +1919,7 @@ void setDrive(double value) {
     }
 }
 
-double getTuneDrive() {
+double getTuneDrive(void) {
     return transmitter->tune_drive;
 }
 
@@ -1952,7 +1952,7 @@ void set_attenuation(int value) {
     }
 }
 
-void set_alex_antennas() {
+void set_alex_antennas(void) {
   //
   // Obtain band of VFO-A and transmitter, set ALEX RX/TX antennas
   // and the step attenuator
@@ -1977,7 +1977,7 @@ void set_alex_antennas() {
   }
 }
 
-void tx_vfo_changed() {
+void tx_vfo_changed(void) {
   //
   // When changing the active receiver or changing the split status,
   // the VFO that controls the transmitter my flip between VFOA/VFOB.
@@ -2019,7 +2019,7 @@ void set_alex_attenuation(int v) {
     }
 }
 
-void radio_split_toggle() {
+void radio_split_toggle(void) {
   radio_set_split(!split);
 }
 
@@ -2037,7 +2037,7 @@ void radio_set_split(int val) {
   }
 }
 
-void radioRestoreState() {
+void radioRestoreState(void) {
   char name[32];
   char *value;
   int i;
@@ -2397,7 +2397,7 @@ g_print("radioRestoreState: %s\n",property_path);
   g_mutex_unlock(&property_mutex);
 }
 
-void radioSaveState() {
+void radioSaveState(void) {
   int i;
   char value[80];
   char name[32];

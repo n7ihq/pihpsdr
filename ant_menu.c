@@ -41,7 +41,7 @@ static GtkWidget *grid=NULL;
 static GtkWidget *adc0_antenna_combo_box;
 static GtkWidget *dac0_antenna_combo_box;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -103,7 +103,7 @@ static void tx_ant_cb(GtkToggleButton *widget, gpointer data) {
   }
 }
 
-static void show_hf() {
+static void show_hf(void) {
   int i;
   int bands=BANDS;
   switch(protocol) {
@@ -201,7 +201,7 @@ static void show_hf() {
     }
 }
 
-static void show_xvtr() {
+static void show_xvtr(void) {
   int i;
     for(i=0;i<XVTRS;i++) {
       BAND *band=band_get_band(BANDS+i);

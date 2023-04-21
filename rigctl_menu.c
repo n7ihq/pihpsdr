@@ -44,7 +44,7 @@ static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *serial_port_entry;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;

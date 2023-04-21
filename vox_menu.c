@@ -89,7 +89,7 @@ static gpointer level_thread(gpointer arg) {
   return NULL;
 }
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -114,7 +114,7 @@ static gboolean enable_cb (GtkWidget *widget, GdkEventButton *event, gpointer da
   return TRUE;
 }
 
-static void start_level_thread() {
+static void start_level_thread(void) {
   run_level=1;
   level_thread_id = g_thread_new( "VOX level", level_thread, NULL);
   if(!level_thread_id ) {
@@ -146,7 +146,6 @@ void vox_menu(GtkWidget *parent) {
   dialog=gtk_dialog_new();
   g_signal_connect (dialog, "destroy", G_CALLBACK(destroy_cb), NULL);
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - VOX");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -156,7 +155,6 @@ void vox_menu(GtkWidget *parent) {
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
   gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
@@ -177,7 +175,6 @@ void vox_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),level_label,0,1,1,1);
 
   level=gtk_progress_bar_new();
-//  gtk_widget_set_size_request (level, 300, 25);
   gtk_widget_show(level);
   gtk_grid_attach(GTK_GRID(grid),level,1,1,3,1);
 
@@ -188,7 +185,6 @@ void vox_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),threshold_label,0,2,1,1);
 
   GtkWidget *vox_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0,1000.0,1.0);
-//  gtk_widget_set_size_request (vox_scale, 300, 25);
   gtk_range_set_increments (GTK_RANGE(vox_scale),1.0,1.0);
   gtk_range_set_value(GTK_RANGE(vox_scale),vox_threshold*1000.0);
   gtk_widget_show(vox_scale);

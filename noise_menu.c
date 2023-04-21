@@ -42,7 +42,7 @@ static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_filter;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -61,7 +61,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-void set_noise() {
+void set_noise(void) {
   SetEXTANBRun(active_receiver->id, active_receiver->nb);
   SetEXTNOBRun(active_receiver->id, active_receiver->nb2);
   SetRXAANRRun(active_receiver->id, active_receiver->nr);
@@ -71,7 +71,7 @@ void set_noise() {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void update_noise() {
+void update_noise(void) {
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
     send_noise(client_socket,active_receiver->id,active_receiver->nb,active_receiver->nb2,active_receiver->nr,active_receiver->nr2,active_receiver->anf,active_receiver->snb);

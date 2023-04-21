@@ -26,7 +26,7 @@ char *css=
 
 ;
 
-void load_css() {
+void load_css(void) {
   GtkCssProvider *provider;
   GdkDisplay *display;
   GdkScreen *screen;

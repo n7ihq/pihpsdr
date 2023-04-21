@@ -188,7 +188,7 @@ static void ReadMIDIdevice(const MIDIPacketList *pktlist, void *refCon, void *co
 static MIDIPortRef myMIDIports[MAX_MIDI_DEVICES];
 static MIDIClientRef myClients[MAX_MIDI_DEVICES];
 
-void close_midi_device(index) {
+void close_midi_device(int index) {
     fprintf(stderr,"%s index=%d\n",__FUNCTION__, index);
     if (index < 0 || index >= MAX_MIDI_DEVICES) return;
     if (midi_devices[index].active == 0) return;
@@ -233,7 +233,7 @@ void register_midi_device(int index) {
      return;
 }
 
-void get_midi_devices() {
+void get_midi_devices(void) {
     int n;
     int i;
     CFStringRef pname;   // MacOS name of the device

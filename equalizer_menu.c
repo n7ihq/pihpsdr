@@ -44,7 +44,7 @@ static GtkWidget *high_scale;
 
 static gboolean tx_menu=TRUE;
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -88,14 +88,14 @@ static gboolean rx_rb_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
   return FALSE;
 }
 
-void set_eq() {
+void set_eq(void) {
     SetTXAGrphEQ(transmitter->id, tx_equalizer);
     SetTXAEQRun(transmitter->id, enable_tx_equalizer);
     SetRXAGrphEQ(active_receiver->id, rx_equalizer);
     SetRXAEQRun(active_receiver->id, enable_rx_equalizer);
 }
 
-void update_eq() {
+void update_eq(void) {
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
      //

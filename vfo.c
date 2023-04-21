@@ -80,7 +80,7 @@ static GtkWidget* band_menu=NULL;
 struct _vfo vfo[MAX_VFOS];
 struct _mode_settings mode_settings[MODES];
 
-static void vfo_save_bandstack() {
+static void vfo_save_bandstack(void) {
   BANDSTACK *bandstack=bandstack_get_bandstack(vfo[0].band);
   BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[0].bandstack];
   entry->frequency=vfo[0].frequency;
@@ -90,7 +90,7 @@ static void vfo_save_bandstack() {
   entry->ctun_frequency=vfo[0].ctun_frequency;
 }
 
-void modesettings_save_state() {
+void modesettings_save_state(void) {
   int i;
   char name[80];
   char value[80];
@@ -159,7 +159,7 @@ void modesettings_save_state() {
   }
 }
 
-void modesettings_restore_state() {
+void modesettings_restore_state(void) {
   int i;
   char name[80];
   char *value;
@@ -251,7 +251,7 @@ void modesettings_restore_state() {
   }
 }
 
-void vfo_save_state() {
+void vfo_save_state(void) {
   int i;
   char name[80];
   char value[80];
@@ -292,7 +292,7 @@ void vfo_save_state() {
   }
 }
 
-void vfo_restore_state() {
+void vfo_restore_state(void) {
   int i;
   char name[80];
   char *value;
@@ -355,7 +355,7 @@ void vfo_restore_state() {
   }
 }
 
-void vfo_xvtr_changed() {
+void vfo_xvtr_changed(void) {
   if(vfo[0].band>=BANDS) {
     BAND *band=band_get_band(vfo[0].band);
     vfo[0].lo=band->frequencyLO+band->errorLO;
@@ -554,7 +554,7 @@ void vfo_filter_changed(int f) {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void vfo_a_to_b() {
+void vfo_a_to_b(void) {
   vfo[VFO_B].band=vfo[VFO_A].band;
   vfo[VFO_B].bandstack=vfo[VFO_A].bandstack;
   vfo[VFO_B].frequency=vfo[VFO_A].frequency;
@@ -575,7 +575,7 @@ void vfo_a_to_b() {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void vfo_b_to_a() {
+void vfo_b_to_a(void) {
   vfo[VFO_A].band=vfo[VFO_B].band;
   vfo[VFO_A].bandstack=vfo[VFO_B].bandstack;
   vfo[VFO_A].frequency=vfo[VFO_B].frequency;
@@ -594,7 +594,7 @@ void vfo_b_to_a() {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void vfo_a_swap_b() {
+void vfo_a_swap_b(void) {
   int temp_band;
   int temp_bandstack;
   long long temp_frequency;
@@ -667,7 +667,7 @@ int vfo_get_step_from_index(int index) {
   return steps[index];
 }
 
-int vfo_get_stepindex() {
+int vfo_get_stepindex(void) {
   //
   // return index of current step size in steps[] array
   //
@@ -1048,7 +1048,7 @@ static gboolean vfo_draw_cb (GtkWidget *widget,
   return FALSE;
 }
 
-void vfo_update() {
+void vfo_update(void) {
 
     int id=active_receiver->id;
     int txvfo=get_tx_vfo();
@@ -1452,13 +1452,13 @@ GtkWidget* vfo_init(int width,int height,GtkWidget *parent) {
 // transmitter (transmitter->mode may segfault).
 //
 
-int get_tx_vfo() {
+int get_tx_vfo(void) {
   int txvfo=active_receiver->id;
   if (split) txvfo = 1 - txvfo;
   return txvfo;
 }
 
-int get_tx_mode() {
+int get_tx_mode(void) {
   int txvfo=active_receiver->id;
   if (split) txvfo = 1 - txvfo;
   if (can_transmit) {
@@ -1468,7 +1468,7 @@ int get_tx_mode() {
   }
 }
 
-long long get_tx_freq() {
+long long get_tx_freq(void) {
   int txvfo=active_receiver->id;
   if (split) txvfo = 1 - txvfo;
   if (vfo[txvfo].ctun) {

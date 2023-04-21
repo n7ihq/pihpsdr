@@ -1793,7 +1793,7 @@ g_print("Client_connected from %s\n",s);
   return NULL;
 }
 
-int create_hpsdr_server() {
+int create_hpsdr_server(void) {
   g_print("create_hpsdr_server\n");
 
   g_mutex_init(&client_mutex);
@@ -1803,7 +1803,7 @@ int create_hpsdr_server() {
   return 0;
 }
 
-int destroy_hpsdr_server() {
+int destroy_hpsdr_server(void) {
 g_print("destroy_hpsdr_server\n");
   running=FALSE;
   return 0;
@@ -1847,7 +1847,7 @@ g_print("start_spectrum: delay %d\n",delay);
   return FALSE;
 }
 
-void start_vfo_timer() {
+void start_vfo_timer(void) {
   g_mutex_init(&accumulated_mutex);
   check_vfo_timer_id=gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE,100,check_vfo, NULL, NULL);
 g_print("check_vfo_timer_id %d\n",check_vfo_timer_id);

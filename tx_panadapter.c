@@ -119,7 +119,6 @@ tx_panadapter_button_release_event_cb (GtkWidget      *widget,
 {
   TRANSMITTER *tx=(TRANSMITTER *)data;
   int display_width=gtk_widget_get_allocated_width (tx->panadapter);
-  //int display_height=gtk_widget_get_allocated_height (tx->panadapter);
 
   if(pressed) {
     int x=(int)event->x;
@@ -196,7 +195,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   hz_per_pixel=(double)tx->iq_output_rate/(double)tx->pixels;
 
-  //clear_panadater_surface();
   cairo_t *cr;
   cr = cairo_create (tx->panadapter_surface);
   cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
@@ -320,8 +318,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   cairo_set_source_rgba(cr, COLOUR_ALARM);
   cairo_set_line_width(cr, 1.0);
 //fprintf(stderr,"cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
-  //cairo_move_to(cr,vfofreq+(vfo[id].offset/hz_per_pixel),0.0);
-  //cairo_line_to(cr,vfofreq+(vfo[id].offset/hz_per_pixel),(double)display_height);
   cairo_move_to(cr,vfofreq,0.0);
   cairo_line_to(cr,vfofreq,(double)display_height);
   cairo_stroke(cr);

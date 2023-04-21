@@ -75,8 +75,8 @@
 #define RXACTION_PS     2    // deliver 2*119 samples to PS engine
 #define RXACTION_DIV    3    // take 2*119 samples, mix them, deliver to a receiver
 
-static int rxcase[7/*MAX_DDC*/];
-static int rxid  [7/*MAX_DDC*/];
+static int rxcase[7];
+static int rxid  [7];
 
 int data_socket=-1;
 
@@ -109,8 +109,8 @@ static int audio_addr_length;
 static struct sockaddr_in iq_addr;
 static int iq_addr_length;
 
-static struct sockaddr_in data_addr[7/*MAX_DDC*/];
-static int data_addr_length[7/*MAX_DDC*/];
+static struct sockaddr_in data_addr[7];
+static int data_addr_length[7];
 
 static GThread *new_protocol_thread_id;
 static GThread *new_protocol_timer_thread_id;
@@ -119,29 +119,11 @@ static long high_priority_sequence = 0;
 static long general_sequence = 0;
 static long rx_specific_sequence = 0;
 static long tx_specific_sequence = 0;
-static long ddc_sequence[7/*MAX_DDC*/];
-
-//static int buffer_size=BUFFER_SIZE;
-//static int fft_size=4096;
-static int dspRate=48000;
-static int outputRate=48000;
-
-static int micSampleRate=48000;
-static int micDspRate=48000;
-static int micOutputRate=192000;
-static int micoutputsamples;  // 48000 in, 192000 out
-
-static double micinputbuffer[MAX_BUFFER_SIZE*2]; // 48000
-static double iqoutputbuffer[MAX_BUFFER_SIZE*4*2]; //192000
+static long ddc_sequence[7];
 
 static long tx_iq_sequence=0;
 static unsigned char iqbuffer[1444];
 static int iqindex;
-
-static int spectrumWIDTH=800;
-static int SPECTRUM_UPDATES_PER_SECOND=10;
-
-static float phase = 0.0F;
 
 static long response_sequence=0;
 static long highprio_rcvd_sequence=0;
@@ -175,22 +157,16 @@ static sem_t mic_line_sem_buffer;
 #endif
 static GThread *mic_line_thread_id;
 #ifdef __APPLE__
-static sem_t *iq_sem_ready[7/*MAX_DDC*/];
-static sem_t *iq_sem_buffer[7/*MAX_DDC*/];
+static sem_t *iq_sem_ready[7];
+static sem_t *iq_sem_buffer[7];
 #else
-static sem_t iq_sem_ready[7/*MAX_DDC*/];
-static sem_t iq_sem_buffer[7/*MAX_DDC*/];
+static sem_t iq_sem_ready[7];
+static sem_t iq_sem_buffer[7];
 #endif
-static GThread *iq_thread_id[7/*MAX_DDC*/];
+static GThread *iq_thread_id[7];
 
-#ifdef INCLUDED
-static int outputsamples;
-#endif
-
-static int leftaudiosample;
-static int rightaudiosample;
 static long audiosequence;
-static unsigned char audiobuffer[260]; // was 1444
+static unsigned char audiobuffer[260];
 static int audioindex;
 
 // Use this to determine the source port of messages received
@@ -200,7 +176,11 @@ static socklen_t length=sizeof(addr);
 // Network buffers
 #define NET_BUFFER_SIZE 2048
 
-
+/////////////////////////////////////////////////////////////////////////////
+//
+// PEDESTRIAN BUFFER MANAGEMENT
+//
+////////////////////////////////////////////////////////////////////////////
 //
 // Instead of allocating and free-ing (malloc/free) the network buffers
 // at a very high rate, we do it the "pedestrian" way, which may
@@ -212,9 +192,11 @@ static socklen_t length=sizeof(addr);
 // This ONLY applies to the network buffers filled with data in
 // new_protocol_thread(), so this need not be thread-safe.
 //
+////////////////////////////////////////////////////////////////////////////
 
 //
-// One buffer. The fences can be used to detect over-writing them
+// One buffer. The fences can be used to detect over-writing 
+// (feature currently not used).
 // 
 //
 
@@ -241,7 +223,7 @@ static mybuffer *buflist = NULL;
 //
 // The buffers used by new_protocol_thread
 //
-static mybuffer *iq_buffer[7/*MAX_DDC*/];
+static mybuffer *iq_buffer[7];
 static mybuffer *command_response_buffer;
 static mybuffer *high_priority_buffer;
 static mybuffer *mic_line_buffer;
@@ -265,15 +247,15 @@ static pthread_mutex_t rx_spec_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t tx_spec_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hi_prio_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t general_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t audio_buffer_mutex  = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t audiob_mutex  = PTHREAD_MUTEX_INITIALIZER;
 
 static int local_ptt=0;
 
-static void new_protocol_start();
-static void new_protocol_high_priority();
-static void new_protocol_general();
-static void new_protocol_receive_specific();
-static void new_protocol_transmit_specific();
+static void new_protocol_start(void);
+static void new_protocol_high_priority(void);
+static void new_protocol_general(void);
+static void new_protocol_receive_specific(void);
+static void new_protocol_transmit_specific(void);
 static gpointer new_protocol_thread(gpointer data);
 static gpointer new_protocol_timer_thread(gpointer data);
 static gpointer command_response_thread(gpointer data);
@@ -283,16 +265,18 @@ static gpointer iq_thread(gpointer data);
 static void  process_iq_data(unsigned char *buffer, RECEIVER *rx);
 static void  process_ps_iq_data(unsigned char *buffer);
 static void process_div_iq_data(unsigned char *buffer);
-static void  process_command_response();
-static void  process_high_priority();
+static void  process_command_response(void);
+static void  process_high_priority(void);
 static void  process_mic_data(int bytes);
 
 //
-// obtain free buffer, if nothing is left allocate
+// Obtain a free buffer. If no one is available allocate
 // 5 new ones. Note these buffer "live" as long as the
-// program lives. They are never free()d.
+// program lives. They are never released. Measurements show
+// that in typical runs, only a handful of buffers is ever
+// allocated.
 //
-static mybuffer *get_my_buffer() {
+static mybuffer *get_my_buffer(void) {
   int i;
   mybuffer *bp=buflist;
   while (bp) {
@@ -321,62 +305,27 @@ static mybuffer *get_my_buffer() {
 }
 
 
-#ifdef INCLUDED
-static void new_protocol_calc_buffers() {
-  switch(sample_rate) {
-    case 48000:
-      outputsamples=buffer_size;
-      break;
-    case 96000:
-      outputsamples=buffer_size/2;
-      break;
-    case 192000:
-      outputsamples=buffer_size/4;
-      break;
-    case 384000:
-      outputsamples=buffer_size/8;
-      break;
-    case 768000:
-      outputsamples=buffer_size/16;
-      break;
-    case 1536000:
-      outputsamples=buffer_size/32;
-      break;
-  }
-}
-#endif
-
-void schedule_high_priority() {
+void schedule_high_priority(void) {
     new_protocol_high_priority();
 }
 
-void schedule_general() {
+void schedule_general(void) {
     new_protocol_general();
 }
 
-void schedule_receive_specific() {
+void schedule_receive_specific(void) {
     new_protocol_receive_specific();
 }
 
-void schedule_transmit_specific() {
+void schedule_transmit_specific(void) {
     new_protocol_transmit_specific();
 }
 
-void filter_board_changed() {
+void filter_board_changed(void) {
     schedule_general();
 }
 
-/*
-void pa_changed() {
-    schedule_general();
-}
-
-void tuner_changed() {
-    schedule_general();
-}
-*/
-
-void update_action_table() {
+void update_action_table(void) {
   //
   // Depending on the values of mox, puresignal, and diversity,
   // determine the actions to be taken when a DDC packet arrives
@@ -461,13 +410,12 @@ void update_action_table() {
 
 void new_protocol_init(int pixels) {
     int i;
-    spectrumWIDTH=pixels;
 
     //
     // This is the hard (compile-time) limit on the number of DDCs
     //
-    if (MAX_DDC > 7) {
-      g_print("%s: MAX_DDC exceeds allowed range\n", __FUNCTION__);
+    if (MAX_DDC < 1 || MAX_DDC > 7) {
+      g_print("%s: MAX_DDC=%d exceeds allowed range\n", __FUNCTION__,MAX_DDC);
       exit(-1);
     }
     g_print("new_protocol_init: MIC_SAMPLES=%d\n",MIC_SAMPLES);
@@ -477,21 +425,12 @@ void new_protocol_init(int pixels) {
     memset(ddc_sequence, 0, sizeof(ddc_sequence));
     update_action_table();
 
-#ifdef INCLUDED
-    outputsamples=buffer_size;
-#endif
-    micoutputsamples=buffer_size*4;
-
     if(transmitter->local_microphone) {
       if(audio_open_input()!=0) {
         g_print("audio_open_input failed\n");
         transmitter->local_microphone=0;
       }
     }
-
-#ifdef INCLUDED
-    new_protocol_calc_buffers();
-#endif
 
 #ifdef __APPLE__
     sem_unlink("RESPONSE");
@@ -666,7 +605,7 @@ g_print("new_protocol_init: data_socket %d bound to interface %s:%d\n",data_sock
 
 }
 
-static void new_protocol_general() {
+static void new_protocol_general(void) {
     BAND *band;
     int rc;
     int txvfo=get_tx_vfo();
@@ -720,7 +659,7 @@ static void new_protocol_general() {
     pthread_mutex_unlock(&general_mutex);
 }
 
-static void new_protocol_high_priority() {
+static void new_protocol_high_priority(void) {
     int i;
     BAND *band;
     long long rx1Frequency;
@@ -728,7 +667,7 @@ static void new_protocol_high_priority() {
     long long txFrequency;
     long long HPFfreq;  // frequency determining the HPF filters
     long long LPFfreq;  // frequency determining the LPF filters
-    long phase;
+    unsigned long phase;
     int ddc;
     int xmit, txvfo, txmode;
 
@@ -794,8 +733,9 @@ static void new_protocol_high_priority() {
 	//
 	// Use frequency of first receiver for both DDC0 and DDC1
 	// This is overridden later if we do PURESIGNAL TX
+        // The "obscure" constant 34.952533333333333333333333333333 is 4294967296/122880000
 	//
-        phase=(long)((4294967296.0*(double)rx1Frequency)/122880000.0);
+        phase=(unsigned long)(((double)rx1Frequency)*34.952533333333333333333333333333);
         high_priority_buffer_to_radio[ 9]=phase>>24;
         high_priority_buffer_to_radio[10]=phase>>16;
         high_priority_buffer_to_radio[11]=phase>>8;
@@ -813,14 +753,14 @@ static void new_protocol_high_priority() {
         ddc=0;
         if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2;
 
-	phase=(long)((4294967296.0*(double)rx1Frequency)/122880000.0);
+        phase=(unsigned long)(((double)rx1Frequency)*34.952533333333333333333333333333);
 	high_priority_buffer_to_radio[ 9+(ddc*4)]=phase>>24;
 	high_priority_buffer_to_radio[10+(ddc*4)]=phase>>16;
 	high_priority_buffer_to_radio[11+(ddc*4)]=phase>>8;
 	high_priority_buffer_to_radio[12+(ddc*4)]=phase;
 
         if (receivers > 1) {
-	  phase=(long)((4294967296.0*(double)rx2Frequency)/122880000.0);
+          phase=(unsigned long)(((double)rx2Frequency)*34.952533333333333333333333333333);
 	  high_priority_buffer_to_radio[13+(ddc*4)]=phase>>24;
 	  high_priority_buffer_to_radio[14+(ddc*4)]=phase>>16;
 	  high_priority_buffer_to_radio[15+(ddc*4)]=phase>>8;
@@ -848,7 +788,7 @@ static void new_protocol_high_priority() {
 
     txFrequency+=calibration;
 
-    phase=(long)((4294967296.0*(double)txFrequency)/122880000.0);
+    phase=(unsigned long)(((double)txFrequency)*34.952533333333333333333333333333);
 
     if (xmit && transmitter->puresignal) {
       //
@@ -1240,7 +1180,7 @@ static void new_protocol_high_priority() {
 }
 
 
-static void new_protocol_transmit_specific() {
+static void new_protocol_transmit_specific(void) {
     int txmode=get_tx_mode();
     int rc;
 
@@ -1328,7 +1268,7 @@ static void new_protocol_transmit_specific() {
 
 }
 
-static void new_protocol_receive_specific() {
+static void new_protocol_receive_specific(void) {
     int i;
     int ddc;
     int rc;
@@ -1431,7 +1371,7 @@ static void new_protocol_receive_specific() {
     pthread_mutex_unlock(&rx_spec_mutex);
 }
 
-static void new_protocol_start() {
+static void new_protocol_start(void) {
     new_protocol_transmit_specific();
     new_protocol_receive_specific();
     new_protocol_timer_thread_id = g_thread_new( "new protocol timer", new_protocol_timer_thread, NULL);
@@ -1444,7 +1384,7 @@ static void new_protocol_start() {
 
 }
 
-void new_protocol_stop() {
+void new_protocol_stop(void) {
     running=0;
     new_protocol_high_priority();
     usleep(100000); // 100 ms
@@ -1455,7 +1395,7 @@ void new_protocol_stop() {
 // This is the function called by the "Restart" button
 // in the new menu if P2 is running
 //
-void new_protocol_restart() {
+void new_protocol_restart(void) {
   fd_set fds;
   struct timeval tv;
   char *buffer;
@@ -1762,10 +1702,9 @@ static void process_iq_data(unsigned char *buffer, RECEIVER *rx) {
     rightsample |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     rightsample |= (int)((unsigned char)buffer[b++]&0xFF);
 
-    leftsampledouble=(double)leftsample/8388608.0; // for 24 bits
-    rightsampledouble=(double)rightsample/8388608.0; // for 24 bits
-    //leftsampledouble=(double)leftsample/16777215.0; // for 24 bits
-    //rightsampledouble=(double)rightsample/16777215.0; // for 24 bits
+    // The "obscure" constant 1.1920928955078125E-7 is 1/(2^23)
+    leftsampledouble=(double)leftsample*1.1920928955078125E-7;
+    rightsampledouble=(double)rightsample*1.1920928955078125E-7;
 
     add_iq_samples(rx, leftsampledouble,rightsampledouble);
   }
@@ -1812,8 +1751,8 @@ static void process_div_iq_data(unsigned char*buffer) {
     rightsample0 |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     rightsample0 |= (int)((unsigned char)buffer[b++]&0xFF);
     
-    leftsampledouble0=(double)leftsample0/8388608.0; 
-    rightsampledouble0=(double)rightsample0/8388608.0; 
+    leftsampledouble0=(double)leftsample0*1.1920928955078125E-7;
+    rightsampledouble0=(double)rightsample0*1.1920928955078125E-7;
     
     leftsample1   = (int)((signed char) buffer[b++])<<16;
     leftsample1  |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
@@ -1822,8 +1761,8 @@ static void process_div_iq_data(unsigned char*buffer) {
     rightsample1 |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     rightsample1 |= (int)((unsigned char)buffer[b++]&0xFF);
 
-    leftsampledouble1=(double)leftsample1/8388608.0; // for 24 bits
-    rightsampledouble1=(double)rightsample1/8388608.0; // for 24 bits
+    leftsampledouble1=(double)leftsample1*1.1920928955078125E-7;
+    rightsampledouble1=(double)rightsample1*1.1920928955078125E-7;
 
     add_div_iq_samples(receiver[0], leftsampledouble0,rightsampledouble0,leftsampledouble1,rightsampledouble1);
     //
@@ -1872,8 +1811,8 @@ static void process_ps_iq_data(unsigned char *buffer) {
     rightsample0 |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     rightsample0 |= (int)((unsigned char)buffer[b++]&0xFF);
 
-    leftsampledouble0=(double)leftsample0/8388608.0;
-    rightsampledouble0=(double)rightsample0/8388608.0;
+    leftsampledouble0=(double)leftsample0*1.1920928955078125E-7;
+    rightsampledouble0=(double)rightsample0*1.1920928955078125E-7;
 
     leftsample1   = (int)((signed char) buffer[b++])<<16;
     leftsample1  |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
@@ -1882,8 +1821,8 @@ static void process_ps_iq_data(unsigned char *buffer) {
     rightsample1 |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     rightsample1 |= (int)((unsigned char)buffer[b++]&0xFF);
 
-    leftsampledouble1=(double)leftsample1/8388608.0; // for 24 bits
-    rightsampledouble1=(double)rightsample1/8388608.0; // for 24 bits
+    leftsampledouble1=(double)leftsample1*1.1920928955078125E-7;
+    rightsampledouble1=(double)rightsample1*1.1920928955078125E-7;
 
     add_ps_iq_samples(transmitter, leftsampledouble1,rightsampledouble1,leftsampledouble0,rightsampledouble0);
 
@@ -1892,7 +1831,7 @@ static void process_ps_iq_data(unsigned char *buffer) {
 }
 
 
-static void process_command_response() {
+static void process_command_response(void) {
     long sequence;
     unsigned char *buffer = command_response_buffer->buffer;
     sequence=((buffer[0]&0xFF)<<24)+((buffer[1]&0xFF)<<16)+((buffer[2]&0xFF)<<8)+(buffer[3]&0xFF);
@@ -1910,7 +1849,7 @@ static void process_command_response() {
 #endif
 }
 
-static void process_high_priority() {
+static void process_high_priority(void) {
     long sequence;
     int previous_ptt;
     int previous_dot;
@@ -2019,7 +1958,7 @@ void new_protocol_cw_audio_samples(short left_audio_sample,short right_audio_sam
     // Only process samples if transmitting in CW
     //
 
-    pthread_mutex_lock(&audio_buffer_mutex);
+    pthread_mutex_lock(&audiob_mutex);
     // insert the samples
     audiobuffer[audioindex++]=left_audio_sample>>8;
     audiobuffer[audioindex++]=left_audio_sample;
@@ -2043,7 +1982,7 @@ void new_protocol_cw_audio_samples(short left_audio_sample,short right_audio_sam
       audioindex=4;
       audiosequence++;
     }
-    pthread_mutex_unlock(&audio_buffer_mutex);
+    pthread_mutex_unlock(&audiob_mutex);
   }
 }
 
@@ -2056,7 +1995,7 @@ void new_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
   //
   if (isTransmitting() && (txmode==modeCWU || txmode==modeCWL)) return;
 
-  pthread_mutex_lock(&audio_buffer_mutex);
+  pthread_mutex_lock(&audiob_mutex);
   // insert the samples
   audiobuffer[audioindex++]=left_audio_sample>>8;
   audiobuffer[audioindex++]=left_audio_sample;
@@ -2080,10 +2019,10 @@ void new_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
     audioindex=4;
     audiosequence++;
   }
-  pthread_mutex_unlock(&audio_buffer_mutex);
+  pthread_mutex_unlock(&audiob_mutex);
 }
 
-void new_protocol_flush_iq_samples() {
+void new_protocol_flush_iq_samples(void) {
 //
 // this is called at the end of a TX phase:
 // zero out "rest" of TX IQ buffer and send it

@@ -81,7 +81,7 @@ static gint xit_minus_timer=-1;
 
 SWITCH *toolbar_switches=switches_controller1[0];
 
-void update_toolbar_labels() {
+void update_toolbar_labels(void) {
   gtk_button_set_label(GTK_BUTTON(sim_mox),ActionTable[toolbar_switches[0].switch_function].button_str);
   gtk_button_set_label(GTK_BUTTON(sim_s1),ActionTable[toolbar_switches[1].switch_function].button_str);
   gtk_button_set_label(GTK_BUTTON(sim_s2),ActionTable[toolbar_switches[2].switch_function].button_str);

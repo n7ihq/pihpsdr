@@ -36,7 +36,7 @@
 
 MEM mem[NUM_OF_MEMORYS];  // This makes it a compile time option
 
-void memSaveState() {
+void memSaveState(void) {
     char name[128];
     char value[128];
     int b;
@@ -56,7 +56,7 @@ void memSaveState() {
     }
 }
 
-void memRestoreState() {
+void memRestoreState(void) {
     char* value;
     int b;
     char name[128];

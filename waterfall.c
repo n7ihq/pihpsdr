@@ -248,38 +248,38 @@ void waterfall_update(RECEIVER *rx) {
                 float range=(float)rx->waterfall_high-(float)rx->waterfall_low;
                 float offset=sample-(float)rx->waterfall_low;
                 float percent=offset/range;
-                if(percent<(2.0f/9.0f)) {
-                    float local_percent = percent / (2.0f/9.0f);
+                if(percent<0.222222f) {
+                    float local_percent = percent * 4.5f;
                     *p++ = (int)((1.0f-local_percent)*colorLowR);
                     *p++ = (int)((1.0f-local_percent)*colorLowG);
                     *p++ = (int)(colorLowB + local_percent*(255-colorLowB));
-                } else if(percent<(3.0f/9.0f)) {
-                    float local_percent = (percent - 2.0f/9.0f) / (1.0f/9.0f);
+                } else if(percent<0.333333f) {
+                    float local_percent = (percent - 0.222222f) *9.0f;
                     *p++ = 0;
                     *p++ = (int)(local_percent*255);
                     *p++ = 255;
-                } else if(percent<(4.0f/9.0f)) {
-                     float local_percent = (percent - 3.0f/9.0f) / (1.0f/9.0f);
+                } else if(percent<0.444444f) {
+                     float local_percent = (percent - 0.333333) *9.0f;
                      *p++ = 0;
                      *p++ = 255;
                      *p++ = (int)((1.0f-local_percent)*255);
-                } else if(percent<(5.0f/9.0f)) {
-                     float local_percent = (percent - 4.0f/9.0f) / (1.0f/9.0f);
+                } else if(percent<0.555555f) {
+                     float local_percent = (percent - 0.444444f) *9.0f;
                      *p++ = (int)(local_percent*255);
                      *p++ = 255;
                      *p++ = 0;
-                } else if(percent<(7.0f/9.0f)) {
-                     float local_percent = (percent - 5.0f/9.0f) / (2.0f/9.0f);
+                } else if(percent<0.777777f) {
+                     float local_percent = (percent - 0.555555f) *4.5f;
                      *p++ = 255;
                      *p++ = (int)((1.0f-local_percent)*255);
                      *p++ = 0;
-                } else if(percent<(8.0f/9.0f)) {
-                     float local_percent = (percent - 7.0f/9.0f) / (1.0f/9.0f);
+                } else if(percent<0.888888f) {
+                     float local_percent = (percent - 0.777777f) *9.0f;
                      *p++ = 255;
                      *p++ = 0;
                      *p++ = (int)(local_percent*255);
                 } else {
-                     float local_percent = (percent - 8.0f/9.0f) / (1.0f/9.0f);
+                     float local_percent = (percent - 0.888888f) *9.0f;
                      *p++ = (int)((0.75f + 0.25f*(1.0f-local_percent))*255.0f);
                      *p++ = (int)(local_percent*255.0f*0.5f);
                      *p++ = 255;

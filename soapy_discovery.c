@@ -300,7 +300,7 @@ fprintf(stderr,"Rx gains: \n");
   free(ranges);
 }
 
-void soapy_discovery() {
+void soapy_discovery(void) {
   size_t length;
   int i;
   SoapySDRKwargs input_args={};

@@ -43,7 +43,7 @@ static GtkWidget *grid2;
 //
 static GtkWidget *spin[11];
 
-static void cleanup() {
+static void cleanup(void) {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -162,7 +162,7 @@ static void show_W(int watts,gboolean reset) {
   }
 }
 
-static void clear_W() {
+static void clear_W(void) {
   int i;
   for(i=0;i<10;i++) {
     gtk_grid_remove_row(GTK_GRID(grid2),1);
