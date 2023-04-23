@@ -47,7 +47,6 @@
 #include "filter_menu.h"
 #include "noise_menu.h"
 #include "agc_menu.h"
-#include "test_menu.h"
 #include "vox_menu.h"
 #include "diversity_menu.h"
 #include "tx_menu.h"
