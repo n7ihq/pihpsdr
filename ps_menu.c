@@ -171,7 +171,7 @@ static int info_thread(gpointer arg) {
           if(info[14]!=old14) {
             old14=info[14];
             if(info[14]==0) {
-              gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='black'>Correcting</span>");
+              gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='red'>Correcting</span>");
             } else {
               gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='green'>Correcting</span>");
             }
