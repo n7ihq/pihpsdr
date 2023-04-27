@@ -437,7 +437,7 @@ int stemlab_start_app(const char * const app_id) {
   return 0;
 }
 
-void stemlab_cleanup(void) {
+void stemlab_cleanup() {
   if (curl_initialised) {
     curl_global_cleanup();
   }
@@ -447,7 +447,7 @@ void stemlab_cleanup(void) {
 //
 // This is the avahi-dependent version of stemlab_discovery()
 //
-void stemlab_discovery(void) {
+void stemlab_discovery() {
   discovery_done = FALSE;
   GaClient * const avahi_client = ga_client_new(GA_CLIENT_FLAG_NO_FLAGS);
   if (avahi_client == NULL) {
@@ -513,7 +513,7 @@ void stemlab_discovery(void) {
 //
 
 
-void stemlab_discovery(void) {
+void stemlab_discovery() {
   char txt[150];
   CURL *curl_handle;
   CURLcode curl_error;

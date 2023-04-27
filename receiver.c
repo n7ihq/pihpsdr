@@ -586,7 +586,6 @@ g_print("%s: panadapter_init: width:%d height:%d\n",__FUNCTION__,rx->width,myhei
   } else {
     if(rx->panadapter!=NULL) {
       gtk_container_remove(GTK_CONTAINER(rx->panel),rx->panadapter);
-      //gtk_widget_destroy(rx->panadapter);
       rx->panadapter=NULL;
     }
   }
@@ -606,7 +605,6 @@ g_print("%s: waterfall set_size_request: width:%d height:%d\n",__FUNCTION__,rx->
   } else {
     if(rx->waterfall!=NULL) {
       gtk_container_remove(GTK_CONTAINER(rx->panel),rx->waterfall);
-      //gtk_widget_destroy(rx->waterfall);
       rx->waterfall=NULL;
     }
   }
@@ -707,11 +705,14 @@ void set_filter(RECEIVER *rx) {
 
   switch (m) {
     case modeCWL:
-      rx->filter_low=-cw_keyer_sidetone_frequency-filter->low;
+      //
+      // translate CW filter edges to the CW pitch frequency
+      //
+      rx->filter_low=-cw_keyer_sidetone_frequency+filter->low;
       rx->filter_high=-cw_keyer_sidetone_frequency+filter->high;
       break;
     case modeCWU:
-      rx->filter_low=cw_keyer_sidetone_frequency-filter->low;
+      rx->filter_low=cw_keyer_sidetone_frequency+filter->low;
       rx->filter_high=cw_keyer_sidetone_frequency+filter->high;
       break;
     case  modeFMN:

@@ -15,11 +15,17 @@
  *            and then decide to re-use an existing one.
  */
 
+
 // Define maximum window size.
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
 
+#ifdef ANDROMEDA
+#define MAX_DISPLAY_WIDTH  1200
+#define MAX_DISPLAY_HEIGHT 600
+#else
 #define MAX_DISPLAY_WIDTH  800                      // Default: 800
 #define MAX_DISPLAY_HEIGHT 480                      // Default: 480
+#endif
 
 //
 // Fonts and sizes for VFO, meter, panadapter etc.

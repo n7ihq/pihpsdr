@@ -114,7 +114,7 @@ enum {
 static int update(void *data);
 static void load_store(void);
 
-static void cleanup(void) {
+static void cleanup() {
   configure_midi_device(FALSE);
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
@@ -301,7 +301,7 @@ static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer dat
   }
 }
 
-static void find_current_cmd(void) {
+static void find_current_cmd() {
   struct desc *cmd;
   cmd=MidiCommandsTable[thisNote];
   while(cmd!=NULL) {
@@ -534,7 +534,7 @@ static void add_store(int key,struct desc *cmd) {
   }
 }
 
-static void load_store(void) {
+static void load_store() {
   struct desc *cmd;
   gtk_list_store_clear(store);
   for(int i=127;i>=0;i--) {
@@ -1418,7 +1418,7 @@ void NewMidiConfigureEvent(enum MIDIevent event, int channel, int note, int val)
   g_idle_add(ProcessNewMidiConfigureEvent, data);
 }
 
-void midi_save_state(void) {
+void midi_save_state() {
   char name[80];
   char value[80];
   struct desc *cmd;
@@ -1451,15 +1451,7 @@ void midi_save_state(void) {
         sprintf(value,"%s",midi_events[cmd->event]);
         setProperty(name,value);
         sprintf(name,"midi[%d].entry[%d].channel[%d].action",i,entry,cmd->channel);
-        sprintf(value,"%s",ActionTable[cmd->action].str);
-        //
-        // ActionTable strings may contain '\n', convert this to '$'
-        //
-        cp=value;
-        while (*cp ) {
-          if (*cp == '\n') *cp='$';
-          cp++;
-        }
+        Action2String(cmd->action,value);
         setProperty(name,value);
         sprintf(name,"midi[%d].entry[%d].channel[%d].type",i,entry,cmd->channel);
         sprintf(value,"%s",midi_types[cmd->type]);
@@ -1535,7 +1527,7 @@ void midi_save_state(void) {
     }
 }
 
-void midi_restore_state(void) {
+void midi_restore_state() {
   char name[80];
   char *value;
   gint entries;
@@ -1612,21 +1604,7 @@ void midi_restore_state(void) {
 	  }
           sprintf(name,"midi[%d].entry[%d].channel[%d].action",i,entry,channel);
           value=getProperty(name);
-	  action=NO_ACTION;
-          if(value) {
-            // convert '$' back to '\n' in action name before comparing
-            cp=value;
-            while (*cp) {
-              if (*cp == '$') *cp='\n';
-              cp++;
-            }
-	    for(j=0;j<ACTIONS;j++) {
-              if(strcmp(value,ActionTable[j].str)==0) {
-                action=ActionTable[j].action;
-		break;
-              }
-	    }
-	  }
+	  action=String2Action(value);
           //
           // Look for "wheel" parameters. For those not found,
           // use default value

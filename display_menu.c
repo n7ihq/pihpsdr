@@ -37,7 +37,7 @@ static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -143,7 +143,6 @@ void display_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Display");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -152,9 +151,6 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   int col=0;
   int row=0;
@@ -167,7 +163,6 @@ void display_menu(GtkWidget *parent) {
   col=0;
 
   GtkWidget *filled_b=gtk_check_button_new_with_label("Fill Panadapter");
-  //gtk_widget_override_font(filled_b, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), display_filled);
   gtk_widget_show(filled_b);
   gtk_grid_attach(GTK_GRID(grid),filled_b,col,row,1,1);
@@ -176,7 +171,6 @@ void display_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *gradient_b=gtk_check_button_new_with_label("Gradient");
-  //gtk_widget_override_font(filled_b, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gradient_b), display_gradient);
   gtk_widget_show(gradient_b);
   gtk_grid_attach(GTK_GRID(grid),gradient_b,col,row,1,1);
@@ -187,14 +181,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *frames_per_second_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(frames_per_second_label), "<b>Frames Per Second:</b>");
-  //gtk_widget_override_font(frames_per_second_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(frames_per_second_label);
   gtk_grid_attach(GTK_GRID(grid),frames_per_second_label,col,row,1,1);
 
   col++;
 
   GtkWidget *frames_per_second_r=gtk_spin_button_new_with_range(1.0,100.0,1.0);
-  //gtk_widget_override_font(frames_per_second_r, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(frames_per_second_r),(double)updates_per_second);
   gtk_widget_show(frames_per_second_r);
   gtk_grid_attach(GTK_GRID(grid),frames_per_second_r,col,row,1,1);
@@ -205,14 +197,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *panadapter_high_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(panadapter_high_label), "<b>Panadapter High: </b>");
-  //gtk_widget_override_font(panadapter_high_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(panadapter_high_label);
   gtk_grid_attach(GTK_GRID(grid),panadapter_high_label,col,row,1,1);
 
   col++;
 
   GtkWidget *panadapter_high_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
-  //gtk_widget_override_font(panadapter_high_r, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(panadapter_high_r),(double)active_receiver->panadapter_high);
   gtk_widget_show(panadapter_high_r);
   gtk_grid_attach(GTK_GRID(grid),panadapter_high_r,col,row,1,1);
@@ -223,14 +213,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *panadapter_low_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(panadapter_low_label), "<b>Panadapter Low: </b>");
-  //gtk_widget_override_font(panadapter_low_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(panadapter_low_label);
   gtk_grid_attach(GTK_GRID(grid),panadapter_low_label,col,row,1,1);
 
   col++;
 
   GtkWidget *panadapter_low_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
-  //gtk_widget_override_font(panadapter_low_r, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(panadapter_low_r),(double)active_receiver->panadapter_low);
   gtk_widget_show(panadapter_low_r);
   gtk_grid_attach(GTK_GRID(grid),panadapter_low_r,col,row,1,1);
@@ -241,14 +229,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *panadapter_step_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(panadapter_step_label), "<b>Panadapter Step: </b>");
-  //gtk_widget_override_font(panadapter_step_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(panadapter_step_label);
   gtk_grid_attach(GTK_GRID(grid),panadapter_step_label,col,row,1,1);
 
   col++;
 
   GtkWidget *panadapter_step_r=gtk_spin_button_new_with_range(1.0,20.0,1.0);
-  //gtk_widget_override_font(panadapter_step_r, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(panadapter_step_r),(double)active_receiver->panadapter_step);
   gtk_widget_show(panadapter_step_r);
   gtk_grid_attach(GTK_GRID(grid),panadapter_step_r,col,row,1,1);
@@ -259,14 +245,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *waterfall_automatic_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(waterfall_automatic_label), "<b>Waterfall Automatic: </b>");
-  //gtk_widget_override_font(waterfall_automatic_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(waterfall_automatic_label);
   gtk_grid_attach(GTK_GRID(grid),waterfall_automatic_label,col,row,1,1);
 
   col++;
 
   GtkWidget *waterfall_automatic_b=gtk_check_button_new();
-  //gtk_widget_override_font(waterfall_automatic_b, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (waterfall_automatic_b), active_receiver->waterfall_automatic);
   gtk_widget_show(waterfall_automatic_b);
   gtk_grid_attach(GTK_GRID(grid),waterfall_automatic_b,col,row,1,1);
@@ -277,14 +261,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *waterfall_high_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(waterfall_high_label), "<b>Waterfall High: </b>");
-  //gtk_widget_override_font(waterfall_high_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(waterfall_high_label);
   gtk_grid_attach(GTK_GRID(grid),waterfall_high_label,col,row,1,1);
 
   col++;
 
   GtkWidget *waterfall_high_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
-  //gtk_widget_override_font(waterfall_high_r, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(waterfall_high_r),(double)active_receiver->waterfall_high);
   gtk_widget_show(waterfall_high_r);
   gtk_grid_attach(GTK_GRID(grid),waterfall_high_r,col,row,1,1);
@@ -295,14 +277,12 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *waterfall_low_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(waterfall_low_label), "<b>Waterfall Low: </b>");
-  //gtk_widget_override_font(waterfall_low_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(waterfall_low_label);
   gtk_grid_attach(GTK_GRID(grid),waterfall_low_label,col,row,1,1);
 
   col++;
 
   GtkWidget *waterfall_low_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
-  //gtk_widget_override_font(waterfall_low_r, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(waterfall_low_r),(double)active_receiver->waterfall_low);
   gtk_widget_show(waterfall_low_r);
   gtk_grid_attach(GTK_GRID(grid),waterfall_low_r,col,row,1,1);
@@ -313,7 +293,6 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *detector_mode_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(detector_mode_label), "<b>Detector:</b>");
-  //gtk_widget_override_font(detector_mode_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(detector_mode_label);
   gtk_grid_attach(GTK_GRID(grid),detector_mode_label,col,row,1,1);
 
@@ -355,7 +334,6 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *average_mode_label=gtk_label_new("Averaging: ");
   gtk_label_set_markup(GTK_LABEL(average_mode_label), "<b>Averaging:</b>");
-  //gtk_widget_override_font(average_mode_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(average_mode_label);
   gtk_grid_attach(GTK_GRID(grid),average_mode_label,col,row,1,1);
 
@@ -394,7 +372,6 @@ void display_menu(GtkWidget *parent) {
   row++;
 
   GtkWidget *time_label=gtk_label_new("Time (ms): ");
-  //gtk_widget_override_font(average_mode_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(time_label);
   gtk_grid_attach(GTK_GRID(grid),time_label,col,row,1,1);
 
@@ -413,7 +390,6 @@ void display_menu(GtkWidget *parent) {
 
   
   GtkWidget *b_display_waterfall=gtk_check_button_new_with_label("Display Waterfall");
-  //gtk_widget_override_font(b_display_waterfall, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_waterfall), active_receiver->display_waterfall);
   gtk_widget_show(b_display_waterfall);
   gtk_grid_attach(GTK_GRID(grid),b_display_waterfall,col,row,1,1);
@@ -430,7 +406,6 @@ void display_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_display_sliders=gtk_check_button_new_with_label("Display Sliders");
-  //gtk_widget_override_font(b_display_sliders, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sliders), display_sliders);
   gtk_widget_show(b_display_sliders);
   gtk_grid_attach(GTK_GRID(grid),b_display_sliders,col,row,1,1);
@@ -439,7 +414,6 @@ void display_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_display_toolbar=gtk_check_button_new_with_label("Display Toolbar");
-  //gtk_widget_override_font(b_display_toolbar, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_toolbar), display_toolbar);
   gtk_widget_show(b_display_toolbar);
   gtk_grid_attach(GTK_GRID(grid),b_display_toolbar,col,row,1,1);

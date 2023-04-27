@@ -22,10 +22,6 @@
 
 #include "mode.h"
 
-#define FILTERS 12
-
-#define CW_PITCH 600
-
 struct _FILTER {
     int low;
     int high;
@@ -34,18 +30,21 @@ struct _FILTER {
 
 typedef struct _FILTER FILTER;
 
-#define filterF0 0
-#define filterF1 1
-#define filterF2 2
-#define filterF3 3
-#define filterF4 4
-#define filterF5 5
-#define filterF6 6
-#define filterF7 7
-#define filterF8 8
-#define filterF9 9
-#define filterVar1 10
-#define filterVar2 11
+enum {
+  filterF0=0,
+  filterF1,
+  filterF2,
+  filterF3,
+  filterF4,
+  filterF5,
+  filterF6,
+  filterF7,
+  filterF8,
+  filterF9,
+  filterVar1,
+  filterVar2,
+  FILTERS
+};
 
 extern int filter;
 
@@ -56,11 +55,15 @@ extern int txFilterLowCut;
 extern int txFilterHighCut;
 
 extern FILTER *filters[MODES];
-
-extern gint filter_step;
+extern const int var1_default_low[MODES];
+extern const int var1_default_high[MODES];
+extern const int var2_default_low[MODES];
+extern const int var2_default_high[MODES];
 
 extern void filterSaveState(void);
 extern void filterRestoreState(void);
-extern void filter_width_changed(int rx,int increment);
-extern void filter_shift_changed(int rx,int increment);
+extern void filter_width_changed(int id,int increment);
+extern void filter_shift_changed(int id,int increment);
+extern void filter_cut_changed(int id, int action, int increment);
+extern void filter_cut_default(int id);
 #endif

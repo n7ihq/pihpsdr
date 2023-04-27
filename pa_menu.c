@@ -43,7 +43,7 @@ static GtkWidget *grid2;
 //
 static GtkWidget *spin[11];
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -162,7 +162,7 @@ static void show_W(int watts,gboolean reset) {
   }
 }
 
-static void clear_W(void) {
+static void clear_W() {
   int i;
   for(i=0;i<10;i++) {
     gtk_grid_remove_row(GTK_GRID(grid2),1);
@@ -207,7 +207,6 @@ void pa_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - PA Calibration");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -283,12 +282,10 @@ void pa_menu(GtkWidget *parent) {
     char band_text[32];
     sprintf(band_text,"<b>%s</b>",band->title);
     gtk_label_set_markup(GTK_LABEL(band_label), band_text);
-    //gtk_widget_override_font(band_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(band_label);
     gtk_grid_attach(GTK_GRID(grid1),band_label,(b/6)*2,(b%6)+1,1,1);
 
     GtkWidget *pa_r=gtk_spin_button_new_with_range(38.8,100.0,0.1);
-    //gtk_widget_override_font(pa_r, pango_font_description_from_string("Arial 18"));
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(pa_r),(double)band->pa_calibration);
     gtk_widget_show(pa_r);
     gtk_grid_attach(GTK_GRID(grid1),pa_r,((b/6)*2)+1,(b%6)+1,1,1);
@@ -304,12 +301,10 @@ void pa_menu(GtkWidget *parent) {
       char band_text[32];
       sprintf(band_text,"<b>%s</b>",band->title);
       gtk_label_set_markup(GTK_LABEL(band_label), band_text);
-      //gtk_widget_override_font(band_label, pango_font_description_from_string("Arial 18"));
       gtk_widget_show(band_label);
       gtk_grid_attach(GTK_GRID(grid1),band_label,(b/6)*2,(b%6)+1,1,1);
 
       GtkWidget *pa_r=gtk_spin_button_new_with_range(38.8,100.0,0.1);
-      //gtk_widget_override_font(pa_r, pango_font_description_from_string("Arial 18"));
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(pa_r),(double)band->pa_calibration);
       gtk_widget_show(pa_r);
       gtk_grid_attach(GTK_GRID(grid1),pa_r,((b/6)*2)+1,(b%6)+1,1,1);

@@ -4,11 +4,7 @@
  *
  * This is the "Layer-1" for Apple Macintosh.
  *
- * This file implements the function register_midi_device,
- * which is called with the name of a supported MIDI device.
- * This name may be truncated:  For example, the call
- * register_midi_device("COMPANY MIDI")
- * will accept both "COMPANY MIDI X" and "COMPANY MIDI Y" devices.
+ * This file implements the function register_midi_device.
  *
  * If more than one MIDI device matches the name, the LAST ONE
  * found will be taken. This may not be predictable, so it is
@@ -233,7 +229,7 @@ void register_midi_device(int index) {
      return;
 }
 
-void get_midi_devices(void) {
+void get_midi_devices() {
     int n;
     int i;
     CFStringRef pname;   // MacOS name of the device

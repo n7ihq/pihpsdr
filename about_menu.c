@@ -37,7 +37,7 @@ static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *label;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -65,7 +65,6 @@ void about_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   sprintf(title,"piHPSDR - About");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -77,9 +76,7 @@ void about_menu(GtkWidget *parent) {
   GtkWidget *grid=gtk_grid_new();
 
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(grid),4);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),4);
 
   int row=0;
 

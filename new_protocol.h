@@ -95,5 +95,6 @@ extern void new_protocol_iq_samples(int isample,int qsample);
 extern void new_protocol_flush_iq_samples(void);
 extern void new_protocol_cw_audio_samples(short l, short r);
 
-extern void new_protocol_restart(void);
+extern void new_protocol_menu_start(void);
+extern void new_protocol_menu_stop(void);
 #endif

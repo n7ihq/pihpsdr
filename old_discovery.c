@@ -426,7 +426,7 @@ g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, disco
     return NULL;
 }
 
-void old_discovery(void) {
+void old_discovery() {
     struct ifaddrs *addrs,*ifa;
     int i, is_local;
 
@@ -434,17 +434,27 @@ fprintf(stderr,"old_discovery\n");
     //
     // In the second phase of the STEMlab (RedPitaya) discovery,
     // we know that it can be reached by a specific IP address
-    // and do not need broadcast packets
+    // and need no discovery any more
     //
     if (!discover_only_stemlab) {
       getifaddrs(&addrs);
       ifa = addrs;
       while (ifa) {
         g_main_context_iteration(NULL, 0);
-        if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
-            if((ifa->ifa_flags&IFF_UP)==IFF_UP
-                && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING) {
-                //&& (ifa->ifa_flags&IFF_LOOPBACK)!=IFF_LOOPBACK) {
+        //
+        // Sometimes there are many (virtual) interfaces, and some
+        // of them are very unlikely to offer a radio connection.
+        // These are skipped.
+        //
+        if (ifa->ifa_addr) {
+            if(
+                ifa->ifa_addr->sa_family == AF_INET
+             && (ifa->ifa_flags&IFF_UP)==IFF_UP
+             && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING
+             && strncmp("veth", ifa->ifa_name, 4)
+             && strncmp("dock", ifa->ifa_name, 4)
+             && strncmp("hass", ifa->ifa_name, 4)
+             ) {
                 discover(ifa, 1);   // send UDP broadcast packet to interface
             }
         }

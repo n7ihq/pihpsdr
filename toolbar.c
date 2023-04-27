@@ -81,7 +81,7 @@ static gint xit_minus_timer=-1;
 
 SWITCH *toolbar_switches=switches_controller1[0];
 
-void update_toolbar_labels(void) {
+void update_toolbar_labels() {
   gtk_button_set_label(GTK_BUTTON(sim_mox),ActionTable[toolbar_switches[0].switch_function].button_str);
   gtk_button_set_label(GTK_BUTTON(sim_s1),ActionTable[toolbar_switches[1].switch_function].button_str);
   gtk_button_set_label(GTK_BUTTON(sim_s2),ActionTable[toolbar_switches[2].switch_function].button_str);
@@ -154,6 +154,7 @@ GtkWidget *toolbar_init(int my_width, int my_height, GtkWidget* parent) {
 
     fprintf(stderr,"toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
 
+    toolbar_switches=switches_controller1[function];
     toolbar=gtk_grid_new();
     gtk_widget_set_size_request (toolbar, width, height);
     gtk_grid_set_column_homogeneous(GTK_GRID(toolbar),TRUE);

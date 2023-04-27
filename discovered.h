@@ -67,6 +67,9 @@
 #ifdef SOAPYSDR
 #define SOAPYSDR_PROTOCOL 2
 #endif
+#ifdef SATURN
+#define SATURNSDR_PROTOCOL 3
+#endif
 
 #ifdef STEMLAB_DISCOVERY
 // A STEMlab discovered via Avahi will have this protocol until the SDR

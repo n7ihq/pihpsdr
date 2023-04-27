@@ -38,7 +38,7 @@ static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -96,7 +96,6 @@ void dsp_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - DSP");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -105,9 +104,6 @@ void dsp_menu(GtkWidget *parent) {
 
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
@@ -126,7 +122,6 @@ void dsp_menu(GtkWidget *parent) {
 
   GtkWidget *pre_post_agc_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(pre_post_agc_label), "<b>NR/NR2/ANF</b>");
-  //gtk_widget_override_font(pre_post_agc_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(pre_post_agc_label);
   gtk_grid_attach(GTK_GRID(grid),pre_post_agc_label,0,2,1,1);
 
@@ -144,7 +139,6 @@ void dsp_menu(GtkWidget *parent) {
 
   GtkWidget *nr2_gain_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nr2_gain_label), "<b>NR Gain Method</b>");
-  //gtk_widget_override_font(nr2_gain_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(nr2_gain_label);
   gtk_grid_attach(GTK_GRID(grid),nr2_gain_label,0,3,1,1);
 
@@ -168,7 +162,6 @@ void dsp_menu(GtkWidget *parent) {
 
   GtkWidget *nr2_npe_method_label=gtk_label_new("NR2 NPE Method");
   gtk_label_set_markup(GTK_LABEL(nr2_npe_method_label), "<b>NR2 NPE Method</b>");
-  //gtk_widget_override_font(nr2_npe_method_label, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(nr2_npe_method_label);
   gtk_grid_attach(GTK_GRID(grid),nr2_npe_method_label,0,4,1,1);
 
@@ -185,7 +178,6 @@ void dsp_menu(GtkWidget *parent) {
   g_signal_connect(mmse_b,"toggled",G_CALLBACK(nr2_npe_method_cb),(gpointer *)1);
 
   GtkWidget *ae_b=gtk_check_button_new_with_label("NR2 AE Filter");
-  //gtk_widget_override_font(ae_b, pango_font_description_from_string("Arial 18"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ae_b), active_receiver->nr2_ae);
   gtk_widget_show(ae_b);
   gtk_grid_attach(GTK_GRID(grid),ae_b,0,5,1,1);

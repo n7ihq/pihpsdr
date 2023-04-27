@@ -78,7 +78,7 @@ static int max_tx_samples;
 static float *output_buffer;
 static int output_buffer_index;
 
-SoapySDRDevice *get_soapy_device(void) {
+SoapySDRDevice *get_soapy_device() {
   return soapy_device;
 }
 
@@ -431,7 +431,7 @@ void soapy_protocol_iq_samples(float isample,float qsample) {
 
 
 
-void soapy_protocol_stop(void) {
+void soapy_protocol_stop() {
 fprintf(stderr,"soapy_protocol_stop\n");
   running=FALSE;
 }

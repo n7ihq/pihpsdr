@@ -83,12 +83,14 @@ static GtkWidget *comp_label;
 static GtkWidget *comp_scale;
 static GtkWidget *comp_enable;
 static GtkWidget *dummy_label;
+static GtkWidget *filter_cut_low_scale;
+static GtkWidget *filter_cut_high_scale;
 static GtkWidget *filter_width_scale;
 static GtkWidget *filter_shift_scale;
 static GtkWidget *diversity_gain_scale;
 static GtkWidget *diversity_phase_scale;
 
-void sliders_update(void) {
+void sliders_update() {
   if(display_sliders) {
     if(can_transmit) {
       if(mic_linein) {
@@ -183,7 +185,6 @@ void set_attenuation_value(double value) {
       gtk_widget_show(attenuation_scale);
       gtk_container_add(GTK_CONTAINER(content),attenuation_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -193,7 +194,7 @@ void set_attenuation_value(double value) {
   }
 }
 
-void update_att_preamp(void) {
+void update_att_preamp() {
   // CHARLY25: update the ATT/Pre buttons to the values of the active RX
   // We should also set the attenuation for use in meter.c
   if (filter_board == CHARLY25) {
@@ -212,7 +213,7 @@ void update_att_preamp(void) {
   }
 }
 
-void att_type_changed(void) {
+void att_type_changed() {
   g_print("%s\n",__FUNCTION__);
   if (filter_board == CHARLY25) {
     if(attenuation_label!=NULL) gtk_widget_hide(attenuation_label);
@@ -311,7 +312,6 @@ void set_agc_gain(int rx,double value) {
       gtk_widget_show(agc_scale);
       gtk_container_add(GTK_CONTAINER(content),agc_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -345,7 +345,7 @@ static void afgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #endif
 }
 
-void update_af_gain(void) {
+void update_af_gain() {
   set_af_gain(active_receiver->id,active_receiver->volume);
 }
 
@@ -382,7 +382,6 @@ void set_af_gain(int rx,double value) {
       gtk_widget_show(af_gain_scale);
       gtk_container_add(GTK_CONTAINER(content),af_gain_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -411,7 +410,7 @@ static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
     }
 }
 
-void update_rf_gain(void) {
+void update_rf_gain() {
   //set_rf_gain(active_receiver->id,active_receiver->rf_gain);
   set_rf_gain(active_receiver->id,adc[active_receiver->id].gain);
 }
@@ -454,7 +453,6 @@ void set_rf_gain(int rx,double value) {
       gtk_widget_show(rf_gain_scale);
       gtk_container_add(GTK_CONTAINER(content),rf_gain_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -480,13 +478,20 @@ void set_filter_width(int rx,int width) {
       sprintf(title,"Filter Width RX %d (Hz)",rx);
       scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
       GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
-      filter_width_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 4000.0, 1.00);
+      //
+      // When drawing a new scale on the screen, adjust the scale to the current filter width
+      // +/ 1000 Hz
+      //
+      if (width < 1000) {
+        filter_width_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 2000.0, 1.00);
+      } else {
+        filter_width_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,(double)(width-1000), (double)(width+1000), 1.00);
+      }
       gtk_widget_set_size_request (filter_width_scale, 400, 30);
       gtk_range_set_value (GTK_RANGE(filter_width_scale),(double)width);
       gtk_widget_show(filter_width_scale);
       gtk_container_add(GTK_CONTAINER(content),filter_width_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -511,13 +516,15 @@ void set_filter_shift(int rx,int shift) {
       sprintf(title,"Filter SHIFT RX %d (Hz)",rx);
       scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
       GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
-      filter_shift_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,-1000.0, 1000.0, 1.00);
+      //
+      // When drawing the slider for the first time, use current value +/- 1000
+      //
+      filter_shift_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,(double)(shift-1000), (double)(shift+1000), 1.00);
       gtk_widget_set_size_request (filter_shift_scale, 400, 30);
       gtk_range_set_value (GTK_RANGE(filter_shift_scale),(double)shift);
       gtk_widget_show(filter_shift_scale);
       gtk_container_add(GTK_CONTAINER(content),filter_shift_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -560,7 +567,6 @@ void set_mic_gain(double value) {
         gtk_widget_show(mic_gain_scale);
         gtk_container_add(GTK_CONTAINER(content),mic_gain_scale);
         scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-        //gtk_widget_show_all(scale_dialog);
         gtk_dialog_run(GTK_DIALOG(scale_dialog));
       } else {
         g_source_remove(scale_timer);
@@ -594,7 +600,6 @@ void set_linein_gain(int value) {
       gtk_widget_show(mic_gain_scale);
       gtk_container_add(GTK_CONTAINER(content),mic_gain_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -634,7 +639,6 @@ void set_drive(double value) {
       gtk_widget_show(drive_scale);
       gtk_container_add(GTK_CONTAINER(content),drive_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -652,6 +656,72 @@ int update_drive(void *data) {
   set_drive(*(double *)data);
   free(data);
   return 0;
+}
+
+void set_filter_cut_high(int rx,int var) {
+  //g_print("%s var=%d\n",__FUNCTION__,var);
+    if(scale_status!=FILTER_CUT_HIGH || scale_rx!=rx) {
+      if(scale_status!=NO_ACTION) {
+        g_source_remove(scale_timer);
+        gtk_widget_destroy(scale_dialog);
+        scale_status=NO_ACTION;
+      }
+    }
+    if(scale_status==NO_ACTION) {
+      scale_status=FILTER_CUT_HIGH;
+      scale_rx=rx;
+      char title[64];
+      sprintf(title,"Filter Cut High RX %d (Hz)",rx);
+      scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
+      GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
+      //
+      // When drawing a new slider, take the current value +/- 1000
+      //
+      filter_cut_high_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,(double)(var-1000), (double)(var+1000), 1.00);
+      gtk_widget_set_size_request (filter_cut_high_scale, 400, 30);
+      gtk_range_set_value (GTK_RANGE(filter_cut_high_scale),(double)var);
+      gtk_widget_show(filter_cut_high_scale);
+      gtk_container_add(GTK_CONTAINER(content),filter_cut_high_scale);
+      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
+      gtk_dialog_run(GTK_DIALOG(scale_dialog));
+    } else {
+      g_source_remove(scale_timer);
+      gtk_range_set_value (GTK_RANGE(filter_cut_high_scale),(double)var);
+      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
+    }
+}
+
+void set_filter_cut_low(int rx,int var) {
+  //g_print("%s var=%d\n",__FUNCTION__,var);
+    if(scale_status!=FILTER_CUT_LOW || scale_rx!=rx) {
+      if(scale_status!=NO_ACTION) {
+        g_source_remove(scale_timer);
+        gtk_widget_destroy(scale_dialog);
+        scale_status=NO_ACTION;
+      }
+    }
+    if(scale_status==NO_ACTION) {
+      scale_status=FILTER_CUT_LOW;
+      scale_rx=rx;
+      char title[64];
+      sprintf(title,"Filter Cut Low RX %d (Hz)",rx);
+      scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
+      GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
+      //
+      // When drawing a new slider, take the current value +/- 1000
+      //
+      filter_cut_low_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,(double)(var-1000), (double)(var+1000), 1.00);
+      gtk_widget_set_size_request (filter_cut_low_scale, 400, 30);
+      gtk_range_set_value (GTK_RANGE(filter_cut_low_scale),(double)var);
+      gtk_widget_show(filter_cut_low_scale);
+      gtk_container_add(GTK_CONTAINER(content),filter_cut_low_scale);
+      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
+      gtk_dialog_run(GTK_DIALOG(scale_dialog));
+    } else {
+      g_source_remove(scale_timer);
+      gtk_range_set_value (GTK_RANGE(filter_cut_low_scale),(double)var);
+      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
+    }
 }
 
 static void squelch_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -755,7 +825,7 @@ void set_compression(TRANSMITTER* tx) {
     }
 }
 
-void show_diversity_gain(void) {
+void show_diversity_gain() {
   g_print("%s\n",__FUNCTION__);
     if(scale_status!=DIV_GAIN) {
       if(scale_status!=NO_ACTION) {
@@ -774,7 +844,6 @@ void show_diversity_gain(void) {
       gtk_widget_show(diversity_gain_scale);
       gtk_container_add(GTK_CONTAINER(content),diversity_gain_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
@@ -783,7 +852,7 @@ void show_diversity_gain(void) {
     }
 }
 
-void show_diversity_phase(void) {
+void show_diversity_phase() {
   g_print("%s\n",__FUNCTION__);
     if(scale_status!=DIV_PHASE) {
       if(scale_status!=NO_ACTION) {
@@ -802,7 +871,6 @@ void show_diversity_phase(void) {
       gtk_widget_show(diversity_phase_scale);
       gtk_container_add(GTK_CONTAINER(content),diversity_phase_scale);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);

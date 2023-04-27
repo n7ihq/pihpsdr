@@ -1,9 +1,28 @@
 #ifndef RIGCTL_H
 #define RIGCTL_H
 
+struct _SERIALPORT {
+  //
+  // parity and bits are not included, since we
+  // always use 8 bits and "no parity"
+  //
+  char port[64];    // e.g. "/dev/ttyACM0"
+  int  baud;        // baud rate
+  int  enable;      // is it enabled?
+#ifdef ANDROMEDA
+  int  andromeda;   // flag for handling ANDROMEDA console
+#endif
+};
+
+typedef struct _SERIALPORT SERIALPORT;
+
+#define MAX_SERIAL 2
+extern SERIALPORT SerialPorts[2];
+extern gboolean rigctl_debug;
+
 void launch_rigctl (void);
-int launch_serial (void);
-void disable_sreial (void);
+int launch_serial (int id);
+void disable_serial (int id);
 
 void  close_rigctl_ports (void);
 int   rigctlGetMode(void);

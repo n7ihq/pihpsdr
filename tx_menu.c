@@ -42,7 +42,7 @@ static GtkWidget *tx_spin_high;
 static GtkWidget *tune_label;
 static GtkWidget *tune_scale;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;

@@ -41,7 +41,7 @@ static GtkWidget *parent_window=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -92,7 +92,6 @@ void encoder_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   switch(controller) {
     case NO_CONTROLLER:

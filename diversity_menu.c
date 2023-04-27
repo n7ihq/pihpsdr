@@ -47,7 +47,7 @@ static GtkWidget *level;
 static double gain_coarse, gain_fine;
 static double phase_coarse, phase_fine;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -94,7 +94,7 @@ static void diversity_cb(GtkWidget *widget, gpointer data) {
 // The DIVERSITY rotation parameters must be re-calculated
 // each time the gain or the phase changes.
 //
-static void set_gain_phase(void) {
+static void set_gain_phase() {
   double amplitude,arg;
   amplitude=pow(10.0, 0.05*div_gain);
   arg=div_phase*0.017453292519943295769236907684886;
@@ -175,7 +175,6 @@ void diversity_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Diversity");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -199,8 +198,6 @@ void diversity_menu(GtkWidget *parent) {
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
   gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);

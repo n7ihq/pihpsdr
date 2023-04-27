@@ -276,7 +276,7 @@ static void  process_mic_data(int bytes);
 // that in typical runs, only a handful of buffers is ever
 // allocated.
 //
-static mybuffer *get_my_buffer(void) {
+static mybuffer *get_my_buffer() {
   int i;
   mybuffer *bp=buflist;
   while (bp) {
@@ -305,27 +305,27 @@ static mybuffer *get_my_buffer(void) {
 }
 
 
-void schedule_high_priority(void) {
+void schedule_high_priority() {
     new_protocol_high_priority();
 }
 
-void schedule_general(void) {
+void schedule_general() {
     new_protocol_general();
 }
 
-void schedule_receive_specific(void) {
+void schedule_receive_specific() {
     new_protocol_receive_specific();
 }
 
-void schedule_transmit_specific(void) {
+void schedule_transmit_specific() {
     new_protocol_transmit_specific();
 }
 
-void filter_board_changed(void) {
+void filter_board_changed() {
     schedule_general();
 }
 
-void update_action_table(void) {
+void update_action_table() {
   //
   // Depending on the values of mox, puresignal, and diversity,
   // determine the actions to be taken when a DDC packet arrives
@@ -605,7 +605,7 @@ g_print("new_protocol_init: data_socket %d bound to interface %s:%d\n",data_sock
 
 }
 
-static void new_protocol_general(void) {
+static void new_protocol_general() {
     BAND *band;
     int rc;
     int txvfo=get_tx_vfo();
@@ -659,7 +659,7 @@ static void new_protocol_general(void) {
     pthread_mutex_unlock(&general_mutex);
 }
 
-static void new_protocol_high_priority(void) {
+static void new_protocol_high_priority() {
     int i;
     BAND *band;
     long long rx1Frequency;
@@ -1180,7 +1180,7 @@ static void new_protocol_high_priority(void) {
 }
 
 
-static void new_protocol_transmit_specific(void) {
+static void new_protocol_transmit_specific() {
     int txmode=get_tx_mode();
     int rc;
 
@@ -1268,7 +1268,7 @@ static void new_protocol_transmit_specific(void) {
 
 }
 
-static void new_protocol_receive_specific(void) {
+static void new_protocol_receive_specific() {
     int i;
     int ddc;
     int rc;
@@ -1371,7 +1371,7 @@ static void new_protocol_receive_specific(void) {
     pthread_mutex_unlock(&rx_spec_mutex);
 }
 
-static void new_protocol_start(void) {
+static void new_protocol_start() {
     new_protocol_transmit_specific();
     new_protocol_receive_specific();
     new_protocol_timer_thread_id = g_thread_new( "new protocol timer", new_protocol_timer_thread, NULL);
@@ -1384,7 +1384,7 @@ static void new_protocol_start(void) {
 
 }
 
-void new_protocol_stop(void) {
+void new_protocol_stop() {
     running=0;
     new_protocol_high_priority();
     usleep(100000); // 100 ms
@@ -1392,18 +1392,17 @@ void new_protocol_stop(void) {
 }
 
 //
-// This is the function called by the "Restart" button
-// in the new menu if P2 is running
+// Function available to e.g. rigctl to stop the protocol
 //
-void new_protocol_restart(void) {
+void new_protocol_menu_stop() {
   fd_set fds;
   struct timeval tv;
   char *buffer;
   //
   // halt the protocol, wait 200 msec, and re-start it
-  // the data socket is drained but kept open 
+  // the data socket is drained but kept open
   //
-  running=0;
+  running=0; 
   // wait until the thread that receives from the radio has terminated
   g_thread_join(new_protocol_thread_id);
   g_thread_join(new_protocol_timer_thread_id);
@@ -1422,8 +1421,14 @@ void new_protocol_restart(void) {
   buffer=malloc(NET_BUFFER_SIZE);
   while (select(data_socket+1, &fds, NULL, NULL, &tv) > 0) {
     recvfrom(data_socket,buffer,NET_BUFFER_SIZE,0,(struct sockaddr*)&addr,&length);
-  }
+  }     
   free(buffer);
+}
+
+//
+// Function available e.g. to rigctl to (re-) start the new protocol
+//
+void new_protocol_menu_start() {
   //
   // reset sequence numbers, action table, etc.
   //
@@ -1831,7 +1836,7 @@ static void process_ps_iq_data(unsigned char *buffer) {
 }
 
 
-static void process_command_response(void) {
+static void process_command_response() {
     long sequence;
     unsigned char *buffer = command_response_buffer->buffer;
     sequence=((buffer[0]&0xFF)<<24)+((buffer[1]&0xFF)<<16)+((buffer[2]&0xFF)<<8)+(buffer[3]&0xFF);
@@ -1849,7 +1854,7 @@ static void process_command_response(void) {
 #endif
 }
 
-static void process_high_priority(void) {
+static void process_high_priority() {
     long sequence;
     int previous_ptt;
     int previous_dot;
@@ -2022,7 +2027,7 @@ void new_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
   pthread_mutex_unlock(&audiob_mutex);
 }
 
-void new_protocol_flush_iq_samples(void) {
+void new_protocol_flush_iq_samples() {
 //
 // this is called at the end of a TX phase:
 // zero out "rest" of TX IQ buffer and send it

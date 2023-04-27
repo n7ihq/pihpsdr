@@ -83,7 +83,7 @@ static void destroy_cb(GtkWidget *widget, gpointer data) {
   usleep(100000);
 }
 
-static void cleanup(void) {
+static void cleanup() {
   running=0;
   // wait for one instance of info_thread to complete
   usleep(100000);
@@ -383,7 +383,6 @@ void ps_menu(GtkWidget *parent) {
   dialog=gtk_dialog_new();
   g_signal_connect (dialog, "destroy", G_CALLBACK(destroy_cb), NULL);
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Pure Signal");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -392,8 +391,6 @@ void ps_menu(GtkWidget *parent) {
 
   GtkWidget *grid=gtk_grid_new();
 
-  //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(grid),5);
   gtk_grid_set_row_spacing (GTK_GRID(grid),5);
 

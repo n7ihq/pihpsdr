@@ -89,7 +89,7 @@ static gpointer level_thread(gpointer arg) {
   return NULL;
 }
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -114,7 +114,7 @@ static gboolean enable_cb (GtkWidget *widget, GdkEventButton *event, gpointer da
   return TRUE;
 }
 
-static void start_level_thread(void) {
+static void start_level_thread() {
   run_level=1;
   level_thread_id = g_thread_new( "VOX level", level_thread, NULL);
   if(!level_thread_id ) {

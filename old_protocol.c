@@ -281,7 +281,7 @@ void dump_buffer(unsigned char *buffer,int length,const char *who) {
   g_mutex_unlock(&dump_mutex);
 }
 
-void old_protocol_stop(void) {
+void old_protocol_stop() {
   //
   // Mutex is needed since in the TCP case, sending TX IQ packets
   // must not occur while the "stop" packet is sent.
@@ -298,7 +298,7 @@ void old_protocol_stop(void) {
   pthread_mutex_unlock(&send_ozy_mutex);
 }
 
-void old_protocol_run(void) {
+void old_protocol_run() {
     g_print("%s\n",__FUNCTION__);
     pthread_mutex_lock(&send_ozy_mutex);
     metis_restart();
@@ -431,7 +431,7 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
 }
 #endif
 
-static void open_udp_socket(void) {
+static void open_udp_socket() {
     int tmp;
 
     if (data_socket >= 0) {
@@ -494,7 +494,7 @@ g_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_
     g_print("%s: UDP socket established: %d for %s:%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
 }
 
-static void open_tcp_socket(void) {
+static void open_tcp_socket() {
     int tmp;
 
     if (tcp_socket >= 0) {
@@ -668,7 +668,7 @@ static gpointer receive_thread(gpointer arg) {
 //
 //
 
-static int rx_feedback_channel(void) {
+static int rx_feedback_channel() {
   //
   // For radios with small FPGAS only supporting 2 RX, use RX1.
   // Else, use the last RX before the TX feedback channel.
@@ -700,7 +700,7 @@ static int rx_feedback_channel(void) {
   return ret;
 }
 
-static int tx_feedback_channel(void) {
+static int tx_feedback_channel() {
   //
   // Radios with small FPGAs use RX2
   // HERMES uses RX4,
@@ -735,11 +735,11 @@ static int tx_feedback_channel(void) {
   return ret;
 }
 
-static int first_receiver_channel(void) {
+static int first_receiver_channel() {
   return 0;
 }
 
-static int second_receiver_channel(void) {
+static int second_receiver_channel() {
   return 1;
 }
 
@@ -822,7 +822,7 @@ static long long channel_freq(int chan) {
   return freq;
 }
 
-static int how_many_receivers(void) {
+static int how_many_receivers() {
   //
   // For DIVERSITY, we need at least two RX channels
   // When PURESIGNAL is active, we need to include the TX DAC channel.
@@ -895,7 +895,7 @@ double right_sample_double_aux;
 static int nsamples;
 static int iq_samples;
 
-static void process_control_bytes(void) {
+static void process_control_bytes() {
   int previous_ptt;
   int previous_dot;
   int previous_dash;
@@ -1343,7 +1343,7 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
   }
 }
 
-void ozy_send_buffer(void) {
+void ozy_send_buffer() {
 
 
   int txmode=get_tx_mode();
@@ -2131,7 +2131,7 @@ static int metis_write(unsigned char ep,unsigned const char* buffer,int length) 
   return length;
 }
 
-static void metis_restart(void) {
+static void metis_restart() {
   int i;
 
   g_print("%s\n",__FUNCTION__);

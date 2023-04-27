@@ -38,7 +38,7 @@ static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -118,7 +118,6 @@ g_print("oc_menu: parent=%p\n",parent);
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Open Collector Output");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -132,9 +131,6 @@ g_print("oc_menu: parent=%p\n",parent);
 
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
@@ -142,25 +138,21 @@ g_print("oc_menu: parent=%p\n",parent);
 
   GtkWidget *band_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(band_title), "<b>Band</b>");
-  //gtk_widget_override_font(band_title, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(band_title);
   gtk_grid_attach(GTK_GRID(grid),band_title,0,1,1,1);
 
   GtkWidget *rx_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(rx_title), "<b>Rx</b>");
-  //gtk_widget_override_font(rx_title, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(rx_title);
   gtk_grid_attach(GTK_GRID(grid),rx_title,4,1,1,1);
 
   GtkWidget *tx_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(tx_title), "<b>Tx</b>");
-  //gtk_widget_override_font(tx_title, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(tx_title);
   gtk_grid_attach(GTK_GRID(grid),tx_title,11,1,1,1);
 
   GtkWidget *tune_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(tune_title), "<b>Tune (ORed with TX)</b>");
-  //gtk_widget_override_font(tune_title, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(tune_title);
   gtk_grid_attach(GTK_GRID(grid),tune_title,18,1,2,1);
 
@@ -169,12 +161,10 @@ g_print("oc_menu: parent=%p\n",parent);
     sprintf(oc_id,"<b>%d</b>",i);
     GtkWidget *oc_rx_title=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(oc_rx_title), oc_id);
-    //gtk_widget_override_font(oc_rx_title, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(oc_rx_title);
     gtk_grid_attach(GTK_GRID(grid),oc_rx_title,i,2,1,1);
     GtkWidget *oc_tx_title=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(oc_tx_title), oc_id);
-    //gtk_widget_override_font(oc_tx_title, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(oc_tx_title);
     gtk_grid_attach(GTK_GRID(grid),oc_tx_title,i+7,2,1,1);
   }
@@ -221,7 +211,6 @@ g_print("oc_menu: parent=%p\n",parent);
       char band_text[32];
       sprintf(band_text,"<b>%s</b>",band->title);
       gtk_label_set_markup(GTK_LABEL(band_label), band_text);
-      //gtk_widget_override_font(band_label, pango_font_description_from_string("Arial 18"));
       gtk_widget_show(band_label);
       gtk_grid_attach(GTK_GRID(grid),band_label,0,row,1,1);
 
@@ -229,14 +218,12 @@ g_print("oc_menu: parent=%p\n",parent);
       for(j=1;j<8;j++) {
         mask=0x01<<(j-1);
         GtkWidget *oc_rx_b=gtk_check_button_new();
-        //gtk_widget_override_font(oc_rx_b, pango_font_description_from_string("Arial 18"));
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (oc_rx_b), (band->OCrx&mask)==mask);
         gtk_widget_show(oc_rx_b);
         gtk_grid_attach(GTK_GRID(grid),oc_rx_b,j,row,1,1);
         g_signal_connect(oc_rx_b,"toggled",G_CALLBACK(oc_rx_cb),(gpointer)(long)(j+(i<<4)));
   
         GtkWidget *oc_tx_b=gtk_check_button_new();
-        //gtk_widget_override_font(oc_tx_b, pango_font_description_from_string("Arial 18"));
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (oc_tx_b), (band->OCtx&mask)==mask);
         gtk_widget_show(oc_tx_b);
         gtk_grid_attach(GTK_GRID(grid),oc_tx_b,j+7,row,1,1);
@@ -261,13 +248,11 @@ g_print("oc_menu: parent=%p\n",parent);
     char oc_id[8];
     sprintf(oc_id,"%d",j);
     GtkWidget *oc_tune_title=gtk_label_new(oc_id);
-    //gtk_widget_override_font(oc_tune_title, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(oc_tune_title);
     gtk_grid_attach(GTK_GRID(grid),oc_tune_title,18,j+1,1,1);
 
     mask=0x01<<(j-1);
     GtkWidget *oc_tune_b=gtk_check_button_new();
-    //gtk_widget_override_font(oc_tune_b, pango_font_description_from_string("Arial 18"));
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (oc_tune_b), (OCtune&mask)==mask);
     gtk_widget_show(oc_tune_b);
     gtk_grid_attach(GTK_GRID(grid),oc_tune_b,19,j+1,1,1);
@@ -276,13 +261,11 @@ g_print("oc_menu: parent=%p\n",parent);
 
   GtkWidget *oc_full_tune_time_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(oc_full_tune_time_title), "Full Tune(ms):");
-  //gtk_widget_override_font(oc_full_tune_time_title, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(oc_full_tune_time_title);
   gtk_grid_attach(GTK_GRID(grid),oc_full_tune_time_title,18,j+1,2,1);
   j++;
 
   GtkWidget *oc_full_tune_time_b=gtk_spin_button_new_with_range(0.0,9999.0,1.0);
-  //gtk_widget_override_font(oc_full_tune_time_b, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(oc_full_tune_time_b),(double)OCfull_tune_time);
   gtk_widget_show(oc_full_tune_time_b);
   gtk_grid_attach(GTK_GRID(grid),oc_full_tune_time_b,18,j+1,2,1);
@@ -291,13 +274,11 @@ g_print("oc_menu: parent=%p\n",parent);
 
   GtkWidget *oc_memory_tune_time_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(oc_memory_tune_time_title), "Memory Tune(ms):");
-  //gtk_widget_override_font(oc_memory_tune_time_title, pango_font_description_from_string("Arial 18"));
   gtk_widget_show(oc_memory_tune_time_title);
   gtk_grid_attach(GTK_GRID(grid),oc_memory_tune_time_title,18,j+1,2,1);
   j++;
 
   GtkWidget *oc_memory_tune_time_b=gtk_spin_button_new_with_range(0.0,9999.0,1.0);
-  //gtk_widget_override_font(oc_memory_tune_time_b, pango_font_description_from_string("Arial 18"));
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(oc_memory_tune_time_b),(double)OCmemory_tune_time);
   gtk_widget_show(oc_memory_tune_time_b);
   gtk_grid_attach(GTK_GRID(grid),oc_memory_tune_time_b,18,j+1,2,1);

@@ -359,7 +359,11 @@ double meter_calibration=0.0;
 double display_calibration=0.0;
 
 int can_transmit=0;
+#ifdef ANDROMEDA
+int optimize_for_touchscreen=1;
+#else
 int optimize_for_touchscreen=0;
+#endif
 
 gboolean duplex=FALSE;
 gboolean mute_rx_while_transmitting=FALSE;
@@ -380,10 +384,9 @@ gint rx_height;
 // 
 void set_backgnd(GtkWidget *widget) {
    static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
-   //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColour);
 }
 
-void radio_stop(void) {
+void radio_stop() {
   if(can_transmit) {
 g_print("radio_stop: TX: CloseChannel: %d\n",transmitter->id);
     CloseChannel(transmitter->id);
@@ -398,7 +401,7 @@ g_print("radio_stop: RX1: CloseChannel: %d\n",receiver[1]->id);
   }
 }
 
-void reconfigure_radio(void) {
+void reconfigure_radio() {
   int i;
   int y;
 g_print("reconfigure_radio: receivers=%d\n",receivers);
@@ -492,7 +495,7 @@ static gboolean menu_cb (GtkWidget *widget, GdkEventButton *event, gpointer data
   return TRUE;
 }
 
-static void create_visual(void) {
+static void create_visual() {
   int y=0;
 
   fixed=gtk_fixed_new();
@@ -696,12 +699,11 @@ g_print("create_visual: calling radio_change_receivers: receivers=%d r=%d\n",rec
     radio_change_receivers(r);
   }
 
-  //gtk_widget_show_all (fixed);
   gtk_widget_show_all (top_window);
 
 }
   
-void start_radio(void) {
+void start_radio() {
   int i;
 //g_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_WATCH));
@@ -1345,13 +1347,17 @@ void start_radio(void) {
 
   if(rigctl_enable) {
     launch_rigctl();
-    if (serial_enable) {
-      launch_serial();
+    for (int id=0; id<MAX_SERIAL; id++) {
+      if (SerialPorts[id].enable) {
+        launch_serial(id);
+      }
     }
   } else {
     // since we do not spawn the serial thread,
     // disable serial
-    serial_enable=0;
+    for (int id=0; id<MAX_SERIAL; id++) {
+      SerialPorts[id].enable=0;
+    }
   }
 
   if(can_transmit) {
@@ -1398,19 +1404,13 @@ void start_radio(void) {
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_ARROW));
 
 #ifdef MIDI
-  //
-  // The MIDI devices could not be opened in midi_restore_state() since MIDI events
-  // must not fly in before the radio is fully configured. Therefore midi_restore_state()
-  // simply marks the devices to be opened here by hi-jacking the "active" flag. Note that
-  // apart from this (ab)use, this flag is updated ONLY in register_midi_device() and
-  // close_midi_device().
-  //
   for (i=0; i<n_midi_devices; i++) {
     if (midi_devices[i].active) {
       //
-      // If device was marked "active" in the props file, open (register) it
-      // Note this flag is hi-jacked, so clear it before opening. It will be set
-      // if the MIDI device has been opened successfully
+      // Normally the "active" flags marks a MIDI device that is up and running.
+      // It is hi-jacked by the props file to indicate the device should be
+      // opened, so we set it to zero. Upon successfull opening of the MIDI device,
+      // it will be set again.
       //
       midi_devices[i].active=0;
       register_midi_device(i);
@@ -1425,7 +1425,7 @@ void start_radio(void) {
 #endif
 }
 
-void disable_rigctl(void) {
+void disable_rigctl() {
    g_print("RIGCTL: disable_rigctl()\n");
    close_rigctl_ports();
 }
@@ -1668,7 +1668,7 @@ void setMox(int state) {
   }
 }
 
-int getMox(void) {
+int getMox() {
     return mox;
 }
 
@@ -1856,15 +1856,15 @@ void setTune(int state) {
   }
 }
 
-int getTune(void) {
+int getTune() {
   return tune;
 }
 
-int isTransmitting(void) {
+int isTransmitting() {
   return mox | vox | tune;
 }
 
-double getDrive(void) {
+double getDrive() {
     return transmitter->drive;
 }
 
@@ -1891,7 +1891,7 @@ static int calcLevel(double d) {
   return level;
 }
 
-void calcDriveLevel(void) {
+void calcDriveLevel() {
   if (tune && !transmitter->tune_use_drive) {
     transmitter->drive_level=calcLevel(transmitter->tune_drive);
 g_print("calcDriveLevel: tune=%d drive_level=%d\n",transmitter->tune_drive,transmitter->drive_level);
@@ -1919,7 +1919,7 @@ void setDrive(double value) {
     }
 }
 
-double getTuneDrive(void) {
+double getTuneDrive() {
     return transmitter->tune_drive;
 }
 
@@ -1952,7 +1952,7 @@ void set_attenuation(int value) {
     }
 }
 
-void set_alex_antennas(void) {
+void set_alex_antennas() {
   //
   // Obtain band of VFO-A and transmitter, set ALEX RX/TX antennas
   // and the step attenuator
@@ -1977,7 +1977,7 @@ void set_alex_antennas(void) {
   }
 }
 
-void tx_vfo_changed(void) {
+void tx_vfo_changed() {
   //
   // When changing the active receiver or changing the split status,
   // the VFO that controls the transmitter my flip between VFOA/VFOB.
@@ -2019,7 +2019,7 @@ void set_alex_attenuation(int v) {
     }
 }
 
-void radio_split_toggle(void) {
+void radio_split_toggle() {
   radio_set_split(!split);
 }
 
@@ -2037,8 +2037,8 @@ void radio_set_split(int val) {
   }
 }
 
-void radioRestoreState(void) {
-  char name[32];
+void radioRestoreState() {
+  char name[64];
   char *value;
   int i;
 
@@ -2272,19 +2272,36 @@ g_print("radioRestoreState: %s\n",property_path);
     if(value) rigctl_enable=atoi(value);
     value=getProperty("rigctl_port_base");
     if(value) rigctl_port_base=atoi(value);
-    value=getProperty("rigctl_serial_enable");
-    if (value) serial_enable=atoi(value);
-    value=getProperty("rigctl_serial_baud_rate");
-    if (value) serial_baud_rate=atoi(value);
-    value=getProperty("rigctl_serial_port");
-    if (value) strcpy(ser_port,value);
 
-    /*
-    value=getProperty("adc_0_attenuation");
-    if(value) adc_attenuation[0]=atoi(value);
-    value=getProperty("adc_1_attenuation");
-    if(value) adc_attenuation[1]=atoi(value);
-    */
+    for (int id=0; id<MAX_SERIAL; id++) {
+      //
+      // Apply some default values
+      //
+      SerialPorts[id].enable=0;
+#ifdef ANDROMEDA
+      SerialPorts[id].andromeda=0;
+#endif
+      SerialPorts[id].baud=0;
+      sprintf(SerialPorts[id].port,"/dev/ttyACM%d", id);
+      //
+      // over-write from props file
+      //
+      sprintf(name,"rigctl_serial_enable[%d]", id);
+      value=getProperty(name);
+      if (value) SerialPorts[i].enable=atoi(value);
+#ifdef ANDROMEDA
+      sprintf(name,"rigctl_serial_andromeda[%d]", id);
+      value=getProperty(name);
+      if (value) SerialPorts[i].andromeda=atoi(value);
+#endif
+      sprintf(name,"rigctl_serial_baud_rate[%i]", id);
+      value=getProperty(name);
+      if (value) SerialPorts[id].baud=atoi(value);
+      sprintf(name,"rigctl_serial_port[%d]",id);
+      value=getProperty(name);
+      if (value) strcpy(SerialPorts[id].port, value);
+    }
+
 	
     value=getProperty("split");
     if(value) split=atoi(value);
@@ -2397,10 +2414,10 @@ g_print("radioRestoreState: %s\n",property_path);
   g_mutex_unlock(&property_mutex);
 }
 
-void radioSaveState(void) {
+void radioSaveState() {
   int i;
   char value[80];
-  char name[32];
+  char name[64];
 
 
 g_print("radioSaveState: %s\n",property_path);
@@ -2737,11 +2754,23 @@ g_print("radioSaveState: %s\n",property_path);
     setProperty("rigctl_enable",value);
     sprintf(value,"%d",rigctl_port_base);
     setProperty("rigctl_port_base",value);
-    sprintf(value,"%d",serial_enable);
-    setProperty("rigctl_serial_enable",value);
-    sprintf(value,"%d",serial_baud_rate);
-    setProperty("rigctl_serial_baud_rate",value);
-    setProperty("rigctl_serial_port",ser_port);
+
+    for (int id=0; id<MAX_SERIAL; id++) {
+      sprintf(name,"rigctl_serial_enable[%d]", id);
+      sprintf(value,"%d",SerialPorts[id].enable);
+      setProperty(name,value);
+#ifdef ANDROMEDA
+      sprintf(name,"rigctl_serial_andromeda[%d]", id);
+      sprintf(value,"%d",SerialPorts[id].andromeda);
+      setProperty(name,value);
+#endif
+      sprintf(name,"rigctl_serial_baud_rate[%d]", id);
+      sprintf(value,"%d",SerialPorts[id].baud);
+      setProperty(name,value);
+      sprintf(name,"rigctl_serial_port[%d]", id);
+      setProperty(name,SerialPorts[id].port);
+    }
+
 
     sprintf(value,"%d",display_sequence_errors);
     setProperty("radio.display_sequence_errors",value);

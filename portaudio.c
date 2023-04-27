@@ -91,7 +91,7 @@ int     mic_ring_inpt=0;
 //
 // This inits PortAudio and looks for suitable input and output channels
 //
-void audio_get_cards(void)
+void audio_get_cards()
 {
   int i, numDevices;
   const PaDeviceInfo *deviceInfo;
@@ -163,7 +163,7 @@ void audio_get_cards(void)
 int pa_mic_cb(const void*, void*, unsigned long, const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags, void*);
 int pa_out_cb(const void*, void*, unsigned long, const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags, void*);
 
-int audio_open_input(void)
+int audio_open_input()
 {
   PaError err;
   PaStreamParameters inputParameters;
@@ -352,7 +352,7 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
 // Utility function for retrieving mic samples
 // from ring buffer
 //
-float audio_get_next_mic_sample(void) {
+float audio_get_next_mic_sample() {
   int newpt;
   float sample;
   g_mutex_lock(&audio_mutex);
@@ -465,7 +465,7 @@ int audio_open_output(RECEIVER *rx)
 //
 // close a TX microphone stream
 //
-void audio_close_input(void)
+void audio_close_input()
 {
   PaError err;
 

@@ -353,13 +353,13 @@ BANDSTACK_ENTRY *bandstack_get_bandstack_entry(int band,int entry) {
     return &bandstack->entry[entry];
 }
 
-BANDSTACK_ENTRY *bandstack_entry_get_current(void) {
+BANDSTACK_ENTRY *bandstack_entry_get_current() {
     BANDSTACK *bandstack=bands[current_band].bandstack;
     BANDSTACK_ENTRY *entry=&bandstack->entry[bandstack->current_entry];
     return entry;
 }
 
-BANDSTACK_ENTRY *bandstack_entry_next(void) {
+BANDSTACK_ENTRY *bandstack_entry_next() {
     BANDSTACK *bandstack=bands[current_band].bandstack;
     bandstack->current_entry++;
     if(bandstack->current_entry>=bandstack->entries) {
@@ -369,7 +369,7 @@ BANDSTACK_ENTRY *bandstack_entry_next(void) {
     return entry;
 }
 
-BANDSTACK_ENTRY *bandstack_entry_previous(void) {
+BANDSTACK_ENTRY *bandstack_entry_previous() {
     BANDSTACK *bandstack=bands[current_band].bandstack;
     bandstack->current_entry--;
     if(bandstack->current_entry<0) {
@@ -380,11 +380,11 @@ BANDSTACK_ENTRY *bandstack_entry_previous(void) {
 }
 
 
-int band_get_current(void) {
+int band_get_current() {
     return current_band;
 }
 
-BAND *band_get_current_band(void) {
+BAND *band_get_current_band() {
     BAND *b=&bands[current_band];
     return b;
 }
@@ -399,7 +399,7 @@ BAND *band_set_current(int b) {
     return &bands[b];
 }
 
-void bandSaveState(void) {
+void bandSaveState() {
     char name[128];
     char value[128];
     BANDSTACK_ENTRY* entry;
@@ -499,7 +499,7 @@ void bandSaveState(void) {
     setProperty("band",value);
 }
 
-void bandRestoreState(void) {
+void bandRestoreState() {
     char* value;
     int v;
     int b;
@@ -677,7 +677,7 @@ g_print("getFrequencyInfo %lld is %s\n",frequency,result);
 }
 #endif
 
-int canTransmit(void) {
+int canTransmit() {
     int result;
     long long txfreq, flow, fhigh;
     int txb, txvfo, txmode;

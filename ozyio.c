@@ -98,7 +98,7 @@ int adc_overflow;
 
 
 
-int ozy_open(void) {
+int ozy_open() {
 	int rc;
 
 	if(init==0) {
@@ -130,7 +130,7 @@ int ozy_open(void) {
 	return 0;
 }
 
-int ozy_close(void) {
+int ozy_close() {
 	int rc;
 
 	rc=libusb_attach_kernel_driver(ozy_handle,0);
@@ -479,7 +479,7 @@ void ozy_i2c_readpwr(int addr) {
 	}
 }
 
-void ozy_i2c_readvars(void) {
+void ozy_i2c_readvars() {
 	int rc = 0;
 	unsigned char buffer[8];
 
@@ -634,7 +634,7 @@ int filePath (char *sOut, const char *sIn) {
 // initialise a USB ozy device. 
 // renamed as "initialise" and combined with the "ozyinit" code
 //
-int ozy_initialise(void) 
+int ozy_initialise() 
 {
 	int rc;
 
@@ -682,7 +682,7 @@ int ozy_initialise(void)
 // returns 1 if a device found on USB
 //
 //
-int ozy_discover(void)
+int ozy_discover()
 {
 	int success = 0;			// function return code
 	int rc;

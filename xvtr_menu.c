@@ -43,7 +43,7 @@ static GtkWidget *tx_lo_frequency[BANDS+XVTRS];
 static GtkWidget *tx_lo_error[BANDS+XVTRS];
 static GtkWidget *disable_pa[BANDS+XVTRS];
 
-static void save_xvtr (void) {
+static void save_xvtr () {
   int i;
   int b;
   if(dialog!=NULL) {
@@ -161,7 +161,7 @@ void lo_error_update(RECEIVER *rx,long long offset) {
   update_receiver(vfo[0].band,TRUE);
 }
 
-static void cleanup(void) {
+static void cleanup() {
   save_xvtr();
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
@@ -188,7 +188,6 @@ void xvtr_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - XVTR");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

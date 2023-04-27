@@ -115,7 +115,7 @@ void new_protocol_programmer(char *filename ) {
 
 }
 
-void programmer_erase(void) {
+void programmer_erase() {
     char buffer[60];
 
     fprintf(stderr,"programmer_erase\n");

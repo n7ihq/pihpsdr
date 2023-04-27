@@ -46,7 +46,7 @@ static GtkWidget *dialog=NULL;
 static SWITCH *temp_switches;
 
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -93,7 +93,7 @@ void toolbar_menu(GtkWidget *parent) {
   GtkWidget *notebook;
   GtkWidget *grid;
   GtkWidget *widget;
-  gint function=0;
+  gint lfunction=0;
 
 
   dialog=gtk_dialog_new_with_buttons("piHPSDR - Toolbar Actions",GTK_WINDOW(parent),GTK_DIALOG_DESTROY_WITH_PARENT,"_OK",GTK_RESPONSE_ACCEPT,NULL);
@@ -102,7 +102,7 @@ void toolbar_menu(GtkWidget *parent) {
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-  function=0;
+  lfunction=0;
 
   notebook=gtk_notebook_new();
   set_backgnd(notebook);
@@ -121,7 +121,7 @@ next_function_set:
 
   gint max_switches=MAX_SWITCHES;
   max_switches=8;
-  temp_switches=switches_controller1[function];
+  temp_switches=switches_controller1[lfunction];
 
   for(int i=0;i<max_switches;i++) {
     if(temp_switches[i].switch_function==FUNCTION) {
@@ -135,10 +135,10 @@ next_function_set:
     col++;
   }
 
-  g_sprintf(label,"Function %d",function);
+  g_sprintf(label,"Function %d",lfunction);
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new(label));
-  function++;
-  if(function<MAX_FUNCTIONS) {
+  lfunction++;
+  if(lfunction<MAX_FUNCTIONS) {
     goto next_function_set;
   }
   gtk_container_add(GTK_CONTAINER(content),notebook);

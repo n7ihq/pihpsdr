@@ -16,7 +16,6 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <math.h>
@@ -214,8 +213,6 @@ static int init(void *data) {
 static void activate_pihpsdr(GtkApplication *app, gpointer data) {
 
 
-  //gtk_init (&argc, &argv);
-
   fprintf(stderr,"Build: %s %s\n",build_date,version);
 
   fprintf(stderr,"GTK+ version %ud.%ud.%ud\n", gtk_major_version, gtk_minor_version, gtk_micro_version);
@@ -325,7 +322,6 @@ fprintf(stderr,"add build label to grid\n");
 fprintf(stderr,"create status\n");
   status=gtk_label_new("");
   gtk_label_set_justify(GTK_LABEL(status),GTK_JUSTIFY_LEFT);
-  //gtk_widget_override_font(status, pango_font_description_from_string("FreeMono 18"));
   gtk_widget_show(status);
 fprintf(stderr,"add status to grid\n");
   gtk_grid_attach(GTK_GRID(grid), status, 1, 3, 1, 1);

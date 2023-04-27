@@ -39,7 +39,7 @@ static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_bandstack;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -90,7 +90,6 @@ void bandstack_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   sprintf(title,"piHPSDR - Band Stack (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -125,7 +124,6 @@ void bandstack_menu(GtkWidget *parent) {
     }
     GtkWidget *b=gtk_button_new_with_label(label);
     set_button_text_color(b,"default");
-    //gtk_widget_override_font(b, pango_font_description_from_string("Arial 20"));
     if(i==vfo[active_receiver->id].bandstack) {
       set_button_text_color(b,"orange");
       last_bandstack=b;

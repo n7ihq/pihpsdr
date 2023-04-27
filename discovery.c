@@ -27,6 +27,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/stat.h>
 
 #include "discovered.h"
 #include "old_discovery.h"
@@ -194,7 +195,7 @@ g_print("connect_cb: %s:%d\n",host_addr,host_port);
 }
 #endif
 
-void discovery(void) {
+void discovery() {
 //fprintf(stderr,"discovery\n");
 
   //
@@ -245,6 +246,51 @@ void discovery(void) {
     discovered[devices].use_routing=0;
     discovered[devices].supported_receivers=2;
     fprintf(stderr,"discovery: found USB OZY device min=%f max=%f\n",
+                            discovered[devices].frequency_min,
+                            discovered[devices].frequency_max);
+
+    devices++;
+  }
+#endif
+
+#ifdef SATURN
+  fprintf(stderr,"looking for /dev/xdma* based Saturn devices\n");
+
+  struct stat sb;
+  int status = 1;
+  char buf[256];
+  uint8_t *mac = discovered[devices].info.network.mac_address;
+
+  if (stat("/dev/xdma/card0", &sb) == 0 && S_ISDIR(sb.st_mode))
+  {
+    discovered[devices].protocol = SATURNSDR_PROTOCOL;
+    //discovered[devices].protocol = ORIGINAL_PROTOCOL;
+    discovered[devices].device = DEVICE_ORION2;
+    discovered[devices].software_version = 10;
+    strcpy(discovered[devices].name,"SATURN");
+    discovered[devices].frequency_min=0.0;
+    discovered[devices].frequency_max=61440000.0;
+    memset(buf, 0, 256);
+    fp = fopen("/sys/class/net/eth0/address", "rt");
+    if (fp) {
+      if (fgets(buf, sizeof buf, fp) > 0) {
+        sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &mac[0],
+               &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+        status = 0;
+      }
+      fclose(fp);
+    } else
+    for(int i=0;i<6;i++) {
+      discovered[devices].info.network.mac_address[i]=0;
+    }
+    discovered[devices].status = STATE_AVAILABLE;
+    discovered[devices].info.network.address_length=0;
+    discovered[devices].info.network.interface_length=0;
+    strcpy(discovered[devices].info.network.interface_name,"XDMA");
+    discovered[devices].use_tcp=0;
+    discovered[devices].use_routing=0;
+    discovered[devices].supported_receivers=2;
+    fprintf(stderr,"discovery: found SATURN device min=%f max=%f\n",
                             discovered[devices].frequency_min,
                             discovered[devices].frequency_max);
 
@@ -346,6 +392,11 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
             sprintf(text,"%s (Protocol SOAPY_SDR %s) on %s",d->name,d->info.soapy.version,d->info.soapy.address);
             break;
 
+#endif
+#ifdef SATURN
+          case SATURNSDR_PROTOCOL:
+            sprintf(text,"%s (Protocol SATURN_SDR %s) on %s",d->name,version,"/dev/xdma");
+            break;
 #endif
 #ifdef STEMLAB_DISCOVERY
           case STEMLAB_PROTOCOL:

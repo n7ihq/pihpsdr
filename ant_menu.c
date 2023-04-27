@@ -41,7 +41,7 @@ static GtkWidget *grid=NULL;
 static GtkWidget *adc0_antenna_combo_box;
 static GtkWidget *dac0_antenna_combo_box;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -103,7 +103,7 @@ static void tx_ant_cb(GtkToggleButton *widget, gpointer data) {
   }
 }
 
-static void show_hf(void) {
+static void show_hf() {
   int i;
   int bands=BANDS;
   switch(protocol) {
@@ -134,7 +134,6 @@ static void show_hf(void) {
       BAND *band=band_get_band(i);
       if(strlen(band->title)>0) {
         GtkWidget *band_label=gtk_label_new(NULL);
-        //gtk_widget_override_font(band_label, pango_font_description_from_string("Arial 18"));
         gtk_label_set_markup(GTK_LABEL(band_label), band->title);
         gtk_widget_show(band_label);
         gtk_grid_attach(GTK_GRID(grid),band_label,0,i+2,1,1);
@@ -176,7 +175,6 @@ static void show_hf(void) {
         g_signal_connect(xvtr_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+5));
 
         GtkWidget *ant_band_label=gtk_label_new(band->title);
-        //gtk_widget_override_font(ant_band_label, pango_font_description_from_string("Arial 18"));
         gtk_widget_show(ant_band_label);
         gtk_grid_attach(GTK_GRID(grid),ant_band_label,7,i+2,1,1);
   
@@ -201,13 +199,12 @@ static void show_hf(void) {
     }
 }
 
-static void show_xvtr(void) {
+static void show_xvtr() {
   int i;
     for(i=0;i<XVTRS;i++) {
       BAND *band=band_get_band(BANDS+i);
       if(strlen(band->title)>0) {
         GtkWidget *band_label=gtk_label_new(NULL);
-        //gtk_widget_override_font(band_label, pango_font_description_from_string("Arial 18"));
         gtk_label_set_markup(GTK_LABEL(band_label), band->title);
         gtk_widget_show(band_label);
         gtk_grid_attach(GTK_GRID(grid),band_label,0,i+2,1,1);
@@ -249,7 +246,6 @@ static void show_xvtr(void) {
         g_signal_connect(xvtr_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)(((i+BANDS)<<4)+5));
 
         GtkWidget *ant_band_label=gtk_label_new(band->title);
-        //gtk_widget_override_font(ant_band_label, pango_font_description_from_string("Arial 18"));
         gtk_widget_show(ant_band_label);
         gtk_grid_attach(GTK_GRID(grid),ant_band_label,7,i+2,1,1);
   
@@ -303,7 +299,6 @@ void ant_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - ANT");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -312,9 +307,6 @@ void ant_menu(GtkWidget *parent) {
 
   grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
@@ -354,67 +346,56 @@ void ant_menu(GtkWidget *parent) {
   if(protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL) {
     GtkWidget *rx_ant_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(rx_ant_label), "<b>Receive</b>");
-    //gtk_widget_override_font(rx_ant_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(rx_ant_label);
     gtk_grid_attach(GTK_GRID(grid),rx_ant_label,0,1,1,1);
 
     GtkWidget *rx1_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(rx1_label), "<b>1</b>");
-    //gtk_widget_override_font(rx1_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(rx1_label);
     gtk_grid_attach(GTK_GRID(grid),rx1_label,1,1,1,1);
 
     GtkWidget *rx2_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(rx2_label), "<b>2</b>");
-    //gtk_widget_override_font(rx2_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(rx2_label);
     gtk_grid_attach(GTK_GRID(grid),rx2_label,2,1,1,1);
 
     GtkWidget *rx3_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(rx3_label), "<b>3</b>");
-    //gtk_widget_override_font(rx3_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(rx3_label);
     gtk_grid_attach(GTK_GRID(grid),rx3_label,3,1,1,1);
 
     GtkWidget *ext1_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(ext1_label), "<b>EXT1</b>");
-    //gtk_widget_override_font(ext1_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(ext1_label);
     gtk_grid_attach(GTK_GRID(grid),ext1_label,4,1,1,1);
 
     GtkWidget *ext2_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(ext2_label), "<b>EXT2</b>");
-    //gtk_widget_override_font(ext2_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(ext2_label);
     gtk_grid_attach(GTK_GRID(grid),ext2_label,5,1,1,1);
 
     GtkWidget *xvtr_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(xvtr_label), "<b>XVTR</b>");
-    //gtk_widget_override_font(xvtr_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(xvtr_label);
     gtk_grid_attach(GTK_GRID(grid),xvtr_label,6,1,1,1);
 
     GtkWidget *tx_ant_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(tx_ant_label), "<b>Transmit</b>");
-    //gtk_widget_override_font(tx_ant_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(tx_ant_label);
     gtk_grid_attach(GTK_GRID(grid),tx_ant_label,7,1,1,1);
 
     GtkWidget *tx1_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(tx1_label), "<b>1</b>");
-    //gtk_widget_override_font(tx1_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(tx1_label);
     gtk_grid_attach(GTK_GRID(grid),tx1_label,8,1,1,1);
 
     GtkWidget *tx2_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(tx2_label), "<b>2</b>");
-    //gtk_widget_override_font(tx2_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(tx2_label);
     gtk_grid_attach(GTK_GRID(grid),tx2_label,9,1,1,1);
 
     GtkWidget *tx3_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(tx3_label), "<b>3</b>");
-    //gtk_widget_override_font(tx3_label, pango_font_description_from_string("Arial 18"));
     gtk_widget_show(tx3_label);
     gtk_grid_attach(GTK_GRID(grid),tx3_label,10,1,1,1);
 

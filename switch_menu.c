@@ -45,7 +45,7 @@ static GtkWidget *dialog=NULL;
 static SWITCH *temp_switches;
 
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -92,7 +92,7 @@ void switch_menu(GtkWidget *parent) {
   GtkWidget *notebook;
   GtkWidget *grid;
   GtkWidget *widget;
-  gint function=0;
+  gint lfunction=0;
 
 
   dialog=gtk_dialog_new_with_buttons("piHPSDR - Switch Actions",GTK_WINDOW(parent),GTK_DIALOG_DESTROY_WITH_PARENT,"_OK",GTK_RESPONSE_ACCEPT,NULL);
@@ -100,7 +100,7 @@ void switch_menu(GtkWidget *parent) {
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-  function=0;
+  lfunction=0;
 
   if(controller==NO_CONTROLLER || controller==CONTROLLER1) {
     notebook=gtk_notebook_new();
@@ -123,11 +123,11 @@ next_function_set:
   switch(controller) {
     case NO_CONTROLLER:
       max_switches=8;
-      temp_switches=switches_controller1[function];
+      temp_switches=switches_controller1[lfunction];
       break;
     case CONTROLLER1:
       max_switches=8;
-      temp_switches=switches_controller1[function];
+      temp_switches=switches_controller1[lfunction];
       break;
     case CONTROLLER2_V1:
       max_switches=16;
@@ -246,10 +246,10 @@ g_print("%s: %d\n",__FUNCTION__,i);
       col++;
     }
 
-    g_sprintf(label,"Function %d",function);
+    g_sprintf(label,"Function %d",lfunction);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new(label));
-    function++;
-    if(function<MAX_FUNCTIONS) {
+    lfunction++;
+    if(lfunction<MAX_FUNCTIONS) {
       goto next_function_set;
     }
     gtk_container_add(GTK_CONTAINER(content),notebook);

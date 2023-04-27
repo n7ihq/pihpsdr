@@ -61,7 +61,7 @@ static GtkWidget *rsat_b;
 static GtkWidget *duplex_b;
 static GtkWidget *mute_rx_b;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -229,7 +229,7 @@ static void split_cb(GtkWidget *widget, gpointer data) {
 //
 // call-able from outside, e.g. toolbar or MIDI, through g_idle_add
 //
-void setDuplex(void) {
+void setDuplex() {
   if(duplex) {
     gtk_container_remove(GTK_CONTAINER(fixed),transmitter->panel);
     reconfigure_transmitter(transmitter,display_width/4,display_height/2);
@@ -269,7 +269,7 @@ static void sat_cb(GtkWidget *widget, gpointer data) {
   g_idle_add(ext_vfo_update, NULL);
 }
 
-void load_filters(void) {
+void load_filters() {
   BAND *band;
   switch (filter_board) {
       case N2ADR:
@@ -438,7 +438,6 @@ void radio_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Radio");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -968,7 +967,6 @@ void radio_menu(GtkWidget *parent) {
         max=73.0;
       }
       GtkWidget *rf_gain_b=gtk_spin_button_new_with_range(0.0,max,1.0);
-      //gtk_spin_button_set_value(GTK_SPIN_BUTTON(rf_gain_b),active_receiver->rf_gain);
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(rf_gain_b),adc[active_receiver->id].gain);
       gtk_grid_attach(GTK_GRID(grid),rf_gain_b,col,row,1,1);
       g_signal_connect(rf_gain_b,"value_changed",G_CALLBACK(rf_gain_value_changed_cb),&adc[0]);
@@ -1001,7 +999,6 @@ void radio_menu(GtkWidget *parent) {
         gtk_widget_set_name (tx_gains[i], radio->info.soapy.tx_gain[i]);
         int value=soapy_protocol_get_tx_gain_element(transmitter,radio->info.soapy.tx_gain[i]);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_gains[i]),(double)value);
-        //gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_gains[i]),(double)dac[0].tx_gain[i]);
         gtk_grid_attach(GTK_GRID(grid),tx_gains[i],col,row,1,1);
         g_signal_connect(tx_gains[i],"value_changed",G_CALLBACK(tx_gain_value_changed_cb),&dac[0]);
 

@@ -1,32 +1,42 @@
 #include <gtk/gtk.h>
 #include "css.h"
 
+//
+// This has to made "complete" (e.g. specifying BOTH
+// the background and the text color) to work independent
+// of the chosen GTK theme.
+// Unless we want a special effect, simply inherent the default colours
+//
 char *css=
-"  @define-color TOGGLE_ON rgb(100%,0%,0%);\n"
-"  @define-color TOGGLE_OFF rgb(70%,70%,70%);\n"
+"  @define-color TOGGLE_ON  rgb(100%,0%,0%);\n"
+"  @define-color TOGGLE_OFF rgb(80%,80%,80%);\n"
+"  @define-color COLOR_ON   rgb(100%,100%,100%);\n"
+"  @define-color COLOR_OFF  rgb(10%,10%,10%);\n"
 "  #small_button {\n"
-"    padding: 0;\n"
+"    padding: 1;\n"
 "    font-family: Sans;\n"
 "    font-size: 15px;\n"
 "    }\n"
-"  #small_toggle_button {\n"
-"    padding: 0;\n"
+"  #small_toggle_button: {\n"
+"    padding: 1;\n"
 "    font-family: Sans;\n"
 "    font-size: 15px;\n"
 "    background-image: none;\n"
-"    background-color: @TOGGLE_OFF;\n"
+"    background-color: currentColor;\n"   // inherited from GTK theme
+"    color: currentColor;\n"              // inherited from GTK theme
 "    }\n"
 "  #small_toggle_button:checked {\n"
-"    padding: 0;\n"
+"    padding: 1;\n"
 "    font-family: Sans;\n"
 "    font-size: 15px;\n"
-"    background-image: none;\n"
+"    background-image: none;\n"           // if checked, white text on red background
 "    background-color: @TOGGLE_ON;\n"
+"    color: @COLOR_ON;\n"
 "    }\n"
 
 ;
 
-void load_css(void) {
+void load_css() {
   GtkCssProvider *provider;
   GdkDisplay *display;
   GdkScreen *screen;

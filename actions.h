@@ -46,6 +46,10 @@ enum ACTION {
   CW_LEFT,
   CW_RIGHT,
   CW_SPEED,
+  CW_KEYER_KEYDOWN,
+  CW_KEYER_SPEED,
+  CW_KEYER_SIDETONE,
+  CW_KEYER_PTT,
   DIV,
   DIV_GAIN,
   DIV_GAIN_COARSE,
@@ -57,6 +61,9 @@ enum ACTION {
   DUPLEX,
   FILTER_MINUS,
   FILTER_PLUS,
+  FILTER_CUT_LOW,
+  FILTER_CUT_HIGH,
+  FILTER_CUT_DEFAULT,
   FUNCTION,
   IF_SHIFT,
   IF_SHIFT_RX1,
@@ -145,13 +152,6 @@ enum ACTION {
   ZOOM,
   ZOOM_MINUS,
   ZOOM_PLUS,
-//
-// Support for external CW keyers
-//
-  CW_KEYER_KEYDOWN,
-  CW_KEYER_SPEED,
-  CW_KEYER_SIDETONE,
-  CW_KEYER_PTT,
   ACTIONS
 };
 
@@ -167,7 +167,7 @@ enum ACTIONtype {
 typedef struct _action_table {
   enum ACTION action;
   const char *str;		// desciptive text
-  const char *button_str;	// short button text
+  const char *button_str;	// short button text, also used in props files
   enum ACTIONtype type;
 } ACTION_TABLE;
 
@@ -188,4 +188,6 @@ extern ACTION_TABLE ActionTable[ACTIONS+1];
 
 extern int process_action(void *data);
 extern void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val);
+extern void Action2String(const int id, char *str);
+extern int  String2Action(const char *str);
 

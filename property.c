@@ -28,7 +28,7 @@ PROPERTY* properties=NULL;
 
 static double version=0.0;
 
-void clearProperties(void) {
+void clearProperties() {
 g_print("clearProperties\n");
   if(properties!=NULL) {
     // free all the properties

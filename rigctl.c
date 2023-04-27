@@ -26,7 +26,6 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
-//#include <semaphore.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -53,9 +52,13 @@
 #include "rigctl_menu.h"
 #include "noise_menu.h"
 #include "new_protocol.h"
+#include "old_protocol.h"
 #ifdef LOCALCW
 #include "iambic.h"              // declare keyer_update()
 #endif
+#include "actions.h"
+#include "new_menu.h"
+
 #include <math.h>
 
 #define NEW_PARSER
@@ -74,11 +77,11 @@ int rigctl_enable=0;
 // max number of bytes we can get at once
 #define MAXDATASIZE 2000
 
+gboolean rigctl_debug=FALSE;
+
 int parse_cmd (void *data);
 int connect_cnt = 0;
 
-int rigctlGetFilterLow(void);
-int rigctlGetFilterHigh(void);
 int new_level;
 int active_transmitter = 0;
 int rigctl_busy = 0;  // Used to tell rigctl_menu that launch has already occured
@@ -101,9 +104,6 @@ static GThread *rigctl_server_thread_id = NULL;
 static GThread *rigctl_cw_thread_id = NULL;
 static int server_running;
 
-static GThread *serial_server_thread_id = NULL;
-static gboolean serial_running=FALSE;
-
 static int server_socket=-1;
 static int server_address_length;
 static struct sockaddr_in server_address;
@@ -117,6 +117,7 @@ typedef struct _client {
                // true serial line
   int busy;    // only needed for serial clients over FIFOs
   int done;    // only needed for serial clients over FIFOs
+  int running; // set this to zero to terminate client
   socklen_t address_length;
   struct sockaddr_in address;
   GThread *thread_id;
@@ -127,12 +128,13 @@ typedef struct _command {
   char *command;
 } COMMAND;
 
-static CLIENT client[MAX_CLIENTS];
-static CLIENT serial_client;       // serial lines must pass a valid CLIENT to parse_cmd
+static CLIENT client[MAX_CLIENTS];          // TCP clients  
+static CLIENT serial_client[MAX_SERIAL];   // serial clienta
+SERIALPORT SerialPorts[MAX_SERIAL];
 
 static gpointer rigctl_client (gpointer data);
 
-void close_rigctl_ports(void) {
+void close_rigctl_ports() {
   int i;
   struct linger linger = { 0 };
   linger.l_onoff = 1;
@@ -141,6 +143,7 @@ void close_rigctl_ports(void) {
   g_print("close_rigctl_ports: server_socket=%d\n",server_socket);
   server_running=0;
   for(i=0;i<MAX_CLIENTS;i++) {
+      client[i].running=0;
       if(client[i].fd!=-1) {
         g_print("setting SO_LINGER to 0 for client_socket: %d\n",client[i].fd);
         if(setsockopt(client[i].fd,SOL_SOCKET,SO_LINGER,(const char *)&linger,sizeof(linger))==-1) {
@@ -149,6 +152,10 @@ void close_rigctl_ports(void) {
         g_print("closing client socket: %d\n",client[i].fd);
         close(client[i].fd);
         client[i].fd=-1;
+      }
+      if (client[i].thread_id) {
+        g_thread_join(client[i].thread_id);
+        client[i].thread_id=NULL;
       }
   }
 
@@ -186,7 +193,7 @@ static int dashsamples;
 // problem, and without too much "busy waiting". We just take a nap until 10 msec
 // before we have to act, and then wait several times for 1 msec until we can shoot.
 //
-void send_dash(void) {
+void send_dash() {
   int TimeToGo;
   for(;;) {
     TimeToGo=cw_key_up+cw_key_down;
@@ -204,7 +211,7 @@ void send_dash(void) {
   cw_key_up   = dotsamples;
 }
 
-void send_dot(void) {
+void send_dot() {
   int TimeToGo;
   for(;;) {
     TimeToGo=cw_key_up+cw_key_down;
@@ -490,12 +497,12 @@ static gpointer rigctl_cw_thread(gpointer data)
   // This very rarely happens. But we should shut down the
   // local CW system gracefully, in case we were in the mid
   // of a transmission
-  rigctl_cw_thread_id = NULL;
   cw_busy=0;
   if (CAT_cw_is_active) {
     CAT_cw_is_active=0;
     g_idle_add(ext_mox_update ,GINT_TO_POINTER(0));
   }
+  rigctl_cw_thread_id = NULL;
   return NULL;
 }
 
@@ -562,7 +569,6 @@ static gpointer rigctl_server(gpointer data) {
     close(server_socket);
     return NULL;
   }
-  server_running=1;
 
   // must start the thread here in order NOT to inherit a lock
   if (!rigctl_cw_thread_id) rigctl_cw_thread_id = g_thread_new("RIGCTL cw", rigctl_cw_thread, NULL);
@@ -613,6 +619,7 @@ static gpointer rigctl_server(gpointer data) {
     //
     // Spawn off a thread for handling this new connection
     //
+    client[spare].running=1;
     client[spare].thread_id = g_thread_new("rigctl client", rigctl_client, (gpointer)&client[spare]);
     // note that g_thread_new() never returns from a failure.
   }
@@ -640,7 +647,7 @@ static gpointer rigctl_client (gpointer data) {
   char *command=g_new(char,MAXDATASIZE);
   int command_index=0;
 
-   while(server_running && (numbytes=recv(client->fd , cmd_input , MAXDATASIZE-2 , 0)) > 0 ) {
+   while(client->running && (numbytes=recv(client->fd , cmd_input , MAXDATASIZE-2 , 0)) > 0 ) {
        for(i=0;i<numbytes;i++) {
          command[command_index]=cmd_input[i];
          command_index++;
@@ -684,13 +691,13 @@ static gpointer rigctl_client (gpointer data) {
 // 
 // FT command intepret vfo_sm state - used by IF command
 //
-int ft_read(void) {
+int ft_read() {
    return(active_transmitter);
 }
 // 
 // Determines RIT state - used by IF command
 //
-int rit_on (void) {
+int rit_on () {
   if(receivers == 1) { // Worry about 1 versus 2 radios
       if(vfo[VFO_A].rit != 0) {
          return 1;
@@ -2555,6 +2562,350 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
 	case 'B': //ZZZB
           implemented=FALSE;
           break;
+       case 'D': //ZZZD
+         // move VFO down
+         if(command[6]==';') {
+           static int steps=0;
+           steps+=atoi(&command[4]);
+           if(steps >= vfo_encoder_divisor) {
+             vfo_id_step((active_receiver->id==0)?VFO_A:VFO_B,-steps/vfo_encoder_divisor);
+             steps=0;
+           }
+         }
+         break;
+// Encoders
+case 'E': //ZZZE
+         if(command[7]==';') {
+           int v,p,d=command[6]-0x30;
+           if((command[4]-0x30)<2) {
+             p=(command[4]-0x2b)*10;
+             v=0;
+           } else {
+             p=(command[4]-0x30)*10;
+             v=1;
+           }
+           p+=(command[5]-0x30);
+           if (!locked) switch(p) {
+             case 51: // RX1 AF Gain
+               schedule_action(AF_GAIN_RX1, RELATIVE, (v==0)?1:-1);
+               break;
+             case 52: // RX1 RF Gain
+               schedule_action(AGC_GAIN_RX1, RELATIVE, (v==0)?1:-1);
+               break;
+             case 53: // RX2 AF Gain
+               schedule_action(AF_GAIN_RX2, RELATIVE, (v==0)?1:-1);
+               break;
+             case 54: // RX2 RF Gain
+               schedule_action(AGC_GAIN_RX2, RELATIVE, (v==0)?1:-1);
+               break;
+             case 55: // Filter Cut High
+               schedule_action(FILTER_CUT_HIGH, RELATIVE, (v==0)?-1:1);
+               break;
+             case 56: // Filter Cut Low
+               schedule_action(FILTER_CUT_LOW, RELATIVE, (v==0)?-1:1);
+               break;
+             case 57: // Diversity Gain
+               if(diversity_enabled) schedule_action(DIV_GAIN, RELATIVE, (v==0)?1:-1);
+               break;
+             case 58: // Diversity Phase
+               if(diversity_enabled) schedule_action(DIV_PHASE, RELATIVE, (v==0)?1:-1);
+               break;
+             case 59: // RIT
+               if(vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled) {
+                 vfo_rit(active_receiver->id,(v==0)?1:-1);
+                 if(!vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled) {
+                   sprintf(reply,"ZZZI080;");
+                   send_resp(client->fd,reply);
+                 }
+               }
+               break;
+             case 60: // XIT
+               if(transmitter->xit_enabled) {
+                 transmitter->xit+=(v==0)?rit_increment:-rit_increment;
+                 transmitter->xit_enabled=(transmitter->xit!=0);
+                 if(protocol==NEW_PROTOCOL) {
+                   schedule_high_priority();
+                 }
+                 g_idle_add(ext_vfo_update,NULL);
+
+                 if(!transmitter->xit_enabled) {
+                   sprintf(reply,"ZZZI090;");
+                   send_resp(client->fd,reply);
+                 }
+               }
+               break;
+             case 61: // Mic Gain
+               schedule_action(MIC_GAIN, RELATIVE, (v==0)?1:-1);
+               break;
+             case 62: // Drive
+               schedule_action(DRIVE, RELATIVE, (v==0)?1:-1);
+               break;
+           }
+         }
+         break;
+       // Push Buttons
+      case 'P': //ZZZP
+         if(command[7]==';') {
+           static int shift=0, startstop=1, longpress=0;
+           int v=(command[6]-0x30);
+           int p=(command[4]-0x30)*10;
+           p+=command[5]-0x30;
+           switch(p) {
+             case 21: // Function Switches
+             case 22:
+             case 23:
+             case 24:
+             case 25:
+             case 26:
+             case 27:
+             case 28:
+               schedule_action(toolbar_switches[p-21].switch_function, (v==0)?PRESSED:RELEASED, 0);
+               sprintf(reply,"ZZZI11%d;", locked);
+               send_resp(client->fd,reply);
+               break;
+             case 46: // SDR On
+               if (v==0) {
+                 if (longpress) {
+                   longpress=0;
+                 } else {
+                   startstop^=1;
+                   switch (protocol) {
+                     case ORIGINAL_PROTOCOL:
+                       startstop ? old_protocol_run() : old_protocol_stop();
+                       break;
+                     case NEW_PROTOCOL:
+                       startstop ? new_protocol_menu_start() : new_protocol_menu_stop();
+                       break;
+#ifdef SOAPYSDR
+                     case SOAPYSDR_PROTOCOL:
+                       // dunno how to do this for soapy
+                       break;
+#endif
+                     default:
+                       // should not occur
+                       break;
+                   }
+                 }
+               } else if (v==2) {
+                 new_menu();
+                 longpress=1;
+               }
+               break;
+           }
+           if (!locked) switch(p) {
+             case 1: // Rx1 AF Mute
+               if(v==0) receiver[0]->mute_radio^=1;
+               break;
+             case 3: // Rx2 AF Mute
+               if(v==0) receiver[1]->mute_radio^=1;
+               break;
+             case 5: // Filter Cut Defaults
+               schedule_action(FILTER_CUT_DEFAULT, (v==0)?PRESSED:RELEASED, 0);
+               break;
+             case 7: // Diversity Enable
+               if(RECEIVERS==2 && n_adc > 1) {
+                 schedule_action(DIV, (v==0)?PRESSED:RELEASED, 0);
+                 if(v==0) {
+                   sprintf(reply,"ZZZI05%d;", diversity_enabled^1);
+                   send_resp(client->fd,reply);
+                 }
+               }
+               break;
+             case 9: // RIT/XIT Clear
+               schedule_action(RIT_CLEAR, (v==0)?PRESSED:RELEASED, 0);
+               schedule_action(XIT_CLEAR, (v==0)?PRESSED:RELEASED, 0);
+               sprintf(reply,"ZZZI080;");
+               send_resp(client->fd,reply);
+               sprintf(reply,"ZZZI090;");
+               send_resp(client->fd,reply);
+               break;
+             case 29: // Shift
+               if(v==0) {
+                 shift^=1;
+                 sprintf(reply,"ZZZI06%d;", shift);
+                 send_resp(client->fd,reply);
+               }
+               break;
+             case 30: // Band Buttons
+             case 31:
+             case 32:
+             case 33:
+             case 34:
+             case 35:
+             case 36:
+             case 37:
+             case 38:
+             case 39:
+             case 40:
+             case 41:
+               if (shift && v==0) {
+                 int band=band20;
+                 if (p==30) band=band160;
+                 else if (p==31) band=band80;
+                 else if (p==32) band=band60;
+                 else if (p==33) band=band40;
+                 else if (p==34) band=band30;
+                 else if (p==35) band=band20;
+                 else if (p==36) band=band17;
+                 else if (p==37) band=band15;
+                 else if (p==38) band=band12;
+                 else if (p==39) band=band10;
+                 else if (p==40) band=band6;
+                 else if (p==41) band=bandGen;
+                 vfo_band_changed(active_receiver->id?VFO_B:VFO_A,band);
+                 shift=0;
+                 sprintf(reply,"ZZZI060;");
+                 send_resp(client->fd,reply);
+               } else {
+                 if (p==30 && v==0) // MODE DATA
+                   start_tx();
+                 else if (p==31) // MODE+
+                   schedule_action(MODE_PLUS, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==32) // FILTER+
+                   schedule_action(FILTER_PLUS, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==33 && v==0) // RX2
+                   radio_change_receivers(receivers==1?2:1);
+                 else if (p==34) // MODE-
+                   schedule_action(MODE_MINUS, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==35) // FILTER-
+                   schedule_action(FILTER_MINUS, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==36) // A>B
+                   schedule_action(A_TO_B, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==37) // B>A
+                   schedule_action(B_TO_A, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==38) // SPLIT
+                   schedule_action(SPLIT, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==39) // U1 (use A_SWAP_B)
+                   schedule_action(A_SWAP_B, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==40) // U2 (use NB)
+                   schedule_action(NB, (v==0)?PRESSED:RELEASED, 0);
+                 else if (p==41) // U3 (use NR)
+                   schedule_action(NR, (v==0)?PRESSED:RELEASED, 0);
+               }
+               break;
+             case 42: // RIT/XIT
+               if (v==0) {
+                 if(!vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled && !transmitter->xit_enabled) {
+                   vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled=1;
+                   sprintf(reply,"ZZZI081;");
+                   send_resp(client->fd,reply);
+                 }
+                 else if(vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled && !transmitter->xit_enabled) {
+                   vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled=0;
+                   transmitter->xit_enabled=1;
+                   sprintf(reply,"ZZZI080;");
+                   send_resp(client->fd,reply);
+                   sprintf(reply,"ZZZI091;");
+                   send_resp(client->fd,reply);
+                 }
+                 else {
+                   vfo[(active_receiver->id==0)?VFO_A:VFO_B].rit_enabled=0;
+                   transmitter->xit_enabled=0;
+                   sprintf(reply,"ZZZI080;");
+                   send_resp(client->fd,reply);
+                   sprintf(reply,"ZZZI090;");
+                   send_resp(client->fd,reply);
+                 }
+                 g_idle_add(ext_vfo_update,NULL);
+               }
+               break;
+             case 43: // switch receivers
+               if(receivers==2) {
+                 if(v==0) {
+                   if(active_receiver->id==0) {
+                     active_receiver=receiver[1];
+                     sprintf(reply,"ZZZI07%d;", vfo[VFO_B].ctun);
+                     send_resp(client->fd,reply);
+                     sprintf(reply,"ZZZI08%d;", vfo[VFO_B].rit_enabled);
+                     send_resp(client->fd,reply);
+                     sprintf(reply,"ZZZI100;");
+                   } else {
+                     active_receiver=receiver[0];
+                     sprintf(reply,"ZZZI07%d;", vfo[VFO_A].ctun);
+                     send_resp(client->fd,reply);
+                     sprintf(reply,"ZZZI08%d;", vfo[VFO_A].rit_enabled);
+                     send_resp(client->fd,reply);
+                     sprintf(reply,"ZZZI101;");
+                   }
+                   send_resp(client->fd,reply);
+                   g_idle_add(ext_vfo_update,NULL);
+                 }
+               }
+               break;
+             case 45: // ctune
+               schedule_action(CTUN, (v==0)?PRESSED:RELEASED, 0);
+               if(v==0) {
+                 sprintf(reply,"ZZZI07%d;", vfo[active_receiver->id].ctun^1);
+                 send_resp(client->fd,reply);
+                 g_idle_add(ext_vfo_update,NULL);
+               }
+               break;
+             case 47: // MOX
+               if(v==0) {
+                 sprintf(reply,"ZZZI01%d;", mox);
+                 send_resp(client->fd,reply);
+               } else {
+                 mox_update(mox^1);
+               }
+               break;
+             case 48: // TUNE
+               if(v==0) {
+                 sprintf(reply,"ZZZI03%d;", tune);
+                 send_resp(client->fd,reply);
+               } else {
+                 tune_update(tune^1);
+               }
+               break;
+             case 50: // TWO TONE
+               schedule_action(TWO_TONE, (v==0)?PRESSED:RELEASED, 0);
+               break;
+             case 49: // PS ON
+               if (v==0) {
+                 if (longpress) {
+                   longpress=0;
+                 } else {
+                   if(can_transmit) {
+                     tx_set_ps(transmitter,transmitter->puresignal^1);
+                     sprintf(reply,"ZZZI04%d;", transmitter->puresignal);
+                     send_resp(client->fd,reply);
+                   }
+                 }
+               }
+               else if (v==2) {
+#ifdef PURESIGNAL
+                 start_ps();
+#endif
+                 longpress=1;
+               }
+               break;
+           }
+           if (p==44) { // VFO lock
+             if(v==0) {
+               locked ^= 1;
+               g_idle_add(ext_vfo_update,NULL);
+               sprintf(reply,"ZZZI11%d;", locked);
+               send_resp(client->fd,reply);
+             }
+           }
+         }
+         break;
+        case 'S': //ZZZS
+         if(command[11]==';') {
+           g_print("rigctl: Andromeda FP Version: h/w:%c%c s/w:%c%c%c\n",
+                  command[6],command[7],command[8],command[9],command[10]);
+         }
+         break;
+       case 'U': //ZZZU
+         // move VFO up
+         if(command[6]==';') {
+           static int steps=0;
+           steps+=atoi(&command[4]);
+           if(steps >= vfo_encoder_divisor) {
+             vfo_id_step((active_receiver->id==0)?VFO_A:VFO_B,steps/vfo_encoder_divisor);
+             steps=0;
+           }
+         }
+         break;
 	case 'Z': //ZZZZ
           implemented=FALSE;
           break;
@@ -3919,19 +4270,19 @@ static gpointer serial_server(gpointer data) {
      int i;
      g_mutex_lock(&mutex_a->m);
      cat_control++;
-     if(rigctl_debug) g_print("RIGCTL: SER INC cat_contro=%d\n",cat_control);
+     if(rigctl_debug) g_print("RIGCTL: SER INC cat_control=%d\n",cat_control);
      g_mutex_unlock(&mutex_a->m);
      g_idle_add(ext_vfo_update,NULL);
-     serial_running=TRUE;
-     while(serial_running) {
+     client->running=TRUE;
+     while(client->running) {
        //
        // If the "serial line" is a FIFO, we must not drain it
-       // by reading our own responses (it must go to the other
+       // by reading our own responses (they must go to the other
        // side). Therefore, wait until 50msec after the last
        // CAT command of this client has been processed.
        // If for some reason this does not happen, resume after
        // waiting for about 500 msec.
-       // Check serial_running after the "pause" and after returning
+       // Check client->running after the "pause" and after returning
        // from "read".
        //
        while (client->fifo && client->busy > 0) {
@@ -3946,16 +4297,20 @@ static gpointer serial_server(gpointer data) {
        }
        client->busy=0;
        client->done=0;
-       if (!serial_running) break;
+       if (!client->running) break;
+       //
+       // ATTN: if the "serial line" is a FIFO, the "NONBLOCK" flag
+       //       has not been set so we might get stuck in the read()
+       //
        numbytes = read (client->fd, cmd_input, sizeof cmd_input);
-       if (!serial_running || numbytes < 0) break;
+       if (!client->running || numbytes < 0) break;
        if(numbytes>0) {
          for(i=0;i<numbytes;i++) {
            command[command_index]=cmd_input[i];
            command_index++;
            if(cmd_input[i]==';') { 
              command[command_index]='\0';
-             if(rigctl_debug) g_print("RIGCTL: command=%s\n",command);
+             if(rigctl_debug) g_print("RIGCTL: serial command=%s\n",command);
              COMMAND *info=g_new(COMMAND,1);
              info->client=client;
              info->command=command;
@@ -3978,9 +4333,95 @@ static gpointer serial_server(gpointer data) {
      return NULL;
 }
 
-int launch_serial (void) {
+#ifdef ANDROMEDA
+static int last_mox;
+static int last_tune;
+static int last_ps;
+static int last_ctun;
+static int last_lock;
+static int last_div;
+static int last_rit;
+static int last_xit;
+static int last_vfoa;
+
+gboolean andromeda_init(gpointer data) {
+  //
+  // This function is put into the GTK idle queue
+  // when an "andromeda" serial line is opened
+  //
+  CLIENT *client = (CLIENT *)data;
+  if (!client->running) return FALSE;
+
+  // This triggers new results to be reported;
+  last_mox = last_tune = last_ctun = last_lock = last_div = last_rit = last_xit = last_vfoa = -999;
+
+  // This triggers a reply (from Andromeda) to report its FP version
+  send_resp(client->fd,"ZZZS;");
+  return TRUE;
+}
+
+gboolean andromeda_handler(gpointer data) {
+  //
+  // This function is repeatedly called until it returns FALSE
+  //
+  //
+  CLIENT *client = (CLIENT *)data;
+  char reply[64];
+
+  if (!client->running) return FALSE;
+
+  if(last_mox!=mox) {
+    sprintf(reply,"ZZZI01%d;", mox);
+    send_resp(client->fd,reply);
+    last_mox=mox;
+  }
+  if(last_tune!=tune) {
+    sprintf(reply,"ZZZI03%d;", tune);
+    send_resp(client->fd,reply);
+    last_tune=tune;
+  }
+  if(last_ps!=transmitter->puresignal) {
+    sprintf(reply,"ZZZI04%d;", transmitter->puresignal);
+    send_resp(client->fd,reply);
+    last_ps=transmitter->puresignal;
+  }
+  if(last_ctun!=vfo[active_receiver->id].ctun) {
+    sprintf(reply,"ZZZI07%d;", vfo[active_receiver->id].ctun);
+    send_resp(client->fd,reply);
+    last_ctun=vfo[active_receiver->id].ctun;
+  }
+  if(last_div!=diversity_enabled) {
+    sprintf(reply,"ZZZI05%d;", diversity_enabled);
+    send_resp(client->fd,reply);
+    last_div=diversity_enabled;
+  }
+  if(last_rit!=vfo[active_receiver->id].rit_enabled) {
+    sprintf(reply,"ZZZI08%d;", vfo[active_receiver->id].rit_enabled);
+    send_resp(client->fd,reply);
+    last_rit=vfo[active_receiver->id].rit_enabled;
+  }
+  if(last_xit!=transmitter->xit_enabled) {
+    sprintf(reply,"ZZZI09%d;", transmitter->xit_enabled);
+    send_resp(client->fd,reply);
+    last_xit=transmitter->xit_enabled;
+  }
+  if(last_vfoa!=active_receiver->id) {
+    sprintf(reply,"ZZZI10%d;", active_receiver->id^1);
+    send_resp(client->fd,reply);
+    last_vfoa=active_receiver->id;
+  }
+  if(last_lock!=locked) {
+    sprintf(reply,"ZZZI11%d;", locked);
+    send_resp(client->fd,reply);
+    last_lock=locked;
+  }
+  return TRUE;
+}
+#endif
+
+int launch_serial (int id) {
      int fd;
-     g_print("RIGCTL: Launch Serial port %s\n",ser_port);
+     g_print("RIGCTL: Launch Serial port %s\n",SerialPorts[id].port);
 
      if(mutex_busy==NULL) {
        mutex_busy = g_new(GT_MUTEX,1);
@@ -3988,20 +4429,21 @@ int launch_serial (void) {
        g_mutex_init(&mutex_busy->m);
      }
      
-     fd = open (ser_port, O_RDWR | O_NOCTTY | O_SYNC);   
+     fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC);   
      if (fd < 0)
      {
-        g_print("RIGCTL: Error %d opening %s: %s\n", errno, ser_port, strerror (errno));
+        g_print("RIGCTL: Error %d opening %s: %s\n", errno, SerialPorts[id].port, strerror (errno));
         return 0 ;
      }
 
      g_print("serial port fd=%d\n",fd);
 
-     serial_client.fd=fd;
-     serial_client.busy=0;
-     serial_client.fifo=0;
+     serial_client[id].fd=fd;
+     serial_client[id].busy=0;
+     serial_client[id].fifo=0;
 
-     if (set_interface_attribs (fd, serial_baud_rate, serial_parity) == 0) {
+     // hard-wired parity = NONE
+     if (set_interface_attribs (fd, SerialPorts[id].baud, 0) == 0) {
        set_blocking (fd, 0);                   // set no blocking
      } else {
        //
@@ -4009,39 +4451,52 @@ int launch_serial (void) {
        // than a serial line.
        //
        g_print("serial port is probably a FIFO\n");
-       serial_client.fifo=1;
+       serial_client[id].fifo=1;
      }
 
-     serial_server_thread_id = g_thread_new( "Serial server", serial_server, &serial_client);
+     serial_client[id].running=1;
+     serial_client[id].thread_id = g_thread_new( "Serial server", serial_server, &serial_client[id]);
+#ifdef ANDROMEDA
+     //
+     // If this is a serial line to an ANDROMEDA controller, initialize it and start a periodic GTK task
+     //
+     if (SerialPorts[id].andromeda) {
+       g_idle_add(andromeda_init, &serial_client[id]);           // executed once
+       g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
+     }
+#endif
      return 1;
 }
 
 // Serial Port close
-void disable_serial (void) {
-     g_print("RIGCTL: Disable Serial port %s\n",ser_port);
-     serial_running=FALSE;
-     if (serial_client.fifo) {
+void disable_serial (int id) {
+     g_print("RIGCTL: Disable Serial port %s\n",SerialPorts[id].port);
+     serial_client[id].running=FALSE;
+     if (serial_client[id].fifo) {
        //
        // If the "serial port" is a fifo then the serial thread
        // may hang in a blocking read().
        // Fortunately, we can set the thread free
        // by sending something to the FIFO
        //
-       write (serial_client.fd, "ID;", 3);
+       write (serial_client[id].fd, "ID;", 3);
      }
      // wait for the serial server actually terminating
-     if (serial_server_thread_id) {
-       g_thread_join(serial_server_thread_id);
+     if (serial_client[id].thread_id) {
+       g_thread_join(serial_client[id].thread_id);
+       serial_client[id].thread_id=NULL;
      }
-     serial_server_thread_id=NULL;
-     close(serial_client.fd);
+     if(serial_client[id].fd >= 0) {
+       close(serial_client[id].fd);
+       serial_client[id].fd=-1;
+     }
 }
 
 //
 // 2-25-17 - K5JAE - create each thread with the pointer to the port number  
 //                   (Port numbers now const ints instead of defines..) 
 //
-void launch_rigctl (void) {
+void launch_rigctl () {
    
    g_print( "LAUNCHING RIGCTL!!\n");
 
@@ -4050,10 +4505,6 @@ void launch_rigctl (void) {
    mutex_a = g_new(GT_MUTEX,1);  // memory leak
    g_mutex_init(&mutex_a->m);
 
-   // This routine encapsulates the thread call
+   server_running=1;
    rigctl_server_thread_id = g_thread_new( "rigctl server", rigctl_server, GINT_TO_POINTER(rigctl_port_base));
-   if( ! rigctl_server_thread_id )
-   {
-     g_print("g_thread_new failed on rigctl_server\n");
-   }
 }

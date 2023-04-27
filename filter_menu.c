@@ -38,14 +38,58 @@ static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_filter;
+static GtkWidget *var1_spin_low;
+static GtkWidget *var1_spin_high;
+static GtkWidget *var2_spin_low;
+static GtkWidget *var2_spin_high;
 
-static void cleanup(void) {
+
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
     sub_menu=NULL;
     active_menu=NO_MENU;
   }
+}
+
+static gboolean default_cb (GtkWidget *widget, gpointer data) {
+  int mode=vfo[active_receiver->id].mode;
+  int f=GPOINTER_TO_INT(data);
+  FILTER *filter=&(filters[mode][f]);
+  int low, high;
+
+  GtkWidget *spinlow, *spinhigh;
+  
+  switch(f) {
+    case filterVar1:
+      spinlow=var1_spin_low;
+      spinhigh=var1_spin_high;
+      low =var1_default_low[mode];
+      high=var1_default_high[mode];
+      break;
+    case filterVar2:
+      spinlow=var2_spin_low;
+      spinhigh=var2_spin_high;
+      low =var2_default_low[mode];
+      high=var2_default_high[mode];
+      break;
+    default:
+      g_print("%s: illegal data = %p (%d)\n",__FUNCTION__,data, f);
+      return FALSE;
+      break;
+  }
+
+  //
+  // Determine value(s) for spin button(s)
+  //
+  if (mode == modeCWL || mode == modeCWU) {
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinlow),(double)(high-low));
+  } else {
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinlow),(double)(low));
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinhigh),(double)(high));
+  }
+  return FALSE;
 }
 
 static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -93,15 +137,16 @@ static void var_spin_low_cb (GtkWidget *widget, gpointer data) {
   FILTER *mode_filters=filters[vfo[id].mode];
   FILTER *filter=&mode_filters[f];
 
-  filter->low=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  int val=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   if(vfo[id].mode==modeCWL || vfo[id].mode==modeCWU) {
-    // Note a 250-Hz-wide CW filter has high=low=125
-    filter->low=filter->low/2;
-    filter->high=filter->low;
+    filter->low = -val/2;
+    filter->high=  val/2;
+  } else {
+    filter->low = val;
   }
+  g_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
   if(f==vfo[id].filter) {
     vfo_filter_changed(f);
-    //receiver_filter_changed(receiver[id]);
   }
 }
 
@@ -113,9 +158,9 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
   FILTER *filter=&mode_filters[f];
 
   filter->high=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  g_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
   if(f==vfo[id].filter) {
     vfo_filter_changed(f);
-    //receiver_filter_changed(receiver[id]);
   }
 }
 
@@ -126,7 +171,6 @@ void filter_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   sprintf(title,"piHPSDR - Filter (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -179,7 +223,7 @@ void filter_menu(GtkWidget *parent) {
       break;
 
     default:
-      for(i=0;i<FILTERS-2;i++) {
+      for(i=0;i<filterVar1;i++) {
         GtkWidget *b=gtk_button_new_with_label(band_filters[i].title);
         if(i==vfo[active_receiver->id].filter) {
           set_button_text_color(b,"orange");
@@ -193,6 +237,7 @@ void filter_menu(GtkWidget *parent) {
 
       // last 2 are var1 and var2
       int row=1+((i+4)/5);
+      int col=0;
       FILTER* band_filter=&band_filters[i];
       GtkWidget *b=gtk_button_new_with_label(band_filters[i].title);
       if(i==vfo[active_receiver->id].filter) {
@@ -201,29 +246,40 @@ void filter_menu(GtkWidget *parent) {
       } else {
         set_button_text_color(b,"default");
       }
-      gtk_grid_attach(GTK_GRID(grid),b,0,row,1,1);
+      gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
       g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
-
-      GtkWidget *var1_spin_low=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
+ 
+      col++;
       //
-      // in CW, filter_low is HALF of the filter width
+      // Filter width in CW, filter low in other modes. In CW, use smaller granularity
       //
       if(vfo[active_receiver->id].mode==modeCWL || vfo[active_receiver->id].mode==modeCWU) {
-        gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_low),(double)band_filter->low * 2.0);
+        var1_spin_low=gtk_spin_button_new_with_range(0,+8000.0,2.0);
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_low),(double)(band_filter->high - band_filter->low));
       } else {
+        var1_spin_low=gtk_spin_button_new_with_range(0,+8000.0,5.0);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_low),(double)band_filter->low);
       }
-      gtk_grid_attach(GTK_GRID(grid),var1_spin_low,1,row,1,1);
+      gtk_grid_attach(GTK_GRID(grid),var1_spin_low,col,row,1,1);
       g_signal_connect(var1_spin_low,"value-changed",G_CALLBACK(var_spin_low_cb),(gpointer)(long)i);
+      col++;
 
+      
       if(vfo[active_receiver->id].mode!=modeCWL && vfo[active_receiver->id].mode!=modeCWU) {
-        GtkWidget *var1_spin_high=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
+        var1_spin_high=gtk_spin_button_new_with_range(-8000.0,+8000.0,5.0);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_high),(double)band_filter->high);
-        gtk_grid_attach(GTK_GRID(grid),var1_spin_high,2,row,1,1);
+        gtk_grid_attach(GTK_GRID(grid),var1_spin_high,col,row,1,1);
         g_signal_connect(var1_spin_high,"value-changed",G_CALLBACK(var_spin_high_cb),(gpointer)(long)i);
+        col++;
       }
 
+      GtkWidget *var1_default_b=gtk_button_new_with_label("Default");
+      g_signal_connect (var1_default_b, "pressed", G_CALLBACK(default_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid),var1_default_b,col,row,1,1);
+
+
       row++;
+      col=0;
       i++;
       band_filter=&band_filters[i];
       b=gtk_button_new_with_label(band_filters[i].title);
@@ -233,27 +289,34 @@ void filter_menu(GtkWidget *parent) {
       } else {
         set_button_text_color(b,"default");
       }
-      gtk_grid_attach(GTK_GRID(grid),b,0,row,1,1);
+      gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
       g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
+      col++;
       
-      GtkWidget *var2_spin_low=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
+      var2_spin_low=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
       //
       // in CW, filter_low is HALF of the filter width
       //
       if(vfo[active_receiver->id].mode==modeCWL || vfo[active_receiver->id].mode==modeCWU) {
-        gtk_spin_button_set_value(GTK_SPIN_BUTTON(var2_spin_low),(double)band_filter->low * 2.0);
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(var2_spin_low),(double)(band_filter->high-band_filter->low));
       } else {
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var2_spin_low),(double)band_filter->low);
       }
-      gtk_grid_attach(GTK_GRID(grid),var2_spin_low,1,row,1,1);
+      gtk_grid_attach(GTK_GRID(grid),var2_spin_low,col,row,1,1);
       g_signal_connect(var2_spin_low,"value-changed",G_CALLBACK(var_spin_low_cb),(gpointer)(long)i);
+      col++;
 
       if(vfo[active_receiver->id].mode!=modeCWL && vfo[active_receiver->id].mode!=modeCWU) {
-        GtkWidget *var2_spin_high=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
+        var2_spin_high=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var2_spin_high),(double)band_filter->high);
         gtk_grid_attach(GTK_GRID(grid),var2_spin_high,2,row,1,1);
         g_signal_connect(var2_spin_high,"value-changed",G_CALLBACK(var_spin_high_cb),(gpointer)(long)i);
+        col++;
       }
+
+      GtkWidget *var2_default_b=gtk_button_new_with_label("Default");
+      g_signal_connect (var2_default_b, "pressed", G_CALLBACK(default_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid),var2_default_b,col,row,1,1);
 
       break;
   }

@@ -50,9 +50,6 @@
 #define LINE_THIN  0.5
 #define LINE_THICK 1.0
 
-//static float panadapter_max=-60.0;
-//static float panadapter_min=-160.0;
-
 static gfloat filter_left;
 static gfloat filter_right;
 static gfloat cw_frequency;
@@ -204,8 +201,6 @@ void rx_panadapter_update(RECEIVER *rx) {
 
   // filter
   cairo_set_source_rgba (cr, COLOUR_PAN_FILTER);
-  //filter_left =(double)display_width*0.5 +(((double)rx->filter_low+offset)/HzPerPixel);
-  //filter_right=(double)display_width*0.5 +(((double)rx->filter_high+offset)/HzPerPixel);
   filter_left =((double)rx->pixels*0.5)-(double)rx->pan +(((double)rx->filter_low+offset)/HzPerPixel);
   filter_right=((double)rx->pixels*0.5)-(double)rx->pan +(((double)rx->filter_high+offset)/HzPerPixel);
   cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);

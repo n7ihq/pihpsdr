@@ -44,7 +44,7 @@ static GtkWidget *high_scale;
 
 static gboolean tx_menu=TRUE;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -88,14 +88,14 @@ static gboolean rx_rb_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
   return FALSE;
 }
 
-void set_eq(void) {
+void set_eq() {
     SetTXAGrphEQ(transmitter->id, tx_equalizer);
     SetTXAEQRun(transmitter->id, enable_tx_equalizer);
     SetRXAGrphEQ(active_receiver->id, rx_equalizer);
     SetRXAEQRun(active_receiver->id, enable_rx_equalizer);
 }
 
-void update_eq(void) {
+void update_eq() {
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
      //
@@ -153,7 +153,6 @@ void equalizer_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Equalizer");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -162,7 +161,6 @@ void equalizer_menu(GtkWidget *parent) {
 
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),10);
   gtk_grid_set_row_homogeneous(GTK_GRID(grid),FALSE);
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),FALSE);
 

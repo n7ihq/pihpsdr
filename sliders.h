@@ -43,6 +43,8 @@ extern void set_af_gain(int rx,double value);
 extern void set_rf_gain(int rx,double value);
 extern void set_mic_gain(double value);
 extern void set_drive(double drive);
+extern void set_filter_cut_low(int rx, int value);
+extern void set_filter_cut_high(int rx, int value);
 //extern void set_tune(double tune);
 extern void set_attenuation_value(double attenuation);
 extern void set_filter_width(int rx,int width);

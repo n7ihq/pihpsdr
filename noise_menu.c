@@ -42,7 +42,7 @@ static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_filter;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -61,7 +61,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-void set_noise(void) {
+void set_noise() {
   SetEXTANBRun(active_receiver->id, active_receiver->nb);
   SetEXTNOBRun(active_receiver->id, active_receiver->nb2);
   SetRXAANRRun(active_receiver->id, active_receiver->nr);
@@ -71,7 +71,7 @@ void set_noise(void) {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void update_noise(void) {
+void update_noise() {
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
     send_noise(client_socket,active_receiver->id,active_receiver->nb,active_receiver->nb2,active_receiver->nr,active_receiver->nr2,active_receiver->anf,active_receiver->snb);
@@ -160,7 +160,6 @@ void noise_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   sprintf(title,"piHPSDR - Noise (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -213,7 +212,6 @@ void noise_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_snb=gtk_check_button_new_with_label("SNB");
-  //gtk_widget_override_font(b_snb, pango_font_description_from_string("Arial 16"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_snb), active_receiver->snb);
   gtk_widget_show(b_snb);
   gtk_grid_attach(GTK_GRID(grid),b_snb,col,row,1,1);

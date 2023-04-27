@@ -38,7 +38,7 @@ static GtkWidget *parent_window=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -79,7 +79,6 @@ void agc_menu(GtkWidget *parent) {
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
-  //gtk_window_set_decorated(GTK_WINDOW(dialog),FALSE);
   char title[64];
   sprintf(title,"piHPSDR - AGC (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -103,7 +102,6 @@ void agc_menu(GtkWidget *parent) {
   int col=0;
 
   GtkWidget *b_off=gtk_radio_button_new_with_label(NULL,"Off");
-  //gtk_widget_override_font(b_off, pango_font_description_from_string("Arial 16"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_off), active_receiver->agc==AGC_OFF);
   gtk_widget_show(b_off);
   gtk_grid_attach(GTK_GRID(grid),b_off,col,row,1,1);
@@ -112,7 +110,6 @@ void agc_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_long=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_off),"Long");
-  //gtk_widget_override_font(b_long, pango_font_description_from_string("Arial 16"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_long), active_receiver->agc==AGC_LONG);
   gtk_widget_show(b_long);
   gtk_grid_attach(GTK_GRID(grid),b_long,col,row,1,1);
@@ -121,7 +118,6 @@ void agc_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_slow=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_long),"Slow");
-  //gtk_widget_override_font(b_slow, pango_font_description_from_string("Arial 16"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_slow), active_receiver->agc==AGC_SLOW);
   gtk_widget_show(b_slow);
   gtk_grid_attach(GTK_GRID(grid),b_slow,col,row,1,1);
@@ -130,7 +126,6 @@ void agc_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_medium=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_slow),"Medium");
-  //gtk_widget_override_font(b_medium, pango_font_description_from_string("Arial 16"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_medium), active_receiver->agc==AGC_MEDIUM);
   gtk_widget_show(b_medium);
   gtk_grid_attach(GTK_GRID(grid),b_medium,col,row,1,1);
@@ -139,7 +134,6 @@ void agc_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_fast=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_medium),"Fast");
-  //gtk_widget_override_font(b_fast, pango_font_description_from_string("Arial 16"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_fast), active_receiver->agc==AGC_FAST);
   gtk_widget_show(b_fast);
   gtk_grid_attach(GTK_GRID(grid),b_fast,col,row,1,1);

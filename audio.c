@@ -178,7 +178,7 @@ g_print("%s: local_audio_buffer: size=%d sample=%ld\n",__FUNCTION__,out_buffer_s
   return 0;
 }
 	
-int audio_open_input(void) {
+int audio_open_input() {
   int err;
   unsigned int rate=48000;
   unsigned int channels=1;
@@ -291,7 +291,7 @@ g_print("%s: rx=%d handle=%p buffer=%p\n",__FUNCTION__,rx->id,rx->playback_handl
   g_mutex_unlock(&rx->local_audio_mutex);
 }
 
-void audio_close_input(void) {
+void audio_close_input() {
 g_print("%s: enter\n",__FUNCTION__);
   running=FALSE;
   g_mutex_lock(&audio_mutex);
@@ -625,7 +625,7 @@ g_print("%s: exiting\n", __FUNCTION__);
 // Utility function for retrieving mic samples
 // from ring buffer
 //
-float audio_get_next_mic_sample(void) {
+float audio_get_next_mic_sample() {
   int newpt;
   float sample;
   g_mutex_lock(&audio_mutex);
@@ -643,7 +643,7 @@ float audio_get_next_mic_sample(void) {
   return sample;
 }
 
-void audio_get_cards(void) {
+void audio_get_cards() {
   snd_ctl_card_info_t *info;
   snd_pcm_info_t *pcminfo;
   snd_ctl_card_info_alloca(&info);

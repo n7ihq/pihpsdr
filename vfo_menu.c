@@ -59,7 +59,7 @@ static char *btn_labels[] = {"1","2","3",
 
 static GtkWidget *btn[16];
 
-static void cleanup(void) {
+static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -198,7 +198,7 @@ static void enable_ps_cb(GtkWidget *widget, gpointer data) {
 }
 #endif
 
-static void set_btn_state(void) {
+static void set_btn_state() {
   int i;
 
   for(i=0;i<16;i++) {

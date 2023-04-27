@@ -67,19 +67,29 @@ void print_device(int i) {
         discovered[i].info.network.interface_name);
 }
 
-void new_discovery(void) {
+void new_discovery() {
     struct ifaddrs *addrs,*ifa;
     int i,is_local;
     getifaddrs(&addrs);
     ifa = addrs;
     while (ifa) {
         g_main_context_iteration(NULL, 0);
+        //
+        // Sometimes there are many (virtual) interfaces, and some
+        // of them are very unlikely to offer a radio connection.
+        // These are skipped.
+        //
         if (ifa->ifa_addr) {
-          if(ifa->ifa_addr->sa_family == AF_INET &&
-            (ifa->ifa_flags&IFF_UP)==IFF_UP &&
-            (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING) {
-		new_discover(ifa,1);
-          }
+            if(
+                ifa->ifa_addr->sa_family == AF_INET 
+             && (ifa->ifa_flags&IFF_UP)==IFF_UP
+             && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING
+             && strncmp("veth", ifa->ifa_name, 4)
+             && strncmp("dock", ifa->ifa_name, 4)
+             && strncmp("hass", ifa->ifa_name, 4)
+             ) {
+                new_discover(ifa, 1);   // send UDP broadcast packet to interface
+            }
         }
         ifa = ifa->ifa_next;
     }

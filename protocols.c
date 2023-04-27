@@ -43,7 +43,7 @@ gboolean enable_stemlab;
 #endif
 gboolean autostart;
 
-void protocols_save_state(void) {
+void protocols_save_state() {
   char value[80];
 
   clearProperties();
@@ -66,7 +66,7 @@ void protocols_save_state(void) {
   
 }
 
-void protocols_restore_state(void) {
+void protocols_restore_state() {
   char *value;
 
   loadProperties("protocols.props");

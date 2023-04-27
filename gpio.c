@@ -342,14 +342,14 @@ static GThread *rotary_encoder_thread_id;
 static uint64_t epochMilli;
 
 #ifdef GPIO
-static void initialiseEpoch(void) {
+static void initialiseEpoch() {
   struct timespec ts ;
 
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
   epochMilli = (uint64_t)ts.tv_sec * (uint64_t)1000    + (uint64_t)(ts.tv_nsec / 1000000L) ;
 }
 
-static unsigned int millis (void) {
+static unsigned int millis () {
   uint64_t now ;
   struct  timespec ts ;
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
@@ -651,7 +651,7 @@ void gpio_set_defaults(int ctrlr) {
   }
 }
 
-void gpio_restore_state(void) {
+void gpio_restore_state() {
   char* value;
   char name[80];
 
@@ -726,7 +726,7 @@ void gpio_restore_state(void) {
   }
 }
 
-void gpio_save_state(void) {
+void gpio_save_state() {
   char value[80];
   char name[80];
 
@@ -807,7 +807,7 @@ void gpio_save_state(void) {
   saveProperties("gpio.props");
 }
 
-void gpio_restore_actions(void) {
+void gpio_restore_actions() {
   char name[80];
   char *value;
   int previous_controller=NO_CONTROLLER;
@@ -821,34 +821,41 @@ void gpio_restore_actions(void) {
     for(int i=0;i<MAX_ENCODERS;i++) {
       sprintf(name,"encoders[%d].bottom_encoder_function",i);
       value=getProperty(name);
-      if(value) encoders[i].bottom_encoder_function=atoi(value);
+      if(value) encoders[i].bottom_encoder_function=String2Action(value);
       sprintf(name,"encoders[%d].top_encoder_function",i);
       value=getProperty(name);
-      if(value) encoders[i].top_encoder_function=atoi(value);
+      if(value) encoders[i].top_encoder_function=String2Action(value);
       sprintf(name,"encoders[%d].switch_function",i);
       value=getProperty(name);
-      if(value) encoders[i].switch_function=atoi(value);
+      if(value) encoders[i].switch_function=String2Action(value);
     }
   }
 
+  //
+  // Together with the functions, store the current "layer" as well
+  //
+  value=getProperty("switches.function");
+  if (value) function=atoi(value);
   for(int f=0;f<MAX_FUNCTIONS;f++) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d,%d].switch_function",f,i);
       value=getProperty(name);
-      if(value) switches_controller1[f][i].switch_function=atoi(value);
+      if(value) {
+        switches_controller1[f][i].switch_function=String2Action(value);
+      }
     }
   }
   if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_function",i);
       value=getProperty(name);
-      if(value) switches[i].switch_function=atoi(value);
+      if(value) switches[i].switch_function=String2Action(value);
     }
   }
   }
 }
 
-void gpio_save_actions(void) {
+void gpio_save_actions() {
   char value[80];
   char name[80];
 
@@ -858,28 +865,31 @@ void gpio_save_actions(void) {
   if(controller!=NO_CONTROLLER) {
     for(int i=0;i<MAX_ENCODERS;i++) {
       sprintf(name,"encoders[%d].bottom_encoder_function",i);
-      sprintf(value,"%d",encoders[i].bottom_encoder_function);
+      Action2String(encoders[i].bottom_encoder_function, value);
       setProperty(name,value);
       sprintf(name,"encoders[%d].top_encoder_function",i);
-      sprintf(value,"%d",encoders[i].top_encoder_function);
+      Action2String(encoders[i].top_encoder_function, value);
       setProperty(name,value);
       sprintf(name,"encoders[%d].switch_function",i);
+      Action2String(encoders[i].switch_function, value);
       sprintf(value,"%d",encoders[i].switch_function);
       setProperty(name,value);
     }
   }
 
+  sprintf(value,"%d", function);
+  setProperty("switches.function",value);
   for(int f=0;f<MAX_FUNCTIONS;f++) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d,%d].switch_function",f,i);
-      sprintf(value,"%d",switches_controller1[f][i].switch_function);
+      Action2String(switches_controller1[f][i].switch_function,value);
       setProperty(name,value);
     }
   }
   if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_function",i);
-      sprintf(value,"%d",switches[i].switch_function);
+      Action2String(switches[i].switch_function,value);
       setProperty(name,value);
     }
   }
@@ -970,7 +980,7 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
 }
 #endif
 
-int gpio_init(void) {
+int gpio_init() {
 
 #ifdef GPIO
   int ret=0;
@@ -1091,7 +1101,7 @@ g_print("%s: err\n",__FUNCTION__);
 #endif
 }
 
-void gpio_close(void) {
+void gpio_close() {
 #ifdef GPIO
   if(chip!=NULL) gpiod_chip_close(chip);
 #endif
@@ -1113,7 +1123,7 @@ void gpio_cw_sidetone_set(int level) {
 #endif
 }
 
-int  gpio_cw_sidetone_enabled(void) {
+int  gpio_cw_sidetone_enabled() {
   return ENABLE_GPIO_SIDETONE;
 }
 
