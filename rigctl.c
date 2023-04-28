@@ -2940,8 +2940,8 @@ int parse_cmd(void *data) {
         case 'G': //AG
           // set/read AF Gain
           if(command[3]==';' && command[2]=='0') { // query, main receiver
-            // send reply back (covert from 0..1 to 0..255)
-            sprintf(reply,"AG0%03d;",(int)(receiver[0]->volume*255.0+0.5));
+            // send reply back (covert from -40...0dB to 0..255)
+            sprintf(reply,"AG0%03d;",(int)(255.0*pow(10.0,0.05*receiver[0]->volume)));
             send_resp(client->fd,reply) ;
           } else if(command[6]==';' && command[2] == '0') {
             int gain=atoi(&command[3]);
@@ -3997,10 +3997,18 @@ int parse_cmd(void *data) {
           break;
         case 'M': //SM
           // read the S meter
+          // Reply is of the form SMYxxxx; where Y = 0,1 and x is from 0 to 30
+          // -127 dBm ==> x = 0000
+          //  -73 dBm ==> x = 0015
+          //  -19 dBm ==> x = 0030
+          // 
           if(command[3]==';') {
             int id=atoi(&command[2]);
             if(id >= 0 && id < receivers) {
-              sprintf(reply,"SM%04d;",(int)receiver[id]->meter);
+              int val = (int)((receiver[id]->meter+127.0)*0.277778);
+              if (val > 30) val=30;
+              if (val < 0 ) val=0;
+              sprintf(reply,"SM%d%04d;",id,val);
               send_resp(client->fd,reply);
             } else {
               implemented=FALSE;
@@ -4083,7 +4091,7 @@ int parse_cmd(void *data) {
           break;
         case 'Y': //TY
           // set/read microprocessor firmware type
-          implemented=FALSE;
+          send_resp(client->fd,"TY000;");
           break;
         default:
           implemented=FALSE;
