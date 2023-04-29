@@ -2288,11 +2288,11 @@ g_print("radioRestoreState: %s\n",property_path);
       //
       sprintf(name,"rigctl_serial_enable[%d]", id);
       value=getProperty(name);
-      if (value) SerialPorts[i].enable=atoi(value);
+      if (value) SerialPorts[id].enable=atoi(value);
 #ifdef ANDROMEDA
       sprintf(name,"rigctl_serial_andromeda[%d]", id);
       value=getProperty(name);
-      if (value) SerialPorts[i].andromeda=atoi(value);
+      if (value) SerialPorts[id].andromeda=atoi(value);
 #endif
       sprintf(name,"rigctl_serial_baud_rate[%i]", id);
       value=getProperty(name);

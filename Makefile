@@ -22,10 +22,6 @@ PURESIGNAL_INCLUDE=PURESIGNAL
 # uncomment the line below to include MIDI support
 MIDI_INCLUDE=MIDI
 
-# uncomment the line below to include SATURN support
-# This requires additions (source code) files
-#SATURN_INCLUDE=SATURN
-
 # uncomment the line below to include ANDROMEDA support
 ANDROMEDA_OPTIONS=-D ANDROMEDA
 
@@ -84,40 +80,6 @@ PURESIGNAL_HEADERS= \
 ps_menu.h
 PURESIGNAL_OBJS= \
 ps_menu.o
-endif
-
-ifeq ($(SATURN_INCLUDE),SATURN)
-VPATH=.:SATURN
-SATURN_OPTIONS=-D SATURN
-SATURN_SOURCES= \
-codecwrite.c \
-debugaids.c \
-hwaccess.c \
-saturndrivers.c \
-saturnregisters.c \
-saturnmain.c \
-saturnversion.c \
-generalpacket.c
-SATURN_HEADERS= \
-codecwrite.h \
-debugaids.h \
-hwaccess.h \
-saturndrivers.h \
-saturnregisters.h \
-saturntypes.h \
-saturnversion.h \
-saturnthreaddata.h \
-generalpacket.h \
-xiic_regdefs.h
-SATURN_OBJS= \
-codecwrite.o \
-debugaids.o \
-hwaccess.o \
-saturndrivers.o \
-saturnregisters.o \
-saturnmain.o \
-saturnversion.o \
-generalpacket.o
 endif
 
 ifeq ($(REMOTE_INCLUDE),REMOTE)
@@ -258,7 +220,7 @@ endif
 
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) $(LOCALCW_OPTIONS) \
-	$(SATURN_OPTIONS) $(ANDROMEDA_OPTIONS) \
+	$(ANDROMEDA_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
 	$(AUDIO_OPTIONS) \
@@ -515,18 +477,18 @@ toolbar_menu.o \
 sintab.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
-		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) $(SATURN_OBJS) \
+		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
-		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) $(SATURN_OBJS) \
+		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
-	$(LOCALCW_HEADERS) $(SATURN_HEADERS) \
+	$(LOCALCW_HEADERS) \
 	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) \
 	$(AUDIO_SOURCES) $(SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) $(SATURN_SOURCES) \
+	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
@@ -548,7 +510,7 @@ CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 .PHONY:	cppcheck
 cppcheck:
 	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(REMOTE_SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(SATURN_SOURCES) \
+	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(LOCALCW_SOURCES) \
 	$(SERVER_SOURCES)
 
