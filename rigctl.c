@@ -2600,10 +2600,10 @@ case 'E': //ZZZE
                schedule_action(AGC_GAIN_RX2, RELATIVE, (v==0)?1:-1);
                break;
              case 55: // Filter Cut High
-               schedule_action(FILTER_CUT_HIGH, RELATIVE, (v==0)?-1:1);
+               schedule_action(FILTER_CUT_HIGH, RELATIVE, (v==0)?1:-1);
                break;
              case 56: // Filter Cut Low
-               schedule_action(FILTER_CUT_LOW, RELATIVE, (v==0)?-1:1);
+               schedule_action(FILTER_CUT_LOW, RELATIVE, (v==0)?1:-1);
                break;
              case 57: // Diversity Gain
                if(diversity_enabled) schedule_action(DIV_GAIN, RELATIVE, (v==0)?1:-1);
@@ -4470,14 +4470,20 @@ int launch_serial (int id) {
      //
      // If this is a serial line to an ANDROMEDA controller, initialize it and start a periodic GTK task
      //
+     launch_andromeda(id);
+#endif
+     return 1;
+}
+
+#ifdef ANDROMEDA
+void launch_andromeda (int id) {
      if (SerialPorts[id].andromeda) {
        usleep(500000L); // Need to wait for andromedas serial to settle, Andromeda FP Version: h/w:01 s/w:006
        g_idle_add(andromeda_init, &serial_client[id]);           // executed once
        serial_client[id].andromeda_timer=g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
      }
-#endif
-     return 1;
 }
+#endif
 
 // Serial Port close
 void disable_serial (int id) {
@@ -4502,12 +4508,18 @@ void disable_serial (int id) {
        serial_client[id].fd=-1;
      }
 #ifdef ANDROMEDA
-     if (serial_client[id].andromeda_timer != 0) {
-       g_source_remove(serial_client[id].andromeda_timer);
-     }
+     disable_andromeda(id);
 #endif
 }
 
+#ifdef ANDROMEDA
+void disable_andromeda (int id) {
+     if (serial_client[id].andromeda_timer != 0) {
+       g_source_remove(serial_client[id].andromeda_timer);
+       serial_client[id].andromeda_timer=0;
+     }
+}
+#endif
 //
 // 2-25-17 - K5JAE - create each thread with the pointer to the port number
 //                   (Port numbers now const ints instead of defines..)
