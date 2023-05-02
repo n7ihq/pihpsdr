@@ -4344,6 +4344,7 @@ static int last_rit;
 static int last_xit;
 static int last_vfoa;
 
+gint andromeda_timer=0;
 gboolean andromeda_init(gpointer data) {
   //
   // This function is put into the GTK idle queue
@@ -4353,11 +4354,11 @@ gboolean andromeda_init(gpointer data) {
   if (!client->running) return FALSE;
 
   // This triggers new results to be reported;
-  last_mox = last_tune = last_ctun = last_lock = last_div = last_rit = last_xit = last_vfoa = -999;
+  last_mox = last_tune = last_ps = last_ctun = last_lock = last_div = last_rit = last_xit = last_vfoa = -999;
 
   // This triggers a reply (from Andromeda) to report its FP version
   send_resp(client->fd,"ZZZS;");
-  return TRUE;
+  return FALSE;
 }
 
 gboolean andromeda_handler(gpointer data) {
@@ -4370,6 +4371,11 @@ gboolean andromeda_handler(gpointer data) {
 
   if (!client->running) return FALSE;
 
+  if(last_div!=diversity_enabled) {
+    sprintf(reply,"ZZZI05%d;", diversity_enabled);
+    send_resp(client->fd,reply);
+    last_div=diversity_enabled;
+  }
   if(last_mox!=mox) {
     sprintf(reply,"ZZZI01%d;", mox);
     send_resp(client->fd,reply);
@@ -4389,11 +4395,6 @@ gboolean andromeda_handler(gpointer data) {
     sprintf(reply,"ZZZI07%d;", vfo[active_receiver->id].ctun);
     send_resp(client->fd,reply);
     last_ctun=vfo[active_receiver->id].ctun;
-  }
-  if(last_div!=diversity_enabled) {
-    sprintf(reply,"ZZZI05%d;", diversity_enabled);
-    send_resp(client->fd,reply);
-    last_div=diversity_enabled;
   }
   if(last_rit!=vfo[active_receiver->id].rit_enabled) {
     sprintf(reply,"ZZZI08%d;", vfo[active_receiver->id].rit_enabled);
@@ -4461,8 +4462,9 @@ int launch_serial (int id) {
      // If this is a serial line to an ANDROMEDA controller, initialize it and start a periodic GTK task
      //
      if (SerialPorts[id].andromeda) {
+       usleep(500000L); // Need to wait for andromedas serial to settle, Andromeda FP Version: h/w:01 s/w:006
        g_idle_add(andromeda_init, &serial_client[id]);           // executed once
-       g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
+       andromeda_timer=g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
      }
 #endif
      return 1;
@@ -4490,6 +4492,11 @@ void disable_serial (int id) {
        close(serial_client[id].fd);
        serial_client[id].fd=-1;
      }
+#ifdef ANDROMEDA
+     if (SerialPorts[id].andromeda && andromeda_timer != 0) {
+       g_source_remove(andromeda_timer);
+     }
+#endif
 }
 
 //
