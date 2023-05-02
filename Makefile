@@ -23,22 +23,22 @@ PURESIGNAL_INCLUDE=PURESIGNAL
 MIDI_INCLUDE=MIDI
 
 # uncomment the line below to include ANDROMEDA support
-ANDROMEDA_OPTIONS=-D ANDROMEDA
+# ANDROMEDA_OPTIONS=-D ANDROMEDA
 
 # uncomment the line below to include USB Ozy support
-USBOZY_INCLUDE=USBOZY
+# USBOZY_INCLUDE=USBOZY
 
 # uncomment the line to below include support local CW keyer
 LOCALCW_INCLUDE=LOCALCW
 
 # uncomment the line below for SoapySDR
-SOAPYSDR_INCLUDE=SOAPYSDR
+# SOAPYSDR_INCLUDE=SOAPYSDR
 
 # uncomment the line below to include support for STEMlab discovery (WITH AVAHI)
 #STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
 
 # uncomment the line below to include support for STEMlab discovery (WITHOUT AVAHI)
-STEMLAB_DISCOVERY=STEMLAB_DISCOVERY_NOAVAHI
+# STEMLAB_DISCOVERY=STEMLAB_DISCOVERY_NOAVAHI
 
 # uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
 #AUDIO_MODULE=ALSA
@@ -47,7 +47,7 @@ STEMLAB_DISCOVERY=STEMLAB_DISCOVERY_NOAVAHI
 #DEBUG_OPTION=-D DEBUG
 
 # very early code not included yet
-SERVER_INCLUDE=SERVER
+# SERVER_INCLUDE=SERVER
 
 CFLAGS?= -O -Wno-deprecated-declarations
 LINK?=   $(CC)
