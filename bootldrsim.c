@@ -116,7 +116,7 @@ int main(int argc, char **argv)
           fprintf(stderr,"Error in pcap_findalldevs_ex: %s\n", errbuf);
           exit(1);
       }
-    
+
       ifp=devlist;
       while (ifp != NULL) {
         if (do_lookup && strcmp(ifp->name, dev)) {
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
           hismac[4]=packet[10];
           hismac[5]=packet[11];
           //printf("Bootloader packet, his MAC=%02x:%02x:%02x:%02x:%02x:%02x Commands=%d:%d\n", hismac[0], hismac[1], hismac[2], hismac[3], hismac[4], hismac[5],packet[14],packet[15]);
-       
+
           if (packet[14] == 3) {
             switch (packet[15]) {
               case READ_METIS_MAC:
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
                 printf("Erased.\n");
                 break;
               case PROGRAM_METIS_FLASH:
-                // data is 276 bytes long 
+                // data is 276 bytes long
                 if (outfd < 0 && outfile != NULL) {
                   progress=0;
                   outfd=open(outfile, O_WRONLY | O_CREAT | O_TRUNC);
@@ -300,7 +300,7 @@ void sendRawCommand(pcap_t *handle, unsigned char dst[6], unsigned char command,
     if (datalen < 0 || datalen > 46) datalen=0;  // should not happen
 
     //
-    // Header is: 
+    // Header is:
     // dest MAC address (6 bytes)
     // source MAC address (6 bytes, value fixed at 11:22:33:44:55:55)
     // 0xEF 0xFE 0x03 (3 bytes)

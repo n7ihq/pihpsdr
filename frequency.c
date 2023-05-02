@@ -1,4 +1,4 @@
-/** 
+/**
 * @file frequency.c
 * @brief Frequency functions
 * @author John Melton, G0ORX/N6LYT, Doxygen Comments Dave Larsen, KV0S
@@ -6,22 +6,22 @@
 * @date 2009-04-11
 */
 
-/* Copyright (C) 
+/* Copyright (C)
 * 2009 - John Melton, G0ORX/N6LYT, Doxygen Comments Dave Larsen, KV0S
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
 * of the License, or (at your option) any later version.
-* 
+*
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-* 
+*
 */
 
 
@@ -45,14 +45,14 @@ struct frequency_info* info;
 struct frequency_info frequencyInfo[]=
     {
 
-        {      60000LL,       60000LL, "MSF Time Signal",                    bandGen, FALSE}, 
-        {      75000LL,       75000LL, "HGB Time Signal",                    bandGen, FALSE}, 
-        {      77500LL,       77500LL, "DCF77 Time Signal",                  bandGen, FALSE}, 
+        {      60000LL,       60000LL, "MSF Time Signal",                    bandGen, FALSE},
+        {      75000LL,       75000LL, "HGB Time Signal",                    bandGen, FALSE},
+        {      77500LL,       77500LL, "DCF77 Time Signal",                  bandGen, FALSE},
         {     135700LL,      137800LL, "136kHz CW",                          band136, TRUE },
         {     472000LL,      474999LL, "472kHz CW",                          band472, TRUE },
         {     475000LL,      479000LL, "472kHz CW/Data",                     band472, TRUE },
-        {     153000LL,      279000LL, "AM - Long Wave",                     bandGen, FALSE}, 
-        {     530000LL,     1710000LL, "Broadcast AM Med Wave",              bandGen, FALSE},                                 
+        {     153000LL,      279000LL, "AM - Long Wave",                     bandGen, FALSE},
+        {     530000LL,     1710000LL, "Broadcast AM Med Wave",              bandGen, FALSE},
 
         {    1800000LL,     1809999LL, "160M CW/Digital Modes",              band160, TRUE },
         {    1810000LL,     1810000LL, "160M CW QRP",                        band160, TRUE },
@@ -62,11 +62,11 @@ struct frequency_info frequencyInfo[]=
         {    1910001LL,     1994999LL, "160M SSB/SSTV/Wide Band",            band160, TRUE },
         {    1995000LL,     1999999LL, "160M Experimental",                  band160, TRUE },
 
-        {    2300000LL,     2495000LL, "120M Short Wave",                    bandGen, FALSE}, 
+        {    2300000LL,     2495000LL, "120M Short Wave",                    bandGen, FALSE},
 
         {    2500000LL,     2500000LL, "WWV",                                bandWWV, FALSE},
 
-        {    3200000LL,     3400000LL, "90M Short Wave",                     bandGen, FALSE}, 
+        {    3200000LL,     3400000LL, "90M Short Wave",                     bandGen, FALSE},
 
         {    3500000LL,     3524999LL, "80M Extra CW",                       band80,  TRUE },
         {    3525000LL,     3579999LL, "80M CW",                             band80,  TRUE },
@@ -84,14 +84,14 @@ struct frequency_info frequencyInfo[]=
         {    3885000LL,     3885000LL, "75M AM Calling Frequency",           band80,  TRUE },
         {    3885001LL,     3999999LL, "75M SSB",                            band80,  TRUE },
 
-        {    4750000LL,     4999999LL, "60M Short Wave",                     bandGen, FALSE}, 
+        {    4750000LL,     4999999LL, "60M Short Wave",                     bandGen, FALSE},
 
-        {    5000000LL,     5000000LL, "WWV",                                bandWWV, FALSE}, 
+        {    5000000LL,     5000000LL, "WWV",                                bandWWV, FALSE},
 
         {    5261250LL,     5408000LL, "60M",                                band60,  TRUE },
         {    5261250LL,     5408000LL, "60M",                                band60,  FALSE},
 
-        {    5900000LL,     6200000LL, "49M Short Wave",                     bandGen, FALSE}, 
+        {    5900000LL,     6200000LL, "49M Short Wave",                     bandGen, FALSE},
 
         {    7000000LL,     7024999LL, "40M Extra CW",                       band40,  TRUE },
         {    7025000LL,     7039999LL, "40M CW",                             band40,  TRUE },
@@ -105,17 +105,17 @@ struct frequency_info frequencyInfo[]=
         {    7290000LL,     7290000LL, "40M AM Calling Frequency",           band40,  TRUE },
         {    7290001LL,     7299999LL, "40M SSB",                            band40,  TRUE },
 
-        {    7300000LL,     7350000LL, "41M Short Wave",                     bandGen, FALSE}, 
-        {    9400000LL,     9900000LL, "31M Short Wave",                     bandGen, FALSE}, 
+        {    7300000LL,     7350000LL, "41M Short Wave",                     bandGen, FALSE},
+        {    9400000LL,     9900000LL, "31M Short Wave",                     bandGen, FALSE},
 
-        {   10000000LL,    10000000LL, "WWV",                                bandWWV, FALSE}, 
+        {   10000000LL,    10000000LL, "WWV",                                bandWWV, FALSE},
 
         {   10100000LL,    10129999LL, "30M CW",                             band30,  TRUE },
         {   10130000LL,    10139999LL, "30M RTTY",                           band30,  TRUE },
         {   10140000LL,    10149999LL, "30M Packet",                         band30,  TRUE },
 
-        {   11600000LL,    12100000LL, "25M Short Wave",                     bandGen, FALSE}, 
-        {   13570000LL,    13870000LL, "22M Short Wave",                     bandGen, FALSE}, 
+        {   11600000LL,    12100000LL, "25M Short Wave",                     bandGen, FALSE},
+        {   13570000LL,    13870000LL, "22M Short Wave",                     bandGen, FALSE},
 
         {   14000000LL,    14024999LL, "20M Extra CW",                       band20,  TRUE },
         {   14025000LL,    14069999LL, "20M CW",                             band20,  TRUE },
@@ -137,10 +137,10 @@ struct frequency_info frequencyInfo[]=
         {   14286000LL,    14286000LL, "20M AM Calling Frequency",           band20,  TRUE },
         {   14286001LL,    14349999LL, "20M SSB",                            band20,  TRUE },
 
-        {   15000000LL,    15000000LL, "WWV",                                bandWWV, FALSE}, 
+        {   15000000LL,    15000000LL, "WWV",                                bandWWV, FALSE},
 
-        {   15100000LL,    15800000LL, "19M Short Wave",                     bandGen, FALSE}, 
-        {   17480000LL,    17900000LL, "16M Short Wave",                     bandGen, FALSE}, 
+        {   15100000LL,    15800000LL, "19M Short Wave",                     bandGen, FALSE},
+        {   17480000LL,    17900000LL, "16M Short Wave",                     bandGen, FALSE},
 
         {   18068000LL,    18099999LL, "17M CW",                             band17,  TRUE },
         {   18100000LL,    18104999LL, "17M RTTY",                           band17,  TRUE },
@@ -148,9 +148,9 @@ struct frequency_info frequencyInfo[]=
         {   18110000LL,    18110000LL, "17M NCDXF Beacons",                  band17,  TRUE },
         {   18110001LL,    18167999LL, "17M SSB",                            band17,  TRUE },
 
-        {   18900000LL,    19020000LL, "15M Short Wave",                     bandGen, FALSE}, 
+        {   18900000LL,    19020000LL, "15M Short Wave",                     bandGen, FALSE},
 
-        {   20000000LL,    20000000LL, "WWV",                                bandWWV, FALSE}, 
+        {   20000000LL,    20000000LL, "WWV",                                bandWWV, FALSE},
 
         {   21000000LL,    21024999LL, "15M Extra CW",                       band15,  TRUE },
         {   21025000LL,    21069999LL, "15M CW",                             band15,  TRUE },
@@ -165,7 +165,7 @@ struct frequency_info frequencyInfo[]=
         {   21340000LL,    21340000LL, "15M SSTV",                           band15,  TRUE },
         {   21340001LL,    21449999LL, "15M SSB",                            band15,  TRUE },
 
-        {   21450000LL,    21850000LL, "13M Short Wave",                     bandGen, FALSE}, 
+        {   21450000LL,    21850000LL, "13M Short Wave",                     bandGen, FALSE},
 
         {   24890000LL,    24919999LL, "12M CW",                             band12,  TRUE },
         {   24920000LL,    24924999LL, "12M RTTY",                           band12,  TRUE },
@@ -173,7 +173,7 @@ struct frequency_info frequencyInfo[]=
         {   24930000LL,    24930000LL, "12M NCDXF Beacons",                  band12,  TRUE },
         {   24930001LL,    24989999LL, "12M SSB Wideband",                   band12,  TRUE },
 
-        {   25600000LL,    26100000LL, "11M Short Wave",                     bandGen, FALSE}, 
+        {   25600000LL,    26100000LL, "11M Short Wave",                     bandGen, FALSE},
 
         {   28000000LL,    28069999LL, "10M CW",                             band10,  TRUE },
         {   28070000LL,    28149999LL, "10M RTTY",                           band10,  TRUE },
@@ -301,7 +301,7 @@ struct frequency_info frequencyInfo[]=
         {  918000000LL,   920999999LL, "33CM FM Repeater Outputs",           NOBAND,  TRUE },
         {  921000000LL,   926999999LL, "33CM ATV",                           NOBAND,  TRUE },
         {  927000000LL,   928000000LL, "33CM FM Simplex/Links",              NOBAND,  TRUE },
-         
+
         { 1240000000LL,  1245999999LL, "23CM ATV #1",                        NOBAND,  TRUE },
         { 1246000000LL,  1251999999LL, "23CM FMN Point/Links",               NOBAND,  TRUE },
         { 1252000000LL,  1257999999LL, "23CM ATV #2, Digital Modes",         NOBAND,  TRUE },
@@ -353,7 +353,7 @@ struct frequency_info frequencyInfo[]=
 
         {0LL,           0LL,           "",                                   0,       FALSE}
 
-        
+
 
     };
 #else
@@ -410,12 +410,12 @@ struct frequency_info frequencyInfo[]=
 #endif
 
 /* --------------------------------------------------------------------------*/
-/** 
+/**
 * @brief iGet the frequency information
-* 
+*
 * @param frequency
-* 
-* @return 
+*
+* @return
 */
 char* getFrequencyInfo(long long frequency,int filter_low,int filter_high) {
 
@@ -481,12 +481,12 @@ if(info) {
 }
 
 /* --------------------------------------------------------------------------*/
-/** 
+/**
 * @brief Get Band information
-* 
+*
 * @param frequency
-* 
-* @return 
+*
+* @return
 */
 int getBand(long long frequency) {
 
@@ -533,7 +533,7 @@ int canTransmit() {
     if (!can_transmit) return 0;
 
     //
-    // In the code canTransmit() is always ORed with tx_out_of_band, 
+    // In the code canTransmit() is always ORed with tx_out_of_band,
     // but this should be done in ONE PLACE (here)
     //
     if (tx_out_of_band) return 1;

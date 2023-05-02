@@ -381,7 +381,7 @@ gint rx_height;
 // TRANSFORMED TO A NO-OP, since a fixed background color
 // implicitly makes an illegal assumption about the GTK
 // theme in use.
-// 
+//
 void set_backgnd(GtkWidget *widget) {
    static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
 }
@@ -436,7 +436,7 @@ g_print("reconfigure_radio: receivers=%d\n",receivers);
     y+=ZOOMPAN_HEIGHT;
   } else {
     if(zoompan!=NULL) {
-      gtk_container_remove(GTK_CONTAINER(fixed),zoompan); 
+      gtk_container_remove(GTK_CONTAINER(fixed),zoompan);
       zoompan=NULL;
     }
   }
@@ -453,7 +453,7 @@ g_print("reconfigure_radio: receivers=%d\n",receivers);
     y+=SLIDERS_HEIGHT;
   } else {
     if(sliders!=NULL) {
-      gtk_container_remove(GTK_CONTAINER(fixed),sliders); 
+      gtk_container_remove(GTK_CONTAINER(fixed),sliders);
       sliders=NULL;
     }
   }
@@ -568,7 +568,7 @@ static void create_visual() {
     g_object_ref((gpointer)receiver[i]->panel);
     y+=rx_height/RECEIVERS;
   }
-  
+
   //
   // Sanity check: in old protocol, all receivers must have the same sample rate
   //
@@ -645,7 +645,7 @@ if(!radio_is_remote) {
     keyer_update();
   }
 #endif
-  
+
 #ifdef CLIENT_SERVER
   if(!radio_is_remote) {
 #endif
@@ -702,7 +702,7 @@ g_print("create_visual: calling radio_change_receivers: receivers=%d r=%d\n",rec
   gtk_widget_show_all (top_window);
 
 }
-  
+
 void start_radio() {
   int i;
 //g_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
@@ -1101,7 +1101,7 @@ void start_radio() {
       }
       break;
   }
- 
+
   //
   // Determine number of ADCs in the device
   //
@@ -1315,7 +1315,7 @@ void start_radio() {
 // which is not compatible with the hardware.
 // Change setting to reasonable value then.
 // This could possibly be moved to radioRestoreState().
-// 
+//
 // Sanity Check #1: restrict buffer size in new protocol
 //
   switch (protocol) {
@@ -1429,7 +1429,7 @@ void disable_rigctl() {
    g_print("RIGCTL: disable_rigctl()\n");
    close_rigctl_ports();
 }
- 
+
 
 void radio_change_receivers(int r) {
 g_print("radio_change_receivers: from %d to %d\n",receivers,r);
@@ -1485,7 +1485,7 @@ g_print("radio_change_receivers: from %d to %d\n",receivers,r);
 
 void radio_change_sample_rate(int rate) {
   int i;
-  
+
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
       // The radio menu calls this function even if the sample rate
@@ -1552,7 +1552,7 @@ static void rxtx(int state) {
     } else {
       gtk_fixed_put(GTK_FIXED(fixed),transmitter->panel,transmitter->x,transmitter->y);
     }
-    
+
     SetChannelState(transmitter->id,1,0);
     tx_set_displaying(transmitter,1);
     switch(protocol) {
@@ -1590,7 +1590,7 @@ static void rxtx(int state) {
       //
       int do_silence=0;
       if (protocol == ORIGINAL_PROTOCOL && (
-                 device == DEVICE_HERMES_LITE2 || 
+                 device == DEVICE_HERMES_LITE2 ||
                  device == DEVICE_HERMES_LITE ||
                  device == DEVICE_HERMES ||
                  device == DEVICE_STEMLAB ||
@@ -2421,7 +2421,7 @@ void radioSaveState() {
 
 
 g_print("radioSaveState: %s\n",property_path);
-  
+
   g_mutex_lock(&property_mutex);
   clearProperties();
   gpio_save_actions();

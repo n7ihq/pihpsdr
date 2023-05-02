@@ -352,7 +352,7 @@ int ReadLegacyMidiFile(char *filename) {
         }
 	cp++;
       }
-      
+
 //g_print("\n%s:INP:%s\n",__FUNCTION__,zeile);
 
       chan=-1;                  // default: any channel

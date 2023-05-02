@@ -229,7 +229,7 @@ static void discover(struct ifaddrs* iface, int discflag) {
 	break;
       case 3:
 	len=1032;  // send TCP packet
-	break;  
+	break;
     }
     buffer[0]=0xEF;
     buffer[1]=0xFE;

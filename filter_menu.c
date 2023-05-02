@@ -60,7 +60,7 @@ static gboolean default_cb (GtkWidget *widget, gpointer data) {
   int low, high;
 
   GtkWidget *spinlow, *spinhigh;
-  
+
   switch(f) {
     case filterVar1:
       spinlow=var1_spin_low;
@@ -248,7 +248,7 @@ void filter_menu(GtkWidget *parent) {
       }
       gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
       g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
- 
+
       col++;
       //
       // Filter width in CW, filter low in other modes. In CW, use smaller granularity
@@ -257,14 +257,14 @@ void filter_menu(GtkWidget *parent) {
         var1_spin_low=gtk_spin_button_new_with_range(0,+8000.0,2.0);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_low),(double)(band_filter->high - band_filter->low));
       } else {
-        var1_spin_low=gtk_spin_button_new_with_range(0,+8000.0,5.0);
+        var1_spin_low=gtk_spin_button_new_with_range(-8000.0,+8000.0,5.0);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_low),(double)band_filter->low);
       }
       gtk_grid_attach(GTK_GRID(grid),var1_spin_low,col,row,1,1);
       g_signal_connect(var1_spin_low,"value-changed",G_CALLBACK(var_spin_low_cb),(gpointer)(long)i);
       col++;
 
-      
+
       if(vfo[active_receiver->id].mode!=modeCWL && vfo[active_receiver->id].mode!=modeCWU) {
         var1_spin_high=gtk_spin_button_new_with_range(-8000.0,+8000.0,5.0);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(var1_spin_high),(double)band_filter->high);
@@ -292,7 +292,7 @@ void filter_menu(GtkWidget *parent) {
       gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
       g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
       col++;
-      
+
       var2_spin_low=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
       //
       // in CW, filter_low is HALF of the filter width

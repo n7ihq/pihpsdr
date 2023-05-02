@@ -75,8 +75,8 @@ static void *midi_thread(void *arg) {
     unsigned short revents;
     int i;
     int chan,arg1,arg2;
-    
-    
+
+
 
     npfds = snd_rawmidi_poll_descriptors_count(input);
     pfds = alloca(npfds * sizeof(struct pollfd));
@@ -104,7 +104,7 @@ static void *midi_thread(void *arg) {
             continue;
         }
         // process bytes in buffer. Since they no not necessarily form complete messages
-        // we need a state machine here. 
+        // we need a state machine here.
         for (i=0; i< ret; i++) {
 	    byte=buf[i];
 	    switch (state) {
@@ -118,7 +118,7 @@ static void *midi_thread(void *arg) {
 			case 0x90:	// Note-ON command
 			    command=CMD_NOTEON;
 			    state=STATE_ARG2;
-			    break;    
+			    break;
 			case 0xB0:	// Controller Change
 			    command=CMD_CTRL;
 			    state=STATE_ARG2;
@@ -238,7 +238,7 @@ void close_midi_device(int index) {
   ret=pthread_join(midi_thread_id[index], NULL);
   if (ret  != 0)  {
     g_print("%s: cannot join: %s\n", __FUNCTION__, strerror(ret));
-  }     
+  }
   //
   // Close MIDI device
   if((ret = snd_rawmidi_close(midi_input[index])) < 0) {

@@ -155,7 +155,7 @@ void reconfigure_transmitter(TRANSMITTER *tx,int width,int height) {
 g_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
   if(width!=tx->width) {
     tx->width=width;
-    tx->height=height; 
+    tx->height=height;
     int ratio=tx->iq_output_rate/tx->mic_sample_rate;
     tx->pixels=display_width*ratio*2;
     g_free(tx->pixel_samples);
@@ -441,7 +441,7 @@ static gboolean update_display(gpointer data) {
       GetPixels(rx_feedback->id,0,rx_feedback->pixel_samples,&rc);
       int full  = rx_feedback->pixels;  // number of pixels in the feedback spectrum
       int width = tx->pixels;           // number of pixels to copy from the feedback spectrum
-      int start = (full-width) /2;      // Copy from start ... (end-1) 
+      int start = (full-width) /2;      // Copy from start ... (end-1)
       float *tfp=tx->pixel_samples;
       float *rfp=rx_feedback->pixel_samples+start;
       float offset;
@@ -789,9 +789,9 @@ g_print("create_dialog: add tx->panel\n");
 }
 
 static void create_visual(TRANSMITTER *tx) {
- 
+
   fprintf(stderr,"transmitter: create_visual: id=%d width=%d height=%d\n",tx->id, tx->width,tx->height);
-  
+
   tx->dialog=NULL;
 
   tx->panel=gtk_fixed_new();
@@ -856,7 +856,7 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
   tx->panadapter_step=10;
 
   tx->displaying=0;
-  
+
   tx->alex_antenna=0;  // default: ANT1
 
 fprintf(stderr,"create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d fps=%d width=%d height=%d\n",tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,tx->fps,tx->width,tx->height);
@@ -1035,7 +1035,7 @@ void tx_set_filter(TRANSMITTER *tx) {
   // load default values
   int low  = tx_filter_low;
   int high = tx_filter_high;  // 0 < low < high
- 
+
   if (tx->use_rx_filter) {
     //
     // Use only 'compatible' parts of RX filter settings
@@ -1196,7 +1196,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     // frequencies, we amplify the mic samples here by 15 dB
     // when doing FM, such that enough "punch" remains after the
     // FM pre-emphasis filter.
-    // 
+    //
     // If ALC happens before FM pre-emphasis, this has little effect
     // since the additional gain applied here will most likely be
     // compensated by ALC, so it is important to have FM pre-emphasis
@@ -1222,7 +1222,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
   if (isTransmitting()) {
 
-    if(  (    (protocol == NEW_PROTOCOL && radio->device==NEW_DEVICE_ATLAS) 
+    if(  (    (protocol == NEW_PROTOCOL && radio->device==NEW_DEVICE_ATLAS)
 #ifdef USBOZY
            || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_OZY)
 #endif
@@ -1230,7 +1230,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
          ) && atlas_penelope == 1) {
       //
       // Note that the atlas_penelope flag can have three values, namely
-      //   0 "no penelope"  : no scaling 
+      //   0 "no penelope"  : no scaling
       //   1 "penelope"     : scale
       //   2 "pennylane"    : no scaling
       //
@@ -1531,7 +1531,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
     full_tx_buffer(tx);
     tx->samples=0;
   }
-  
+
 #ifdef AUDIO_WATERFALL
   if(audio_samples!=NULL && isTransmitting()) {
     if(waterfall_samples==0) {

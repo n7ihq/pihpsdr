@@ -1,6 +1,6 @@
 /*
  * Contribution of DL1YCF Christoph van W"ullen:
- * 
+ *
  * This is the "ramp" with length 200 which is
  * the step response derived from a digital filter
  * with a Blackman-Harris window.

@@ -96,7 +96,7 @@ void new_protocol_programmer(char *filename ) {
     source=(char *)malloc(source_size);
 
     blocks=source_size/256;
- 
+
     // read the file in
     int r;
     int b=0;
@@ -106,7 +106,7 @@ void new_protocol_programmer(char *filename ) {
 
     fclose(fp);
 
-    // start the thread to program 
+    // start the thread to program
     rc=pthread_create(&programmer_thread_id,NULL,programmer_thread,NULL);
     if(rc != 0) {
         fprintf(stderr,"pthread_create failed on programmer_thread: rc=%d\n", rc);
@@ -154,7 +154,7 @@ void programmer_send_block(long block) {
     buffer[6]=blocks>>16;
     buffer[7]=blocks>>8;
     buffer[8]=blocks;
-    
+
 
     // copy a block (256 bytes)
     memcpy(&buffer[9],&source[block*256],256);
@@ -243,5 +243,5 @@ void *programmer_thread(void *arg) {
         block_sequence++;
     }
 
-    return NULL;    
+    return NULL;
 }

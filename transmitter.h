@@ -94,7 +94,7 @@ typedef struct _transmitter {
   int tune_drive;
 
   int drive_level;
- 
+
   int compressor;
   double compressor_level;
 
@@ -108,7 +108,7 @@ typedef struct _transmitter {
 
   gint xit_enabled;
   long long xit;
-  
+
   int x;
   int y;
 

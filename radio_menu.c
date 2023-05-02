@@ -458,7 +458,7 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
 
-  
+
   temp_row=1;
   col=0;
   row=1;
@@ -477,7 +477,7 @@ void radio_menu(GtkWidget *parent) {
   gtk_combo_box_set_active(GTK_COMBO_BOX(receivers_combo),receivers - 1);
   my_combo_attach(GTK_GRID(grid),receivers_combo,col,row,1,1);
   g_signal_connect(receivers_combo,"changed",G_CALLBACK(receivers_cb),NULL);
-  
+
   row++;
 
 
@@ -683,7 +683,7 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect(vfo_divisor,"value_changed",G_CALLBACK(vfo_divisor_value_changed_cb),NULL);
   row++;
 #endif
-   
+
   if(row>temp_row) temp_row=row;
 
   //
@@ -852,7 +852,7 @@ void radio_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (touchscreen_b), optimize_for_touchscreen);
   gtk_grid_attach(GTK_GRID(grid),touchscreen_b,col,row,1,1);
   g_signal_connect(touchscreen_b,"toggled",G_CALLBACK(touchscreen_cb),NULL);
-  
+
   col++;
   GtkWidget *PA_enable_b=gtk_check_button_new_with_label("PA enable");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (PA_enable_b), pa_enabled);

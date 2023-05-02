@@ -23,7 +23,7 @@ static gboolean draw_led_cb (GtkWidget *widget, cairo_t *cr, gpointer data) {
   GdkRGBA *color=(GdkRGBA *)data;
 //fprintf(stderr,"draw_led_cb: %p color=%p r=%f g=%f b=%f\n",widget,color,color->red,color->green,color->blue);
   cairo_set_source_rgb(cr, color->red, color->green, color->blue);
-  cairo_paint(cr);      
+  cairo_paint(cr);
   return FALSE;
 }
 

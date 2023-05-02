@@ -237,14 +237,14 @@ void xvtr_menu(GtkWidget *parent) {
     gtk_entry_set_text(GTK_ENTRY(min_frequency[i]),f);
     gtk_grid_attach(GTK_GRID(grid),min_frequency[i],1,i+2,1,1);
     g_signal_connect(min_frequency[i],"changed",G_CALLBACK(min_frequency_cb),GINT_TO_POINTER(i));
-    
+
     max_frequency[i]=gtk_entry_new();
     gtk_entry_set_width_chars(GTK_ENTRY(max_frequency[i]),7);
     sprintf(f,"%5.3f",(double)xvtr->frequencyMax/1000000.0);
     gtk_entry_set_text(GTK_ENTRY(max_frequency[i]),f);
     gtk_grid_attach(GTK_GRID(grid),max_frequency[i],2,i+2,1,1);
     g_signal_connect(max_frequency[i],"changed",G_CALLBACK(max_frequency_cb),GINT_TO_POINTER(i));
-    
+
     lo_frequency[i]=gtk_entry_new();
     gtk_entry_set_width_chars(GTK_ENTRY(lo_frequency[i]),7);
     sprintf(f,"%5.3f",(double)xvtr->frequencyLO/1000000.0);
@@ -262,7 +262,7 @@ void xvtr_menu(GtkWidget *parent) {
     disable_pa[i]=gtk_check_button_new();
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disable_pa[i]),xvtr->disablePA);
     gtk_grid_attach(GTK_GRID(grid),disable_pa[i],7,i+2,1,1);
-    
+
   }
 
   gtk_container_add(GTK_CONTAINER(content),grid);

@@ -331,7 +331,7 @@ fprintf(stderr,"soapy_protocol: receive_thread\n");
     if(elements<0) {
       continue;
     }
-    
+
     for(i=0;i<elements;i++) {
       rx->buffer[i*2]=(double)buffer[i*2];
       rx->buffer[(i*2)+1]=(double)buffer[(i*2)+1];

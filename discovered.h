@@ -38,7 +38,7 @@
 #define DEVICE_ORION           5
 #define DEVICE_HERMES_LITE     6
 #define DEVICE_HERMES_LITE2 1006
-#define DEVICE_ORION2         10 
+#define DEVICE_ORION2         10
 #define DEVICE_STEMLAB       100
 #define DEVICE_STEMLAB_Z20   101
 

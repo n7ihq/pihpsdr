@@ -455,12 +455,12 @@ void vfo_band_changed(int id,int b) {
   if (id == 0) {
       bandstack->current_entry=vfo[id].bandstack;
   }
-  if (id < receivers) { 
+  if (id < receivers) {
     vfo_apply_mode_settings(receiver[id]);
     receiver_vfo_changed(receiver[id]);
   }
 
-  tx_vfo_changed(); 
+  tx_vfo_changed();
   set_alex_antennas();  // This includes scheduling hiprio and general packets
 #ifdef SOAPYSDR
   //
@@ -497,8 +497,8 @@ void vfo_bandstack_changed(int b) {
     vfo_apply_mode_settings(receiver[id]);
     receiver_vfo_changed(receiver[id]);
   }
-   
-  tx_vfo_changed(); 
+
+  tx_vfo_changed();
   set_alex_antennas();  // This includes scheduling hiprio and general packets
   g_idle_add(ext_vfo_update,NULL);
 }
@@ -587,7 +587,7 @@ void vfo_b_to_a() {
   vfo[VFO_A].rit=vfo[VFO_B].rit;
   vfo[VFO_A].lo=vfo[VFO_B].lo;
   vfo[VFO_A].offset=vfo[VFO_B].offset;
-  
+
   receiver_vfo_changed(receiver[0]);
   tx_vfo_changed();
   set_alex_antennas();  // This includes scheduling hiprio and general packets
@@ -1581,7 +1581,7 @@ void num_pad(int val) {
   //
   // The numpad may be difficult to use since the frequency has to be given in Hz
   // TODO: add a multiplier button like "kHz"
-  // TODO: display the current "entered_frequency" somewhere 
+  // TODO: display the current "entered_frequency" somewhere
   //       (not all of us are good in typing blind)
   //
   RECEIVER *rx=active_receiver;

@@ -1,6 +1,6 @@
 /*
  * Layer-3 of MIDI support
- * 
+ *
  * (C) Christoph van Wullen, DL1YCF
  *
  *

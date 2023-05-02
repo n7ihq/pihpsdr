@@ -141,16 +141,16 @@ static void mute_radio_cb(GtkWidget *widget, gpointer data) {
 //
 static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
   int i = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-  
+
   if(active_receiver->local_audio) {
     audio_close_output(active_receiver);                     // audio_close with OLD device
   }
-    
+
   if(active_receiver->audio_name!=NULL) {
     g_free(active_receiver->audio_name);
     active_receiver->audio_name=NULL;
   }
-  
+
   if(i>=0) {
     fprintf(stderr,"local_output_changed rx=%d %s\n",active_receiver->id,output_devices[i].name);
     active_receiver->audio_name=g_new(gchar,strlen(output_devices[i].name)+1);
@@ -214,7 +214,7 @@ void rx_menu(GtkWidget *parent) {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sample_rate_96), active_receiver->sample_rate==96000);
       gtk_grid_attach(GTK_GRID(grid),sample_rate_96,x,3,1,1);
       g_signal_connect(sample_rate_96,"toggled",G_CALLBACK(sample_rate_cb),(gpointer *)96000);
-  
+
       GtkWidget *sample_rate_192=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(sample_rate_48),"192000");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sample_rate_192), active_receiver->sample_rate==192000);
       gtk_grid_attach(GTK_GRID(grid),sample_rate_192,x,4,1,1);
@@ -248,7 +248,7 @@ void rx_menu(GtkWidget *parent) {
       gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate</b>");
       gtk_grid_attach(GTK_GRID(grid),sample_rate_label,x,row,1,1);
       row++;
-      
+
 
       char rate_string[16];
       sprintf(rate_string,"%d",radio->info.soapy.sample_rate);
@@ -274,7 +274,7 @@ void rx_menu(GtkWidget *parent) {
 #endif
 
   }
- 
+
   //
   // The CHARLY25 board (with RedPitaya) has no support for dither or random,
   // so those are left out. For Charly25, PreAmps and Alex Attenuator are controlled via
@@ -309,7 +309,7 @@ void rx_menu(GtkWidget *parent) {
 
       if (filter_board == ALEX && active_receiver->adc == 0
           && ((protocol==ORIGINAL_PROTOCOL && device != DEVICE_ORION2) || (protocol==NEW_PROTOCOL && device != NEW_DEVICE_ORION2))) {
-  
+
         //
         // The "Alex ATT" value is stored in receiver[0] no matter how the ADCs are selected
         //
@@ -408,7 +408,7 @@ void rx_menu(GtkWidget *parent) {
   gtk_widget_show(mute_audio_b);
   gtk_grid_attach(GTK_GRID(grid),mute_audio_b,x,++row,1,1);
   g_signal_connect(mute_audio_b,"toggled",G_CALLBACK(mute_audio_cb),NULL);
-  
+
   row++;
 
   GtkWidget *mute_radio_b=gtk_check_button_new_with_label("Mute audio to radio");

@@ -244,7 +244,7 @@ void pa_menu(GtkWidget *parent) {
   gtk_widget_show(tx_out_of_band_b);
   gtk_grid_attach(GTK_GRID(grid0),tx_out_of_band_b,3,0,1,1);
   g_signal_connect(tx_out_of_band_b,"toggled",G_CALLBACK(tx_out_of_band_cb),NULL);
- 
+
   GtkWidget *grid1=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid1),10);
 
@@ -318,7 +318,7 @@ void pa_menu(GtkWidget *parent) {
 
   grid2=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid2),10);
-  
+
   switch(pa_power) {
     case PA_1W:
       show_1W(FALSE);

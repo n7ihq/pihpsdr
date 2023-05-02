@@ -324,7 +324,7 @@ void old_protocol_init(int rx,int pixels,int rate) {
   }
 
   display_width=pixels;
- 
+
 #ifdef USBOZY
 //
 // if we have a USB interfaced Ozy device:
@@ -398,7 +398,7 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
 
   g_print( "old_protocol: USB EP6 receive_thread\n");
   running=1;
- 
+
   while (running)
   {
     bytes = ozy_read(EP6_IN_ID,ep6_inbuffer,EP6_BUFFER_SIZE); // read a 2K buffer at a time
@@ -959,7 +959,7 @@ static void process_control_bytes() {
         }
       }
       //
-      //DEBUG code to monitor HL2 TX-FIFO filling and 
+      //DEBUG code to monitor HL2 TX-FIFO filling and
       //underflow/overflow detection.
       //
       // Measured on HL2 software version 7.2:
@@ -1017,7 +1017,7 @@ static void process_control_bytes() {
       }
       //
       //  calculate moving averages of fwd and rev voltages to have a correct SWR
-      //  at the edges of an RF pulse. Otherwise a false trigger of the SWR 
+      //  at the edges of an RF pulse. Otherwise a false trigger of the SWR
       //  protection may occur. Note that the rate at which these packets arrive strongly
       //  depend on the sample rate and the number of receivers.
       //  This exponential average means that the power drops to 1 percent within 16 hits
@@ -1199,7 +1199,7 @@ static void process_ozy_byte(int b) {
           fsample = transmitter->local_microphone ? audio_get_next_mic_sample() : (float) mic_sample * 0.00003051;
         }
         add_mic_sample(transmitter,fsample);
-        // micsamplecount is the "heart beat" for sending data from the 
+        // micsamplecount is the "heart beat" for sending data from the
         // ring buffer to the radio
         micsamplecount++;
         mic_samples=0;
@@ -1403,7 +1403,7 @@ void ozy_send_buffer() {
       // a pennylane is chosen implicitly (not no drive level adjustment via IQ scaling in this case!)
       // and CONFIG_BOTH becomes effective.
       //
-      
+
       output_buffer[C1] |= CONFIG_MERCURY;
 
       if (atlas_penelope) {
@@ -1568,7 +1568,7 @@ void ozy_send_buffer() {
 
     // 0 ... 7 maps on 1 ... 8 receivers
     output_buffer[C4]|=(num_hpsdr_receivers-1)<<3;
-    
+
 //
 //  Now we set the bits for Ant1/2/3 (RX and TX may be different)
 //
@@ -1758,7 +1758,7 @@ void ozy_send_buffer() {
           output_buffer[C3] |= 0x20;  // bypass all RX filters
 	  //
 	  // For "manual" filter selection we also need to select the appropriate TX LPF
-	  // 
+	  //
 	  // We here use the transition frequencies used in Thetis by default. Note the
 	  // P1 firmware has different default transition frequences.
 	  // Even more odd, HERMES routes 15m through the 10/12 LPF, while
@@ -1820,7 +1820,7 @@ void ozy_send_buffer() {
         if(transmitter->puresignal) {
           output_buffer[C2]|=0x40;
         }
-  
+
 	// upon TX, use transmitter->attenuation
 	// Usually the firmware takes care of this, but it is no
 	// harm to do this here as well
@@ -1853,7 +1853,7 @@ void ozy_send_buffer() {
              output_buffer[C4] = 0x40 | (45 - (transmitter->attenuation & 0x1F));
             }
 #endif
-          } else { 
+          } else {
 	    output_buffer[C4] = 0x40 | (rxgain & 0x3F);
           }
         } else {
@@ -1861,7 +1861,7 @@ void ozy_send_buffer() {
             output_buffer[C4]=0x20 | (transmitter->attenuation & 0x1F);
           } else {
             output_buffer[C4]=0x20 | (adc[0].attenuation & 0x1F);
-          } 
+          }
         }
         command=5;
 	break;
@@ -1982,7 +1982,7 @@ void ozy_send_buffer() {
         // TX iq samples before HL2 starts TXing. This should be
         // enough to prevent underflows and leave some head-room.
         // My measurements indicate that the TX FIFO can hold about
-        // 75 msec or 3600 samples (cum grano salis). 
+        // 75 msec or 3600 samples (cum grano salis).
         output_buffer[C0]=0x2E;
         output_buffer[C3]=20;   // 20 msec PTT hang time, only bits 4:0
         output_buffer[C4]=40;   // 40 msec TX latency,    only bits 6:0
@@ -2160,7 +2160,7 @@ static void metis_restart() {
   //
   txring_inptr = 0;
   txring_outptr = 0;
-  // 
+  //
   // Some (older) HPSDR apps on the RedPitaya have very small
   // buffers that over-run if too much data is sent
   // to the RedPitaya *before* sending a METIS start packet.
@@ -2191,7 +2191,7 @@ static void metis_start_stop(int command) {
   int i;
   int tmp;
   unsigned char buffer[1032];
-    
+
   g_print("%s: %d\n",__FUNCTION__,command);
   //
   // Clear TX IQ ring buffer

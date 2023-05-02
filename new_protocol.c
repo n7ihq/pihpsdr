@@ -186,7 +186,7 @@ static socklen_t length=sizeof(addr);
 // at a very high rate, we do it the "pedestrian" way, which may
 // alleviate the system load a little.
 //
-// Therefore we allocate a pool of network buffers *once*, make 
+// Therefore we allocate a pool of network buffers *once*, make
 // them a linked list, and simply maintain a "free" flag.
 //
 // This ONLY applies to the network buffers filled with data in
@@ -195,9 +195,9 @@ static socklen_t length=sizeof(addr);
 ////////////////////////////////////////////////////////////////////////////
 
 //
-// One buffer. The fences can be used to detect over-writing 
+// One buffer. The fences can be used to detect over-writing
 // (feature currently not used).
-// 
+//
 //
 
 struct mybuffer_ {
@@ -213,7 +213,7 @@ typedef struct mybuffer_ mybuffer;
 //
 // number of buffers allocated (for statistics)
 //
-static int num_buf = 0; 
+static int num_buf = 0;
 
 //
 // head of buffer list
@@ -897,7 +897,7 @@ static void new_protocol_high_priority() {
 //  the frequency of VFO_A is used with ADC0, and that the
 //  frequency of VFO_B can safely be used to control the
 //  filters of ADC1 (if there are any).
-//  
+//
 
     switch(device) {
       case NEW_DEVICE_ORION2:
@@ -1169,7 +1169,7 @@ static void new_protocol_high_priority() {
         abort();
         //exit(1);
     }
- 
+
     if(rc!=sizeof(high_priority_buffer_to_radio)) {
       g_print("sendto socket for high_priority: %d rather than %ld",rc,(long)sizeof(high_priority_buffer_to_radio));
     }
@@ -1361,7 +1361,7 @@ static void new_protocol_receive_specific() {
       g_print("sendto socket failed for receive_specific: %d\n",rc);
       exit(1);
     }
- 
+
     if(rc!=sizeof(receive_specific_buffer)) {
       g_print("sendto socket for receive_specific: %d rather than %ld",rc,(long)sizeof(receive_specific_buffer));
     }
@@ -1402,7 +1402,7 @@ void new_protocol_menu_stop() {
   // halt the protocol, wait 200 msec, and re-start it
   // the data socket is drained but kept open
   //
-  running=0; 
+  running=0;
   // wait until the thread that receives from the radio has terminated
   g_thread_join(new_protocol_thread_id);
   g_thread_join(new_protocol_timer_thread_id);
@@ -1421,7 +1421,7 @@ void new_protocol_menu_stop() {
   buffer=malloc(NET_BUFFER_SIZE);
   while (select(data_socket+1, &fds, NULL, NULL, &tv) > 0) {
     recvfrom(data_socket,buffer,NET_BUFFER_SIZE,0,(struct sockaddr*)&addr,&length);
-  }     
+  }
   free(buffer);
 }
 
@@ -1755,10 +1755,10 @@ static void process_div_iq_data(unsigned char*buffer) {
     rightsample0  = (int)((signed char)buffer[b++]) << 16;
     rightsample0 |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     rightsample0 |= (int)((unsigned char)buffer[b++]&0xFF);
-    
+
     leftsampledouble0=(double)leftsample0*1.1920928955078125E-7;
     rightsampledouble0=(double)rightsample0*1.1920928955078125E-7;
-    
+
     leftsample1   = (int)((signed char) buffer[b++])<<16;
     leftsample1  |= (int)((((unsigned char)buffer[b++])<<8)&0xFF00);
     leftsample1  |= (int)((unsigned char)buffer[b++]&0xFF);
@@ -2006,7 +2006,7 @@ void new_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
   audiobuffer[audioindex++]=left_audio_sample;
   audiobuffer[audioindex++]=right_audio_sample>>8;
   audiobuffer[audioindex++]=right_audio_sample;
-            
+
   if(audioindex>=sizeof(audiobuffer)) {
 
     // insert the sequence

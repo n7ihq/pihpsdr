@@ -192,7 +192,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
     wide_port=rc;
     fprintf(stderr,"GP: Wideband data snd       port is  %4d\n", rc);
   }
-  rc=buffer[23]; 
+  rc=buffer[23];
   if (rc != wide_enable || !run) {
     wide_enable = rc;
     fprintf(stderr,"GP: Wideband Enable Flag is %d\n", rc);
@@ -517,14 +517,14 @@ void *duc_specific_thread(void *data) {
 	  fprintf(stderr,"TX: ORION PTT=ring MIC=tip\n");
         } else {
 	  fprintf(stderr,"TX: ORION PTT=tip  MIC=ring\n");
-        }       
+        }
         if (orion & 0x01) {
 	  gain= buffer[51];
 	  fprintf(stderr,"TX: ORION Line-In selected\n");
         } else {
 	  fprintf(stderr,"TX: ORION Microphone selected\n");
         }
-        if (orion & 0x02) { 
+        if (orion & 0x02) {
 	  fprintf(stderr,"TX: ORION Microphone 20dB boost selected\n");
         } else {
 	  fprintf(stderr,"TX: ORION Microphone 20dB boost NOT selected\n");
@@ -803,7 +803,7 @@ void *rx_thread(void *data) {
   int divptr;
   int decimation;
   unsigned int seed;
-  
+
   struct timespec delay;
 
   myddc=(int) (uintptr_t) data;
@@ -835,14 +835,14 @@ void *rx_thread(void *data) {
   tonept=noisept=0;
   clock_gettime(CLOCK_MONOTONIC, &delay);
   fprintf(stderr,"RX thread %d, enabled=%d\n", myddc, ddcenable[myddc]);
-  rxptr=txptr-4096;  
+  rxptr=txptr-4096;
   if (rxptr < 0) rxptr += NEWRTXLEN;
   divptr=0;
   while (run) {
 	if (ddcenable[myddc] <= 0 || rxrate[myddc] == 0 || rxfreq[myddc] == 0) {
 	  usleep(5000);
           clock_gettime(CLOCK_MONOTONIC, &delay);
-	  rxptr=txptr-4096;  
+	  rxptr=txptr-4096;
 	  if (rxptr < 0) rxptr += NEWRTXLEN;
           continue;
         }
@@ -875,7 +875,7 @@ void *rx_thread(void *data) {
 	// ADC1 TX: HERMES only: original TX signal
 	// ADC2   : original TX signal
 	//
-	  
+	
         p=buffer;
         *p++ =(seqnum >> 24) & 0xFF;
         *p++ =(seqnum >> 16) & 0xFF;
@@ -905,7 +905,7 @@ void *rx_thread(void *data) {
           if (noisept == LENNOISE) noisept=rand_r(&seed) / NOISEDIV;
 	  //
 	  // PS: produce sample PAIRS,
-	  // a) distorted TX data (with Drive and Attenuation) 
+	  // a) distorted TX data (with Drive and Attenuation)
 	  // b) original TX data (normalized)
 	  //
 	  // DIV: produce sample PAIRS,
@@ -1026,7 +1026,7 @@ void *tx_thread(void * data) {
     return NULL;
   }
 
-  seqnum=0; 
+  seqnum=0;
   while(run) {
      rc = recvfrom(sock, buffer, 1444, 0,(struct sockaddr *)&addr, &lenaddr);
      if (rc < 0 && errno != EAGAIN) {
@@ -1129,14 +1129,14 @@ void *send_highprio_thread(void *data) {
     *p++ = 0;    // no ADC overload
     *p++ = 0;
     *p++ = txdrive;
- 
+
     p +=6;
 
-    rc=(int) ((4095.0/c1)*sqrt(100.0*txlevel*c2));    
+    rc=(int) ((4095.0/c1)*sqrt(100.0*txlevel*c2));
     *p++ = (rc >> 8) & 0xFF;
     *p++ = (rc     ) & 0xFF;
 
-    buffer[49]=63;   // about 13 volts supply 
+    buffer[49]=63;   // about 13 volts supply
 
     if (sendto(sock, buffer, 60, 0, (struct sockaddr*)&addr_new, sizeof(addr_new)) < 0) {
        perror("***** ERROR: HP send thread sendto");

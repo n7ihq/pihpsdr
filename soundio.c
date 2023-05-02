@@ -117,7 +117,7 @@ static void write_callback(struct SoundIoOutStream *outstream, int frame_count_m
           *s=output_right_buffer[remove_index];
         }
         areas[channel].ptr += areas[channel].step;
-      } 
+      }
       frames--;
       remove_index++;
       if(remove_index==BUFFER_SIZE) {
@@ -217,7 +217,7 @@ fprintf(stderr,"audio_open_input: %d\n",n_selected_input_device);
   char hw[16];
   char *selected=input_devices[n_selected_input_device];
   fprintf(stderr,"audio_open_input: selected=%d:%s\n",n_selected_input_device,selected);
-  
+
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
       mic_buffer_size = 720;
@@ -228,7 +228,7 @@ fprintf(stderr,"audio_open_input: %d\n",n_selected_input_device);
     default:
       break;
   }
-  
+
   fprintf(stderr,"audio_open_input: mic_buffer_size=%d\n",mic_buffer_size);
   i=0;
   while(selected[i]!=' ') {

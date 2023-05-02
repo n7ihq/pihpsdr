@@ -476,7 +476,7 @@ void tx_menu(GtkWidget *parent) {
   g_signal_connect(tune_use_drive_b,"toggled",G_CALLBACK(tune_use_drive_cb),NULL);
 
   col++;
-  
+
   GtkWidget *tune_drive_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(tune_drive_label), "<b>Drive for Tune:</b>");
   gtk_widget_set_halign(tune_drive_label, GTK_ALIGN_START);

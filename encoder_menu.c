@@ -142,7 +142,7 @@ void encoder_menu(GtkWidget *parent) {
         gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
         row++;
         col=4;
-        
+
         widget=gtk_label_new(NULL);
         gtk_widget_set_name(widget,"small_button");
         gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
@@ -405,7 +405,7 @@ void encoder_menu(GtkWidget *parent) {
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
     }
-    
+
     row++;
     col=0;
   }

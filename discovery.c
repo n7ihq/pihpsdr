@@ -285,7 +285,7 @@ void discovery() {
   discover_only_stemlab=0;
 
   status_text("Discovery");
-  
+
     fprintf(stderr,"discovery: found %d devices\n", devices);
     gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_ARROW));
 

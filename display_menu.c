@@ -388,7 +388,7 @@ void display_menu(GtkWidget *parent) {
   row++;
   col=0;
 
-  
+
   GtkWidget *b_display_waterfall=gtk_check_button_new_with_label("Display Waterfall");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_waterfall), active_receiver->display_waterfall);
   gtk_widget_show(b_display_waterfall);

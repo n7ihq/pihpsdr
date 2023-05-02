@@ -70,7 +70,7 @@
 
 //#define PACKETLIST  // indicate incoming packets with time-stamp
 
-#define EXTERN 
+#define EXTERN
 #include "hpsdrsim.h"
 
 /*
@@ -187,7 +187,7 @@ static void *handler_ep6(void *arg);
 static double  last_i_sample=0.0;
 static double  last_q_sample=0.0;
 static int  txptr=0;
-static int  oldnew=3;    // 1: only P1, 2: only P2, 3: P1 and P2, 
+static int  oldnew=3;    // 1: only P1, 2: only P2, 3: P1 and P2,
 
 static double txlevel;
 
@@ -1214,12 +1214,12 @@ void process_ep2(uint8_t *frame)
 	    chk_data(frame[1] << 2 | (frame[2] & 3), pwmmin,"PWM MIN");
 	    chk_data(frame[3] << 2 | (frame[4] & 3), pwmmax,"PWM MAX");
 	    break;
-        
+
 	case 36:
 	case 37:
 	    chk_data(frame[1] & 0x7f, adc2bpf,"ADC2 BPF settings");
 	    chk_data((frame[1] >> 7) & 0x01, rx2gnd, "Ground-RX2-Input");
-            chk_data(frame[2] & 0x02, anan7kxvtr, "Anan7k/8k XVTR enable");  
+            chk_data(frame[2] & 0x02, anan7kxvtr, "Anan7k/8k XVTR enable");
 	    chk_data(frame[2] & 0x40, anan7kps,  "Anan7k PureSignal flag");
 	    chk_data(frame[3] << 8 | frame[4], envgain, "Firmware EnvGain");
 	    break;
@@ -1295,7 +1295,7 @@ void *handler_ep6(void *arg)
 	// the typical TX FIFO size
         rxptr=txptr-4096;
         if (rxptr < 0) rxptr += OLDRTXLEN;
-        
+
         clock_gettime(CLOCK_MONOTONIC, &delay);
 	while (1)
 	{
@@ -1369,7 +1369,7 @@ void *handler_ep6(void *arg)
 			    header_offset=0;
 			    break;
 		    }
-			    
+			
 		    pointer += 8;
 		    memset(pointer, 0, 504);
 		    fac1=rxatt_dbl[0]*0.0002239;	// Amplitude of 800-Hz-signal to ADC1

@@ -559,7 +559,7 @@ void stemlab_discovery() {
     fprintf(stderr, "STEMLAB ping error: %s\n", curl_easy_strerror(curl_error));
     return;
   }
-  
+
 //
 // Determine which SDR apps are present on the RedPitaya. The list may be empty.
 //
@@ -589,7 +589,7 @@ void stemlab_discovery() {
     fprintf(stderr, "Could contact web server but no SDR apps found.\n");
     return;
   }
-    
+
 //
 // Constructe "device" descripter. Hi-Jack the software version to
 // encode which apps are present.

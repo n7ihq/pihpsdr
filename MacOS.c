@@ -64,12 +64,12 @@ void MacOSstartup(char *path) {
 //
 //  works from macOS 10.6 so should be enough
 //  no return check is needed
- 
+
     IOPMAssertionCreateWithName (kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn,
                                 CFSTR ("piHPSDR"), &keep_awake);
 //
 //  If the current work dir is NOT "/", just do nothing
-//    
+//
     *workdir=0;
     if (getcwd(workdir,sizeof(workdir)) == NULL) return;
     if (strlen(workdir) != 1 || *workdir != '/') return;

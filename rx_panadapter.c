@@ -244,7 +244,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       cairo_line_to(cr,(double)display_width,y);
 
       sprintf(v,"%d dBm",i);
-      cairo_move_to(cr, 1, y);  
+      cairo_move_to(cr, 1, y);
       cairo_show_text(cr, v);
     }
   }
@@ -376,7 +376,7 @@ void rx_panadapter_update(RECEIVER *rx) {
 
     sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
     cairo_text_extents(cr, v, &extents);
-    cairo_move_to(cr, x-(extents.width/2.0), 10.0);  
+    cairo_move_to(cr, x-(extents.width/2.0), 10.0);
     cairo_show_text(cr, v);
     f+=divisor;
   }
@@ -404,7 +404,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       }
     }
   }
-            
+
 #ifdef CLIENT_SERVER
   if(clients!=NULL) {
     cairo_select_font_face(cr, DISPLAY_FONT,
@@ -541,7 +541,7 @@ void rx_panadapter_update(RECEIVER *rx) {
                             * (double) display_height
                             / (rx->panadapter_high - rx->panadapter_low));
     S9 = 1.0-(S9/(double)display_height);
-  
+
     if(active) {
       cairo_pattern_add_color_stop_rgba(gradient,0.0,         COLOUR_GRAD1);
       cairo_pattern_add_color_stop_rgba(gradient,S9/3.0,      COLOUR_GRAD2);
@@ -633,12 +633,12 @@ void rx_panadapter_update(RECEIVER *rx) {
 
     double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
     sprintf(text,"%0.1fC",t);
-    cairo_move_to(cr, 100.0, 30.0);  
+    cairo_move_to(cr, 100.0, 30.0);
     cairo_show_text(cr, text);
 
     double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
     sprintf(text,"%0.0fmA",c);
-    cairo_move_to(cr, 160.0, 30.0);  
+    cairo_move_to(cr, 160.0, 30.0);
     cairo_show_text(cr, text);
   }
 

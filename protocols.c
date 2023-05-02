@@ -63,7 +63,7 @@ void protocols_save_state() {
   sprintf(value,"%d",autostart);
   setProperty("autostart",value);
   saveProperties("protocols.props");
-  
+
 }
 
 void protocols_restore_state() {

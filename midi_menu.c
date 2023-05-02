@@ -362,7 +362,7 @@ static void wheelparam_cb(GtkWidget *widget, gpointer user_data) {
         if (newval > thisFr2) newval=thisFr2;
         thisFr1=newval;
         break;
-     case 11:  // Fast Right2 
+     case 11:  // Fast Right2
         if (newval < thisFr1) newval=thisFr1;
         thisFr2=newval;
         break;
@@ -385,7 +385,7 @@ static void wheelparam_cb(GtkWidget *widget, gpointer user_data) {
 static void clear_cb(GtkWidget *widget,gpointer user_data) {
 
   gtk_list_store_clear(store);
-  MidiReleaseCommands();  
+  MidiReleaseCommands();
 }
 
 static void save_cb(GtkWidget *widget,gpointer user_data) {
@@ -1032,7 +1032,7 @@ void midi_menu(GtkWidget *parent) {
   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(WheelGrid), lbl, col, row, 1, 1);
   col++;
- 
+
   set_fl1 = gtk_spin_button_new_with_range(-1.0, 127.0, 1.0);
   gtk_grid_attach(GTK_GRID(WheelGrid), set_fl1, col, row, 1, 1);
   g_signal_connect(set_fl1, "value-changed", G_CALLBACK(wheelparam_cb), GINT_TO_POINTER(4));
@@ -1253,7 +1253,7 @@ static int update(void *data) {
       gtk_label_set_text(GTK_LABEL(newMin),text);
       sprintf(text,"%d",thisMax);
       gtk_label_set_text(GTK_LABEL(newMax),text);
-  
+
       find_current_cmd();
       g_print("%s: current_cmd %p\n",__FUNCTION__,current_cmd);
 
@@ -1402,12 +1402,12 @@ int ProcessNewMidiConfigureEvent(void * data) {
 
       valid=gtk_tree_model_iter_next(model,&iter);
     }
-    
+
     update(GINT_TO_POINTER(UPDATE_NEW));
   }
   return 0;
 }
- 
+
 void NewMidiConfigureEvent(enum MIDIevent event, int channel, int note, int val) {
   myevent *data = g_new(myevent, 1);
   data->event = event;

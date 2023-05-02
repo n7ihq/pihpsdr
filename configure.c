@@ -189,7 +189,7 @@ void configure_gpio(GtkWidget *parent) {
       gtk_spin_button_set_value (GTK_SPIN_BUTTON(widget),encoders[i].top_encoder_address_a);
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
- 
+
       widget=gtk_spin_button_new_with_range (0.0,28.0,1.0);
       gtk_spin_button_set_value (GTK_SPIN_BUTTON(widget),encoders[i].top_encoder_address_b);
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -226,7 +226,7 @@ void configure_gpio(GtkWidget *parent) {
         max_switches=0;
         break;
     }
-  
+
   if (max_switches > 0) {
     grid=gtk_grid_new();
     gtk_grid_set_column_homogeneous(GTK_GRID(grid),FALSE);
@@ -236,12 +236,12 @@ void configure_gpio(GtkWidget *parent) {
 
     row=0;
     col=0;
-  
+
 /*
     widget=gtk_label_new(NULL);
     gtk_label_set_markup (GTK_LABEL(widget), "<span foreground=\"#ff0000\"><b>Note: Pin number now use Broadcom GPIO</b></span>");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,6,1);
-  
+
     row++;
     col=0;
 */
@@ -250,28 +250,28 @@ void configure_gpio(GtkWidget *parent) {
       gtk_label_set_markup (GTK_LABEL(widget), "<b>ID</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
-    
+
       widget=gtk_label_new(NULL);
       gtk_label_set_markup (GTK_LABEL(widget), "<b>Gpio</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
     }
-  
+
     row++;
     col=0;
-  
+
     for(i=0;i<max_switches;i++) {
       widget=gtk_label_new(NULL);
       gchar id[16];
       g_sprintf(id,"<b>%d</b>",i);
       gtk_label_set_markup (GTK_LABEL(widget), id);
       gtk_grid_attach(GTK_GRID(grid),widget,(i/8)*2,(row+(i%8)),1,1);
-  
+
       widget=gtk_spin_button_new_with_range (0.0,28.0,1.0);
       gtk_spin_button_set_value (GTK_SPIN_BUTTON(widget),switches[i].switch_address);
       gtk_grid_attach(GTK_GRID(grid),widget,((i/8)*2)+1,(row+(i%8)),1,1);
     }
-    
+
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new("switches"));
   }
 
@@ -285,7 +285,7 @@ void configure_gpio(GtkWidget *parent) {
 
     row=0;
     col=0;
- 
+
     widget=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(widget),"<b>I2C Device</b>");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -333,7 +333,7 @@ void configure_gpio(GtkWidget *parent) {
 
       row++;
     }
-    
+
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new("i2c"));
   }
 

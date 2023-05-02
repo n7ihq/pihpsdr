@@ -222,7 +222,7 @@ g_print("oc_menu: parent=%p\n",parent);
         gtk_widget_show(oc_rx_b);
         gtk_grid_attach(GTK_GRID(grid),oc_rx_b,j,row,1,1);
         g_signal_connect(oc_rx_b,"toggled",G_CALLBACK(oc_rx_cb),(gpointer)(long)(j+(i<<4)));
-  
+
         GtkWidget *oc_tx_b=gtk_check_button_new();
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (oc_tx_b), (band->OCtx&mask)==mask);
         gtk_widget_show(oc_tx_b);

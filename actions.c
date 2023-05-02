@@ -1297,7 +1297,7 @@ void Action2String(int id, char *str) {
     strcpy(str,ActionTable[id].button_str);
   }
 }
- 
+
 //
 // Function to convert a string to an action number
 // This is used to specify actions in the props files.

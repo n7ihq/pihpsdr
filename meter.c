@@ -121,7 +121,7 @@ fprintf(stderr,"meter_init: width=%d height=%d\n",width,height);
 
   meter = gtk_drawing_area_new ();
   gtk_widget_set_size_request (meter, width, height);
- 
+
   /* Signals used to handle the backing surface */
   g_signal_connect (meter, "draw",
             G_CALLBACK (meter_draw_cb), NULL);
@@ -139,7 +139,7 @@ fprintf(stderr,"meter_init: width=%d height=%d\n",width,height);
 
 
 void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double exciter,double alc,double swr) {
-  
+
   double rxlvl;   // only used for RX input level, clones "value"
   double pwr;     // only used for TX power, clones "value"
   char sf[32];
@@ -176,7 +176,7 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   // - if current_value >  max_value then set max_value to current_value and reset counter
   //
   // A new max value will therefore be immediately visible, the display stays (if not surpassed) for
-  // CNTMAX cycles and then the displayed value will gradually approach the new one(s). 
+  // CNTMAX cycles and then the displayed value will gradually approach the new one(s).
   #define CNTMAX 5
   #define EXPAV1 0.75
   #define EXPAV2 0.25
@@ -341,7 +341,7 @@ if(analog_meter) {
       if(vfo[active_receiver->id].frequency>30000000LL) {
         angle=angle+20;
       }
-     
+
       radians=angle*M_PI/180.0;
       cairo_arc(cr, cx, cx, radius+8, radians, radians);
       cairo_line_to(cr, cx, cx);
@@ -479,7 +479,7 @@ if(analog_meter) {
     cairo_set_source_rgba(cr, COLOUR_METER);
     cairo_move_to(cr, 0.0, 8.0);
     cairo_show_text(cr, "Mic Lvl");
-    
+
 
     cairo_move_to(cr, offset, 0.0);
     cairo_line_to(cr, offset, 5.0);
@@ -600,7 +600,7 @@ if(analog_meter) {
         if(vfo[active_receiver->id].frequency>30000000LL) {
           l=max_rxlvl+20.0;
         }
-        
+
 	// use colours from the "gradient" panadapter display,
         // but use no gradient: S0-S9 first colour, <S9 last colour
 	cairo_pattern_t *pat=cairo_pattern_create_linear(0.0,0.0,114.0,0.0);

@@ -121,7 +121,7 @@ void meter_menu (GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),smeter_average,col,row,1,1);
   g_signal_connect(smeter_average,"toggled",G_CALLBACK(smeter_select_cb),GINT_TO_POINTER(RXA_S_AV));
 
-  col++;   
+  col++;
 
   GtkWidget *alc_average=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(alc_peak),"ALC Average");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (alc_average), alc==TXA_ALC_AV);

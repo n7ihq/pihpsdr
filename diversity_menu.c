@@ -32,7 +32,7 @@
 #include "sliders.h"
 #include "ext.h"
 
-#include <math.h> 
+#include <math.h>
 
 static GtkWidget *parent_window=NULL;
 
@@ -258,7 +258,7 @@ void diversity_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),phase_fine_scale,1,4,1,1);
   g_signal_connect(G_OBJECT(phase_fine_scale),"value_changed",G_CALLBACK(phase_fine_changed_cb),NULL);
 
-  
+
   gtk_container_add(GTK_CONTAINER(content),grid);
 
   sub_menu=dialog;

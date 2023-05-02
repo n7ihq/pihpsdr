@@ -576,7 +576,7 @@ hpsdrsim:       hpsdrsim.o newhpsdrsim.o
 
 #############################################################################
 #
-# bootloader is a small command-line program that allows to 
+# bootloader is a small command-line program that allows to
 # set the radio's IP address and upload firmware through the
 # ancient protocol. This program can only be run as root since
 # this protocol requires "sniffing" at the Ethernet adapter

@@ -271,7 +271,7 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(name,"receiver.%d.waterfall_automatic",rx->id);
     sprintf(value,"%d",rx->waterfall_automatic);
     setProperty(name,value);
-  
+
     sprintf(name,"receiver.%d.alex_attenuation",rx->id);
     sprintf(value,"%d",rx->alex_attenuation);
     setProperty(name,value);
@@ -337,18 +337,18 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(name,"receiver.%d.low_latency",rx->id);
     sprintf(value,"%d",rx->low_latency);
     setProperty(name,value);
-  
+
     sprintf(name,"receiver.%d.deviation",rx->id);
     sprintf(value,"%d",rx->deviation);
     setProperty(name,value);
-  
+
     sprintf(name,"receiver.%d.squelch_enable",rx->id);
     sprintf(value,"%d",rx->squelch_enable);
     setProperty(name,value);
     sprintf(name,"receiver.%d.squelch",rx->id);
     sprintf(value,"%f",rx->squelch);
     setProperty(name,value);
-  
+
     sprintf(name,"receiver.%d.zoom",rx->id);
     sprintf(value,"%d",rx->zoom);
     setProperty(name,value);
@@ -531,7 +531,7 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.ae",rx->id);
     value=getProperty(name);
     if(value) rx->nr2_ae=atoi(value);
-  
+
     sprintf(name,"receiver.%d.low_latency",rx->id);
     value=getProperty(name);
     if(value) rx->low_latency=atoi(value);
@@ -539,7 +539,7 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.deviation",rx->id);
     value=getProperty(name);
     if(value) rx->deviation=atoi(value);
-  
+
     sprintf(name,"receiver.%d.squelch_enable",rx->id);
     value=getProperty(name);
     if(value) rx->squelch_enable=atoi(value);
@@ -749,7 +749,7 @@ void set_deviation(RECEIVER *rx) {
 }
 
 void set_agc(RECEIVER *rx, int agc) {
- 
+
   SetRXAAGCMode(rx->id, agc);
   //SetRXAAGCThresh(rx->id, agc_thresh_point, 4096.0, rx->sample_rate);
   SetRXAAGCSlope(rx->id,rx->agc_slope);
@@ -912,7 +912,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
     // display only the central part.
     //
     // Also need a mutex, when changing sample rate
-    // 
+    //
     g_mutex_init(&rx->mutex);
     if (protocol == ORIGINAL_PROTOCOL) {
 	rx->pixels=(sample_rate/24000) * width;
@@ -960,7 +960,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->nr2_gain_method=2;
   rx->nr2_npe_method=0;
   rx->nr2_ae=1;
-  
+
   rx->alex_antenna=0;
   rx->alex_attenuation=0;
 
@@ -968,7 +968,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->agc_gain=80.0;
   rx->agc_slope=35.0;
   rx->agc_hang_threshold=0.0;
-  
+
   rx->local_audio_buffer=NULL;
   rx->local_audio_buffer_size=2048;
   rx->local_audio=0;
@@ -1097,7 +1097,7 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->nr2_gain_method=2;
   rx->nr2_npe_method=0;
   rx->nr2_ae=1;
-  
+
   BAND *b=band_get_band(vfo[rx->id].band);
   rx->alex_antenna=b->alexRxAntenna;
   rx->alex_attenuation=b->alexAttenuation;
@@ -1106,7 +1106,7 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->agc_gain=80.0;
   rx->agc_slope=35.0;
   rx->agc_hang_threshold=0.0;
-  
+
   rx->local_audio=0;
   g_mutex_init(&rx->local_audio_mutex);
   rx->local_audio_buffer=NULL;
@@ -1241,7 +1241,7 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
 
   SetDisplayDetectorMode(rx->id, 0, display_detector_mode);
   SetDisplayAverageMode(rx->id, 0,  display_average_mode);
-   
+
   calculate_display_average(rx);
 
   create_visual(rx);

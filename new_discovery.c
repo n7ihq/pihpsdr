@@ -52,7 +52,7 @@ static GThread *discover_thread_id;
 gpointer new_discover_receive_thread(gpointer data);
 
 void print_device(int i) {
-    fprintf(stderr,"discovery: found protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
+    fprintf(stderr,"discovery: found protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
         discovered[i].protocol,
         discovered[i].device,
         discovered[i].software_version,
@@ -81,7 +81,7 @@ void new_discovery() {
         //
         if (ifa->ifa_addr) {
             if(
-                ifa->ifa_addr->sa_family == AF_INET 
+                ifa->ifa_addr->sa_family == AF_INET
              && (ifa->ifa_flags&IFF_UP)==IFF_UP
              && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING
              && strncmp("veth", ifa->ifa_name, 4)
@@ -109,9 +109,9 @@ void new_discovery() {
     }
     if (!is_local) new_discover(NULL,2);
 
-    
+
     fprintf(stderr, "new_discovery found %d devices\n",devices);
-    
+
     for(i=0;i<devices;i++) {
         print_device(i);
     }
@@ -356,7 +356,7 @@ gpointer new_discover_receive_thread(gpointer data) {
                     // "discovered" data structure.
                     //
 
-                    fprintf(stderr,"new_discover: P2(%d)  device=%d (%dRX) software_version=%d(.%d) status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
+                    fprintf(stderr,"new_discover: P2(%d)  device=%d (%dRX) software_version=%d(.%d) status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
                             buffer[12] & 0xFF,
                             discovered[devices].device,
                             buffer[20] & 0xFF,

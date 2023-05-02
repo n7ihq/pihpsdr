@@ -200,7 +200,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_paint (cr);
 
-  
+
   // filter
   if (txmode != modeCWU && txmode != modeCWL) {
     cairo_set_source_rgba(cr, COLOUR_PAN_FILTER);
@@ -282,9 +282,9 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         char v[32];
         sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
-        //cairo_move_to(cr, (double)i, (double)(display_height-10));  
+        //cairo_move_to(cr, (double)i, (double)(display_height-10));
         cairo_text_extents(cr, v, &extents);
-        cairo_move_to(cr, (double)i-(extents.width/2.0), 10.0);  
+        cairo_move_to(cr, (double)i-(extents.width/2.0), 10.0);
         cairo_show_text(cr, v);
       }
     }
@@ -313,7 +313,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
       cairo_stroke(cr);
     }
   }
-            
+
   // cursor
   cairo_set_source_rgba(cr, COLOUR_ALARM);
   cairo_set_line_width(cr, 1.0);

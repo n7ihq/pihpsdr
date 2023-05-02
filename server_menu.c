@@ -92,7 +92,7 @@ void server_menu(GtkWidget *parent) {
   gtk_widget_show(server_enable_b);
   gtk_grid_attach(GTK_GRID(grid),server_enable_b,0,1,1,1);
   g_signal_connect(server_enable_b,"toggled",G_CALLBACK(server_enable_cb),NULL);
- 
+
   GtkWidget *server_port_label =gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(server_port_label), "<b>Server Port</b>");
   gtk_widget_show(server_port_label);

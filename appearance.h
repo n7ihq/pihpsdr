@@ -57,7 +57,7 @@
 #define COLOUR_ATTN_WEAK     0.50, 0.50, 0.00, 1.00 // Default: 0.50, 0.50, 0.00, 1.00
 #define COLOUR_OK            0.00, 1.00, 0.00, 1.00 // Default: 0.00, 1.00, 0.00, 1.00
 #define COLOUR_OK_WEAK       0.00, 0.50, 0.00, 1.00 // Default: 0.00, 0.50, 0.00, 1.00
- 
+
 //
 // Colours for drawing horizontal (dBm) and vertical (Frequency)
 // lines in the panadapters, and indicating filter passbands and
@@ -72,7 +72,7 @@
 #define COLOUR_PAN_60M       0.60, 0.30, 0.30, 1.00 // Default: 0.60, 0.30, 0.30, 1.00
 
 //
-// Main background colours, allowing different colors for the panadapters and 
+// Main background colours, allowing different colors for the panadapters and
 // the VFO/meter bar.
 // Writing with SHADE on a BACKGND should be visible,
 // but need not be "alerting"
@@ -83,7 +83,7 @@
 // with the GTK theme the user chose.
 //
 
-#define COLOUR_MENU_BACKGND  1.00, 1.00, 0.95, 1.00 // Default: 1.00, 1.00, 1.00, 1.00 
+#define COLOUR_MENU_BACKGND  1.00, 1.00, 0.95, 1.00 // Default: 1.00, 1.00, 1.00, 1.00
 #define COLOUR_PAN_BACKGND   0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
 #define COLOUR_VFO_BACKGND   0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
 #define COLOUR_SHADE         0.70, 0.70, 0.70, 1.00 // Default: 0.70, 0.70, 0.70, 1.00

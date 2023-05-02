@@ -378,7 +378,7 @@ void filterSaveState() {
     setProperty("filter.lsb.var2.low",value);
     sprintf(value,"%d",filterLSB[filterVar2].high);
     setProperty("filter.lsb.var2.high",value);
-    
+
     sprintf(value,"%d",filterDIGL[filterVar1].low);
     setProperty("filter.digl.var1.low",value);
     sprintf(value,"%d",filterDIGL[filterVar1].high);
@@ -387,7 +387,7 @@ void filterSaveState() {
     setProperty("filter.digl.var2.low",value);
     sprintf(value,"%d",filterDIGL[filterVar2].high);
     setProperty("filter.digl.var2.high",value);
-    
+
     sprintf(value,"%d",filterCWL[filterVar1].low);
     setProperty("filter.cwl.var1.low",value);
     sprintf(value,"%d",filterCWL[filterVar1].high);
@@ -396,7 +396,7 @@ void filterSaveState() {
     setProperty("filter.cwl.var2.low",value);
     sprintf(value,"%d",filterCWL[filterVar2].high);
     setProperty("filter.cwl.var2.high",value);
-    
+
     sprintf(value,"%d",filterUSB[filterVar1].low);
     setProperty("filter.usb.var1.low",value);
     sprintf(value,"%d",filterUSB[filterVar1].high);
@@ -405,7 +405,7 @@ void filterSaveState() {
     setProperty("filter.usb.var2.low",value);
     sprintf(value,"%d",filterUSB[filterVar2].high);
     setProperty("filter.usb.var2.high",value);
-    
+
     sprintf(value,"%d",filterDIGU[filterVar1].low);
     setProperty("filter.digu.var1.low",value);
     sprintf(value,"%d",filterDIGU[filterVar1].high);
@@ -414,7 +414,7 @@ void filterSaveState() {
     setProperty("filter.digu.var2.low",value);
     sprintf(value,"%d",filterDIGU[filterVar2].high);
     setProperty("filter.digu.var2.high",value);
-    
+
     sprintf(value,"%d",filterCWU[filterVar1].low);
     setProperty("filter.cwu.var1.low",value);
     sprintf(value,"%d",filterCWU[filterVar1].high);
@@ -423,7 +423,7 @@ void filterSaveState() {
     setProperty("filter.cwu.var2.low",value);
     sprintf(value,"%d",filterCWU[filterVar2].high);
     setProperty("filter.cwu.var2.high",value);
-    
+
     sprintf(value,"%d",filterAM[filterVar1].low);
     setProperty("filter.am.var1.low",value);
     sprintf(value,"%d",filterAM[filterVar1].high);
@@ -432,7 +432,7 @@ void filterSaveState() {
     setProperty("filter.am.var2.low",value);
     sprintf(value,"%d",filterAM[filterVar2].high);
     setProperty("filter.am.var2.high",value);
-    
+
     sprintf(value,"%d",filterSAM[filterVar1].low);
     setProperty("filter.sam.var1.low",value);
     sprintf(value,"%d",filterSAM[filterVar1].high);
@@ -441,7 +441,7 @@ void filterSaveState() {
     setProperty("filter.sam.var2.low",value);
     sprintf(value,"%d",filterSAM[filterVar2].high);
     setProperty("filter.sam.var2.high",value);
-    
+
     sprintf(value,"%d",filterFMN[filterVar1].low);
     setProperty("filter.fmn.var1.low",value);
     sprintf(value,"%d",filterFMN[filterVar1].high);
@@ -450,7 +450,7 @@ void filterSaveState() {
     setProperty("filter.fmn.var2.low",value);
     sprintf(value,"%d",filterFMN[filterVar2].high);
     setProperty("filter.fmn.var2.high",value);
-    
+
     sprintf(value,"%d",filterDSB[filterVar1].low);
     setProperty("filter.dsb.var1.low",value);
     sprintf(value,"%d",filterDSB[filterVar1].high);
@@ -459,7 +459,7 @@ void filterSaveState() {
     setProperty("filter.dsb.var2.low",value);
     sprintf(value,"%d",filterDSB[filterVar2].high);
     setProperty("filter.dsb.var2.high",value);
-    
+
 }
 
 void filterRestoreState() {

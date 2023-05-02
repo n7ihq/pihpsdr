@@ -400,7 +400,7 @@ int audio_open_output(RECEIVER *rx)
         break;
     }
   }
-  g_print("%s: name=%s PADEV=%d\n", __FUNCTION__, rx->audio_name, padev); 
+  g_print("%s: name=%s PADEV=%d\n", __FUNCTION__, rx->audio_name, padev);
   //
   // Device name possibly came from props file and device is no longer there
   //
@@ -564,7 +564,7 @@ int audio_write (RECEIVER *rx, float left, float right)
       // This is not always an "error" to be reported and necessarily happens in three cases:
       //  a) we come here for the first time
       //  b) we come from a TX/RX transition in non-CW mode, and no duplex
-      //  c) we come from a TX/RX transition in CW mode 
+      //  c) we come from a TX/RX transition in CW mode
       //
       // In case a) and b) the buffer will be empty, in c) the buffer will contain "few" samples
       // because of the "CW audio low latency" strategy.
@@ -579,7 +579,7 @@ int audio_write (RECEIVER *rx, float left, float right)
     }
     if (avail > MY_RING_HIGH_WATER) {
       //
-      // Running the RX-audio for a very long time 
+      // Running the RX-audio for a very long time
       // and with audio hardware whose "48000 Hz" are a little slower than the "48000 Hz" of
       // the SDR will very slowly fill the buffer. This should be the only situation where
       // this "buffer overrun" condition should occur. We recover from this by brutally
@@ -601,7 +601,7 @@ int audio_write (RECEIVER *rx, float left, float right)
       //
       // buffer space available
       //
-      buffer[oldpt] = (left+right)*0.5;  //   mix to MONO   
+      buffer[oldpt] = (left+right)*0.5;  //   mix to MONO
       rx->local_audio_buffer_inpt=newpt;
     }
   }
@@ -652,12 +652,12 @@ int cw_audio_write(RECEIVER *rx, float sample) {
     }
     switch (adjust) {
       case 0:
-        // 
+        //
         // default case: put sample into ring buffer
         //
         oldpt=rx->local_audio_buffer_inpt;
         newpt=oldpt+1;
-        if (newpt == MY_RING_BUFFER_SIZE) newpt=0; 
+        if (newpt == MY_RING_BUFFER_SIZE) newpt=0;
         if (newpt != rx->local_audio_buffer_outpt) {
           //
           // buffer space available

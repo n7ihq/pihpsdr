@@ -106,7 +106,7 @@ void switch_menu(GtkWidget *parent) {
     notebook=gtk_notebook_new();
     set_backgnd(notebook);
   }
- 
+
 next_function_set:
 
   grid=gtk_grid_new();

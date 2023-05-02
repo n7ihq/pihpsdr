@@ -90,7 +90,7 @@ void fft_menu(GtkWidget *parent) {
   GtkWidget *filter_type_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(filter_type_label), "<b>Filter Type</b>");
   gtk_grid_attach(GTK_GRID(grid),filter_type_label,col,row,1,1);
-  
+
   row++;
   col=0;
 
@@ -113,7 +113,7 @@ void fft_menu(GtkWidget *parent) {
 
   GtkWidget *filter_size_label=gtk_label_new("Filter Size: ");
   gtk_grid_attach(GTK_GRID(grid),filter_size_label,col,row,1,1);
-  
+
   row++;
   col=0;
 

@@ -21,7 +21,7 @@
 // If PortAudio is used instead of ALSA (e.g. on MacOS),
 // this file is not used (and replaced by portaudio.c).
 
-#ifndef PORTAUDIO 
+#ifndef PORTAUDIO
 
 //
 // Some important parameters
@@ -115,7 +115,7 @@ g_print("%s: rx=%d %s buffer_size=%d\n",__FUNCTION__,rx->id,rx->audio_name,out_b
 
   int i;
   char hw[128];
- 
+
 
   i=0;
   while(i<127 && rx->audio_name[i]!=' ') {
@@ -123,13 +123,13 @@ g_print("%s: rx=%d %s buffer_size=%d\n",__FUNCTION__,rx->id,rx->audio_name,out_b
     i++;
   }
   hw[i]='\0';
-  
+
 g_print("%s: hw=%s\n", __FUNCTION__, hw);
 
   for(i=0;i<FORMATS;i++) {
     g_mutex_lock(&rx->local_audio_mutex);
     if ((err = snd_pcm_open (&rx->playback_handle, hw, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) < 0) {
-      g_print("%s: cannot open audio device %s (%s)\n", 
+      g_print("%s: cannot open audio device %s (%s)\n",
 	      __FUNCTION__,
               hw,
               snd_strerror (err));
@@ -171,7 +171,7 @@ g_print("%s: local_audio_buffer: size=%d sample=%ld\n",__FUNCTION__,out_buffer_s
       rx->local_audio_buffer=g_new(gfloat,2*out_buffer_size);
       break;
   }
-  
+
   g_print("%s: rx=%d audio_device=%d handle=%p buffer=%p size=%d\n",__FUNCTION__,rx->id,rx->audio_device,rx->playback_handle,rx->local_audio_buffer,out_buffer_size);
 
   g_mutex_unlock(&rx->local_audio_mutex);
@@ -192,7 +192,7 @@ int audio_open_input() {
   }
 
 g_print("%s: %s\n",__FUNCTION__, transmitter->microphone_name);
-  
+
   g_print("%s: mic_buffer_size=%d\n",__FUNCTION__, mic_buffer_size);
   i=0;
   while(i<63 && transmitter->microphone_name[i]!=' ') {

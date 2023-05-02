@@ -656,7 +656,7 @@ void gpio_restore_state() {
   char name[80];
 
   loadProperties("gpio.props");
- 
+
   value=getProperty("controller");
   if(value) controller=atoi(value);
   gpio_set_defaults(controller);
@@ -811,7 +811,7 @@ void gpio_restore_actions() {
   char name[80];
   char *value;
   int previous_controller=NO_CONTROLLER;
-  
+
   value=getProperty("controller");
   if(value) previous_controller=atoi(value);
   gpio_set_defaults(controller);
@@ -972,7 +972,7 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
   }
 
   // write initial value
-  
+
 
   gpiod_line_release(line);
 

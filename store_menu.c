@@ -58,7 +58,7 @@ static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
    int index = GPOINTER_TO_INT(data);
    fprintf(stderr,"STORE BUTTON PUSHED=%d\n",index);
    char workstr[40];
-     
+
    store_memory_slot(index);
 
    sprintf(workstr,"M%d=%8.6f MHz", index,((double) mem[index].frequency)/1000000.0);
@@ -101,7 +101,7 @@ void store_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   for(i=0;i<NUM_OF_MEMORYS;i++) {
-     sprintf(label_str,"Store M%d",i); 
+     sprintf(label_str,"Store M%d",i);
      b=gtk_button_new_with_label(label_str);
      g_signal_connect(b,"pressed",G_CALLBACK(store_select_cb),(gpointer)(long)i);
      gtk_grid_attach(GTK_GRID(grid),b,2,i,1,1);

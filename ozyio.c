@@ -402,7 +402,7 @@ int ozy_load_fpga(char *rbf_fnamep) {
 	if ( rc < 0 ) {
 		fprintf(stderr, "ozy_load_fpga: failed @ FL_END\n");
 		return 0;
-	}      
+	}
 
 	return 1;
 }
@@ -587,7 +587,7 @@ int filePath (char *sOut, const char *sIn) {
 	int rc = 0;
 
 	if ((rc = file_exists (sIn))) {
-		strcpy (sOut, sIn); 
+		strcpy (sOut, sIn);
 		rc = 1;
 	} else {
 		char cwd[PATH_MAX];
@@ -609,7 +609,7 @@ int filePath (char *sOut, const char *sIn) {
 				// found in the same dir of executable
 				fprintf (stderr, "File: [%s]\n", s);
 				strcpy(sOut, s);
-			} else { 
+			} else {
 				if (getcwd(cwd, sizeof(cwd)) != NULL) {
 					fprintf(stdout, "Current working dir: %s\n", cwd);
 
@@ -631,10 +631,10 @@ int filePath (char *sOut, const char *sIn) {
 
 
 //
-// initialise a USB ozy device. 
+// initialise a USB ozy device.
 // renamed as "initialise" and combined with the "ozyinit" code
 //
-int ozy_initialise() 
+int ozy_initialise()
 {
 	int rc;
 
@@ -701,7 +701,7 @@ int ozy_discover()
 // do a trial open with thr PID and VID of ozy
 //
 	ozy_handle=libusb_open_device_with_vid_pid(NULL, OZY_VID, OZY_PID);
-	if(ozy_handle==NULL) 
+	if(ozy_handle==NULL)
 	{
 		fprintf(stderr,"libusbio: cannot find ozy device\n");
 		return success;

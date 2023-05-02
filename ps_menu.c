@@ -295,7 +295,7 @@ static int info_thread(gpointer arg) {
 //       of EXT1. In the latter case, any RX filters have
 //       to by bypassed, which is of particular importance
 //       on the 6m band.
-//       
+//
 //
 static void ps_ant_cb(GtkWidget *widget, gpointer data) {
   int val = GPOINTER_TO_INT(data);
@@ -424,7 +424,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_b), transmitter->auto_on);
   gtk_grid_attach(GTK_GRID(grid),auto_b,col,row,1,1);
   g_signal_connect(auto_b,"toggled",G_CALLBACK(auto_cb),NULL);
-  
+
   col++;
 
   GtkWidget *reset_b=gtk_button_new_with_label("OFF");

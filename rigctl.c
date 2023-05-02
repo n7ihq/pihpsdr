@@ -22,7 +22,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <errno.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
@@ -121,6 +121,7 @@ typedef struct _client {
   socklen_t address_length;
   struct sockaddr_in address;
   GThread *thread_id;
+  gint andromda_timer;  // for periodic andromeda_tasks
 } CLIENT;
 
 typedef struct _command {
@@ -128,7 +129,7 @@ typedef struct _command {
   char *command;
 } COMMAND;
 
-static CLIENT client[MAX_CLIENTS];          // TCP clients  
+static CLIENT client[MAX_CLIENTS];          // TCP clients
 static CLIENT serial_client[MAX_SERIAL];   // serial clienta
 SERIALPORT SerialPorts[MAX_SERIAL];
 
@@ -172,7 +173,7 @@ void close_rigctl_ports() {
 
 int vfo_sm=0;   // VFO State Machine - this keeps track of
 
-// 
+//
 //  CW sending stuff
 //
 
@@ -253,55 +254,55 @@ void rigctl_send_cw_char(char cw_char) {
     switch (cw_char) {
        case 'a':
        case 'A': strcpy(pattern,".-"); break;
-       case 'b': 
+       case 'b':
        case 'B': strcpy(pattern,"-..."); break;
-       case 'c': 
+       case 'c':
        case 'C': strcpy(pattern,"-.-."); break;
-       case 'd': 
+       case 'd':
        case 'D': strcpy(pattern,"-.."); break;
-       case 'e': 
+       case 'e':
        case 'E': strcpy(pattern,"."); break;
-       case 'f': 
+       case 'f':
        case 'F': strcpy(pattern,"..-."); break;
-       case 'g': 
+       case 'g':
        case 'G': strcpy(pattern,"--."); break;
-       case 'h': 
+       case 'h':
        case 'H': strcpy(pattern,"...."); break;
-       case 'i': 
+       case 'i':
        case 'I': strcpy(pattern,".."); break;
-       case 'j': 
+       case 'j':
        case 'J': strcpy(pattern,".---"); break;
-       case 'k': 
+       case 'k':
        case 'K': strcpy(pattern,"-.-"); break;
-       case 'l': 
+       case 'l':
        case 'L': strcpy(pattern,".-.."); break;
-       case 'm': 
+       case 'm':
        case 'M': strcpy(pattern,"--"); break;
-       case 'n': 
+       case 'n':
        case 'N': strcpy(pattern,"-."); break;
-       case 'o': 
+       case 'o':
        case 'O': strcpy(pattern,"---"); break;
-       case 'p': 
+       case 'p':
        case 'P': strcpy(pattern,".--."); break;
-       case 'q': 
+       case 'q':
        case 'Q': strcpy(pattern,"--.-"); break;
-       case 'r': 
+       case 'r':
        case 'R': strcpy(pattern,".-."); break;
-       case 's': 
+       case 's':
        case 'S': strcpy(pattern,"..."); break;
-       case 't': 
+       case 't':
        case 'T': strcpy(pattern,"-"); break;
-       case 'u': 
+       case 'u':
        case 'U': strcpy(pattern,"..-"); break;
-       case 'v': 
+       case 'v':
        case 'V': strcpy(pattern,"...-"); break;
-       case 'w': 
+       case 'w':
        case 'W': strcpy(pattern,".--"); break;
-       case 'x': 
+       case 'x':
        case 'X': strcpy(pattern,"-..-"); break;
        case 'y':
        case 'Y': strcpy(pattern,"-.--"); break;
-       case 'z': 
+       case 'z':
        case 'Z': strcpy(pattern,"--.."); break;
        case '0': strcpy(pattern,"-----"); break;
        case '1': strcpy(pattern,".----"); break;
@@ -339,7 +340,7 @@ void rigctl_send_cw_char(char cw_char) {
        case '&': strcpy(pattern,".-...");break;
        default:  strcpy(pattern,"");
     }
-     
+
     while(*ptr != '\0') {
        if(*ptr == '-') {
           send_dash();
@@ -379,7 +380,7 @@ void rigctl_send_cw_char(char cw_char) {
 // is enough space in the ring buffer, then cw_busy is reset.
 //
 static gpointer rigctl_cw_thread(gpointer data)
-{ 
+{
   int i;
   char c;
   char last_char=0;
@@ -389,7 +390,7 @@ static gpointer rigctl_cw_thread(gpointer data)
   char *p;
   int  num_buf=0;
   int  txmode;
-  
+
   while (server_running) {
     // wait for CW data (periodically look every 100 msec)
     if (!cw_busy && num_buf ==0) {
@@ -629,7 +630,7 @@ static gpointer rigctl_server(gpointer data) {
 }
 
 static gpointer rigctl_client (gpointer data) {
-   
+
   CLIENT *client=(CLIENT *)data;
 
   g_print("rigctl_client: starting rigctl_client: socket=%d\n",client->fd);
@@ -685,16 +686,16 @@ static gpointer rigctl_client (gpointer data) {
   if(rigctl_debug) g_print("RIGCTL: CTLA DEC - cat_control=%d\n",cat_control);
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update,NULL);
-  return NULL; 
+  return NULL;
 }
 
-// 
+//
 // FT command intepret vfo_sm state - used by IF command
 //
 int ft_read() {
    return(active_transmitter);
 }
-// 
+//
 // Determines RIT state - used by IF command
 //
 int rit_on () {
@@ -703,7 +704,7 @@ int rit_on () {
          return 1;
       } else {
          return 0;
-      }  
+      }
   } else { // Well - we have two so use active_reciever->id
       if(vfo[active_receiver->id].rit != 0) {
           return 1 ;
@@ -2067,13 +2068,13 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
     case 'S': //ZZSx
       switch(command[3]) {
         case 'A': //ZZSA
-          // move VFO A down one step 
+          // move VFO A down one step
           if(command[4]==';') {
             vfo_step(-1);
           }
           break;
         case 'B': //ZZSB
-          // move VFO A up one step 
+          // move VFO A up one step
           if(command[4]==';') {
             vfo_step(1);
           }
@@ -3883,7 +3884,7 @@ int parse_cmd(void *data) {
             if(vfo[active_receiver->id].mode==modeLSB) {
               low=abs(filter->high);
             }
-          
+
             if(low<=10) {
               fl=0;
             } else if(low<=50) {
@@ -4001,7 +4002,7 @@ int parse_cmd(void *data) {
           // -127 dBm ==> x = 0000
           //  -73 dBm ==> x = 0015
           //  -19 dBm ==> x = 0030
-          // 
+          //
           if(command[3]==';') {
             int id=atoi(&command[2]);
             if(id >= 0 && id < receivers) {
@@ -4316,7 +4317,7 @@ static gpointer serial_server(gpointer data) {
          for(i=0;i<numbytes;i++) {
            command[command_index]=cmd_input[i];
            command_index++;
-           if(cmd_input[i]==';') { 
+           if(cmd_input[i]==';') {
              command[command_index]='\0';
              if(rigctl_debug) g_print("RIGCTL: serial command=%s\n",command);
              COMMAND *info=g_new(COMMAND,1);
@@ -4352,7 +4353,6 @@ static int last_rit;
 static int last_xit;
 static int last_vfoa;
 
-gint andromeda_timer=0;
 gboolean andromeda_init(gpointer data) {
   //
   // This function is put into the GTK idle queue
@@ -4437,8 +4437,8 @@ int launch_serial (int id) {
        g_print("launch_serial: mutex_busy=%p\n",mutex_busy);
        g_mutex_init(&mutex_busy->m);
      }
-     
-     fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC);   
+
+     fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC);
      if (fd < 0)
      {
         g_print("RIGCTL: Error %d opening %s: %s\n", errno, SerialPorts[id].port, strerror (errno));
@@ -4464,6 +4464,7 @@ int launch_serial (int id) {
      }
 
      serial_client[id].running=1;
+     serial_client[id].andromeda_timer=0;
      serial_client[id].thread_id = g_thread_new( "Serial server", serial_server, &serial_client[id]);
 #ifdef ANDROMEDA
      //
@@ -4472,7 +4473,7 @@ int launch_serial (int id) {
      if (SerialPorts[id].andromeda) {
        usleep(500000L); // Need to wait for andromedas serial to settle, Andromeda FP Version: h/w:01 s/w:006
        g_idle_add(andromeda_init, &serial_client[id]);           // executed once
-       andromeda_timer=g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
+       serial_client[id].andromeda_timer=g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
      }
 #endif
      return 1;
@@ -4501,18 +4502,18 @@ void disable_serial (int id) {
        serial_client[id].fd=-1;
      }
 #ifdef ANDROMEDA
-     if (SerialPorts[id].andromeda && andromeda_timer != 0) {
+     if (serial_client[id].andromeda_timer != 0) {
        g_source_remove(andromeda_timer);
      }
 #endif
 }
 
 //
-// 2-25-17 - K5JAE - create each thread with the pointer to the port number  
-//                   (Port numbers now const ints instead of defines..) 
+// 2-25-17 - K5JAE - create each thread with the pointer to the port number
+//                   (Port numbers now const ints instead of defines..)
 //
 void launch_rigctl () {
-   
+
    g_print( "LAUNCHING RIGCTL!!\n");
 
    rigctl_busy = 1;

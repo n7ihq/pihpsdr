@@ -298,7 +298,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
     //
     // If the sliders are "on display", then we also have a squelch-enable checkbox
     // in the display area.
-    // 
+    //
     GtkWidget *enable_squelch=gtk_check_button_new_with_label("Enable Squelch");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_squelch), active_receiver->squelch_enable);
     gtk_grid_attach(GTK_GRID(grid),enable_squelch,3,5,1,1);

@@ -110,9 +110,9 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
    if (radio != NULL) {
 	  if (event->keyval == GDK_KEY_space) {
-		  
+		
 		  fprintf(stderr, "space");
-		  
+		
 		if(getTune()==1) {
 		  setTune(0);
 		}
@@ -135,7 +135,7 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 		 return TRUE;
 	  }
   }
-  
+
   return FALSE;
 }
 

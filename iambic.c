@@ -152,7 +152,7 @@
  * between mode-A and mode-B.
  *
  * So imagine you want to produce the letter "N" (dah dit) this way. You will hit the dash key,
- * then immediately afterwards the dot key, and possibly have both keys released 
+ * then immediately afterwards the dot key, and possibly have both keys released
  * when the final dot of the letter should start. The final dot should not be suppressed
  * even in mode-A.
  * Thus: if both keys have been held at the beginning of a dash, and are relased
@@ -281,7 +281,7 @@ void keyer_event(int left, int state) {
     //g_print("%s: running=%d left=%d state=%d\n",__FUNCTION__,running,left,state);
     if (!running) return;
     if (state) {
-        // This is to remember whether the key stroke interrupts a running CAT CW 
+        // This is to remember whether the key stroke interrupts a running CAT CW
 	// Since in this case we return to RX after vox delay.
 	if (CAT_cw_is_active) enforce_cw_vox=1;
     }
@@ -426,7 +426,7 @@ static void* keyer_thread(void *arg) {
                 } else {
 		    // Paddle
 		    // If both following if-statements are true, which one should win?
-		    // I think a "simultaneous squeeze" means a dot-dash sequence, since in 
+		    // I think a "simultaneous squeeze" means a dot-dash sequence, since in
 		    // a dash-dot sequence there is a larger time window to hit the dot.
                     if (*kdash) key_state = PREDASH;
                     if (*kdot) key_state = PREDOT;
@@ -500,7 +500,7 @@ static void* keyer_thread(void *arg) {
 			key_state = EXITLOOP;
 		    // end of iambic case
                   }
-                }   
+                }
                 break;
 
 	    case PREDASH:
@@ -606,7 +606,7 @@ int keyer_init() {
     int rc;
 
     fprintf(stderr,".... starting keyer thread.\n");
-    
+
 #ifdef __APPLE__
     sem_unlink("CW");
     cw_event=sem_open("CW", O_CREAT | O_EXCL, 0700, 0);

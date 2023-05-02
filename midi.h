@@ -14,7 +14,7 @@
  * changed, it calls Layer 2.
  *
  * Layer-2: MIDI device specific
- * ----------------------------- 
+ * -----------------------------
  *
  * Layer2 translates MIDI commands into pihpsdr actions. This is done with
  * a table-driven algorithm, such that the same translator can be used for
@@ -74,7 +74,7 @@ enum MIDIevent {
 // menu item if wheel events are generated at a very high rate. Therefore we can define
 // a delay: once a wheel event is reported upstream, any such events are suppressed during
 // the delay.
-// 
+//
 // Note that with a MIDI KEY, normally only "Note on" messages
 // are processed, except for the actions
 // CW_KEYER, CW_LEFT, CW_RIGHT, PTT_KEYER which generate actions
@@ -110,7 +110,7 @@ void configure_midi_device(gboolean state);
 
 //
 // Layer-2 entry point (called by Layer1)
-// 
+//
 // When Layer-1 has received a MIDI message, it calls
 // NewMidiEvent.
 //

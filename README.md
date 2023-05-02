@@ -7,5 +7,8 @@ Download release/documentation/pihpsdr-install.pdf for instructions to install o
 
 wget https://github.com/g0orx/pihpsdr/blob/master/release/documentation/pihpsdr-install.pdf
 
-Full download using git into your HOME folder: 
+Full download using git into your HOME folder:
 git clone https://github.com/g0orx/pihpsdr.git
+
+For THIS version, use
+git clone https://github.com/dl1ycf/pihpsdr.git

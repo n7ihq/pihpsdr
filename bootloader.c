@@ -13,7 +13,7 @@
 // data packets. You either have to use a "dump switch" or (better)
 // a direct-cable-connection.
 //
-// For older ANAN radios, you have to place a jumper on the HPSDR board 
+// For older ANAN radios, you have to place a jumper on the HPSDR board
 // to put the board into "bootloader" mode. More recent radios are more
 // comfortable, you simply have to change a switch (at the bottom or
 // the back panel of the case) from "normal" to "bootloader" position.
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         fprintf(stderr,"Error in pcap_findalldevs_ex: %s\n", errbuf);
         exit(1);
     }
-    
+
     ifp=devlist;
     have_addr=0;
     have_mac=0;
@@ -307,11 +307,11 @@ int main(int argc, char **argv)
       // pad with 0xFF up to the next multiple of 256
       for (i=rbflen; i<rbfxfr; i++) {
         rbfcontent[i]=0xff;
-      } 
+      }
       rbfptr=0;
       printf("RBF file read into memory.\n");
     }
-   
+
     //
     // From this point on we need admin privileges
     //
@@ -393,10 +393,10 @@ int main(int argc, char **argv)
       /* determine if this is a packet from a bootloader to our computer */
       if (hdr.len > 22 && packet[0] == mymac[0] && packet[1] == mymac[1] && packet[2] == mymac[2]
                        && packet[3] == mymac[3] && packet[4] == mymac[4] && packet[5] == mymac[5]
-                       && packet[6] == 0x11     && packet[7] == 0x22     && packet[8] == 0x33    
-                       && packet[9] == 0x44     && packet[10]== 0x55     && packet[11]== 0x66    
+                       && packet[6] == 0x11     && packet[7] == 0x22     && packet[8] == 0x33
+                       && packet[9] == 0x44     && packet[10]== 0x55     && packet[11]== 0x66
                        && packet[12] == 0xef && packet[13] == 0xfe && packet[14] == 0x03) {
-       
+
           switch (packet[15]) {
             case HAVE_MAC_ADDRESS:
               printf("HPSDR board detected, MAC=%02x:%02x:%02x:%02x:%02x:%02x\n", packet[16], packet[17], packet[18], packet[19], packet[20], packet[21]);

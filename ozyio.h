@@ -33,10 +33,10 @@
 /*
  * code modified from that in Ozy_Metis_RPI_Gateway
  * Laurence Barker, G8NJJ December 2016
- * this gathers all Ozy functionality in one file (merging code 
+ * this gathers all Ozy functionality in one file (merging code
  * from ozy.c).
  * Further modified to add a "discover" function
- * 
+ *
 */
 
 #if !defined __OZYIO_H__

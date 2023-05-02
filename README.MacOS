@@ -21,7 +21,7 @@ dl1ycf@darc.de. The brew.init script (hopefully) loads support files for
 LimeSDR, Adalm Pluto, RTL sticks, AirSpy and AirSpyHF, and HackRF
 hardware.
 
-After having initialized the homebrew universe, you simply need the 
+After having initialized the homebrew universe, you simply need the
 following two steps, the commands (to be entered in a terminal window)
 are given for both cases. The pihpsdr "app" file is then moved to
 the Desktop. Note it only runs on the machine where it has been compiled.

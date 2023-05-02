@@ -175,7 +175,7 @@ void waterfall_update(RECEIVER *rx) {
           //
           // If rotate_pixels != 0, shift waterfall horizontally and set "freq changed" flag
           // calculated which VFO/pan value combination the shifted waterfall corresponds to
-          //  
+          //
           //
           if(rotate_pixels<0) {
             // shift left, and clear the right-most part
@@ -285,10 +285,10 @@ void waterfall_update(RECEIVER *rx) {
                      *p++ = 255;
                 }
             }
-        
+
       }
 
-    
+
       if(rx->waterfall_automatic) {
         rx->waterfall_low=average/width;
         rx->waterfall_high=rx->waterfall_low+50;
