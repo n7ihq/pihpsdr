@@ -121,7 +121,7 @@ typedef struct _client {
   socklen_t address_length;
   struct sockaddr_in address;
   GThread *thread_id;
-  gint andromda_timer;  // for periodic andromeda_tasks
+  gint andromeda_timer;  // for periodic andromeda_tasks
 } CLIENT;
 
 typedef struct _command {
@@ -4503,7 +4503,7 @@ void disable_serial (int id) {
      }
 #ifdef ANDROMEDA
      if (serial_client[id].andromeda_timer != 0) {
-       g_source_remove(andromeda_timer);
+       g_source_remove(serial_client[id].andromeda_timer);
      }
 #endif
 }
