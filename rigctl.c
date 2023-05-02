@@ -4430,6 +4430,7 @@ gboolean andromeda_handler(gpointer data) {
 
 int launch_serial (int id) {
      int fd;
+     int baud;
      g_print("RIGCTL: Launch Serial port %s\n",SerialPorts[id].port);
 
      if(mutex_busy==NULL) {
@@ -4452,7 +4453,12 @@ int launch_serial (int id) {
      serial_client[id].fifo=0;
 
      // hard-wired parity = NONE
-     if (set_interface_attribs (fd, SerialPorts[id].baud, 0) == 0) {
+     // if ANDROMEDA, hard-wired baud = 9600
+     baud=SerialPorts[id].baud;
+#ifdef ANDROMEDA
+     if (SerialPorts[id].andromeda) baud=B9600;
+#endif
+     if (set_interface_attribs (fd, baud, 0) == 0) {
        set_blocking (fd, 0);                   // set no blocking
      } else {
        //
@@ -4477,7 +4483,10 @@ int launch_serial (int id) {
 
 #ifdef ANDROMEDA
 void launch_andromeda (int id) {
-     if (SerialPorts[id].andromeda) {
+     //
+     // This is a no-op if the serial client is NOT running
+     //
+     if (SerialPorts[id].andromeda && serial_client[id].running) {
        usleep(500000L); // Need to wait for andromedas serial to settle, Andromeda FP Version: h/w:01 s/w:006
        g_idle_add(andromeda_init, &serial_client[id]);           // executed once
        serial_client[id].andromeda_timer=g_timeout_add(500,andromeda_handler,&serial_client[id]);  // executed periodically
@@ -4488,6 +4497,9 @@ void launch_andromeda (int id) {
 // Serial Port close
 void disable_serial (int id) {
      g_print("RIGCTL: Disable Serial port %s\n",SerialPorts[id].port);
+#ifdef ANDROMEDA
+     disable_andromeda(id);
+#endif
      serial_client[id].running=FALSE;
      if (serial_client[id].fifo) {
        //
@@ -4507,9 +4519,6 @@ void disable_serial (int id) {
        close(serial_client[id].fd);
        serial_client[id].fd=-1;
      }
-#ifdef ANDROMEDA
-     disable_andromeda(id);
-#endif
 }
 
 #ifdef ANDROMEDA
