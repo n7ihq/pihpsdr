@@ -97,6 +97,10 @@ static void serial_port_cb(GtkWidget *widget, gpointer data) {
 static void andromeda_cb(GtkWidget *widget, gpointer data) {
   int id=GPOINTER_TO_INT(data);
   SerialPorts[id].andromeda=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  if (SerialPorts[id].andromeda) {
+   SerialPorts[id].baud=B9600; //fixed baud rate
+   gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 1);
+  }
 }
 #endif
 
@@ -187,8 +191,9 @@ void rigctl_menu(GtkWidget *parent) {
 
   for (int i=0; i<MAX_SERIAL; i++) {
     int row=i+2;
+    char *str = g_strdup_printf ("<b>Serial Port%d: </b>", i);
     GtkWidget *serial_text_label=gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(serial_text_label), "<b>Serial Port: </b>");
+    gtk_label_set_markup(GTK_LABEL(serial_text_label), str);
     gtk_grid_attach(GTK_GRID(grid),serial_text_label,0,row,1,1);
 
     serial_port_entry=gtk_entry_new();
@@ -196,6 +201,12 @@ void rigctl_menu(GtkWidget *parent) {
     gtk_widget_show(serial_port_entry);
     gtk_grid_attach(GTK_GRID(grid),serial_port_entry,1,row,2,1);
     g_signal_connect(serial_port_entry, "changed", G_CALLBACK(serial_port_cb), GINT_TO_POINTER(i));
+#ifdef ANDROMEDA
+    GtkWidget *andromeda_b=gtk_check_button_new_with_label("Andromeda");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (andromeda_b), SerialPorts[i].andromeda);
+    gtk_grid_attach(GTK_GRID(grid),andromeda_b,5,row,1,1);
+    g_signal_connect(andromeda_b,"toggled",G_CALLBACK(andromeda_cb),GINT_TO_POINTER(i));
+#endif
 
     GtkWidget *baud_combo=gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"4800 Bd");	
@@ -224,12 +235,6 @@ void rigctl_menu(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),serial_enable_b[i],4,row,1,1);
     g_signal_connect(serial_enable_b[i],"toggled",G_CALLBACK(serial_enable_cb),GINT_TO_POINTER(i));
 
-#ifdef ANDROMEDA
-    GtkWidget *andromeda_b=gtk_check_button_new_with_label("Andromeda");
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (andromeda_b), SerialPorts[i].andromeda);
-    gtk_grid_attach(GTK_GRID(grid),andromeda_b,5,row,1,1);
-    g_signal_connect(andromeda_b,"toggled",G_CALLBACK(andromeda_cb),GINT_TO_POINTER(i));
-#endif
   }
 
   gtk_container_add(GTK_CONTAINER(content),grid);
