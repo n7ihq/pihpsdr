@@ -99,7 +99,11 @@ static void andromeda_cb(GtkWidget *widget, gpointer data) {
   SerialPorts[id].andromeda=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   if (SerialPorts[id].andromeda) {
    SerialPorts[id].baud=B9600; //fixed baud rate
-   gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 1);
+   if(SerialPorts[id].enable) {
+     launch_andromeda(id);
+   }
+  } else {
+    disable_andromeda(id);
   }
 }
 #endif

@@ -22,7 +22,9 @@ extern gboolean rigctl_debug;
 
 void launch_rigctl (void);
 int launch_serial (int id);
+void launch_andromeda (int id);
 void disable_serial (int id);
+void disable_andromeda (int id);
 
 void  close_rigctl_ports (void);
 int   rigctlGetMode(void);
