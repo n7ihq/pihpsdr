@@ -341,7 +341,7 @@ void update_action_table() {
   if (transmitter->puresignal && xmit)	flag +=10;
   if (diversity_enabled && !xmit)	flag +=1;
 
-  // Note that the PURESIGNAL and DUPLEX flags are only set in the TX cases, since they
+  // Note that the PureSignal and DUPLEX flags are only set in the TX cases, since they
   // make no difference upon RXing
   // Note further, we do not use the diversity mixer upon transmitting.
   //
@@ -368,7 +368,7 @@ void update_action_table() {
   rxcase[3] = RXACTION_SKIP;
   switch (flag) {
     case       0:							// HERMES, RX, no DIVERSITY
-    case   10100:							// HERMES, TX, no PURESIGNAL, DUPLEX
+    case   10100:							// HERMES, TX, no PureSignal, DUPLEX
 	rxid[0]=0;
 	rxcase[0] = RXACTION_NORMAL;
         if (receivers > 1) {
@@ -381,20 +381,20 @@ void update_action_table() {
 	rxid[0]=0;
 	rxcase[0] = RXACTION_DIV;
 	break;
-    case  100:								// HERMES or ORION, TX, no PURESIGNAL, no DUPLEX
+    case  100:								// HERMES or ORION, TX, no PureSignal, no DUPLEX
     case 1100:
 	// just skip samples
 	break;
-    case  110:								// HERMES or ORION, TX, PURESIGNAL, no DUPLEX
+    case  110:								// HERMES or ORION, TX, PureSignal, no DUPLEX
     case 1110:
     case 10110:								// HERMES, TX, DUPLEX, PS: duplex is ignored
 	rxcase[0] = RXACTION_PS;
 	break;
-    case 11110:								// ORION, TX, PURESIGNAL, DUPLEX
+    case 11110:								// ORION, TX, PureSignal, DUPLEX
 	rxcase[0] = RXACTION_PS;
 	/* FALLTHROUGH */
     case 1000:								// ORION, RX, no DIVERSITY
-    case 11100:								// ORION, TX, no PURESIGNAL, DUPLEX
+    case 11100:								// ORION, TX, no PureSignal, DUPLEX
 	rxid[2]=0;
 	rxcase[2] = RXACTION_NORMAL;
         if (receivers > 1) {
@@ -732,7 +732,7 @@ static void new_protocol_high_priority() {
     if (diversity_enabled && !xmit) {
 	//
 	// Use frequency of first receiver for both DDC0 and DDC1
-	// This is overridden later if we do PURESIGNAL TX
+	// This is overridden later if we do PureSignal TX
         // The "obscure" constant 34.952533333333333333333333333333 is 4294967296/122880000
 	//
         phase=(unsigned long)(((double)rx1Frequency)*34.952533333333333333333333333333);
@@ -905,7 +905,7 @@ static void new_protocol_high_priority() {
 //	new ANAN-7000/8000 band-pass RX filters
 //
 //	To support the ANAN-8000 we
-//	should bypass BPFs while transmitting in PURESIGNAL,
+//	should bypass BPFs while transmitting in PureSignal,
 //	but this causes unnecessary "relay chatter" on ANAN-7000
 //	So if it should be done, 20 lines below it is shown how.
 //
@@ -972,10 +972,8 @@ static void new_protocol_high_priority() {
         }
 	i=0;  // flag used here for "filter bypass"
 	if (HPFfreq<1800000L) i=1;
-#ifdef PURESIGNAL
-	// Bypass HPFs if using EXT1 for PURESIGNAL feedback!
+	// Bypass HPFs if using EXT1 for PureSignal feedback!
 	if (xmit && transmitter->puresignal && receiver[PS_RX_FEEDBACK]->alex_antenna == 6) i=1;
-#endif
         if (i) {
           alex0|=ALEX_BYPASS_HPF;
         } else if(HPFfreq<6500000LL) {
@@ -1029,18 +1027,16 @@ static void new_protocol_high_priority() {
 //
 //  Set bits that route Ext1/Ext2/XVRTin to the RX
 //
-//  If transmitting with PURESIGNAL, we must use the alex_antenna
+//  If transmitting with PureSignal, we must use the alex_antenna
 //  settings of the PS_RX_FEEDBACK receiver
 //
 //  ANAN-7000 routes signals differently (these bits have no function on ANAN-80000)
 //            and uses ALEX0(14) to connnect Ext/XvrtIn to the RX.
 //
     i=receiver[0]->alex_antenna;			// 0,1,2  or 3,4,5
-#ifdef PURESIGNAL
     if (xmit && transmitter->puresignal) {
 	i=receiver[PS_RX_FEEDBACK]->alex_antenna;   	// 0, 6, or 7
     }
-#endif
     if (device == NEW_DEVICE_ORION2) {
       i +=100;
     } else if (new_pa_board) {
@@ -1052,7 +1048,7 @@ static void new_protocol_high_priority() {
     // or which do not work (using EXT1-on-TX with ANAN-7000).
     // In these cases, fall back to a "reasonable" case (e.g. use EXT1 if
     // there is no EXT2).
-    // As a result, the "New PA board" setting is overriden for PURESIGNAL
+    // As a result, the "New PA board" setting is overriden for PureSignal
     // feedback: EXT1 assumes old PA board and ByPass assumes new PA board.
     //
     switch(i) {
@@ -1143,7 +1139,7 @@ static void new_protocol_high_priority() {
 
 //
 //  Upon transmitting, set the attenuator of ADC0 to the "transmitter attenuation"
-//  (used in PURESIGNAL signal strength adjustment) and the attenuator of ADC1
+//  (used in PureSignal signal strength adjustment) and the attenuator of ADC1
 //  to the maximum value (to protect RX2 in DIVERSITY setups).
 //
 

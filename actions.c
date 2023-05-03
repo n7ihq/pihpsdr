@@ -12,9 +12,7 @@
 #include "radio_menu.h"
 #include "new_menu.h"
 #include "new_protocol.h"
-#ifdef PURESIGNAL
 #include "ps_menu.h"
-#endif
 #include "agc.h"
 #include "filter.h"
 #include "mode.h"
@@ -719,13 +717,11 @@ int process_action(void *data) {
         start_noise();
       }
       break;
-#ifdef PURESIGNAL
     case MENU_PS:
       if(a->mode==PRESSED) {
         start_ps();
       }
       break;
-#endif
     case MIC_GAIN:
       value=KnobOrWheel(a, mic_gain, -12.0, 50.0, 1.0);
       set_mic_gain(value);
@@ -887,7 +883,6 @@ int process_action(void *data) {
     case PREAMP:
       break;
     case PS:
-#ifdef PURESIGNAL
       if(a->mode==PRESSED) {
         if(can_transmit) {
           if(transmitter->puresignal==0) {
@@ -897,7 +892,6 @@ int process_action(void *data) {
           }
         }
       }
-#endif
       break;
     case PTT:
       if(a->mode==PRESSED || a->mode==RELEASED) {

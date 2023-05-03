@@ -752,7 +752,7 @@ static long long channel_freq(int chan) {
   // outside the allowed range, and thus can be used
   // to set the TX frequency.
   //
-  // If transmitting with PURESIGNAL, the frequencies of
+  // If transmitting with PureSignal, the frequencies of
   // the feedback and TX DAC channels are set to the TX freq.
   //
   // This subroutine is the ONLY place here where the VFO
@@ -762,7 +762,7 @@ static long long channel_freq(int chan) {
   long long freq;
 
   // RX1 and RX2 are normally used for the first and second receiver.
-  // all other channels are used for PURESIGNAL and get the TX frequency
+  // all other channels are used for PureSignal and get the TX frequency
   switch (chan) {
     case 0:
       vfonum=receiver[0]->id;
@@ -825,7 +825,7 @@ static long long channel_freq(int chan) {
 static int how_many_receivers() {
   //
   // For DIVERSITY, we need at least two RX channels
-  // When PURESIGNAL is active, we need to include the TX DAC channel.
+  // When PureSignal is active, we need to include the TX DAC channel.
   //
   int ret = receivers;   	// 1 or 2
   if (diversity_enabled) ret=2; // need both RX channels, even if there is only one RX
@@ -834,7 +834,7 @@ static int how_many_receivers() {
   //
   // Always return 2 so the number of HPSDR-RX is NEVER changed.
   // With 2 RX you can do 1RX or 2RX modes, and it is
-  // also OK for doing PURESIGNAL on OZY.
+  // also OK for doing PureSignal on OZY.
   // Rationale: Rick reported that OZY's tend to hang if the
   //            number of receivers is changed while running.
   // OK it wastes bandwidth and this might be a problem at higher
@@ -843,7 +843,6 @@ static int how_many_receivers() {
   if (device == DEVICE_OZY) return 2;
 #endif
 
-#ifdef PURESIGNAL
     // for PureSignal, the number of receivers needed is hard-coded below.
     // we need at least 2, and up to 5 for Orion2 boards. This is so because
     // the TX DAC is hard-wired to RX4 for HERMES,STEMLAB and to RX5 for ANGELIA
@@ -869,12 +868,11 @@ static int how_many_receivers() {
 	ret=5;  // TX feedback hard-wired to RX5
 	break;
       default:
-	ret=2; // This is the minimum for PURESIGNAL
+	ret=2; // This is the minimum for PureSignal
 	break;
     }
   }
-#endif
-    return ret;
+  return ret;
 }
 
 static int nreceiver;
@@ -900,7 +898,7 @@ static void process_control_bytes() {
   int previous_dot;
   int previous_dash;
 
-  // do not set ptt. In PURESIGNAL, this would stop the
+  // do not set ptt. In PureSignal, this would stop the
   // receiver sending samples to WDSP abruptly.
   // Do the RX-TX change only via ext_mox_update.
   previous_ptt=local_ptt;
@@ -1126,7 +1124,7 @@ static void process_ozy_byte(int b) {
 
       if (isTransmitting() && transmitter->puresignal) {
         //
-        // transmitting with PURESIGNAL. Get sample pairs and feed to pscc
+        // transmitting with PureSignal. Get sample pairs and feed to pscc
         //
         if (nreceiver == rxfdbk) {
           left_sample_double_rx=left_sample_double;
@@ -1244,7 +1242,7 @@ static void process_ozy_input_buffer(unsigned const char  *buffer) {
 	  // This can only happen if the GUI thread initiates
 	  // a protocol stop/start sequence, as it does e.g.
 	  // when changing the number of receivers, changing
-	  // the sample rate, en/dis-abling PURESIGNAL or
+	  // the sample rate, en/dis-abling PureSignal or
 	  // DIVERSITY, or executing the RESTART button.
 	  // In these cases, the TX ring buffer is reset anywas
 	  // so we do not have to do anything here.
@@ -1499,9 +1497,7 @@ void ozy_send_buffer() {
     // the feedback signal is routed automatically/internally
     // If feedback is to the second ADC, leave RX1 ANT settings untouched
     //
-#ifdef PURESIGNAL
     if (isTransmitting() && transmitter->puresignal) i=receiver[PS_RX_FEEDBACK]->alex_antenna;
-#endif
     if (device == DEVICE_ORION2) {
       i +=100;
     } else if (new_pa_board) {
@@ -1513,7 +1509,7 @@ void ozy_send_buffer() {
     // or which do not work (using EXT1-on-TX with ANAN-7000).
     // In these cases, fall back to a "reasonable" case (e.g. use EXT1 if
     // there is no EXT2).
-    // As a result, the "New PA board" setting is overriden for PURESIGNAL
+    // As a result, the "New PA board" setting is overriden for PureSignal
     // feedback: EXT1 assumes old PA board and ByPass assumes new PA board.
     //
     switch(i) {
@@ -1672,7 +1668,7 @@ void ozy_send_buffer() {
 	    //       stronger than the "TUNE" signal, and in the case of very low drive slider
 	    //       values they can be *much* stronger.
 	    //
-	    // NOTE: When using predistortion (PURESIGNAL), the IQ scaling must be switched off.
+	    // NOTE: When using predistortion (PureSignal), the IQ scaling must be switched off.
 	    //       In this case, the output  power can also be stronger than intended.
 	    //
             int hl2power;
@@ -1745,9 +1741,8 @@ void ozy_send_buffer() {
             output_buffer[C3]|=0x20; // bypass all RX filters
           }
         }
-#ifdef PURESIGNAL
 	//
-	// If using PURESIGNAL and a feedback to EXT1, we have to manually activate the RX HPF/BPF
+	// If using PureSignal and a feedback to EXT1, we have to manually activate the RX HPF/BPF
 	// filters and select "bypass" since the feedback signal must arrive at the board
         // un-altered. This is not necessary for feedback at the "ByPass" jack since filter bypass
         // is realized in hardware here.
@@ -1781,7 +1776,6 @@ void ozy_send_buffer() {
 	    output_buffer[C4] = 0x08;
 	  }
 	}
-#endif
         if (device==DEVICE_HERMES_LITE2) {
           // do not set any Apollo/Alex bits (ADDR=0x09 bits 0:23)
           // ADDR=0x09 bit 19 follows "PA enable" state
@@ -1848,11 +1842,9 @@ void ozy_send_buffer() {
             // in the PS menu) the preamp range is -12 ... +19 dB.
             //
            output_buffer[C4] = 0x40 | (33 - (transmitter->attenuation & 0x1F));
-#ifdef PURESIGNAL
            if (receiver[PS_RX_FEEDBACK]->alex_antenna == 0) {
              output_buffer[C4] = 0x40 | (45 - (transmitter->attenuation & 0x1F));
             }
-#endif
           } else {
 	    output_buffer[C4] = 0x40 | (rxgain & 0x3F);
           }
@@ -1913,11 +1905,9 @@ void ozy_send_buffer() {
           // for the built-in preamp. For the effect of choosing different
           // "alex antennas" see above.
           output_buffer[C3] = 0xC0 | (33 - (transmitter->attenuation & 0x1F));
-#ifdef PURESIGNAL
           if (receiver[PS_RX_FEEDBACK]->alex_antenna == 0) {
             output_buffer[C3] = 0xC0 | (45 - (transmitter->attenuation & 0x1F));
           }
-#endif
         } else {
           output_buffer[C3]=transmitter->attenuation & 0x1F;  // Step attenuator of first ADC, value used when TXing
         }

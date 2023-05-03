@@ -19,9 +19,7 @@ extern void start_store(void);
 extern void start_rx(void);
 extern void start_tx(void);
 extern void start_diversity(void);
-#ifdef PURESIGNAL
 extern void start_ps(void);
-#endif
 #ifdef CLIENT_SERVER
 extern void start_server(void);
 #endif

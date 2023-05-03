@@ -83,10 +83,8 @@ extern int region;
 extern int RECEIVERS;
 extern int MAX_RECEIVERS;
 extern int MAX_DDC;
-#ifdef PURESIGNAL
 extern int PS_TX_FEEDBACK;
 extern int PS_RX_FEEDBACK;
-#endif
 
 extern RECEIVER *receiver[];
 extern RECEIVER *active_receiver;

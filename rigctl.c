@@ -2874,9 +2874,7 @@ case 'E': //ZZZE
                  }
                }
                else if (v==2) {
-#ifdef PURESIGNAL
                  start_ps();
-#endif
                  longpress=1;
                }
                break;

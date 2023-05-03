@@ -452,7 +452,7 @@ void ps_menu(GtkWidget *parent) {
   col=0;
 
   //
-  // Selection of feedback path for PURESIGNAL
+  // Selection of feedback path for PureSignal
   //
   // AUTO		Using internal feedback (to ADC0)
   // EXT1		Using EXT1 jacket (to ADC0), ANAN-7000: still uses AUTO

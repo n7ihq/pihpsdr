@@ -88,7 +88,7 @@
 #define ALEX_TX_RELAY          0x08000000               // (bit 27)
 
 //
-// Bit used for PURESIGNAL
+// Bit used for PureSignal
 //
 #define ALEX_PS_BIT            0x00040000               // (bit 18)
 

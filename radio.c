@@ -145,10 +145,8 @@ TRANSMITTER *transmitter;
 int RECEIVERS;
 int MAX_RECEIVERS;
 int MAX_DDC;
-#ifdef PURESIGNAL
 int PS_TX_FEEDBACK;
 int PS_RX_FEEDBACK;
-#endif
 
 
 
@@ -599,7 +597,6 @@ if(!radio_is_remote) {
 
     calcDriveLevel();
 
-#ifdef PURESIGNAL
     if(protocol==NEW_PROTOCOL || protocol==ORIGINAL_PROTOCOL) {
       tx_set_ps_sample_rate(transmitter,protocol==NEW_PROTOCOL?192000:active_receiver->sample_rate);
       receiver[PS_TX_FEEDBACK]=create_pure_signal_receiver(PS_TX_FEEDBACK, buffer_size,protocol==ORIGINAL_PROTOCOL?active_receiver->sample_rate:192000,display_width);
@@ -620,7 +617,6 @@ if(!radio_is_remote) {
       }
       SetPSHWPeak(transmitter->id, pk);
     }
-#endif
 
   }
 #ifdef CLIENT_SERVER
@@ -1285,23 +1281,17 @@ void start_radio() {
   g_print("%s: setup RECEIVERS SOAPYSDR\n",__FUNCTION__);
       RECEIVERS=1;
       MAX_RECEIVERS=RECEIVERS;
-#ifdef PURESIGNAL
       PS_TX_FEEDBACK=0;
       PS_RX_FEEDBACK=0;
-#endif
       MAX_DDC=1;
       break;
 #endif
     default:
   g_print("%s: setup RECEIVERS default\n",__FUNCTION__);
       RECEIVERS=2;
-#ifdef PURESIGNAL
       MAX_RECEIVERS=(RECEIVERS+2);
       PS_TX_FEEDBACK=(RECEIVERS);
       PS_RX_FEEDBACK=(RECEIVERS+1);
-#else
-      MAX_RECEIVERS=RECEIVERS;
-#endif
       MAX_DDC=(RECEIVERS+2);
       break;
   }
@@ -1496,9 +1486,7 @@ void radio_change_sample_rate(int rate) {
         for(i=0;i<receivers;i++) {
           receiver_change_sample_rate(receiver[i],rate);
         }
-#ifdef PURESIGNAL
         receiver_change_sample_rate(receiver[PS_RX_FEEDBACK],rate);
-#endif
         old_protocol_set_mic_sample_rate(rate);
         old_protocol_run();
         tx_set_ps_sample_rate(transmitter,rate);
@@ -1518,19 +1506,17 @@ static void rxtx(int state) {
 
   if(state) {
     // switch to tx
-#ifdef PURESIGNAL
     RECEIVER *rx_feedback=receiver[PS_RX_FEEDBACK];
     RECEIVER *tx_feedback=receiver[PS_TX_FEEDBACK];
 
     rx_feedback->samples=0;
     tx_feedback->samples=0;
-#endif
 
     if(!duplex) {
       for(i=0;i<receivers;i++) {
         // Delivery of RX samples
         // to WDSP via fexchange0() may come to an abrupt stop
-        // (especially with PURESIGNAL or DIVERSITY).
+        // (especially with PureSignal or DIVERSITY).
         // Therefore, wait for *all* receivers to complete
         // their slew-down before going TX.
         SetChannelState(receiver[i]->id,0,1);
@@ -1638,11 +1624,9 @@ static void rxtx(int state) {
     }
   }
 
-#ifdef PURESIGNAL
   if(transmitter->puresignal) {
     SetPSMox(transmitter->id,state);
   }
-#endif
 }
 
 void setMox(int state) {
@@ -1777,7 +1761,7 @@ void setTune(int state) {
         for(i=0;i<receivers;i++) {
           // Delivery of RX samples
           // to WDSP via fexchange0() may come to an abrupt stop
-          // (especially with PURESIGNAL or DIVERSITY)
+          // (especially with PureSignal or DIVERSITY)
           // Therefore, wait for *all* receivers to complete
           // their slew-down before going TX.
           SetChannelState(receiver[i]->id,0,1);
@@ -2443,11 +2427,9 @@ g_print("radioSaveState: %s\n",property_path);
   setProperty("display_toolbar",value);
 
   if(can_transmit) {
-#ifdef PURESIGNAL
     // The only variables of interest in this receiver are
     // the alex_antenna an the adc
     receiver_save_state(receiver[PS_RX_FEEDBACK]);
-#endif
     transmitter_save_state(transmitter);
   }
 

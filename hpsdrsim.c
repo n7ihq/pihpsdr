@@ -37,7 +37,7 @@
  * The SDR application has to make the proper ADC settings, except for STEMlab
  * (RedPitaya based SDRs), where there is a fixed association
  * RX1=ADC1, RX2=ADC2, RX3=ADC2, RX4=TX-DAC
- * and the PURESIGNAL feedback signal is connected to the second ADC.
+ * and the PureSignal feedback signal is connected to the second ADC.
  *
  * Audio sent to the "radio" is played via the first available output channel.
  * This works on MacOS (PORTAUDIO) and Linux (ALSASOUND).
@@ -733,7 +733,7 @@ int main(int argc, char *argv[])
 
 				//
 				// The initial value of txptr defines the delay between
-				// TX samples sent to the SDR and PURESIGNAL feedback
+				// TX samples sent to the SDR and PureSignal feedback
 				// samples arriving
 				//
                                 txptr=OLDRTXLEN/2;

@@ -849,7 +849,7 @@ void *rx_thread(void *data) {
 	decimation=1536/rxrate[myddc];
 	myadc=adcmap[myddc];
         // for simplicity, we only allow for a single "synchronized" DDC,
-        // this well covers the PURESIGNAL and DIVERSITY cases
+        // this well covers the PureSignal and DIVERSITY cases
 	sync=0;
 	i=syncddc[myddc];
 	while (i) {

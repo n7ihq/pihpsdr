@@ -69,7 +69,7 @@ EXTERN double toneItab[LENTONE];
 EXTERN double toneQtab[LENTONE];
 
 //
-// TX fifo (needed for PURESIGNAL)
+// TX fifo (needed for PureSignal)
 //
 
 // RTXLEN must be an sixteen-fold multiple of 63

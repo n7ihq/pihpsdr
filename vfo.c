@@ -1180,7 +1180,6 @@ void vfo_update() {
         cairo_move_to(cr, 300, 38);
         cairo_show_text(cr, temp_text);
 
-#ifdef PURESIGNAL
         if(can_transmit) {
           cairo_move_to(cr, 120, 50);
           if(transmitter->puresignal) {
@@ -1191,7 +1190,6 @@ void vfo_update() {
           cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
           cairo_show_text(cr, "PS");
         }
-#endif
 
         cairo_move_to(cr, 55, 50);
         if(active_receiver->zoom>1) {

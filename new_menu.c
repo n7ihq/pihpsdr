@@ -410,7 +410,6 @@ static gboolean tx_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) 
   return TRUE;
 }
 
-#ifdef PURESIGNAL
 void start_ps() {
   cleanup();
   ps_menu(top_window);
@@ -420,7 +419,6 @@ static gboolean ps_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) 
   start_ps();
   return TRUE;
 }
-#endif
 
 #ifdef CLIENT_SERVER
 void start_server() {
@@ -510,14 +508,12 @@ void new_menu()
       gtk_grid_attach(GTK_GRID(grid),tx_b,(i%5),i/5,1,1);
       i++;
 
-#ifdef PURESIGNAL
       if(protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL) {
         GtkWidget *ps_b=gtk_button_new_with_label("PS");
         g_signal_connect (ps_b, "button-press-event", G_CALLBACK(ps_cb), NULL);
         gtk_grid_attach(GTK_GRID(grid),ps_b,(i%5),i/5,1,1);
         i++;
       }
-#endif
 
       GtkWidget *pa_b=gtk_button_new_with_label("PA");
       g_signal_connect (pa_b, "button-press-event", G_CALLBACK(pa_cb), NULL);

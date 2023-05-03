@@ -175,7 +175,7 @@ void MidiAddCommand(int note, struct desc *desc) {
 //
 // maintained so old midi configurations can be loaded
 // the sole purpose of this table is to map names in
-// the midi.props file to actions
+// "legacy" midi.props file to actions
 //
 // THIS TABLE IS ONLY USED IN keyword2action()
 //

@@ -16,9 +16,6 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 #
 GPIO_INCLUDE=GPIO
 
-# uncomment the line below to include Pure Signal support
-PURESIGNAL_INCLUDE=PURESIGNAL
-
 # uncomment the line below to include MIDI support
 MIDI_INCLUDE=MIDI
 
@@ -70,29 +67,6 @@ MIDI_SOURCES= alsa_midi.c midi2.c midi3.c midi_menu.c
 MIDI_OBJS= alsa_midi.o midi2.o midi3.o midi_menu.o
 MIDI_LIBS= -lasound
 endif
-endif
-
-ifeq ($(PURESIGNAL_INCLUDE),PURESIGNAL)
-PURESIGNAL_OPTIONS=-D PURESIGNAL
-PURESIGNAL_SOURCES= \
-ps_menu.c
-PURESIGNAL_HEADERS= \
-ps_menu.h
-PURESIGNAL_OBJS= \
-ps_menu.o
-endif
-
-ifeq ($(REMOTE_INCLUDE),REMOTE)
-REMOTE_OPTIONS=-D REMOTE
-REMOTE_SOURCES= \
-remote_radio.c \
-remote_receiver.c
-REMOTE_HEADERS= \
-remote_radio.h \
-remote_receiver.h
-REMOTE_OBJS= \
-remote_radio.o \
-remote_receiver.o
 endif
 
 ifeq ($(USBOZY_INCLUDE),USBOZY)
@@ -218,7 +192,7 @@ AUDIO_SOURCES=portaudio.c
 AUDIO_OBJS=portaudio.o
 endif
 
-OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
+OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) $(LOCALCW_OPTIONS) \
 	$(ANDROMEDA_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
@@ -320,7 +294,8 @@ gpio.c \
 encoder_menu.c \
 switch_menu.c \
 toolbar_menu.c \
-sintab.c
+sintab.c \
+ps_menu.c
 
 
 
@@ -398,7 +373,8 @@ gpio.h \
 encoder_menu.h \
 switch_menu.h \
 toolbar_menu.h \
-sintab.h
+sintab.h \
+ps_menu.h
 
 
 
@@ -474,22 +450,20 @@ gpio.o \
 encoder_menu.o \
 switch_menu.o \
 toolbar_menu.o \
-sintab.o
+sintab.o \
+ps_menu.o
 
-$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
-		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
+$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
-	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
-		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
+	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
 	$(LOCALCW_HEADERS) \
-	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) \
-	$(AUDIO_SOURCES) $(SOURCES) \
+	$(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) $(AUDIO_SOURCES) $(SOURCES) \
 	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) \
-	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
+	$(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
 prebuild:
@@ -509,10 +483,8 @@ CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 
 .PHONY:	cppcheck
 cppcheck:
-	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(REMOTE_SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
-	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(LOCALCW_SOURCES) \
-	$(SERVER_SOURCES)
+	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(USBOZY_SOURCES) \
+	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(LOCALCW_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	clean
 clean:
@@ -560,7 +532,7 @@ controller2v2: clean $(PROGRAM)
 #
 # hpsdrsim is a cool program that emulates an SDR board with UDP and TCP
 # facilities. It even feeds back the TX signal and distorts it, so that
-# you can test PURESIGNAL.
+# you can test PureSignal.
 # This feature only works if the sample rate is 48000
 #
 #############################################################################
@@ -613,12 +585,11 @@ debian:
 #############################################################################
 
 .PHONY: app
-app:	$(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS)  $(SOAPYSDR_OBJS) \
-		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
+app:	$(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
-	$(LINK) -headerpad_max_install_names -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS)  $(USBOZY_OBJS)  \
-		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
-		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS) $(LDFLAGS)
+	$(LINK) -headerpad_max_install_names -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  \
+		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) \
+		$(LIBS) $(LDFLAGS)
 	@rm -rf pihpsdr.app
 	@mkdir -p pihpsdr.app/Contents/MacOS
 	@mkdir -p pihpsdr.app/Contents/Frameworks

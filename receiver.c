@@ -223,7 +223,6 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(value,"%d",rx->alex_antenna);
     setProperty(name,value);
 
-#ifdef PURESIGNAL
     //
     // for PS_RX_RECEIVER, *only* save the ALEX antenna setting
     // and then return quickly.
@@ -233,7 +232,6 @@ void receiver_save_state(RECEIVER *rx) {
         && protocol!=SOAPYSDR_PROTOCOL
 #endif
        ) return;
-#endif
 
     sprintf(name,"receiver.%d.sample_rate",rx->id);
     sprintf(value,"%d",rx->sample_rate);
@@ -400,7 +398,6 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     value=getProperty(name);
     if(value) rx->alex_antenna=atoi(value);
 
-#ifdef PURESIGNAL
     //
     // for PS_RX_RECEIVER, *only* restore the ALEX antenna and setting
     // and then return quickly
@@ -410,7 +407,6 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
         && protocol!=SOAPYSDR_PROTOCOL
 #endif
        ) return;
-#endif
 
     sprintf(name,"receiver.%d.sample_rate",rx->id);
     value=getProperty(name);
@@ -884,7 +880,6 @@ g_print("%s: waterfall height=%d y=%d %p\n",__FUNCTION__,height,y,rx->waterfall)
   gtk_widget_show_all(rx->panel);
 }
 
-#ifdef PURESIGNAL
 RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int width) {
 g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   RECEIVER *rx=malloc(sizeof(RECEIVER));
@@ -1001,7 +996,6 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
 
   return rx;
 }
-#endif
 
 RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int fps, int width, int height) {
 g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,id,buffer_size, fft_size, pixels, fps);
@@ -1276,7 +1270,6 @@ void receiver_change_sample_rate(RECEIVER *rx,int sample_rate) {
 
 g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTION__,rx->id,sample_rate,scale,rx->buffer_size,rx->output_samples);
 
-#ifdef PURESIGNAL
   //
   // In the old protocol, the RX_FEEDBACK sample rate is tied
   // to the radio's sample rate and therefore may vary.
@@ -1294,7 +1287,6 @@ g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTI
     g_mutex_unlock(&rx->mutex);
     return;
   }
-#endif
   //
   // re-calculate AGC line for panadapter since it depends on sample rate
   //

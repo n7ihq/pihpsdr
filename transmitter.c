@@ -203,7 +203,6 @@ void transmitter_save_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.low_latency",tx->id);
   sprintf(value,"%d",tx->low_latency);
   setProperty(name,value);
-#ifdef PURESIGNAL
   sprintf(name,"transmitter.%d.puresignal",tx->id);
   sprintf(value,"%d",tx->puresignal);
   setProperty(name,value);
@@ -219,7 +218,6 @@ void transmitter_save_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.attenuation",tx->id);
   sprintf(value,"%d",tx->attenuation);
   setProperty(name,value);
-#endif
   sprintf(name,"transmitter.%d.ctcss_enabled",tx->id);
   sprintf(value,"%d",tx->ctcss_enabled);
   setProperty(name,value);
@@ -310,7 +308,6 @@ void transmitter_restore_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.low_latency",tx->id);
   value=getProperty(name);
   if(value) tx->low_latency=atoi(value);
-#ifdef PURESIGNAL
   sprintf(name,"transmitter.%d.puresignal",tx->id);
   value=getProperty(name);
   if(value) tx->puresignal=atoi(value);
@@ -326,7 +323,6 @@ void transmitter_restore_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.attenuation",tx->id);
   value=getProperty(name);
   if(value) tx->attenuation=atoi(value);
-#endif
   sprintf(name,"transmitter.%d.ctcss_enabled",tx->id);
   value=getProperty(name);
   if(value) tx->ctcss_enabled=atoi(value);
@@ -434,7 +430,6 @@ static gboolean update_display(gpointer data) {
     // If both spectra have the same number of pixels, this code
     // just copies all of them
     //
-#ifdef PURESIGNAL
     if(tx->puresignal && tx->feedback) {
       RECEIVER *rx_feedback=receiver[PS_RX_FEEDBACK];
       g_mutex_lock(&rx_feedback->mutex);
@@ -453,7 +448,7 @@ static gboolean update_display(gpointer data) {
       // The strength of the feedback signal, however, depends on the drive, on the PA and
       // on the attenuation effective in the feedback path.
       // We try to normalize the feeback signal such that is looks like a "normal" TX
-      // panadapter if the feedback is optimal for PURESIGNAL (that is, if the attenuation
+      // panadapter if the feedback is optimal for PureSignal (that is, if the attenuation
       // is optimal). The correction (offset) depends on the protocol (different peak levels in the TX
       // feedback channel.
       switch (protocol) {
@@ -475,11 +470,8 @@ static gboolean update_display(gpointer data) {
       }
       g_mutex_unlock(&rx_feedback->mutex);
     } else {
-#endif
       GetPixels(tx->id,0,tx->pixel_samples,&rc);
-#ifdef PURESIGNAL
     }
-#endif
     if(rc) {
       tx_panadapter_update(tx);
     }
@@ -1551,10 +1543,6 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
 }
 
 void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, double i_sample_rx, double q_sample_rx) {
-//
-// If not compiled for PURESIGNAL, make this a dummy function
-//
-#ifdef PURESIGNAL
   RECEIVER *tx_feedback=receiver[PS_TX_FEEDBACK];
   RECEIVER *rx_feedback=receiver[PS_RX_FEEDBACK];
 
@@ -1578,7 +1566,6 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
     rx_feedback->samples=0;
     tx_feedback->samples=0;
   }
-#endif
 }
 
 void tx_set_displaying(TRANSMITTER *tx,int state) {
@@ -1589,9 +1576,8 @@ void tx_set_displaying(TRANSMITTER *tx,int state) {
 }
 
 void tx_set_ps(TRANSMITTER *tx,int state) {
-#ifdef PURESIGNAL
   //
-  // Switch PURESIGNAL on (state !=0) or off (state==0)
+  // Switch PureSignal on (state !=0) or off (state==0)
   //
   // The following rules must be obeyed:
   //
@@ -1637,7 +1623,6 @@ void tx_set_ps(TRANSMITTER *tx,int state) {
   }
   // update screen
   g_idle_add(ext_vfo_update,NULL);
-#endif
 }
 
 void tx_set_twotone(TRANSMITTER *tx,int state) {
@@ -1664,9 +1649,7 @@ void tx_set_twotone(TRANSMITTER *tx,int state) {
 }
 
 void tx_set_ps_sample_rate(TRANSMITTER *tx,int rate) {
-#ifdef PURESIGNAL
   SetPSFeedbackRate (tx->id,rate);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////
