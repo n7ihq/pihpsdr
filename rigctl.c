@@ -2563,6 +2563,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
 	case 'B': //ZZZB
           implemented=FALSE;
           break;
+#ifdef ANDROMEDA
        case 'D': //ZZZD
          // move VFO down
          if(command[6]==';') {
@@ -2574,8 +2575,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
            }
          }
          break;
-// Encoders
 case 'E': //ZZZE
+         // Encoders
          if(command[7]==';') {
            int v,p,d=command[6]-0x30;
            if((command[4]-0x30)<2) {
@@ -2644,8 +2645,8 @@ case 'E': //ZZZE
            }
          }
          break;
-       // Push Buttons
       case 'P': //ZZZP
+         // Push Buttons
          if(command[7]==';') {
            static int shift=0, startstop=1, longpress=0;
            int v=(command[6]-0x30);
@@ -2891,6 +2892,7 @@ case 'E': //ZZZE
          }
          break;
         case 'S': //ZZZS
+         // ANDROMEDA version info
          if(command[11]==';') {
            g_print("rigctl: Andromeda FP Version: h/w:%c%c s/w:%c%c%c\n",
                   command[6],command[7],command[8],command[9],command[10]);
@@ -2907,6 +2909,7 @@ case 'E': //ZZZE
            }
          }
          break;
+#endif
 	case 'Z': //ZZZZ
           implemented=FALSE;
           break;
