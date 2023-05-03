@@ -501,12 +501,6 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 #endif
 
     GtkWidget *discover_b=gtk_button_new_with_label("Discover");
-    //
-    // This call records the colour of the label and stores it.
-    // Subsequent calls to set_button_text_color() with color == "default"
-    // will then use that color.
-    //
-    set_button_default_color(discover_b);
     g_signal_connect (discover_b, "button-press-event", G_CALLBACK(discover_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid),discover_b,1,row,1,1);
 
@@ -538,6 +532,12 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
     gtk_container_add (GTK_CONTAINER (content), grid);
     gtk_widget_show_all(discovery_dialog);
 fprintf(stderr,"showing device dialog\n");
+    //
+    // This call records the colour of the label and stores it.
+    // Subsequent calls to set_button_text_color() with color == "default"
+    // will then use that color.
+    //
+    set_button_default_color(discover_b);
 
     //
     // Autostart and RedPitaya radios:
