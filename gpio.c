@@ -872,7 +872,6 @@ void gpio_save_actions() {
       setProperty(name,value);
       sprintf(name,"encoders[%d].switch_function",i);
       Action2String(encoders[i].switch_function, value);
-      sprintf(value,"%d",encoders[i].switch_function);
       setProperty(name,value);
     }
   }
