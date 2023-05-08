@@ -838,6 +838,17 @@ void vfo_id_step(int id, int steps) {
   }
 }
 
+//
+// In order to meet intuition, the frequency move
+// is counter-intuitive here:
+//
+// In "normal" (non-CTUN) mode, a move with a positive shift
+// shifts the spectrum to the right, that is, the VFO frequency
+// *decreases*.
+// In "CTUN" mode, the spectrum is nailed to the display and we
+// move the filter area instead. Here a positive shift moves the
+// filter to the right so the VFO frequency *increases*
+//
 void vfo_id_move(int id,long long hz,int round) {
   long long delta;
   int sid;
@@ -868,6 +879,7 @@ void vfo_id_move(int id,long long hz,int round) {
       }
 
       delta=vfo[id].ctun_frequency;
+      // *Add* the shift (hz) to the ctun frequency
       vfo[id].ctun_frequency=vfo[id].ctun_frequency+hz;
       if(round && (vfo[id].mode!=modeCWL && vfo[id].mode!=modeCWU)) {
          vfo[id].ctun_frequency=ROUND(vfo[id].ctun_frequency,0);
@@ -875,6 +887,7 @@ void vfo_id_move(int id,long long hz,int round) {
       delta=vfo[id].ctun_frequency - delta;
     } else {
       delta=vfo[id].frequency;
+      // *Subtract* the shift (hz) from the VFO frequency
       vfo[id].frequency=vfo[id].frequency-hz;
       if(round && (vfo[id].mode!=modeCWL && vfo[id].mode!=modeCWU)) {
          vfo[id].frequency=ROUND(vfo[id].frequency,0);
