@@ -608,8 +608,19 @@ int keyer_init() {
     fprintf(stderr,".... starting keyer thread.\n");
 
 #ifdef __APPLE__
-    sem_unlink("CW");
-    cw_event=sem_open("CW", O_CREAT | O_EXCL, 0700, 0);
+    //
+    // Enable several instances of this program running on the same
+    // machine
+    //
+    static long semcount=0;
+    char sname[20];
+    for (;;) {
+      sprintf(sname,"CW%08ld",semcount++);
+      cw_event=sem_open(sname, O_CREAT | O_EXCL, 0700, 0);
+      if (cw_event == SEM_FAILED && errno == EEXIST) continue;
+      break;
+    }
+    sem_unlink(sname);
     rc = (cw_event == SEM_FAILED);
 #else
     rc = sem_init(&cw_event, 0, 0);

@@ -176,6 +176,43 @@ static socklen_t length=sizeof(addr);
 // Network buffers
 #define NET_BUFFER_SIZE 2048
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// MacOS semaphores
+//
+// Since MacOS only supports named semaphores, we have to be careful to
+// allow serveral instances of this program to run at the same time on the
+// same machine
+//
+/////////////////////////////////////////////////////////////////////////////
+#ifdef __APPLE__
+sem_t *apple_sem(int initial_value) {
+  sem_t *sem;
+  static long semcount=0;
+  char sname[20];
+  for (;;) {
+    sprintf(sname,"P2_%08ld", semcount++);
+    sem=sem_open(sname, O_CREAT | O_EXCL, 0700, initial_value);
+
+    //
+    // This can happen if a semaphore of that name is already in use,
+    // for example by another SDR program running on the same machine
+    //
+    if (sem == SEM_FAILED && errno == EEXIST) continue;
+    break;
+  }
+  if (sem == SEM_FAILED) {
+    perror("NewProtocol:SemOpen");
+    exit (-1);
+  }
+  // we can unlink the semaphore NOW. It will remain functional
+  // until sem_close() has been called by all threads using that
+  // semaphore.
+  sem_unlink(sname);
+  return sem;
+}
+#endif
 /////////////////////////////////////////////////////////////////////////////
 //
 // PEDESTRIAN BUFFER MANAGEMENT
@@ -433,20 +470,14 @@ void new_protocol_init(int pixels) {
     }
 
 #ifdef __APPLE__
-    sem_unlink("RESPONSE");
-    response_sem=sem_open("RESPONSE", O_CREAT | O_EXCL, 0700, 0);
-    if (response_sem == SEM_FAILED) perror("ResponseSemaphore");
+    response_sem=apple_sem(0);
 #else
     (void)sem_init(&response_sem, 0, 0); // check return value!
 #endif
 
 #ifdef __APPLE__
-    sem_unlink("COMMRESREADY");
-    command_response_sem_ready=sem_open("COMMRESREADY", O_CREAT | O_EXCL, 0700, 0);
-    if (command_response_sem_ready == SEM_FAILED) perror("CommandResponseReadySemaphore");
-    sem_unlink("COMMRESBUF");
-    command_response_sem_buffer=sem_open("COMMRESBUF", O_CREAT | O_EXCL, 0700, 0);
-    if (command_response_sem_buffer == SEM_FAILED) perror("CommandResponseBufferSemaphore");
+    command_response_sem_ready=apple_sem(0);
+    command_response_sem_buffer=apple_sem(0);
 #else
     (void)sem_init(&command_response_sem_ready, 0, 0); // check return value!
     (void)sem_init(&command_response_sem_buffer, 0, 0); // check return value!
@@ -458,12 +489,8 @@ void new_protocol_init(int pixels) {
     }
     g_print( "command_response_thread: id=%p\n",command_response_thread_id);
 #ifdef __APPLE__
-    sem_unlink("HIGHREADY");
-    high_priority_sem_ready=sem_open("HIGHREADY", O_CREAT | O_EXCL, 0700, 0);
-    if (high_priority_sem_ready == SEM_FAILED) perror("HighPriorityReadySemaphore");
-    sem_unlink("HIGHBUF");
-    high_priority_sem_buffer=sem_open("HIGHBUF",   O_CREAT | O_EXCL, 0700, 0);
-    if (high_priority_sem_buffer == SEM_FAILED) perror("HIGHPriorityBufferSemaphore");
+    high_priority_sem_ready=apple_sem(0);
+    high_priority_sem_buffer=apple_sem(0);
 #else
     (void)sem_init(&high_priority_sem_ready, 0, 0); // check return value!
     (void)sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
@@ -475,12 +502,8 @@ void new_protocol_init(int pixels) {
     }
     g_print( "high_priority_thread: id=%p\n",high_priority_thread_id);
 #ifdef __APPLE__
-    sem_unlink("MICREADY");
-    mic_line_sem_ready=sem_open("MICREADY", O_CREAT | O_EXCL, 0700, 0);
-    if (mic_line_sem_ready == SEM_FAILED) perror("MicLineReadySemaphore");
-    sem_unlink("MICBUF");
-    mic_line_sem_buffer=sem_open("MICBUF",   O_CREAT | O_EXCL, 0700, 0);
-    if (mic_line_sem_buffer == SEM_FAILED) perror("MicLineBufferSemaphore");
+    mic_line_sem_ready=apple_sem(0);
+    mic_line_sem_buffer=apple_sem(0);
 #else
     (void)sem_init(&mic_line_sem_ready, 0, 0); // check return value!
     (void)sem_init(&mic_line_sem_buffer, 0, 0); // check return value!
@@ -499,21 +522,8 @@ void new_protocol_init(int pixels) {
 //
     for(i=0;i<MAX_DDC;i++) {
 #ifdef __APPLE__
-      char sname[12];
-      sprintf(sname,"IQREADY%03d", i);
-      sem_unlink(sname);
-      iq_sem_ready[i]=sem_open(sname, O_CREAT | O_EXCL, 0700, 0);
-      if (iq_sem_ready[i] == SEM_FAILED) {
-        g_print("SEM=%s, ",sname);
-        perror("IQreadySemaphore");
-      }
-      sprintf(sname,"IQBUF%03d", i);
-      sem_unlink(sname);
-      iq_sem_buffer[i]=sem_open(sname, O_CREAT| O_EXCL, 0700, 0);
-      if (iq_sem_buffer[i] == SEM_FAILED) {
-        g_print("SEM=%s, ",sname);
-        perror("IQbufferSemaphore");
-      }
+      iq_sem_ready[i]=apple_sem(0);
+      iq_sem_buffer[i]=apple_sem(0);
 #else
       (void)sem_init(&iq_sem_ready[i], 0, 0); // check return value!
       (void)sem_init(&iq_sem_buffer[i], 0, 0); // check return value!
@@ -535,6 +545,7 @@ void new_protocol_init(int pixels) {
     optval = 0xb8;  // DSCP EF
     if(setsockopt(data_socket, IPPROTO_IP, IP_TOS, &optval, sizeof(optval))<0) {
       perror("data_socket: IP_TOS");
+      exit (-1);
     }
 #endif
 
