@@ -171,9 +171,9 @@ tx_panadapter_scroll_event_cb (GtkWidget      *widget,
                gpointer        data)
 {
   if(event->direction==GDK_SCROLL_UP) {
-    vfo_move(step,TRUE);
+    vfo_step(1);
   } else {
-    vfo_move(-step,TRUE);
+    vfo_step(-1);
   }
   return FALSE;
 }

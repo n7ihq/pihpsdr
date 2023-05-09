@@ -839,15 +839,18 @@ void vfo_id_step(int id, int steps) {
 }
 
 //
-// In order to meet intuition, the frequency move
-// is counter-intuitive here:
+// vfo_move (and vfo_id_move) are exclusively used
+// to update the radio while dragging with the 
+// pointer device in the panadapter area. Therefore,
+// the behaviour is different whether we use CTUN or not.
 //
-// In "normal" (non-CTUN) mode, a move with a positive shift
-// shifts the spectrum to the right, that is, the VFO frequency
-// *decreases*.
+// In "normal" (non-CTUN) mode, we "drag the spectrum". This
+// means, when dragging to the right the spectrum moves towards
+// higher frequencies  this means the RX frequence is *decreased*.
+//
 // In "CTUN" mode, the spectrum is nailed to the display and we
-// move the filter area instead. Here a positive shift moves the
-// filter to the right so the VFO frequency *increases*
+// move the CTUN frequency. So dragging to the right
+// *increases* the RX frequency.
 //
 void vfo_id_move(int id,long long hz,int round) {
   long long delta;
@@ -1022,9 +1025,9 @@ vfo_scroll_event_cb (GtkWidget      *widget,
                gpointer        data)
 {
   if(event->direction==GDK_SCROLL_UP) {
-    vfo_move(step,TRUE);
+    vfo_step(1);
   } else {
-    vfo_move(-step,TRUE);
+    vfo_step(-1);
   }
   return FALSE;
 }

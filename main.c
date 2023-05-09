@@ -127,11 +127,11 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 		return TRUE;
 	  }
 	  if (event->keyval == GDK_KEY_d ) {
-		vfo_move(step,TRUE);
+		vfo_step(-1);
 		return TRUE;
 	  }
 	  if (event->keyval == GDK_KEY_u ) {
-		 vfo_move(-step,TRUE);
+		 vfo_step(1);
 		 return TRUE;
 	  }
   }
