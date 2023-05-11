@@ -737,8 +737,8 @@ static void new_protocol_high_priority() {
       }
     }
 
-    rx1Frequency+=calibration;
-    rx2Frequency+=calibration;
+    rx1Frequency+=frequency_calibration;
+    rx2Frequency+=frequency_calibration;
 
     if (diversity_enabled && !xmit) {
 	//
@@ -797,7 +797,7 @@ static void new_protocol_high_priority() {
       }
     }
 
-    txFrequency+=calibration;
+    txFrequency+=frequency_calibration;
 
     phase=(unsigned long)(((double)txFrequency)*34.952533333333333333333333333333);
 
@@ -1174,7 +1174,6 @@ static void new_protocol_high_priority() {
     if((rc=sendto(data_socket,high_priority_buffer_to_radio,sizeof(high_priority_buffer_to_radio),0,(struct sockaddr*)&high_priority_addr,high_priority_addr_length))<0) {
         g_print("sendto socket failed for high priority: rc=%d errno=%d\n",rc,errno);
         abort();
-        //exit(1);
     }
 
     if(rc!=sizeof(high_priority_buffer_to_radio)) {
@@ -1545,7 +1544,6 @@ g_print("new_protocol_thread\n");
 #else
               sem_post(&command_response_sem_buffer);
 #endif
-              //process_command_response();
               break;
             case HIGH_PRIORITY_TO_HOST_PORT:
 #ifdef __APPLE__
@@ -1559,7 +1557,6 @@ g_print("new_protocol_thread\n");
 #else
               sem_post(&high_priority_sem_buffer);
 #endif
-              //process_high_priority();
               break;
             case MIC_LINE_TO_HOST_PORT:
 #ifdef __APPLE__
@@ -1787,7 +1784,6 @@ static void process_div_iq_data(unsigned char*buffer) {
 }
 
 static void process_ps_iq_data(unsigned char *buffer) {
-  //long long timestamp; // never used
   int bitspersample;     // used in debug code
   int samplesperframe;
   int b;
@@ -1799,15 +1795,6 @@ static void process_ps_iq_data(unsigned char *buffer) {
   int rightsample1;
   double leftsampledouble1;
   double rightsampledouble1;
-
-  //timestamp=((long long)(buffer[ 4]&0xFF)<<56)
-  //         +((long long)(buffer[ 5]&0xFF)<<48)
-  //         +((long long)(buffer[ 6]&0xFF)<<40)
-  //         +((long long)(buffer[ 7]&0xFF)<<32)
-  //         +((long long)(buffer[ 8]&0xFF)<<24)
-  //         +((long long)(buffer[ 9]&0xFF)<<16)
-  //         +((long long)(buffer[10]&0xFF)<< 8)
-  //         +((long long)(buffer[11]&0xFF)    );
 
   bitspersample=((buffer[12]&0xFF)<<8)+(buffer[13]&0xFF); // used in debug code
   samplesperframe=((buffer[14]&0xFF)<<8)+(buffer[15]&0xFF);

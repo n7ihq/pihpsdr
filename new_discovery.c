@@ -248,7 +248,6 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
     }
 }
 
-//void* new_discover_receive_thread(void* arg) {
 gpointer new_discover_receive_thread(gpointer data) {
     struct sockaddr_in addr;
     socklen_t len;

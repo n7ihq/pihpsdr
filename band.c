@@ -512,15 +512,6 @@ void bandRestoreState() {
         value=getProperty(name);
         if(value) strcpy(bands[b].title,value);
 
-	// The number of entries is a compile-time constant,
-        // which changes when compiling piHPSDR with different
-	// options (e.g. with and without SOAPYSDR)
-	// Therefore this number cannot be "restored" from a props file
-
-        //sprintf(name,"band.%d.entries",b);
-        //lue=getProperty(name);
-        //if(value) bands[b].bandstack->entries=atoi(value);
-
         sprintf(name,"band.%d.current",b);
         value=getProperty(name);
         if(value) {

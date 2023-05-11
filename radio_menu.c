@@ -165,7 +165,7 @@ static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #endif
 
 static void calibration_value_changed_cb(GtkWidget *widget, gpointer data) {
-  calibration=(long long)gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  frequency_calibration=(long long)gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
 static void rx_gain_calibration_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -886,22 +886,23 @@ void radio_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *calibration_b=gtk_spin_button_new_with_range(-10000.0,10000.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(calibration_b),(double)calibration);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(calibration_b),(double)frequency_calibration);
   gtk_grid_attach(GTK_GRID(grid),calibration_b,col,row,1,1);
   g_signal_connect(calibration_b,"value_changed",G_CALLBACK(calibration_value_changed_cb),NULL);
 
-  if(have_rx_gain) {
-    col++;
-    GtkWidget *rx_gain_label=gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(rx_gain_label), "<b>RX Gain Calibration:</b>");
-    gtk_grid_attach(GTK_GRID(grid),rx_gain_label,col,row,1,1);
+  //
+  // Calibration of the RF front end
+  //
+  col++;
+  GtkWidget *rx_gain_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(rx_gain_label), "<b>RX Gain Calibration:</b>");
+  gtk_grid_attach(GTK_GRID(grid),rx_gain_label,col,row,1,1);
 
-    col++;
-    GtkWidget *rx_gain_calibration_b=gtk_spin_button_new_with_range(-50.0,50.0,1.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(rx_gain_calibration_b),(double)rx_gain_calibration);
-    gtk_grid_attach(GTK_GRID(grid),rx_gain_calibration_b,col,row,1,1);
-    g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
-  }
+  col++;
+  GtkWidget *rx_gain_calibration_b=gtk_spin_button_new_with_range(-50.0,50.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(rx_gain_calibration_b),(double)rx_gain_calibration);
+  gtk_grid_attach(GTK_GRID(grid),rx_gain_calibration_b,col,row,1,1);
+  g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
 
   row++;
   if(row>temp_row) temp_row=row;
@@ -985,7 +986,6 @@ void radio_menu(GtkWidget *parent) {
 
     if(can_transmit) {
 /*
-      //tx_gains=g_new(GtkWidget*,radio->info.soapy.tx_gains);
       for(i=0;i<radio->info.soapy.tx_gains;i++) {
         col=2;
         GtkWidget *tx_gain_label=gtk_label_new(radio->info.soapy.tx_gain[i]);

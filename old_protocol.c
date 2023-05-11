@@ -415,7 +415,6 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
     {
       g_print("old_protocol_ep6_read: OzyBulkRead failed %d bytes\n",bytes);
       perror("ozy_read(EP6 read failed");
-      //exit(1);
     }
     else
 // process the received data normally
@@ -579,7 +578,6 @@ static gpointer receive_thread(gpointer arg) {
             }
 	    if (ret < 0) {
 	      bytes_read=ret;                          // error case: discard whole packet
-              //perror("old_protocol recvfrom TCP:");
 	    }
 	  } else if (data_socket >= 0) {
             bytes_read=recvfrom(data_socket,buffer,sizeof(buffer),0,(struct sockaddr*)&addr,&length);
@@ -818,7 +816,7 @@ static long long channel_freq(int chan) {
       }
     }
   }
-  freq+=calibration;
+  freq+=frequency_calibration;
   return freq;
 }
 
@@ -982,10 +980,6 @@ static void process_control_bytes() {
              // until it first vanishes. tx_fifo_flag becomes "true"
              // as soon as a "no underflow" condition is seen.
              //
-             //fprintf(stderr,"TX FIFO: %d", control_in[3] & 0x7F);
-             //if ((control_in[3] & 0xC0) == 0xC0) fprintf(stderr," OVER ");
-             //if ((control_in[3] & 0xC0) == 0x80) fprintf(stderr," UNDER ");
-             //fprintf(stderr,"\n");
              if ((control_in[3] & 0xC0) != 0x80) tx_fifo_flag=1;
              if ((control_in[3] & 0xC0) == 0x80 && tx_fifo_flag) tx_fifo_underrun=1;
              if ((control_in[3] & 0xC0) == 0xC0) tx_fifo_overrun=1;
@@ -1641,7 +1635,6 @@ void ozy_send_buffer() {
         break;
       case 3:
         power=0;
-//static int last_power=0;
 	//
 	// Some HPSDR apps for the RedPitaya generate CW inside the FPGA, but while
 	// doing this, DriveLevel changes are processed by the server, but do not become effective.
@@ -1708,11 +1701,6 @@ void ozy_send_buffer() {
             power=hl2power;
           }
         }
-
-//if(last_power!=power) {
-//  g_print("power=%d\n",power);
-//  last_power=power;
-//}
 
        //fprintf(stderr,"%s: TXband=%s disablePA=%d\n",__FUNCTION__,txband->title,txband->disablePA);
 
@@ -2258,7 +2246,6 @@ static void metis_send_buffer(unsigned char* buffer,int length) {
     bytes_sent=sendto(data_socket,buffer,length,0,(struct sockaddr*)&data_addr,sizeof(data_addr));
     if(bytes_sent!=length) {
       g_print("%s: UDP sendto failed: %d: %s\n",__FUNCTION__,errno,strerror(errno));
-      //perror("sendto socket failed for UDP metis_send_data\n");
     }
   } else {
     // This should not happen

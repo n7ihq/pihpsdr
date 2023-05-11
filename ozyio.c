@@ -79,8 +79,6 @@ extern unsigned short penny_fp, penny_rp, penny_alc;
 extern int adc_overflow;
 void writepenny(unsigned char mode);
 static libusb_device_handle* ozy_handle;
-//static libusb_context* context;
-
 
 static char ozy_firmware[64] = {0};
 static char ozy_fpga[64] = {0};
@@ -439,7 +437,6 @@ void ozy_i2c_readpwr(int addr) {
 		rc = ozy_i2c_read(buffer,2,I2C_PENNY_ALC);	
 		if(rc<0) {
 			perror("ozy_i2c_readpwr alc: failed");
-			//exit(1);
 		}
 		penny_alc = (buffer[0] << 8) + buffer[1];
 		break;
@@ -448,7 +445,6 @@ void ozy_i2c_readpwr(int addr) {
 		rc = ozy_i2c_read(buffer,2,I2C_PENNY_FWD);	
 		if(rc<0) {
 			perror("ozy_i2c_readpwr fwd: failed");
-			//exit(1);
 		}
 		penny_fp = (buffer[0] << 8) + buffer[1];
 		break;
@@ -457,7 +453,6 @@ void ozy_i2c_readpwr(int addr) {
 		rc = ozy_i2c_read(buffer,2,I2C_PENNY_REV);	
 		if(rc<0) {
 			perror("ozy_i2c_readpwr rev: failed");
-			//exit(1);
 		}
 		penny_rp = (buffer[0] << 8) + buffer[1];
 		break;
@@ -467,7 +462,6 @@ void ozy_i2c_readpwr(int addr) {
 		rc = ozy_i2c_read(buffer,2,I2C_MERC1_ADC_OFS);	// adc1 overflow status
 		if(rc<0) {
 			perror("ozy_i2c_readpwr adc: failed");
-			//exit(1);
 		}
 		if (buffer[0] == 0) {		// its overloaded
 			adc_overflow = 2000;	// counts down to give hold time to client
@@ -645,7 +639,6 @@ int ozy_initialise()
 	rc = ozy_open();
 	if (rc != 0) {
 		fprintf(stderr,"Cannot locate Ozy\n");
-		//exit(1);
 	}
 // load Ozy FW
 	ozy_reset_cpu(1);

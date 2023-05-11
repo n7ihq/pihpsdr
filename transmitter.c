@@ -835,7 +835,6 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
   }
   int ratio=tx->iq_output_rate/tx->mic_sample_rate;
   tx->output_samples=tx->buffer_size*ratio;
-  //tx->pixels=width*ratio*4;
   tx->pixels=display_width*ratio*2;
 
   tx->width=width;

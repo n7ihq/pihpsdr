@@ -196,7 +196,6 @@ g_print("connect_cb: %s:%d\n",host_addr,host_port);
 #endif
 
 void discovery() {
-//fprintf(stderr,"discovery\n");
 
   //
   // On the discovery screen, make the combo-boxes "touchscreen-friendly"

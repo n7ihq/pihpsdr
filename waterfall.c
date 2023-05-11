@@ -307,7 +307,6 @@ void waterfall_init(RECEIVER *rx,int width,int height) {
   rx->waterfall_frequency=0;
   rx->waterfall_sample_rate=0;
 
-  //waterfall_frame = gtk_frame_new (NULL);
   rx->waterfall = gtk_drawing_area_new ();
   gtk_widget_set_size_request (rx->waterfall, width, height);
 

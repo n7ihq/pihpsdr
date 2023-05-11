@@ -218,14 +218,12 @@ g_print("remote_set_pan: EXIT\n");
 }
 
 void update_pan(double pan) {
-  //g_mutex_lock(&pan_zoom_mutex);
   if(active_receiver->zoom>1) {
     int p=active_receiver->pan+(int)pan;
     if(p<0) p=0;
     if(p>(active_receiver->pixels-active_receiver->width)) p=active_receiver->pixels-active_receiver->width;
     set_pan(active_receiver->id,(double)p);
   }
-  //g_mutex_lock(&pan_zoom_mutex);
 }
 
 GtkWidget *zoompan_init(int my_width, int my_height) {

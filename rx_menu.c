@@ -82,7 +82,6 @@ static void preamp_cb(GtkWidget *widget, gpointer data) {
 static void alex_att_cb(GtkWidget *widget, gpointer data) {
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     set_alex_attenuation((intptr_t) data);
-    update_att_preamp();
   }
 }
 
@@ -155,7 +154,6 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
     fprintf(stderr,"local_output_changed rx=%d %s\n",active_receiver->id,output_devices[i].name);
     active_receiver->audio_name=g_new(gchar,strlen(output_devices[i].name)+1);
     strcpy(active_receiver->audio_name,output_devices[i].name);
-    //active_receiver->audio_device=output_devices[i].index;  // update rx to NEW device
   }
 
   if(active_receiver->local_audio) {
@@ -280,7 +278,7 @@ void rx_menu(GtkWidget *parent) {
   // so those are left out. For Charly25, PreAmps and Alex Attenuator are controlled via
   // the sliders menu.
   //
-  // Preamps are not switchable on all SDR hardware I know of, so this is commented out
+  // Preamps are switchable only for the very first HPSDR radios
   //
   // We assume Alex attenuators are present if we have an ALEX board and no Orion2
   // (ANAN-7000/8000 do not have these), and if the RX is fed by the first ADC.

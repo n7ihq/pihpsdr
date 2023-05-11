@@ -79,7 +79,6 @@ static DISCOVERED* d;
 static GtkWidget *status;
 
 void status_text(char *text) {
-  //fprintf(stderr,"splash_status: %s\n",text);
   gtk_label_set_text(GTK_LABEL(status),text);
   usleep(100000);
   while (gtk_events_pending ())
@@ -174,10 +173,6 @@ static int init(void *data) {
   g_print("%s\n",__FUNCTION__);
 
   audio_get_cards();
-
-  // wait for get_cards to complete
-  //g_mutex_lock(&audio_mutex);
-  //g_mutex_unlock(&audio_mutex);
 
   cursor_arrow=gdk_cursor_new(GDK_ARROW);
   cursor_watch=gdk_cursor_new(GDK_WATCH);
@@ -281,7 +276,6 @@ fprintf(stderr,"display_width=%d display_height=%d\n", display_width, display_he
     }
   }
   g_signal_connect (top_window, "delete-event", G_CALLBACK (main_delete), NULL);
-  //g_signal_connect (top_window,"draw", G_CALLBACK (main_draw_cb), NULL);
 
   //
   // We want to use the space-bar as an alternative to go to TX
