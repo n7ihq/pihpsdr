@@ -1304,8 +1304,12 @@ static void new_protocol_receive_specific() {
 	// (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
         ddc=i;
         if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2+i;
-        receive_specific_buffer[5]|=receiver[i]->dither<<ddc; // dither enable
-        receive_specific_buffer[6]|=receiver[i]->random<<ddc; // random enable
+        //
+        // If there is at least one RX which has the dither or random bit set,
+        // this bit is set for the corresponding ADC
+        //
+        receive_specific_buffer[5]|=receiver[i]->dither<<receiver[i]->adc; // dither enable
+        receive_specific_buffer[6]|=receiver[i]->random<<receiver[i]->adc; // random enable
 	if (!xmit && !diversity_enabled) {
 	  // normal RX without diversity
           receive_specific_buffer[7]|=(1<<ddc); // DDC enable
