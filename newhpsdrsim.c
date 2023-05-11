@@ -50,7 +50,7 @@ static int smm_port = 0;
 static int iqform = 0;
 
 // data from rx specific packet
-static int adc=0;
+static int n_adc=0;
 static int adcdither[8];
 static int adcrandom[8];
 static int ddcenable[NUMRECEIVERS];
@@ -79,8 +79,8 @@ static int ptt=0;
 static int cwx=0;
 static int dot=0;
 static int dash=0;
-static unsigned long rxfreq[NUMRECEIVERS];
-static unsigned long txfreq=0;
+static long rxfreq[NUMRECEIVERS];
+static long txfreq=0;
 static int txdrive=0;
 static int w1400=0;  // Xvtr and Audio enable
 static int ocout=0;
@@ -286,7 +286,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
   memset(adcmap, -1, NUMRECEIVERS*sizeof(int));
   memset(syncddc, -1, NUMRECEIVERS*sizeof(int));
 
-  memset(rxfreq, -1, NUMRECEIVERS*sizeof(unsigned long));
+  memset(rxfreq, -1, NUMRECEIVERS*sizeof(long));
   memset(alex0, 0, 32*sizeof(int));
   memset(alex1, 0, 32*sizeof(int));
   }
@@ -344,18 +344,18 @@ void *ddc_specific_thread(void *data) {
      if (seqnum != 0 && seqnum != seqold+1 ) {
        fprintf(stderr,"RXspec: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
      }
-     if (adc != buffer[4]) {
-       adc=buffer[4];
-       fprintf(stderr,"RX: Number of ADCs: %d\n",adc);
+     if (n_adc != buffer[4]) {
+       n_adc=buffer[4];
+       fprintf(stderr,"RX: Number of ADCs: %d\n",n_adc);
      }
-     for (i=0; i<adc; i++) {
+     for (i=0; i<n_adc; i++) {
        rc=(buffer[5] >> i) & 0x01;
        if (rc != adcdither[i]) {
          adcdither[i]=rc;
 	 fprintf(stderr,"RX: ADC%d dither=%d\n",i,rc);
        }
      }
-     for (i=0; i<adc; i++) {
+     for (i=0; i<n_adc; i++) {
        rc=(buffer[6] >> i) & 0x01;
        if (rc != adcrandom[i]) {
          adcrandom[i]=rc;
@@ -649,8 +649,8 @@ void *highprio_thread(void *data) {
        hp_mod=1;
        fprintf(stderr,"HP: PTT=%d\n", rc);
        if (ptt == 0) {
-	 memset(isample, 0, sizeof(float)*NEWRTXLEN);
-	 memset(qsample, 0, sizeof(float)*NEWRTXLEN);
+	 memset(isample, 0, sizeof(double)*NEWRTXLEN);
+	 memset(qsample, 0, sizeof(double)*NEWRTXLEN);
        }
      }
      rc=(buffer[5] >> 0) & 0x01;
@@ -794,7 +794,7 @@ void *rx_thread(void *data) {
   double fac;
   int sample;
   unsigned char *p;
-  int noisept,tonept;
+  int noisept;
   int myddc;
   long myrate;
   int sync,size;
@@ -803,9 +803,12 @@ void *rx_thread(void *data) {
   int divptr;
   int decimation;
   unsigned int seed;
+  double off,tonearg,tonedelta;
+  int do_tone;
 
   struct timespec delay;
 
+  tonearg=0.0;
   myddc=(int) (uintptr_t) data;
   if (myddc < 0 || myddc >= NUMRECEIVERS) return NULL;
   seqnum=0;
@@ -832,7 +835,7 @@ void *rx_thread(void *data) {
     return NULL;
   }
 
-  tonept=noisept=0;
+  noisept=0;
   clock_gettime(CLOCK_MONOTONIC, &delay);
   fprintf(stderr,"RX thread %d, enabled=%d\n", myddc, ddcenable[myddc]);
   rxptr=txptr-4096;
@@ -848,6 +851,17 @@ void *rx_thread(void *data) {
         }
 	decimation=1536/rxrate[myddc];
 	myadc=adcmap[myddc];
+        //
+        // IQ frequency of 14.1 MHz signal
+        //
+        if (myadc == 0 && labs(14100000L-rxfreq[myddc]) < 500*rxrate[myddc]) {
+          off = (double)(14100000 - rxfreq[myddc]);
+          tonedelta = -6.283185307179586476925286766559*off/((double) (1000*rxrate[myddc]));
+          do_tone=1;
+        } else {
+          do_tone=0;
+        }
+
         // for simplicity, we only allow for a single "synchronized" DDC,
         // this well covers the PureSignal and DIVERSITY cases
 	sync=0;
@@ -869,7 +883,7 @@ void *rx_thread(void *data) {
           wait=238000000L/rxrate[myddc]; // time for these samples in nano-secs
 	}
 	//
-	// ADC0 RX: noise + 800Hz signal at -73 dBm
+	// ADC0 RX: noise + 14.1 MHz signal at -73 dBm
 	// ADC0 TX: noise + distorted TX signal
 	// ADC1 RX: noise
 	// ADC1 TX: HERMES only: original TX signal
@@ -912,21 +926,23 @@ void *rx_thread(void *data) {
 	  // a) add man-made-noise on I-sample of RX channel
 	  // b) add man-made-noise on Q-sample of "synced" channel
 	  //
-	  if (sync && (rxrate[myadc]==192) && ptt && (syncadc == adc)) {
+	  if (sync && (rxrate[myadc]==192) && ptt && (syncadc == n_adc)) {
 	    irsample = isample[rxptr];
 	    qrsample = qsample[rxptr++];
 	    if (rxptr >= NEWRTXLEN) rxptr=0;
 	    fac=txatt_dbl*txdrv_dbl*(IM3a+IM3b*(irsample*irsample+qrsample*qrsample)*txdrv_dbl*txdrv_dbl);
 	    if (myadc == 0) {
-	      i0sample += irsample*fac;
-	      q0sample += qrsample*fac;
+	      i0sample += irsample *fac;
+	      q0sample += qrsample *fac;
 	    }
 	    i1sample = irsample * 0.2899;
 	    q1sample = qrsample * 0.2899;
-	  } else if (myadc == 0) {
-	    i0sample += toneItab[tonept] * 0.0002239 * rxatt0_dbl;
-	    q0sample += toneQtab[tonept] * 0.0002239 * rxatt0_dbl;
-	    tonept += decimation; if (tonept >= LENTONE) tonept=0;
+	  } else if (do_tone) {
+	    i0sample += cos(tonearg) * 0.0002239 * rxatt0_dbl;
+	    q0sample += sin(tonearg) * 0.0002239 * rxatt0_dbl;
+            tonearg += tonedelta;
+            if (tonearg > 6.3)  tonearg -= 6.283185307179586476925286766559;         
+            if (tonearg < -6.3) tonearg += 6.283185307179586476925286766559;
 	  }
 	  if (diversity && !sync && myadc == 0) {
 	    i0sample += 0.0001 * rxatt0_dbl * divtab[divptr];

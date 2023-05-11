@@ -61,12 +61,6 @@ EXTERN int nb_pulse, nb_width;
 
 #define LENDIV 48000
 EXTERN double divtab[LENDIV];
-//
-// An 800-Hz tone with 0 dBm
-//
-#define LENTONE 15360
-EXTERN double toneItab[LENTONE];
-EXTERN double toneQtab[LENTONE];
 
 //
 // TX fifo (needed for PureSignal)
