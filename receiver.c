@@ -274,9 +274,6 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(name,"receiver.%d.volume",rx->id);
     sprintf(value,"%f",rx->volume);
     setProperty(name,value);
-    //sprintf(name,"receiver.%d.rf_gain",rx->id);
-    //sprintf(value,"%f",rx->rf_gain);
-    //setProperty(name,value);
     sprintf(name,"receiver.%d.agc",rx->id);
     sprintf(value,"%d",rx->agc);
     setProperty(name,value);
@@ -470,9 +467,6 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.volume",rx->id);
     value=getProperty(name);
     if(value) rx->volume=atof(value);
-    //sprintf(name,"receiver.%d.rf_gain",rx->id);
-    //value=getProperty(name);
-    //if(value) rx->rf_gain=atof(value);
     sprintf(name,"receiver.%d.agc",rx->id);
     value=getProperty(name);
     if(value) rx->agc=atoi(value);
@@ -630,18 +624,14 @@ static gint update_display(gpointer data) {
         // the value obtained from WDSP is best corrected HERE for
         // possible gain and attenuation
         //
-        double level=GetRXAMeter(rx->id,smeter)+meter_calibration;
+        double level=GetRXAMeter(rx->id,smeter);
         level += (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-        if (filter_board == CHARLY25) {
-          // preamp/dither encodes the preamp level
-          if (rx->preamp) level -= 18.0;
-          if (rx->dither) level -= 18.0;
+
+        if (filter_board == CHARLY25 && rx->adc == 0) {
+          level += (double)(12*rx->alex_attenuation-18*rx->preamp-18*rx->dither);
         }
-        //
-        // Assume that alex_attenuation is set correctly if we have an ALEX board
-        //
         if (filter_board == ALEX && rx->adc == 0) {
-          level += 10*rx->alex_attenuation;
+          level += (double)(10*rx->alex_attenuation);
         }
         rx->meter=level;
 
@@ -920,7 +910,6 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
 
   // allocate buffers
   rx->iq_input_buffer=g_new(double,2*rx->buffer_size);
-  //rx->audio_buffer=NULL;
   rx->audio_sequence=0L;
   rx->pixel_samples=g_new(float,rx->pixels);
 

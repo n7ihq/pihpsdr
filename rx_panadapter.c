@@ -127,6 +127,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   long long f;
   long long divisor=20000;
   double x=0.0;
+  double soffset;
 
   gboolean active=active_receiver==rx;
 
@@ -135,14 +136,12 @@ void rx_panadapter_update(RECEIVER *rx) {
 
   samples=rx->pixel_samples;
 
-  //clear_panadater_surface();
   cairo_t *cr;
   cr = cairo_create (rx->panadapter_surface);
   cairo_set_line_width(cr, LINE_THIN);
   cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
   cairo_rectangle(cr,0,0,display_width,display_height);
   cairo_fill(cr);
-  //cairo_paint (cr);
 
   double HzPerPixel = rx->hz_per_pixel;  // need this many times
 
@@ -150,6 +149,19 @@ void rx_panadapter_update(RECEIVER *rx) {
   long long frequency=vfo[rx->id].frequency;
   int vfoband=vfo[rx->id].band;
   long long offset = vfo[rx->id].ctun ? vfo[rx->id].offset : 0;
+
+  //
+  // soffset contains all corrections for attenuation and preamps
+  // Perhaps some adjustment is necessary for those old radios which have
+  // switchable preamps.
+  //
+  soffset=(double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
+  if (filter_board == ALEX && rx->adc == 0) {
+    soffset += (double)(10*rx->alex_attenuation-20*rx->preamp);
+  }
+  if (filter_board == CHARLY25 && rx->adc == 0) {
+    soffset += (double)(12*rx->alex_attenuation-18*rx->preamp-18*rx->dither);
+  }
 
   // In diversity mode, the RX1 frequency tracks the RX0 frequency
   if (diversity_enabled && rx->id == 1) {
@@ -423,22 +435,12 @@ void rx_panadapter_update(RECEIVER *rx) {
   // agc
   if(rx->agc!=AGC_OFF) {
     cairo_set_line_width(cr, LINE_THICK);
-    double knee_y=rx->agc_thresh + (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-    if (filter_board == ALEX && rx->adc == 0) knee_y += (double)(10*rx->alex_attenuation);
-    if (filter_board == CHARLY25) {
-      if (rx->preamp) knee_y -= 18.0;
-      if (rx->dither) knee_y -= 18.0;
-    }
+    double knee_y=rx->agc_thresh + soffset;
     knee_y = floor((rx->panadapter_high - knee_y)
                         * (double) display_height
                         / (rx->panadapter_high - rx->panadapter_low));
 
-    double hang_y=rx->agc_hang + (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-    if (filter_board == ALEX && rx->adc == 0) hang_y += (double)(10*rx->alex_attenuation);
-    if (filter_board == CHARLY25) {
-      if (rx->preamp) hang_y -= 18.0;
-      if (rx->dither) hang_y -= 18.0;
-    }
+    double hang_y=rx->agc_hang + soffset;
     hang_y = floor((rx->panadapter_high - hang_y)
                         * (double) display_height
                         / (rx->panadapter_high - rx->panadapter_low));
@@ -503,25 +505,14 @@ void rx_panadapter_update(RECEIVER *rx) {
   //
   // most HPSDR only have attenuation (no gain), while HermesLite-II and SOAPY use gain (no attenuation)
   //
-  s1=(double)samples[pan] + (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-  cairo_move_to(cr, 0.0, s1);
-  if (filter_board == ALEX && rx->adc == 0) s1 += (double)(10*rx->alex_attenuation);
-  if (filter_board == CHARLY25) {
-    if (rx->preamp) s1 -= 18.0;
-    if (rx->dither) s1 -= 18.0;
-  }
+  s1=(double)samples[pan] + soffset;
 
   s1 = floor((rx->panadapter_high - s1)
                         * (double) display_height
                         / (rx->panadapter_high - rx->panadapter_low));
   cairo_move_to(cr, 0.0, s1);
   for(i=1;i<display_width;i++) {
-    s2=(double)samples[i+pan] + (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-    if (filter_board == ALEX && rx->adc == 0) s2 += (double)(10*rx->alex_attenuation);
-    if (filter_board == CHARLY25) {
-      if (rx->preamp) s2 -= 18.0;
-      if (rx->dither) s2 -= 18.0;
-    }
+    s2=(double)samples[i+pan] + soffset;
     s2 = floor((rx->panadapter_high - s2)
                             * (double) display_height
                             / (rx->panadapter_high - rx->panadapter_low));

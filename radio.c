@@ -673,7 +673,8 @@ g_print("create_visual: calling radio_change_receivers: receivers=%d r=%d\n",rec
     radio_change_receivers(r);
   }
 
-  gtk_widget_show_all (top_window);
+  gtk_widget_show_all (top_window);  // ... this shows both the HPSDR and C25 preamp/att sliders
+  att_type_changed();                // ... and this hides the „wrong“ ones.
 
 }
 

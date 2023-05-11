@@ -29,7 +29,7 @@ extern GtkWidget *scale_dialog;
 int scale_timeout_cb(gpointer data);
 
 extern void att_type_changed(void);
-extern void update_att_preamp(void);
+extern void update_c25_att(void);
 
 extern int sliders_active_receiver_changed(void *data);
 extern void update_agc_gain(double gain);
@@ -45,7 +45,6 @@ extern void set_mic_gain(double value);
 extern void set_drive(double drive);
 extern void set_filter_cut_low(int rx, int value);
 extern void set_filter_cut_high(int rx, int value);
-//extern void set_tune(double tune);
 extern void set_attenuation_value(double attenuation);
 extern void set_filter_width(int rx,int width);
 extern void set_filter_shift(int rx,int width);
