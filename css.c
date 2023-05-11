@@ -2,16 +2,16 @@
 #include "css.h"
 
 //
-// This has to made "complete" (e.g. specifying BOTH
-// the background and the text color) to work independent
-// of the chosen GTK theme.
-// Unless we want a special effect, simply inherent the default colours
+// Unless we want a special effect, do not specify colors so
+// we inherit them from the GTK them.
+//
+// Here, only the color for the "selected" state
+// (white text on a red button) is specified
+// 
 //
 char *css=
 "  @define-color TOGGLE_ON  rgb(100%,0%,0%);\n"
-"  @define-color TOGGLE_OFF rgb(80%,80%,80%);\n"
 "  @define-color COLOR_ON   rgb(100%,100%,100%);\n"
-"  @define-color COLOR_OFF  rgb(10%,10%,10%);\n"
 "  #small_button {\n"
 "    padding: 1px;\n"
 "    font-family: Sans;\n"
@@ -22,8 +22,6 @@ char *css=
 "    font-family: Sans;\n"
 "    font-size: 15px;\n"
 "    background-image: none;\n"
-"    background-color: currentColor;\n"   // inherited from GTK theme
-"    color: currentColor;\n"              // inherited from GTK theme
 "    }\n"
 "  #small_toggle_button:checked {\n"
 "    padding: 1px;\n"
