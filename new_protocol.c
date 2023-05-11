@@ -700,12 +700,19 @@ static void new_protocol_high_priority() {
     high_priority_buffer_to_radio[4]=running;
 
     if (xmit) {
-      //
-      //  We need not set PTT if doing internal CW with break-in
-      //
       if(txmode==modeCWU || txmode==modeCWL) {
-        if ((!cw_keyer_internal || !cw_breakin || CAT_cw_is_active)) high_priority_buffer_to_radio[4]|=0x02;
+        //
+        // For "internal" CW, we should not set
+        // the MOX bit, everything is done in the FPGA.
+        //
+        // However, if we are doing CAT CW, local CW or tuning/TwoTone,
+        // we must put the SDR into TX mode
+        //
+        if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone) {
+           high_priority_buffer_to_radio[4]|=0x02;
+        }
       } else {
+        // not doing CW? always set MOX if transmitting
         high_priority_buffer_to_radio[4]|=0x02;
       }
     }
