@@ -710,10 +710,6 @@ int af_encoder_get_pos() {
     return pos;
 }
 
-//int af_function_get_state() {
-//    return afFunction;
-//}
-
 int rf_encoder_get_pos() {
     int pos=rfEncoderPos;
     rfEncoderPos=0;
@@ -725,10 +721,6 @@ int agc_encoder_get_pos() {
     agcEncoderPos=0;
     return pos;
 }
-
-//int rf_function_get_state() {
-//    return rfFunction;
-//}
 
 int function_get_state() {
     return function_state;
@@ -771,8 +763,6 @@ static int vfo_encoder_changed(void *data) {
   if(!locked) {
     int pos=*(int*)data;
     BANDSTACK_ENTRY* entry=bandstack_entry_get_current();
-    //entry->frequency=entry->frequency+(pos*step);
-    //setFrequency(entry->frequency);
     setFrequency(entry->frequency+ddsOffset+(pos*step));
     g_idle_add(ext_vfo_update,NULL);
   }
