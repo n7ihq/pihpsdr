@@ -68,8 +68,8 @@ static GtkWidget *agc_gain_label;
 static GtkWidget *agc_scale;
 static GtkWidget *attenuation_label=NULL;
 static GtkWidget *attenuation_scale=NULL;
-static GtkWidget *c25_att_label;
-static GtkWidget *c25_att_combobox;
+static GtkWidget *c25_att_label=NULL;
+static GtkWidget *c25_att_combobox=NULL;
 static GtkWidget *mic_gain_label;
 static GtkWidget *mic_gain_scale;
 static GtkWidget *drive_label;
@@ -191,24 +191,26 @@ void set_attenuation_value(double value) {
 void att_type_changed() {
   //
   // This function manages a transition from/to a CHARLY25 filter board
+  // Note all sliders might be non-existent, e.g. if sliders are not
+  // displayed at all. So verify all widgets are non-NULL
   //
   g_print("%s\n",__FUNCTION__);
   if (filter_board == CHARLY25) {
-    if(attenuation_label!=NULL) gtk_widget_hide(attenuation_label);
-    if(rf_gain_label!=NULL)     gtk_widget_hide(rf_gain_label);
-    if(attenuation_scale!=NULL) gtk_widget_hide(attenuation_scale);
-    if(rf_gain_scale!=NULL)     gtk_widget_hide(rf_gain_scale);
-    gtk_widget_show(c25_att_label);
-    gtk_widget_show(c25_att_combobox);
-    update_c25_att();
+    if(attenuation_label!=NULL)   gtk_widget_hide(attenuation_label);
+    if(rf_gain_label!=NULL)       gtk_widget_hide(rf_gain_label);
+    if(attenuation_scale!=NULL)   gtk_widget_hide(attenuation_scale);
+    if(rf_gain_scale!=NULL)       gtk_widget_hide(rf_gain_scale);
+    if(c25_att_label!=NULL)       gtk_widget_show(c25_att_label);
+    if(c25_att_combobox!=NULL)    gtk_widget_show(c25_att_combobox);
   } else {
-    gtk_widget_hide(c25_att_label);
-    gtk_widget_hide(c25_att_combobox);
-    if(attenuation_label!=NULL) gtk_widget_show(attenuation_label);
-    if(rf_gain_label!=NULL)     gtk_widget_show(rf_gain_label);
-    if(attenuation_scale!=NULL) gtk_widget_show(attenuation_scale);
-    if(rf_gain_scale!=NULL)     gtk_widget_show(rf_gain_scale);
+    if (c25_att_label != NULL)    gtk_widget_hide(c25_att_label);
+    if (c25_att_combobox != NULL) gtk_widget_hide(c25_att_combobox);
+    if(attenuation_label!=NULL)   gtk_widget_show(attenuation_label);
+    if(rf_gain_label!=NULL)       gtk_widget_show(rf_gain_label);
+    if(attenuation_scale!=NULL)   gtk_widget_show(attenuation_scale);
+    if(rf_gain_scale!=NULL)       gtk_widget_show(rf_gain_scale);
   }
+  sliders_active_receiver_changed(NULL);
 }
 
 static void c25_att_combobox_changed(GtkWidget *widget, gpointer data) {
@@ -219,8 +221,6 @@ static void c25_att_combobox_changed(GtkWidget *widget, gpointer data) {
     // store attenuation, such that in meter.c the correct level is displayed
     // There is no adjustable preamp or attenuator, so nail these values to zero
     //
-    adc[active_receiver->adc].attenuation = 0;
-    adc[active_receiver->adc].gain        = 0;
     switch (val) {
       case -36:
         active_receiver->alex_attenuation=3;
@@ -274,8 +274,6 @@ void update_c25_att() {
   int att;
   if (filter_board == CHARLY25) {
     char id[16];
-    adc[active_receiver->adc].attenuation = 0;
-    adc[active_receiver->adc].gain        = 0;
     if (active_receiver->adc != 0) {
       active_receiver->alex_attenuation=0;
       active_receiver->preamp=0;
@@ -286,7 +284,6 @@ void update_c25_att() {
     //
     if (active_receiver->preamp || active_receiver->dither) {
       active_receiver->alex_attenuation=0;
-      adc[active_receiver->adc].attenuation = 0;
     }
     att=-12*active_receiver->alex_attenuation+18*active_receiver->dither+18*active_receiver->preamp;
     sprintf(id, "%d", att);
@@ -949,6 +946,9 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     gtk_widget_show(rf_gain_scale);
     gtk_grid_attach(GTK_GRID(sliders),rf_gain_scale,7,0,2,1);
     g_signal_connect(G_OBJECT(rf_gain_scale),"value_changed",G_CALLBACK(rf_gain_value_changed_cb),NULL);
+  } else {
+    rf_gain_label=NULL;
+    rf_gain_scale=NULL;
   }
   if (have_rx_att) {
     attenuation_label=gtk_label_new("ATT (dB):");
@@ -962,6 +962,9 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     gtk_widget_show(attenuation_scale);
     gtk_grid_attach(GTK_GRID(sliders),attenuation_scale,7,0,2,1);
     g_signal_connect(G_OBJECT(attenuation_scale),"value_changed",G_CALLBACK(attenuation_value_changed_cb),NULL);
+  } else {
+    attenuation_label=NULL;
+    attenuation_scale=NULL;
   }
 
   //
@@ -1010,6 +1013,11 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     gtk_widget_show(drive_scale);
     gtk_grid_attach(GTK_GRID(sliders),drive_scale,4,1,2,1);
     g_signal_connect(G_OBJECT(drive_scale),"value_changed",G_CALLBACK(drive_value_changed_cb),NULL);
+  } else {
+    mic_gain_label=NULL;
+    mic_gain_scale=NULL;
+    drive_label=NULL;
+    drive_scale=NULL;
   }
 
   squelch_label=gtk_label_new("Squelch:");
