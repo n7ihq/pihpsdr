@@ -181,6 +181,8 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
 	//
 	// prepeare socket for sending an UPD packet to ipaddr_radio
 	//
+        interface_addr.sin_family = AF_INET;
+        interface_addr.sin_addr.s_addr = INADDR_ANY;
         memset(&to_addr, 0, sizeof(to_addr));
         to_addr.sin_family=AF_INET;
         to_addr.sin_port=htons(DISCOVERY_PORT);
