@@ -174,6 +174,14 @@ ENCODER encoders_controller2_v2[MAX_ENCODERS]={
   {TRUE,TRUE,18,1,17,1,0,VFO,R_START,FALSE,TRUE,0,0,0,0,0,0,R_START,FALSE,TRUE,0,0,0L},
   };
 
+ENCODER encoders_g2_frontpanel[MAX_ENCODERS]={
+  {TRUE,TRUE,5,1,6,1,0,DRIVE,R_START,TRUE,TRUE,26,1,20,1,0,MIC_GAIN,R_START,TRUE,TRUE,22,PS,0L},               //ENC1
+  {TRUE,TRUE,9,1,7,1,0,AGC_GAIN,R_START,TRUE,TRUE,21,1,4,1,0,AF_GAIN,R_START,TRUE,TRUE,27,MUTE,0L},            //ENC3
+  {TRUE,TRUE,11,1,10,1,0,IF_WIDTH,R_START,TRUE,TRUE,19,1,16,1,0,IF_SHIFT,R_START,TRUE,TRUE,23,MENU_FILTER,0L}, //ENC7
+  {TRUE,TRUE,13,1,12,1,0,XIT,R_START,TRUE,TRUE,8,1,25,1,0,RIT,R_START,TRUE,TRUE,24,MENU_FREQUENCY,0L},         //ENC5
+  {TRUE,TRUE,18,1,17,1,0,VFO,R_START,FALSE,TRUE,0,0,0,0,0,0,R_START,FALSE,TRUE,0,0,0L},                        //VFO
+  };  
+
 ENCODER *encoders=encoders_no_controller;
 
 SWITCH switches_no_controller[MAX_SWITCHES]={
@@ -332,6 +340,25 @@ SWITCH switches_controller2_v2[MAX_SWITCHES]={
   {FALSE,FALSE,0,LOCK,0L},
   {FALSE,FALSE,0,CTUN,0L}
   };
+
+SWITCH switches_g2_frontpanel[MAX_SWITCHES]={
+  {FALSE,FALSE,0,MOX,0L},      //GPA0
+  {FALSE,FALSE,0,TUNE,0L}, 
+  {FALSE,FALSE,0,CTUN,0L},
+  {FALSE,FALSE,0,LOCK,0L},
+  {FALSE,FALSE,0,MODE_PLUS,0L},
+  {FALSE,FALSE,0,FILTER_PLUS,0L},
+  {FALSE,FALSE,0,BAND_PLUS,0L},
+  {FALSE,FALSE,0,MODE_MINUS,0L},//GPA7
+  {FALSE,FALSE,0,FILTER_MINUS,0L},//GPB0
+  {FALSE,FALSE,0,BAND_MINUS,0L},
+  {FALSE,FALSE,0,A_TO_B,0L},
+  {FALSE,FALSE,0,B_TO_A,0L},
+  {FALSE,FALSE,0,SPLIT,0L},
+  {FALSE,FALSE,0,FUNCTION,0L},
+  {FALSE,FALSE,0,RIT,0L},
+  {FALSE,FALSE,0,XIT,0L}       //GPB7
+  };    
 
 SWITCH *switches=switches_controller1[0];
 
@@ -567,7 +594,7 @@ static void process_edge(int offset,int value) {
     }
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     if(I2C_INTERRUPT==offset) {
       if(value==PRESSED) {
         i2c_interrupt();
@@ -647,6 +674,19 @@ void gpio_set_defaults(int ctrlr) {
 
       encoders=encoders_controller2_v2;
       switches=switches_controller2_v2;
+      break;
+    case G2_FRONTPANEL:
+#ifdef LOCALCW
+      //
+      // This controller uses nearly all GPIO lines,
+      // so lines 9, 10, 11 are not available for
+      // CW keys and producing a side tone
+      //
+      ENABLE_GPIO_SIDETONE=0;
+      ENABLE_CW_BUTTONS=0;
+#endif
+      encoders=encoders_g2_frontpanel;
+      switches=switches_g2_frontpanel;
       break;
   }
 }
@@ -790,7 +830,7 @@ void gpio_save_state() {
     }
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_enabled",i);
       sprintf(value,"%d",switches[i].switch_enabled);
@@ -845,7 +885,7 @@ void gpio_restore_actions() {
       }
     }
   }
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_function",i);
       value=getProperty(name);
@@ -872,7 +912,6 @@ void gpio_save_actions() {
       setProperty(name,value);
       sprintf(name,"encoders[%d].switch_function",i);
       Action2String(encoders[i].switch_function, value);
-      sprintf(value,"%d",encoders[i].switch_function);
       setProperty(name,value);
     }
   }
@@ -886,7 +925,7 @@ void gpio_save_actions() {
       setProperty(name,value);
     }
   }
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_function",i);
       Action2String(switches[i].switch_function,value);
@@ -1038,7 +1077,7 @@ int gpio_init() {
     }
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     i2c_init();
     g_print("%s: setup i2c interrupt %d\n",__FUNCTION__,I2C_INTERRUPT);
     if((ret=setup_line(chip,I2C_INTERRUPT,TRUE))<0) {

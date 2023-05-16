@@ -91,7 +91,6 @@ static void discover(struct ifaddrs* iface, int discflag) {
         // bind to this interface and the discovery port
         interface_addr.sin_family = AF_INET;
         interface_addr.sin_addr.s_addr = sa->sin_addr.s_addr;
-        //interface_addr.sin_port = htons(DISCOVERY_PORT*2);
         interface_addr.sin_port = htons(0); // system assigned port
         if(bind(discovery_socket,(struct sockaddr*)&interface_addr,sizeof(interface_addr))<0) {
             perror("discover: bind socket failed for discovery_socket:");
@@ -118,7 +117,10 @@ static void discover(struct ifaddrs* iface, int discflag) {
       case 2:
 	//
 	// Send METIS detection packet via UDP to ipaddr_radio
+        // To be able to connect later, we have to specify INADDR_ANY
 	//
+        interface_addr.sin_family = AF_INET;
+        interface_addr.sin_addr.s_addr = INADDR_ANY;
 	memset(&to_addr, 0, sizeof(to_addr));
         to_addr.sin_family=AF_INET;
         to_addr.sin_port=htons(DISCOVERY_PORT);
@@ -283,7 +285,6 @@ static void discover(struct ifaddrs* iface, int discflag) {
     }
 }
 
-//static void *discover_receive_thread(void* arg) {
 static gpointer discover_receive_thread(gpointer data) {
     struct sockaddr_in addr;
     socklen_t len;

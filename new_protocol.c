@@ -176,6 +176,43 @@ static socklen_t length=sizeof(addr);
 // Network buffers
 #define NET_BUFFER_SIZE 2048
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// MacOS semaphores
+//
+// Since MacOS only supports named semaphores, we have to be careful to
+// allow serveral instances of this program to run at the same time on the
+// same machine
+//
+/////////////////////////////////////////////////////////////////////////////
+#ifdef __APPLE__
+sem_t *apple_sem(int initial_value) {
+  sem_t *sem;
+  static long semcount=0;
+  char sname[20];
+  for (;;) {
+    sprintf(sname,"P2_%08ld", semcount++);
+    sem=sem_open(sname, O_CREAT | O_EXCL, 0700, initial_value);
+
+    //
+    // This can happen if a semaphore of that name is already in use,
+    // for example by another SDR program running on the same machine
+    //
+    if (sem == SEM_FAILED && errno == EEXIST) continue;
+    break;
+  }
+  if (sem == SEM_FAILED) {
+    perror("NewProtocol:SemOpen");
+    exit (-1);
+  }
+  // we can unlink the semaphore NOW. It will remain functional
+  // until sem_close() has been called by all threads using that
+  // semaphore.
+  sem_unlink(sname);
+  return sem;
+}
+#endif
 /////////////////////////////////////////////////////////////////////////////
 //
 // PEDESTRIAN BUFFER MANAGEMENT
@@ -433,20 +470,14 @@ void new_protocol_init(int pixels) {
     }
 
 #ifdef __APPLE__
-    sem_unlink("RESPONSE");
-    response_sem=sem_open("RESPONSE", O_CREAT | O_EXCL, 0700, 0);
-    if (response_sem == SEM_FAILED) perror("ResponseSemaphore");
+    response_sem=apple_sem(0);
 #else
     (void)sem_init(&response_sem, 0, 0); // check return value!
 #endif
 
 #ifdef __APPLE__
-    sem_unlink("COMMRESREADY");
-    command_response_sem_ready=sem_open("COMMRESREADY", O_CREAT | O_EXCL, 0700, 0);
-    if (command_response_sem_ready == SEM_FAILED) perror("CommandResponseReadySemaphore");
-    sem_unlink("COMMRESBUF");
-    command_response_sem_buffer=sem_open("COMMRESBUF", O_CREAT | O_EXCL, 0700, 0);
-    if (command_response_sem_buffer == SEM_FAILED) perror("CommandResponseBufferSemaphore");
+    command_response_sem_ready=apple_sem(0);
+    command_response_sem_buffer=apple_sem(0);
 #else
     (void)sem_init(&command_response_sem_ready, 0, 0); // check return value!
     (void)sem_init(&command_response_sem_buffer, 0, 0); // check return value!
@@ -458,12 +489,8 @@ void new_protocol_init(int pixels) {
     }
     g_print( "command_response_thread: id=%p\n",command_response_thread_id);
 #ifdef __APPLE__
-    sem_unlink("HIGHREADY");
-    high_priority_sem_ready=sem_open("HIGHREADY", O_CREAT | O_EXCL, 0700, 0);
-    if (high_priority_sem_ready == SEM_FAILED) perror("HighPriorityReadySemaphore");
-    sem_unlink("HIGHBUF");
-    high_priority_sem_buffer=sem_open("HIGHBUF",   O_CREAT | O_EXCL, 0700, 0);
-    if (high_priority_sem_buffer == SEM_FAILED) perror("HIGHPriorityBufferSemaphore");
+    high_priority_sem_ready=apple_sem(0);
+    high_priority_sem_buffer=apple_sem(0);
 #else
     (void)sem_init(&high_priority_sem_ready, 0, 0); // check return value!
     (void)sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
@@ -475,12 +502,8 @@ void new_protocol_init(int pixels) {
     }
     g_print( "high_priority_thread: id=%p\n",high_priority_thread_id);
 #ifdef __APPLE__
-    sem_unlink("MICREADY");
-    mic_line_sem_ready=sem_open("MICREADY", O_CREAT | O_EXCL, 0700, 0);
-    if (mic_line_sem_ready == SEM_FAILED) perror("MicLineReadySemaphore");
-    sem_unlink("MICBUF");
-    mic_line_sem_buffer=sem_open("MICBUF",   O_CREAT | O_EXCL, 0700, 0);
-    if (mic_line_sem_buffer == SEM_FAILED) perror("MicLineBufferSemaphore");
+    mic_line_sem_ready=apple_sem(0);
+    mic_line_sem_buffer=apple_sem(0);
 #else
     (void)sem_init(&mic_line_sem_ready, 0, 0); // check return value!
     (void)sem_init(&mic_line_sem_buffer, 0, 0); // check return value!
@@ -499,21 +522,8 @@ void new_protocol_init(int pixels) {
 //
     for(i=0;i<MAX_DDC;i++) {
 #ifdef __APPLE__
-      char sname[12];
-      sprintf(sname,"IQREADY%03d", i);
-      sem_unlink(sname);
-      iq_sem_ready[i]=sem_open(sname, O_CREAT | O_EXCL, 0700, 0);
-      if (iq_sem_ready[i] == SEM_FAILED) {
-        g_print("SEM=%s, ",sname);
-        perror("IQreadySemaphore");
-      }
-      sprintf(sname,"IQBUF%03d", i);
-      sem_unlink(sname);
-      iq_sem_buffer[i]=sem_open(sname, O_CREAT| O_EXCL, 0700, 0);
-      if (iq_sem_buffer[i] == SEM_FAILED) {
-        g_print("SEM=%s, ",sname);
-        perror("IQbufferSemaphore");
-      }
+      iq_sem_ready[i]=apple_sem(0);
+      iq_sem_buffer[i]=apple_sem(0);
 #else
       (void)sem_init(&iq_sem_ready[i], 0, 0); // check return value!
       (void)sem_init(&iq_sem_buffer[i], 0, 0); // check return value!
@@ -535,6 +545,7 @@ void new_protocol_init(int pixels) {
     optval = 0xb8;  // DSCP EF
     if(setsockopt(data_socket, IPPROTO_IP, IP_TOS, &optval, sizeof(optval))<0) {
       perror("data_socket: IP_TOS");
+      exit (-1);
     }
 #endif
 
@@ -689,12 +700,19 @@ static void new_protocol_high_priority() {
     high_priority_buffer_to_radio[4]=running;
 
     if (xmit) {
-      //
-      //  We need not set PTT if doing internal CW with break-in
-      //
       if(txmode==modeCWU || txmode==modeCWL) {
-        if ((!cw_keyer_internal || !cw_breakin || CAT_cw_is_active)) high_priority_buffer_to_radio[4]|=0x02;
+        //
+        // For "internal" CW, we should not set
+        // the MOX bit, everything is done in the FPGA.
+        //
+        // However, if we are doing CAT CW, local CW or tuning/TwoTone,
+        // we must put the SDR into TX mode
+        //
+        if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone) {
+           high_priority_buffer_to_radio[4]|=0x02;
+        }
       } else {
+        // not doing CW? always set MOX if transmitting
         high_priority_buffer_to_radio[4]|=0x02;
       }
     }
@@ -726,8 +744,8 @@ static void new_protocol_high_priority() {
       }
     }
 
-    rx1Frequency+=calibration;
-    rx2Frequency+=calibration;
+    rx1Frequency+=frequency_calibration;
+    rx2Frequency+=frequency_calibration;
 
     if (diversity_enabled && !xmit) {
 	//
@@ -786,7 +804,7 @@ static void new_protocol_high_priority() {
       }
     }
 
-    txFrequency+=calibration;
+    txFrequency+=frequency_calibration;
 
     phase=(unsigned long)(((double)txFrequency)*34.952533333333333333333333333333);
 
@@ -851,14 +869,9 @@ static void new_protocol_high_priority() {
     unsigned long alex0=0x00000000;
     unsigned  long alex1=0x00000000;
 
-    if (device != NEW_DEVICE_ORION2) {
+    if (have_alex_att) {
       //
       // ANAN7000 and 8000 do not have ALEX attenuators.
-      // Even worse, ALEX0(14) bit used to control these attenuators
-      // on ANAN-10/100/200 is now used differently.
-      //
-      // Note: ALEX attenuators are not much used anyway since we
-      //       have step attenuators on most boards.
       //
       switch (receiver[0]->alex_attenuation) {
 	case 0:
@@ -1163,7 +1176,6 @@ static void new_protocol_high_priority() {
     if((rc=sendto(data_socket,high_priority_buffer_to_radio,sizeof(high_priority_buffer_to_radio),0,(struct sockaddr*)&high_priority_addr,high_priority_addr_length))<0) {
         g_print("sendto socket failed for high priority: rc=%d errno=%d\n",rc,errno);
         abort();
-        //exit(1);
     }
 
     if(rc!=sizeof(high_priority_buffer_to_radio)) {
@@ -1287,8 +1299,12 @@ static void new_protocol_receive_specific() {
 	// (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
         ddc=i;
         if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2+i;
-        receive_specific_buffer[5]|=receiver[i]->dither<<ddc; // dither enable
-        receive_specific_buffer[6]|=receiver[i]->random<<ddc; // random enable
+        //
+        // If there is at least one RX which has the dither or random bit set,
+        // this bit is set for the corresponding ADC
+        //
+        receive_specific_buffer[5]|=receiver[i]->dither<<receiver[i]->adc; // dither enable
+        receive_specific_buffer[6]|=receiver[i]->random<<receiver[i]->adc; // random enable
 	if (!xmit && !diversity_enabled) {
 	  // normal RX without diversity
           receive_specific_buffer[7]|=(1<<ddc); // DDC enable
@@ -1534,7 +1550,6 @@ g_print("new_protocol_thread\n");
 #else
               sem_post(&command_response_sem_buffer);
 #endif
-              //process_command_response();
               break;
             case HIGH_PRIORITY_TO_HOST_PORT:
 #ifdef __APPLE__
@@ -1548,7 +1563,6 @@ g_print("new_protocol_thread\n");
 #else
               sem_post(&high_priority_sem_buffer);
 #endif
-              //process_high_priority();
               break;
             case MIC_LINE_TO_HOST_PORT:
 #ifdef __APPLE__
@@ -1776,7 +1790,6 @@ static void process_div_iq_data(unsigned char*buffer) {
 }
 
 static void process_ps_iq_data(unsigned char *buffer) {
-  //long long timestamp; // never used
   int bitspersample;     // used in debug code
   int samplesperframe;
   int b;
@@ -1788,15 +1801,6 @@ static void process_ps_iq_data(unsigned char *buffer) {
   int rightsample1;
   double leftsampledouble1;
   double rightsampledouble1;
-
-  //timestamp=((long long)(buffer[ 4]&0xFF)<<56)
-  //         +((long long)(buffer[ 5]&0xFF)<<48)
-  //         +((long long)(buffer[ 6]&0xFF)<<40)
-  //         +((long long)(buffer[ 7]&0xFF)<<32)
-  //         +((long long)(buffer[ 8]&0xFF)<<24)
-  //         +((long long)(buffer[ 9]&0xFF)<<16)
-  //         +((long long)(buffer[10]&0xFF)<< 8)
-  //         +((long long)(buffer[11]&0xFF)    );
 
   bitspersample=((buffer[12]&0xFF)<<8)+(buffer[13]&0xFF); // used in debug code
   samplesperframe=((buffer[14]&0xFF)<<8)+(buffer[15]&0xFF);

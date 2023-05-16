@@ -9,7 +9,7 @@
  *
  * This device has four "RF sources"
  *
- * RF1: ADC noise plus a  800 Hz signal plus 5000 Hz signal at -73dBm
+ * RF1: ADC noise plus a signal at 14.1 MHz at -73 dBm
  * RF2: ADC noise
  * RF3: TX feedback signal with some distortion.
  * RF4: normalized undistorted TX signal
@@ -38,9 +38,6 @@
  * (RedPitaya based SDRs), where there is a fixed association
  * RX1=ADC1, RX2=ADC2, RX3=ADC2, RX4=TX-DAC
  * and the PureSignal feedback signal is connected to the second ADC.
- *
- * Audio sent to the "radio" is played via the first available output channel.
- * This works on MacOS (PORTAUDIO) and Linux (ALSASOUND).
  *
  * If invoked with the "-diversity" flag, broad "man-made" noise is fed to ADC1 and
  * ADC2 upon RXing. The ADC2 signal is phase shifted by 90 degrees and somewhat
@@ -191,6 +188,10 @@ static int  oldnew=3;    // 1: only P1, 2: only P2, 3: P1 and P2,
 
 static double txlevel;
 
+static double tonearg;
+static double tonedelta;
+static int    do_tone;
+
 int main(int argc, char *argv[])
 {
 	int i, j, size;
@@ -235,6 +236,9 @@ int main(int argc, char *argv[])
 
 	// seed value for random number generator
 	seed = ((uintptr_t) &seed) & 0xffffff;
+        tonearg=0.0;
+        tonedelta=0.0;
+        do_tone=0;
         diversity=0;
         noiseblank=0;
         nb_pulse=0;
@@ -295,17 +299,6 @@ int main(int argc, char *argv[])
           noiseItab[i]= ((double) rand_r(&seed) / j - 1.0) * 0.00003;
           noiseQtab[i]= ((double) rand_r(&seed) / j - 1.0) * 0.00003;
         }
-
-	fprintf(stderr,".... producing signals\n");
-	// Produce an 800 Hz tone at 0 dBm
-        run=0.0;
-        off=0.0;
-	for (i=0; i<LENTONE; i++) {
-	  toneQtab[i]=cos(run)+cos(off);
-	  toneItab[i]=sin(run)+sin(off);
-	  run += 0.0032724923474893679567319201909161;
-	  off += 0.016362461737446839783659600954581;
-	}
 
         //
         // Use only one buffer, so diversity and
@@ -545,6 +538,13 @@ int main(int argc, char *argv[])
 				process_ep2(buffer + 11);
 				process_ep2(buffer + 523);
 
+                                if (labs(14100000L-rx_freq[0]) < (24000 << rate)) {
+                                  off = (double)(14100000 - rx_freq[0]);
+                                  tonedelta = -6.283185307179586476925286766559*off/((double) (48000 << rate));
+                                  do_tone=1;
+                                } else {
+                                  do_tone=0;
+                                }
 				if (active_thread) {
                                   // Put TX IQ samples into the ring buffer
 				  // In the old protocol, samples come in groups of 8 bytes L1 L0 R1 R0 I1 I0 Q1 Q0
@@ -1274,11 +1274,11 @@ void *handler_ep6(void *arg)
 
         struct timespec delay;
         long wait;
-        int noiseIQpt,toneIQpt,divpt,rxptr;
+        int noiseIQpt,divpt,rxptr;
         double i1,q1,fac1,fac2,fac3,fac4;
-        int decimation;  // for converting 1536 kHz samples to 48, 192, 384, ....
         unsigned int seed;
         unsigned int tx_fifo_count;
+        int decimation;
 
 	seed=((uintptr_t) &seed) & 0xffffff;
 
@@ -1288,7 +1288,6 @@ void *handler_ep6(void *arg)
 	counter = 0;
 
 	noiseIQpt=0;
-	toneIQpt=0;
 	divpt=0;
 	// The rxptr should never "overtake" the txptr, but
 	// it also must not lag behind by too much. Let's take
@@ -1317,10 +1316,6 @@ void *handler_ep6(void *arg)
 //              power (39 dB)
 //
 
-		//  48 kHz   decimation=32
-		//  96 kHz   decimation=16
-		// 192 kHz   decimation= 8
-		// 384 kHz   decimation= 4
 		decimation = 32 >> rate;
 		for (i = 0; i < 2; ++i)
 		{
@@ -1372,7 +1367,7 @@ void *handler_ep6(void *arg)
 			
 		    pointer += 8;
 		    memset(pointer, 0, 504);
-		    fac1=rxatt_dbl[0]*0.0002239;	// Amplitude of 800-Hz-signal to ADC1
+                    fac1 = do_tone ?  rxatt_dbl[0]*0.0002239 : 0.0;
 		    if (diversity && !noiseblank) {
 			fac2=0.0001*rxatt_dbl[0];	// Amplitude of broad "man-made" noise to ADC1
 			fac4=0.0002*rxatt_dbl[1];	// Amplitude of broad "man-made" noise to ADC2
@@ -1392,11 +1387,11 @@ void *handler_ep6(void *arg)
 			  adc1qsample= (txatt_dbl*q1*fac3+noiseItab[noiseIQpt]) * 8388607.0;
 			} else if (diversity) {
 			  // man made noise to ADC1 samples
-			  adc1isample= (noiseItab[noiseIQpt]+toneItab[toneIQpt]*fac1+divtab[divpt]*fac2) * 8388607.0;
-			  adc1qsample= (noiseQtab[noiseIQpt]+toneQtab[toneIQpt]*fac1                   ) * 8388607.0;
+			  adc1isample= (noiseItab[noiseIQpt]+cos(tonearg)*fac1+divtab[divpt]*fac2) * 8388607.0;
+			  adc1qsample= (noiseQtab[noiseIQpt]+sin(tonearg)*fac1                   ) * 8388607.0;
 			} else {
-			  adc1isample= (noiseItab[noiseIQpt]+toneItab[toneIQpt]*fac1) * 8388607.0;
-			  adc1qsample= (noiseQtab[noiseIQpt]+toneQtab[toneIQpt]*fac1) * 8388607.0;
+			  adc1isample= (noiseItab[noiseIQpt]+cos(tonearg)*fac1) * 8388607.0;
+			  adc1qsample= (noiseQtab[noiseIQpt]+sin(tonearg)*fac1) * 8388607.0;
 			}
 			// ADC2: noise RX, feedback sig. on TX (only STEMlab)
 			if (ptt && (OLDDEVICE == DEVICE_C25)) {
@@ -1467,7 +1462,9 @@ void *handler_ep6(void *arg)
 			pointer += 2;
 			rxptr++;              if (rxptr >= OLDRTXLEN) rxptr=0;
 			noiseIQpt++;          if (noiseIQpt >= LENNOISE) noiseIQpt=rand_r(&seed) / NOISEDIV;
-			toneIQpt+=decimation; if (toneIQpt >= LENTONE) toneIQpt=0;
+                        tonearg += tonedelta;
+                        if (tonearg > 6.3)  tonearg -= 6.283185307179586476925286766559;
+                        if (tonearg < -6.3) tonearg += 6.283185307179586476925286766559;
 			divpt+=decimation;    if (divpt >= LENDIV) divpt=0;
 		    }
 		}

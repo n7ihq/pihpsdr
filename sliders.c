@@ -68,9 +68,8 @@ static GtkWidget *agc_gain_label;
 static GtkWidget *agc_scale;
 static GtkWidget *attenuation_label=NULL;
 static GtkWidget *attenuation_scale=NULL;
-static GtkWidget *c25_att_preamp_label;
+static GtkWidget *c25_att_label;
 static GtkWidget *c25_att_combobox;
-static GtkWidget *c25_preamp_combobox;
 static GtkWidget *mic_gain_label;
 static GtkWidget *mic_gain_scale;
 static GtkWidget *drive_label;
@@ -123,7 +122,7 @@ int sliders_active_receiver_changed(void *data) {
     g_signal_handler_unblock(G_OBJECT(squelch_scale),squelch_signal_id);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(squelch_enable),active_receiver->squelch_enable);
     if (filter_board == CHARLY25) {
-      update_att_preamp();
+      update_c25_att();
     } else {
       if(attenuation_scale!=NULL) gtk_range_set_value (GTK_RANGE(attenuation_scale),(double)adc[active_receiver->adc].attenuation);
       if (rf_gain_scale != NULL)  gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[active_receiver->adc].gain);
@@ -140,6 +139,7 @@ int scale_timeout_cb(gpointer data) {
 }
 
 static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
+  if (!have_rx_att) return;
   adc[active_receiver->adc].attenuation=gtk_range_get_value(GTK_RANGE(attenuation_scale));
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -154,13 +154,7 @@ static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 void set_attenuation_value(double value) {
   g_print("%s\n",__FUNCTION__);
-  if (have_rx_gain) {
-    // The only way to arrive here is to assign "ATTENUATION" to a
-    // MIDI/GPIO controller. However, this program either uses attenuation
-    // or gain, so ignore this.
-    g_print("%s: Ignoring attempt to set ATTENUATION value\n",__FUNCTION__);
-    return;
-  }
+  if (!have_rx_att) return;
   adc[active_receiver->adc].attenuation=(int)value;
   set_attenuation(adc[active_receiver->adc].attenuation);
   if(display_sliders) {
@@ -194,40 +188,22 @@ void set_attenuation_value(double value) {
   }
 }
 
-void update_att_preamp() {
-  // CHARLY25: update the ATT/Pre buttons to the values of the active RX
-  // We should also set the attenuation for use in meter.c
-  if (filter_board == CHARLY25) {
-    char id[] = "x";
-    if (active_receiver->adc != 0) {
-      active_receiver->alex_attenuation=0;
-      active_receiver->preamp=0;
-      active_receiver->dither=0;
-      adc[active_receiver->adc].attenuation = 0;
-    }
-    sprintf(id, "%d", active_receiver->alex_attenuation);
-    adc[active_receiver->adc].attenuation = 12*active_receiver->alex_attenuation;
-    gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_att_combobox), id);
-    sprintf(id, "%d", active_receiver->preamp + active_receiver->dither);
-    gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_preamp_combobox), id);
-  }
-}
-
 void att_type_changed() {
+  //
+  // This function manages a transition from/to a CHARLY25 filter board
+  //
   g_print("%s\n",__FUNCTION__);
   if (filter_board == CHARLY25) {
     if(attenuation_label!=NULL) gtk_widget_hide(attenuation_label);
     if(rf_gain_label!=NULL)     gtk_widget_hide(rf_gain_label);
     if(attenuation_scale!=NULL) gtk_widget_hide(attenuation_scale);
     if(rf_gain_scale!=NULL)     gtk_widget_hide(rf_gain_scale);
-    gtk_widget_show(c25_att_preamp_label);
+    gtk_widget_show(c25_att_label);
     gtk_widget_show(c25_att_combobox);
-    gtk_widget_show(c25_preamp_combobox);
-    update_att_preamp();
+    update_c25_att();
   } else {
-    gtk_widget_hide(c25_att_preamp_label);
+    gtk_widget_hide(c25_att_label);
     gtk_widget_hide(c25_att_combobox);
-    gtk_widget_hide(c25_preamp_combobox);
     if(attenuation_label!=NULL) gtk_widget_show(attenuation_label);
     if(rf_gain_label!=NULL)     gtk_widget_show(rf_gain_label);
     if(attenuation_scale!=NULL) gtk_widget_show(attenuation_scale);
@@ -235,39 +211,86 @@ void att_type_changed() {
   }
 }
 
-static gboolean load_att_type_cb(gpointer data) {
-  att_type_changed();
-  return G_SOURCE_REMOVE;
-}
-
 static void c25_att_combobox_changed(GtkWidget *widget, gpointer data) {
   int val = atoi(gtk_combo_box_get_active_id(GTK_COMBO_BOX(widget)));
   if (active_receiver->adc == 0) {
-    // this button is only valid for the first receiver
+    //
+    // this button is only valid for the first ADC
     // store attenuation, such that in meter.c the correct level is displayed
-    adc[active_receiver->adc].attenuation = 12*val;
-    set_alex_attenuation(val);
+    // There is no adjustable preamp or attenuator, so nail these values to zero
+    //
+    adc[active_receiver->adc].attenuation = 0;
+    adc[active_receiver->adc].gain        = 0;
+    switch (val) {
+      case -36:
+        active_receiver->alex_attenuation=3;
+        active_receiver->preamp = 0;
+        active_receiver->dither = 0;
+        break;
+      case -24:
+        active_receiver->alex_attenuation=2;
+        active_receiver->preamp = 0;
+        active_receiver->dither = 0;
+        break;
+      case -12:
+        active_receiver->alex_attenuation=1;
+        active_receiver->preamp = 0;
+        active_receiver->dither = 0;
+        break;
+      case 0:
+        active_receiver->alex_attenuation=0;
+        active_receiver->preamp = 0;
+        active_receiver->dither = 0;
+        break;
+      case 18:
+        active_receiver->alex_attenuation=0;
+        active_receiver->preamp = 1;
+        active_receiver->dither = 0;
+        break;
+      case 36:
+        active_receiver->alex_attenuation=0;
+        active_receiver->preamp = 1;
+        active_receiver->dither = 1;
+        break;
+      }
   } else {
-    // always show "0 dB" on the button if the second RX is active
+    //
+    // For second ADC, always show "0 dB" on the button
+    //
+    active_receiver->alex_attenuation=0;
+    active_receiver->preamp = 0;
+    active_receiver->dither = 0;
     if (val != 0) {
       gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_att_combobox), "0");
     }
   }
 }
 
-static void c25_preamp_combobox_changed(GtkWidget *widget, gpointer data) {
-  int val = atoi(gtk_combo_box_get_active_id(GTK_COMBO_BOX(widget)));
-  if (active_receiver->id == 0) {
-    // This button is only valid for the first receiver
-    // dither and preamp are "misused" to store the PreAmp value.
-    // this has to be exploited in meter.c
-    active_receiver->dither = (val >= 2);  // second preamp ON
-    active_receiver->preamp = (val >= 1);  // first  preamp ON
-  } else{
-    // always show "0 dB" on the button if the second RX is active
-    if (val != 0) {
-      gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_preamp_combobox), "0");
+void update_c25_att() {
+  //
+  // Only effective with the CHARLY25 filter board.
+  // Change the Att/Preamp combo-box to the current attenuation status
+  //
+  int att;
+  if (filter_board == CHARLY25) {
+    char id[16];
+    adc[active_receiver->adc].attenuation = 0;
+    adc[active_receiver->adc].gain        = 0;
+    if (active_receiver->adc != 0) {
+      active_receiver->alex_attenuation=0;
+      active_receiver->preamp=0;
+      active_receiver->dither=0;
     }
+    //
+    // This is to recover from an "illegal" props file
+    //
+    if (active_receiver->preamp || active_receiver->dither) {
+      active_receiver->alex_attenuation=0;
+      adc[active_receiver->adc].attenuation = 0;
+    }
+    att=-12*active_receiver->alex_attenuation+18*active_receiver->dither+18*active_receiver->preamp;
+    sprintf(id, "%d", att);
+    gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_att_combobox), id);
   }
 }
 
@@ -411,19 +434,14 @@ static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 void update_rf_gain() {
-  //set_rf_gain(active_receiver->id,active_receiver->rf_gain);
   set_rf_gain(active_receiver->id,adc[active_receiver->id].gain);
 }
 
 void set_rf_gain(int rx,double value) {
+  if (!have_rx_gain) return;
   if (rx >= receivers) return;
   int rxadc=receiver[rx]->adc;
   g_print("%s rx=%d adc=%d val=%f\n",__FUNCTION__, rx, rxadc, value);
-  if (!have_rx_gain) {
-    // ignore attempt to set gain when we do not have one
-    g_print("%s: Ignoring attempt to set RF gain\n",__FUNCTION__);
-    return;
-  }
   adc[rxadc].gain=value;
 #ifdef SOAPYSDR
   if(protocol==SOAPYSDR_PROTOCOL) {
@@ -931,7 +949,8 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     gtk_widget_show(rf_gain_scale);
     gtk_grid_attach(GTK_GRID(sliders),rf_gain_scale,7,0,2,1);
     g_signal_connect(G_OBJECT(rf_gain_scale),"value_changed",G_CALLBACK(rf_gain_value_changed_cb),NULL);
-  } else {
+  }
+  if (have_rx_att) {
     attenuation_label=gtk_label_new("ATT (dB):");
     gtk_widget_override_font(attenuation_label, pango_font_description_from_string(SLIDERS_FONT));
     gtk_widget_show(attenuation_label);
@@ -945,31 +964,28 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     g_signal_connect(G_OBJECT(attenuation_scale),"value_changed",G_CALLBACK(attenuation_value_changed_cb),NULL);
   }
 
-  c25_att_preamp_label = gtk_label_new("Att/PreAmp");
-  gtk_widget_override_font(c25_att_preamp_label, pango_font_description_from_string(SLIDERS_FONT));
-  gtk_grid_attach(GTK_GRID(sliders), c25_att_preamp_label, 6, 0, 1, 1);
+  //
+  // These handles need to be created because they are activated/deactivaded
+  // depending on selecting/deselcting the CHARLY25 filter board
+  //
+  c25_att_label = gtk_label_new("Attenuation/PreAmp");
+  gtk_widget_override_font(c25_att_label, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_grid_attach(GTK_GRID(sliders), c25_att_label, 6, 0, 2, 1);
 
   //
-  // Do not use my_combo_attach here because these widgets can be hidden/shown
+  // One could achieve a finer granulation by combining attenuators and preamps,
+  // but it seems sufficient to either engage attenuators or preamps
   //
   c25_att_combobox = gtk_combo_box_text_new();
   gtk_widget_override_font(c25_att_combobox, pango_font_description_from_string(SLIDERS_FONT));
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "0", "0 dB");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "1", "-12 dB");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "2", "-24 dB");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "3", "-36 dB");
-  my_combo_attach(GTK_GRID(sliders), c25_att_combobox, 7, 0, 1, 1);
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "-36", "-36 dB");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "-24", "-24 dB");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "-12", "-12 dB");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "0",   "  0 dB");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "18",  "+18 dB");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "36",  "+36 dB");
+  my_combo_attach(GTK_GRID(sliders), c25_att_combobox, 8, 0, 1, 1);
   g_signal_connect(G_OBJECT(c25_att_combobox), "changed", G_CALLBACK(c25_att_combobox_changed), NULL);
-
-  c25_preamp_combobox = gtk_combo_box_text_new();
-  gtk_widget_override_font(c25_preamp_combobox, pango_font_description_from_string(SLIDERS_FONT));
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_preamp_combobox), "0", "0 dB");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_preamp_combobox), "1", "18 dB");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_preamp_combobox), "2", "36 dB");
-  my_combo_attach(GTK_GRID(sliders), c25_preamp_combobox, 8, 0, 1, 1);
-  g_signal_connect(G_OBJECT(c25_preamp_combobox), "changed", G_CALLBACK(c25_preamp_combobox_changed), NULL);
-  g_idle_add(load_att_type_cb, NULL);
-
 
   if(can_transmit) {
 

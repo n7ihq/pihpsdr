@@ -13,6 +13,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 #    CONTROLLER1 (Original Controller)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
 #    CONTROLLER2_V2 dual encoders with MCP23017 switches
+#    G2_FRONTPANEL dual encoders with MCP23017 switches
 #
 GPIO_INCLUDE=GPIO
 
@@ -31,11 +32,8 @@ LOCALCW_INCLUDE=LOCALCW
 # uncomment the line below for SoapySDR
 # SOAPYSDR_INCLUDE=SOAPYSDR
 
-# uncomment the line below to include support for STEMlab discovery (WITH AVAHI)
+# uncomment the line below to include support for STEMlab discovery
 #STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
-
-# uncomment the line below to include support for STEMlab discovery (WITHOUT AVAHI)
-# STEMLAB_DISCOVERY=STEMLAB_DISCOVERY_NOAVAHI
 
 # uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
 #AUDIO_MODULE=ALSA
@@ -118,23 +116,8 @@ endif
 GPIO_LIBS=-lgpiod -li2c
 endif
 
-#
-# We have two versions of STEMLAB_DISCOVERY here,
-# the second one has to be used
-# if you do not have the avahi (devel-) libraries
-# on your system.
-#
 ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
-STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY \
-  `$(PKG_CONFIG) --cflags avahi-gobject` `$(PKG_CONFIG) --cflags libcurl`
-STEMLAB_LIBS=`$(PKG_CONFIG) --libs avahi-gobject --libs libcurl`
-STEMLAB_SOURCES=stemlab_discovery.c
-STEMLAB_HEADERS=stemlab_discovery.h
-STEMLAB_OBJS=stemlab_discovery.o
-endif
-
-ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY_NOAVAHI)
-STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY -D NO_AVAHI `$(PKG_CONFIG) --cflags libcurl`
+STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
 STEMLAB_SOURCES=stemlab_discovery.c
 STEMLAB_HEADERS=stemlab_discovery.h

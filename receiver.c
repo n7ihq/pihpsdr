@@ -178,10 +178,8 @@ gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, 
 
 gboolean receiver_scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
   if(event->direction==GDK_SCROLL_UP) {
-    //vfo_move(step,TRUE);
     vfo_step(1);
   } else {
-    //vfo_move(-step,TRUE);
     vfo_step(-1);
   }
   return TRUE;
@@ -270,15 +268,14 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(value,"%d",rx->waterfall_automatic);
     setProperty(name,value);
 
-    sprintf(name,"receiver.%d.alex_attenuation",rx->id);
-    sprintf(value,"%d",rx->alex_attenuation);
-    setProperty(name,value);
+    if (have_alex_att) {
+      sprintf(name,"receiver.%d.alex_attenuation",rx->id);
+      sprintf(value,"%d",rx->alex_attenuation);
+      setProperty(name,value);
+    }
     sprintf(name,"receiver.%d.volume",rx->id);
     sprintf(value,"%f",rx->volume);
     setProperty(name,value);
-    //sprintf(name,"receiver.%d.rf_gain",rx->id);
-    //sprintf(value,"%f",rx->rf_gain);
-    //setProperty(name,value);
     sprintf(name,"receiver.%d.agc",rx->id);
     sprintf(value,"%d",rx->agc);
     setProperty(name,value);
@@ -466,15 +463,14 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     value=getProperty(name);
     if(value) rx->waterfall_automatic=atoi(value);
 
-    sprintf(name,"receiver.%d.alex_attenuation",rx->id);
-    value=getProperty(name);
-    if(value) rx->alex_attenuation=atoi(value);
+    if (have_alex_att) {
+      sprintf(name,"receiver.%d.alex_attenuation",rx->id);
+      value=getProperty(name);
+      if(value) rx->alex_attenuation=atoi(value);
+    }
     sprintf(name,"receiver.%d.volume",rx->id);
     value=getProperty(name);
     if(value) rx->volume=atof(value);
-    //sprintf(name,"receiver.%d.rf_gain",rx->id);
-    //value=getProperty(name);
-    //if(value) rx->rf_gain=atof(value);
     sprintf(name,"receiver.%d.agc",rx->id);
     value=getProperty(name);
     if(value) rx->agc=atoi(value);
@@ -632,18 +628,14 @@ static gint update_display(gpointer data) {
         // the value obtained from WDSP is best corrected HERE for
         // possible gain and attenuation
         //
-        double level=GetRXAMeter(rx->id,smeter)+meter_calibration;
+        double level=GetRXAMeter(rx->id,smeter);
         level += (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-        if (filter_board == CHARLY25) {
-          // preamp/dither encodes the preamp level
-          if (rx->preamp) level -= 18.0;
-          if (rx->dither) level -= 18.0;
+
+        if (filter_board == CHARLY25 && rx->adc == 0) {
+          level += (double)(12*rx->alex_attenuation-18*rx->preamp-18*rx->dither);
         }
-        //
-        // Assume that alex_attenuation is set correctly if we have an ALEX board
-        //
         if (filter_board == ALEX && rx->adc == 0) {
-          level += 10*rx->alex_attenuation;
+          level += (double)(10*rx->alex_attenuation);
         }
         rx->meter=level;
 
@@ -922,7 +914,6 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
 
   // allocate buffers
   rx->iq_input_buffer=g_new(double,2*rx->buffer_size);
-  //rx->audio_buffer=NULL;
   rx->audio_sequence=0L;
   rx->pixel_samples=g_new(float,rx->pixels);
 
@@ -980,7 +971,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   if (id == PS_RX_FEEDBACK) receiver_restore_state(rx);
 
   int result;
-  XCreateAnalyzer(rx->id, &result, 262144, 1, 1, "");
+  XCreateAnalyzer(rx->id, &result, 262144, 1, 1, NULL);
   if(result != 0) {
     g_print( "%s: XCreateAnalyzer id=%d failed: %d\n",__FUNCTION__, rx->id, result);
   } else {
@@ -1094,8 +1085,11 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
 
   BAND *b=band_get_band(vfo[rx->id].band);
   rx->alex_antenna=b->alexRxAntenna;
-  rx->alex_attenuation=b->alexAttenuation;
-
+  if (have_alex_att) {
+    rx->alex_attenuation=b->alexAttenuation;
+  } else {
+    rx->alex_attenuation=0;
+  }
   rx->agc=AGC_MEDIUM;
   rx->agc_gain=80.0;
   rx->agc_slope=35.0;
@@ -1226,7 +1220,7 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   receiver_mode_changed(rx);
 
   int result;
-  XCreateAnalyzer(rx->id, &result, 262144, 1, 1, "");
+  XCreateAnalyzer(rx->id, &result, 262144, 1, 1, NULL);
   if(result != 0) {
     g_print( "%s: XCreateAnalyzer id=%d failed: %d\n",__FUNCTION__,rx->id, result);
   } else {

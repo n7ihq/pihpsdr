@@ -611,6 +611,7 @@ void new_menu()
         break;
       case CONTROLLER2_V1:
       case CONTROLLER2_V2:
+      case G2_FRONTPANEL:
         {
 #ifdef GPIO
         GtkWidget *encoders_b=gtk_button_new_with_label("Encoders");

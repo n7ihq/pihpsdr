@@ -224,17 +224,24 @@ void waterfall_update(RECEIVER *rx) {
       memmove(&pixels[rowstride],pixels,(height-1)*rowstride);
 
       float sample;
+      float soffset;
       int average=0;
       unsigned char *p;
       p=pixels;
       samples=rx->pixel_samples;
 
+      //
+      // soffset contains all corrections due to attenuation, preamps, etc.
+      //
+      soffset=(float)(rx_gain_calibration+adc[rx->adc].attenuation-adc[rx->adc].gain);
+      if (filter_board == ALEX && rx->adc == 0) {
+        soffset += (float)(10*rx->alex_attenuation-20*rx->preamp);
+      }
+      if (filter_board == CHARLY25 && rx->adc == 0) {
+        soffset += (float)(12*rx->alex_attenuation-18*rx->preamp-18*rx->dither);
+      }
       for(i=0;i<width;i++) {
-            if(have_rx_gain) {
-              sample=samples[i+pan]+(float)(rx_gain_calibration-adc[rx->adc].gain);
-            } else {
-              sample=samples[i+pan]+(float)adc[rx->adc].attenuation;
-            }
+            sample=samples[i+pan]+soffset;
             average+=(int)sample;
             if(sample<(float)rx->waterfall_low) {
                 *p++=colorLowR;
@@ -307,7 +314,6 @@ void waterfall_init(RECEIVER *rx,int width,int height) {
   rx->waterfall_frequency=0;
   rx->waterfall_sample_rate=0;
 
-  //waterfall_frame = gtk_frame_new (NULL);
   rx->waterfall = gtk_drawing_area_new ();
   gtk_widget_set_size_request (rx->waterfall, width, height);
 

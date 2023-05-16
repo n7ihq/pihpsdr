@@ -2543,7 +2543,7 @@ g_print("radio_connect_remote: socket %d bound to %s:%d\n",client_socket,host,po
 }
 
 //
-// Execute a remote command throuth the GTK idle queue
+// Execute a remote command through the GTK idle queue
 // and send a response.
 // Because of the response required, we cannot just
 // delegate to actions.c

@@ -165,7 +165,7 @@ static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #endif
 
 static void calibration_value_changed_cb(GtkWidget *widget, gpointer data) {
-  calibration=(long long)gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  frequency_calibration=(long long)gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
 static void rx_gain_calibration_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -269,31 +269,41 @@ static void sat_cb(GtkWidget *widget, gpointer data) {
   g_idle_add(ext_vfo_update, NULL);
 }
 
+void n2adr_oc_settings() {
+    //
+    // set OC outputs for each band according to the N2ADR board requirements
+    // unlike load_filters(), this can be executed outside the GTK queue
+    //
+    BAND *band;
+    band=band_get_band(band160);
+    band->OCrx=band->OCtx=1;
+    band=band_get_band(band80);
+    band->OCrx=band->OCtx=66;
+    band=band_get_band(band60);
+    band->OCrx=band->OCtx=68;
+    band=band_get_band(band40);
+    band->OCrx=band->OCtx=68;
+    band=band_get_band(band30);
+    band->OCrx=band->OCtx=72;
+    band=band_get_band(band20);
+    band->OCrx=band->OCtx=72;
+    band=band_get_band(band17);
+    band->OCrx=band->OCtx=80;
+    band=band_get_band(band15);
+    band->OCrx=band->OCtx=80;
+    band=band_get_band(band12);
+    band->OCrx=band->OCtx=96;
+    band=band_get_band(band10);
+    band->OCrx=band->OCtx=96;
+    if(protocol==NEW_PROTOCOL) {
+      schedule_high_priority();
+    }
+}
+
 void load_filters() {
-  BAND *band;
   switch (filter_board) {
       case N2ADR:
-        // set OC outputs for each band according to the N2ADR board requirements
-        band=band_get_band(band160);
-        band->OCrx=band->OCtx=1;
-        band=band_get_band(band80);
-        band->OCrx=band->OCtx=66;
-        band=band_get_band(band60);
-        band->OCrx=band->OCtx=68;
-        band=band_get_band(band40);
-        band->OCrx=band->OCtx=68;
-        band=band_get_band(band30);
-        band->OCrx=band->OCtx=72;
-        band=band_get_band(band20);
-        band->OCrx=band->OCtx=72;
-        band=band_get_band(band17);
-        band->OCrx=band->OCtx=80;
-        band=band_get_band(band15);
-        band->OCrx=band->OCtx=80;
-        band=band_get_band(band12);
-        band->OCrx=band->OCtx=96;
-        band=band_get_band(band10);
-        band->OCrx=band->OCtx=96;
+        n2adr_oc_settings();
         break;
     case ALEX:
     case APOLLO:
@@ -307,15 +317,8 @@ void load_filters() {
         break;
   }
   //
-  // After doing filter-board-specific actions,
-  // schedule "General" and "HighPrio" packets for P2
-  //
-  if(protocol==NEW_PROTOCOL) {
-    schedule_general();
-    schedule_high_priority();
-  }
-  //
   // This switches between StepAttenuator slider and CHARLY25 ATT/Preamp checkboxes
+  // when the filter board is switched to/from CHARLY25
   //
   att_type_changed();
 }
@@ -886,22 +889,23 @@ void radio_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *calibration_b=gtk_spin_button_new_with_range(-10000.0,10000.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(calibration_b),(double)calibration);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(calibration_b),(double)frequency_calibration);
   gtk_grid_attach(GTK_GRID(grid),calibration_b,col,row,1,1);
   g_signal_connect(calibration_b,"value_changed",G_CALLBACK(calibration_value_changed_cb),NULL);
 
-  if(have_rx_gain) {
-    col++;
-    GtkWidget *rx_gain_label=gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(rx_gain_label), "<b>RX Gain Calibration:</b>");
-    gtk_grid_attach(GTK_GRID(grid),rx_gain_label,col,row,1,1);
+  //
+  // Calibration of the RF front end
+  //
+  col++;
+  GtkWidget *rx_gain_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(rx_gain_label), "<b>RX Gain Calibration:</b>");
+  gtk_grid_attach(GTK_GRID(grid),rx_gain_label,col,row,1,1);
 
-    col++;
-    GtkWidget *rx_gain_calibration_b=gtk_spin_button_new_with_range(-50.0,50.0,1.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(rx_gain_calibration_b),(double)rx_gain_calibration);
-    gtk_grid_attach(GTK_GRID(grid),rx_gain_calibration_b,col,row,1,1);
-    g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
-  }
+  col++;
+  GtkWidget *rx_gain_calibration_b=gtk_spin_button_new_with_range(-50.0,50.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(rx_gain_calibration_b),(double)rx_gain_calibration);
+  gtk_grid_attach(GTK_GRID(grid),rx_gain_calibration_b,col,row,1,1);
+  g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
 
   row++;
   if(row>temp_row) temp_row=row;
@@ -985,7 +989,6 @@ void radio_menu(GtkWidget *parent) {
 
     if(can_transmit) {
 /*
-      //tx_gains=g_new(GtkWidget*,radio->info.soapy.tx_gains);
       for(i=0;i<radio->info.soapy.tx_gains;i++) {
         col=2;
         GtkWidget *tx_gain_label=gtk_label_new(radio->info.soapy.tx_gain[i]);

@@ -79,7 +79,6 @@ static DISCOVERED* d;
 static GtkWidget *status;
 
 void status_text(char *text) {
-  //fprintf(stderr,"splash_status: %s\n",text);
   gtk_label_set_text(GTK_LABEL(status),text);
   usleep(100000);
   while (gtk_events_pending ())
@@ -127,11 +126,11 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 		return TRUE;
 	  }
 	  if (event->keyval == GDK_KEY_d ) {
-		vfo_move(step,TRUE);
+		vfo_step(-1);
 		return TRUE;
 	  }
 	  if (event->keyval == GDK_KEY_u ) {
-		 vfo_move(-step,TRUE);
+		 vfo_step(1);
 		 return TRUE;
 	  }
   }
@@ -174,10 +173,6 @@ static int init(void *data) {
   g_print("%s\n",__FUNCTION__);
 
   audio_get_cards();
-
-  // wait for get_cards to complete
-  //g_mutex_lock(&audio_mutex);
-  //g_mutex_unlock(&audio_mutex);
 
   cursor_arrow=gdk_cursor_new(GDK_ARROW);
   cursor_watch=gdk_cursor_new(GDK_WATCH);
@@ -281,7 +276,6 @@ fprintf(stderr,"display_width=%d display_height=%d\n", display_width, display_he
     }
   }
   g_signal_connect (top_window, "delete-event", G_CALLBACK (main_delete), NULL);
-  //g_signal_connect (top_window,"draw", G_CALLBACK (main_draw_cb), NULL);
 
   //
   // We want to use the space-bar as an alternative to go to TX
@@ -320,7 +314,7 @@ fprintf(stderr,"add build label to grid\n");
   gtk_grid_attach(GTK_GRID(grid),build_date_label,1,1,1,1);
 
 fprintf(stderr,"create status\n");
-  status=gtk_label_new("");
+  status=gtk_label_new(NULL);
   gtk_label_set_justify(GTK_LABEL(status),GTK_JUSTIFY_LEFT);
   gtk_widget_show(status);
 fprintf(stderr,"add status to grid\n");

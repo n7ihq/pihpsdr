@@ -63,7 +63,7 @@ void configure_midi_device(gboolean state) {
 }
 
 static void *midi_thread(void *arg) {
-    int index = (int) arg;
+    int index = (int) (uintptr_t) arg;
     snd_rawmidi_t *input=midi_input[index];
     char *port=midi_port[index];
 
@@ -206,7 +206,7 @@ void register_midi_device(int index) {
     snd_rawmidi_read(midi_input[index], NULL, 0); /* trigger reading */
 
 
-    ret = pthread_create(&midi_thread_id[index], NULL, midi_thread, (void *) index);
+    ret = pthread_create(&midi_thread_id[index], NULL, midi_thread, (void *) (uintptr_t) index);
     if (ret < 0) {
       g_print("%s: Failed to create MIDI read thread\n",__FUNCTION__);
       if((ret = snd_rawmidi_close(midi_input[index])) < 0) {

@@ -137,10 +137,15 @@ next_function_set:
       max_switches=16;
       temp_switches=switches_controller2_v2;
       break;
+    case G2_FRONTPANEL:
+      max_switches=16;
+      temp_switches=switches_g2_frontpanel;
+      break;
   }
 
 
   int original_row=row;
+  int i;
 
   if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
     row=row+5;
@@ -229,6 +234,96 @@ next_function_set:
     widget=gtk_button_new_with_label(ActionTable[temp_switches[15].switch_function].str);
     gtk_widget_set_name(widget,"small_button");
     g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(15));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+
+    gtk_container_add(GTK_CONTAINER(content),grid);
+  } else if(controller==G2_FRONTPANEL) {
+    row=2;
+    col=0;
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[0].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(0));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    row++;
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[1].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(1));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+
+    // padding
+    row=1;
+    col=1;
+    widget=gtk_label_new(NULL);
+    gtk_widget_set_name(widget,"small_button");
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    row=1;
+    col=2;
+    widget=gtk_label_new(NULL);
+    gtk_widget_set_name(widget,"small_button");
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+
+    row=0;
+    col=6;
+    for(i=4; i<7; i++) {
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(i));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    col++;
+    }
+
+    row=1;
+    col=6;
+    for(i=7; i<10; i++) {
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(i));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    col++;
+    }
+
+    row=2;
+    col=6;
+    for(i=10; i<13; i++) {
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(i));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    col++;
+    }
+
+    row=3;
+    col=6;
+    for(i=13; i<16; i++) {
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(i));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    col++;
+    }
+
+    // padding
+    row=4;
+    col=6;
+    widget=gtk_label_new(NULL);
+    gtk_widget_set_name(widget,"small_button");
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    row=5;
+    col=6;
+    widget=gtk_label_new(NULL);
+    gtk_widget_set_name(widget,"small_button");
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+
+    row=6;
+    col=6;
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[2].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(2));
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    col+=2;
+    widget=gtk_button_new_with_label(ActionTable[temp_switches[3].switch_function].str);
+    gtk_widget_set_name(widget,"small_button");
+    g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(3));
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
     gtk_container_add(GTK_CONTAINER(content),grid);

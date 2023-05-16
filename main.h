@@ -24,10 +24,11 @@
 extern struct utsname unameData;
 
 enum {
-  NO_CONTROLLER,
+  NO_CONTROLLER=0,
   CONTROLLER1,
   CONTROLLER2_V1,
-  CONTROLLER2_V2
+  CONTROLLER2_V2,
+  G2_FRONTPANEL
 };
 
 extern gint controller;

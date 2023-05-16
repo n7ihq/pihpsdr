@@ -171,9 +171,9 @@ tx_panadapter_scroll_event_cb (GtkWidget      *widget,
                gpointer        data)
 {
   if(event->direction==GDK_SCROLL_UP) {
-    vfo_move(step,TRUE);
+    vfo_step(1);
   } else {
-    vfo_move(-step,TRUE);
+    vfo_step(-1);
   }
   return FALSE;
 }
@@ -282,7 +282,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         char v[32];
         sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
-        //cairo_move_to(cr, (double)i, (double)(display_height-10));
         cairo_text_extents(cr, v, &extents);
         cairo_move_to(cr, (double)i-(extents.width/2.0), 10.0);
         cairo_show_text(cr, v);
@@ -384,9 +383,12 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   //
   // When doing CW, the signal is produced outside WDSP, so
-  // it makes no sense to display a PureSignal status.
+  // it makes no sense to display a PureSignal status. The
+  // only exception is if we are running twotone from
+  // within the PS menu.
   //
-  if(tx->puresignal && (txmode != modeCWU) && (txmode != modeCWL)) {
+  int cwmode = (tx->mode == modeCWL || tx->mode == modeCWU) && !tune && !tx->twotone;
+  if(tx->puresignal && !cwmode) {
     cairo_set_source_rgba(cr,COLOUR_OK);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE2);
     cairo_move_to(cr,display_width/2+10,display_height-10);

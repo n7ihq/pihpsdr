@@ -196,7 +196,6 @@ g_print("connect_cb: %s:%d\n",host_addr,host_port);
 #endif
 
 void discovery() {
-//fprintf(stderr,"discovery\n");
 
   //
   // On the discovery screen, make the combo-boxes "touchscreen-friendly"
@@ -255,11 +254,7 @@ void discovery() {
 
 #ifdef STEMLAB_DISCOVERY
   if(enable_stemlab && !discover_only_stemlab) {
-#ifdef NO_AVAHI
     status_text("Looking for STEMlab WEB apps");
-#else
-    status_text("STEMlab (Avahi) ... Discovering Devices");
-#endif
     stemlab_discovery();
   }
 #endif
@@ -350,18 +345,7 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 #endif
 #ifdef STEMLAB_DISCOVERY
           case STEMLAB_PROTOCOL:
-#ifdef NO_AVAHI
             sprintf(text,"Choose RedPitaya App from %s and re-discover: ",inet_ntoa(d->info.network.address.sin_addr));
-#else
-            sprintf(text, "STEMlab (%02X:%02X:%02X:%02X:%02X:%02X) on %s",
-                           d->info.network.mac_address[0],
-                           d->info.network.mac_address[1],
-                           d->info.network.mac_address[2],
-                           d->info.network.mac_address[3],
-                           d->info.network.mac_address[4],
-                           d->info.network.mac_address[5],
-                           d->info.network.interface_name);
-#endif
 #endif
         }
 
@@ -493,7 +477,7 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gpio),NULL,"Controller1");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gpio),NULL,"Controller2 V1");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gpio),NULL,"Controller2 V2");
-    //gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gpio),NULL,"Controller I2C");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gpio),NULL,"G2 Front Panel");
     my_combo_attach(GTK_GRID(grid),gpio,0,row,1,1);
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(gpio),controller);
@@ -501,12 +485,6 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 #endif
 
     GtkWidget *discover_b=gtk_button_new_with_label("Discover");
-    //
-    // This call records the colour of the label and stores it.
-    // Subsequent calls to set_button_text_color() with color == "default"
-    // will then use that color.
-    //
-    set_button_default_color(discover_b);
     g_signal_connect (discover_b, "button-press-event", G_CALLBACK(discover_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid),discover_b,1,row,1,1);
 
@@ -538,6 +516,12 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
     gtk_container_add (GTK_CONTAINER (content), grid);
     gtk_widget_show_all(discovery_dialog);
 fprintf(stderr,"showing device dialog\n");
+    //
+    // This call records the colour of the label and stores it.
+    // Subsequent calls to set_button_text_color() with color == "default"
+    // will then use that color.
+    //
+    set_button_default_color(discover_b);
 
     //
     // Autostart and RedPitaya radios:

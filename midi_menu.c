@@ -549,7 +549,6 @@ static void load_store() {
 static void add_cb(GtkButton *widget,gpointer user_data) {
 
   gchar *str_type=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(newType));
-  //gchar *str_action=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(newAction));
   const gchar *str_action=gtk_button_get_label(GTK_BUTTON(newAction));
 ;
 
@@ -625,7 +624,6 @@ static void update_cb(GtkButton *widget,gpointer user_data) {
 
 
   gchar *str_type=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(newType));
-  //gchar *str_action=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(newAction));
   const gchar *str_action=gtk_button_get_label(GTK_BUTTON(newAction));
 ;
   //g_print("%s: type=%s action=%s\n",__FUNCTION__,str_type,str_action);
@@ -694,8 +692,7 @@ static void update_cb(GtkButton *widget,gpointer user_data) {
   }
   sprintf(str_note,"%d",thisNote);
 
-  //g_print("%s: event=%s channel=%s note=%s type=%s action=%s\n",
-  //        __FUNCTION__,str_event,str_channel,str_note,str_type,str_action);
+  //g_print("%s: event=%s channel=%s note=%s type=%s action=%s\n",__FUNCTION__,str_event,str_channel,str_note,str_type,str_action);
   gtk_list_store_set(store,&iter,
       EVENT_COLUMN,str_event,
       CHANNEL_COLUMN,str_channel,
@@ -882,20 +879,20 @@ void midi_menu(GtkWidget *parent) {
 
   row++;
   col=0;
-  newEvent=gtk_label_new("");
+  newEvent=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newEvent,col++,row,1,1);
-  newChannel=gtk_label_new("");
+  newChannel=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newChannel,col++,row,1,1);
-  newNote=gtk_label_new("");
+  newNote=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newNote,col++,row,1,1);
   newType=gtk_combo_box_text_new();
   my_combo_attach(GTK_GRID(grid),newType,col++,row,1,1);
   g_signal_connect(newType,"changed",G_CALLBACK(type_changed_cb),NULL);
-  newVal=gtk_label_new("");
+  newVal=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newVal,col++,row,1,1);
-  newMin=gtk_label_new("");
+  newMin=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newMin,col++,row,1,1);
-  newMax=gtk_label_new("");
+  newMax=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newMax,col++,row,1,1);
 
   newAction=gtk_button_new_with_label("    ");
