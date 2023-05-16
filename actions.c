@@ -28,9 +28,7 @@
 #include "actions.h"
 #include "gpio.h"
 #include "toolbar.h"
-#ifdef LOCALCW
 #include "iambic.h"
-#endif
 
 //
 // The "short button text" (button_str) needs to be present in ALL cases, and must be different
@@ -245,12 +243,8 @@ void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
   switch (action) {
     case CW_LEFT:
     case CW_RIGHT:
-#ifdef LOCALCW
       cw_key_hit=1;
       keyer_event(action==CW_LEFT,mode==PRESSED);
-#else
-      g_print("CW_Left/Right but compiled without LOCALCW\n");
-#endif
       break;
     case CW_KEYER_KEYDOWN:
       //
@@ -544,9 +538,7 @@ int process_action(void *data) {
     case CW_SPEED:
       value=KnobOrWheel(a, (double)cw_keyer_speed, 1.0, 60.0, 1.0);
       cw_keyer_speed=(int)value;
-#ifdef LOCALCW
       keyer_update();
-#endif
       g_idle_add(ext_vfo_update,NULL);
       break;
     case DIV:
@@ -1221,9 +1213,7 @@ int process_action(void *data) {
         cw_keyer_speed=(127*a->val + 50)/100;
         if (cw_keyer_speed <  1) cw_keyer_speed=1;
         if (cw_keyer_speed > 99) cw_keyer_speed=99;
-#ifdef LOCALCW
         keyer_update();
-#endif
         g_idle_add(ext_vfo_update,NULL);
       }
       break;

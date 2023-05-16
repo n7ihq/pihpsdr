@@ -69,9 +69,7 @@
 #include "rigctl.h"
 #include "ext.h"
 #include "radio_menu.h"
-#ifdef LOCALCW
 #include "iambic.h"
-#endif
 #include "rigctl_menu.h"
 #ifdef MIDI
 #include "midi.h"
@@ -615,13 +613,11 @@ if(!radio_is_remote) {
     }
 #endif
 
-#ifdef LOCALCW
   // init local keyer if enabled
   if (cw_keyer_internal == 0) {
 	g_print("Initialize keyer.....\n");
     keyer_update();
   }
-#endif
 
 #ifdef CLIENT_SERVER
   if(!radio_is_remote) {

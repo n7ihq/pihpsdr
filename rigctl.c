@@ -53,9 +53,7 @@
 #include "noise_menu.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef LOCALCW
 #include "iambic.h"              // declare keyer_update()
-#endif
 #include "actions.h"
 #include "new_menu.h"
 
@@ -3302,9 +3300,7 @@ int parse_cmd(void *data) {
             int speed=atoi(&command[2]);
             if(speed>=1 && speed<=60) {
               cw_keyer_speed=speed;
-#ifdef LOCALCW
               keyer_update();
-#endif
               g_idle_add(ext_vfo_update,NULL);
             }
           } else {

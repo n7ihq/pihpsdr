@@ -1,7 +1,6 @@
 #ifndef _IAMBIC_H
 #define _IAMBIC_H
 
-#ifdef LOCALCW
 enum {
     CHECK = 0,
     STRAIGHT,
@@ -20,5 +19,4 @@ void keyer_update(void);
 void keyer_close(void);
 int  keyer_init(void);
 
-#endif
 #endif

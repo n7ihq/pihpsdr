@@ -26,9 +26,6 @@ MIDI_INCLUDE=MIDI
 # uncomment the line below to include USB Ozy support
 # USBOZY_INCLUDE=USBOZY
 
-# uncomment the line to below include support local CW keyer
-LOCALCW_INCLUDE=LOCALCW
-
 # uncomment the line below for SoapySDR
 # SOAPYSDR_INCLUDE=SOAPYSDR
 
@@ -91,13 +88,6 @@ soapy_protocol.h
 SOAPYSDR_OBJS= \
 soapy_discovery.o \
 soapy_protocol.o
-endif
-
-ifeq ($(LOCALCW_INCLUDE),LOCALCW)
-LOCALCW_OPTIONS=-D LOCALCW
-LOCALCW_SOURCES= iambic.c
-LOCALCW_HEADERS= iambic.h
-LOCALCW_OBJS   = iambic.o
 endif
 
 #
@@ -176,7 +166,7 @@ AUDIO_OBJS=portaudio.o
 endif
 
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
-	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) $(LOCALCW_OPTIONS) \
+	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) \
 	$(ANDROMEDA_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
@@ -278,7 +268,8 @@ encoder_menu.c \
 switch_menu.c \
 toolbar_menu.c \
 sintab.c \
-ps_menu.c
+ps_menu.c \
+iambic.c
 
 
 
@@ -357,7 +348,8 @@ encoder_menu.h \
 switch_menu.h \
 toolbar_menu.h \
 sintab.h \
-ps_menu.h
+ps_menu.h \
+iambic.h
 
 
 
@@ -434,18 +426,18 @@ encoder_menu.o \
 switch_menu.o \
 toolbar_menu.o \
 sintab.o \
-ps_menu.o
+ps_menu.o \
+iambic.o
 
-$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
+$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
-	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
+	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
-	$(LOCALCW_HEADERS) \
 	$(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) $(AUDIO_SOURCES) $(SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) \
+	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
 	$(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
@@ -467,7 +459,7 @@ CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 .PHONY:	cppcheck
 cppcheck:
 	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(USBOZY_SOURCES) \
-	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(LOCALCW_SOURCES) $(SERVER_SOURCES)
+	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	clean
 clean:
@@ -568,10 +560,10 @@ debian:
 #############################################################################
 
 .PHONY: app
-app:	$(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
+app:	$(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
 	$(LINK) -headerpad_max_install_names -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  \
-		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) \
+		$(SOAPYSDR_OBJS) $(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) \
 		$(LIBS) $(LDFLAGS)
 	@rm -rf pihpsdr.app
 	@mkdir -p pihpsdr.app/Contents/MacOS

@@ -63,7 +63,6 @@
 #include "sliders.h"
 #include "new_protocol.h"
 #include "zoompan.h"
-#ifdef LOCALCW
 #include "iambic.h"
 
 //
@@ -77,7 +76,6 @@ int SIDETONE_GPIO=10;
 int ENABLE_GPIO_SIDETONE=0;
 int ENABLE_CW_BUTTONS=1;
 int CW_ACTIVE_LOW=1;
-#endif
 
 enum {
   TOP_ENCODER,
@@ -544,7 +542,7 @@ static void process_edge(int offset,int value) {
 
   //g_print("%s: offset=%d value=%d\n",__FUNCTION__,offset,value);
   found=FALSE;
-#ifdef LOCALCW
+
   if(ENABLE_CW_BUTTONS) {
     if(offset==CWL_BUTTON) {
       keyer_event(1, CW_ACTIVE_LOW ? (value==PRESSED) : value);
@@ -557,7 +555,7 @@ static void process_edge(int offset,int value) {
     }
   }
   if(found) return;
-#endif
+
   // check encoders
   for(i=0;i<MAX_ENCODERS;i++) {
     if(encoders[i].bottom_encoder_enabled && encoders[i].bottom_encoder_address_a==offset) {
@@ -662,7 +660,6 @@ void gpio_set_defaults(int ctrlr) {
       switches=switches_controller2_v1;
       break;
     case CONTROLLER2_V2:
-#ifdef LOCALCW
       //
       // This controller uses nearly all GPIO lines,
       // so lines 9, 10, 11 are not available for
@@ -670,13 +667,10 @@ void gpio_set_defaults(int ctrlr) {
       //
       ENABLE_GPIO_SIDETONE=0;
       ENABLE_CW_BUTTONS=0;
-#endif
-
       encoders=encoders_controller2_v2;
       switches=switches_controller2_v2;
       break;
     case G2_FRONTPANEL:
-#ifdef LOCALCW
       //
       // This controller uses nearly all GPIO lines,
       // so lines 9, 10, 11 are not available for
@@ -684,7 +678,6 @@ void gpio_set_defaults(int ctrlr) {
       //
       ENABLE_GPIO_SIDETONE=0;
       ENABLE_CW_BUTTONS=0;
-#endif
       encoders=encoders_g2_frontpanel;
       switches=switches_g2_frontpanel;
       break;
@@ -1085,7 +1078,6 @@ int gpio_init() {
     }
   }
 
-#ifdef LOCALCW
   g_print("%s: ENABLE_CW_BUTTONS=%d  CWL_BUTTON=%d CWR_BUTTON=%d\n", __FUNCTION__, ENABLE_CW_BUTTONS, CWL_BUTTON, CWR_BUTTON);
   if(ENABLE_CW_BUTTONS) {
     if((ret=setup_line(chip,CWL_BUTTON,CW_ACTIVE_LOW==1))<0) {
@@ -1104,13 +1096,8 @@ int gpio_init() {
       goto err;
     }
   }
-#endif
 
-  if(controller!=NO_CONTROLLER
-#ifdef LOCALCW
-    || ENABLE_CW_BUTTONS
-#endif
-    ) {
+  if(controller!=NO_CONTROLLER || ENABLE_CW_BUTTONS) {
     monitor_thread_id = g_thread_new( "gpiod monitor", monitor_thread, NULL);
     if(!monitor_thread_id ) {
       g_print("%s: g_thread_new failed for monitor_thread\n",__FUNCTION__);
@@ -1146,7 +1133,6 @@ void gpio_close() {
 #endif
 }
 
-#ifdef LOCALCW
 void gpio_cw_sidetone_set(int level) {
 #ifdef GPIO
   int rc;
@@ -1165,5 +1151,3 @@ void gpio_cw_sidetone_set(int level) {
 int  gpio_cw_sidetone_enabled() {
   return ENABLE_GPIO_SIDETONE;
 }
-
-#endif

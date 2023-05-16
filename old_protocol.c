@@ -911,23 +911,10 @@ static void process_control_bytes() {
     cw_key_hit=1;
     CAT_cw_is_active=0;
   }
-#ifdef LOCALCW
   if (!cw_keyer_internal) {
     if (dash != previous_dash) keyer_event(0, dash);
     if (dot  != previous_dot ) keyer_event(1, dot );
   }
-#else
-    //
-    // Note that if an external keyer is connected to the "CW" jack of
-    // the ANAN-7000, it will report its state via the "dot" state
-    // so we can do CW directly. Only act on dot state changes so we
-    // do not intervene with CAT CW. Note it is assumed that the external
-    // keyer also takes care of PTT.
-    //
-    if (!cw_keyer_internal && dot != previous_dot) {
-      cw_key_down=dot ? 960000 : 0;
-    }
-#endif
 
   if(previous_ptt!=local_ptt) {
     g_idle_add(ext_mox_update,(gpointer)(long)(local_ptt));
