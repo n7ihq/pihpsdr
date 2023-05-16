@@ -1780,11 +1780,7 @@ void ozy_send_buffer() {
       case 4:
         output_buffer[C0]=0x14;
 
-#ifdef USBOZY
-        if ((device == DEVICE_OZY) || (device == DEVICE_METIS)) {
-#else
-        if (device == DEVICE_METIS) {
-#endif
+        if (have_preamp) {
           for(i=0;i<receivers;i++) {
             output_buffer[C1]|=(receiver[i]->preamp<<i);
           }

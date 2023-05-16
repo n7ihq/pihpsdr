@@ -269,31 +269,41 @@ static void sat_cb(GtkWidget *widget, gpointer data) {
   g_idle_add(ext_vfo_update, NULL);
 }
 
+void n2adr_oc_settings() {
+    //
+    // set OC outputs for each band according to the N2ADR board requirements
+    // unlike load_filters(), this can be executed outside the GTK queue
+    //
+    BAND *band;
+    band=band_get_band(band160);
+    band->OCrx=band->OCtx=1;
+    band=band_get_band(band80);
+    band->OCrx=band->OCtx=66;
+    band=band_get_band(band60);
+    band->OCrx=band->OCtx=68;
+    band=band_get_band(band40);
+    band->OCrx=band->OCtx=68;
+    band=band_get_band(band30);
+    band->OCrx=band->OCtx=72;
+    band=band_get_band(band20);
+    band->OCrx=band->OCtx=72;
+    band=band_get_band(band17);
+    band->OCrx=band->OCtx=80;
+    band=band_get_band(band15);
+    band->OCrx=band->OCtx=80;
+    band=band_get_band(band12);
+    band->OCrx=band->OCtx=96;
+    band=band_get_band(band10);
+    band->OCrx=band->OCtx=96;
+    if(protocol==NEW_PROTOCOL) {
+      schedule_high_priority();
+    }
+}
+
 void load_filters() {
-  BAND *band;
   switch (filter_board) {
       case N2ADR:
-        // set OC outputs for each band according to the N2ADR board requirements
-        band=band_get_band(band160);
-        band->OCrx=band->OCtx=1;
-        band=band_get_band(band80);
-        band->OCrx=band->OCtx=66;
-        band=band_get_band(band60);
-        band->OCrx=band->OCtx=68;
-        band=band_get_band(band40);
-        band->OCrx=band->OCtx=68;
-        band=band_get_band(band30);
-        band->OCrx=band->OCtx=72;
-        band=band_get_band(band20);
-        band->OCrx=band->OCtx=72;
-        band=band_get_band(band17);
-        band->OCrx=band->OCtx=80;
-        band=band_get_band(band15);
-        band->OCrx=band->OCtx=80;
-        band=band_get_band(band12);
-        band->OCrx=band->OCtx=96;
-        band=band_get_band(band10);
-        band->OCrx=band->OCtx=96;
+        n2adr_oc_settings();
         break;
     case ALEX:
     case APOLLO:
@@ -307,15 +317,8 @@ void load_filters() {
         break;
   }
   //
-  // After doing filter-board-specific actions,
-  // schedule "General" and "HighPrio" packets for P2
-  //
-  if(protocol==NEW_PROTOCOL) {
-    schedule_general();
-    schedule_high_priority();
-  }
-  //
   // This switches between StepAttenuator slider and CHARLY25 ATT/Preamp checkboxes
+  // when the filter board is switched to/from CHARLY25
   //
   att_type_changed();
 }

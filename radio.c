@@ -283,6 +283,9 @@ int tune=0;
 int memory_tune=0;
 int full_tune=0;
 int have_rx_gain=0;
+int have_rx_att=0;
+int have_alex_att=0;
+int have_preamp=0;
 int rx_gain_calibration=0;
 
 long long frequencyB=14250000;
@@ -830,34 +833,69 @@ void start_radio() {
   }
 
   //
-  // have_rx_gain determines whether we have "ATT" or "RX Gain" Sliders
-  // It is set for HermesLite (and RadioBerry, for that matter)
+  // Set various capabilities, depending in the radio model
   //
-  have_rx_gain=0;
   switch (protocol) {
     case ORIGINAL_PROTOCOL:
 	switch (device) {
+            case DEVICE_METIS:
+#ifdef USBOZY
+            case DEVICE_OZY:
+#endif
+              have_rx_att=1;  // Sure?
+              have_alex_att=1;
+              have_preamp=1;
+              break;
+            case DEVICE_HERMES:
+	    case DEVICE_GRIFFIN:
+            case DEVICE_ANGELIA:
+            case DEVICE_ORION:
+              have_rx_att=1;
+              have_alex_att=1;
+              break;
+            case DEVICE_ORION2:
+              // ANAN7000/8000 boards have no ALEX attenuator
+              have_rx_att=1;
+              break;
 	    case DEVICE_HERMES_LITE:
 	    case DEVICE_HERMES_LITE2:
 		have_rx_gain=1;
 		rx_gain_calibration=14;
 		break;
 	    default:
-		have_rx_gain=0;
-		rx_gain_calibration=0;
+                //
+                // DEFAULT: we have a step attenuator nothing else
+                //
+                have_rx_att=1;
 		break;
 	}
 	break;
     case NEW_PROTOCOL:
 	switch (device) {
+            case NEW_DEVICE_ATLAS:
+              have_rx_att=1;  // Sure?
+              have_alex_att=1;
+              have_preamp=1;
+              break;
+            case NEW_DEVICE_HERMES:
+            case NEW_DEVICE_ANGELIA:
+            case NEW_DEVICE_ORION:
+              have_rx_att=1;
+              have_alex_att=1;
+              break;
+            case NEW_DEVICE_ORION2:
+              have_rx_att=1;
+              break;
 	    case NEW_DEVICE_HERMES_LITE:
 	    case NEW_DEVICE_HERMES_LITE2:
 		have_rx_gain=1;
 		rx_gain_calibration=14;
 		break;
 	    default:
-		have_rx_gain=0;
-		rx_gain_calibration=0;
+                //
+                // DEFAULT: we have a step attenuator nothing else
+                //
+                have_rx_att=1;
 		break;
 	}
 	break;
@@ -868,9 +906,15 @@ void start_radio() {
         break;
 #endif
     default:
-	have_rx_gain=0;
-	rx_gain_calibration=0;
+        // NOTREACHED
 	break;
+  }
+  //
+  // The GUI expects that we either have a gain or an attenuation slider,
+  // but not both.
+  //
+  if (have_rx_gain) {
+    have_rx_att=0;
   }
 
   //
@@ -1100,13 +1144,13 @@ void start_radio() {
   }
 
   iqswap=0;
-
 //
 // In most cases, ALEX is the best default choice for the filter board.
 // here we set filter_board to a different default value for some
 // "special" hardware. The choice made here only applies if the filter_board
 // is not specified in the props fil
 //
+
 #ifdef SOAPYSDR
   if(device==SOAPYSDR_USB_DEVICE) {
     iqswap=1;
@@ -1118,7 +1162,7 @@ void start_radio() {
   if ((protocol == ORIGINAL_PROTOCOL && device == DEVICE_HERMES_LITE2) ||
       (protocol == NEW_PROTOCOL && device == NEW_DEVICE_HERMES_LITE2))  {
     filter_board = N2ADR;
-    load_filters();  // Apply default OC settings for N2ADR board
+    n2adr_oc_settings(); // Apply default OC settings for N2ADR board
   }
 
   if (protocol == ORIGINAL_PROTOCOL && (device == DEVICE_STEMLAB || device == DEVICE_STEMLAB_Z20)) {
@@ -1135,17 +1179,17 @@ void start_radio() {
   adc[0].random=FALSE;
   adc[0].preamp=FALSE;
   adc[0].attenuation=0;
+  adc[0].enable_step_attenuation=0;
   adc[0].gain=rx_gain_calibration;
   adc[0].min_gain=0.0;
   adc[0].max_gain=100.0;
   dac[0].antenna=1;
   dac[0].gain=0;
 
-  //
-  // Some HPSDR radios have RX GAIN instead of attenuation
-  // these usually have a gain range from -12 to +48
-  //
   if(have_rx_gain && (protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL)) {
+    //
+    // This is the setting valid for HERMES_LITE and some other radios such as RADIOBERRY
+    //
     adc[0].min_gain=-12.0;
     adc[0].max_gain=+48.0;
   }
@@ -1169,6 +1213,7 @@ void start_radio() {
   adc[1].random=FALSE;
   adc[1].preamp=FALSE;
   adc[1].attenuation=0;
+  adc[1].enable_step_attenuation=0;
   adc[1].gain=rx_gain_calibration;
   adc[1].min_gain=0.0;
   adc[1].max_gain=100.0;
@@ -1880,6 +1925,8 @@ void set_attenuation(int value) {
         break;
 #ifdef SOAPYSDR
       case SOAPYSDR_PROTOCOL:
+        // I think we should never arrive here
+        g_print("%s: NOTREACHED assessment failed\n", __FUNCTION__);
 	soapy_protocol_set_gain_element(active_receiver,radio->info.soapy.rx_gain[0],(int)adc[0].gain);
 	break;
 #endif
@@ -2120,14 +2167,6 @@ g_print("radioRestoreState: %s\n",property_path);
     if(value) smeter=atoi(value);
     value=getProperty("alc");
     if(value) alc=atoi(value);
-//    value=getProperty("local_audio");
-//    if(value) local_audio=atoi(value);
-//    value=getProperty("n_selected_output_device");
-//    if(value) n_selected_output_device=atoi(value);
-//    value=getProperty("local_microphone");
-//    if(value) local_microphone=atoi(value);
-//    value=getProperty("n_selected_input_device");
-//    if(value) n_selected_input_device=atoi(value);
     value=getProperty("enable_tx_equalizer");
     if(value) enable_tx_equalizer=atoi(value);
     value=getProperty("tx_equalizer.0");
@@ -2188,10 +2227,8 @@ g_print("radioRestoreState: %s\n",property_path);
     value=getProperty("iqswap");
     if(value) iqswap=atoi(value);
 
-    if (have_rx_gain) {
-      value=getProperty("rx_gain_calibration");
-      if(value) rx_gain_calibration=atoi(value);
-    }
+    value=getProperty("rx_gain_calibration");
+    if(value) rx_gain_calibration=atoi(value);
 
     value=getProperty("optimize_touchscreen");
     if (value) optimize_for_touchscreen=atoi(value);
@@ -2261,16 +2298,20 @@ g_print("radioRestoreState: %s\n",property_path);
     if(value) adc[0].random=atoi(value);
     value=getProperty("radio.adc[0].preamp");
     if(value) adc[0].preamp=atoi(value);
-    value=getProperty("radio.adc[0].attenuation");
-    if(value) adc[0].attenuation=atoi(value);
-    value=getProperty("radio.adc[0].enable_step_attenuation");
-    if(value) adc[0].enable_step_attenuation=atoi(value);
-    value=getProperty("radio.adc[0].gain");
-    if(value) adc[0].gain=atof(value);
-    value=getProperty("radio.adc[0].min_gain");
-    if(value) adc[0].min_gain=atof(value);
-    value=getProperty("radio.adc[0].max_gain");
-    if(value) adc[0].max_gain=atof(value);
+    if (have_rx_att) {
+      value=getProperty("radio.adc[0].attenuation");
+      if(value) adc[0].attenuation=atoi(value);
+      value=getProperty("radio.adc[0].enable_step_attenuation");
+      if(value) adc[0].enable_step_attenuation=atoi(value);
+    }
+    if (have_rx_gain) {
+      value=getProperty("radio.adc[0].gain");
+      if(value) adc[0].gain=atof(value);
+      value=getProperty("radio.adc[0].min_gain");
+      if(value) adc[0].min_gain=atof(value);
+      value=getProperty("radio.adc[0].max_gain");
+      if(value) adc[0].max_gain=atof(value);
+    }
 
 
 #ifdef  SOAPYSDR
@@ -2300,16 +2341,20 @@ g_print("radioRestoreState: %s\n",property_path);
       if(value) adc[1].random=atoi(value);
       value=getProperty("radio.adc[1].preamp");
       if(value) adc[1].preamp=atoi(value);
-      value=getProperty("radio.adc[1].attenuation");
-      if(value) adc[1].attenuation=atoi(value);
-      value=getProperty("radio.adc[1].enable_step_attenuation");
-      if(value) adc[1].enable_step_attenuation=atoi(value);
-      value=getProperty("radio.adc[1].gain");
-      if(value) adc[1].gain=atof(value);
-      value=getProperty("radio.adc[1].min_gain");
-      if(value) adc[1].min_gain=atof(value);
-      value=getProperty("radio.adc[1].max_gain");
-      if(value) adc[1].max_gain=atof(value);
+      if (have_rx_att) {
+        value=getProperty("radio.adc[1].attenuation");
+        if(value) adc[1].attenuation=atoi(value);
+        value=getProperty("radio.adc[1].enable_step_attenuation");
+        if(value) adc[1].enable_step_attenuation=atoi(value);
+      }
+      if (have_rx_gain) {
+        value=getProperty("radio.adc[1].gain");
+        if(value) adc[1].gain=atof(value);
+        value=getProperty("radio.adc[1].min_gain");
+        if(value) adc[1].min_gain=atof(value);
+        value=getProperty("radio.adc[1].max_gain");
+        if(value) adc[1].max_gain=atof(value);
+      }
 
 
 #ifdef  SOAPYSDR
@@ -2562,17 +2607,8 @@ g_print("radioSaveState: %s\n",property_path);
     sprintf(value,"%f",tone_level);
     setProperty("tone_level",value);
 
-    /*
-    sprintf(value,"%d",adc_attenuation[0]);
-    setProperty("adc_0_attenuation",value);
-    sprintf(value,"%d",adc_attenuation[1]);
-    setProperty("adc_1_attenuation",value);
-    */
-	
-    if (have_rx_gain) {
-      sprintf(value,"%d",rx_gain_calibration);
-      setProperty("rx_gain_calibration",value);
-    }
+    sprintf(value,"%d",rx_gain_calibration);
+    setProperty("rx_gain_calibration",value);
 
     sprintf(value,"%d", adc[0].filters);
     setProperty("radio.adc[0].filters",value);
@@ -2588,16 +2624,20 @@ g_print("radioSaveState: %s\n",property_path);
     setProperty("radio.adc[0].random",value);
     sprintf(value,"%d", adc[0].preamp);
     setProperty("radio.adc[0].preamp",value);
-    sprintf(value,"%d", adc[0].attenuation);
-    setProperty("radio.adc[0].attenuation",value);
-    sprintf(value,"%d", adc[0].enable_step_attenuation);
-    setProperty("radio.adc[0].enable_step_attenuation",value);
-    sprintf(value,"%f", adc[0].gain);
-    setProperty("radio.adc[0].gain",value);
-    sprintf(value,"%f", adc[0].min_gain);
-    setProperty("radio.adc[0].min_gain",value);
-    sprintf(value,"%f", adc[0].max_gain);
-    setProperty("radio.adc[0].max_gain",value);
+    if (have_rx_att) {
+      sprintf(value,"%d", adc[0].attenuation);
+      setProperty("radio.adc[0].attenuation",value);
+      sprintf(value,"%d", adc[0].enable_step_attenuation);
+      setProperty("radio.adc[0].enable_step_attenuation",value);
+    }
+    if (have_rx_gain) {
+      sprintf(value,"%f", adc[0].gain);
+      setProperty("radio.adc[0].gain",value);
+      sprintf(value,"%f", adc[0].min_gain);
+      setProperty("radio.adc[0].min_gain",value);
+      sprintf(value,"%f", adc[0].max_gain);
+      setProperty("radio.adc[0].max_gain",value);
+    }
 
 
 #ifdef  SOAPYSDR
@@ -2627,16 +2667,20 @@ g_print("radioSaveState: %s\n",property_path);
       setProperty("radio.adc[1].random",value);
       sprintf(value,"%d", adc[1].preamp);
       setProperty("radio.adc[1].preamp",value);
-      sprintf(value,"%d", adc[1].attenuation);
-      setProperty("radio.adc[1].attenuation",value);
-      sprintf(value,"%d", adc[1].enable_step_attenuation);
-      setProperty("radio.adc[1].enable_step_attenuation",value);
-      sprintf(value,"%f", adc[1].gain);
-      setProperty("radio.adc[1].gain",value);
-      sprintf(value,"%f", adc[1].min_gain);
-      setProperty("radio.adc[1].min_gain",value);
-      sprintf(value,"%f", adc[1].max_gain);
-      setProperty("radio.adc[1].max_gain",value);
+      if (have_rx_att) {
+        sprintf(value,"%d", adc[1].attenuation);
+        setProperty("radio.adc[1].attenuation",value);
+        sprintf(value,"%d", adc[1].enable_step_attenuation);
+        setProperty("radio.adc[1].enable_step_attenuation",value);
+      }
+      if (have_rx_gain) {
+        sprintf(value,"%f", adc[1].gain);
+        setProperty("radio.adc[1].gain",value);
+        sprintf(value,"%f", adc[1].min_gain);
+        setProperty("radio.adc[1].min_gain",value);
+        sprintf(value,"%f", adc[1].max_gain);
+        setProperty("radio.adc[1].max_gain",value);
+      }
 
 #ifdef  SOAPYSDR
       if(device==SOAPYSDR_USB_DEVICE) {

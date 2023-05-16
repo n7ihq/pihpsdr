@@ -351,8 +351,10 @@ int process_action(void *data) {
       }
       break;
     case ATTENUATION:
-      value=KnobOrWheel(a, adc[active_receiver->adc].attenuation,   0.0, 31.0, 1.0);
-      set_attenuation_value(value);
+      if (have_rx_att) {
+        value=KnobOrWheel(a, adc[active_receiver->adc].attenuation,   0.0, 31.0, 1.0);
+        set_attenuation_value(value);
+      }
       break;
     case B_TO_A:
       if(a->mode==PRESSED) {
@@ -899,15 +901,19 @@ int process_action(void *data) {
       }
       break;
     case RF_GAIN:
-      value=KnobOrWheel(a, adc[active_receiver->adc].gain, adc[active_receiver->adc].min_gain, adc[active_receiver->adc].max_gain, 1.0);
-      set_rf_gain(active_receiver->id,value);
+      if (have_rx_gain) {
+        value=KnobOrWheel(a, adc[active_receiver->adc].gain, adc[active_receiver->adc].min_gain, adc[active_receiver->adc].max_gain, 1.0);
+        set_rf_gain(active_receiver->id,value);
+      }
       break;
     case RF_GAIN_RX1:
-      value=KnobOrWheel(a, adc[receiver[0]->adc].gain, adc[receiver[0]->adc].min_gain, adc[receiver[0]->adc].max_gain, 1.0);
-      set_rf_gain(0,value);
+      if (have_rx_gain) {
+        value=KnobOrWheel(a, adc[receiver[0]->adc].gain, adc[receiver[0]->adc].min_gain, adc[receiver[0]->adc].max_gain, 1.0);
+        set_rf_gain(0,value);
+      }
       break;
     case RF_GAIN_RX2:
-      if (receivers == 2) {
+      if (have_rx_gain && receivers == 2) {
         value=KnobOrWheel(a, adc[receiver[1]->adc].gain, adc[receiver[1]->adc].min_gain, adc[receiver[1]->adc].max_gain, 1.0);
         set_rf_gain(1,value);
       }

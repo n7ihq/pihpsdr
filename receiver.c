@@ -268,9 +268,11 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(value,"%d",rx->waterfall_automatic);
     setProperty(name,value);
 
-    sprintf(name,"receiver.%d.alex_attenuation",rx->id);
-    sprintf(value,"%d",rx->alex_attenuation);
-    setProperty(name,value);
+    if (have_alex_att) {
+      sprintf(name,"receiver.%d.alex_attenuation",rx->id);
+      sprintf(value,"%d",rx->alex_attenuation);
+      setProperty(name,value);
+    }
     sprintf(name,"receiver.%d.volume",rx->id);
     sprintf(value,"%f",rx->volume);
     setProperty(name,value);
@@ -461,9 +463,11 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     value=getProperty(name);
     if(value) rx->waterfall_automatic=atoi(value);
 
-    sprintf(name,"receiver.%d.alex_attenuation",rx->id);
-    value=getProperty(name);
-    if(value) rx->alex_attenuation=atoi(value);
+    if (have_alex_att) {
+      sprintf(name,"receiver.%d.alex_attenuation",rx->id);
+      value=getProperty(name);
+      if(value) rx->alex_attenuation=atoi(value);
+    }
     sprintf(name,"receiver.%d.volume",rx->id);
     value=getProperty(name);
     if(value) rx->volume=atof(value);
@@ -1081,8 +1085,11 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
 
   BAND *b=band_get_band(vfo[rx->id].band);
   rx->alex_antenna=b->alexRxAntenna;
-  rx->alex_attenuation=b->alexAttenuation;
-
+  if (have_alex_att) {
+    rx->alex_attenuation=b->alexAttenuation;
+  } else {
+    rx->alex_attenuation=0;
+  }
   rx->agc=AGC_MEDIUM;
   rx->agc_gain=80.0;
   rx->agc_slope=35.0;

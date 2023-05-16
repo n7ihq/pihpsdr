@@ -139,6 +139,7 @@ int scale_timeout_cb(gpointer data) {
 }
 
 static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
+  if (!have_rx_att) return;
   adc[active_receiver->adc].attenuation=gtk_range_get_value(GTK_RANGE(attenuation_scale));
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -153,13 +154,7 @@ static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 void set_attenuation_value(double value) {
   g_print("%s\n",__FUNCTION__);
-  if (have_rx_gain) {
-    // The only way to arrive here is to assign "ATTENUATION" to a
-    // MIDI/GPIO controller. However, this program either uses attenuation
-    // or gain, so ignore this.
-    g_print("%s: Ignoring attempt to set ATTENUATION value\n",__FUNCTION__);
-    return;
-  }
+  if (!have_rx_att) return;
   adc[active_receiver->adc].attenuation=(int)value;
   set_attenuation(adc[active_receiver->adc].attenuation);
   if(display_sliders) {
@@ -443,14 +438,10 @@ void update_rf_gain() {
 }
 
 void set_rf_gain(int rx,double value) {
+  if (!have_rx_gain) return;
   if (rx >= receivers) return;
   int rxadc=receiver[rx]->adc;
   g_print("%s rx=%d adc=%d val=%f\n",__FUNCTION__, rx, rxadc, value);
-  if (!have_rx_gain) {
-    // ignore attempt to set gain when we do not have one
-    g_print("%s: Ignoring attempt to set RF gain\n",__FUNCTION__);
-    return;
-  }
   adc[rxadc].gain=value;
 #ifdef SOAPYSDR
   if(protocol==SOAPYSDR_PROTOCOL) {
@@ -958,7 +949,8 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     gtk_widget_show(rf_gain_scale);
     gtk_grid_attach(GTK_GRID(sliders),rf_gain_scale,7,0,2,1);
     g_signal_connect(G_OBJECT(rf_gain_scale),"value_changed",G_CALLBACK(rf_gain_value_changed_cb),NULL);
-  } else {
+  }
+  if (have_rx_att) {
     attenuation_label=gtk_label_new("ATT (dB):");
     gtk_widget_override_font(attenuation_label, pango_font_description_from_string(SLIDERS_FONT));
     gtk_widget_show(attenuation_label);
@@ -972,6 +964,10 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     g_signal_connect(G_OBJECT(attenuation_scale),"value_changed",G_CALLBACK(attenuation_value_changed_cb),NULL);
   }
 
+  //
+  // These handles need to be created because they are activated/deactivaded
+  // depending on selecting/deselcting the CHARLY25 filter board
+  //
   c25_att_label = gtk_label_new("Attenuation/PreAmp");
   gtk_widget_override_font(c25_att_label, pango_font_description_from_string(SLIDERS_FONT));
   gtk_grid_attach(GTK_GRID(sliders), c25_att_label, 6, 0, 2, 1);

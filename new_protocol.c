@@ -869,14 +869,9 @@ static void new_protocol_high_priority() {
     unsigned long alex0=0x00000000;
     unsigned  long alex1=0x00000000;
 
-    if (device != NEW_DEVICE_ORION2) {
+    if (have_alex_att) {
       //
       // ANAN7000 and 8000 do not have ALEX attenuators.
-      // Even worse, ALEX0(14) bit used to control these attenuators
-      // on ANAN-10/100/200 is now used differently.
-      //
-      // Note: ALEX attenuators are not much used anyway since we
-      //       have step attenuators on most boards.
       //
       switch (receiver[0]->alex_attenuation) {
 	case 0:

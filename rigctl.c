@@ -1945,7 +1945,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             }
             sprintf(reply,"ZZPA%d;",a);
             send_resp(client->fd,reply);
-          } else if(command[5]==';') {
+          } else if(command[5]==';' && have_rx_att) {
             int a=atoi(&command[4]);
             switch(a) {
               case 0:
@@ -3618,9 +3618,12 @@ int parse_cmd(void *data) {
           if(command[2]==';') {
             int att=0;
             if(have_rx_gain) {
+              // map gain value -12...48 to 0...99
               att=(int)(adc[active_receiver->adc].attenuation+12);
               att=(int)(((double)att/60.0)*99.0);
-            } else {
+            }
+            if (have_rx_att) {
+              // map att value -31 ... 0 to 0...99
               att=(int)(adc[active_receiver->adc].attenuation);
               att=(int)(((double)att/31.0)*99.0);
             }
@@ -3629,11 +3632,15 @@ int parse_cmd(void *data) {
           } else if(command[4]==';') {
             int att=atoi(&command[2]);
             if(have_rx_gain) {
+              // map 0...99 scale to -12...48
               att=(int)((((double)att/99.0)*60.0)-12.0);
-            } else {
-              att=(int)(((double)att/99.0)*31.0);
+              set_rf_gain(active_receiver->id,(double)att);
             }
-            set_attenuation_value((double)att);
+            if (have_rx_att) {
+              // mapp 0...99 scale to 0...31
+              att=(int)(((double)att/99.0)*31.0);
+              set_attenuation_value((double)att);
+            }
           }
           break;
         case 'C': //RC

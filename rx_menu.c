@@ -73,12 +73,16 @@ static void random_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void preamp_cb(GtkWidget *widget, gpointer data) {
-  active_receiver->preamp=active_receiver->preamp==1?0:1;
+  if (have_preamp) {
+    active_receiver->preamp=active_receiver->preamp==1?0:1;
+  }
 }
 
 static void alex_att_cb(GtkWidget *widget, gpointer data) {
-  int val=gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-  set_alex_attenuation(val);
+  if (have_alex_att) {
+    int val=gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
+    set_alex_attenuation(val);
+  }
 }
 
 static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
@@ -279,9 +283,7 @@ void rx_menu(GtkWidget *parent) {
 #endif
   }
 
-  if (filter_board == ALEX && active_receiver->adc == 0
-      && ((protocol==ORIGINAL_PROTOCOL && device != DEVICE_ORION2) || (protocol==NEW_PROTOCOL && device != NEW_DEVICE_ORION2))) {
-      
+  if (filter_board == ALEX && active_receiver->adc == 0 && have_alex_att) {
     // 
     // The "Alex ATT" value is stored in receiver[0] no matter how the ADCs are selected
     //
@@ -323,7 +325,7 @@ void rx_menu(GtkWidget *parent) {
   }
 
   //
-  // The CHARLY25 board (with RedPitaya) has no support for dither or random,
+  // The CHARLY25 board (with RedPitaya) has no support for preamp/dither/random
   // so those are left out. For Charly25, PreAmps and Alex Attenuator are controlled via
   // the sliders menu.
   //
@@ -344,11 +346,7 @@ void rx_menu(GtkWidget *parent) {
       g_signal_connect(random_b,"toggled",G_CALLBACK(random_cb),NULL);
       row++;
 
-      if((protocol==ORIGINAL_PROTOCOL && device == DEVICE_METIS) ||
-#ifdef USBOZY
-         (protocol==ORIGINAL_PROTOCOL && device == DEVICE_OZY) ||
-#endif
-	 (protocol==NEW_PROTOCOL && device == NEW_DEVICE_ATLAS)) {
+      if(have_preamp) {
         GtkWidget *preamp_b=gtk_check_button_new_with_label("Preamp");
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (preamp_b), active_receiver->preamp);
         gtk_grid_attach(GTK_GRID(grid),preamp_b,0,row,1,1);
