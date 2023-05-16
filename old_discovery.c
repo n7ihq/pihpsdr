@@ -117,7 +117,10 @@ static void discover(struct ifaddrs* iface, int discflag) {
       case 2:
 	//
 	// Send METIS detection packet via UDP to ipaddr_radio
+        // To be able to connect later, we have to specify INADDR_ANY
 	//
+        interface_addr.sin_family = AF_INET;
+        interface_addr.sin_addr.s_addr = INADDR_ANY;
 	memset(&to_addr, 0, sizeof(to_addr));
         to_addr.sin_family=AF_INET;
         to_addr.sin_port=htons(DISCOVERY_PORT);
