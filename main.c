@@ -45,9 +45,6 @@
 #include "radio.h"
 #include "version.h"
 #include "button_text.h"
-#ifdef I2C
-#include "i2c.h"
-#endif
 #include "discovery.h"
 #include "new_protocol.h"
 #include "old_protocol.h"

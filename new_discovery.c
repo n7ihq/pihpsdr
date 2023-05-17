@@ -84,6 +84,7 @@ void new_discovery() {
                 ifa->ifa_addr->sa_family == AF_INET
              && (ifa->ifa_flags&IFF_UP)==IFF_UP
              && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING
+             && (ifa->ifa_flags&IFF_LOOPBACK)!=IFF_LOOPBACK
              && strncmp("veth", ifa->ifa_name, 4)
              && strncmp("dock", ifa->ifa_name, 4)
              && strncmp("hass", ifa->ifa_name, 4)
