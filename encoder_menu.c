@@ -164,6 +164,8 @@ void encoder_menu(GtkWidget *parent) {
       gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
+      // This one is hard-wired to "VFO" and generates no signal
+      encoders[3].bottom_encoder_function=VFO;
       widget=gtk_label_new(NULL);
       gtk_widget_set_name(widget,"small_button");
       g_sprintf(label,"<b>%s</b>",ActionTable[encoders[3].bottom_encoder_function].str);
@@ -241,6 +243,8 @@ void encoder_menu(GtkWidget *parent) {
       gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
+      // This one is hard-wired to "VFO" and generates no signal
+      encoders[4].bottom_encoder_function=VFO;
       widget=gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
       gtk_widget_set_name(widget,"small_button");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -340,6 +344,8 @@ void encoder_menu(GtkWidget *parent) {
       gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
       col++;
+      // This one is hard-wired to "VFO" and generates no signal
+      encoders[4].bottom_encoder_function=VFO;
       widget=gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
       gtk_widget_set_name(widget,"small_button");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -434,6 +440,8 @@ void encoder_menu(GtkWidget *parent) {
       gtk_label_set_markup (GTK_LABEL(widget),"<b>Main Dial</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,3,5,1,1);
 
+      // This one is hard-wired to "VFO" and generates no signal
+      encoders[4].bottom_encoder_function=VFO;
       widget=gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
       gtk_widget_set_name(widget,"small_button");
       gtk_grid_attach(GTK_GRID(grid),widget,3,6,1,1);
