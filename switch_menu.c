@@ -64,10 +64,6 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-void switch_page_cb(GtkNotebook *notebook,GtkWidget *page,guint page_num,gpointer user_data) {
-  temp_switches=switches_controller1[page_num];
-}
-
 static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
   int sw=GPOINTER_TO_INT(data);
   int action=action_dialog(dialog,CONTROLLER_SWITCH,temp_switches[sw].switch_function);
@@ -77,37 +73,22 @@ static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
   return TRUE;
 }
 
-static void response_event(GtkWidget *mydialog,gint id,gpointer user_data) {
-  // mydialog is a copy of dialog
-  gtk_widget_destroy(mydialog);
-  dialog=NULL;
-  active_menu=NO_MENU;
-  sub_menu=NULL;
-}
-
 void switch_menu(GtkWidget *parent) {
   gint row;
   gint col;
   gchar label[64];
-  GtkWidget *notebook;
   GtkWidget *grid;
   GtkWidget *widget;
-  gint lfunction=0;
 
+  dialog=gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
+  gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Switch Actions");
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
+  set_backgnd(dialog);
 
-  dialog=gtk_dialog_new_with_buttons("piHPSDR - Switch Actions",GTK_WINDOW(parent),GTK_DIALOG_DESTROY_WITH_PARENT,"_OK",GTK_RESPONSE_ACCEPT,NULL);
-  g_signal_connect (dialog, "response", G_CALLBACK (response_event), NULL);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-  lfunction=0;
-
-  if(controller==NO_CONTROLLER || controller==CONTROLLER1) {
-    notebook=gtk_notebook_new();
-    set_backgnd(notebook);
-  }
-
-next_function_set:
 
   grid=gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
@@ -115,19 +96,23 @@ next_function_set:
   gtk_grid_set_column_spacing (GTK_GRID(grid),0);
   gtk_grid_set_row_spacing (GTK_GRID(grid),0);
 
+  GtkWidget *close_b=gtk_button_new_with_label("Close");
+  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
-  row=0;
+  row=1;
   col=0;
 
+  int i;
   gint max_switches=MAX_SWITCHES;
+
   switch(controller) {
     case NO_CONTROLLER:
-      max_switches=8;
-      temp_switches=switches_controller1[lfunction];
-      break;
     case CONTROLLER1:
-      max_switches=8;
-      temp_switches=switches_controller1[lfunction];
+      //
+      // NOTREACHED
+      // Controller1 switches are assigned via the "Toolbar" menu
+      //
       break;
     case CONTROLLER2_V1:
       max_switches=16;
@@ -143,9 +128,6 @@ next_function_set:
       break;
   }
 
-
-  int original_row=row;
-  int i;
 
   if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
     row=row+5;
@@ -185,7 +167,7 @@ next_function_set:
     g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(6));
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
-    row=original_row;
+    row=1;
     col=8;
     widget=gtk_button_new_with_label(ActionTable[temp_switches[7].switch_function].str);
     gtk_widget_set_name(widget,"small_button");
@@ -237,8 +219,9 @@ next_function_set:
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
     gtk_container_add(GTK_CONTAINER(content),grid);
-  } else if(controller==G2_FRONTPANEL) {
-    row=2;
+  }
+  if(controller==G2_FRONTPANEL) {
+    row=3;
     col=0;
     widget=gtk_button_new_with_label(ActionTable[temp_switches[0].switch_function].str);
     gtk_widget_set_name(widget,"small_button");
@@ -251,18 +234,18 @@ next_function_set:
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
     // padding
-    row=1;
+    row=2;
     col=1;
     widget=gtk_label_new(NULL);
     gtk_widget_set_name(widget,"small_button");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-    row=1;
+    row=2;
     col=2;
     widget=gtk_label_new(NULL);
     gtk_widget_set_name(widget,"small_button");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
-    row=0;
+    row=1;
     col=6;
     for(i=4; i<7; i++) {
     widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
@@ -272,7 +255,7 @@ next_function_set:
     col++;
     }
 
-    row=1;
+    row=2;
     col=6;
     for(i=7; i<10; i++) {
     widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
@@ -282,7 +265,7 @@ next_function_set:
     col++;
     }
 
-    row=2;
+    row=3;
     col=6;
     for(i=10; i<13; i++) {
     widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
@@ -292,7 +275,7 @@ next_function_set:
     col++;
     }
 
-    row=3;
+    row=4;
     col=6;
     for(i=13; i<16; i++) {
     widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
@@ -303,18 +286,18 @@ next_function_set:
     }
 
     // padding
-    row=4;
-    col=6;
-    widget=gtk_label_new(NULL);
-    gtk_widget_set_name(widget,"small_button");
-    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
     row=5;
     col=6;
     widget=gtk_label_new(NULL);
     gtk_widget_set_name(widget,"small_button");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-
     row=6;
+    col=6;
+    widget=gtk_label_new(NULL);
+    gtk_widget_set_name(widget,"small_button");
+    gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+
+    row=7;
     col=6;
     widget=gtk_button_new_with_label(ActionTable[temp_switches[2].switch_function].str);
     gtk_widget_set_name(widget,"small_button");
@@ -327,28 +310,6 @@ next_function_set:
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
     gtk_container_add(GTK_CONTAINER(content),grid);
-  } else {
-    for(int i=0;i<max_switches;i++) {
-      if((controller==NO_CONTROLLER || controller==CONTROLLER1) && (temp_switches[i].switch_function==FUNCTION)) {
-        widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
-        // no signal for Function button
-      } else {
-        widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(i));
-g_print("%s: %d\n",__FUNCTION__,i);
-      }
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
-    }
-
-    g_sprintf(label,"Function %d",lfunction);
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new(label));
-    lfunction++;
-    if(lfunction<MAX_FUNCTIONS) {
-      goto next_function_set;
-    }
-    gtk_container_add(GTK_CONTAINER(content),notebook);
-    g_signal_connect (notebook, "switch-page",G_CALLBACK(switch_page_cb),NULL);
   }
 
   sub_menu=dialog;

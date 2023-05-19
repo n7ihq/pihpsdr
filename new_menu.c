@@ -595,19 +595,19 @@ void new_menu()
         }
         break;
       case CONTROLLER1:
-#ifdef GPIO
         {
+#ifdef GPIO
         GtkWidget *encoders_b=gtk_button_new_with_label("Encoders");
         g_signal_connect (encoders_b, "button-press-event", G_CALLBACK(encoder_cb), NULL);
         gtk_grid_attach(GTK_GRID(grid),encoders_b,(i%5),i/5,1,1);
         i++;
 
         GtkWidget *switches_b=gtk_button_new_with_label("Switches");
-        g_signal_connect (switches_b, "button-press-event", G_CALLBACK(switch_cb), NULL);
+        g_signal_connect (switches_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
         gtk_grid_attach(GTK_GRID(grid),switches_b,(i%5),i/5,1,1);
         i++;
-        }
 #endif
+        }
         break;
       case CONTROLLER2_V1:
       case CONTROLLER2_V2:
