@@ -252,8 +252,8 @@ void send_radio_data(REMOTE_CLIENT *client) {
   radio_data.header.data_type=htons(INFO_RADIO);
   radio_data.header.version=htonl(CLIENT_SERVER_VERSION);
   strcpy(radio_data.name,radio->name);
-  radio_data.protocol=htons(radio->protocol);
-  radio_data.device=htons(radio->device);
+  radio_data.protocol=htons(protocol);
+  radio_data.device=htons(device);
   uint64_t temp=(uint64_t)radio->frequency_min;
   radio_data.frequency_min=htonll(temp);
   temp=(uint64_t)radio->frequency_max;
@@ -1888,8 +1888,9 @@ g_print("INFO_RADIO: %d\n",bytes_read);
         // build a radio (discovered) structure
         radio=g_new(DISCOVERED,1);
         strcpy(radio->name,radio_data.name);
-        radio->protocol=ntohs(radio_data.protocol);
-        radio->device=ntohs(radio_data.device);
+        // Note we use "protocol" and "device" througout the program
+        protocol=radio->protocol=ntohs(radio_data.protocol);
+        device=radio->device=ntohs(radio_data.device);
         uint64_t temp=ntohll(radio_data.frequency_min);
         radio->frequency_min=(double)temp;
         temp=ntohll(radio_data.frequency_max);
@@ -1911,7 +1912,6 @@ g_print("INFO_RADIO: %d\n",bytes_read);
         split=radio_data.split;
         sat_mode=radio_data.sat_mode;
         duplex=radio_data.duplex;
-        protocol=radio->protocol;
         have_rx_gain=radio_data.have_rx_gain;
         short s=ntohs(radio_data.rx_gain_calibration);
         rx_gain_calibration=(int)s;

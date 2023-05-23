@@ -83,7 +83,7 @@ static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   myadc->gain=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
 
 #ifdef SOAPYSDR
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     soapy_protocol_set_gain(receiver[0]);
   }
 #endif
@@ -91,7 +91,7 @@ static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 static void rx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   ADC *myadc=(ADC *)data;
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     myadc->gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 #ifdef SOAPYSDR
     soapy_protocol_set_gain_element(receiver[0],(char *)gtk_widget_get_name(widget),myadc->gain);
@@ -100,7 +100,7 @@ static void rx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void drive_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     // should use setDrive here to move the main drive slider
     transmitter->drive=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 #ifdef SOAPYSDR
@@ -118,7 +118,7 @@ static void drive_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #if 0
 static void tx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   int gain;
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 #ifdef SOAPYSDR
     soapy_protocol_set_tx_gain_element(transmitter,(char *)gtk_widget_get_name(widget),gain);
@@ -142,7 +142,7 @@ static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   DAC *dac=(DAC *)data;
   int gain;
 #ifdef SOAPYSDR
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     soapy_protocol_set_tx_gain_element(radio->transmitter,(char *)gtk_widget_get_name(widget),gain);
     for(int i=0;i<radio->discovered->info.soapy.tx_gains;i++) {
@@ -871,7 +871,7 @@ void radio_menu(GtkWidget *parent) {
 
   col=0;
 #ifdef SOAPYSDR
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     int i;
     if(strcmp(radio->name,"sdrplay")==0 || strcmp(radio->name,"rtlsdr")==0) {
       // We display fixed gains below

@@ -295,7 +295,7 @@ void vfo_restore_state() {
     vfo[i].band=band20;
     vfo[i].bandstack=0;
     vfo[i].frequency=14010000;
-    if(radio->protocol==SOAPYSDR_PROTOCOL) {
+    if(protocol==SOAPYSDR_PROTOCOL) {
       vfo[i].band=band430;
       vfo[i].bandstack=0;
       vfo[i].frequency=434010000;
