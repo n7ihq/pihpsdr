@@ -28,8 +28,6 @@
 #include "radio.h"
 #include "vfo.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
@@ -201,12 +199,9 @@ g_print("max_power_changed_cb: %d\n",pa_power);
 }
 
 void pa_menu(GtkWidget *parent) {
-  int i;
-
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - PA Calibration");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -248,34 +243,10 @@ void pa_menu(GtkWidget *parent) {
   GtkWidget *grid1=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid1),10);
 
-  int bands=BANDS;
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      switch(device) {
-        case DEVICE_HERMES_LITE:
-        case DEVICE_HERMES_LITE2:
-          bands=band10+1;
-          break;
-        default:
-          bands=band6+1;
-          break;
-      }
-      break;
-    case NEW_PROTOCOL:
-      switch(device) {
-        case NEW_DEVICE_HERMES_LITE:
-        case NEW_DEVICE_HERMES_LITE2:
-          bands=band10+1;
-          break;
-        default:
-          bands=band6+1;
-          break;
-      }
-      break;
-  }
-
+  int bands=max_band();
   int b=0;
-  for(i=0;i<bands;i++) {
+
+  for(int i=0;i<=bands;i++) {
     BAND *band=band_get_band(i);
 
     GtkWidget *band_label=gtk_label_new(NULL);
@@ -294,7 +265,7 @@ void pa_menu(GtkWidget *parent) {
     b++;
   }
 
-  for(i=BANDS;i<BANDS+XVTRS;i++) {
+  for(int i=BANDS;i<BANDS+XVTRS;i++) {
     BAND *band=band_get_band(i);
     if(strlen(band->title)>0) {
       GtkWidget *band_label=gtk_label_new(NULL);

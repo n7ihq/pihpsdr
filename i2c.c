@@ -25,7 +25,7 @@ char *i2c_device="/dev/i2c-1";
 unsigned int i2c_address_1=0X20;
 unsigned int i2c_address_2=0X23;
 
-static int fd;
+static int i2cfd;
 //
 // When reading the flags and ints registers of the
 // MCP23017, it is important that no other thread
@@ -59,35 +59,31 @@ unsigned int i2c_sw[16]=
 static int write_byte_data(unsigned char reg, unsigned char data) {
   int rc;
 
-  if((rc=i2c_smbus_write_byte_data(fd,reg,data&0xFF))<0) {
+  if((rc=i2c_smbus_write_byte_data(i2cfd,reg,data&0xFF))<0) {
     g_print("%s: write REG_GCONF config failed: addr=%02X %s\n",__FUNCTION__,i2c_address_1,g_strerror(errno));
   }
 
   return rc;
 }
 
+//NOTUSED
 static unsigned char read_byte_data(unsigned char reg) {
   __s32 data;
 
-  data=i2c_smbus_read_byte_data(fd,reg);
+  data=i2c_smbus_read_byte_data(i2cfd,reg);
   return data&0xFF;
 }
 
 static unsigned int read_word_data(unsigned char reg) {
   __s32 data;
 
-  data=i2c_smbus_read_word_data(fd,reg);
+  data=i2c_smbus_read_word_data(i2cfd,reg);
   return data&0xFFFF;
 }
 
 
-static void frequencyStep(int pos) {
-  vfo_step(pos);
-}
-
 void i2c_interrupt() {
   unsigned int flags;
-  unsigned int ints;
   int i;
 
   g_mutex_lock(&i2c_mutex);
@@ -99,7 +95,7 @@ void i2c_interrupt() {
     // by another interrupt service routine). If we enter here (protected by
     // the mutex), we handle all interrupts until no one is left (flags==0)
     if (flags == 0) break;
-    ints=read_word_data(0x10);
+    unsigned int ints=read_word_data(0x10);
 //g_print("%s: flags=%04X ints=%04X\n",__FUNCTION__,flags,ints);
     // only those bits in "ints" matter where the corresponding position
     // in "flags" is set. We have a PRESSED or RELEASED event depending on
@@ -119,17 +115,17 @@ void i2c_interrupt() {
 
 void i2c_init() {
 
-  int flags, ints;
+  int flags;
 
   g_print("%s: open i2c device %s\n",__FUNCTION__,i2c_device);
-  fd=open(i2c_device, O_RDWR);
-  if(fd<0) {
+  i2cfd=open(i2c_device, O_RDWR);
+  if(i2cfd<0) {
     g_print("%s: open i2c device %s failed: %s\n",__FUNCTION__,i2c_device,g_strerror(errno));
     return;
   }
-  g_print("%s: open i2c device %s fd=%d\n",__FUNCTION__,i2c_device,fd);
+  g_print("%s: open i2c device %s fd=%d\n",__FUNCTION__,i2c_device,i2cfd);
 
-  if (ioctl(fd, I2C_SLAVE, i2c_address_1) < 0) {
+  if (ioctl(i2cfd, I2C_SLAVE, i2c_address_1) < 0) {
     g_print("%s: ioctl i2c slave %d failed: %s\n",__FUNCTION__,i2c_address_1,g_strerror(errno));
     return;
   }
@@ -177,7 +173,7 @@ void i2c_init() {
   do {
     flags=read_word_data(0x0E);
     if(flags) {
-      ints=read_word_data(0x10);
+      (void) read_word_data(0x10);
       count++;
       if(count==10) {
         return;

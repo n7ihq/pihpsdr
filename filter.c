@@ -588,17 +588,17 @@ void filter_cut_changed(int id, int action, int increment) {
   int mode=vfo[id].mode;
   int f=vfo[id].filter;
   FILTER *filter=&(filters[mode][f]);
-  int step=(mode == modeCWU || mode == modeCWL) ? 2 : 5;
+  int st = (mode == modeCWU || mode == modeCWL) ? 2 : 5;
 
   if(f==filterVar1 || f==filterVar2) {
 
     switch(action) {
       case FILTER_CUT_HIGH:
-        filter->high += increment*step;
+        filter->high += increment*st;
         set_filter_cut_high(id,filter->high);
         break;
       case FILTER_CUT_LOW:
-        filter->low += increment*step;
+        filter->low += increment*st;
         set_filter_cut_low(id,filter->low);
         break;
       default:

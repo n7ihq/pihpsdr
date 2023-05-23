@@ -169,7 +169,7 @@ int main(int argc, char **argv)
     // list devices
     //
     if (pcap_findalldevs(&devlist, errbuf) == -1) {
-        fprintf(stderr,"Error in pcap_findalldevs_ex: %s\n", errbuf);
+        printf("Error in pcap_findalldevs_ex: %s\n", errbuf);
         exit(1);
     }
 

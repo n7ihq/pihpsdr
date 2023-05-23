@@ -271,7 +271,6 @@ void update_c25_att() {
   // Only effective with the CHARLY25 filter board.
   // Change the Att/Preamp combo-box to the current attenuation status
   //
-  int att;
   if (filter_board == CHARLY25) {
     char id[16];
     if (active_receiver->adc != 0) {
@@ -285,7 +284,7 @@ void update_c25_att() {
     if (active_receiver->preamp || active_receiver->dither) {
       active_receiver->alex_attenuation=0;
     }
-    att=-12*active_receiver->alex_attenuation+18*active_receiver->dither+18*active_receiver->preamp;
+    int att=-12*active_receiver->alex_attenuation+18*active_receiver->dither+18*active_receiver->preamp;
     sprintf(id, "%d", att);
     gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_att_combobox), id);
   }
@@ -423,15 +422,11 @@ static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #ifdef SOAPYSDR
       case SOAPYSDR_PROTOCOL:
         soapy_protocol_set_gain(active_receiver);
-	break;
+        break;
 #endif
       default:
-	break;
+        break;
     }
-}
-
-void update_rf_gain() {
-  set_rf_gain(active_receiver->id,adc[active_receiver->id].gain);
 }
 
 void set_rf_gain(int rx,double value) {
@@ -592,44 +587,6 @@ void set_mic_gain(double value) {
   }
 }
 
-void set_linein_gain(int value) {
-  g_print("%s\n",__FUNCTION__);
-  linein_gain=value;
-  if(display_sliders) {
-    gtk_range_set_value (GTK_RANGE(mic_gain_scale),linein_gain);
-  } else {
-    if(scale_status!=LINEIN_GAIN) {
-      if(scale_status!=NO_ACTION) {
-        g_source_remove(scale_timer);
-        gtk_widget_destroy(scale_dialog);
-        scale_status=NO_ACTION;
-      }
-    }
-    if(scale_status==NO_ACTION) {
-      scale_status=LINEIN_GAIN;
-      scale_dialog=gtk_dialog_new_with_buttons("Linein Gain",GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
-      GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
-      mic_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 31.0, 1.00);
-      gtk_widget_set_size_request (mic_gain_scale, 400, 30);
-      gtk_range_set_value (GTK_RANGE(mic_gain_scale),linein_gain);
-      gtk_widget_show(mic_gain_scale);
-      gtk_container_add(GTK_CONTAINER(content),mic_gain_scale);
-      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      gtk_dialog_run(GTK_DIALOG(scale_dialog));
-    } else {
-      g_source_remove(scale_timer);
-      gtk_range_set_value (GTK_RANGE(mic_gain_scale),linein_gain);
-      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-    }
-  }
-}
-
-int update_linein_gain(void *data) {
-  set_linein_gain(*(int*)data);
-  free(data);
-  return 0;
-}
-
 void set_drive(double value) {
   g_print("%s\n",__FUNCTION__);
   setDrive(value);
@@ -665,12 +622,6 @@ void set_drive(double value) {
 
 static void drive_value_changed_cb(GtkWidget *widget, gpointer data) {
   setDrive(gtk_range_get_value(GTK_RANGE(drive_scale)));
-}
-
-int update_drive(void *data) {
-  set_drive(*(double *)data);
-  free(data);
-  return 0;
 }
 
 void set_filter_cut_high(int rx,int var) {
@@ -899,7 +850,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   width=my_width;
   height=my_height;
 
-fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
+g_print("sliders_init: width=%d height=%d\n", width,height);
 
   sliders=gtk_grid_new();
   gtk_widget_set_size_request (sliders, width, height);

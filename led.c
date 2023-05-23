@@ -21,14 +21,14 @@
 
 static gboolean draw_led_cb (GtkWidget *widget, cairo_t *cr, gpointer data) {
   GdkRGBA *color=(GdkRGBA *)data;
-//fprintf(stderr,"draw_led_cb: %p color=%p r=%f g=%f b=%f\n",widget,color,color->red,color->green,color->blue);
+//g_print("%s: %p color=%p r=%f g=%f b=%f\n",__FUNCTION__,widget,color,color->red,color->green,color->blue);
   cairo_set_source_rgb(cr, color->red, color->green, color->blue);
   cairo_paint(cr);
   return FALSE;
 }
 
 void led_set_color(GtkWidget *led) {
-//fprintf(stderr,"led_set_color: %p\n",led);
+//g_print("%s: %p\n",__FUNCTION__,led);
   gtk_widget_queue_draw (led);
 }
 
@@ -37,6 +37,6 @@ GtkWidget *create_led(int width,int height,GdkRGBA *color) {
   gtk_widget_set_size_request(led,width,height);
   g_signal_connect (led, "draw", G_CALLBACK (draw_led_cb), (gpointer)color);
 
-fprintf(stderr,"create_led: %p: color=%p\n",led,color);
+g_print("%s: %p: color=%p\n",__FUNCTION__,led,color);
   return led;
 }

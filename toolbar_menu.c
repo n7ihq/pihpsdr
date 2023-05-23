@@ -39,8 +39,6 @@
 #include "gpio.h"
 #include "i2c.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static SWITCH *temp_switches;
@@ -87,11 +85,8 @@ static void response_event(GtkWidget *mydialog,gint id,gpointer user_data) {
 }
 
 void toolbar_menu(GtkWidget *parent) {
-  gint row;
-  gint col;
   gchar label[64];
   GtkWidget *notebook;
-  GtkWidget *grid;
   GtkWidget *widget;
   gint lfunction=0;
 
@@ -107,7 +102,7 @@ void toolbar_menu(GtkWidget *parent) {
   set_backgnd(notebook);
 
   for (lfunction=0; lfunction<MAX_FUNCTIONS; lfunction++) {
-    grid=gtk_grid_new();
+    GtkWidget *grid=gtk_grid_new();
     gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
     gtk_grid_set_row_homogeneous(GTK_GRID(grid),FALSE);
     gtk_grid_set_column_spacing (GTK_GRID(grid),0);

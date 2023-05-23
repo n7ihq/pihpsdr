@@ -225,11 +225,7 @@ void receiver_save_state(RECEIVER *rx) {
     // for PS_RX_RECEIVER, *only* save the ALEX antenna setting
     // and then return quickly.
     //
-    if (rx->id == PS_RX_FEEDBACK
-#ifdef SOAPYSDR
-        && protocol!=SOAPYSDR_PROTOCOL
-#endif
-       ) return;
+    if (rx->id == PS_RX_FEEDBACK && protocol!=SOAPYSDR_PROTOCOL) return;
 
     sprintf(name,"receiver.%d.sample_rate",rx->id);
     sprintf(value,"%d",rx->sample_rate);
@@ -399,11 +395,7 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     // for PS_RX_RECEIVER, *only* restore the ALEX antenna and setting
     // and then return quickly
     //
-    if (rx->id == PS_RX_FEEDBACK
-#ifdef SOAPYSDR
-        && protocol!=SOAPYSDR_PROTOCOL
-#endif
-       ) return;
+    if (rx->id == PS_RX_FEEDBACK && protocol!=SOAPYSDR_PROTOCOL) return;
 
     sprintf(name,"receiver.%d.sample_rate",rx->id);
     value=getProperty(name);
@@ -796,7 +788,7 @@ static void init_analyzer(RECEIVER *rx) {
     int n_pixout=1;
     int spur_elimination_ffts = 1;
     int data_type = 1;
-    int fft_size = 8192;
+    int afft_size = 8192;
     int window_type = 4;
     double kaiser_pi = 14.0;
     int overlap = 2048;
@@ -809,9 +801,9 @@ static void init_analyzer(RECEIVER *rx) {
     double span_min_freq = 0.0;
     double span_max_freq = 0.0;
 
-    int max_w = fft_size + (int) min(keep_time * (double) rx->fps, keep_time * (double) fft_size * (double) rx->fps);
+    int max_w = afft_size + (int) min(keep_time * (double) rx->fps, keep_time * (double) afft_size * (double) rx->fps);
 
-    overlap = (int)fmax(0.0, ceil(fft_size - (double)rx->sample_rate / (double)rx->fps));
+    overlap = (int)fmax(0.0, ceil(afft_size - (double)rx->sample_rate / (double)rx->fps));
 
     //g_print("%s: id=%d buffer_size=%d overlap=%d\n",_FUNCTION__,rx->id,rx->buffer_size,overlap);
 
@@ -821,7 +813,7 @@ static void init_analyzer(RECEIVER *rx) {
             spur_elimination_ffts, //number of LO frequencies = number of ffts used in elimination
             data_type, //0 for real input data (I only); 1 for complex input data (I & Q)
             flp, //vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
-            fft_size, //size of the fft, i.e., number of input samples
+            afft_size, //size of the fft, i.e., number of input samples
             rx->buffer_size, //number of samples transferred for each OpenBuffer()/CloseBuffer()
             window_type, //integer specifying which window function to use
             kaiser_pi, //PiAlpha parameter for Kaiser window
@@ -902,7 +894,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
     //
     g_mutex_init(&rx->mutex);
     if (protocol == ORIGINAL_PROTOCOL) {
-	rx->pixels=(sample_rate/24000) * width;
+      rx->pixels=(sample_rate/24000) * width;
     } else {
       // sample rate of feedback is TX sample rate is 192000
       rx->pixels = 8*width;
@@ -1000,50 +992,31 @@ g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,i
       rx->adc=0;
       break;
     default:
-      switch(protocol) {
-        case ORIGINAL_PROTOCOL:
-          switch(device) {
-            case DEVICE_METIS:
-#ifdef USBOZY
-	    case DEVICE_OZY:
-#endif
-
-            case DEVICE_HERMES:
-            case DEVICE_HERMES_LITE:			
-            case DEVICE_HERMES_LITE2:			
-              rx->adc=0;
-              break;
-            default:
-              rx->adc=1;
-              break;
-          }
+      switch(device) {
+        case DEVICE_METIS:
+        case DEVICE_OZY:
+        case DEVICE_HERMES:
+        case DEVICE_HERMES_LITE:
+        case DEVICE_HERMES_LITE2:
+        case NEW_DEVICE_ATLAS:
+        case NEW_DEVICE_HERMES:
+          rx->adc=0;
           break;
         default:
-          switch(device) {
-            case NEW_DEVICE_ATLAS:
-            case NEW_DEVICE_HERMES:
-              rx->adc=0;
-              break;
-            default:
-              rx->adc=1;
-              break;
-          }
+          rx->adc=1;
           break;
       }
   }
 g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
+  rx->sample_rate=48000;
+  if(device==SOAPYSDR_USB_DEVICE) {
 #ifdef SOAPYSDR
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
     rx->sample_rate=radio->info.soapy.sample_rate;
+#endif
     rx->resampler=NULL;
     rx->resample_buffer=NULL;
-g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
-  } else {
-#endif
-    rx->sample_rate=48000;
-#ifdef SOAPYSDR
   }
-#endif
+g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->buffer_size=buffer_size;
   rx->fft_size=fft_size;
   rx->fps=fps;
@@ -1504,10 +1477,8 @@ static void process_rx_buffer(RECEIVER *rx) {
             }
           }
           break;
-#ifdef SOAPYSDR
         case SOAPYSDR_PROTOCOL:
           break;
-#endif
       }
 
 #ifdef AUDIO_WATERFALL

@@ -29,7 +29,6 @@
 #include "mode.h"
 #include "vfo.h"
 
-static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *last_filter;
 static GtkWidget *input;
@@ -225,10 +224,8 @@ void tx_menu(GtkWidget *parent) {
   int i;
   char temp[32];
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Transmit");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -290,36 +287,26 @@ void tx_menu(GtkWidget *parent) {
   row++;
   col=0;
 
-  gboolean device_has_microphone_input=FALSE;
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      switch(device) {
-        case DEVICE_METIS:
-#ifdef USBOZY
-	case DEVICE_OZY:
-#endif
-
-        case DEVICE_HERMES:
-        case DEVICE_GRIFFIN:
-        case DEVICE_ANGELIA:
-        case DEVICE_ORION:
-        case DEVICE_ORION2:
-          device_has_microphone_input=TRUE;
-          break;
-      }
-      break;
-    case NEW_PROTOCOL:
-      switch(device) {
-        case NEW_DEVICE_ATLAS:
-        case NEW_DEVICE_HERMES:
-        case NEW_DEVICE_HERMES2:
-        case NEW_DEVICE_ANGELIA:
-        case NEW_DEVICE_ORION:
-        case NEW_DEVICE_ORION2:
-          device_has_microphone_input=TRUE;
-          break;
-      }
-      break;
+  gboolean device_has_microphone_input;
+  switch(device) {
+    case DEVICE_METIS:
+    case DEVICE_OZY:
+    case DEVICE_HERMES:
+    case DEVICE_GRIFFIN:
+    case DEVICE_ANGELIA:
+    case DEVICE_ORION:
+    case DEVICE_ORION2:
+    case NEW_DEVICE_ATLAS:
+    case NEW_DEVICE_HERMES:
+    case NEW_DEVICE_HERMES2:
+    case NEW_DEVICE_ANGELIA:
+    case NEW_DEVICE_ORION:
+    case NEW_DEVICE_ORION2:
+     device_has_microphone_input=TRUE;
+     break;
+   default:
+     device_has_microphone_input=FALSE;
+     break;
   }
 
   if(device_has_microphone_input) {

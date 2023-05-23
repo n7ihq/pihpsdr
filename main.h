@@ -37,7 +37,7 @@ extern gint display_width;
 extern gint display_height;
 extern gint full_screen;
 extern GtkWidget *top_window;
-extern GtkWidget *grid;
+extern GtkWidget *topgrid;
 extern void status_text(char *text);
 
 extern gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);

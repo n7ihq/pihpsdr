@@ -37,8 +37,6 @@
 #include "gpio.h"
 #include "i2c.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static void cleanup() {
@@ -171,8 +169,6 @@ void encoder_menu(GtkWidget *parent) {
       g_sprintf(label,"<b>%s</b>",ActionTable[encoders[3].bottom_encoder_function].str);
       gtk_label_set_markup (GTK_LABEL(widget), label);
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      row++;
-      col=0;
       break;
     case CONTROLLER2_V1:
       // 3 horizontal single encoders with switches
@@ -389,8 +385,6 @@ void encoder_menu(GtkWidget *parent) {
         gtk_widget_set_name(widget,"small_button");
         g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
         gtk_grid_attach(GTK_GRID(grid),widget,2,3+i,1,1);
-        col=0;
-        row++;
       }
 
       // 2 vertical double encoders with switches right side
@@ -431,8 +425,6 @@ void encoder_menu(GtkWidget *parent) {
         gtk_widget_set_name(widget,"small_button");
         g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
         gtk_grid_attach(GTK_GRID(grid),widget,6,1+i,1,1);
-        col=6;
-        row++;
       }
 
       widget=gtk_label_new(NULL);

@@ -68,9 +68,7 @@ typedef struct _adc {
   gdouble gain;
   gdouble min_gain;
   gdouble max_gain;
-#ifdef SOAPYSDR
   gboolean agc;
-#endif
 } ADC;
 
 #endif

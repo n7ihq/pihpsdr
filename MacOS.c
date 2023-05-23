@@ -47,15 +47,10 @@ void MacOSstartup(char *path) {
 //
 // If "$HOME/Library/Application Support" does not exist, fall back to case a)
 //
-    char *c;
-    char source[1024];
     char workdir[1024];
     char *homedir;
     const char *AppSupport ="/Library/Application Support/piHPSDR";
-    const char *IconInApp  ="/../Resources/hpsdr.png";
     struct stat st;
-    int fdin, fdout;
-    int rc;
     static IOPMAssertionID keep_awake = 0;
 
 //
@@ -108,7 +103,9 @@ void MacOSstartup(char *path) {
 //
 //  chdir to the work dir
 //
-    chdir(workdir);
+    if (chdir(workdir) != 0) {
+      return;
+    }
 //
 //  Make two local files for stdout and stderr, to allow
 //  post-mortem debugging
@@ -122,11 +119,15 @@ void MacOSstartup(char *path) {
       //
       // source = basename of the executable
       //
+      char *c;
+      char source[1024];
       strcpy(source, path);
       c=rindex(source,'/');
       if (c) {
         *c=0;
+        const char *IconInApp  ="/../Resources/hpsdr.png";
         if ((strlen(source) + strlen(IconInApp) < 1024)) {
+          int fdin, fdout;
           strcat(source,  IconInApp);
           //
           // Now copy the file from "source" to "workdir"
@@ -137,8 +138,9 @@ void MacOSstartup(char *path) {
             //
             // Now do the copy, use "source" as I/O buffer
             //
-            while ((rc=read(fdin, source, 1024)) > 0) {
-              write (fdout, source, rc);
+            int ch;
+            while ((ch=read(fdin, source, 1024)) > 0) {
+              write (fdout, source, ch);
             }
             close(fdin);
             close(fdout);

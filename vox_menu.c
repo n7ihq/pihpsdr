@@ -33,8 +33,6 @@
 #include "vox.h"
 #include "ext.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static GtkWidget *level;
@@ -117,10 +115,7 @@ static gboolean enable_cb (GtkWidget *widget, GdkEventButton *event, gpointer da
 static void start_level_thread() {
   run_level=1;
   level_thread_id = g_thread_new( "VOX level", level_thread, NULL);
-  if(!level_thread_id ) {
-    fprintf(stderr,"g_thread_new failed on level_thread\n");
-  }
-  fprintf(stderr, "level_thread: id=%p\n",level_thread_id);
+  g_print("level_thread: id=%p\n",level_thread_id);
 }
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {
@@ -132,20 +127,15 @@ static void vox_value_changed_cb(GtkWidget *widget, gpointer data) {
   vox_threshold=gtk_range_get_value(GTK_RANGE(widget))/1000.0;
 }
 
-static void vox_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
-  vox_gain=gtk_range_get_value(GTK_RANGE(widget));
-}
-
 static void vox_hang_value_changed_cb(GtkWidget *widget, gpointer data) {
   vox_hang=gtk_range_get_value(GTK_RANGE(widget));
 }
 
 void vox_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
   g_signal_connect (dialog, "destroy", G_CALLBACK(destroy_cb), NULL);
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - VOX");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

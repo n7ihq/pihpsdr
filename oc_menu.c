@@ -32,8 +32,6 @@
 #include "radio.h"
 #include "new_protocol.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
@@ -61,7 +59,7 @@ static void oc_rx_cb(GtkWidget *widget, gpointer data) {
   int oc=(GPOINTER_TO_UINT(data))&0xF;
   BAND *band=band_get_band(b);
   int mask=0x01<<(oc-1);
-fprintf(stderr,"oc_rx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
+g_print("oc_rx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     band->OCrx|=mask;
   } else {
@@ -79,7 +77,7 @@ static void oc_tx_cb(GtkWidget *widget, gpointer data) {
   BAND *band=band_get_band(b);
   int mask=0x01<<(oc-1);
 
-fprintf(stderr,"oc_tx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
+g_print("oc_tx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
 
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     band->OCtx|=mask;
@@ -94,7 +92,7 @@ fprintf(stderr,"oc_tx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
 static void oc_tune_cb(GtkWidget *widget, gpointer data) {
   int oc=(GPOINTER_TO_UINT(data))&0xF;
   int mask=0x01<<(oc-1);
-fprintf(stderr,"oc_tune_cb: oc=%d mask=%d\n",oc,mask);
+g_print("oc_tune_cb: oc=%d mask=%d\n",oc,mask);
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     OCtune|=mask;
   } else {
@@ -114,10 +112,9 @@ void oc_menu(GtkWidget *parent) {
   int i,j;
 
 g_print("oc_menu: parent=%p\n",parent);
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Open Collector Output");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -169,37 +166,12 @@ g_print("oc_menu: parent=%p\n",parent);
     gtk_grid_attach(GTK_GRID(grid),oc_tx_title,i+7,2,1,1);
   }
 
-  int bands=BANDS;
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      switch(device) {
-        case DEVICE_HERMES_LITE:
-        case DEVICE_HERMES_LITE2:
-          bands=band10+1;
-          break;
-        default:
-          bands=band6+1;
-          break;
-      }
-      break;
-    case NEW_PROTOCOL:
-      switch(device) {
-        case NEW_DEVICE_HERMES_LITE:
-        case NEW_DEVICE_HERMES_LITE2:
-          bands=band10+1;
-          break;
-        default:
-          bands=band6+1;
-          break;
-      }
-      break;
-  }
-
+  int bands=max_band();
   int row=3;
 
   //
   // fused loop. i runs over the following values:
-  // bandGen, 0 ... bands-1, BANDS ... BANDS+XVTRS-1
+  // bandGen, 0 ... bands, BANDS ... BANDS+XVTRS-1
   // XVTR bands not-yet-assigned have an empty title
   // and are filtered out
   //
@@ -235,7 +207,7 @@ g_print("oc_menu: parent=%p\n",parent);
     // update "loop index"
     if (i == bandGen) {
       i=0;
-    } else if (i == bands-1) {
+    } else if (i == bands) {
       i=BANDS;
     } else {
       i++;
@@ -283,7 +255,6 @@ g_print("oc_menu: parent=%p\n",parent);
   gtk_widget_show(oc_memory_tune_time_b);
   gtk_grid_attach(GTK_GRID(grid),oc_memory_tune_time_b,18,j+1,2,1);
   g_signal_connect(oc_memory_tune_time_b,"value_changed",G_CALLBACK(oc_memory_tune_time_cb),NULL);
-  j++;
 
   gtk_container_add(GTK_CONTAINER(viewport),grid);
   gtk_container_add(GTK_CONTAINER(sw),viewport);

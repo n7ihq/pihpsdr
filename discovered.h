@@ -31,48 +31,47 @@
 // ANAN 7000DLE and 8000DLE uses 10 as the device type in old protocol
 // Newer STEMlab hpsdr emulators use 100 instead of 1
 // HermesLite V2 uses V1 board ID and software version >= 40
-#define DEVICE_METIS           0
-#define DEVICE_HERMES          1
-#define DEVICE_GRIFFIN         2
-#define DEVICE_ANGELIA         4
-#define DEVICE_ORION           5
-#define DEVICE_HERMES_LITE     6
-#define DEVICE_HERMES_LITE2 1006
-#define DEVICE_ORION2         10
-#define DEVICE_STEMLAB       100
-#define DEVICE_STEMLAB_Z20   101
+//
+// To avoid probing both the protocol and the device, device numbers
+// need to be unique across protocols, and should be defined here
+// for all protocols, even if piHPSDR is not compiled for that
+// protocol (so define DEVICE_OZY and SOAPYSDR_USB_DEVICE in all cases!)
+//
+#define DEVICE_METIS               0
+#define DEVICE_HERMES              1
+#define DEVICE_GRIFFIN             2
+#define DEVICE_ANGELIA             4
+#define DEVICE_ORION               5
+#define DEVICE_HERMES_LITE         6
+#define DEVICE_HERMES_LITE2      506
+#define DEVICE_ORION2             10
+#define DEVICE_STEMLAB           100
+#define DEVICE_STEMLAB_Z20       101
 
-#ifdef USBOZY
-#define DEVICE_OZY 7
-#endif
+#define DEVICE_OZY                 7
 
-#define NEW_DEVICE_ATLAS           0
-#define NEW_DEVICE_HERMES          1
-#define NEW_DEVICE_HERMES2         2
-#define NEW_DEVICE_ANGELIA         3
-#define NEW_DEVICE_ORION           4
-#define NEW_DEVICE_ORION2          5
-#define NEW_DEVICE_HERMES_LITE     6
-#define NEW_DEVICE_HERMES_LITE2 1006
+#define NEW_DEVICE_ATLAS        1000
+#define NEW_DEVICE_HERMES       1001
+#define NEW_DEVICE_HERMES2      1002
+#define NEW_DEVICE_ANGELIA      1003
+#define NEW_DEVICE_ORION        1004
+#define NEW_DEVICE_ORION2       1005
+#define NEW_DEVICE_HERMES_LITE  1006
+#define NEW_DEVICE_HERMES_LITE2 1506
 
-#ifdef SOAPYSDR
-#define SOAPYSDR_USB_DEVICE 2000
-#endif
+#define SOAPYSDR_USB_DEVICE     2000
 
 #define STATE_AVAILABLE 2
 #define STATE_SENDING 3
 
 #define ORIGINAL_PROTOCOL 0
-#define NEW_PROTOCOL 1
-#ifdef SOAPYSDR
+#define NEW_PROTOCOL      1
 #define SOAPYSDR_PROTOCOL 2
-#endif
+#define STEMLAB_PROTOCOL  5
 
-#ifdef STEMLAB_DISCOVERY
 // A STEMlab discovered via Avahi will have this protocol until the SDR
 // application itself is started, at which point it will be changed to the old
 // protocol and proceed to be handled just like a normal HPSDR radio.
-#define STEMLAB_PROTOCOL 5
 //
 // Since there are multiple HPSDR applications for the STEMlab, but not all
 // are always installed, we need to keep track of which are installed, so the
@@ -81,18 +80,17 @@
 // and we use one bit to distinguish between fancy (STEMlab) and
 // barebone (ALPINE) RedPitayas.
 //
-#define STEMLAB_PAVEL_RX   1	// found: sdr_receiver_hpsdr
-#define STEMLAB_PAVEL_TRX  2	// found: sdr_transceiver_hpsdr
-#define STEMLAB_RP_TRX     4	// found: stemlab_sdr_transceiver_hpsdr
-#define HAMLAB_RP_TRX      8	// found: hamlab_sdr_transceiver_hpsdr
-#define BARE_REDPITAYA    16	// barebone RedPitaya (no STEMlab)
-#endif
+#define STEMLAB_PAVEL_RX   1    // found: sdr_receiver_hpsdr
+#define STEMLAB_PAVEL_TRX  2    // found: sdr_transceiver_hpsdr
+#define STEMLAB_RP_TRX     4    // found: stemlab_sdr_transceiver_hpsdr
+#define HAMLAB_RP_TRX      8    // found: hamlab_sdr_transceiver_hpsdr
+#define BARE_REDPITAYA    16    // barebone RedPitaya (no STEMlab)
 
 
 struct _DISCOVERED {
     int protocol;
     int device;
-    int use_tcp;    	// Radio connection is via TCP
+    int use_tcp;        // Radio connection is via TCP
     int use_routing;    // Radio connection is "routed" to some IP address
     char name[64];
     int software_version;
@@ -135,7 +133,7 @@ struct _DISCOVERED {
         SoapySDRRange *tx_range;
         size_t tx_antennas;
         char **tx_antenna;
-	size_t sensors;
+        size_t sensors;
         char **sensor;
         gboolean has_temp;
         char address[64];

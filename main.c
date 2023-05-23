@@ -33,7 +33,6 @@
 #include "band.h"
 #include "bandstack.h"
 #include "main.h"
-#include "channel.h"
 #include "discovered.h"
 #include "configure.h"
 #include "actions.h"
@@ -69,14 +68,14 @@ static GdkCursor *cursor_watch;
 static GtkWidget *splash;
 
 GtkWidget *top_window;
-GtkWidget *grid;
+GtkWidget *topgrid;
 
 static DISCOVERED* d;
 
-static GtkWidget *status;
+static GtkWidget *status_label;
 
 void status_text(char *text) {
-  gtk_label_set_text(GTK_LABEL(status),text);
+  gtk_label_set_text(GTK_LABEL(status_label),text);
   usleep(100000);
   while (gtk_events_pending ())
     gtk_main_iteration ();
@@ -105,31 +104,31 @@ static void* wisdom_thread(void *arg) {
 gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
    if (radio != NULL) {
-	  if (event->keyval == GDK_KEY_space) {
-		
-		  fprintf(stderr, "space");
-		
-		if(getTune()==1) {
-		  setTune(0);
-		}
-		if(getMox()==1) {
-		  setMox(0);
-		} else if(canTransmit() || tx_out_of_band) {
-		  setMox(1);
-		} else {
-		  transmitter_set_out_of_band(transmitter);
-		}
-		g_idle_add(ext_vfo_update,NULL);
-		return TRUE;
-	  }
-	  if (event->keyval == GDK_KEY_d ) {
-		vfo_step(-1);
-		return TRUE;
-	  }
-	  if (event->keyval == GDK_KEY_u ) {
-		 vfo_step(1);
-		 return TRUE;
-	  }
+      if (event->keyval == GDK_KEY_space) {
+        
+          g_print( "space");
+        
+        if(getTune()==1) {
+          setTune(0);
+        }
+        if(getMox()==1) {
+          setMox(0);
+        } else if(canTransmit() || tx_out_of_band) {
+          setMox(1);
+        } else {
+          transmitter_set_out_of_band(transmitter);
+        }
+        g_idle_add(ext_vfo_update,NULL);
+        return TRUE;
+      }
+      if (event->keyval == GDK_KEY_d ) {
+        vfo_step(-1);
+        return TRUE;
+      }
+      if (event->keyval == GDK_KEY_u ) {
+         vfo_step(1);
+         return TRUE;
+      }
   }
 
   return FALSE;
@@ -184,7 +183,7 @@ static int init(void *data) {
   //
   (void) getcwd(wisdom_directory, sizeof(wisdom_directory));
   strcpy(&wisdom_directory[strlen(wisdom_directory)],"/");
-  fprintf(stderr,"Securing wisdom file in directory: %s\n", wisdom_directory);
+  g_print("Securing wisdom file in directory: %s\n", wisdom_directory);
   status_text("Checking FFTW Wisdom file ...");
   wisdom_running=1;
   pthread_create(&wisdom_thread_id, NULL, wisdom_thread, wisdom_directory);
@@ -205,21 +204,21 @@ static int init(void *data) {
 static void activate_pihpsdr(GtkApplication *app, gpointer data) {
 
 
-  fprintf(stderr,"Build: %s %s\n",build_date,version);
+  g_print("Build: %s %s\n",build_date,version);
 
-  fprintf(stderr,"GTK+ version %ud.%ud.%ud\n", gtk_major_version, gtk_minor_version, gtk_micro_version);
+  g_print("GTK+ version %ud.%ud.%ud\n", gtk_major_version, gtk_minor_version, gtk_micro_version);
   uname(&unameData);
-  fprintf(stderr,"sysname: %s\n",unameData.sysname);
-  fprintf(stderr,"nodename: %s\n",unameData.nodename);
-  fprintf(stderr,"release: %s\n",unameData.release);
-  fprintf(stderr,"version: %s\n",unameData.version);
-  fprintf(stderr,"machine: %s\n",unameData.machine);
+  g_print("sysname: %s\n",unameData.sysname);
+  g_print("nodename: %s\n",unameData.nodename);
+  g_print("release: %s\n",unameData.release);
+  g_print("version: %s\n",unameData.version);
+  g_print("machine: %s\n",unameData.machine);
 
   load_css();
 
   GdkScreen *screen=gdk_screen_get_default();
   if(screen==NULL) {
-    fprintf(stderr,"no default screen!\n");
+    g_print("no default screen!\n");
     _exit(0);
   }
 
@@ -227,7 +226,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   display_width=gdk_screen_get_width(screen);
   display_height=gdk_screen_get_height(screen);
 
-fprintf(stderr,"width=%d height=%d\n", display_width, display_height);
+g_print("width=%d height=%d\n", display_width, display_height);
 
   // Go to "window" mode if there is enough space on the screen.
   // Do not forget extra space needed for window top bars, screen bars etc.
@@ -251,25 +250,25 @@ fprintf(stderr,"width=%d height=%d\n", display_width, display_height);
     full_screen=1;
   }
 
-fprintf(stderr,"display_width=%d display_height=%d\n", display_width, display_height);
+g_print("display_width=%d display_height=%d\n", display_width, display_height);
 
-  fprintf(stderr,"create top level window\n");
+  g_print("create top level window\n");
   top_window = gtk_application_window_new (app);
   set_backgnd(top_window);
   if(full_screen) {
-    fprintf(stderr,"full screen\n");
+    g_print("full screen\n");
     gtk_window_fullscreen(GTK_WINDOW(top_window));
   }
   gtk_widget_set_size_request(top_window, display_width, display_height);
   gtk_window_set_title (GTK_WINDOW (top_window), "piHPSDR");
   gtk_window_set_position(GTK_WINDOW(top_window),GTK_WIN_POS_CENTER_ALWAYS);
   gtk_window_set_resizable(GTK_WINDOW(top_window), FALSE);
-  fprintf(stderr,"setting top window icon\n");
+  g_print("setting top window icon\n");
   GError *error;
   if(!gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "hpsdr.png", &error)) {
-    fprintf(stderr,"Warning: failed to set icon for top_window\n");
+    g_print("Warning: failed to set icon for top_window\n");
     if(error!=NULL) {
-      fprintf(stderr,"%s\n",error->message);
+      g_print("%s\n",error->message);
     }
   }
   g_signal_connect (top_window, "delete-event", G_CALLBACK (main_delete), NULL);
@@ -281,52 +280,52 @@ fprintf(stderr,"display_width=%d display_height=%d\n", display_width, display_he
   g_signal_connect(top_window, "key_press_event", G_CALLBACK(keypress_cb), NULL);
 
 
-fprintf(stderr,"create grid\n");
-  grid = gtk_grid_new();
-  gtk_widget_set_size_request(grid, display_width, display_height);
-  gtk_grid_set_row_homogeneous(GTK_GRID(grid),FALSE);
-  gtk_grid_set_column_homogeneous(GTK_GRID(grid),FALSE);
-fprintf(stderr,"add grid\n");
-  gtk_container_add (GTK_CONTAINER (top_window), grid);
+g_print("create grid\n");
+  topgrid = gtk_grid_new();
+  gtk_widget_set_size_request(topgrid, display_width, display_height);
+  gtk_grid_set_row_homogeneous(GTK_GRID(topgrid),FALSE);
+  gtk_grid_set_column_homogeneous(GTK_GRID(topgrid),FALSE);
+g_print("add grid\n");
+  gtk_container_add (GTK_CONTAINER (top_window), topgrid);
 
-fprintf(stderr,"create image\n");
+g_print("create image\n");
   GtkWidget  *image=gtk_image_new_from_file("hpsdr.png");
-fprintf(stderr,"add image to grid\n");
-  gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 4);
+g_print("add image to grid\n");
+  gtk_grid_attach(GTK_GRID(topgrid), image, 0, 0, 1, 4);
 
-fprintf(stderr,"create pi label\n");
+g_print("create pi label\n");
   char build[128];
   sprintf(build,"build: %s %s",build_date, version);
   GtkWidget *pi_label=gtk_label_new("piHPSDR by John Melton g0orx/n6lyt");
   gtk_label_set_justify(GTK_LABEL(pi_label),GTK_JUSTIFY_LEFT);
   gtk_widget_show(pi_label);
-fprintf(stderr,"add pi label to grid\n");
-  gtk_grid_attach(GTK_GRID(grid),pi_label,1,0,1,1);
+g_print("add pi label to grid\n");
+  gtk_grid_attach(GTK_GRID(topgrid),pi_label,1,0,1,1);
 
-fprintf(stderr,"create build label\n");
+g_print("create build label\n");
   GtkWidget *build_date_label=gtk_label_new(build);
   gtk_label_set_justify(GTK_LABEL(build_date_label),GTK_JUSTIFY_LEFT);
   gtk_widget_show(build_date_label);
-fprintf(stderr,"add build label to grid\n");
-  gtk_grid_attach(GTK_GRID(grid),build_date_label,1,1,1,1);
+g_print("add build label to grid\n");
+  gtk_grid_attach(GTK_GRID(topgrid),build_date_label,1,1,1,1);
 
-fprintf(stderr,"create status\n");
-  status=gtk_label_new(NULL);
-  gtk_label_set_justify(GTK_LABEL(status),GTK_JUSTIFY_LEFT);
-  gtk_widget_show(status);
-fprintf(stderr,"add status to grid\n");
-  gtk_grid_attach(GTK_GRID(grid), status, 1, 3, 1, 1);
+g_print("create status\n");
+  status_label=gtk_label_new(NULL);
+  gtk_label_set_justify(GTK_LABEL(status_label),GTK_JUSTIFY_LEFT);
+  gtk_widget_show(status_label);
+g_print("add status to grid\n");
+  gtk_grid_attach(GTK_GRID(topgrid), status_label, 1, 3, 1, 1);
 
   gtk_widget_show_all(top_window);
 
-fprintf(stderr,"g_idle_add: init\n");
+g_print("g_idle_add: init\n");
   g_idle_add(init,NULL);
 
 }
 
 int main(int argc,char **argv) {
   GtkApplication *pihpsdr;
-  int status;
+  int rc;
 
   char name[1024];
 
@@ -337,12 +336,12 @@ int main(int argc,char **argv) {
 
   sprintf(name,"org.g0orx.pihpsdr.pid%d",getpid());
 
-//fprintf(stderr,"gtk_application_new: %s\n",name);
+//g_print("gtk_application_new: %s\n",name);
 
   pihpsdr=gtk_application_new(name, G_APPLICATION_FLAGS_NONE);
   g_signal_connect(pihpsdr, "activate", G_CALLBACK(activate_pihpsdr), NULL);
-  status=g_application_run(G_APPLICATION(pihpsdr), argc, argv);
-  fprintf(stderr,"exiting ...\n");
+  rc=g_application_run(G_APPLICATION(pihpsdr), argc, argv);
+  g_print("exiting ...\n");
   g_object_unref(pihpsdr);
-  return status;
+  return rc;
 }

@@ -8,7 +8,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 # uncomment the following line to force 480x320 screen
 #SMALL_SCREEN_OPTIONS=-D SMALL_SCREEN
 
-# uncomment the line below to include GPIO
+# uncomment the line below to include GPIO (needs libgpiod)
 # For support of:
 #    CONTROLLER1 (Original Controller)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
@@ -17,26 +17,23 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 #
 GPIO_INCLUDE=GPIO
 
-# uncomment the line below to include MIDI support
+# uncomment the line below to include MIDI support (needs MIDI support)
 MIDI_INCLUDE=MIDI
 
 # uncomment the line below to include ANDROMEDA support
 # ANDROMEDA_OPTIONS=-D ANDROMEDA
 
-# uncomment the line below to include USB Ozy support
+# uncomment the line below to include USB Ozy support (needs libusb)
 # USBOZY_INCLUDE=USBOZY
 
-# uncomment the line below for SoapySDR
+# uncomment the line below for SoapySDR (needs SOAPY libs)
 # SOAPYSDR_INCLUDE=SOAPYSDR
 
-# uncomment the line below to include support for STEMlab discovery
+# uncomment the line below to include support for STEMlab discovery (needs libcurl)
 #STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
 
 # uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
 #AUDIO_MODULE=ALSA
-
-# uncomment the line below for various debug facilities
-#DEBUG_OPTION=-D DEBUG
 
 # very early code not included yet
 # SERVER_INCLUDE=SERVER
@@ -252,10 +249,8 @@ button_text.c \
 vox.c \
 store.c \
 store_menu.c \
-memory.c \
 led.c \
 ext.c \
-error_handler.c \
 cwramp.c \
 protocols.c \
 css.c \
@@ -279,7 +274,6 @@ agc.h \
 alex.h \
 band.h \
 bandstack.h \
-channel.h \
 discovered.h \
 discovery.h \
 filter.h \
@@ -333,10 +327,8 @@ button_text.h \
 vox.h \
 store.h \
 store_menu.h \
-memory.h \
 led.h \
 ext.h \
-error_handler.h \
 protocols.h \
 css.h \
 actions.h \
@@ -410,10 +402,8 @@ button_text.o \
 vox.o \
 store.o \
 store_menu.o \
-memory.o \
 led.o \
 ext.o \
-error_handler.o \
 cwramp.o \
 protocols.o \
 css.o \
@@ -450,9 +440,11 @@ prebuild:
 # Therefore, correct this here. Furthermore, we can add additional options to CPP
 # in the variable CPPOPTIONS
 #
-CPPOPTIONS= --enable=all --suppress=shadowVariable --suppress=variableScope
+CPPOPTIONS= --enable=all
 ifeq ($(UNAME_S), Darwin)
 CPPOPTIONS += -D__APPLE__
+else
+CPPOPTIONS += -D__linux__
 endif
 CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 

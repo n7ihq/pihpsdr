@@ -223,7 +223,6 @@ void waterfall_update(RECEIVER *rx) {
 
       memmove(&pixels[rowstride],pixels,(height-1)*rowstride);
 
-      float sample;
       float soffset;
       int average=0;
       unsigned char *p;
@@ -241,7 +240,7 @@ void waterfall_update(RECEIVER *rx) {
         soffset += (float)(12*rx->alex_attenuation-18*rx->preamp-18*rx->dither);
       }
       for(i=0;i<width;i++) {
-            sample=samples[i+pan]+soffset;
+            float sample=samples[i+pan]+soffset;
             average+=(int)sample;
             if(sample<(float)rx->waterfall_low) {
                 *p++=colorLowR;

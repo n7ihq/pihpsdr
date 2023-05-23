@@ -29,7 +29,6 @@
 #include "appearance.h"
 #include "agc.h"
 #include "band.h"
-#include "channel.h"
 #include "discovered.h"
 #include "radio.h"
 #include "receiver.h"
@@ -43,10 +42,6 @@
 #endif
 #include "ext.h"
 #include "new_menu.h"
-
-static gint last_x;
-static gboolean has_moved=FALSE;
-static gboolean pressed=FALSE;
 
 static gdouble hz_per_pixel;
 static gdouble filter_left=0.0;
@@ -103,79 +98,12 @@ tx_panadapter_button_press_event_cb (GtkWidget      *widget,
                gpointer        data)
 {
   if (event->button == 1) {
-    last_x=(int)event->x;
-    has_moved=FALSE;
-    pressed=TRUE;
+    // do nothing for left mouse button
   } else {
+    // start TX menu for other mouse buttons
     g_idle_add(ext_start_tx,NULL);
   }
   return TRUE;
-}
-
-static gboolean
-tx_panadapter_button_release_event_cb (GtkWidget      *widget,
-               GdkEventButton *event,
-               gpointer        data)
-{
-  TRANSMITTER *tx=(TRANSMITTER *)data;
-  int display_width=gtk_widget_get_allocated_width (tx->panadapter);
-
-  if(pressed) {
-    int x=(int)event->x;
-    if (event->button == 1) {
-      if(has_moved) {
-        // drag
-        vfo_move((long long)((float)(x-last_x)*hz_per_pixel),TRUE);
-      } else {
-        // move to this frequency
-        vfo_move_to((long long)((float)(x-(display_width/2))*hz_per_pixel));
-      }
-      last_x=x;
-      pressed=FALSE;
-    }
-  }
-  return TRUE;
-}
-
-static gboolean
-tx_panadapter_motion_notify_event_cb (GtkWidget      *widget,
-                GdkEventMotion *event,
-                gpointer        data)
-{
-  int x, y;
-  GdkModifierType state;
-  //
-  // DL1YCF: if !pressed, we may come from the destruction
-  //         of a menu, and should not move the VFO
-  //
-  if (pressed) {
-    gdk_window_get_device_position (event->window,
-                                    event->device,
-                                    &x,
-                                    &y,
-                                    &state);
-    if(state & GDK_BUTTON1_MASK) {
-      int moved=last_x-x;
-      vfo_move((long long)((float)moved*hz_per_pixel),FALSE);
-      last_x=x;
-      has_moved=TRUE;
-    }
-  }
-
-  return TRUE;
-}
-
-static gboolean
-tx_panadapter_scroll_event_cb (GtkWidget      *widget,
-               GdkEventScroll *event,
-               gpointer        data)
-{
-  if(event->direction==GDK_SCROLL_UP) {
-    vfo_step(1);
-  } else {
-    vfo_step(-1);
-  }
-  return FALSE;
 }
 
 void tx_panadapter_update(TRANSMITTER *tx) {
@@ -222,10 +150,10 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
   for(i=tx->panadapter_high;i>=tx->panadapter_low;i--) {
-    char v[32];
     if((abs(i)%tx->panadapter_step) ==0) {
       double y = (double)(tx->panadapter_high-i)*dbm_per_line;
       if ((abs(i) % 20) == 0) {
+        char v[32];
         cairo_set_source_rgba(cr, COLOUR_PAN_LINE_WEAK);
         cairo_move_to(cr,0.0,y);
         cairo_line_to(cr,(double)display_width,y);
@@ -316,13 +244,13 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   // cursor
   cairo_set_source_rgba(cr, COLOUR_ALARM);
   cairo_set_line_width(cr, 1.0);
-//fprintf(stderr,"cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
+//g_print("cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
   cairo_move_to(cr,vfofreq,0.0);
   cairo_line_to(cr,vfofreq,(double)display_height);
   cairo_stroke(cr);
 
   // signal
-  double s1,s2;
+  double s1;
 
   int offset=(tx->pixels/2)-(display_width/2);
   samples[offset]=-200.0;
@@ -334,6 +262,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
                         / (tx->panadapter_high - tx->panadapter_low));
   cairo_move_to(cr, 0.0, s1);
   for(i=1;i<display_width;i++) {
+    double s2;
     s2=(double)samples[i+offset];
     s2 = floor((tx->panadapter_high - s2)
                             * (double) display_height
@@ -470,7 +399,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     }
   }
 
-  if(tx->dialog==NULL && protocol==ORIGINAL_PROTOCOL && device==DEVICE_HERMES_LITE2) {
+  if(tx->dialog==NULL && device==DEVICE_HERMES_LITE2) {
     char text[64];
     cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
@@ -513,43 +442,24 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
 void tx_panadapter_init(TRANSMITTER *tx, int width,int height) {
 
-fprintf(stderr,"tx_panadapter_init: %d x %d\n",width,height);
+g_print("tx_panadapter_init: %d x %d\n",width,height);
 
   tx->panadapter_surface=NULL;
   tx->panadapter=gtk_drawing_area_new ();
   gtk_widget_set_size_request (tx->panadapter, width, height);
 
   /* Signals used to handle the backing surface */
-  g_signal_connect (tx->panadapter, "draw",
-            G_CALLBACK (tx_panadapter_draw_cb), tx);
-  g_signal_connect (tx->panadapter,"configure-event",
-            G_CALLBACK (tx_panadapter_configure_event_cb), tx);
+  g_signal_connect (tx->panadapter, "draw", G_CALLBACK (tx_panadapter_draw_cb), tx);
+  g_signal_connect (tx->panadapter,"configure-event", G_CALLBACK (tx_panadapter_configure_event_cb), tx);
 
   /* Event signals */
-/*
-  g_signal_connect (tx->panadapter, "motion-notify-event",
-            G_CALLBACK (tx_panadapter_motion_notify_event_cb), tx);
-*/
-  g_signal_connect (tx->panadapter, "button-press-event",
-            G_CALLBACK (tx_panadapter_button_press_event_cb), tx);
-/*
-  g_signal_connect (tx->panadapter, "button-release-event",
-            G_CALLBACK (tx_panadapter_button_release_event_cb), tx);
-  g_signal_connect(tx->panadapter,"scroll_event",
-            G_CALLBACK(tx_panadapter_scroll_event_cb),tx);
-*/
+  //
+  // The only signal we do process is to start the TX menu if clicked with the right mouse button
+  //
+  g_signal_connect (tx->panadapter, "button-press-event", G_CALLBACK (tx_panadapter_button_press_event_cb), tx);
 
-  /* Ask to receive events the drawing area doesn't normally
-   * subscribe to. In particular, we need to ask for the
-   * button press and motion notify events that want to handle.
+  /*
+   * Enable button press events
    */
-  gtk_widget_set_events (tx->panadapter, gtk_widget_get_events (tx->panadapter)
-                     | GDK_BUTTON_PRESS_MASK);
-/*
-                     | GDK_BUTTON_RELEASE_MASK
-                     | GDK_BUTTON1_MOTION_MASK
-                     | GDK_SCROLL_MASK
-                     | GDK_POINTER_MOTION_MASK
-                     | GDK_POINTER_MOTION_HINT_MASK);
-*/
+  gtk_widget_set_events (tx->panadapter, gtk_widget_get_events (tx->panadapter) | GDK_BUTTON_PRESS_MASK);
 }

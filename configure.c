@@ -40,18 +40,14 @@
 
 #ifdef GPIO
 
-static GtkWidget *dialog;
-
 static GtkWidget *i2c_sw_text[16];
-
-static void response_event(GtkWidget *dialog,gint id,gpointer user_data) {
+static void response_event(GtkWidget *dialog, gint id,gpointer user_data) {
   g_print("%s: id=%d\n",__FUNCTION__,id);
   if(id==GTK_RESPONSE_ACCEPT) {
     gpio_save_state();
     g_print("%s: ACCEPT\n",__FUNCTION__);
   }
   gtk_widget_destroy(dialog);
-  dialog=NULL;
 }
 
 void configure_gpio(GtkWidget *parent) {
@@ -59,7 +55,6 @@ void configure_gpio(GtkWidget *parent) {
   gint col=0;
   GtkWidget *widget;
   GtkWidget *grid;
-  int i;
 
   gpio_restore_state();
 
@@ -160,12 +155,11 @@ void configure_gpio(GtkWidget *parent) {
   widget=gtk_label_new(NULL);
   gtk_label_set_markup (GTK_LABEL(widget), "<b>Gpio</b>");
   gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-  col++;
 
   row++;
   col=0;
 
-  for(i=0;i<max_encoders;i++) {
+  for(int i=0;i<max_encoders;i++) {
     widget=gtk_label_new(NULL);
     gchar id[16];
     g_sprintf(id,"<b>%d</b>",i);
@@ -199,7 +193,6 @@ void configure_gpio(GtkWidget *parent) {
       widget=gtk_spin_button_new_with_range (0.0,28.0,1.0);
       gtk_spin_button_set_value (GTK_SPIN_BUTTON(widget),encoders[i].switch_address);
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
     }
 
     row++;
@@ -243,7 +236,7 @@ void configure_gpio(GtkWidget *parent) {
     row++;
     col=0;
 */
-    for(i=0;i<max_switches/8;i++) {
+    for(int i=0;i<max_switches/8;i++) {
       widget=gtk_label_new(NULL);
       gtk_label_set_markup (GTK_LABEL(widget), "<b>ID</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -252,13 +245,11 @@ void configure_gpio(GtkWidget *parent) {
       widget=gtk_label_new(NULL);
       gtk_label_set_markup (GTK_LABEL(widget), "<b>Gpio</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
     }
 
     row++;
-    col=0;
 
-    for(i=0;i<max_switches;i++) {
+    for(int i=0;i<max_switches;i++) {
       widget=gtk_label_new(NULL);
       gchar id[16];
       g_sprintf(id,"<b>%d</b>",i);
@@ -306,7 +297,6 @@ void configure_gpio(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
     row++;
-    col=0;
 
     for(int i=0;i<8;i++) {
       widget=gtk_label_new(NULL);

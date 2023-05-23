@@ -49,7 +49,6 @@
 #include "client_server.h"
 #endif
 
-static GtkWidget *parent_window=NULL;
 static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *rx_gains[3];
@@ -79,30 +78,24 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-#ifdef SOAPYSDR
 static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
-  ADC *adc=(ADC *)data;
-  adc->gain=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+  ADC *myadc=(ADC *)data;
+  myadc->gain=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
 
+#ifdef SOAPYSDR
   if(radio->device==SOAPYSDR_USB_DEVICE) {
     soapy_protocol_set_gain(receiver[0]);
   }
+#endif
 }
 
 static void rx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
-  ADC *adc=(ADC *)data;
+  ADC *myadc=(ADC *)data;
   if(radio->device==SOAPYSDR_USB_DEVICE) {
-    adc->gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-    soapy_protocol_set_gain_element(receiver[0],(char *)gtk_widget_get_name(widget),adc->gain);
-/*
-    for(int i=0;i<radio->info.soapy.rx_gains;i++) {
-      if(strcmp(radio->info.soapy.rx_gain[i],(char *)gtk_widget_get_name(widget))==0) {
-        adc[0].rx_gain[i]=gain;
-        soapy_protocol_set_gain_element(receiver[0],(char *)gtk_widget_get_name(widget),gain);
-        break;
-      }
-    }
-*/
+    myadc->gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+#ifdef SOAPYSDR
+    soapy_protocol_set_gain_element(receiver[0],(char *)gtk_widget_get_name(widget),myadc->gain);
+#endif
   }
 }
 
@@ -110,6 +103,7 @@ static void drive_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   if(radio->device==SOAPYSDR_USB_DEVICE) {
     // should use setDrive here to move the main drive slider
     transmitter->drive=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+#ifdef SOAPYSDR
     soapy_protocol_set_tx_gain(transmitter,(double)transmitter->drive);
 /*
     for(int i=0;i<radio->info.soapy.tx_gains;i++) {
@@ -117,39 +111,37 @@ static void drive_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_gains[i]),(double)value);
     }
 */
+#endif
   }
 }
 
+#if 0
 static void tx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   int gain;
   if(radio->device==SOAPYSDR_USB_DEVICE) {
     gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+#ifdef SOAPYSDR
     soapy_protocol_set_tx_gain_element(transmitter,(char *)gtk_widget_get_name(widget),gain);
-/*
-    DAC *dac=(DAC *)data;
-    for(int i=0;i<radio->info.soapy.tx_gains;i++) {
-      if(strcmp(radio->info.soapy.tx_gain[i],(char *)gtk_widget_get_name(widget))==0) {
-        dac[0].tx_gain[i]=gain;
-        break;
-      }
-    }
-*/
+#endif
   }
 }
-
+#endif
 
 static void agc_changed_cb(GtkWidget *widget, gpointer data) {
   gboolean agc=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+#ifdef SOAPYSDR
   soapy_protocol_set_automatic_gain(active_receiver,agc);
   if(!agc) {
     soapy_protocol_set_gain(active_receiver);
   }
+#endif
 }
 
 /*
 static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   DAC *dac=(DAC *)data;
   int gain;
+#ifdef SOAPYSDR
   if(radio->device==SOAPYSDR_USB_DEVICE) {
     gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     soapy_protocol_set_tx_gain_element(radio->transmitter,(char *)gtk_widget_get_name(widget),gain);
@@ -160,9 +152,9 @@ static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
       }
     }
   }
+#endif
 }
 */
-#endif
 
 static void calibration_value_changed_cb(GtkWidget *widget, gpointer data) {
   frequency_calibration=(long long)gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
@@ -175,19 +167,6 @@ static void rx_gain_calibration_value_changed_cb(GtkWidget *widget, gpointer dat
 static void vfo_divisor_value_changed_cb(GtkWidget *widget, gpointer data) {
   vfo_encoder_divisor=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
-
-#ifdef GPIO
-static void gpio_settle_value_changed_cb(GtkWidget *widget, gpointer data) {
-  settle_time=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-}
-#endif
-
-/*
-static void toolbar_dialog_buttons_cb(GtkWidget *widget, gpointer data) {
-  toolbar_dialog_buttons=toolbar_dialog_buttons==1?0:1;
-  update_toolbar_labels();
-}
-*/
 
 static void ptt_cb(GtkWidget *widget, gpointer data) {
   mic_ptt_enabled=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
@@ -323,13 +302,6 @@ void load_filters() {
   att_type_changed();
 }
 
-static void none_cb(GtkWidget *widget, gpointer data) {
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
-    filter_board = NONE;
-    load_filters();
-  }
-}
-
 static void filter_cb(GtkWidget *widget, gpointer data) {
   int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
   switch (val) {
@@ -437,10 +409,9 @@ static void janus_cb(GtkWidget *widget, gpointer data) {
 }
 
 void radio_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Radio");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -455,14 +426,13 @@ void radio_menu(GtkWidget *parent) {
 
   int col=0;
   int row=0;
-  int temp_row=0;
+  int temp_row;
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
 
 
-  temp_row=1;
   col=0;
   row=1;
 
@@ -503,16 +473,16 @@ void radio_menu(GtkWidget *parent) {
       switch (active_receiver->sample_rate) {
          case 48000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
-	    break;
+            break;
          case 96000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),1);
-	    break;
+            break;
          case 192000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),2);
-	    break;
+            break;
          case 384000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),3);
-	    break;
+            break;
       }
       my_combo_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
       g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
@@ -551,7 +521,7 @@ void radio_menu(GtkWidget *parent) {
 //          case 768000:
 //            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),3);
 //            break;
-//	}
+//    }
       } else {
 
         // There is only one sample rate and this we write into the combobox
@@ -570,7 +540,7 @@ void radio_menu(GtkWidget *parent) {
   }
 
 
-  if(row>temp_row) temp_row=row;
+  temp_row=row;
   col++,
   row=1;
 
@@ -652,19 +622,19 @@ void radio_menu(GtkWidget *parent) {
 
     switch (filter_board) {
       case NONE:
-	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),0);
-	break;
+        gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),0);
+        break;
       case ALEX:
-	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),1);
-	break;
+        gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),1);
+        break;
       case APOLLO:
-	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),2);
-	break;
+        gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),2);
+        break;
       case CHARLY25:
-	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),3);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),3);
         break;
       case N2ADR:
-	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),4);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),4);
         break;
     }
     my_combo_attach(GTK_GRID(grid), filter_combo, col, row, 1, 1);
@@ -693,11 +663,7 @@ void radio_menu(GtkWidget *parent) {
   // The HPSDR machine-specific stuff is now put in the last column(s),
   // either the ATLAS bits (METIS) or the ORION microphone settings
   //
-#ifdef USBOZY
-  if (protocol==ORIGINAL_PROTOCOL && (device == DEVICE_OZY || device == DEVICE_METIS))
-#else
-  if (protocol==ORIGINAL_PROTOCOL && radio->device == DEVICE_METIS)
-#endif
+  if (device == DEVICE_OZY || device == DEVICE_METIS)
   {
     col++;
     row=1;
@@ -761,29 +727,25 @@ void radio_menu(GtkWidget *parent) {
 
     row++;
 
-#ifdef USBOZY
     //
     // This option is for ATLAS systems which *only* have an OZY
     // and a JANUS board (the RF front end then is either SDR-1000 or SoftRock)
     //
     // It is assumed that the SDR-1000 is controlled outside piHPSDR
     //
-    if (protocol == ORIGINAL_PROTOCOL && device == DEVICE_OZY) {
+    if (device == DEVICE_OZY) {
       GtkWidget *janus_b=gtk_check_button_new_with_label("Janus Only");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (janus_b), atlas_janus);
       gtk_grid_attach(GTK_GRID(grid),janus_b,col+1,row,1,1);
       g_signal_connect(janus_b,"toggled",G_CALLBACK(janus_cb),NULL);
       row++;
     }
-#endif
 
     if(row>temp_row) temp_row=row;
   }
 
-  if((protocol==NEW_PROTOCOL && device==NEW_DEVICE_ORION) ||
-     (protocol==NEW_PROTOCOL && device==NEW_DEVICE_ORION2) ||
-     (protocol==ORIGINAL_PROTOCOL && device==DEVICE_ORION) ||
-     (protocol==ORIGINAL_PROTOCOL && device==DEVICE_ORION2)) {
+  if(device==NEW_DEVICE_ORION || device==NEW_DEVICE_ORION2 ||
+     device==DEVICE_ORION || device==DEVICE_ORION2) {
 
       col++;
       row=1;
@@ -862,7 +824,7 @@ void radio_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),PA_enable_b,col,row,1,1);
   g_signal_connect(PA_enable_b,"toggled",G_CALLBACK(PA_enable_cb),NULL);
 
-  if (protocol == ORIGINAL_PROTOCOL && device==DEVICE_HERMES_LITE2) {
+  if (device==DEVICE_HERMES_LITE2) {
     col++;
     GtkWidget *hl2audio_b=gtk_check_button_new_with_label("HL2 audio codec");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hl2audio_b), hl2_audio_codec);
@@ -870,7 +832,6 @@ void radio_menu(GtkWidget *parent) {
     g_signal_connect(hl2audio_b,"toggled",G_CALLBACK(hl2audio_cb),NULL);
   }
 
-#ifdef SOAPYSDR
   if (protocol == SOAPYSDR_PROTOCOL) {
     col++;
     GtkWidget *iqswap_b=gtk_check_button_new_with_label("Swap IQ");
@@ -878,7 +839,6 @@ void radio_menu(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),iqswap_b,col,row,1,1);
     g_signal_connect(iqswap_b,"toggled",G_CALLBACK(iqswap_cb),NULL);
   }
-#endif
 
   row++;
   col=0;
@@ -897,9 +857,9 @@ void radio_menu(GtkWidget *parent) {
   // Calibration of the RF front end
   //
   col++;
-  GtkWidget *rx_gain_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(rx_gain_label), "<b>RX Gain Calibration:</b>");
-  gtk_grid_attach(GTK_GRID(grid),rx_gain_label,col,row,1,1);
+  GtkWidget *rx_gain_calib_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(rx_gain_calib_label), "<b>RX Gain Calibration:</b>");
+  gtk_grid_attach(GTK_GRID(grid),rx_gain_calib_label,col,row,1,1);
 
   col++;
   GtkWidget *rx_gain_calibration_b=gtk_spin_button_new_with_range(-50.0,50.0,1.0);
@@ -908,10 +868,9 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
 
   row++;
-  if(row>temp_row) temp_row=row;
 
-#ifdef SOAPYSDR
   col=0;
+#ifdef SOAPYSDR
   if(radio->device==SOAPYSDR_USB_DEVICE) {
     int i;
     if(strcmp(radio->name,"sdrplay")==0 || strcmp(radio->name,"rtlsdr")==0) {
@@ -988,7 +947,7 @@ void radio_menu(GtkWidget *parent) {
     row=temp_row;
 
     if(can_transmit) {
-/*
+#if 0
       for(i=0;i<radio->info.soapy.tx_gains;i++) {
         col=2;
         GtkWidget *tx_gain_label=gtk_label_new(radio->info.soapy.tx_gain[i]);
@@ -1009,7 +968,7 @@ void radio_menu(GtkWidget *parent) {
 
         row++;
       }
-*/
+#endif
       // used single gain control - LimeSDR works out best setting for the 3 rx gains
       col=2;
       GtkWidget *tx_gain_label=gtk_label_new(NULL);
@@ -1029,7 +988,6 @@ void radio_menu(GtkWidget *parent) {
     }
   }
 #endif
-
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

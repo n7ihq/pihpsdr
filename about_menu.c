@@ -33,7 +33,6 @@
 #include "radio.h"
 #include "version.h"
 
-static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *label;
 
@@ -58,13 +57,9 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 void about_menu(GtkWidget *parent) {
   char text[2048];
   char line[256];
-  char addr[64];
-  char interface_addr[64];
-
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   char title[64];
   sprintf(title,"piHPSDR - About");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -109,13 +104,12 @@ void about_menu(GtkWidget *parent) {
   switch(radio->protocol) {
     case ORIGINAL_PROTOCOL:
     case NEW_PROTOCOL:
-#ifdef USBOZY
-      if(radio->device==DEVICE_OZY) {
+      if(device==DEVICE_OZY) {
         sprintf(line,"\nDevice OZY: USB /dev/ozy Protocol %s v%d.%d",radio->protocol==ORIGINAL_PROTOCOL?"1":"2",radio->software_version/10,radio->software_version%10);
         strcat(text,line);
       } else {
-#endif
-
+        char interface_addr[64];
+        char addr[64];
         strcpy(addr,inet_ntoa(radio->info.network.address.sin_addr));
         strcpy(interface_addr,inet_ntoa(radio->info.network.interface_address.sin_addr));
         sprintf(line,"\nDevice Mac Address: %02X:%02X:%02X:%02X:%02X:%02X",
@@ -128,10 +122,7 @@ void about_menu(GtkWidget *parent) {
         strcat(text,line);
         sprintf(line,"\nDevice IP Address: %s on %s (%s)",addr,radio->info.network.interface_name,interface_addr);
         strcat(text,line);
-
-#ifdef USBOZY
       }
-#endif
       break;
   }
 

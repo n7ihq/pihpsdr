@@ -31,7 +31,6 @@
 #include "appearance.h"
 #include "agc.h"
 #include "band.h"
-#include "channel.h"
 #include "discovered.h"
 #include "radio.h"
 #include "receiver.h"
@@ -618,7 +617,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     }
   }
 
-  if(rx->id==0 && protocol==ORIGINAL_PROTOCOL && device==DEVICE_HERMES_LITE2) {
+  if(rx->id==0 && device==DEVICE_HERMES_LITE2) {
     cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
 

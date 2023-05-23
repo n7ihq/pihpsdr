@@ -28,8 +28,6 @@
 #include "vfo.h"
 #include "ext.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static void cleanup() {
@@ -59,10 +57,8 @@ static void step_select_cb (GtkToggleButton *widget, gpointer        data) {
 
 void step_menu(GtkWidget *parent) {
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - VFO Step");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -79,7 +75,7 @@ void step_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   GtkWidget *step_rb=NULL;
-  int index=vfo_get_stepindex();
+  int ind=vfo_get_stepindex();
   for (int i=0; i<STEPS; i++) {
     if(i==0) {
       step_rb=gtk_radio_button_new_with_label(NULL,step_labels[i]);
@@ -87,7 +83,7 @@ void step_menu(GtkWidget *parent) {
       step_rb=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(step_rb),step_labels[i]);
     }
     gtk_widget_override_font(step_rb, pango_font_description_from_string("Sans 16"));
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (step_rb), i==index);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (step_rb), i==ind);
     gtk_widget_show(step_rb);
     gtk_grid_attach(GTK_GRID(grid),step_rb,i%5,1+(i/5),1,1);
     g_signal_connect(step_rb,"toggled",G_CALLBACK(step_select_cb),(gpointer)(long)i);

@@ -34,7 +34,6 @@
 
 static GtkWidget *serial_enable_b[MAX_SERIAL];
 
-static GtkWidget *parent_window=NULL;
 static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *serial_port_entry;
@@ -119,12 +118,12 @@ static void serial_enable_cb(GtkWidget *widget, gpointer data) {
   }
   if((SerialPorts[id].enable=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))) {
      if(launch_serial(id) == 0) {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),FALSE)	     ;
-     }	
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),FALSE);
+     }
   } else {
      disable_serial(id);
   }
-  fprintf(stderr,"RIGCTL_MENU: Serial enable : ID=%d Enabled=%d\n",id,SerialPorts[id].enable);
+  g_print("RIGCTL_MENU: Serial enable : ID=%d Enabled=%d\n",id,SerialPorts[id].enable);
 }
 
 // Set Baud Rate
@@ -145,14 +144,13 @@ static void baud_cb(GtkWidget *widget, gpointer data) {
        SerialPorts[id].baud=B38400;
        break;
    }
-   fprintf(stderr,"RIGCTL_MENU: Baud rate changed: ID=%d Baud=%d\n",id,SerialPorts[id].baud);
+   g_print("RIGCTL_MENU: Baud rate changed: ID=%d Baud=%d\n",id,SerialPorts[id].baud);
 }
 
 void rigctl_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - RIGCTL");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -207,10 +205,10 @@ void rigctl_menu(GtkWidget *parent) {
     g_signal_connect(serial_port_entry, "changed", G_CALLBACK(serial_port_cb), GINT_TO_POINTER(i));
 
     GtkWidget *baud_combo=gtk_combo_box_text_new();
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"4800 Bd");	
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"9600 Bd");	
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"19200 Bd");	
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"38400 Bd");	
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"4800 Bd");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"9600 Bd");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"19200 Bd");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(baud_combo), NULL,"38400 Bd");
     switch (SerialPorts[i].baud) {
       case B9600:
         gtk_combo_box_set_active(GTK_COMBO_BOX(baud_combo), 1);

@@ -48,21 +48,21 @@ g_print("clearProperties\n");
 * @param filename
 */
 void loadProperties(char* filename) {
-    char string[256];
-    char* name;
-    char* value;
     FILE* f=fopen(filename,"r");
     PROPERTY* property;
 
-    fprintf(stderr,"loadProperties: %s\n",filename);
+    g_print("loadProperties: %s\n",filename);
     clearProperties();
     if(f) {
+        char* value;
+        char* name;
+        char string[256];
         while(fgets(string,sizeof(string),f)) {
             if(string[0]!='#') {
                 name=strtok(string,"=");
                 value=strtok(NULL,"\n");
-		// Beware of "illegal" lines in corrupted files
-		if (name != NULL && value != NULL) {
+                // Beware of "illegal" lines in corrupted files
+                if (name != NULL && value != NULL) {
                   property=malloc(sizeof(PROPERTY));
                   property->name=malloc(strlen(name)+1);
                   strcpy(property->name,name);
@@ -73,7 +73,7 @@ void loadProperties(char* filename) {
                   if(strcmp(name,"property_version")==0) {
                     version=atof(value);
                   }
-		}
+               }
             }
         }
         fclose(f);
@@ -81,7 +81,7 @@ void loadProperties(char* filename) {
 
     if(version!=PROPERTY_VERSION) {
       properties=NULL;
-      fprintf(stderr,"loadProperties: version=%f expected version=%f ignoring\n",version,PROPERTY_VERSION);
+      g_print("loadProperties: version=%f expected version=%f ignoring\n",version,PROPERTY_VERSION);
     }
 }
 
@@ -96,10 +96,10 @@ void saveProperties(char* filename) {
     FILE* f=fopen(filename,"w+");
     char line[512];
 
-    fprintf(stderr,"saveProperties: %s\n",filename);
+    g_print("saveProperties: %s\n",filename);
 
     if(!f) {
-        fprintf(stderr,"can't open %s\n",filename);
+        g_print("can't open %s\n",filename);
         return;
     }
 

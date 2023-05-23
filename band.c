@@ -134,7 +134,6 @@ BANDSTACK_ENTRY bandstack_entries6[] =
      {50125000LL,0,0LL,modeUSB,filterF5},
      {50200000LL,0,0LL,modeUSB,filterF5}};
 
-#ifdef SOAPYSDR
 BANDSTACK_ENTRY bandstack_entries70[] =
     {{70010000LL,0,0LL,modeCWU,filterF6},
      {70200000LL,0,0LL,modeUSB,filterF5},
@@ -185,7 +184,6 @@ BANDSTACK_ENTRY bandstack_entriesAIR[] =
      {124100000LL,0,0LL,modeAM,filterF3},
      {126600000LL,0,0LL,modeAM,filterF3},
      {136500000LL,0,0LL,modeAM,filterF3}};
-#endif
 
 BANDSTACK_ENTRY bandstack_entriesGEN[] =
     {{909000LL,0,0LL,modeAM,filterF3},
@@ -210,7 +208,6 @@ BANDSTACK bandstack15={3,1,bandstack_entries15};
 BANDSTACK bandstack12={3,1,bandstack_entries12};
 BANDSTACK bandstack10={3,1,bandstack_entries10};
 BANDSTACK bandstack6={3,1,bandstack_entries6};
-#ifdef SOAPYSDR
 BANDSTACK bandstack70={3,1,bandstack_entries70};
 BANDSTACK bandstack144={6,1,bandstack_entries144};
 BANDSTACK bandstack220={3,1,bandstack_entries220};
@@ -220,7 +217,6 @@ BANDSTACK bandstack1240={3,1,bandstack_entries1240};
 BANDSTACK bandstack2300={3,1,bandstack_entries2300};
 BANDSTACK bandstack3400={3,1,bandstack_entries3400};
 BANDSTACK bandstackAIR={6,1,bandstack_entriesAIR};
-#endif
 BANDSTACK bandstackGEN={3,1,bandstack_entriesGEN};
 BANDSTACK bandstackWWV={5,1,bandstack_entriesWWV};
 BANDSTACK bandstack136={2,0,bandstack_entries136};
@@ -290,7 +286,6 @@ BAND bands[BANDS+XVTRS] =
      {"12",&bandstack12,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,24890000LL,24990000LL,0LL,0LL,0},
      {"10",&bandstack10,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,28000000LL,29700000LL,0LL,0LL,0},
      {"6",&bandstack6,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,50000000LL,54000000LL,0LL,0LL,0},
-#ifdef SOAPYSDR
      {"4",&bandstack70,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,70000000LL,70500000LL,0LL,0LL,0},
      {"144",&bandstack144,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,144000000LL,148000000LL,0LL,0LL,0},
      {"220",&bandstack220,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,222000000LL,224980000LL,0LL,0LL,0},
@@ -300,7 +295,6 @@ BAND bands[BANDS+XVTRS] =
      {"2300",&bandstack2300,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,2300000000LL,2450000000LL,0LL,0LL,0},
      {"3400",&bandstack3400,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,3400000000LL,3410000000LL,0LL,0LL,0},
      {"AIR",&bandstack3400,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,108000000LL,137000000LL,0LL,0LL,0},
-#endif
      {"WWV",&bandstackWWV,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,0LL,0LL,0LL,0LL,0},
      {"GEN",&bandstackGEN,0,0,0,0,0,ALEX_ATTENUATION_0dB,53.0,0LL,0LL,0LL,0LL,0},
 // XVTRS
@@ -347,38 +341,6 @@ CHANNEL *band_channels_60m;
 BANDSTACK *bandstack_get_bandstack(int band) {
     return bands[band].bandstack;
 }
-
-BANDSTACK_ENTRY *bandstack_get_bandstack_entry(int band,int entry) {
-    BANDSTACK *bandstack=bands[band].bandstack;
-    return &bandstack->entry[entry];
-}
-
-BANDSTACK_ENTRY *bandstack_entry_get_current() {
-    BANDSTACK *bandstack=bands[current_band].bandstack;
-    BANDSTACK_ENTRY *entry=&bandstack->entry[bandstack->current_entry];
-    return entry;
-}
-
-BANDSTACK_ENTRY *bandstack_entry_next() {
-    BANDSTACK *bandstack=bands[current_band].bandstack;
-    bandstack->current_entry++;
-    if(bandstack->current_entry>=bandstack->entries) {
-        bandstack->current_entry=0;
-    }
-    BANDSTACK_ENTRY *entry=&bandstack->entry[bandstack->current_entry];
-    return entry;
-}
-
-BANDSTACK_ENTRY *bandstack_entry_previous() {
-    BANDSTACK *bandstack=bands[current_band].bandstack;
-    bandstack->current_entry--;
-    if(bandstack->current_entry<0) {
-        bandstack->current_entry=bandstack->entries-1;
-    }
-    BANDSTACK_ENTRY *entry=&bandstack->entry[bandstack->current_entry];
-    return entry;
-}
-
 
 int band_get_current() {
     return current_band;
@@ -515,14 +477,14 @@ void bandRestoreState() {
         sprintf(name,"band.%d.current",b);
         value=getProperty(name);
         if(value) {
-	  //
-	  // Since the number of bandstack entries is a compile-time constant,
-	  // we cannot allow "current" to exceed the number of available slots
-	  //
-	  v=atoi(value);
-	  if (v >= bands[b].bandstack->entries) v=0;
-	  bands[b].bandstack->current_entry=v;
-	}
+          //
+          // Since the number of bandstack entries is a compile-time constant,
+          // we cannot allow "current" to exceed the number of available slots
+          //
+          v=atoi(value);
+          if (v >= bands[b].bandstack->entries) v=0;
+          bands[b].bandstack->current_entry=v;
+        }
 
         sprintf(name,"band.%d.preamp",b);
         value=getProperty(name);
@@ -673,7 +635,6 @@ int canTransmit() {
     long long txfreq, flow, fhigh;
     int txb, txvfo, txmode;
     BAND *txband;
-    int i;
 
     //
     // If there is no transmitter, we cannot transmit
@@ -692,21 +653,11 @@ int canTransmit() {
     //
     // See if we have a band
     //
-if(info_band!=bandGen
-       && info_band!=bandWWV
-#ifdef SOAPYSDR
-       && info_band!=bandAIR
-#endif
-      ) {
+if(info_band!=bandGen && info_band!=bandWWV && info_band!=bandAIR) {
         result=TRUE;
     }
 
-    if (txb == bandGen
-        || txb  ==bandWWV
-#ifdef SOAPYSDR
-        || txb  ==bandAIR
-#endif
-       ) return 0;
+    if (txb == bandGen || txb  ==bandWWV || txb  ==bandAIR) return 0;
 
     //
     // Determine the edges of our band
@@ -733,24 +684,24 @@ if(info_band!=bandGen
       // For 60m band, ensure signal is within one of the "channels"
       //
       result=0;
-      for(i=0;i<channel_entries;i++) {
+      for(int i=0;i<channel_entries;i++) {
         long long low_freq=band_channels_60m[i].frequency-(band_channels_60m[i].width/(long long)2);
         long long hi_freq=band_channels_60m[i].frequency+(band_channels_60m[i].width/(long long)2);
-//fprintf(stderr,"TRY CHANNEL: low=%lld high=%lld SIGNAL: low=%lld high=%lld\n", low_freq, hi_freq, flow, fhigh);
+//g_print("TRY CHANNEL: low=%lld high=%lld SIGNAL: low=%lld high=%lld\n", low_freq, hi_freq, flow, fhigh);
         if(flow>=low_freq && fhigh<=hi_freq) {
-//fprintf(stderr,"60m channel OK: chan=%d flow=%lld fhigh=%lld\n", i, flow, fhigh);
+//g_print("60m channel OK: chan=%d flow=%lld fhigh=%lld\n", i, flow, fhigh);
           result = 1;
           break;
         }
       }
-//fprintf(stderr,"60m channel NOT FOUND: flow=%lld fhigh=%lld\n", flow, fhigh);
+//g_print("60m channel NOT FOUND: flow=%lld fhigh=%lld\n", flow, fhigh);
     } else {
       //
       // For other bands, return true if signal within band
       //
       result = flow >= txband->frequencyMin && fhigh <= txband->frequencyMax;
     }
-//fprintf(stderr,"CANTRANSMIT: low=%lld  high=%lld transmit=%d\n", flow, fhigh, result);
+//g_print("CANTRANSMIT: low=%lld  high=%lld transmit=%d\n", flow, fhigh, result);
     return result;
 }
 
@@ -759,9 +710,9 @@ void band_plus(int id) {
   long long frequency_min=radio->frequency_min;
   long long frequency_max=radio->frequency_max;
   int b=vfo[id].band;
-  BAND *band;
   int found=0;
   while(!found) {
+    BAND *band;
     b++;
     if(b>=BANDS+XVTRS) b=0;
     band=(BAND*)band_get_band(b);
@@ -783,9 +734,9 @@ void band_minus(int id) {
   long long frequency_min=radio->frequency_min;
   long long frequency_max=radio->frequency_max;
   int b=vfo[id].band;
-  BAND *band;
   int found=0;
   while(!found) {
+    BAND *band;
     b--;
     if(b<0) b=BANDS+XVTRS-1;
     band=(BAND*)band_get_band(b);

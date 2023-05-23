@@ -44,7 +44,7 @@
 #include "property.h"
 #include "new_menu.h"
 #include "button_text.h"
-#include "ext.h"	
+#include "ext.h"
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
@@ -54,7 +54,6 @@ int function=0;
 static int width;
 static int height;
 
-static GtkWidget *parent_window;
 static GtkWidget *toolbar;
 
 static GtkWidget *last_dialog;
@@ -104,7 +103,7 @@ void update_toolbar_labels() {
 //
 
 void mox_update(int state) {
-//fprintf(stderr,"mox_update: state=%d\n",state);
+//g_print("mox_update: state=%d\n",state);
   if (!can_transmit) return;
   if(getTune()==1) {
     setTune(0);
@@ -141,24 +140,23 @@ void tune_update(int state) {
 
 void switch_pressed_cb(GtkWidget *widget, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
-fprintf(stderr,"%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
+g_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
   schedule_action(toolbar_switches[i].switch_function, PRESSED, 0);
 }
 
 void switch_released_cb(GtkWidget *widget, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
-fprintf(stderr,"%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
+g_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
   schedule_action(toolbar_switches[i].switch_function, RELEASED, 0);
 }
 
-GtkWidget *toolbar_init(int my_width, int my_height, GtkWidget* parent) {
+GtkWidget *toolbar_init(int my_width, int my_height) {
     width=my_width;
     height=my_height;
-    parent_window=parent;
 
     int button_width=width/8;
 
-    fprintf(stderr,"toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
+    g_print("toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
 
     toolbar_switches=switches_controller1[function];
     toolbar=gtk_grid_new();

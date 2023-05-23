@@ -31,7 +31,6 @@
 #include "radio.h"
 #include "vfo.h"
 
-static GtkWidget *parent_window=NULL;
 static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *title[BANDS+XVTRS];
@@ -44,18 +43,15 @@ static GtkWidget *tx_lo_error[BANDS+XVTRS];
 static GtkWidget *disable_pa[BANDS+XVTRS];
 
 static void save_xvtr () {
-  int i;
-  int b;
   if(dialog!=NULL) {
-    const char *t;
     const char *minf;
     const char *maxf;
     const char *lof;
     const char *loerr;
-    for(i=BANDS;i<BANDS+XVTRS;i++) {
+    for(int i=BANDS;i<BANDS+XVTRS;i++) {
       BAND *xvtr=band_get_band(i);
       BANDSTACK *bandstack=xvtr->bandstack;
-      t=gtk_entry_get_text(GTK_ENTRY(title[i]));
+      const char *t=gtk_entry_get_text(GTK_ENTRY(title[i]));
       strcpy(xvtr->title,t);
       if(strlen(t)!=0) {
         minf=gtk_entry_get_text(GTK_ENTRY(min_frequency[i]));
@@ -68,7 +64,7 @@ static void save_xvtr () {
         xvtr->errorLO=atoll(loerr);
         xvtr->disablePA=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(disable_pa[i]));
 
-        for(b=0;b<bandstack->entries;b++) {
+        for(int b=0;b<bandstack->entries;b++) {
           BANDSTACK_ENTRY *entry=&bandstack->entry[b];
           entry->frequency=xvtr->frequencyMin+((xvtr->frequencyMax-xvtr->frequencyMin)/2);
           entry->mode=modeUSB;
@@ -92,14 +88,13 @@ void update_receiver(int band,gboolean error) {
   //       to use receiver_frequency_change() instead of
   //       frequency_changed()
   //
-  RECEIVER *rx=active_receiver;
-  gboolean saved_ctun;
 //g_print("update_receiver: band=%d error=%d\n",band,error);
   if(vfo[0].band==band) {
+    RECEIVER *rx=active_receiver;
     BAND *xvtr=band_get_band(band);
 //g_print("update_receiver: found band: %s\n",xvtr->title);
     vfo[0].lo=xvtr->frequencyLO+xvtr->errorLO;
-    saved_ctun=vfo[0].ctun;
+    gboolean saved_ctun=vfo[0].ctun;
     if(saved_ctun) {
       vfo[0].ctun=FALSE;
     }
@@ -107,14 +102,6 @@ void update_receiver(int band,gboolean error) {
     if(saved_ctun) {
       vfo[0].ctun=TRUE;
     }
-
-/*
-    if(radio->transmitter!=NULL) {
-      if(radio->transmitter->rx==rx) {
-        update_tx_panadapter(radio);
-      }
-    }
-*/
   }
 }
 
@@ -184,10 +171,8 @@ void xvtr_menu(GtkWidget *parent) {
   int i;
   char f[16];
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - XVTR");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

@@ -68,7 +68,7 @@ int running;
 //
 
 static enum {
-        STATE_SKIP,		// skip bytes until command bit is set
+        STATE_SKIP,             // skip bytes until command bit is set
         STATE_ARG1,             // one arg byte to come
         STATE_ARG2,             // two arg bytes to come
 } state=STATE_SKIP;
@@ -85,12 +85,12 @@ static gboolean configure=FALSE;
 static void ReadMIDIdevice(const MIDIPacketList *pktlist, void *refCon, void *connRefCon) {
     int i,j,byte,chan,arg1,arg2;
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
-	
-	
+        
+        
     // loop through all packets in the current list
     for (j=0; j < pktlist->numPackets; ++j) {
-	for (i=0; i<packet->length; i++) {
-	    byte=packet->data[i];
+        for (i=0; i<packet->length; i++) {
+            byte=packet->data[i];
             switch (state) {
                 case STATE_SKIP:
                     chan=byte & 0x0F;
@@ -115,15 +115,15 @@ static void ReadMIDIdevice(const MIDIPacketList *pktlist, void *refCon, void *co
                         case 0xC0:      // Program change: skip args
                         case 0xD0:      // Channel pressure: skip args
                         case 0xF0:      // System Message: skip args
-                        default:	// Remain in STATE_SKIP until "interesting" command seen
+                        default:        // Remain in STATE_SKIP until "interesting" command seen
                             break;
                     }
                     break;
-                case STATE_ARG2:	// store byte as first argument
+                case STATE_ARG2:        // store byte as first argument
                     arg1=byte;
                     state=STATE_ARG1;
                     break;
-                case STATE_ARG1:	// store byte as second argument, process command
+                case STATE_ARG1:        // store byte as second argument, process command
                     arg2=byte;
                     // We have a command!
                     switch (command) {
@@ -170,8 +170,8 @@ static void ReadMIDIdevice(const MIDIPacketList *pktlist, void *refCon, void *co
                     state=STATE_SKIP;
                     break;
             }
-	} // i-loop through the packet
-	packet = MIDIPacketNext(packet);
+        } // i-loop through the packet
+        packet = MIDIPacketNext(packet);
     } // j-loop through the list of packets
 }
 
@@ -185,7 +185,7 @@ static MIDIPortRef myMIDIports[MAX_MIDI_DEVICES];
 static MIDIClientRef myClients[MAX_MIDI_DEVICES];
 
 void close_midi_device(int index) {
-    fprintf(stderr,"%s index=%d\n",__FUNCTION__, index);
+    g_print("%s index=%d\n",__FUNCTION__, index);
     if (index < 0 || index >= MAX_MIDI_DEVICES) return;
     if (midi_devices[index].active == 0) return;
     //
@@ -296,7 +296,7 @@ void get_midi_devices() {
                 //
               }
             } else {
-	      //
+              //
               // This slot was unoccupied. Insert name and mark inactive
               //
               midi_devices[n_midi_devices].name=g_new(gchar,strlen(name)+1);
