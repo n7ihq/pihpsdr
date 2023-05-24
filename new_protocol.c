@@ -478,10 +478,6 @@ void new_protocol_init(int pixels) {
     (void)sem_init(&command_response_sem_buffer, 0, 0); // check return value!
 #endif
     command_response_thread_id = g_thread_new( "command_response thread",command_response_thread, NULL);
-    if( ! command_response_thread_id ) {
-      g_print("g_thread_new failed on command_response_thread\n");
-      exit( -1 );
-    }
     g_print( "command_response_thread: id=%p\n",command_response_thread_id);
 #ifdef __APPLE__
     high_priority_sem_ready=apple_sem(0);
@@ -491,10 +487,6 @@ void new_protocol_init(int pixels) {
     (void)sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
 #endif
     high_priority_thread_id = g_thread_new( "high_priority thread", high_priority_thread, NULL);
-    if( ! high_priority_thread_id ) {
-      g_print("g_thread_new failed on high_priority_thread\n");
-      exit( -1 );
-    }
     g_print( "high_priority_thread: id=%p\n",high_priority_thread_id);
 #ifdef __APPLE__
     mic_line_sem_ready=apple_sem(0);
@@ -504,10 +496,6 @@ void new_protocol_init(int pixels) {
     (void)sem_init(&mic_line_sem_buffer, 0, 0); // check return value!
 #endif
     mic_line_thread_id = g_thread_new( "mic_line thread", mic_line_thread, NULL);
-    if( ! mic_line_thread_id ) {
-      g_print("g_thread_new failed on mic_line_thread\n");
-      exit( -1 );
-    }
     g_print( "mic_line_thread: id=%p\n",mic_line_thread_id);
 
 //
@@ -598,11 +586,6 @@ g_print("new_protocol_init: data_socket %d bound to interface %s:%d\n",data_sock
     // is is set before starting the timer thread sending the HP packet.
     running=1;
     new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
-    if( ! new_protocol_thread_id )
-    {
-        g_print("g_thread_new failed on new_protocol_thread\n");
-        exit( -1 );
-    }
     g_print( "new_protocol_thread: id=%p\n",new_protocol_thread_id);
 
     new_protocol_general();
@@ -1380,11 +1363,6 @@ static void new_protocol_start() {
     new_protocol_transmit_specific();
     new_protocol_receive_specific();
     new_protocol_timer_thread_id = g_thread_new( "new protocol timer", new_protocol_timer_thread, NULL);
-    if( ! new_protocol_timer_thread_id )
-    {
-        g_print("g_thread_new failed on new_protocol_timer_thread\n");
-        exit( -1 );
-    }
     g_print( "new_protocol_timer_thread: id=%p\n",new_protocol_timer_thread_id);
 
 }

@@ -1089,16 +1089,8 @@ int gpio_init() {
 
   if(controller!=NO_CONTROLLER || ENABLE_CW_BUTTONS) {
     monitor_thread_id = g_thread_new( "gpiod monitor", monitor_thread, NULL);
-    if(!monitor_thread_id ) {
-      g_print("%s: g_thread_new failed for monitor_thread\n",__FUNCTION__);
-    }
-
     if(controller!=NO_CONTROLLER) {
       rotary_encoder_thread_id = g_thread_new( "encoders", rotary_encoder_thread, NULL);
-      if(!rotary_encoder_thread_id ) {
-        g_print("%s: g_thread_new failed on rotary_encoder_thread\n",__FUNCTION__);
-        exit( -1 );
-      }
       g_print("%s: rotary_encoder_thread: id=%p\n",__FUNCTION__,rotary_encoder_thread_id);
     }
   }

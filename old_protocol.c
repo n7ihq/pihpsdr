@@ -337,11 +337,6 @@ void old_protocol_init(int rx,int pixels,int rate) {
       open_udp_socket();
     }
     receive_thread_id = g_thread_new( "old protocol", receive_thread, NULL);
-    if( ! receive_thread_id )
-    {
-      g_print("g_thread_new failed on receive_thread\n");
-      exit( -1 );
-    }
     g_print( "receive_thread: id=%p\n",receive_thread_id);
   }
 
@@ -366,11 +361,6 @@ static void start_usb_receive_threads()
   g_print("old_protocol starting USB receive thread\n");
 
   ozy_EP6_rx_thread_id = g_thread_new( "OZY EP6 RX", ozy_ep6_rx_thread, NULL);
-  if( ! ozy_EP6_rx_thread_id )
-  {
-    g_print("g_thread_new failed for ozy_ep6_rx_thread\n");
-    exit( -1 );
-  }
 }
 
 //
