@@ -56,7 +56,7 @@ static int max_samples;
 
 static double bandwidth=2000000.0;
 
-static GThread *receive_thread_id;
+static GThread *receive_thread_id=NULL;
 static gpointer receive_thread(gpointer data);
 
 static int actual_rate;
@@ -83,14 +83,38 @@ void soapy_protocol_set_mic_sample_rate(int rate) {
 }
 
 void soapy_protocol_change_sample_rate(RECEIVER *rx) {
-// rx->mutex already locked
-  if(strcmp(radio->name,"sdrplay")==0) {
+//
+// rx->mutex already locked, so we can call this  only
+// if the radio is stopped -- we cannot change the resampler
+// while the receive thread is stuck in add_iq_samples()
+//
+#if 0
+//
+//  sample code to query, set, and query the sample rate
+//  (without using a resampler). However, going to lower
+//  sample rates should also involve going to smaller
+//  band widths, otherwise there will be aliases
+//
+    int rc;
+    double d;
     g_print("%s: setting samplerate=%f\n",__FUNCTION__,(double)rx->sample_rate);
-    int rc=SoapySDRDevice_setSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc,(double)rx->sample_rate);
+    d=SoapySDRDevice_getSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc);
+    fprintf(stderr,"OLD SAMPLE RATE=%f\n", d);
+    d=SoapySDRDevice_getBandwidth(soapy_device,SOAPY_SDR_RX,rx->adc);
+    fprintf(stderr,"OLD BAND WIDTH =%f\n", d);
+    rc=SoapySDRDevice_setSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc,(double)rx->sample_rate);
     if(rc!=0) {
       g_print("%s: SoapySDRDevice_setSampleRate(%f) failed: %s\n",__FUNCTION__,(double)rx->sample_rate,SoapySDR_errToStr(rc));
     }
-  } else if(rx->sample_rate==radio_sample_rate) {
+    d=SoapySDRDevice_getSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc);
+    fprintf(stderr,"NEW SAMPLE RATE=%f\n", d);
+    d=SoapySDRDevice_getBandwidth(soapy_device,SOAPY_SDR_RX,rx->adc);
+    fprintf(stderr,"NEW BAND WIDTH =%f\n", d);
+#endif
+//
+// We stick to the hardware sample rate and use the WDSP resampler
+//   
+  if(rx->sample_rate==radio_sample_rate) {
     if(rx->resample_buffer!=NULL) {
       g_free(rx->resample_buffer);
       rx->resample_buffer=NULL;
@@ -112,9 +136,7 @@ void soapy_protocol_change_sample_rate(RECEIVER *rx) {
     rx->resample_buffer_size=2*max_samples/(radio_sample_rate/rx->sample_rate);
     rx->resample_buffer=g_new(double,rx->resample_buffer_size);
     rx->resampler=create_resample (1,max_samples,rx->buffer,rx->resample_buffer,radio_sample_rate,rx->sample_rate,0.0,0,1.0);
-
   }
-
 }
 
 void soapy_protocol_create_receiver(RECEIVER *rx) {
@@ -193,11 +215,6 @@ void soapy_protocol_start_receiver(RECEIVER *rx) {
 
   g_print("%s: create receiver_thread\n",__FUNCTION__);
   receive_thread_id = g_thread_new( "soapy_rx", receive_thread, rx);
-  if( ! receive_thread_id )
-  {
-    g_print("%s: g_thread_new failed for receive_thread\n",__FUNCTION__);
-    exit( -1 );
-  }
   g_print("%s: receiver_thread_id=%p\n",__FUNCTION__,receive_thread_id);
 }
 
@@ -248,10 +265,20 @@ g_print("soapy_protocol_start_transmitter: activateStream rate=%f\n",rate);
   }
 }
 
+void soapy_protocol_stop_receiver(RECEIVER *rx) {
+  // argument rx unused
+  running=FALSE;
+  if (receive_thread_id) {
+    g_thread_join(receive_thread_id);
+    receive_thread_id=NULL;
+  }
+}
+
 void soapy_protocol_stop_transmitter(TRANSMITTER *tx) {
   int rc;
 
 g_print("soapy_protocol_stop_transmitter: deactivateStream\n");
+  // argument tx unused
   rc=SoapySDRDevice_deactivateStream(soapy_device, tx_stream, 0, 0LL);
   if(rc!=0) {
     g_print("soapy_protocol_stop_transmitter: SoapySDRDevice_deactivateStream failed: %s\n",SoapySDR_errToStr(rc));
@@ -387,10 +414,6 @@ g_print("soapy_protocol: receive_thread: SoapySDRDevice_unmake\n");
   SoapySDRDevice_unmake(soapy_device);
   */
   return NULL;
-}
-
-void soapy_protocol_process_local_mic(float sample) {
-  add_mic_sample(transmitter,sample);
 }
 
 void soapy_protocol_iq_samples(float isample,float qsample) {

@@ -123,7 +123,7 @@ int region=REGION_OTHER;
 
 int echo=0;
 
-int radio_sample_rate;
+int radio_sample_rate;   // alias for radio->info.soapy.sample_rate
 gboolean iqswap;
 
 static gint save_timer_id;
@@ -1326,27 +1326,34 @@ void radio_change_sample_rate(int rate) {
 
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
+      //
       // The radio menu calls this function even if the sample rate
       // has not changed. Do nothing in this case.
+      //
+      // Note P2 and SOAPY directly call receiver_change_sample_rate
+      // and handle changes in the RX menu.
+      //
       if (receiver[0]->sample_rate != rate) {
-        radio_sample_rate=rate;
-        old_protocol_stop();
+        protocol_stop();
         for(i=0;i<receivers;i++) {
           receiver_change_sample_rate(receiver[i],rate);
         }
         receiver_change_sample_rate(receiver[PS_RX_FEEDBACK],rate);
         old_protocol_set_mic_sample_rate(rate);
-        old_protocol_run();
+        protocol_run();
         tx_set_ps_sample_rate(transmitter,rate);
       }
       break;
 #ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
-      soapy_protocol_change_sample_rate(receiver[0]);
-      soapy_protocol_set_mic_sample_rate(rate);
+      if (receiver[0]->sample_rate != rate) {
+        protocol_stop();
+        receiver_change_sample_rate(receiver[0],rate);
+        protocol_run();
+      }
       break;
 #endif
-  }
+    }
 }
 
 static void rxtx(int state) {
@@ -2788,4 +2795,38 @@ int max_band() {
       break;
   }
   return max;
+}
+
+void protocol_stop() {
+  switch(protocol) {
+    case ORIGINAL_PROTOCOL:
+      old_protocol_stop();
+      break;
+    case NEW_PROTOCOL:
+      new_protocol_menu_stop();
+      break;
+    case SOAPYSDR_PROTOCOL:
+      soapy_protocol_stop_receiver(receiver[0]);
+      break;
+  }
+}
+
+void protocol_run() {
+  switch(protocol) {
+    case ORIGINAL_PROTOCOL:
+      old_protocol_run();
+      break;
+    case NEW_PROTOCOL:
+      new_protocol_menu_start();
+      break;
+    case SOAPYSDR_PROTOCOL:
+      soapy_protocol_start_receiver(receiver[0]);
+      break;
+  }
+}
+
+void protocol_restart() {
+  protocol_stop();
+  usleep(200000);
+  protocol_run();
 }

@@ -615,7 +615,6 @@ static gpointer rigctl_server(gpointer data) {
     //
     tcp_client[spare].running=1;
     tcp_client[spare].thread_id = g_thread_new("rigctl client", rigctl_client, (gpointer)&tcp_client[spare]);
-    // note that g_thread_new() never returns from a failure.
   }
 
   close(server_socket);
@@ -2640,20 +2639,7 @@ case 'E': //ZZZE
                  } else {
                    static int startstop=1;
                    startstop^=1;
-                   switch (protocol) {
-                     case ORIGINAL_PROTOCOL:
-                       startstop ? old_protocol_run() : old_protocol_stop();
-                       break;
-                     case NEW_PROTOCOL:
-                       startstop ? new_protocol_menu_start() : new_protocol_menu_stop();
-                       break;
-                     case SOAPYSDR_PROTOCOL:
-                       // dunno how to do this for soapy
-                       break;
-                     default:
-                       // should not occur
-                       break;
-                   }
+                   startstop ? protocol_run() : protocol_stop();
                  }
                } else if (v==2) {
                  new_menu();

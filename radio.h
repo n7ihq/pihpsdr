@@ -342,4 +342,7 @@ extern int remote_start(void *data);
 extern int optimize_for_touchscreen;
 extern void my_combo_attach(GtkGrid *grid, GtkWidget *combo, int row, int col, int spanrow, int spancol);
 extern int max_band(void);
+extern void protocol_run();
+extern void protocol_stop();
+extern void protocol_restart();
 #endif
