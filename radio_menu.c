@@ -456,7 +456,7 @@ void radio_menu(GtkWidget *parent) {
 
   switch(protocol) {
     case NEW_PROTOCOL:
-      // Each RX has its own sample rate, this is handled in the RX MENU
+      // Sample rate changes handled in the RX menu
       break;
     case ORIGINAL_PROTOCOL:
       {
@@ -489,7 +489,6 @@ void radio_menu(GtkWidget *parent) {
       row++;
       }
       break;
-
 #ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
       {
@@ -498,43 +497,24 @@ void radio_menu(GtkWidget *parent) {
       gtk_grid_attach(GTK_GRID(grid),sample_rate_label,col,row,1,1);
       row++;
 
+      char rate_string[16];
       GtkWidget *sample_rate_combo_box=gtk_combo_box_text_new();
-      if(strcmp(radio->name,"sdrplay")==0) {
-        // It seems that only one does work ?
-        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"768000");
-        gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
 
-//        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"96000");
-//        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"192000");
-//        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"384000");
-//        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"768000");
-//        switch(radio_sample_rate) {
-//          case 96000:
-//            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
-//            break;
-//          case 192000:
-//            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),1);
-//            break;
-//          case 384000:
-//            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),2);
-//            break;
-//          case 768000:
-//            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),3);
-//            break;
-//    }
-      } else {
-
-        // There is only one sample rate and this we write into the combobox
-        char rate[16];
-        sprintf(rate,"%d",radio->info.soapy.sample_rate);
-
-        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,rate);
-        gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
+      int rate=radio->info.soapy.sample_rate;
+      int pos=0;
+      while(rate>=48000) {
+          sprintf(rate_string,"%d",rate);
+          gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,rate_string);
+          if (rate == active_receiver->sample_rate) {
+            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),pos);
+          }
+          rate=rate/2;
+          pos++;
       }
       my_combo_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
       g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
-      row++;
       }
+      row++;
       break;
 #endif
   }
