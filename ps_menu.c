@@ -312,21 +312,35 @@ static void ps_ant_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void enable_cb(GtkWidget *widget, gpointer data) {
-  //g_idle_add(ext_tx_set_ps,GINT_TO_POINTER(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget))));
   if (can_transmit) {
-    tx_set_ps(transmitter, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
+    int val=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+    tx_set_ps(transmitter, val);
+    if (val && transmitter->auto_on) {
+      char label[16];
+      sprintf(label,"%d",transmitter->attenuation);
+      gtk_entry_set_text(GTK_ENTRY(tx_att),label);
+      gtk_widget_show(tx_att);
+      gtk_widget_hide(tx_att_spin);
+    } else {
+      gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_att_spin), (double) transmitter->attenuation);
+      gtk_widget_show(tx_att_spin);
+      gtk_widget_hide(tx_att);
+    }
   }
 }
 
 static void auto_cb(GtkWidget *widget, gpointer data) {
   transmitter->auto_on=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
 
-  if (transmitter->auto_on) {
+  if (transmitter->auto_on && transmitter->puresignal) {
     //
     // automatic attenuation switched on:
     // hide spin-box for manual attenuation
     // show text field for automatic attenuation
     //
+    char label[16];
+    sprintf(label,"%d",transmitter->attenuation);
+    gtk_entry_set_text(GTK_ENTRY(tx_att),label);
     gtk_widget_show(tx_att);
     gtk_widget_hide(tx_att_spin);
   } else {
@@ -336,11 +350,10 @@ static void auto_cb(GtkWidget *widget, gpointer data) {
     // hide text field for automatic attenuation
     // set attenuation to value stored in spin button
     //
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_att_spin), (double) transmitter->attenuation);
     gtk_widget_show(tx_att_spin);
     gtk_widget_hide(tx_att);
-    transmitter->attenuation=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(tx_att_spin));
   }
-
 }
 
 static void resume_cb(GtkWidget *widget, gpointer data) {
@@ -605,7 +618,10 @@ void ps_menu(GtkWidget *parent) {
   // If using auto-attenuattion, hide the
   // "manual attenuation" label and spin button
   //
-  if (transmitter->auto_on) {
+  if (transmitter->auto_on && transmitter->puresignal) {
+    char label[16];
+    sprintf(label,"%d",transmitter->attenuation);
+    gtk_entry_set_text(GTK_ENTRY(tx_att),label);
     gtk_widget_show(tx_att);
     gtk_widget_hide(tx_att_spin);
   } else {
