@@ -33,8 +33,6 @@
 #include "soapy_protocol.h"
 #endif
 
-
-static GtkWidget *parent_window=NULL;
 static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *grid=NULL;
@@ -70,25 +68,25 @@ static void rx_ant_cb(GtkToggleButton *widget, gpointer data) {
 }
 
 static void adc0_antenna_cb(GtkComboBox *widget,gpointer data) {
-  ADC *adc=(ADC *)data;
-  adc->antenna=gtk_combo_box_get_active(widget);
+  ADC *myadc=(ADC *)data;
+  myadc->antenna=gtk_combo_box_get_active(widget);
   if(radio->protocol==NEW_PROTOCOL) {
     schedule_high_priority();
+  } else if(device==SOAPYSDR_USB_DEVICE) {
 #ifdef SOAPYSDR
-  } else if(radio->device==SOAPYSDR_USB_DEVICE) {
     soapy_protocol_set_rx_antenna(receiver[0],adc[0].antenna);
 #endif
   }
 }
 
 static void dac0_antenna_cb(GtkComboBox *widget,gpointer data) {
-  DAC *dac=(DAC *)data;
-  dac->antenna=gtk_combo_box_get_active(widget);
+  DAC *mydac=(DAC *)data;
+  mydac->antenna=gtk_combo_box_get_active(widget);
   if(radio->protocol==NEW_PROTOCOL) {
     schedule_high_priority();
+  } else if(device==SOAPYSDR_USB_DEVICE) {
 #ifdef SOAPYSDR
-  } else if(radio->device==SOAPYSDR_USB_DEVICE) {
-    soapy_protocol_set_tx_antenna(transmitter,dac->antenna);
+    soapy_protocol_set_tx_antenna(transmitter,mydac->antenna);
 #endif
   }
 }
@@ -104,99 +102,74 @@ static void tx_ant_cb(GtkToggleButton *widget, gpointer data) {
 }
 
 static void show_hf() {
-  int i;
-  int bands=BANDS;
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      switch(device) {
-        case DEVICE_HERMES_LITE:
-        case DEVICE_HERMES_LITE2:
-          bands=band10+1;
-          break;
-        default:
-          bands=band6+1;
-          break;
-      }
-      break;
-    case NEW_PROTOCOL:
-      switch(device) {
-        case NEW_DEVICE_HERMES_LITE:
-        case NEW_DEVICE_HERMES_LITE2:
-          bands=band10+1;
-          break;
-        default:
-          bands=band6+1;
-          break;
-      }
-      break;
-  }
-    for(i=0;i<bands;i++) {
-      BAND *band=band_get_band(i);
-      if(strlen(band->title)>0) {
-        GtkWidget *band_label=gtk_label_new(NULL);
-        gtk_label_set_markup(GTK_LABEL(band_label), band->title);
-        gtk_widget_show(band_label);
-        gtk_grid_attach(GTK_GRID(grid),band_label,0,i+2,1,1);
+  int bands=max_band();
+  for(int i=0;i<=bands;i++) {
+    BAND *band=band_get_band(i);
+    if(strlen(band->title)>0) {
+      GtkWidget *band_label=gtk_label_new(NULL);
+      gtk_label_set_markup(GTK_LABEL(band_label), band->title);
+      gtk_widget_show(band_label);
+      gtk_grid_attach(GTK_GRID(grid),band_label,0,i+2,1,1);
 
-        GtkWidget *rx1_b=gtk_radio_button_new(NULL);
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rx1_b), band->alexRxAntenna==0);
-        gtk_widget_show(rx1_b);
-        gtk_grid_attach(GTK_GRID(grid),rx1_b,1,i+2,1,1);
-        g_signal_connect(rx1_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+0));
+      GtkWidget *rx1_b=gtk_radio_button_new(NULL);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rx1_b), band->alexRxAntenna==0);
+      gtk_widget_show(rx1_b);
+      gtk_grid_attach(GTK_GRID(grid),rx1_b,1,i+2,1,1);
+      g_signal_connect(rx1_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+0));
 
-        GtkWidget *rx2_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(rx1_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rx2_b), band->alexRxAntenna==1);
-        gtk_widget_show(rx2_b);
-        gtk_grid_attach(GTK_GRID(grid),rx2_b,2,i+2,1,1);
-        g_signal_connect(rx2_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+1));
+      GtkWidget *rx2_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(rx1_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rx2_b), band->alexRxAntenna==1);
+      gtk_widget_show(rx2_b);
+      gtk_grid_attach(GTK_GRID(grid),rx2_b,2,i+2,1,1);
+      g_signal_connect(rx2_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+1));
 
-        GtkWidget *rx3_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(rx2_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rx3_b), band->alexRxAntenna==2);
-        gtk_widget_show(rx3_b);
-        gtk_grid_attach(GTK_GRID(grid),rx3_b,3,i+2,1,1);
-        g_signal_connect(rx3_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+2));
+      GtkWidget *rx3_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(rx2_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rx3_b), band->alexRxAntenna==2);
+      gtk_widget_show(rx3_b);
+      gtk_grid_attach(GTK_GRID(grid),rx3_b,3,i+2,1,1);
+      g_signal_connect(rx3_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+2));
 
-        GtkWidget *ext1_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(rx3_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ext1_b), band->alexRxAntenna==3);
-        gtk_widget_show(ext1_b);
-        gtk_grid_attach(GTK_GRID(grid),ext1_b,4,i+2,1,1);
-        g_signal_connect(ext1_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+3));
+      GtkWidget *ext1_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(rx3_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ext1_b), band->alexRxAntenna==3);
+      gtk_widget_show(ext1_b);
+      gtk_grid_attach(GTK_GRID(grid),ext1_b,4,i+2,1,1);
+      g_signal_connect(ext1_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+3));
 
-        GtkWidget *ext2_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(ext1_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ext2_b), band->alexRxAntenna==4);
-        gtk_widget_show(ext2_b);
-        gtk_grid_attach(GTK_GRID(grid),ext2_b,5,i+2,1,1);
-        g_signal_connect(ext2_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+4));
+      GtkWidget *ext2_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(ext1_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ext2_b), band->alexRxAntenna==4);
+      gtk_widget_show(ext2_b);
+      gtk_grid_attach(GTK_GRID(grid),ext2_b,5,i+2,1,1);
+      g_signal_connect(ext2_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+4));
 
-        GtkWidget *xvtr_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(ext2_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xvtr_b), band->alexRxAntenna==5);
-        gtk_widget_show(xvtr_b);
-        gtk_grid_attach(GTK_GRID(grid),xvtr_b,6,i+2,1,1);
-        g_signal_connect(xvtr_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+5));
+      GtkWidget *xvtr_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(ext2_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xvtr_b), band->alexRxAntenna==5);
+      gtk_widget_show(xvtr_b);
+      gtk_grid_attach(GTK_GRID(grid),xvtr_b,6,i+2,1,1);
+      g_signal_connect(xvtr_b,"toggled",G_CALLBACK(rx_ant_cb),(gpointer)(long)((i<<4)+5));
 
-        GtkWidget *ant_band_label=gtk_label_new(band->title);
-        gtk_widget_show(ant_band_label);
-        gtk_grid_attach(GTK_GRID(grid),ant_band_label,7,i+2,1,1);
+      GtkWidget *ant_band_label=gtk_label_new(band->title);
+      gtk_widget_show(ant_band_label);
+      gtk_grid_attach(GTK_GRID(grid),ant_band_label,7,i+2,1,1);
 
-        GtkWidget *tx1_b=gtk_radio_button_new(NULL);
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx1_b), band->alexTxAntenna==0);
-        gtk_widget_show(tx1_b);
-        gtk_grid_attach(GTK_GRID(grid),tx1_b,8,i+2,1,1);
-        g_signal_connect(tx1_b,"toggled",G_CALLBACK(tx_ant_cb),(gpointer)(long)((i<<4)+0));
+      GtkWidget *tx1_b=gtk_radio_button_new(NULL);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx1_b), band->alexTxAntenna==0);
+      gtk_widget_show(tx1_b);
+      gtk_grid_attach(GTK_GRID(grid),tx1_b,8,i+2,1,1);
+      g_signal_connect(tx1_b,"toggled",G_CALLBACK(tx_ant_cb),(gpointer)(long)((i<<4)+0));
 
-        GtkWidget *tx2_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(tx1_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx2_b), band->alexTxAntenna==1);
-        gtk_widget_show(tx2_b);
-        gtk_grid_attach(GTK_GRID(grid),tx2_b,9,i+2,1,1);
-        g_signal_connect(tx2_b,"toggled",G_CALLBACK(tx_ant_cb),(gpointer)(long)((i<<4)+1));
+      GtkWidget *tx2_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(tx1_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx2_b), band->alexTxAntenna==1);
+      gtk_widget_show(tx2_b);
+      gtk_grid_attach(GTK_GRID(grid),tx2_b,9,i+2,1,1);
+      g_signal_connect(tx2_b,"toggled",G_CALLBACK(tx_ant_cb),(gpointer)(long)((i<<4)+1));
 
-        GtkWidget *tx3_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(tx2_b));
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx3_b), band->alexTxAntenna==2);
-        gtk_widget_show(tx3_b);
-        gtk_grid_attach(GTK_GRID(grid),tx3_b,10,i+2,1,1);
-        g_signal_connect(tx3_b,"toggled",G_CALLBACK(tx_ant_cb),(gpointer)(long)((i<<4)+2));
-      }
+      GtkWidget *tx3_b=gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(tx2_b));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx3_b), band->alexTxAntenna==2);
+      gtk_widget_show(tx3_b);
+      gtk_grid_attach(GTK_GRID(grid),tx3_b,10,i+2,1,1);
+      g_signal_connect(tx3_b,"toggled",G_CALLBACK(tx_ant_cb),(gpointer)(long)((i<<4)+2));
     }
+  }
 }
 
 static void show_xvtr() {
@@ -295,10 +268,9 @@ static void newpa_cb(GtkWidget *widget, gpointer data) {
 }
 
 void ant_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - ANT");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -312,9 +284,7 @@ void ant_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
-#ifdef SOAPYSDR
-  if(radio->device!=SOAPYSDR_USB_DEVICE) {
-#endif
+  if(device!=SOAPYSDR_USB_DEVICE) {
     GtkWidget *hf_rb=gtk_radio_button_new_with_label(NULL,"HF");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hf_rb),TRUE);
     g_signal_connect(hf_rb,"toggled",G_CALLBACK(hf_rb_cb),NULL);
@@ -323,13 +293,10 @@ void ant_menu(GtkWidget *parent) {
     GtkWidget *xvtr_rb=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(hf_rb),"XVTR");
     g_signal_connect(xvtr_rb,"toggled",G_CALLBACK(xvtr_rb_cb),NULL);
     gtk_grid_attach(GTK_GRID(grid),xvtr_rb,2,0,1,1);
-
-#ifdef SOAPYSDR
   }
-#endif
 
-  if ((protocol == NEW_PROTOCOL      && (device == NEW_DEVICE_HERMES || device == NEW_DEVICE_ANGELIA || device == NEW_DEVICE_ORION)) ||
-      (protocol == ORIGINAL_PROTOCOL && (device == DEVICE_HERMES     || device == DEVICE_ANGELIA     || device == DEVICE_ORION))) {
+  if (device == NEW_DEVICE_HERMES || device == NEW_DEVICE_ANGELIA || device == NEW_DEVICE_ORION ||
+      device == DEVICE_HERMES     || device == DEVICE_ANGELIA     || device == DEVICE_ORION) {
 
       //
       // ANAN-100/200: There is an "old" (Rev. 15/16) and "new" (Rev. 24) PA board
@@ -403,7 +370,7 @@ void ant_menu(GtkWidget *parent) {
   }
 
 #ifdef SOAPYSDR
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
+  if(device==SOAPYSDR_USB_DEVICE) {
     int i;
 
 g_print("rx_antennas=%ld\n",radio->info.soapy.rx_antennas);

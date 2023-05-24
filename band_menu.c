@@ -36,8 +36,6 @@
 #include "client_server.h"
 #endif
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_band;
@@ -65,7 +63,7 @@ gboolean band_select_cb (GtkWidget *widget, gpointer        data) {
   int b=GPOINTER_TO_UINT(data);
   set_button_text_color(last_band,"default");
   last_band=widget;
-  //fprintf(stderr,"%s: %d\n",__FUNCTION__,b);
+  //g_print("%s: %d\n",__FUNCTION__,b);
   set_button_text_color(last_band,"orange");
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -81,12 +79,9 @@ gboolean band_select_cb (GtkWidget *widget, gpointer        data) {
 
 void band_menu(GtkWidget *parent) {
   int i,j;
-  BAND *band;
-
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   char title[64];
   sprintf(title,"piHPSDR - Band (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -112,6 +107,7 @@ void band_menu(GtkWidget *parent) {
   //g_print("band_menu: min=%lld max=%lld\n",frequency_min,frequency_max);
   j=0;
   for(i=0;i<BANDS+XVTRS;i++) {
+    BAND *band;
     band=(BAND*)band_get_band(i);
     if(strlen(band->title)>0) {
       if(i<BANDS) {

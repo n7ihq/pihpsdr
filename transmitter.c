@@ -66,7 +66,7 @@ static int waterfall_resample=8;
 //
 // cw_key_up/cw_key_down: set number of samples for next key-down/key-up sequence
 //                        Any of these variable will only be set from outside if
-//			  both have value 0.
+//                        both have value 0.
 // cw_not_ready:          set to 0 if transmitting in CW mode. This is used to
 //                        abort pending CAT CW messages if MOX or MODE is switched
 //                        manually.
@@ -88,9 +88,9 @@ static int cw_shape = 0;
 // new arrays cwramp48[] and cwramp192[] have to be provided
 // in cwramp.c
 //
-#define RAMPLEN 250			// 200: 4 msec ramp width, 250: 5 msec ramp width
-extern double cwramp48[];		// see cwramp.c, for 48 kHz sample rate
-extern double cwramp192[];		// see cwramp.c, for 192 kHz sample rate
+#define RAMPLEN 250         // 200: 4 msec ramp width, 250: 5 msec ramp width
+extern double cwramp48[];       // see cwramp.c, for 48 kHz sample rate
+extern double cwramp192[];      // see cwramp.c, for 192 kHz sample rate
 
 double ctcss_frequencies[CTCSS_FREQUENCIES]= {
   67.0,71.9,74.4,77.0,79.7,82.5,85.4,88.5,91.5,94.8,
@@ -416,7 +416,7 @@ static gboolean update_display(gpointer data) {
   TRANSMITTER *tx=(TRANSMITTER *)data;
   int rc;
 
-//fprintf(stderr,"update_display: tx id=%d\n",tx->id);
+//g_print("update_display: tx id=%d\n",tx->id);
   if(tx->displaying) {
     // if "MON" button is active (tx->feedback is TRUE),
     // then obtain spectrum pixels from PS_RX_FEEDBACK,
@@ -453,12 +453,12 @@ static gboolean update_display(gpointer data) {
       // feedback channel.
       switch (protocol) {
         case ORIGINAL_PROTOCOL:
-	  // TX dac feedback peak = 0.406, on HermesLite2 0.230
+      // TX dac feedback peak = 0.406, on HermesLite2 0.230
           offset = (device == DEVICE_HERMES_LITE2) ? 17.0 : 12.0;
           break;
         case NEW_PROTOCOL:
           // TX dac feedback peak = 0.2899
-	  offset = 15.0;
+      offset = 15.0;
           break;
         default:
           // we probably never come here
@@ -477,10 +477,12 @@ static gboolean update_display(gpointer data) {
     }
 
     tx->alc=GetTXAMeter(tx->id, alc);
-    double constant1=3.3;
-    double constant2=0.095;
-    int fwd_cal_offset=6;
 
+    double constant1;
+    double constant2;
+    int fwd_cal_offset;
+    int rev_cal_offset;
+    
     int fwd_power;
     int rev_power;
     int fwd_average;  // only used for SWR calculation, VOLTAGE value
@@ -488,158 +490,119 @@ static gboolean update_display(gpointer data) {
     int ex_power;
     double v1;
 
-    fwd_power=alex_forward_power;
-    rev_power=alex_reverse_power;
-    fwd_average=alex_forward_power_average;
-    rev_average=alex_reverse_power_average;
-    if(device==DEVICE_HERMES_LITE || device==DEVICE_HERMES_LITE2) {
-      ex_power=0;
-    } else {
-      ex_power=exciter_power;
-    }
-    switch(protocol) {
-      case ORIGINAL_PROTOCOL:
-        switch(device) {
-          case DEVICE_METIS:
-#ifdef USBOZY
-	  case DEVICE_OZY:
-#endif
-            constant1=3.3;
-            constant2=0.09;
-            break;
-          case DEVICE_HERMES:
-          case DEVICE_STEMLAB:
-          case DEVICE_STEMLAB_Z20:
-            constant1=3.3;
-            constant2=0.095;
-            break;
-          case DEVICE_ANGELIA:
-            constant1=3.3;
-            constant2=0.095;
-            break;
-          case DEVICE_ORION:
-            constant1=5.0;
-            constant2=0.108;
-            fwd_cal_offset=4;
-            break;
-          case DEVICE_ORION2:
-            constant1=5.0;
-            constant2=0.08;
-            fwd_cal_offset=18;
-            break;
-          case DEVICE_HERMES_LITE:
-          case DEVICE_HERMES_LITE2:
-            // possible reversed depending polarity of current sense transformer
-            if(rev_power>fwd_power) {
-              fwd_power=alex_reverse_power;
-              rev_power=alex_forward_power;
-              fwd_average=alex_reverse_power_average;
-              rev_average=alex_forward_power_average;
-            }
-            constant1=3.3;
-            constant2=1.4;
-            fwd_cal_offset=6;
-            break;
-        }
+    rc=get_tx_vfo();
+    int is6m = (vfo[rc].band == band6);
 
+    //
+    // Updated values of constant1/2 throughout,
+    // taking the values from the Thetis
+    // repository.
+    //
+    switch(device) {
+      default:
+        // This include SOAPY (where these numbers are not used)
+        constant1=3.3;
+        constant2=0.09;
+        rev_cal_offset=3;
+        fwd_cal_offset=6;
+        if (is6m) constant2=0.5;
+        break;
+      case DEVICE_HERMES:
+      case DEVICE_ANGELIA:
+      case NEW_DEVICE_HERMES2:
+      case NEW_DEVICE_ANGELIA:
+        constant1=3.3;
+        constant2=0.095;
+        rev_cal_offset=3;
+        fwd_cal_offset=6;
+        if (is6m) constant2=0.5;
+        break;
+      case DEVICE_ORION:  // Anan200D
+      case NEW_DEVICE_ORION:
+        constant1=5.0;
+        constant2=0.108;
+        rev_cal_offset=2;
+        fwd_cal_offset=4;
+        if (is6m) constant2=0.5;
+        break;
+      case DEVICE_ORION2:  // Anan7000/8000
+      case NEW_DEVICE_ORION2:
+        if (pa_power == PA_100W) {
+          // ANAN-7000  values.
+          // Thetis uses a highly improbable value for the
+          // reverse power on the 6m band.
+          constant1=5.0;
+          constant2=0.12;            // Thetis: fwd=0.12 rev=0.15
+          rev_cal_offset=28;
+          fwd_cal_offset=32;
+        } else {
+          // Anan-8000 values
+          constant1=5.0;
+          constant2=0.08;            // Anan7000: 0.12 ... 0.15
+          rev_cal_offset=16;         // Anan7000: 28
+          fwd_cal_offset=28;         // Anan7000: 32
+        }
+        break;
+      case DEVICE_HERMES_LITE:
+      case DEVICE_HERMES_LITE2:
+      case NEW_DEVICE_HERMES_LITE:
+      case NEW_DEVICE_HERMES_LITE2:
+        // possible reversed depending polarity of current sense transformer
+        if(rev_power>fwd_power) {
+          fwd_power=alex_reverse_power;
+          rev_power=alex_forward_power;
+          fwd_average=alex_reverse_power_average;
+          rev_average=alex_forward_power_average;
+        }
+        constant1=3.3;
+        constant2=1.5;      // Thetis: 1.8 for ref, 1.4 for fwd
+        rev_cal_offset=3;
+        fwd_cal_offset=6;
+        break;
+    }
+
+    switch (protocol) {
+      case ORIGINAL_PROTOCOL:
+      case NEW_PROTOCOL:
+        fwd_power=alex_forward_power;
+        rev_power=alex_reverse_power;
+        fwd_average=alex_forward_power_average;
+        rev_average=alex_reverse_power_average;
+        ex_power=exciter_power;
+        if(device==DEVICE_HERMES_LITE || device==DEVICE_HERMES_LITE2 ||
+           device==NEW_DEVICE_HERMES_LITE || device==NEW_DEVICE_HERMES_LITE2) {
+          ex_power=0;
+          tx->exciter=0.0;
+        } else {
+          ex_power=ex_power-fwd_cal_offset;
+          if (ex_power < 0) ex_power=0;
+          v1=((double)ex_power/4095.0)*constant1;
+          tx->exciter=(v1*v1)/constant2;
+        }
         if(fwd_power==0) {
           fwd_power=ex_power;
         }
         fwd_power=fwd_power-fwd_cal_offset;
+        if (fwd_power < 0) fwd_power=0;
         v1=((double)fwd_power/4095.0)*constant1;
         tx->fwd=(v1*v1)/constant2;
 
-        if(device==DEVICE_HERMES_LITE || device==DEVICE_HERMES_LITE2) {
-          tx->exciter=0.0;
-        } else {
-          ex_power=ex_power-fwd_cal_offset;
-          v1=((double)ex_power/4095.0)*constant1;
-          tx->exciter=(v1*v1)/constant2;
-        }
-
         tx->rev=0.0;
-        if(fwd_power!=0) {
+        if(fwd_power !=0 ) {
+          rev_power=rev_power-rev_cal_offset;
+          if (rev_power < 0) rev_power=0;
           v1=((double)rev_power/4095.0)*constant1;
           tx->rev=(v1*v1)/constant2;
         }
-
         //
         // we apply the offset but no further calculation
         // since only the ratio of rev_average and fwd_average is needed
         //
         fwd_average=fwd_average-fwd_cal_offset;
-        rev_average=rev_average-fwd_cal_offset;
+        rev_average=rev_average-rev_cal_offset;
         if (rev_average < 0) rev_average=0;
         if (fwd_average < 0) fwd_average=0;
-
         break;
-      case NEW_PROTOCOL:
-        switch(device) {
-          case NEW_DEVICE_ATLAS:
-            constant1=3.3;
-            constant2=0.09;
-            break;
-          case NEW_DEVICE_HERMES:
-            constant1=3.3;
-            constant2=0.09;
-            break;
-          case NEW_DEVICE_HERMES2:
-            constant1=3.3;
-            constant2=0.095;
-            break;
-          case NEW_DEVICE_ANGELIA:
-            constant1=3.3;
-            constant2=0.095;
-            break;
-          case NEW_DEVICE_ORION:
-            constant1=5.0;
-            constant2=0.108;
-            fwd_cal_offset=4;
-            break;
-          case NEW_DEVICE_ORION2:
-            constant1=5.0;
-            constant2=0.08;
-            fwd_cal_offset=18;
-            break;
-          case NEW_DEVICE_HERMES_LITE:
-          case NEW_DEVICE_HERMES_LITE2:
-            constant1=3.3;
-            constant2=0.09;
-            break;
-        }
-
-        fwd_power=alex_forward_power;
-        if(fwd_power==0) {
-          fwd_power=exciter_power;
-        }
-        fwd_power=fwd_power-fwd_cal_offset;
-        v1=((double)fwd_power/4095.0)*constant1;
-        tx->fwd=(v1*v1)/constant2;
-
-        ex_power=exciter_power;
-        ex_power=ex_power-fwd_cal_offset;
-        v1=((double)ex_power/4095.0)*constant1;
-        tx->exciter=(v1*v1)/constant2;
-
-        tx->rev=0.0;
-        if(alex_forward_power!=0) {
-          rev_power=alex_reverse_power;
-          v1=((double)rev_power/4095.0)*constant1;
-          tx->rev=(v1*v1)/constant2;
-        }
-
-        //
-        // we apply the offset but no further calculation
-        // since only the ratio of rev_average and fwd_average is needed
-        //
-        fwd_average=fwd_average-fwd_cal_offset;
-        rev_average=rev_average-fwd_cal_offset;
-        if (rev_average < 0) rev_average=0;
-        if (fwd_average < 0) fwd_average=0;
-
-        break;
-
-#ifdef SOAPYSDR
       case SOAPYSDR_PROTOCOL:
         tx->fwd=0.0;
         tx->exciter=0.0;
@@ -647,7 +610,6 @@ static gboolean update_display(gpointer data) {
         fwd_average=0;
         rev_average=0;
         break;
-#endif
     }
 
 //g_print("transmitter: meter_update: fwd:%f->%f rev:%f->%f ex_fwd=%d alex_fwd=%d alex_rev=%d\n",tx->fwd,compute_power(tx->fwd),tx->rev,compute_power(tx->rev),exciter_power,alex_forward_power,alex_reverse_power);
@@ -690,10 +652,10 @@ static gboolean update_display(gpointer data) {
     if (tx->fwd <= 0.0) tx->fwd = tx->exciter;
 
 
-//
-//  If SWR is above threshold and SWR protection is enabled,
-//  set the drive slider to zero. Do not do this while tuning
-//
+    //
+    //  If SWR is above threshold and SWR protection is enabled,
+    //  set the drive slider to zero. Do not do this while tuning
+    //
     if (tx->swr_protection && !getTune() && tx->swr >= tx->swr_alarm) {
       set_drive(0.0);
       display_swr_protection = TRUE;
@@ -715,7 +677,7 @@ static void init_analyzer(TRANSMITTER *tx) {
     int n_pixout=1;
     int spur_elimination_ffts = 1;
     int data_type = 1;
-    int fft_size = 8192;
+    int afft_size = 8192;
     int window_type = 4;
     double kaiser_pi = 14.0;
     int overlap = 2048;
@@ -728,33 +690,33 @@ static void init_analyzer(TRANSMITTER *tx) {
     double span_min_freq = 0.0;
     double span_max_freq = 0.0;
 
-    int max_w = fft_size + (int) min(keep_time * (double) tx->fps, keep_time * (double) fft_size * (double) tx->fps);
+    int max_w = afft_size + (int) min(keep_time * (double) tx->fps, keep_time * (double) afft_size * (double) tx->fps);
 
-    overlap = (int)max(0.0, ceil(fft_size - (double)tx->mic_sample_rate / (double)tx->fps));
+    overlap = (int)max(0.0, ceil(afft_size - (double)tx->mic_sample_rate / (double)tx->fps));
 
-    fprintf(stderr,"SetAnalyzer id=%d buffer_size=%d overlap=%d pixels=%d\n",tx->id,tx->output_samples,overlap,tx->pixels);
+    g_print("SetAnalyzer id=%d buffer_size=%d overlap=%d pixels=%d\n",tx->id,tx->output_samples,overlap,tx->pixels);
 
 
     SetAnalyzer(tx->id,
-            n_pixout,
-            spur_elimination_ffts, // number of LO frequencies = number of ffts used in elimination
-            data_type,             // 0 for real input data (I only); 1 for complex input data (I & Q)
-            flp,                   // vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
-            fft_size,              // size of the fft, i.e., number of input samples
-            tx->output_samples,    // number of samples transferred for each OpenBuffer()/CloseBuffer()
-            window_type,           // integer specifying which window function to use
-            kaiser_pi,             // PiAlpha parameter for Kaiser window
-            overlap,               // number of samples each fft (other than the first) is to re-use from the previous
-            clip,                  // number of fft output bins to be clipped from EACH side of each sub-span
-            span_clip_l,           // number of bins to clip from low end of entire span
-            span_clip_h,           // number of bins to clip from high end of entire span
-            pixels,                // number of pixel values to return.  may be either <= or > number of bins
-            stitches,              // number of sub-spans to concatenate to form a complete span
-            calibration_data_set,  // identifier of which set of calibration data to use
-            span_min_freq,         // frequency at first pixel value8192
-            span_max_freq,         // frequency at last pixel value
-            max_w                  //max samples to hold in input ring buffers
-    );
+                n_pixout,
+                spur_elimination_ffts, // number of LO frequencies = number of ffts used in elimination
+                data_type,             // 0 for real input data (I only); 1 for complex input data (I & Q)
+                flp,                   // vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
+                afft_size,             // size of the fft, i.e., number of input samples
+                tx->output_samples,    // number of samples transferred for each OpenBuffer()/CloseBuffer()
+                window_type,           // integer specifying which window function to use
+                kaiser_pi,             // PiAlpha parameter for Kaiser window
+                overlap,               // number of samples each fft (other than the first) is to re-use from the previous
+                clip,                  // number of fft output bins to be clipped from EACH side of each sub-span
+                span_clip_l,           // number of bins to clip from low end of entire span
+                span_clip_h,           // number of bins to clip from high end of entire span
+                pixels,                // number of pixel values to return.  may be either <= or > number of bins
+                stitches,              // number of sub-spans to concatenate to form a complete span
+                calibration_data_set,  // identifier of which set of calibration data to use
+                span_min_freq,         // frequency at first pixel value8192
+                span_max_freq,         // frequency at last pixel value
+                max_w                  //max samples to hold in input ring buffers
+                );
    //
    // This cannot be changed for the TX panel,
    // use peak mode
@@ -782,7 +744,7 @@ g_print("create_dialog: add tx->panel\n");
 
 static void create_visual(TRANSMITTER *tx) {
 
-  fprintf(stderr,"transmitter: create_visual: id=%d width=%d height=%d\n",tx->id, tx->width,tx->height);
+  g_print("transmitter: create_visual: id=%d width=%d height=%d\n",tx->id, tx->width,tx->height);
 
   tx->dialog=NULL;
 
@@ -824,14 +786,11 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
       tx->mic_dsp_rate=96000;
       tx->iq_output_rate=192000;
       break;
-#ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
       tx->mic_sample_rate=48000;
       tx->mic_dsp_rate=96000;
       tx->iq_output_rate=radio_sample_rate;
       break;
-#endif
-
   }
   int ratio=tx->iq_output_rate/tx->mic_sample_rate;
   tx->output_samples=tx->buffer_size*ratio;
@@ -850,7 +809,7 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
 
   tx->alex_antenna=0;  // default: ANT1
 
-fprintf(stderr,"create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d fps=%d width=%d height=%d\n",tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,tx->fps,tx->width,tx->height);
+g_print("create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d fps=%d width=%d height=%d\n",tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,tx->fps,tx->width,tx->height);
 
   tx->filter_low=tx_filter_low;
   tx->filter_high=tx_filter_high;
@@ -898,7 +857,7 @@ fprintf(stderr,"create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_
 
 
   // allocate buffers
-fprintf(stderr,"transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d pixels=%d\n",tx->buffer_size,tx->output_samples,tx->pixels);
+g_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d pixels=%d\n",tx->buffer_size,tx->output_samples,tx->pixels);
   tx->mic_input_buffer=g_new(double,2*tx->buffer_size);
   tx->iq_output_buffer=g_new(double,2*tx->output_samples);
   tx->samples=0;
@@ -915,9 +874,7 @@ fprintf(stderr,"transmitter: allocate buffers: mic_input_buffer=%d iq_output_buf
       cw_shape_buffer48=g_new(double,tx->buffer_size);
       break;
    case NEW_PROTOCOL:
-#ifdef SOAPYSDR
    case SOAPYSDR_PROTOCOL:
-#endif
       //
       // We need two buffers: one for the audio sample amplitudes
       // and another one for the TX IQ amplitudes
@@ -1002,7 +959,7 @@ fprintf(stderr,"transmitter: allocate buffers: mic_input_buffer=%d iq_output_buf
 
   XCreateAnalyzer(tx->id, &rc, 262144, 1, 1, "");
   if (rc != 0) {
-    fprintf(stderr, "XCreateAnalyzer id=%d failed: %d\n",tx->id,rc);
+    g_print("XCreateAnalyzer id=%d failed: %d\n",tx->id,rc);
   } else {
     init_analyzer(tx);
   }
@@ -1137,11 +1094,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     case NEW_PROTOCOL:
       gain=8388607.0; // 24 bit
       break;
-#ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
       // gain is not used, since samples are floating point
       break;
-#endif
   }
 
   if (cwmode) {
@@ -1160,16 +1115,16 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     switch (protocol) {
       case ORIGINAL_PROTOCOL:
         for (j = 0; j < tx->output_samples; j++) {
-	    *dp++ = 0.0;
-	    *dp++ = cw_shape_buffer48[j];
+        *dp++ = 0.0;
+        *dp++ = cw_shape_buffer48[j];
         }
-	break;
+    break;
       case NEW_PROTOCOL:
         for (j = 0; j < tx->output_samples; j++) {
-	    *dp++ = 0.0;
-	    *dp++ = cw_shape_buffer192[j];
+        *dp++ = 0.0;
+        *dp++ = cw_shape_buffer192[j];
         }
-	break;
+    break;
     }
   } else {
     update_vox(tx);
@@ -1203,7 +1158,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
     fexchange0(tx->id, tx->mic_input_buffer, tx->iq_output_buffer, &error);
     if(error!=0) {
-      fprintf(stderr,"full_tx_buffer: id=%d fexchange0: error=%d\n",tx->id,error);
+      g_print("full_tx_buffer: id=%d fexchange0: error=%d\n",tx->id,error);
     }
   }
 
@@ -1213,12 +1168,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
   if (isTransmitting()) {
 
-    if(  (    (protocol == NEW_PROTOCOL && radio->device==NEW_DEVICE_ATLAS)
-#ifdef USBOZY
-           || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_OZY)
-#endif
-           || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_METIS)
-         ) && atlas_penelope == 1) {
+    if((device==NEW_DEVICE_ATLAS || device==DEVICE_OZY || device==DEVICE_METIS) && atlas_penelope == 1) {
       //
       // Note that the atlas_penelope flag can have three values, namely
       //   0 "no penelope"  : no scaling
@@ -1236,63 +1186,63 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     }
 
     if (txflag == 0 && protocol == NEW_PROTOCOL) {
-	//
-	// this is the first time (after a pause) that we send TX samples
-	// so send some "silence" to prevent FIFO underflows
-	//
-	for (j=0; j< 480; j++) {
-	      new_protocol_iq_samples(0,0);
-	}	
+    //
+    // this is the first time (after a pause) that we send TX samples
+    // so send some "silence" to prevent FIFO underflows
+    //
+    for (j=0; j< 480; j++) {
+          new_protocol_iq_samples(0,0);
+    }   
     }
     txflag=1;
-//
-//  When doing CW, we do not need WDSP since Q(t) = cw_shape_buffer(t) and I(t)=0
-//  For the old protocol where the IQ and audio samples are tied together, we can
-//  easily generate a synchronous side tone
-//
-//  Note that the CW shape buffer is tied to the mic sample rate (48 kHz).
-//
+    //
+    //  When doing CW, we do not need WDSP since Q(t) = cw_shape_buffer(t) and I(t)=0
+    //  For the old protocol where the IQ and audio samples are tied together, we can
+    //  easily generate a synchronous side tone
+    //
+    //  Note that the CW shape buffer is tied to the mic sample rate (48 kHz).
+    //
     if (cwmode) {
-	//
-	// "pulse shape case":
-	// directly produce the I/Q samples. For a continuous zero-frequency
-	// carrier (as needed for CW) I(t)=1 and Q(t)=0 everywhere. We shape I(t)
-	// with the pulse envelope. We also produce a side tone with same shape.
-	// Note that tx->iq_output_buffer is not used. Therefore, all the
+        //
+        // "pulse shape case":
+        // directly produce the I/Q samples. For a continuous zero-frequency
+        // carrier (as needed for CW) I(t)=1 and Q(t)=0 everywhere. We shape I(t)
+        // with the pulse envelope. We also produce a side tone with same shape.
+        // Note that tx->iq_output_buffer is not used. Therefore, all the
         // SetTXAPostGen functions are not needed for CW!
         //
         // "Side tone to radio" treatment:
         // old protocol: done HERE
         // new protocol: already done in add_mic_sample
         // soapy       : no audio to radio
-	//
-	switch (protocol) {
-	  case ORIGINAL_PROTOCOL:
-	    //
-	    // tx->output_samples equals tx->buffer_size
-	    // Take TX envelope from the 48kHz shape buffer
-	    //
+        //
+        switch (protocol) {
+          case ORIGINAL_PROTOCOL:
+            //
+            // tx->output_samples equals tx->buffer_size
+            // Take TX envelope from the 48kHz shape buffer
+            //
             sidevol= 64.0 * cw_keyer_sidetone_volume;  // between 0.0 and 8128.0
-	    isample=0;				    // will be constantly zero
+            isample=0;                  // will be constantly zero
             for(j=0;j<tx->output_samples;j++) {
-	      ramp=cw_shape_buffer48[j];	    	    // between 0.0 and 1.0
-	      qsample=floor(gain*ramp+0.5);         // always non-negative, isample is just the pulse envelope
-	      sidetone=sidevol * ramp * sine_generator(&p1radio, &p2radio, cw_keyer_sidetone_frequency);
-	      old_protocol_iq_samples(isample,qsample,sidetone);
-	    }
-	    break;
-	  case NEW_PROTOCOL:
-	    //
-	    // tx->output_samples is four times tx->buffer_size
-	    // Take TX envelope from the 192kHz shape buffer
-	    //
-	    isample=0;
+              ramp=cw_shape_buffer48[j];                // between 0.0 and 1.0
+              qsample=floor(gain*ramp+0.5);         // always non-negative, isample is just the pulse envelope
+              sidetone=sidevol * ramp * sine_generator(&p1radio, &p2radio, cw_keyer_sidetone_frequency);
+              old_protocol_iq_samples(isample,qsample,sidetone);
+            }
+            break;
+          case NEW_PROTOCOL:
+            //
+            // tx->output_samples is four times tx->buffer_size
+            // Take TX envelope from the 192kHz shape buffer
+            //
+            isample=0;
             for(j=0;j<tx->output_samples;j++) {
-	      ramp=cw_shape_buffer192[j];	    		// between 0.0 and 1.0
-	      qsample=floor(gain*ramp+0.5);         	    	// always non-negative, isample is just the pulse envelope
-	      new_protocol_iq_samples(isample,qsample);
-	    }
-	    break;
+              ramp=cw_shape_buffer192[j];               // between 0.0 and 1.0
+              qsample=floor(gain*ramp+0.5);                     // always non-negative, isample is just the pulse envelope
+              new_protocol_iq_samples(isample,qsample);
+            }
+            break;
 #ifdef SOAPYSDR
           case SOAPYSDR_PROTOCOL:
             //
@@ -1300,37 +1250,37 @@ static void full_tx_buffer(TRANSMITTER *tx) {
             // generate audio samples to be sent to the radio
             //
             for(j=0;j<tx->output_samples;j++) {
-	      ramp=cw_shape_buffer192[j];	    		// between 0.0 and 1.0
+              ramp=cw_shape_buffer192[j];               // between 0.0 and 1.0
               soapy_protocol_iq_samples(0.0F,(float)ramp);      // SOAPY: just convert double to float
-	    }
-	    break;
+            }
+        break;
 #endif
-	}
+        }
     } else {
-	//
-	// Original code without pulse shaping and without side tone
-	//
-	for(j=0;j<tx->output_samples;j++) {
+        //
+        // Original code without pulse shaping and without side tone
+        //
+        for(j=0;j<tx->output_samples;j++) {
             double is,qs;
-	    is=tx->iq_output_buffer[j*2];
-	    qs=tx->iq_output_buffer[(j*2)+1];
-	    isample=is>=0.0?(long)floor(is*gain+0.5):(long)ceil(is*gain-0.5);
-	    qsample=qs>=0.0?(long)floor(qs*gain+0.5):(long)ceil(qs*gain-0.5);
-	    switch(protocol) {
-		case ORIGINAL_PROTOCOL:
-		    old_protocol_iq_samples(isample,qsample,0);
-		    break;
-		case NEW_PROTOCOL:
-		    new_protocol_iq_samples(isample,qsample);
-		    break;
+            is=tx->iq_output_buffer[j*2];
+            qs=tx->iq_output_buffer[(j*2)+1];
+            isample=is>=0.0?(long)floor(is*gain+0.5):(long)ceil(is*gain-0.5);
+            qsample=qs>=0.0?(long)floor(qs*gain+0.5):(long)ceil(qs*gain-0.5);
+            switch(protocol) {
+              case ORIGINAL_PROTOCOL:
+                old_protocol_iq_samples(isample,qsample,0);
+                break;
+              case NEW_PROTOCOL:
+                new_protocol_iq_samples(isample,qsample);
+                break;
 #ifdef SOAPYSDR
-                case SOAPYSDR_PROTOCOL:
-                    // SOAPY: just convert the double IQ samples (is,qs) to float.
-                    soapy_protocol_iq_samples((float)is,(float)qs);
-                    break;
+              case SOAPYSDR_PROTOCOL:
+                // SOAPY: just convert the double IQ samples (is,qs) to float.
+                soapy_protocol_iq_samples((float)is,(float)qs);
+                break;
 #endif
-	    }
-	}
+            }
+        }
     }
   } else {
     //
@@ -1346,13 +1296,13 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
   int mode=tx->mode;
   float cwsample;
   double mic_sample_double, ramp;
-  int i,s;
+  int i,j,s;
   int updown;
 
-//
-// silence TX audio if tuning, or when doing CW.
-// (in order not to fire VOX)
-//
+  //
+  // silence TX audio if tuning, or when doing CW.
+  // (in order not to fire VOX)
+  //
 
   if (tune || mode==modeCWL || mode==modeCWU) {
     mic_sample_double=0.0;
@@ -1360,160 +1310,154 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
     mic_sample_double=(double)mic_sample;
   }
 
-//
-// shape CW pulses when doing CW and transmitting, else nullify them
-//
+  //
+  // shape CW pulses when doing CW and transmitting, else nullify them
+  //
   if((mode==modeCWL || mode==modeCWU) && isTransmitting()) {
-//
-//	RigCtl CW sets the variables cw_key_up and cw_key_down
-//	to the number of samples for the next down/up sequence.
-//	cw_key_down can be zero, for inserting some space
-//
-//	We HAVE TO shape the signal to avoid hard clicks to be
-//	heard way beside our frequency. The envelope (ramp function)
-//      is stored in cwramp48[0::RAMPLEN], so we "move" cw_shape between these
-//      values. The ramp width is RAMPLEN/48000 seconds.
-//
-//      In the new protocol, we use this ramp for the side tone, but
-//      must use values from cwramp192 for the TX iq signal.
-//
-//      Note that usually, the pulse is much broader than the ramp,
-//      that is, cw_key_down and cw_key_up are much larger than RAMPLEN.
-//
-	cw_not_ready=0;
-	if (cw_key_down > 0 ) {
-	  if (cw_shape < RAMPLEN) cw_shape++;	// walk up the ramp
-	  cw_key_down--;			// decrement key-up counter
-	  updown=1;
-	} else {
-	  // dig into this even if cw_key_up is already zero, to ensure
-	  // that we reach the bottom of the ramp for very small pauses
-	  if (cw_shape > 0) cw_shape--;	// walk down the ramp
-	  if (cw_key_up > 0) cw_key_up--; // decrement key-down counter
-	  updown=0;
-	}
-	//
-	// store the ramp value in cw_shape_buffer, but also use it for shaping the "local"
-	// side tone
-	ramp=cwramp48[cw_shape];
-	cwsample=0.00197 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local, cw_keyer_sidetone_frequency);
-	if(active_receiver->local_audio && cw_keyer_sidetone_volume > 0) cw_audio_write(active_receiver,cwsample);
+    //
+    //  RigCtl CW sets the variables cw_key_up and cw_key_down
+    //  to the number of samples for the next down/up sequence.
+    //  cw_key_down can be zero, for inserting some space
+    //
+    //  We HAVE TO shape the signal to avoid hard clicks to be
+    //  heard way beside our frequency. The envelope (ramp function)
+    //      is stored in cwramp48[0::RAMPLEN], so we "move" cw_shape between these
+    //      values. The ramp width is RAMPLEN/48000 seconds.
+    //
+    //      In the new protocol, we use this ramp for the side tone, but
+    //      must use values from cwramp192 for the TX iq signal.
+    //
+    //      Note that usually, the pulse is much broader than the ramp,
+    //      that is, cw_key_down and cw_key_up are much larger than RAMPLEN.
+    //
+    cw_not_ready=0;
+    if (cw_key_down > 0 ) {
+      if (cw_shape < RAMPLEN) cw_shape++;   // walk up the ramp
+      cw_key_down--;            // decrement key-up counter
+      updown=1;
+    } else {
+      // dig into this even if cw_key_up is already zero, to ensure
+      // that we reach the bottom of the ramp for very small pauses
+      if (cw_shape > 0) cw_shape--; // walk down the ramp
+      if (cw_key_up > 0) cw_key_up--; // decrement key-down counter
+      updown=0;
+    }
+    //
+    // store the ramp value in cw_shape_buffer, but also use it for shaping the "local"
+    // side tone
+    ramp=cwramp48[cw_shape];
+    cwsample=0.00197 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local, cw_keyer_sidetone_frequency);
+    if(active_receiver->local_audio && cw_keyer_sidetone_volume > 0) cw_audio_write(active_receiver,cwsample);
         cw_shape_buffer48[tx->samples]=ramp;
-	//
-	// In the new protocol, we MUST maintain a constant flow of audio samples to the radio
-	// (at least for ANAN-200D and ANAN-7000 internal side tone generation)
-	// So we ship out audio: silence if CW is internal, side tone if CW is local.
-	//
-	// Furthermore, for each audio sample we have to create four TX samples. If we are at
-	// the beginning of the ramp, these are four zero samples, if we are at the, it is
-	// four unit samples, and in-between, we use the values from cwramp192.
-	// Note that this ramp has been extended a little, such that it begins with four zeros
-	// and ends with four times 1.0.
-	//
-        if (protocol == NEW_PROTOCOL) {
- 	    s=0;
-            // cwsample is in the range 0.0 - 0.25. For my Anan-7000, the following scaling
-            // produces the same volume as "internal CW".
- 	    if (!cw_keyer_internal || CAT_cw_is_active) s=(int) (cwsample * 65535.0);
-	    new_protocol_cw_audio_samples(s, s);
-	    s=4*cw_shape;
-	    i=4*tx->samples;
-	    // The 192kHz-ramp is constructed such that for cw_shape==0 or cw_shape==RAMPLEN,
-	    // the two following cases create the same shape.
-	    if (updown) {
-	      // climbing up...
-	      cw_shape_buffer192[i+0]=cwramp192[s+0];
-	      cw_shape_buffer192[i+1]=cwramp192[s+1];
-	      cw_shape_buffer192[i+2]=cwramp192[s+2];
-	      cw_shape_buffer192[i+3]=cwramp192[s+3];
-	   } else {
-	      // descending...
-	      cw_shape_buffer192[i+0]=cwramp192[s+3];
-	      cw_shape_buffer192[i+1]=cwramp192[s+2];
-	      cw_shape_buffer192[i+2]=cwramp192[s+1];
-	      cw_shape_buffer192[i+3]=cwramp192[s+0];
-	   }
-	}
-#ifdef SOAPYSDR
-        if (protocol == SOAPYSDR_PROTOCOL) {
-          //
-          // The ratio between the TX and microphone sample rate can be any value, so
-          // it is difficult to construct a general ramp here. We may at least *assume*
-          // that the ratio is integral. We can extrapolate from the shapes calculated
-          // for 48 and 192 kHz sample rate.
-          //
-          // At any rate, we *must* produce tx->outputsamples IQ samples from an input
-          // buffer of size tx->buffer_size.
-          //
-          int ratio = tx->output_samples / tx->buffer_size;
-          int j;
-          i=ratio*tx->samples;  // current position in TX IQ buffer
-          if (updown) {
-            //
-            // Climb up the ramp
-            //
-            if (ratio % 4 == 0) {
-              // simple adaptation from the 192 kHz ramp
-              ratio = ratio / 4;
-	      s=4*cw_shape;
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+0];
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+1];
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+2];
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+3];
-            } else {
-              // simple adaptation from the 48 kHz ramp
-              for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp48[cw_shape];
-            }
-          } else {
-            //
-            // Walk down the ramp
-            //
-            if (ratio % 4 == 0) {
-              // simple adaptation from the 192 kHz ramp
-              ratio = ratio / 4;
-	      s=4*cw_shape;
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+3];
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+2];
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+1];
-	      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+0];
-            } else {
-              // simple adaptation from the 48 kHz ramp
-              for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp48[cw_shape];
-            }
-          }
+    //
+    // In the new protocol, we MUST maintain a constant flow of audio samples to the radio
+    // (at least for ANAN-200D and ANAN-7000 internal side tone generation)
+    // So we ship out audio: silence if CW is internal, side tone if CW is local.
+    //
+    // Furthermore, for each audio sample we have to create four TX samples. If we are at
+    // the beginning of the ramp, these are four zero samples, if we are at the, it is
+    // four unit samples, and in-between, we use the values from cwramp192.
+    // Note that this ramp has been extended a little, such that it begins with four zeros
+    // and ends with four times 1.0.
+    //
+    if (protocol == NEW_PROTOCOL) {
+        s=0;
+        // cwsample is in the range 0.0 - 0.25. For my Anan-7000, the following scaling
+        // produces the same volume as "internal CW".
+        if (!cw_keyer_internal || CAT_cw_is_active) s=(int) (cwsample * 65535.0);
+        new_protocol_cw_audio_samples(s, s);
+        s=4*cw_shape;
+        i=4*tx->samples;
+        // The 192kHz-ramp is constructed such that for cw_shape==0 or cw_shape==RAMPLEN,
+        // the two following cases create the same shape.
+        if (updown) {
+          // climbing up...
+          cw_shape_buffer192[i+0]=cwramp192[s+0];
+          cw_shape_buffer192[i+1]=cwramp192[s+1];
+          cw_shape_buffer192[i+2]=cwramp192[s+2];
+          cw_shape_buffer192[i+3]=cwramp192[s+3];
+       } else {
+          // descending...
+          cw_shape_buffer192[i+0]=cwramp192[s+3];
+          cw_shape_buffer192[i+1]=cwramp192[s+2];
+          cw_shape_buffer192[i+2]=cwramp192[s+1];
+          cw_shape_buffer192[i+3]=cwramp192[s+0];
+       }
+    }
+    if (protocol == SOAPYSDR_PROTOCOL) {
+      //
+      // The ratio between the TX and microphone sample rate can be any value, so
+      // it is difficult to construct a general ramp here. We may at least *assume*
+      // that the ratio is integral. We can extrapolate from the shapes calculated
+      // for 48 and 192 kHz sample rate.
+      //
+      // At any rate, we *must* produce tx->outputsamples IQ samples from an input
+      // buffer of size tx->buffer_size.
+      //
+      int ratio = tx->output_samples / tx->buffer_size;
+      i=ratio*tx->samples;  // current position in TX IQ buffer
+      if (updown) {
+        //
+        // Climb up the ramp
+        //
+        if (ratio % 4 == 0) {
+          // simple adaptation from the 192 kHz ramp
+          ratio = ratio / 4;
+          s=4*cw_shape;
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+0];
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+1];
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+2];
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+3];
+        } else {
+          // simple adaptation from the 48 kHz ramp
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp48[cw_shape];
         }
-#endif
+      } else {
+        //
+        // Walk down the ramp
+        //
+        if (ratio % 4 == 0) {
+          // simple adaptation from the 192 kHz ramp
+          ratio = ratio / 4;
+          s=4*cw_shape;
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+3];
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+2];
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+1];
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+0];
+        } else {
+          // simple adaptation from the 48 kHz ramp
+          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp48[cw_shape];
+        }
+      }
+    }
   } else {
-//
-//	If no longer transmitting, or no longer doing CW: reset pulse shaper.
-//	This will also swallow any pending CW in rigtl CAT CW and wipe out
-//      cw_shape_buffer very quickly. In order to tell rigctl etc. that CW should be
-//	aborted, we also use the cw_not_ready flag.
-//
-	cw_not_ready=1;
-	cw_key_up=0;
-	if (cw_key_down > 0) cw_key_down--;  // in case it occured before the RX/TX transition
-	cw_shape=0;
-        // insert "silence" in CW audio and TX IQ buffers
-  	cw_shape_buffer48[tx->samples]=0.0;
-	if (protocol == NEW_PROTOCOL) {
-	  cw_shape_buffer192[4*tx->samples+0]=0.0;
-	  cw_shape_buffer192[4*tx->samples+1]=0.0;
-	  cw_shape_buffer192[4*tx->samples+2]=0.0;
-	  cw_shape_buffer192[4*tx->samples+3]=0.0;
-	}
-#ifdef SOAPYSDR
-        if (protocol == SOAPYSDR_PROTOCOL) {
-          //
-          // this essentially the P2 code, where the ratio
-          // is fixed to 4
-          //
-          int ratio = tx->output_samples / tx->buffer_size;
-          int i=ratio*tx->samples;
-          int j;
-          for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=0.0;
-        }
-#endif
+    //
+    //  If no longer transmitting, or no longer doing CW: reset pulse shaper.
+    //  This will also swallow any pending CW in rigtl CAT CW and wipe out
+    //      cw_shape_buffer very quickly. In order to tell rigctl etc. that CW should be
+    //  aborted, we also use the cw_not_ready flag.
+    //
+    cw_not_ready=1;
+    cw_key_up=0;
+    if (cw_key_down > 0) cw_key_down--;  // in case it occured before the RX/TX transition
+    cw_shape=0;
+    // insert "silence" in CW audio and TX IQ buffers
+    cw_shape_buffer48[tx->samples]=0.0;
+    if (protocol == NEW_PROTOCOL) {
+      cw_shape_buffer192[4*tx->samples+0]=0.0;
+      cw_shape_buffer192[4*tx->samples+1]=0.0;
+      cw_shape_buffer192[4*tx->samples+2]=0.0;
+      cw_shape_buffer192[4*tx->samples+3]=0.0;
+    }
+    if (protocol == SOAPYSDR_PROTOCOL) {
+      //
+      // this essentially the P2 code, where the ratio
+      // is fixed to 4
+      //
+      int ratio = tx->output_samples / tx->buffer_size;
+      i=ratio*tx->samples;
+      for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=0.0;
+    }
   }
   tx->mic_input_buffer[tx->samples*2]=mic_sample_double;
   tx->mic_input_buffer[(tx->samples*2)+1]=0.0; //mic_sample_double;
@@ -1531,13 +1475,13 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
        if(audio_samples_index>=AUDIO_WATERFALL_SAMPLES) {
          //Spectrum(CHANNEL_AUDIO,0,0,audio_samples,audio_samples);
          audio_samples_index=0;
-     }
-     }
-     waterfall_samples++;
-     if(waterfall_samples==waterfall_resample) {
+       }
+    }
+    waterfall_samples++;
+    if(waterfall_samples==waterfall_resample) {
        waterfall_samples=0;
-     }
-   }
+    }
+  }
 #endif
 }
 
@@ -1545,7 +1489,7 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
   RECEIVER *tx_feedback=receiver[PS_TX_FEEDBACK];
   RECEIVER *rx_feedback=receiver[PS_RX_FEEDBACK];
 
-//fprintf(stderr,"add_ps_iq_samples: samples=%d i_rx=%f q_rx=%f i_tx=%f q_tx=%f\n",rx_feedback->samples, i_sample_rx,q_sample_rx,i_sample_tx,q_sample_tx);
+//g_print("add_ps_iq_samples: samples=%d i_rx=%f q_rx=%f i_tx=%f q_tx=%f\n",rx_feedback->samples, i_sample_rx,q_sample_rx,i_sample_tx,q_sample_tx);
 
   tx_feedback->iq_input_buffer[tx_feedback->samples*2]=i_sample_tx;
   tx_feedback->iq_input_buffer[(tx_feedback->samples*2)+1]=q_sample_tx;
@@ -1632,11 +1576,11 @@ void tx_set_twotone(TRANSMITTER *tx,int state) {
       case modeCWL:
       case modeLSB:
       case modeDIGL:
-	SetTXAPostGenTTFreq(tx->id, -900.0, -1700.0);
+    SetTXAPostGenTTFreq(tx->id, -900.0, -1700.0);
         break;
       default:
-	SetTXAPostGenTTFreq(tx->id, 900.0, 1700.0);
-	break;
+    SetTXAPostGenTTFreq(tx->id, 900.0, 1700.0);
+    break;
     }
     SetTXAPostGenTTMag (tx->id, 0.49, 0.49);
     SetTXAPostGenMode(tx->id, 1);

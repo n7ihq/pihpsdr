@@ -30,8 +30,6 @@
 #include "button_text.h"
 #include "store.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 GtkWidget *store_button[NUM_OF_MEMORYS];
@@ -55,22 +53,22 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
-   int index = GPOINTER_TO_INT(data);
-   fprintf(stderr,"STORE BUTTON PUSHED=%d\n",index);
+   int ind = GPOINTER_TO_INT(data);
+   g_print("STORE BUTTON PUSHED=%d\n",ind);
    char workstr[40];
 
-   store_memory_slot(index);
+   store_memory_slot(ind);
 
-   sprintf(workstr,"M%d=%8.6f MHz", index,((double) mem[index].frequency)/1000000.0);
-   gtk_button_set_label(GTK_BUTTON(store_button[index]),workstr);
+   sprintf(workstr,"M%d=%8.6f MHz", ind,((double) mem[ind].frequency)/1000000.0);
+   gtk_button_set_label(GTK_BUTTON(store_button[ind]),workstr);
 
    return FALSE;
 }
 
 
 static gboolean recall_select_cb (GtkWidget *widget, gpointer data) {
-    int index = GPOINTER_TO_INT(data);
-    recall_memory_slot(index);
+    int ind = GPOINTER_TO_INT(data);
+    recall_memory_slot(ind);
     return FALSE;
 }
 
@@ -79,10 +77,8 @@ void store_menu(GtkWidget *parent) {
   int i;
   char label_str[50];
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Store");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

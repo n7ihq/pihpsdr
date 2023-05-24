@@ -44,16 +44,16 @@ static snd_rawmidi_t *midi_input[MAX_MIDI_DEVICES];
 static void* midi_thread(void *);
 
 static enum {
-        STATE_SKIP,		// skip bytes
+        STATE_SKIP,             // skip bytes
         STATE_ARG1,             // one arg byte to come
         STATE_ARG2,             // two arg bytes to come
 } state=STATE_SKIP;
 
 static enum {
-	CMD_NOTEON,
-	CMD_NOTEOFF,
-	CMD_CTRL,
-	CMD_PITCH,
+        CMD_NOTEON,
+        CMD_NOTEOFF,
+        CMD_CTRL,
+        CMD_PITCH,
 } command;
 
 static gboolean configure=FALSE;
@@ -67,9 +67,8 @@ static void *midi_thread(void *arg) {
     snd_rawmidi_t *input=midi_input[index];
     char *port=midi_port[index];
 
-    int ret;
     int npfds;
-    struct pollfd *pfds;
+    //struct pollfd *pfds;
     unsigned char buf[32];
     unsigned char byte;
     unsigned short revents;
@@ -79,120 +78,121 @@ static void *midi_thread(void *arg) {
 
 
     npfds = snd_rawmidi_poll_descriptors_count(input);
-    pfds = alloca(npfds * sizeof(struct pollfd));
+    // replaced alloca by variable-length array
+    struct pollfd pfds[npfds];
+    //pfds = alloca(npfds * sizeof(struct pollfd));
     snd_rawmidi_poll_descriptors(input, pfds, npfds);
     for (;;) {
-	ret = poll(pfds, npfds, 250);
+        int ret = poll(pfds, npfds, 250);
         if (!midi_devices[index].active) break;
-	if (ret < 0) {
-            fprintf(stderr,"poll failed: %s\n", strerror(errno));
-	    // Do not give up, but also do not fire too rapidly
-	    usleep(250000);
-	}
-	if (ret <= 0) continue;  // nothing arrived, do next poll()
-	if ((ret = snd_rawmidi_poll_descriptors_revents(input, pfds, npfds, &revents)) < 0) {
-            fprintf(stderr,"cannot get poll events: %s\n", snd_strerror(errno));
+        if (ret < 0) {
+            g_print("poll failed: %s\n", strerror(errno));
+            // Do not give up, but also do not fire too rapidly
+            usleep(250000);
+        }
+        if (ret <= 0) continue;  // nothing arrived, do next poll()
+        if ((ret = snd_rawmidi_poll_descriptors_revents(input, pfds, npfds, &revents)) < 0) {
+            g_print("cannot get poll events: %s\n", snd_strerror(errno));
             continue;
         }
         if (revents & (POLLERR | POLLHUP)) continue;
         if (!(revents & POLLIN)) continue;
-	// something has arrived
-	ret = snd_rawmidi_read(input, buf, 64);
+        // something has arrived
+        ret = snd_rawmidi_read(input, buf, 64);
         if (ret == 0) continue;
         if (ret < 0) {
-            fprintf(stderr,"cannot read from port \"%s\": %s\n", port, snd_strerror(ret));
+            g_print("cannot read from port \"%s\": %s\n", port, snd_strerror(ret));
             continue;
         }
         // process bytes in buffer. Since they no not necessarily form complete messages
         // we need a state machine here.
         for (i=0; i< ret; i++) {
-	    byte=buf[i];
-	    switch (state) {
-		case STATE_SKIP:
-		    chan=byte & 0x0F;
-		    switch (byte & 0xF0) {
-			case 0x80:	// Note-OFF command
-			    command=CMD_NOTEOFF;
-			    state=STATE_ARG2;
-			    break;
-			case 0x90:	// Note-ON command
-			    command=CMD_NOTEON;
-			    state=STATE_ARG2;
-			    break;
-			case 0xB0:	// Controller Change
-			    command=CMD_CTRL;
-			    state=STATE_ARG2;
-			    break;
-			case 0xE0:	// Pitch Bend
-			    command=CMD_PITCH;
-			    state=STATE_ARG2;
-			    break;
-			case 0xA0:	// Polyphonic Pressure
-			case 0xC0:	// Program change
-			case 0xD0:	// Channel pressure
-			case 0xF0:	// System Message: continue waiting for bit7 set
-			default: 	// Remain in STATE_SKIP until bit7 is set
-			    break;
-		    }
-		    break;
-		case STATE_ARG2:
-		    arg1=byte;
+            byte=buf[i];
+            switch (state) {
+                case STATE_SKIP:
+                    chan=byte & 0x0F;
+                    switch (byte & 0xF0) {
+                        case 0x80:      // Note-OFF command
+                            command=CMD_NOTEOFF;
+                            state=STATE_ARG2;
+                            break;
+                        case 0x90:      // Note-ON command
+                            command=CMD_NOTEON;
+                            state=STATE_ARG2;
+                            break;
+                        case 0xB0:      // Controller Change
+                            command=CMD_CTRL;
+                            state=STATE_ARG2;
+                            break;
+                        case 0xE0:      // Pitch Bend
+                            command=CMD_PITCH;
+                            state=STATE_ARG2;
+                            break;
+                        case 0xA0:      // Polyphonic Pressure
+                        case 0xC0:      // Program change
+                        case 0xD0:      // Channel pressure
+                        case 0xF0:      // System Message: continue waiting for bit7 set
+                        default:        // Remain in STATE_SKIP until bit7 is set
+                            break;
+                    }
+                    break;
+                case STATE_ARG2:
+                    arg1=byte;
                     state=STATE_ARG1;
                     break;
-		case STATE_ARG1:
-		    arg2=byte;
-		    // We have a command!
-		    switch (command) {
-			case CMD_NOTEON:
-			   // Hercules MIDI controllers generate NoteOn
-			   // messages with velocity == 0 when releasing
-			   // a push-button
-			   if (arg2 == 0) {
+                case STATE_ARG1:
+                    arg2=byte;
+                    // We have a command!
+                    switch (command) {
+                        case CMD_NOTEON:
+                           // Hercules MIDI controllers generate NoteOn
+                           // messages with velocity == 0 when releasing
+                           // a push-button
+                           if (arg2 == 0) {
                              if(configure) {
-			       NewMidiConfigureEvent(MIDI_NOTE, chan, arg1, 0);
+                               NewMidiConfigureEvent(MIDI_NOTE, chan, arg1, 0);
                              } else {
-			       NewMidiEvent(MIDI_NOTE, chan, arg1, 0);
-			     }
-			   } else {
+                               NewMidiEvent(MIDI_NOTE, chan, arg1, 0);
+                             }
+                           } else {
                              if(configure) {
-			       NewMidiConfigureEvent(MIDI_NOTE, chan, arg1, 1);
+                               NewMidiConfigureEvent(MIDI_NOTE, chan, arg1, 1);
                              } else {
-			       NewMidiEvent(MIDI_NOTE, chan, arg1, 1);
-			     }
-			   }
-			   break;
-			case CMD_NOTEOFF:
+                               NewMidiEvent(MIDI_NOTE, chan, arg1, 1);
+                             }
+                           }
+                           break;
+                        case CMD_NOTEOFF:
                            if(configure) {
-			     NewMidiConfigureEvent(MIDI_NOTE, chan, arg1, 0);
+                             NewMidiConfigureEvent(MIDI_NOTE, chan, arg1, 0);
                            } else {
-			     NewMidiEvent(MIDI_NOTE, chan, arg1, 0);
-			   }
-			   break;
-			case CMD_CTRL:
+                             NewMidiEvent(MIDI_NOTE, chan, arg1, 0);
+                           }
+                           break;
+                        case CMD_CTRL:
                            if(configure) {
-			     NewMidiConfigureEvent(MIDI_CTRL, chan, arg1, arg2);
+                             NewMidiConfigureEvent(MIDI_CTRL, chan, arg1, arg2);
                            } else {
-			     NewMidiEvent(MIDI_CTRL, chan, arg1, arg2);
-			   }
-			   break;
-			case CMD_PITCH:
+                             NewMidiEvent(MIDI_CTRL, chan, arg1, arg2);
+                           }
+                           break;
+                        case CMD_PITCH:
                            if(configure) {
-			     NewMidiConfigureEvent(MIDI_PITCH, chan, 0, arg1+128*arg2);
+                             NewMidiConfigureEvent(MIDI_PITCH, chan, 0, arg1+128*arg2);
                            } else {
-			     NewMidiEvent(MIDI_PITCH, chan, 0, arg1+128*arg2);
-			   }
-			   break;
+                             NewMidiEvent(MIDI_PITCH, chan, 0, arg1+128*arg2);
+                           }
+                           break;
                     }
-		    state=STATE_SKIP;
-		    break;
-	    }
+                    state=STATE_SKIP;
+                    break;
+            }
         }
     }
     return NULL;
 }
 
 void register_midi_device(int index) {
-    int i;
     int ret=0;
 
     if (index < 0 || index >= n_midi_devices) return;
@@ -200,7 +200,7 @@ void register_midi_device(int index) {
     g_print("%s: open MIDI device %d\n", __FUNCTION__, index);
 
     if ((ret = snd_rawmidi_open(&midi_input[index], NULL, midi_port[index], SND_RAWMIDI_NONBLOCK)) < 0) {
-        fprintf(stderr,"cannot open port \"%s\": %s\n", midi_port[index], snd_strerror(ret));
+        g_print("cannot open port \"%s\": %s\n", midi_port[index], snd_strerror(ret));
         return;
     }
     snd_rawmidi_read(midi_input[index], NULL, 0); /* trigger reading */
@@ -257,25 +257,25 @@ void get_midi_devices() {
     n_midi_devices=0;
     card=-1;
     if ((ret = snd_card_next(&card)) < 0) {
-        fprintf(stderr,"cannot determine card number: %s\n", snd_strerror(ret));
+        g_print("cannot determine card number: %s\n", snd_strerror(ret));
         return;
     }
     while (card >= 0) {
-        //fprintf(stderr,"Found Sound Card=%d\n",card);
+        //g_print("Found Sound Card=%d\n",card);
         sprintf(portname,"hw:%d", card);
         if ((ret = snd_ctl_open(&ctl, portname, 0)) < 0) {
-                fprintf(stderr,"cannot open control for card %d: %s\n", card, snd_strerror(ret));
+                g_print("cannot open control for card %d: %s\n", card, snd_strerror(ret));
                 return;
         }
         device = -1;
         // loop through devices of the card
         for (;;) {
             if ((ret = snd_ctl_rawmidi_next_device(ctl, &device)) < 0) {
-                fprintf(stderr,"cannot determine device number: %s\n", snd_strerror(ret));
+                g_print("cannot determine device number: %s\n", snd_strerror(ret));
                 break;
             }
             if (device < 0) break;
-            //fprintf(stderr,"Found Device=%d on Card=%d\n", device, card);
+            //g_print("Found Device=%d on Card=%d\n", device, card);
             // found sub-device
             snd_rawmidi_info_alloca(&info);
             snd_rawmidi_info_set_device(info, device);
@@ -286,7 +286,7 @@ void get_midi_devices() {
             } else {
                 subs = 0;
             }
-            //fprintf(stderr,"Number of MIDI input devices: %d\n", subs);
+            //g_print("Number of MIDI input devices: %d\n", subs);
             if (!subs) break;
             // subs: number of sub-devices to device on card
             for (sub = 0; sub < subs; ++sub) {
@@ -294,7 +294,7 @@ void get_midi_devices() {
                 snd_rawmidi_info_set_subdevice(info, sub);
                 ret = snd_ctl_rawmidi_info(ctl, info);
                 if (ret < 0) {
-                    fprintf(stderr,"cannot get rawmidi information %d:%d:%d: %s\n",
+                    g_print("cannot get rawmidi information %d:%d:%d: %s\n",
                                    card, device, sub, snd_strerror(ret));
                     break;
                 }
@@ -318,25 +318,25 @@ void get_midi_devices() {
                 int match = 1;
                 if (midi_devices[n_midi_devices].name == NULL) {
                   midi_devices[n_midi_devices].name=g_new(gchar,strlen(devnam)+1);
-		  strcpy(midi_devices[n_midi_devices].name, devnam);
+                  strcpy(midi_devices[n_midi_devices].name, devnam);
                   match = 0;
                 } else {
                   if (strcmp(devnam, midi_devices[n_midi_devices].name)) {
                     g_free(midi_devices[n_midi_devices].name);
                     midi_devices[n_midi_devices].name=g_new(gchar,strlen(devnam)+1);
-		    strcpy(midi_devices[n_midi_devices].name, devnam);
+                    strcpy(midi_devices[n_midi_devices].name, devnam);
                     match = 0;
                   }
                 }
                 if (midi_port[n_midi_devices] == NULL) {
                   midi_port[n_midi_devices]=g_new(gchar,strlen(portname)+1);
-		  strcpy(midi_port[n_midi_devices], portname);
+                  strcpy(midi_port[n_midi_devices], portname);
                   match = 0;
                 } else {
                   if (strcmp(midi_port[n_midi_devices], portname)) {
                     g_free(midi_port[n_midi_devices]);
                     midi_port[n_midi_devices]=g_new(gchar,strlen(portname)+1);
-		    strcpy(midi_port[n_midi_devices], portname);
+                    strcpy(midi_port[n_midi_devices], portname);
                     match = 0;
                   }
                 }
@@ -354,7 +354,7 @@ void get_midi_devices() {
         snd_ctl_close(ctl);
         // next card
         if ((ret = snd_card_next(&card)) < 0) {
-            fprintf(stderr,"cannot determine card number: %s\n", snd_strerror(ret));
+            g_print("cannot determine card number: %s\n", snd_strerror(ret));
             break;
         }
     }

@@ -8,40 +8,32 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 # uncomment the following line to force 480x320 screen
 #SMALL_SCREEN_OPTIONS=-D SMALL_SCREEN
 
-# uncomment the line below to include GPIO
+# uncomment the line below to include GPIO (needs libgpiod)
 # For support of:
 #    CONTROLLER1 (Original Controller)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
 #    CONTROLLER2_V2 dual encoders with MCP23017 switches
+#    G2_FRONTPANEL dual encoders with MCP23017 switches
 #
 GPIO_INCLUDE=GPIO
 
-# uncomment the line below to include MIDI support
+# uncomment the line below to include MIDI support (needs MIDI support)
 MIDI_INCLUDE=MIDI
 
 # uncomment the line below to include ANDROMEDA support
 # ANDROMEDA_OPTIONS=-D ANDROMEDA
 
-# uncomment the line below to include USB Ozy support
+# uncomment the line below to include USB Ozy support (needs libusb)
 # USBOZY_INCLUDE=USBOZY
 
-# uncomment the line to below include support local CW keyer
-LOCALCW_INCLUDE=LOCALCW
-
-# uncomment the line below for SoapySDR
+# uncomment the line below for SoapySDR (needs SOAPY libs)
 # SOAPYSDR_INCLUDE=SOAPYSDR
 
-# uncomment the line below to include support for STEMlab discovery (WITH AVAHI)
+# uncomment the line below to include support for STEMlab discovery (needs libcurl)
 #STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
-
-# uncomment the line below to include support for STEMlab discovery (WITHOUT AVAHI)
-# STEMLAB_DISCOVERY=STEMLAB_DISCOVERY_NOAVAHI
 
 # uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
 #AUDIO_MODULE=ALSA
-
-# uncomment the line below for various debug facilities
-#DEBUG_OPTION=-D DEBUG
 
 # very early code not included yet
 # SERVER_INCLUDE=SERVER
@@ -95,13 +87,6 @@ soapy_discovery.o \
 soapy_protocol.o
 endif
 
-ifeq ($(LOCALCW_INCLUDE),LOCALCW)
-LOCALCW_OPTIONS=-D LOCALCW
-LOCALCW_SOURCES= iambic.c
-LOCALCW_HEADERS= iambic.h
-LOCALCW_OBJS   = iambic.o
-endif
-
 #
 # disable GPIO for MacOS
 #
@@ -118,23 +103,8 @@ endif
 GPIO_LIBS=-lgpiod -li2c
 endif
 
-#
-# We have two versions of STEMLAB_DISCOVERY here,
-# the second one has to be used
-# if you do not have the avahi (devel-) libraries
-# on your system.
-#
 ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
-STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY \
-  `$(PKG_CONFIG) --cflags avahi-gobject` `$(PKG_CONFIG) --cflags libcurl`
-STEMLAB_LIBS=`$(PKG_CONFIG) --libs avahi-gobject --libs libcurl`
-STEMLAB_SOURCES=stemlab_discovery.c
-STEMLAB_HEADERS=stemlab_discovery.h
-STEMLAB_OBJS=stemlab_discovery.o
-endif
-
-ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY_NOAVAHI)
-STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY -D NO_AVAHI `$(PKG_CONFIG) --cflags libcurl`
+STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
 STEMLAB_SOURCES=stemlab_discovery.c
 STEMLAB_HEADERS=stemlab_discovery.h
@@ -193,7 +163,7 @@ AUDIO_OBJS=portaudio.o
 endif
 
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
-	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) $(LOCALCW_OPTIONS) \
+	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) \
 	$(ANDROMEDA_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
@@ -279,10 +249,8 @@ button_text.c \
 vox.c \
 store.c \
 store_menu.c \
-memory.c \
 led.c \
 ext.c \
-error_handler.c \
 cwramp.c \
 protocols.c \
 css.c \
@@ -295,7 +263,8 @@ encoder_menu.c \
 switch_menu.c \
 toolbar_menu.c \
 sintab.c \
-ps_menu.c
+ps_menu.c \
+iambic.c
 
 
 
@@ -305,7 +274,6 @@ agc.h \
 alex.h \
 band.h \
 bandstack.h \
-channel.h \
 discovered.h \
 discovery.h \
 filter.h \
@@ -359,10 +327,8 @@ button_text.h \
 vox.h \
 store.h \
 store_menu.h \
-memory.h \
 led.h \
 ext.h \
-error_handler.h \
 protocols.h \
 css.h \
 actions.h \
@@ -374,7 +340,8 @@ encoder_menu.h \
 switch_menu.h \
 toolbar_menu.h \
 sintab.h \
-ps_menu.h
+ps_menu.h \
+iambic.h
 
 
 
@@ -435,10 +402,8 @@ button_text.o \
 vox.o \
 store.o \
 store_menu.o \
-memory.o \
 led.o \
 ext.o \
-error_handler.o \
 cwramp.o \
 protocols.o \
 css.o \
@@ -451,18 +416,18 @@ encoder_menu.o \
 switch_menu.o \
 toolbar_menu.o \
 sintab.o \
-ps_menu.o
+ps_menu.o \
+iambic.o
 
-$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
+$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
-	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
+	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
-	$(LOCALCW_HEADERS) \
 	$(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) $(AUDIO_SOURCES) $(SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) \
+	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
 	$(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
@@ -475,16 +440,18 @@ prebuild:
 # Therefore, correct this here. Furthermore, we can add additional options to CPP
 # in the variable CPPOPTIONS
 #
-CPPOPTIONS= --enable=all --suppress=shadowVariable --suppress=variableScope
+CPPOPTIONS= --enable=all
 ifeq ($(UNAME_S), Darwin)
 CPPOPTIONS += -D__APPLE__
+else
+CPPOPTIONS += -D__linux__
 endif
 CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 
 .PHONY:	cppcheck
 cppcheck:
 	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(USBOZY_SOURCES) \
-	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(LOCALCW_SOURCES) $(SERVER_SOURCES)
+	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	clean
 clean:
@@ -585,10 +552,10 @@ debian:
 #############################################################################
 
 .PHONY: app
-app:	$(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  $(SOAPYSDR_OBJS) $(LOCALCW_OBJS) \
+app:	$(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
 	$(LINK) -headerpad_max_install_names -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS)  \
-		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) \
+		$(SOAPYSDR_OBJS) $(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) \
 		$(LIBS) $(LDFLAGS)
 	@rm -rf pihpsdr.app
 	@mkdir -p pihpsdr.app/Contents/MacOS

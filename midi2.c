@@ -48,62 +48,62 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
 #endif
 
     if (event == MIDI_PITCH) {
-	desc=MidiCommandsTable[128];
+        desc=MidiCommandsTable[128];
     } else {
-	desc=MidiCommandsTable[note];
+        desc=MidiCommandsTable[note];
     }
 //g_print("%s: init DESC=%p\n",__FUNCTION__,desc);
     while (desc) {
 //g_print("%s: DESC=%p next=%p CHAN=%d EVENT=%d\n",__FUNCTION__,desc,desc->next,desc->channel,desc->event);
-	if ((desc->channel == channel || desc->channel == -1) && (desc->event == event)) {
-	    // Found matching entry
-	    switch (desc->event) {
-		case MIDI_NOTE:
+        if ((desc->channel == channel || desc->channel == -1) && (desc->event == event)) {
+            // Found matching entry
+            switch (desc->event) {
+                case MIDI_NOTE:
                     DoTheMidi(desc->action, desc->type, val);
                     break;
-		case MIDI_CTRL:
-		    if (desc->type == MIDI_KNOB) {
-			// normalize value to range 0 - 100, round to nearest
-			new = (val*100+63)/127;
-			DoTheMidi(desc->action, desc->type, new);
-		    } else if (desc->type == MIDI_WHEEL) {
-			if (desc->delay > 0 && last_wheel_action == desc->action) {
-			  clock_gettime(CLOCK_MONOTONIC, &tp);
-			  delta=1000*(tp.tv_sec - last_wheel_tp.tv_sec);
-			  delta += (tp.tv_nsec - last_wheel_tp.tv_nsec)/1000000;
-			  if (delta < desc->delay) break;
-			  last_wheel_tp = tp;
-			}
-			// translate value to direction/speed
-			new=0;
-			if ((val >= desc->vfl1) && (val <= desc->vfl2)) new=-16;
-			if ((val >= desc-> fl1) && (val <= desc-> fl2)) new=-4;
-			if ((val >= desc->lft1) && (val <= desc->lft2)) new=-1;
-			if ((val >= desc->rgt1) && (val <= desc->rgt2)) new= 1;
-			if ((val >= desc-> fr1) && (val <= desc-> fr2)) new= 4;
-			if ((val >= desc->vfr1) && (val <= desc->vfr2)) new= 16;
-//			g_print("%s: WHEEL PARAMS: val=%d new=%d thrs=%d/%d, %d/%d, %d/%d, %d/%d, %d/%d, %d/%d\n",
+                case MIDI_CTRL:
+                    if (desc->type == MIDI_KNOB) {
+                        // normalize value to range 0 - 100, round to nearest
+                        new = (val*100+63)/127;
+                        DoTheMidi(desc->action, desc->type, new);
+                    } else if (desc->type == MIDI_WHEEL) {
+                        if (desc->delay > 0 && last_wheel_action == desc->action) {
+                          clock_gettime(CLOCK_MONOTONIC, &tp);
+                          delta=1000*(tp.tv_sec - last_wheel_tp.tv_sec);
+                          delta += (tp.tv_nsec - last_wheel_tp.tv_nsec)/1000000;
+                          if (delta < desc->delay) break;
+                          last_wheel_tp = tp;
+                        }
+                        // translate value to direction/speed
+                        new=0;
+                        if ((val >= desc->vfl1) && (val <= desc->vfl2)) new=-16;
+                        if ((val >= desc-> fl1) && (val <= desc-> fl2)) new=-4;
+                        if ((val >= desc->lft1) && (val <= desc->lft2)) new=-1;
+                        if ((val >= desc->rgt1) && (val <= desc->rgt2)) new= 1;
+                        if ((val >= desc-> fr1) && (val <= desc-> fr2)) new= 4;
+                        if ((val >= desc->vfr1) && (val <= desc->vfr2)) new= 16;
+//                      g_print("%s: WHEEL PARAMS: val=%d new=%d thrs=%d/%d, %d/%d, %d/%d, %d/%d, %d/%d, %d/%d\n",
 //                               __FUNCTION__,
 //                               val, new, desc->vfl1, desc->vfl2, desc->fl1, desc->fl2, desc->lft1, desc->lft2,
-//				 desc->rgt1, desc->rgt2, desc->fr1, desc->fr2, desc->vfr1, desc->vfr2);
-			if (new != 0) DoTheMidi(desc->action, desc->type, new);
-			last_wheel_action=desc->action;
-		    }
-		    break;
-		case MIDI_PITCH:
-		    if (desc->type == MIDI_KNOB) {
-			// normalize value to 0 - 100, round to nearest
-			new = (val*100+8191)/16383;
-			DoTheMidi(desc->action, desc->type, new);
-		    }
-		    break;
-		case EVENT_NONE:
-		    break;
-	    }
-	    break;
-	} else {
-	    desc=desc->next;
-	}
+//                               desc->rgt1, desc->rgt2, desc->fr1, desc->fr2, desc->vfr1, desc->vfr2);
+                        if (new != 0) DoTheMidi(desc->action, desc->type, new);
+                        last_wheel_action=desc->action;
+                    }
+                    break;
+                case MIDI_PITCH:
+                    if (desc->type == MIDI_KNOB) {
+                        // normalize value to 0 - 100, round to nearest
+                        new = (val*100+8191)/16383;
+                        DoTheMidi(desc->action, desc->type, new);
+                    }
+                    break;
+                case EVENT_NONE:
+                    break;
+            }
+            break;
+        } else {
+            desc=desc->next;
+        }
     }
     if (!desc) {
       // Nothing found. This is nothing to worry about, but log the key to stderr
@@ -115,15 +115,6 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
 
 gchar *midi_types[] = {"NONE","KEY","KNOB/SLIDER","*INVALID*","WHEEL"};
 gchar *midi_events[] = {"NONE","NOTE","CTRL","PITCH"};
-
-int MIDIstop() {
-  for (int i=0; i<n_midi_devices; i++) {
-    if (midi_devices[i].active) {
-      close_midi_device(i);
-    }
-  }
-  return 0;
-}
 
 /*
  * Release data from MidiCommandsTable
@@ -186,109 +177,109 @@ typedef struct _old_mapping {
 
 
 static OLD_MAPPING OLD_Mapping[] = {
-	{ NO_ACTION,		"NONE"			},
-	{ A_TO_B,		"A2B"			},
-        { AF_GAIN,      	"AFGAIN"		},
-	{ AGC,   		"AGCATTACK"		},
-        { AGC_GAIN, 		"AGCVAL"		},
-        { ANF,     		"ANF"			},
-        { ATTENUATION, 		"ATT"			},
-	{ B_TO_A,		"B2A"			},
-	{ BAND_10,      	"BAND10"		},
-        { BAND_12,      	"BAND12"		},
-        { BAND_1240,    	"BAND1240"		},
-        { BAND_144,     	"BAND144"		},
-        { BAND_15,      	"BAND15"		},
-        { BAND_160,     	"BAND160"		},
-        { BAND_17,      	"BAND17"		},
-        { BAND_20,      	"BAND20"		},
-        { BAND_220,     	"BAND220"		},
-        { BAND_2300,    	"BAND2300"		},
-        { BAND_30,      	"BAND30"		},
-        { BAND_3400,    	"BAND3400"		},
-        { BAND_40,      	"BAND40"		},
-        { BAND_430,     	"BAND430"		},
-        { BAND_6,       	"BAND6"			},
-        { BAND_60,      	"BAND60"		},
-        { BAND_70,      	"BAND70"		},
-        { BAND_80,      	"BAND80"		},
-        { BAND_902,     	"BAND902"		},
-        { BAND_AIR,     	"BANDAIR"		},
-        { BAND_MINUS,   	"BANDDOWN"		},
-        { BAND_GEN,     	"BANDGEN"		},
-        { BAND_PLUS,    	"BANDUP"		},
-        { BAND_WWV,     	"BANDWWV"		},
-        { COMPRESSION,  	"COMPRESS"		},
-	{ CTUN,  		"CTUN"			},
-	{ VFO,			"CURRVFO"		},
-	{ CW_LEFT,		"CWL"			},
-	{ CW_RIGHT,		"CWR"			},
-	{ CW_SPEED,		"CWSPEED"		},
-	{ DIV_GAIN_COARSE,	"DIVCOARSEGAIN"		},
-	{ DIV_PHASE_COARSE,	"DIVCOARSEPHASE"	},
-	{ DIV_GAIN_FINE,	"DIVFINEGAIN"		},
-	{ DIV_PHASE_FINE,	"DIVFINEPHASE"		},
-	{ DIV_GAIN,		"DIVGAIN"		},
-	{ DIV_PHASE,		"DIVPHASE"		},
-	{ DIV,			"DIVTOGGLE"		},
-	{ DUPLEX,  		"DUP"			},
-        { FILTER_MINUS,  	"FILTERDOWN"		},
-        { FILTER_PLUS,    	"FILTERUP"		},
-	{ MENU_FILTER,		"MENU_FILTER"		},
-	{ MENU_MODE,		"MENU_MODE"		},
-	{ LOCK,	    		"LOCK"			},
-        { MIC_GAIN,   		"MICGAIN"		},
-	{ MODE_MINUS,		"MODEDOWN"		},
-	{ MODE_PLUS,		"MODEUP"		},
-        { MOX, 		    	"MOX"			},
-	{ MUTE,			"MUTE"			},
-	{ NB,    		"NOISEBLANKER"		},
-	{ NR,    		"NOISEREDUCTION"	},
-	{ NUMPAD_0,		"NUMPAD0"		},
-	{ NUMPAD_1,		"NUMPAD1"		},
-	{ NUMPAD_2,		"NUMPAD2"		},
-	{ NUMPAD_3,		"NUMPAD3"		},
-	{ NUMPAD_4,		"NUMPAD4"		},
-	{ NUMPAD_5,		"NUMPAD5"		},
-	{ NUMPAD_6,		"NUMPAD6"		},
-	{ NUMPAD_7,		"NUMPAD7"		},
-	{ NUMPAD_8,		"NUMPAD8"		},
-	{ NUMPAD_9,		"NUMPAD9"		},
-	{ NUMPAD_CL,		"NUMPADCL"		},
-	{ NUMPAD_ENTER,		"NUMPADENTER"		},
-        { PAN,			"PAN"			},
-        { PANADAPTER_HIGH,     	"PANHIGH"		},
-        { PANADAPTER_LOW,      	"PANLOW"		},
-        { PREAMP,          	"PREAMP"		},
-	{ PTT,    		"PTT"			},
-	{ PS,    		"PURESIGNAL"		},
-	{ RF_GAIN,	 	"RFGAIN"		},
-        { DRIVE, 	    	"RFPOWER"		},
-	{ RIT_CLEAR,		"RITCLEAR"		},
-	{ RIT_STEP, 		"RITSTEP"		},
-        { RIT_ENABLE,   	"RITTOGGLE"		},
-        { RIT, 	     		"RITVAL"		},
-        { SAT,     		"SAT"			},
-        { SNB, 		    	"SNB"			},
-	{ SPLIT,  		"SPLIT"			},
-	{ SWAP_RX,		"SWAPRX"		},
-	{ A_SWAP_B,		"SWAPVFO"		},
-        { TUNE, 	   	"TUNE"			},
-        { VFOA,         	"VFOA"			},
-        { VFOB,         	"VFOB"			},
-	{ VFO_STEP_MINUS,	"VFOSTEPDOWN"		},
-	{ VFO_STEP_PLUS,  	"VFOSTEPUP"		},
-	{ VOX,   		"VOX"			},
-	{ VOXLEVEL,   		"VOXLEVEL"		},
-	{ XIT_CLEAR, 	 	"XITCLEAR"		},
-	{ XIT,  		"XITVAL"		},
-	{ ZOOM,			"ZOOM"			},
-	{ ZOOM_MINUS,		"ZOOMDOWN"		},
-	{ ZOOM_PLUS,		"ZOOMUP"		},
+        { NO_ACTION,            "NONE"                  },
+        { A_TO_B,               "A2B"                   },
+        { AF_GAIN,              "AFGAIN"                },
+        { AGC,                  "AGCATTACK"             },
+        { AGC_GAIN,             "AGCVAL"                },
+        { ANF,                  "ANF"                   },
+        { ATTENUATION,          "ATT"                   },
+        { B_TO_A,               "B2A"                   },
+        { BAND_10,              "BAND10"                },
+        { BAND_12,              "BAND12"                },
+        { BAND_1240,            "BAND1240"              },
+        { BAND_144,             "BAND144"               },
+        { BAND_15,              "BAND15"                },
+        { BAND_160,             "BAND160"               },
+        { BAND_17,              "BAND17"                },
+        { BAND_20,              "BAND20"                },
+        { BAND_220,             "BAND220"               },
+        { BAND_2300,            "BAND2300"              },
+        { BAND_30,              "BAND30"                },
+        { BAND_3400,            "BAND3400"              },
+        { BAND_40,              "BAND40"                },
+        { BAND_430,             "BAND430"               },
+        { BAND_6,               "BAND6"                 },
+        { BAND_60,              "BAND60"                },
+        { BAND_70,              "BAND70"                },
+        { BAND_80,              "BAND80"                },
+        { BAND_902,             "BAND902"               },
+        { BAND_AIR,             "BANDAIR"               },
+        { BAND_MINUS,           "BANDDOWN"              },
+        { BAND_GEN,             "BANDGEN"               },
+        { BAND_PLUS,            "BANDUP"                },
+        { BAND_WWV,             "BANDWWV"               },
+        { COMPRESSION,          "COMPRESS"              },
+        { CTUN,                 "CTUN"                  },
+        { VFO,                  "CURRVFO"               },
+        { CW_LEFT,              "CWL"                   },
+        { CW_RIGHT,             "CWR"                   },
+        { CW_SPEED,             "CWSPEED"               },
+        { DIV_GAIN_COARSE,      "DIVCOARSEGAIN"         },
+        { DIV_PHASE_COARSE,     "DIVCOARSEPHASE"        },
+        { DIV_GAIN_FINE,        "DIVFINEGAIN"           },
+        { DIV_PHASE_FINE,       "DIVFINEPHASE"          },
+        { DIV_GAIN,             "DIVGAIN"               },
+        { DIV_PHASE,            "DIVPHASE"              },
+        { DIV,                  "DIVTOGGLE"             },
+        { DUPLEX,               "DUP"                   },
+        { FILTER_MINUS,         "FILTERDOWN"            },
+        { FILTER_PLUS,          "FILTERUP"              },
+        { MENU_FILTER,          "MENU_FILTER"           },
+        { MENU_MODE,            "MENU_MODE"             },
+        { LOCK,                 "LOCK"                  },
+        { MIC_GAIN,             "MICGAIN"               },
+        { MODE_MINUS,           "MODEDOWN"              },
+        { MODE_PLUS,            "MODEUP"                },
+        { MOX,                  "MOX"                   },
+        { MUTE,                 "MUTE"                  },
+        { NB,                   "NOISEBLANKER"          },
+        { NR,                   "NOISEREDUCTION"        },
+        { NUMPAD_0,             "NUMPAD0"               },
+        { NUMPAD_1,             "NUMPAD1"               },
+        { NUMPAD_2,             "NUMPAD2"               },
+        { NUMPAD_3,             "NUMPAD3"               },
+        { NUMPAD_4,             "NUMPAD4"               },
+        { NUMPAD_5,             "NUMPAD5"               },
+        { NUMPAD_6,             "NUMPAD6"               },
+        { NUMPAD_7,             "NUMPAD7"               },
+        { NUMPAD_8,             "NUMPAD8"               },
+        { NUMPAD_9,             "NUMPAD9"               },
+        { NUMPAD_CL,            "NUMPADCL"              },
+        { NUMPAD_ENTER,         "NUMPADENTER"           },
+        { PAN,                  "PAN"                   },
+        { PANADAPTER_HIGH,      "PANHIGH"               },
+        { PANADAPTER_LOW,       "PANLOW"                },
+        { PREAMP,               "PREAMP"                },
+        { PTT,                  "PTT"                   },
+        { PS,                   "PURESIGNAL"            },
+        { RF_GAIN,              "RFGAIN"                },
+        { DRIVE,                "RFPOWER"               },
+        { RIT_CLEAR,            "RITCLEAR"              },
+        { RIT_STEP,             "RITSTEP"               },
+        { RIT_ENABLE,           "RITTOGGLE"             },
+        { RIT,                  "RITVAL"                },
+        { SAT,                  "SAT"                   },
+        { SNB,                  "SNB"                   },
+        { SPLIT,                "SPLIT"                 },
+        { SWAP_RX,              "SWAPRX"                },
+        { A_SWAP_B,             "SWAPVFO"               },
+        { TUNE,                 "TUNE"                  },
+        { VFOA,                 "VFOA"                  },
+        { VFOB,                 "VFOB"                  },
+        { VFO_STEP_MINUS,       "VFOSTEPDOWN"           },
+        { VFO_STEP_PLUS,        "VFOSTEPUP"             },
+        { VOX,                  "VOX"                   },
+        { VOXLEVEL,             "VOXLEVEL"              },
+        { XIT_CLEAR,            "XITCLEAR"              },
+        { XIT,                  "XITVAL"                },
+        { ZOOM,                 "ZOOM"                  },
+        { ZOOM_MINUS,           "ZOOMDOWN"              },
+        { ZOOM_PLUS,            "ZOOMUP"                },
         { CW_KEYER_KEYDOWN,     "KEYER-CW"              },
         { CW_KEYER_SPEED,       "KEYER-SPEED"           },
         { CW_KEYER_SIDETONE,    "KEYER-SIDETONE"        },
-        { NO_ACTION,  		"NONE"			}
+        { NO_ACTION,            "NONE"                  }
 };
 
 /*
@@ -299,9 +290,9 @@ static int keyword2action(char *s) {
     int i=0;
 
     for (i=0; i< (sizeof(OLD_Mapping) / sizeof(OLD_Mapping[0])); i++) {
-	if (!strcmp(s, OLD_Mapping[i].str)) return OLD_Mapping[i].action;
+        if (!strcmp(s, OLD_Mapping[i].str)) return OLD_Mapping[i].action;
     }
-    fprintf(stderr,"MIDI: action keyword %s NOT FOUND.\n", s);
+    g_print("MIDI: action keyword %s NOT FOUND.\n", s);
     return NO_ACTION;
 }
 
@@ -342,15 +333,15 @@ int ReadLegacyMidiFile(char *filename) {
       cp=zeile;
       while ((c=*cp)) {
         switch (c) {
-	  case '\n':
-	  case '\r':
-	  case '\t':
-	  case ',':
-	  case '/':
-	    *cp=' ';
-	    break;
+          case '\n':
+          case '\r':
+          case '\t':
+          case ',':
+          case '/':
+            *cp=' ';
+            break;
         }
-	cp++;
+        cp++;
       }
 
 //g_print("\n%s:INP:%s\n",__FUNCTION__,zeile);
@@ -373,18 +364,18 @@ int ReadLegacyMidiFile(char *filename) {
       if ((cp = strstr(zeile, "KEY="))) {
         sscanf(cp+4, "%d", &key);
         event=MIDI_NOTE;
-	type=MIDI_KEY;
+        type=MIDI_KEY;
 //g_print("%s: MIDI:KEY:%d\n",__FUNCTION__, key);
       }
       if ((cp = strstr(zeile, "CTRL="))) {
         sscanf(cp+5, "%d", &key);
-	event=MIDI_CTRL;
-	type=MIDI_KNOB;
+        event=MIDI_CTRL;
+        type=MIDI_KNOB;
 //g_print("%s: MIDI:CTL:%d\n",__FUNCTION__, key);
       }
       if ((cp = strstr(zeile, "PITCH "))) {
         event=MIDI_PITCH;
-	type=MIDI_KNOB;
+        type=MIDI_KNOB;
 //g_print("%s: MIDI:PITCH\n",__FUNCTION__);
       }
       //
@@ -392,7 +383,7 @@ int ReadLegacyMidiFile(char *filename) {
       //
       if (event == EVENT_NONE) {
 //g_print("%s: no event found: %s\n", __FUNCTION__, zeile);
-	continue;
+        continue;
       }
 
       //
@@ -403,12 +394,12 @@ int ReadLegacyMidiFile(char *filename) {
 
       if ((cp = strstr(zeile, "CHAN="))) {
         sscanf(cp+5, "%d", &chan);
-	chan--;
+        chan--;
         if (chan<0 || chan>15) chan=-1;
 //g_print("%s:CHAN:%d\n",__FUNCTION__,chan);
       }
       if ((cp = strstr(zeile, "WHEEL")) && (type == MIDI_KNOB)) {
-	// change type from MIDI_KNOB to MIDI_WHEEL
+        // change type from MIDI_KNOB to MIDI_WHEEL
         type=MIDI_WHEEL;
 //g_print("%s:WHEEL\n",__FUNCTION__);
       }
@@ -425,7 +416,7 @@ int ReadLegacyMidiFile(char *filename) {
         // cut zeile at the first blank character following
         cq=cp+7;
         while (*cq != 0 && *cq != '\n' && *cq != ' ' && *cq != '\t') cq++;
-	*cq=0;
+        *cq=0;
         action=keyword2action(cp+7);
 //g_print("MIDI:ACTION:%s (%d)\n",cp+7, action);
       }

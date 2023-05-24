@@ -37,8 +37,6 @@
 #include "new_menu.h"
 #include "vfo.h"
 
-static GtkWidget *parent_window;
-
 static GtkWidget *meter;
 static cairo_surface_t *meter_surface = NULL;
 
@@ -55,18 +53,6 @@ static double max_alc   = min_alc;
 static double max_pwr   = min_pwr;
 
 static int max_count=0;
-
-static void
-meter_clear_surface (void)
-{
-  cairo_t *cr;
-  cr = cairo_create (meter_surface);
-
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-  cairo_fill (cr);
-
-  cairo_destroy (cr);
-}
 
 static gboolean
 meter_configure_event_cb (GtkWidget         *widget,
@@ -112,12 +98,11 @@ meter_press_event_cb (GtkWidget *widget,
 }
 
 
-GtkWidget* meter_init(int width,int height,GtkWidget *parent) {
+GtkWidget* meter_init(int width,int height) {
 
-fprintf(stderr,"meter_init: width=%d height=%d\n",width,height);
+g_print("meter_init: width=%d height=%d\n",width,height);
   meter_width=width;
   meter_height=height;
-  parent_window=parent;
 
   meter = gtk_drawing_area_new ();
   gtk_widget_set_size_request (meter, width, height);
@@ -143,7 +128,6 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   double rxlvl;   // only used for RX input level, clones "value"
   double pwr;     // only used for TX power, clones "value"
   char sf[32];
-  int text_location;
   double offset;
   char *units="W";
   double interval=10.0;
@@ -374,39 +358,6 @@ if(analog_meter) {
       cairo_set_line_width(cr, 1.0);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
-      char *units="W";
-      double interval=10.0;
-
-      if(band->disablePA || !pa_enabled) {
-        units="mW";
-        interval=100.0;
-      } else {
-        switch(pa_power) {
-          case PA_1W:
-            units="mW";
-            interval=100.0;
-            break;
-          case PA_10W:
-            interval=1.0;
-            break;
-          case PA_30W:
-            interval=3.0;
-            break;
-          case PA_50W:
-            interval=5.0;
-            break;
-          case PA_100W:
-            interval=10.0;
-            break;
-          case PA_200W:
-            interval=20.0;
-            break;
-          case PA_500W:
-            interval=50.0;
-            break;
-        }
-      }
-
       for(i=0;i<=100;i++) {
         angle=(double)i+offset;
         radians=angle*M_PI/180.0;
@@ -503,6 +454,7 @@ if(analog_meter) {
   }
 
 } else {
+  int text_location;
   // Section for the digital meter
   // clear the meter
   cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
@@ -601,18 +553,18 @@ if(analog_meter) {
           l=max_rxlvl+20.0;
         }
 
-	// use colours from the "gradient" panadapter display,
+        // use colours from the "gradient" panadapter display,
         // but use no gradient: S0-S9 first colour, <S9 last colour
-	cairo_pattern_t *pat=cairo_pattern_create_linear(0.0,0.0,114.0,0.0);
-	cairo_pattern_add_color_stop_rgba(pat,0.00,COLOUR_GRAD1);
-	cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD1);
-	cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD4);
-	cairo_pattern_add_color_stop_rgba(pat,1.00,COLOUR_GRAD4);
+        cairo_pattern_t *pat=cairo_pattern_create_linear(0.0,0.0,114.0,0.0);
+        cairo_pattern_add_color_stop_rgba(pat,0.00,COLOUR_GRAD1);
+        cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD1);
+        cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD4);
+        cairo_pattern_add_color_stop_rgba(pat,1.00,COLOUR_GRAD4);
         cairo_set_source(cr, pat);
 
         cairo_rectangle(cr, offset+0.0, (double)(meter_height-40), (double)((l+127.0)*db), 20.0);
         cairo_fill(cr);
-	cairo_pattern_destroy(pat);
+        cairo_pattern_destroy(pat);
 
         if(l!=0) {
           //
@@ -641,9 +593,9 @@ if(analog_meter) {
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
       if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
-	//
-	// Power/Alc/SWR not available for SOAPY.
-	//
+        //
+        // Power/Alc/SWR not available for SOAPY.
+        //
         sprintf(sf,"FWD: %d%s",(int)(max_pwr+0.5),units);
         cairo_move_to(cr, 10, 35);
         cairo_show_text(cr, sf);

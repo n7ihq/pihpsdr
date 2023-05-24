@@ -46,14 +46,6 @@ enum {
   FILTERS
 };
 
-extern int filter;
-
-extern int filterLow;
-extern int filterHigh;
-
-extern int txFilterLowCut;
-extern int txFilterHighCut;
-
 extern FILTER *filters[MODES];
 extern const int var1_default_low[MODES];
 extern const int var1_default_high[MODES];

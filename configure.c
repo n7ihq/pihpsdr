@@ -40,18 +40,14 @@
 
 #ifdef GPIO
 
-static GtkWidget *dialog;
-
 static GtkWidget *i2c_sw_text[16];
-
-static void response_event(GtkWidget *dialog,gint id,gpointer user_data) {
+static void response_event(GtkWidget *dialog, gint id,gpointer user_data) {
   g_print("%s: id=%d\n",__FUNCTION__,id);
   if(id==GTK_RESPONSE_ACCEPT) {
     gpio_save_state();
     g_print("%s: ACCEPT\n",__FUNCTION__);
   }
   gtk_widget_destroy(dialog);
-  dialog=NULL;
 }
 
 void configure_gpio(GtkWidget *parent) {
@@ -59,7 +55,6 @@ void configure_gpio(GtkWidget *parent) {
   gint col=0;
   GtkWidget *widget;
   GtkWidget *grid;
-  int i;
 
   gpio_restore_state();
 
@@ -83,9 +78,8 @@ void configure_gpio(GtkWidget *parent) {
       max_encoders=4;
       break;
     case CONTROLLER2_V1:
-      max_encoders=5;
-      break;
     case CONTROLLER2_V2:
+    case G2_FRONTPANEL:
       max_encoders=5;
       break;
   }
@@ -108,16 +102,16 @@ void configure_gpio(GtkWidget *parent) {
   row++;
   col=0;
 */
-  widget=gtk_label_new("");
+  widget=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
   col++;
 
   widget=gtk_label_new(NULL);
-  gtk_label_set_markup (GTK_LABEL(widget), controller==CONTROLLER2_V2?"<b>Bottom Encoder</b>":"<b>Encoder</b>");
+  gtk_label_set_markup (GTK_LABEL(widget), (controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL)?"<b>Bottom Encoder</b>":"<b>Encoder</b>");
   gtk_grid_attach(GTK_GRID(grid),widget,col,row,2,1);
   col+=2;
 
-  if(controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     widget=gtk_label_new(NULL);
     gtk_label_set_markup (GTK_LABEL(widget), "<b>Top Encoder</b>");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,2,1);
@@ -146,7 +140,7 @@ void configure_gpio(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
   col++;
 
-  if(controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     widget=gtk_label_new(NULL);
     gtk_label_set_markup (GTK_LABEL(widget), "<b>Gpio A</b>");
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -161,12 +155,11 @@ void configure_gpio(GtkWidget *parent) {
   widget=gtk_label_new(NULL);
   gtk_label_set_markup (GTK_LABEL(widget), "<b>Gpio</b>");
   gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-  col++;
 
   row++;
   col=0;
 
-  for(i=0;i<max_encoders;i++) {
+  for(int i=0;i<max_encoders;i++) {
     widget=gtk_label_new(NULL);
     gchar id[16];
     g_sprintf(id,"<b>%d</b>",i);
@@ -184,7 +177,7 @@ void configure_gpio(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
     col++;
 
-    if(controller==CONTROLLER2_V2 && i<(max_encoders-1)) {
+    if((controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) && i<(max_encoders-1)) {
       widget=gtk_spin_button_new_with_range (0.0,28.0,1.0);
       gtk_spin_button_set_value (GTK_SPIN_BUTTON(widget),encoders[i].top_encoder_address_a);
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -200,7 +193,6 @@ void configure_gpio(GtkWidget *parent) {
       widget=gtk_spin_button_new_with_range (0.0,28.0,1.0);
       gtk_spin_button_set_value (GTK_SPIN_BUTTON(widget),encoders[i].switch_address);
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
     }
 
     row++;
@@ -220,9 +212,8 @@ void configure_gpio(GtkWidget *parent) {
         max_switches=8;
         break;
       case CONTROLLER2_V1:
-        max_switches=0;
-        break;
       case CONTROLLER2_V2:
+      case G2_FRONTPANEL:
         max_switches=0;
         break;
     }
@@ -245,7 +236,7 @@ void configure_gpio(GtkWidget *parent) {
     row++;
     col=0;
 */
-    for(i=0;i<max_switches/8;i++) {
+    for(int i=0;i<max_switches/8;i++) {
       widget=gtk_label_new(NULL);
       gtk_label_set_markup (GTK_LABEL(widget), "<b>ID</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
@@ -254,13 +245,11 @@ void configure_gpio(GtkWidget *parent) {
       widget=gtk_label_new(NULL);
       gtk_label_set_markup (GTK_LABEL(widget), "<b>Gpio</b>");
       gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
     }
 
     row++;
-    col=0;
 
-    for(i=0;i<max_switches;i++) {
+    for(int i=0;i<max_switches;i++) {
       widget=gtk_label_new(NULL);
       gchar id[16];
       g_sprintf(id,"<b>%d</b>",i);
@@ -275,7 +264,7 @@ void configure_gpio(GtkWidget *parent) {
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new("switches"));
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     char text[16];
     grid=gtk_grid_new();
     gtk_grid_set_column_homogeneous(GTK_GRID(grid),FALSE);
@@ -308,7 +297,6 @@ void configure_gpio(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
 
     row++;
-    col=0;
 
     for(int i=0;i<8;i++) {
       widget=gtk_label_new(NULL);

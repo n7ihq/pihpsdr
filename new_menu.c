@@ -115,23 +115,7 @@ static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
 //
 static gboolean restart_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      old_protocol_stop();
-      usleep(200000);
-      old_protocol_run();
-      break;
-    case NEW_PROTOCOL:
-      new_protocol_menu_stop();
-      usleep(200000);
-      new_protocol_menu_start();
-      break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      // dunno how to do this for soapy
-      break;
-#endif
-  }
+  protocol_restart();
   return TRUE;
 }
 
@@ -267,11 +251,6 @@ void start_band() {
   }
 }
 
-static gboolean band_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_band();
-  return TRUE;
-}
-
 void start_bandstack() {
   int old_menu=active_menu;
   cleanup();
@@ -279,11 +258,6 @@ void start_bandstack() {
     bandstack_menu(top_window);
     active_menu=BANDSTACK_MENU;
   }
-}
-
-static gboolean bandstack_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_bandstack();
-  return TRUE;
 }
 
 void start_mode() {
@@ -295,11 +269,6 @@ void start_mode() {
   }
 }
 
-static gboolean mode_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_mode();
-  return TRUE;
-}
-
 void start_filter() {
   int old_menu=active_menu;
   cleanup();
@@ -307,11 +276,6 @@ void start_filter() {
     filter_menu(top_window);
     active_menu=FILTER_MENU;
   }
-}
-
-static gboolean filter_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_filter();
-  return TRUE;
 }
 
 void start_noise() {
@@ -323,11 +287,6 @@ void start_noise() {
   }
 }
 
-static gboolean noise_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_noise();
-  return TRUE;
-}
-
 void start_agc() {
   int old_menu=active_menu;
   cleanup();
@@ -335,11 +294,6 @@ void start_agc() {
     agc_menu(top_window);
     active_menu=AGC_MENU;
   }
-}
-
-static gboolean agc_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_agc();
-  return TRUE;
 }
 
 void start_vox() {
@@ -381,11 +335,6 @@ void start_vfo(int vfo) {
   }
 }
 
-static gboolean vfo_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_vfo(active_receiver->id);
-  return TRUE;
-}
-
 void start_store() {
   int old_menu=active_menu;
   cleanup();
@@ -393,11 +342,6 @@ void start_store() {
     store_menu(top_window);
     active_menu=STORE_MENU;
   }
-}
-
-static gboolean store_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_store();
-  return TRUE;
 }
 
 void start_tx() {
@@ -477,14 +421,9 @@ void new_menu()
     // The "Restart" button restarts the protocol
     // This may help to recover from certain error conditions
     //
-#ifdef SOAPYSDR
-    if (protocol != SOAPYSDR_PROTOCOL)
-#endif
-    {
-      GtkWidget *restart_b=gtk_button_new_with_label("Restart");
-      g_signal_connect (restart_b, "button-press-event", G_CALLBACK(restart_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid),restart_b,2,0,1,1);
-    }
+    GtkWidget *restart_b=gtk_button_new_with_label("Restart");
+    g_signal_connect (restart_b, "button-press-event", G_CALLBACK(restart_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid),restart_b,2,0,1,1);
 
     GtkWidget *exit_b=gtk_button_new_with_label("Exit piHPSDR");
     g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
@@ -595,22 +534,23 @@ void new_menu()
         }
         break;
       case CONTROLLER1:
-#ifdef GPIO
         {
+#ifdef GPIO
         GtkWidget *encoders_b=gtk_button_new_with_label("Encoders");
         g_signal_connect (encoders_b, "button-press-event", G_CALLBACK(encoder_cb), NULL);
         gtk_grid_attach(GTK_GRID(grid),encoders_b,(i%5),i/5,1,1);
         i++;
 
         GtkWidget *switches_b=gtk_button_new_with_label("Switches");
-        g_signal_connect (switches_b, "button-press-event", G_CALLBACK(switch_cb), NULL);
+        g_signal_connect (switches_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
         gtk_grid_attach(GTK_GRID(grid),switches_b,(i%5),i/5,1,1);
         i++;
-        }
 #endif
+        }
         break;
       case CONTROLLER2_V1:
       case CONTROLLER2_V2:
+      case G2_FRONTPANEL:
         {
 #ifdef GPIO
         GtkWidget *encoders_b=gtk_button_new_with_label("Encoders");

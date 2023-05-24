@@ -27,12 +27,9 @@
 #include "new_menu.h"
 #include "dsp_menu.h"
 #include "agc.h"
-#include "channel.h"
 #include "radio.h"
 #include "receiver.h"
 #include "wdsp.h"
-
-static GtkWidget *parent_window=NULL;
 
 static GtkWidget *menu_b=NULL;
 
@@ -92,10 +89,9 @@ static void ae_cb(GtkWidget *widget, gpointer data) {
 }
 
 void dsp_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - DSP");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

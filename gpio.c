@@ -63,7 +63,6 @@
 #include "sliders.h"
 #include "new_protocol.h"
 #include "zoompan.h"
-#ifdef LOCALCW
 #include "iambic.h"
 
 //
@@ -77,7 +76,6 @@ int SIDETONE_GPIO=10;
 int ENABLE_GPIO_SIDETONE=0;
 int ENABLE_CW_BUTTONS=1;
 int CW_ACTIVE_LOW=1;
-#endif
 
 enum {
   TOP_ENCODER,
@@ -167,12 +165,20 @@ ENCODER encoders_controller2_v1[MAX_ENCODERS]={
   };
 
 ENCODER encoders_controller2_v2[MAX_ENCODERS]={
-  {TRUE,TRUE,5,1,6,1,0,DRIVE,R_START,TRUE,TRUE,26,1,20,1,0,AF_GAIN,R_START,TRUE,TRUE,22,MENU_BAND,0L},
-  {TRUE,TRUE,9,1,7,1,0,ATTENUATION,R_START,TRUE,TRUE,21,1,4,1,0,AGC_GAIN,R_START,TRUE,TRUE,27,MENU_MODE,0L},
-  {TRUE,TRUE,11,1,10,1,0,IF_WIDTH,R_START,TRUE,TRUE,19,1,16,1,0,IF_SHIFT,R_START,TRUE,TRUE,23,MENU_FILTER,0L},
-  {TRUE,TRUE,13,1,12,1,0,XIT,R_START,TRUE,TRUE,8,1,25,1,0,RIT,R_START,TRUE,TRUE,24,MENU_FREQUENCY,0L},
-  {TRUE,TRUE,18,1,17,1,0,VFO,R_START,FALSE,TRUE,0,0,0,0,0,0,R_START,FALSE,TRUE,0,0,0L},
+  {TRUE,TRUE,5,1,6,1,0,DRIVE,R_START,TRUE,TRUE,26,1,20,1,0,AF_GAIN,R_START,TRUE,TRUE,22,MENU_BAND,0L},          //ENC2
+  {TRUE,TRUE,9,1,7,1,0,ATTENUATION,R_START,TRUE,TRUE,21,1,4,1,0,AGC_GAIN,R_START,TRUE,TRUE,27,MENU_MODE,0L},    //ENC3
+  {TRUE,TRUE,11,1,10,1,0,DIV_GAIN,R_START,TRUE,TRUE,19,1,16,1,0,DIV_PHASE,R_START,TRUE,TRUE,23,DIV,0L},         //ENC4
+  {TRUE,TRUE,13,1,12,1,0,XIT,R_START,TRUE,TRUE,8,1,25,1,0,RIT,R_START,TRUE,TRUE,24,MENU_FREQUENCY,0L},          //ENC5
+  {TRUE,TRUE,18,1,17,1,0,VFO,R_START,FALSE,TRUE,0,0,0,0,0,0,R_START,FALSE,TRUE,0,0,0L},                         //ENC1/VFO
   };
+
+ENCODER encoders_g2_frontpanel[MAX_ENCODERS]={
+  {TRUE,TRUE,5,1,6,1,0,DRIVE,R_START,TRUE,TRUE,26,1,20,1,0,MIC_GAIN,R_START,TRUE,TRUE,22,PS,0L},               //ENC1
+  {TRUE,TRUE,9,1,7,1,0,AGC_GAIN,R_START,TRUE,TRUE,21,1,4,1,0,AF_GAIN,R_START,TRUE,TRUE,27,MUTE,0L},            //ENC3
+  {TRUE,TRUE,11,1,10,1,0,DIV_GAIN,R_START,TRUE,TRUE,19,1,16,1,0,DIV_PHASE,R_START,TRUE,TRUE,23,DIV,0L},        //ENC7
+  {TRUE,TRUE,13,1,12,1,0,XIT,R_START,TRUE,TRUE,8,1,25,1,0,RIT,R_START,TRUE,TRUE,24,MENU_FREQUENCY,0L},         //ENC5
+  {TRUE,TRUE,18,1,17,1,0,VFO,R_START,FALSE,TRUE,0,0,0,0,0,0,R_START,FALSE,TRUE,0,0,0L},                        //VFO
+  };  
 
 ENCODER *encoders=encoders_no_controller;
 
@@ -307,7 +313,7 @@ SWITCH switches_controller2_v1[MAX_SWITCHES]={
   {FALSE,FALSE,0,BAND_MINUS,0L},
   {FALSE,FALSE,0,MODE_PLUS,0L},
   {FALSE,FALSE,0,BAND_PLUS,0L},
-  {FALSE,FALSE,0,XIT,0L},
+  {FALSE,FALSE,0,XIT_ENABLE,0L},
   {FALSE,FALSE,0,NB,0L},
   {FALSE,FALSE,0,SNB,0L},
   {FALSE,FALSE,0,LOCK,0L},
@@ -315,22 +321,41 @@ SWITCH switches_controller2_v1[MAX_SWITCHES]={
   };
 
 SWITCH switches_controller2_v2[MAX_SWITCHES]={
-  {FALSE,FALSE,0,MOX,0L},
-  {FALSE,FALSE,0,TUNE,0L},
-  {FALSE,FALSE,0,PS,0L},
-  {FALSE,FALSE,0,TWO_TONE,0L},
-  {FALSE,FALSE,0,NR,0L},
-  {FALSE,FALSE,0,A_TO_B,0L},
-  {FALSE,FALSE,0,B_TO_A,0L},
-  {FALSE,FALSE,0,MODE_MINUS,0L},
-  {FALSE,FALSE,0,BAND_MINUS,0L},
-  {FALSE,FALSE,0,MODE_PLUS,0L},
-  {FALSE,FALSE,0,BAND_PLUS,0L},
-  {FALSE,FALSE,0,XIT,0L},
-  {FALSE,FALSE,0,NB,0L},
-  {FALSE,FALSE,0,SNB,0L},
-  {FALSE,FALSE,0,LOCK,0L},
-  {FALSE,FALSE,0,CTUN,0L}
+  {FALSE,FALSE,0,MOX,0L},       //GPB7 SW2
+  {FALSE,FALSE,0,TUNE,0L},      //GPB6 SW3
+  {FALSE,FALSE,0,PS,0L},        //GPB5 SW4
+  {FALSE,FALSE,0,TWO_TONE,0L},  //GPB4 SW5
+  {FALSE,FALSE,0,NR,0L},        //GPA3 SW6
+  {FALSE,FALSE,0,NB,0L},        //GPB3 SW14
+  {FALSE,FALSE,0,SNB,0L},       //GPB2 SW15
+  {FALSE,FALSE,0,XIT_ENABLE,0L},//GPA7 SW13
+  {FALSE,FALSE,0,BAND_PLUS,0L}, //GPA6 SW12
+  {FALSE,FALSE,0,MODE_PLUS,0L}, //GPA5 SW11
+  {FALSE,FALSE,0,BAND_MINUS,0L},//GPA4 SW10
+  {FALSE,FALSE,0,MODE_MINUS,0L},//GPA0 SW9
+  {FALSE,FALSE,0,A_TO_B,0L},    //GPA2 SW7
+  {FALSE,FALSE,0,B_TO_A,0L},    //GPA1 SW8
+  {FALSE,FALSE,0,LOCK,0L},      //GPB1 SW16
+  {FALSE,FALSE,0,CTUN,0L}       //GPB0 SW17
+  };
+
+SWITCH switches_g2_frontpanel[MAX_SWITCHES]={
+  {FALSE,FALSE,0,XIT_ENABLE,0L},//GPB7 SW22
+  {FALSE,FALSE,0,RIT_ENABLE,0L},//GPB6 SW21
+  {FALSE,FALSE,0,FUNCTION,0L},  //GPB5 SW20
+  {FALSE,FALSE,0,SPLIT,0L},     //GPB4 SW19
+  {FALSE,FALSE,0,LOCK,0L},      //GPA3 SW9
+  {FALSE,FALSE,0,B_TO_A,0L},    //GPB3 SW18
+  {FALSE,FALSE,0,A_TO_B,0L},    //GPB2 SW17
+  {FALSE,FALSE,0,MODE_MINUS,0L},//GPA7 SW13
+  {FALSE,FALSE,0,BAND_PLUS,0L}, //GPA6 SW12
+  {FALSE,FALSE,0,FILTER_PLUS,0L},//GPA5 SW11
+  {FALSE,FALSE,0,MODE_PLUS,0L}, //GPA4 SW10
+  {FALSE,FALSE,0,MOX,0L},       //GPA0 SW6
+  {FALSE,FALSE,0,CTUN,0L},      //GPA2 SW8
+  {FALSE,FALSE,0,TUNE,0L},      //GPA1 SW7
+  {FALSE,FALSE,0,BAND_MINUS,0L},//GPB1 SW16
+  {FALSE,FALSE,0,FILTER_MINUS,0L}//GPB0 SW15
   };
 
 SWITCH *switches=switches_controller1[0];
@@ -373,42 +398,32 @@ static gpointer rotary_encoder_thread(gpointer data) {
         //g_print("%s: BOTTOM encoder %d pos=%d\n",__FUNCTION__,i,encoders[i].bottom_encoder_pos);
         action=encoders[i].bottom_encoder_function;
         mode=RELATIVE;
-	if(action==VFO && vfo_encoder_divisor>1) {
+        if(action==VFO && vfo_encoder_divisor>1) {
           val=encoders[i].bottom_encoder_pos/vfo_encoder_divisor;
           encoders[i].bottom_encoder_pos=encoders[i].bottom_encoder_pos-(val*vfo_encoder_divisor);
         } else {
           val=encoders[i].bottom_encoder_pos;
           encoders[i].bottom_encoder_pos=0;
-	}
-	if(val!=0) schedule_action(action, mode, val);
+        }
+        if(val!=0) schedule_action(action, mode, val);
       }
       if(encoders[i].top_encoder_enabled && encoders[i].top_encoder_pos!=0) {
         //g_print("%s: TOP encoder %d pos=%d\n",__FUNCTION__,i,encoders[i].top_encoder_pos);
         action=encoders[i].top_encoder_function;
         mode=RELATIVE;
-	if(action==VFO && vfo_encoder_divisor>1) {
+        if(action==VFO && vfo_encoder_divisor>1) {
           val=encoders[i].top_encoder_pos/vfo_encoder_divisor;
           encoders[i].top_encoder_pos=encoders[i].top_encoder_pos-(val*vfo_encoder_divisor);
         } else {
           val=encoders[i].top_encoder_pos;
           encoders[i].top_encoder_pos=0;
-	}
-	if(val!=0) schedule_action(action, mode, val);
+        }
+        if(val!=0) schedule_action(action, mode, val);
       }
     }
     g_mutex_unlock(&encoder_mutex);
     usleep(100000); // sleep for 100ms
   }
-}
-
-int process_function_switch(void *data) {
-  function++;
-  if(function>=MAX_FUNCTIONS) {
-    function=0;
-  }
-  switches=switches_controller1[function];
-  update_toolbar_labels();
-  return 0;
 }
 
 #ifdef GPIO
@@ -517,7 +532,7 @@ static void process_edge(int offset,int value) {
 
   //g_print("%s: offset=%d value=%d\n",__FUNCTION__,offset,value);
   found=FALSE;
-#ifdef LOCALCW
+
   if(ENABLE_CW_BUTTONS) {
     if(offset==CWL_BUTTON) {
       keyer_event(1, CW_ACTIVE_LOW ? (value==PRESSED) : value);
@@ -530,7 +545,7 @@ static void process_edge(int offset,int value) {
     }
   }
   if(found) return;
-#endif
+
   // check encoders
   for(i=0;i<MAX_ENCODERS;i++) {
     if(encoders[i].bottom_encoder_enabled && encoders[i].bottom_encoder_address_a==offset) {
@@ -567,7 +582,7 @@ static void process_edge(int offset,int value) {
     }
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     if(I2C_INTERRUPT==offset) {
       if(value==PRESSED) {
         i2c_interrupt();
@@ -635,7 +650,6 @@ void gpio_set_defaults(int ctrlr) {
       switches=switches_controller2_v1;
       break;
     case CONTROLLER2_V2:
-#ifdef LOCALCW
       //
       // This controller uses nearly all GPIO lines,
       // so lines 9, 10, 11 are not available for
@@ -643,10 +657,19 @@ void gpio_set_defaults(int ctrlr) {
       //
       ENABLE_GPIO_SIDETONE=0;
       ENABLE_CW_BUTTONS=0;
-#endif
-
       encoders=encoders_controller2_v2;
       switches=switches_controller2_v2;
+      break;
+    case G2_FRONTPANEL:
+      //
+      // This controller uses nearly all GPIO lines,
+      // so lines 9, 10, 11 are not available for
+      // CW keys and producing a side tone
+      //
+      ENABLE_GPIO_SIDETONE=0;
+      ENABLE_CW_BUTTONS=0;
+      encoders=encoders_g2_frontpanel;
+      switches=switches_g2_frontpanel;
       break;
   }
 }
@@ -790,7 +813,7 @@ void gpio_save_state() {
     }
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_enabled",i);
       sprintf(value,"%d",switches[i].switch_enabled);
@@ -808,7 +831,6 @@ void gpio_save_state() {
 }
 
 void gpio_restore_actions() {
-  char name[80];
   char *value;
   int previous_controller=NO_CONTROLLER;
 
@@ -817,6 +839,7 @@ void gpio_restore_actions() {
   gpio_set_defaults(controller);
 
   if(controller==previous_controller) {
+  char name[80];
   if(controller!=NO_CONTROLLER) {
     for(int i=0;i<MAX_ENCODERS;i++) {
       sprintf(name,"encoders[%d].bottom_encoder_function",i);
@@ -845,7 +868,7 @@ void gpio_restore_actions() {
       }
     }
   }
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_function",i);
       value=getProperty(name);
@@ -885,7 +908,7 @@ void gpio_save_actions() {
       setProperty(name,value);
     }
   }
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     for(int i=0;i<MAX_SWITCHES;i++) {
       sprintf(name,"switches[%d].switch_function",i);
       Action2String(switches[i].switch_function,value);
@@ -909,9 +932,9 @@ static gpointer monitor_thread(gpointer arg) {
   t.tv_nsec=0;
 
   int ret=gpiod_ctxless_event_monitor_multiple(
-			gpio_device, GPIOD_CTXLESS_EVENT_BOTH_EDGES,
-			monitor_lines, lines, FALSE,
-			consumer, &t, NULL, interrupt_cb,NULL);
+                        gpio_device, GPIOD_CTXLESS_EVENT_BOTH_EDGES,
+                        monitor_lines, lines, FALSE,
+                        consumer, &t, NULL, interrupt_cb,NULL);
   if (ret<0) {
     g_print("%s: ctxless event monitor failed: %s\n",__FUNCTION__,g_strerror(errno));
   }
@@ -1037,7 +1060,7 @@ int gpio_init() {
     }
   }
 
-  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
+  if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     i2c_init();
     g_print("%s: setup i2c interrupt %d\n",__FUNCTION__,I2C_INTERRUPT);
     if((ret=setup_line(chip,I2C_INTERRUPT,TRUE))<0) {
@@ -1045,7 +1068,6 @@ int gpio_init() {
     }
   }
 
-#ifdef LOCALCW
   g_print("%s: ENABLE_CW_BUTTONS=%d  CWL_BUTTON=%d CWR_BUTTON=%d\n", __FUNCTION__, ENABLE_CW_BUTTONS, CWL_BUTTON, CWR_BUTTON);
   if(ENABLE_CW_BUTTONS) {
     if((ret=setup_line(chip,CWL_BUTTON,CW_ACTIVE_LOW==1))<0) {
@@ -1064,24 +1086,11 @@ int gpio_init() {
       goto err;
     }
   }
-#endif
 
-  if(controller!=NO_CONTROLLER
-#ifdef LOCALCW
-    || ENABLE_CW_BUTTONS
-#endif
-    ) {
+  if(controller!=NO_CONTROLLER || ENABLE_CW_BUTTONS) {
     monitor_thread_id = g_thread_new( "gpiod monitor", monitor_thread, NULL);
-    if(!monitor_thread_id ) {
-      g_print("%s: g_thread_new failed for monitor_thread\n",__FUNCTION__);
-    }
-
     if(controller!=NO_CONTROLLER) {
       rotary_encoder_thread_id = g_thread_new( "encoders", rotary_encoder_thread, NULL);
-      if(!rotary_encoder_thread_id ) {
-        g_print("%s: g_thread_new failed on rotary_encoder_thread\n",__FUNCTION__);
-        exit( -1 );
-      }
       g_print("%s: rotary_encoder_thread: id=%p\n",__FUNCTION__,rotary_encoder_thread_id);
     }
   }
@@ -1106,7 +1115,6 @@ void gpio_close() {
 #endif
 }
 
-#ifdef LOCALCW
 void gpio_cw_sidetone_set(int level) {
 #ifdef GPIO
   int rc;
@@ -1125,5 +1133,3 @@ void gpio_cw_sidetone_set(int level) {
 int  gpio_cw_sidetone_enabled() {
   return ENABLE_GPIO_SIDETONE;
 }
-
-#endif

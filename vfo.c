@@ -58,7 +58,6 @@
 #endif
 #include "ext.h"
 
-static GtkWidget *parent_window;
 static int my_width;
 static int my_height;
 
@@ -91,11 +90,9 @@ static void vfo_save_bandstack() {
 }
 
 void modesettings_save_state() {
-  int i;
-  char name[80];
-  char value[80];
-
-  for (i=0; i<MODES; i++) {
+  for (int i=0; i<MODES; i++) {
+    char name[80];
+    char value[80];
     sprintf(name,"modeset.%d.filter", i);
     sprintf(value,"%d", mode_settings[i].filter);
     setProperty(name,value);
@@ -160,13 +157,12 @@ void modesettings_save_state() {
 }
 
 void modesettings_restore_state() {
-  int i;
-  char name[80];
-  char *value;
 
   // set some reasonable defaults
 
-  for (i=0; i<MODES; i++) {
+  for (int i=0; i<MODES; i++) {
+    char *value;
+    char name[80];
     mode_settings[i].filter=filterF6;
     mode_settings[i].nr=0;
     mode_settings[i].nr2=0;
@@ -252,13 +248,12 @@ void modesettings_restore_state() {
 }
 
 void vfo_save_state() {
-  int i;
-  char name[80];
-  char value[80];
 
   vfo_save_bandstack();
 
-  for(i=0;i<MAX_VFOS;i++) {
+  for(int i=0;i<MAX_VFOS;i++) {
+    char name[80];
+    char value[80];
     sprintf(name,"vfo.%d.band",i);
     sprintf(value,"%d",vfo[i].band);
     setProperty(name,value);
@@ -293,22 +288,18 @@ void vfo_save_state() {
 }
 
 void vfo_restore_state() {
-  int i;
-  char name[80];
-  char *value;
 
-  for(i=0;i<MAX_VFOS;i++) {
-
+  for(int i=0;i<MAX_VFOS;i++) {
+    char name[80];
+    char *value;
     vfo[i].band=band20;
     vfo[i].bandstack=0;
     vfo[i].frequency=14010000;
-#ifdef SOAPYSDR
-    if(radio->protocol==SOAPYSDR_PROTOCOL) {
-      vfo[i].band=band144;
+    if(protocol==SOAPYSDR_PROTOCOL) {
+      vfo[i].band=band430;
       vfo[i].bandstack=0;
-      vfo[i].frequency=144010000;
+      vfo[i].frequency=434010000;
     }
-#endif
     vfo[i].mode=modeCWU;
     vfo[i].filter=filterF6;
     vfo[i].lo=0;
@@ -316,7 +307,6 @@ void vfo_restore_state() {
     vfo[i].rit_enabled=0;
     vfo[i].rit=0;
     vfo[i].ctun=0;
-
 
     sprintf(name,"vfo.%d.band",i);
     value=getProperty(name);
@@ -350,7 +340,7 @@ void vfo_restore_state() {
     if(value) vfo[i].filter=atoi(value);
     // Sanity check: if !ctun, offset must be zero
     if (!vfo[i].ctun) {
-	vfo[i].offset=0;
+    vfo[i].offset=0;
     }
   }
 }
@@ -528,8 +518,8 @@ void vfo_mode_changed(int m) {
   // and SDR need to be informed about "CW or not CW"
   //
   if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();		// update frequencies
-    schedule_transmit_specific();	// update "CW" flag
+    schedule_high_priority();       // update frequencies
+    schedule_transmit_specific();   // update "CW" flag
   }
   g_idle_add(ext_vfo_update,NULL);
 }
@@ -786,11 +776,10 @@ void vfo_step(int steps) {
 //         changing the VFO of the active receiver
 //
 void vfo_id_step(int id, int steps) {
-  long long delta;
-  int sid;
-  RECEIVER *other_receiver;
 
   if(!locked) {
+    RECEIVER *other_receiver;
+    long long delta;
     if(vfo[id].ctun) {
       delta=vfo[id].ctun_frequency;
       vfo[id].ctun_frequency=ROUND(vfo[id].ctun_frequency,steps);
@@ -801,7 +790,7 @@ void vfo_id_step(int id, int steps) {
       delta = vfo[id].frequency - delta;
     }
 
-    sid=id==0?1:0;
+    int sid=id==0?1:0;
     if (sid < receivers) {
       other_receiver=receiver[sid];
     }
@@ -1112,23 +1101,23 @@ void vfo_update() {
         cairo_move_to(cr, 5, 15);
         cairo_show_text(cr, temp_text);
 
-	// In what follows, we want to display the VFO frequency
-	// on which we currently transmit a signal with red colour.
-	// If it is out-of-band, we display "Out of band" in red.
-	// Frequencies we are not transmitting on are displayed in green
-	// (dimmed if the freq. does not belong to the active receiver).
+        // In what follows, we want to display the VFO frequency
+        // on which we currently transmit a signal with red colour.
+        // If it is out-of-band, we display "Out of band" in red.
+        // Frequencies we are not transmitting on are displayed in green
+        // (dimmed if the freq. does not belong to the active receiver).
 
         // Frequencies of VFO A and B
 
         long long af = vfo[0].ctun ? vfo[0].ctun_frequency : vfo[0].frequency;
         long long bf = vfo[1].ctun ? vfo[1].ctun_frequency : vfo[1].frequency;
 
-	if(vfo[0].entering_frequency) {
-	    af=vfo[0].entered_frequency;
-	}
-	if(vfo[1].entering_frequency) {
-	    bf=vfo[1].entered_frequency;
-	}
+        if(vfo[0].entering_frequency) {
+          af=vfo[0].entered_frequency;
+        }
+        if(vfo[1].entering_frequency) {
+          bf=vfo[1].entered_frequency;
+        }
 
 #if 0
 //
@@ -1240,9 +1229,9 @@ void vfo_update() {
           cairo_show_text(cr, temp_text);
         }
 
-	// NB and NB2 are mutually exclusive, therefore
-	// they are put to the same place in order to save
-	// some space
+        // NB and NB2 are mutually exclusive, therefore
+        // they are put to the same place in order to save
+        // some space
         cairo_move_to(cr, 145, 50);
         if(active_receiver->nb) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1250,12 +1239,12 @@ void vfo_update() {
         } else if (active_receiver->nb2) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
           cairo_show_text(cr, "NB2");
-	} else {
+        } else {
           cairo_set_source_rgba(cr, COLOUR_SHADE);
           cairo_show_text(cr, "NB");
         }
 
-	// NR and NR2 are mutually exclusive
+        // NR and NR2 are mutually exclusive
         cairo_move_to(cr, 175, 50);
         if(active_receiver->nr) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1263,7 +1252,7 @@ void vfo_update() {
         } else if (active_receiver->nr2) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
           cairo_show_text(cr, "NR2");
-	} else {
+        } else {
           cairo_set_source_rgba(cr, COLOUR_SHADE);
           cairo_show_text(cr, "NR");
         }
@@ -1308,20 +1297,20 @@ void vfo_update() {
             break;
         }
 
-	//
-	// Since we can now change it by a MIDI controller,
-	// we should display the compressor (level)
-	//
+        //
+        // Since we can now change it by a MIDI controller,
+        // we should display the compressor (level)
+        //
         if(can_transmit) {
           cairo_move_to(cr, 335, 50);
-  	  if (transmitter->compressor) {
+          if (transmitter->compressor) {
               sprintf(temp_text,"CMPR %d",(int) transmitter->compressor_level);
               cairo_set_source_rgba(cr, COLOUR_ATTN);
               cairo_show_text(cr, temp_text);
-	  } else {
+          } else {
               cairo_set_source_rgba(cr, COLOUR_SHADE);
               cairo_show_text(cr, "CMPR");
-	  }
+          }
         }
         //
         // Indicate whether an equalizer is active
@@ -1342,11 +1331,11 @@ void vfo_update() {
         }
         cairo_show_text(cr, "DIV");
 
-	int s;
-	for(s=0;s<STEPS;s++) {
-	  if(steps[s]==step) break;
-	}
-	if(s>=STEPS) s=0;
+        int s;
+        for(s=0;s<STEPS;s++) {
+          if(steps[s]==step) break;
+        }
+        if(s>=STEPS) s=0;
 
         sprintf(temp_text,"Step %s",step_labels[s]);
         cairo_move_to(cr, 400, 15);
@@ -1421,7 +1410,7 @@ void vfo_update() {
         cairo_destroy (cr);
         gtk_widget_queue_draw (vfo_panel);
     } else {
-fprintf(stderr,"%s: no surface!\n",__FUNCTION__);
+g_print("%s: no surface!\n",__FUNCTION__);
     }
 }
 
@@ -1434,9 +1423,8 @@ vfo_press_event_cb (GtkWidget *widget,
   return TRUE;
 }
 
-GtkWidget* vfo_init(int width,int height,GtkWidget *parent) {
+GtkWidget* vfo_init(int width,int height) {
 
-  parent_window=parent;
   my_width=width;
   my_height=height;
 

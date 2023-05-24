@@ -33,8 +33,6 @@
 #include "button_text.h"
 #include "ext.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static GtkWidget *last_filter;
@@ -56,7 +54,6 @@ static void cleanup() {
 static gboolean default_cb (GtkWidget *widget, gpointer data) {
   int mode=vfo[active_receiver->id].mode;
   int f=GPOINTER_TO_INT(data);
-  FILTER *filter=&(filters[mode][f]);
   int low, high;
 
   GtkWidget *spinlow, *spinhigh;
@@ -167,10 +164,8 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
 void filter_menu(GtkWidget *parent) {
   int i;
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   char title[64];
   sprintf(title,"piHPSDR - Filter (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -190,9 +185,7 @@ void filter_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
-  BAND *band=band_get_band(vfo[active_receiver->id].band);
   FILTER* band_filters=filters[vfo[active_receiver->id].mode];
-  FILTER* band_filter=&band_filters[vfo[active_receiver->id].filter];
 
   switch(vfo[active_receiver->id].mode) {
     case modeFMN:
@@ -238,6 +231,7 @@ void filter_menu(GtkWidget *parent) {
       // last 2 are var1 and var2
       int row=1+((i+4)/5);
       int col=0;
+      i=filterVar1;
       FILTER* band_filter=&band_filters[i];
       GtkWidget *b=gtk_button_new_with_label(band_filters[i].title);
       if(i==vfo[active_receiver->id].filter) {
@@ -280,7 +274,7 @@ void filter_menu(GtkWidget *parent) {
 
       row++;
       col=0;
-      i++;
+      i=filterVar2;
       band_filter=&band_filters[i];
       b=gtk_button_new_with_label(band_filters[i].title);
       if(i==vfo[active_receiver->id].filter) {

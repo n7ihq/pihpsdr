@@ -21,7 +21,7 @@ char build_date[]=GIT_DATE;
 char build_version[]=GIT_VERSION;
 
 char version[]=GIT_VERSION
-" includes PureSignal"
+" includes PureSignal LocalCW"
 #ifdef GPIO
 " GPIO"
 #endif
@@ -30,9 +30,6 @@ char version[]=GIT_VERSION
 #endif
 #ifdef MIDI
 " MIDI"
-#endif
-#ifdef LOCALCW
-" LOCALCW"
 #endif
 
 ;

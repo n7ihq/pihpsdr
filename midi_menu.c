@@ -134,15 +134,15 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void device_cb(GtkWidget *widget, gpointer data) {
-  int index=GPOINTER_TO_INT(data);
+  int ind=GPOINTER_TO_INT(data);
   int val=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   if (val == 1) {
-    register_midi_device(index);
+    register_midi_device(ind);
   } else {
-    close_midi_device(index);
+    close_midi_device(ind);
   }
   // take care button remains un-checked if opening failed
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), midi_devices[index].active);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), midi_devices[ind].active);
 }
 
 static void configure_cb(GtkWidget *widget, gpointer data) {
@@ -250,7 +250,6 @@ static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer dat
   char *str_note;
   char *str_type;
   char *str_action;
-  int i;
 
   if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
     gtk_tree_model_get(model, &iter, EVENT_COLUMN, &str_event, -1);
@@ -290,7 +289,7 @@ static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer dat
       }
 
       thisAction=NO_ACTION;
-      for(i=0;i<ACTIONS;i++) {
+      for(int i=0;i<ACTIONS;i++) {
         if(strcmp(ActionTable[i].str,str_action)==0 && (thisType & ActionTable[i].type)) {
           thisAction=ActionTable[i].action;
           break;
@@ -728,10 +727,10 @@ static void delete_cb(GtkButton *widget,gpointer user_data) {
       next_cmd=previous_cmd->next;
       if(next_cmd==current_cmd) {
         g_print("%s: remove next\n",__FUNCTION__);
-	previous_cmd->next=next_cmd->next;
-	g_free(next_cmd);
+        previous_cmd->next=next_cmd->next;
+        g_free(next_cmd);
         current_cmd=NULL;  // note next_cmd == current_cmd
-	break;
+        break;
       }
       previous_cmd=next_cmd;
     }
@@ -747,7 +746,6 @@ static void delete_cb(GtkButton *widget,gpointer user_data) {
 }
 
 void midi_menu(GtkWidget *parent) {
-  int i;
   int col;
   int row;
   GtkCellRenderer *renderer;
@@ -785,24 +783,24 @@ void midi_menu(GtkWidget *parent) {
     // and make as many rows as necessary
     col=3;
     int width = 1;
-    for (i=0; i<n_midi_devices; i++) {
+    for (int i=0; i<n_midi_devices; i++) {
       device_b[i] = gtk_check_button_new_with_label(midi_devices[i].name);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(device_b[i]), midi_devices[i].active);
       gtk_grid_attach(GTK_GRID(grid),device_b[i],col,row,width,1);
       switch (col) {
-	case 3:
-	  col=4;
+        case 3:
+          col=4;
           width=3;
-	  break;
+          break;
         case 4:
-	  col=7;
+          col=7;
           width=1;
           break;
-	case 7:
-	  col=3;
+        case 7:
+          col=3;
           width=1;
           row++;
-	  break;
+          break;
       }
       g_signal_connect(device_b[i], "toggled", G_CALLBACK(device_cb), GINT_TO_POINTER(i));
       gtk_widget_show(device_b[i]);
@@ -879,20 +877,20 @@ void midi_menu(GtkWidget *parent) {
 
   row++;
   col=0;
-  newEvent=gtk_label_new("");
+  newEvent=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newEvent,col++,row,1,1);
-  newChannel=gtk_label_new("");
+  newChannel=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newChannel,col++,row,1,1);
-  newNote=gtk_label_new("");
+  newNote=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newNote,col++,row,1,1);
   newType=gtk_combo_box_text_new();
   my_combo_attach(GTK_GRID(grid),newType,col++,row,1,1);
   g_signal_connect(newType,"changed",G_CALLBACK(type_changed_cb),NULL);
-  newVal=gtk_label_new("");
+  newVal=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newVal,col++,row,1,1);
-  newMin=gtk_label_new("");
+  newMin=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newMin,col++,row,1,1);
-  newMax=gtk_label_new("");
+  newMax=gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid),newMax,col++,row,1,1);
 
   newAction=gtk_button_new_with_label("    ");
@@ -1215,33 +1213,33 @@ static int update(void *data) {
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(newType),NULL,"NONE");
       switch(thisEvent) {
         case EVENT_NONE:
-	  gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
+          gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
           break;
         case MIDI_NOTE:
           gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(newType),NULL,"KEY");
-	  if(thisType==TYPE_NONE) {
-	    gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
-	  } else if(thisType==MIDI_KEY) {
-	    gtk_combo_box_set_active (GTK_COMBO_BOX(newType),1);
-	  }
+          if(thisType==TYPE_NONE) {
+            gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
+          } else if(thisType==MIDI_KEY) {
+            gtk_combo_box_set_active (GTK_COMBO_BOX(newType),1);
+          }
           break;
         case MIDI_CTRL:
           gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(newType),NULL,"KNOB/SLIDER");
           gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(newType),NULL,"WHEEL");
-	  if(thisType==TYPE_NONE) {
-	    gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
-	  } else if(thisType==MIDI_KNOB) {
-	    gtk_combo_box_set_active (GTK_COMBO_BOX(newType),1);
-	  } else if(thisType==MIDI_WHEEL) {
+          if(thisType==TYPE_NONE) {
+            gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
+          } else if(thisType==MIDI_KNOB) {
+            gtk_combo_box_set_active (GTK_COMBO_BOX(newType),1);
+          } else if(thisType==MIDI_WHEEL) {
             gtk_combo_box_set_active (GTK_COMBO_BOX(newType),2);
           }
           break;
         case MIDI_PITCH:
           gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(newType),NULL,"KNOB/SLIDER");
-	  if(thisType==MIDI_KNOB) {
-	    gtk_combo_box_set_active (GTK_COMBO_BOX(newType),1);
-	  } else {
-	    gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
+          if(thisType==MIDI_KNOB) {
+            gtk_combo_box_set_active (GTK_COMBO_BOX(newType),1);
+          } else {
+            gtk_combo_box_set_active (GTK_COMBO_BOX(newType),0);
           }
       }
       sprintf(text,"%d",thisVal);
@@ -1299,17 +1297,11 @@ int ProcessNewMidiConfigureEvent(void * data) {
   int  note = mydata->note;
   int  val = mydata->val;
 
-  gboolean valid;
   char *str_event;
   char *str_channel;
   char *str_note;
   char *str_type;
   char *str_action;
-  int i;
-
-  gint tree_event;
-  gint tree_channel;
-  gint tree_note;
 
   g_free(data);
 
@@ -1346,7 +1338,7 @@ int ProcessNewMidiConfigureEvent(void * data) {
     thisVfr2  = -1;
 
     // search tree to see if it is existing event
-    valid=gtk_tree_model_get_iter_first(model,&iter);
+    gboolean valid=gtk_tree_model_get_iter_first(model,&iter);
     while(valid) {
       gtk_tree_model_get(model, &iter, EVENT_COLUMN, &str_event, -1);
       gtk_tree_model_get(model, &iter, CHANNEL_COLUMN, &str_channel, -1);
@@ -1355,6 +1347,9 @@ int ProcessNewMidiConfigureEvent(void * data) {
       gtk_tree_model_get(model, &iter, ACTION_COLUMN, &str_action, -1);
 
       if(str_event!=NULL && str_channel!=NULL && str_note!=NULL && str_type!=NULL && str_action!=NULL) {
+        gint tree_event;
+        gint tree_channel;
+        gint tree_note;
         if(strcmp(str_event,"CTRL")==0) {
           tree_event=MIDI_CTRL;
         } else if(strcmp(str_event,"PITCH")==0) {
@@ -1365,13 +1360,13 @@ int ProcessNewMidiConfigureEvent(void * data) {
           tree_event=EVENT_NONE;
         }
         if (!strncmp(str_channel,"Any", 3)) {
-	  tree_channel=-1;
+          tree_channel=-1;
         } else {
           tree_channel=atoi(str_channel);
         }
         tree_note=atoi(str_note);
 
-	if(thisEvent==tree_event && thisChannel==tree_channel && thisNote==tree_note) {
+        if(thisEvent==tree_event && thisChannel==tree_channel && thisNote==tree_note) {
           thisVal=0;
           thisMin=0;
           thisMax=0;
@@ -1385,16 +1380,16 @@ int ProcessNewMidiConfigureEvent(void * data) {
             thisType=TYPE_NONE;
           }
           thisAction=NO_ACTION;
-          for(i=0;i<ACTIONS;i++) {
+          for(int i=0;i<ACTIONS;i++) {
             if(strcmp(ActionTable[i].str,str_action)==0 && (ActionTable[i].type & thisType)) {
               thisAction=ActionTable[i].action;
               break;
             }
           }
-	  gtk_tree_view_set_cursor(GTK_TREE_VIEW(view),gtk_tree_model_get_path(model,&iter),NULL,FALSE);
+          gtk_tree_view_set_cursor(GTK_TREE_VIEW(view),gtk_tree_model_get_path(model,&iter),NULL,FALSE);
           update(GINT_TO_POINTER(UPDATE_EXISTING));
           return 0;
-	}
+        }
       }
 
       valid=gtk_tree_model_iter_next(model,&iter);
@@ -1421,7 +1416,6 @@ void midi_save_state() {
   struct desc *cmd;
   gint entry;
   int i;
-  char *cp;
 
   entry=0;
   for (i=0; i<n_midi_devices; i++) {
@@ -1540,7 +1534,6 @@ void midi_restore_state() {
   gint fr1, fr2;
   gint vfr1, vfr2;
   int i,j;
-  char *cp;
 
   get_midi_devices();
   MidiReleaseCommands();
@@ -1576,21 +1569,21 @@ void midi_restore_state() {
         sprintf(name,"midi[%d].entry[%d].channel",i,entry);
         value=getProperty(name);
         if(value) {
-	  channel=atoi(value);
+          channel=atoi(value);
           sprintf(name,"midi[%d].entry[%d].channel[%d].event",i,entry,channel);
           value=getProperty(name);
-	  event=EVENT_NONE;
+          event=EVENT_NONE;
           if(value) {
             for(j=0;j<4;j++) {
-	      if(strcmp(value,midi_events[j])==0) {
-		event=j;
-		break;
+              if(strcmp(value,midi_events[j])==0) {
+                event=j;
+                break;
               }
-	    }
-	  }
+            }
+          }
           sprintf(name,"midi[%d].entry[%d].channel[%d].type",i,entry,channel);
           value=getProperty(name);
-	  type=TYPE_NONE;
+          type=TYPE_NONE;
           if(value) {
             for(j=0;j<5;j++) {
               if(strcmp(value,midi_types[j])==0) {
@@ -1598,10 +1591,10 @@ void midi_restore_state() {
                 break;
               }
             }
-	  }
+          }
           sprintf(name,"midi[%d].entry[%d].channel[%d].action",i,entry,channel);
           value=getProperty(name);
-	  action=String2Action(value);
+          action=String2Action(value);
           //
           // Look for "wheel" parameters. For those not found,
           // use default value
@@ -1662,7 +1655,7 @@ void midi_restore_state() {
           //
           // Construct descriptor and add to the list of MIDI commands
           //
-	  struct desc *desc = (struct desc *) malloc(sizeof(struct desc));
+          struct desc *desc = (struct desc *) malloc(sizeof(struct desc));
 
           desc->next     = NULL;
           desc->action   = action; // MIDIaction

@@ -31,7 +31,6 @@
 #include "vfo.h"
 #include "ext.h"
 
-static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *feedback_l;
 static GtkWidget *correcting_l;
@@ -49,9 +48,9 @@ static char   pk_text[16];
 static double ampdelay  = 150e-9;   // 150 nsec
 static int    ints      = 16;
 static int    spi       = 256;     // ints=16/spi=256 corresponds to "TINT=0.5 dB"
-static int    stbl      = 0;	   // "Stbl" un-checked
+static int    stbl      = 0;       // "Stbl" un-checked
 static int    map       = 1;       // "Map"  checked
-static int    pin       = 1;	   // "Pin"  checked
+static int    pin       = 1;       // "Pin"  checked
 static double ptol      = 0.8;     // "Relax Tolerance" un-checked
 static double moxdelay  = 0.2;     // "MOX Wait" 0.2 sec
 static double loopdelay = 0.0;     // "CAL Wait" 0.0 sec
@@ -135,16 +134,13 @@ static int info_thread(gpointer arg) {
   int i;
   gchar label[20];
   static int old5=0;
-  static int old5_2=0;
   static int old14=0;
-  int display;
-  static int state=0;
 
   if (!running) return FALSE;
 
     GetPSInfo(transmitter->id,&info[0]);
     for(i=0;i<INFO_SIZE;i++) {
-      display=1;
+      int display=1;
       sprintf(label,"%d",info[i]);
       switch(i) {
         case 4:
@@ -234,51 +230,53 @@ static int info_thread(gpointer arg) {
     gtk_entry_set_text(GTK_ENTRY(get_pk),label);
 
     if (transmitter->auto_on) {
-      double ddb;
-      static int new_att;
+      static int old5_2=0;
+      static int state=0;
       int newcal=info[5]!=old5_2;
       old5_2=info[5];
       switch(state) {
         case 0:
           //
-	  // A value of 175 means 1.2 dB too strong
-	  // A value of 132 means 1.2 dB too weak
-	  //
+              // A value of 175 means 1.2 dB too strong
+              // A value of 132 means 1.2 dB too weak
+              //
           if(newcal && ((info[4]>175 && transmitter->attenuation < 31) || (info[4]<=132 && transmitter->attenuation>0))) {
+            double ddb;
+            int new_att;
             if (info[4] > 256) {
-	      // If signal is very strong, start with large attenuation and then step up
-	      ddb = 100.0;  // this makes the attenuation 31 dB in the next step
+                  // If signal is very strong, start with large attenuation and then step up
+                  ddb = 100.0;  // this makes the attenuation 31 dB in the next step
             } else if (info[4] > 0) {
               ddb= 20.0 * log10((double)info[4]/152.293);
-	    } else {
-	      // This happens when the "Drive" slider is moved to zero
-	      ddb= -100.0;  // this makes the attenuation zero in the next step
-	    }
+                } else {
+                  // This happens when the "Drive" slider is moved to zero
+                  ddb= -100.0;  // this makes the attenuation zero in the next step
+                }
             new_att=transmitter->attenuation + (int)lround(ddb);
-	    // keep new value of attenuation in allowed range
-	    if (new_att <  0) new_att= 0;
-	    if (new_att > 31) new_att=31;
-	    // A "PS reset" is only necessary if the attenuation
-	    // has actually changed. This prevents firing "reset"
-	    // constantly if the SDR board does not have a TX attenuator
-	    // (in this case, att will fast reach 31 and stay there if the
-	    // feedback level is too high).
-	    // Actually, we first adjust the attenuation (state=0),
-	    // then do a PS reset (state=1), and then restart PS (state=2).
+                // keep new value of attenuation in allowed range
+                if (new_att <  0) new_att= 0;
+                if (new_att > 31) new_att=31;
+                // A "PS reset" is only necessary if the attenuation
+                // has actually changed. This prevents firing "reset"
+                // constantly if the SDR board does not have a TX attenuator
+                // (in this case, att will fast reach 31 and stay there if the
+                // feedback level is too high).
+                // Actually, we first adjust the attenuation (state=0),
+                // then do a PS reset (state=1), and then restart PS (state=2).
             if (transmitter->attenuation != new_att) {
               SetPSControl(transmitter->id, 1, 0, 0, 0);
-	      transmitter->attenuation=new_att;
-	      if (protocol == NEW_PROTOCOL) {
-		schedule_transmit_specific();
-	      }
+                  transmitter->attenuation=new_att;
+                  if (protocol == NEW_PROTOCOL) {
+                        schedule_transmit_specific();
+                  }
               state=1;
-	    }
+                }
           }
           break;
         case 1:
-	  state=2;
+          state=2;
           SetPSControl(transmitter->id, 1, 0, 0, 0);
-	  break;
+          break;
         case 2:
           state=0;
           SetPSControl(transmitter->id, 0, 0, 1, 0);
@@ -301,34 +299,48 @@ static void ps_ant_cb(GtkWidget *widget, gpointer data) {
   int val = GPOINTER_TO_INT(data);
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     switch (val) {
-      case 0:	// Internal
-      case 6:	// EXT1; RX filters switched to "BYPASS"
-      case 7:	// Bypass
-	receiver[PS_RX_FEEDBACK]->alex_antenna = val;
-	if (protocol == NEW_PROTOCOL) {
-	  schedule_high_priority();
-	}
-	break;
+      case 0:   // Internal
+      case 6:   // EXT1; RX filters switched to "BYPASS"
+      case 7:   // Bypass
+        receiver[PS_RX_FEEDBACK]->alex_antenna = val;
+        if (protocol == NEW_PROTOCOL) {
+          schedule_high_priority();
+        }
+        break;
     }
   }
 }
 
 static void enable_cb(GtkWidget *widget, gpointer data) {
-  //g_idle_add(ext_tx_set_ps,GINT_TO_POINTER(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget))));
   if (can_transmit) {
-    tx_set_ps(transmitter, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
+    int val=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+    tx_set_ps(transmitter, val);
+    if (val && transmitter->auto_on) {
+      char label[16];
+      sprintf(label,"%d",transmitter->attenuation);
+      gtk_entry_set_text(GTK_ENTRY(tx_att),label);
+      gtk_widget_show(tx_att);
+      gtk_widget_hide(tx_att_spin);
+    } else {
+      gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_att_spin), (double) transmitter->attenuation);
+      gtk_widget_show(tx_att_spin);
+      gtk_widget_hide(tx_att);
+    }
   }
 }
 
 static void auto_cb(GtkWidget *widget, gpointer data) {
   transmitter->auto_on=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
 
-  if (transmitter->auto_on) {
+  if (transmitter->auto_on && transmitter->puresignal) {
     //
     // automatic attenuation switched on:
     // hide spin-box for manual attenuation
     // show text field for automatic attenuation
     //
+    char label[16];
+    sprintf(label,"%d",transmitter->attenuation);
+    gtk_entry_set_text(GTK_ENTRY(tx_att),label);
     gtk_widget_show(tx_att);
     gtk_widget_hide(tx_att_spin);
   } else {
@@ -338,11 +350,10 @@ static void auto_cb(GtkWidget *widget, gpointer data) {
     // hide text field for automatic attenuation
     // set attenuation to value stored in spin button
     //
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_att_spin), (double) transmitter->attenuation);
     gtk_widget_show(tx_att_spin);
     gtk_widget_hide(tx_att);
-    transmitter->attenuation=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(tx_att_spin));
   }
-
 }
 
 static void resume_cb(GtkWidget *widget, gpointer data) {
@@ -378,11 +389,9 @@ static void twotone_cb(GtkWidget *widget, gpointer data) {
 void ps_menu(GtkWidget *parent) {
   int i;
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
   g_signal_connect (dialog, "destroy", G_CALLBACK(destroy_cb), NULL);
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Pure Signal");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -454,9 +463,9 @@ void ps_menu(GtkWidget *parent) {
   //
   // Selection of feedback path for PureSignal
   //
-  // AUTO		Using internal feedback (to ADC0)
-  // EXT1		Using EXT1 jacket (to ADC0), ANAN-7000: still uses AUTO
-  // BYPASS		Using BYPASS. Not available with ANAN-100/200 up to Rev. 16 filter boards
+  // AUTO               Using internal feedback (to ADC0)
+  // EXT1               Using EXT1 jacket (to ADC0), ANAN-7000: still uses AUTO
+  // BYPASS             Using BYPASS. Not available with ANAN-100/200 up to Rev. 16 filter boards
   //
   // In fact, we provide the possibility of using EXT1 only to support these older
   // (before February, 2015) ANAN-100/200 devices.
@@ -609,7 +618,10 @@ void ps_menu(GtkWidget *parent) {
   // If using auto-attenuattion, hide the
   // "manual attenuation" label and spin button
   //
-  if (transmitter->auto_on) {
+  if (transmitter->auto_on && transmitter->puresignal) {
+    char label[16];
+    sprintf(label,"%d",transmitter->attenuation);
+    gtk_entry_set_text(GTK_ENTRY(tx_att),label);
     gtk_widget_show(tx_att);
     gtk_widget_hide(tx_att_spin);
   } else {

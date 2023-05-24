@@ -166,8 +166,8 @@ enum ACTIONtype {
 
 typedef struct _action_table {
   enum ACTION action;
-  const char *str;		// desciptive text
-  const char *button_str;	// short button text, also used in props files
+  const char *str;              // desciptive text
+  const char *button_str;       // short button text, also used in props files
   enum ACTIONtype type;
 } ACTION_TABLE;
 

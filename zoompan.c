@@ -230,7 +230,7 @@ GtkWidget *zoompan_init(int my_width, int my_height) {
   width=my_width;
   height=my_height;
 
-fprintf(stderr,"zoompan_init: width=%d height=%d\n", width,height);
+g_print("%s: width=%d height=%d\n", __FUNCTION__,width,height);
 
   zoompan=gtk_grid_new();
   gtk_widget_set_size_request (zoompan, width, height);

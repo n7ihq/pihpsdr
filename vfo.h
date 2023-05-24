@@ -77,7 +77,7 @@ extern struct _mode_settings mode_settings[];
 #define STEPS 15
 extern char *step_labels[];
 
-extern GtkWidget* vfo_init(int width,int height,GtkWidget *parent);
+extern GtkWidget* vfo_init(int width,int height);
 extern int  vfo_get_stepindex(void);
 extern void vfo_set_step_from_index(int index);
 extern void vfo_set_stepsize(int newstep);

@@ -22,7 +22,7 @@ void DoTheMidi(int action, enum ACTIONtype type, int val) {
     switch(type) {
       case MIDI_KEY:
         schedule_action(action, val?PRESSED:RELEASED, 0);
-	break;
+        break;
       case MIDI_KNOB:
         schedule_action(action, ABSOLUTE, val);
         break;

@@ -36,7 +36,6 @@
 #include "button_text.h"
 #include "ext.h"
 
-static GtkWidget *parent_window=NULL;
 static gint v;
 static GtkWidget *dialog=NULL;
 static GtkWidget *label;
@@ -212,12 +211,10 @@ static void lock_cb(GtkWidget *widget, gpointer data) {
 
 void vfo_menu(GtkWidget *parent,int vfo) {
   int i;
-
-  parent_window=parent;
   v=vfo;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   char title[64];
   sprintf(title,"piHPSDR - VFO %s",vfo==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
@@ -281,10 +278,10 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   gtk_grid_attach(GTK_GRID(grid),vfo_label,3,3,1,1);
 
   GtkWidget *vfo_b=gtk_combo_box_text_new();
-  int index=vfo_get_stepindex();
+  int ind=vfo_get_stepindex();
   for (i=0; i<STEPS; i++) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(vfo_b),NULL,step_labels[i]);
-    if(i == index) {
+    if(i == ind) {
       gtk_combo_box_set_active (GTK_COMBO_BOX(vfo_b), i);
     }
   }

@@ -53,9 +53,7 @@
 #include "noise_menu.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef LOCALCW
 #include "iambic.h"              // declare keyer_update()
-#endif
 #include "actions.h"
 #include "new_menu.h"
 
@@ -129,7 +127,7 @@ typedef struct _command {
   char *command;
 } COMMAND;
 
-static CLIENT client[MAX_CLIENTS];          // TCP clients
+static CLIENT tcp_client[MAX_CLIENTS];     // TCP clients
 static CLIENT serial_client[MAX_SERIAL];   // serial clienta
 SERIALPORT SerialPorts[MAX_SERIAL];
 
@@ -144,19 +142,19 @@ void close_rigctl_ports() {
   g_print("close_rigctl_ports: server_socket=%d\n",server_socket);
   server_running=0;
   for(i=0;i<MAX_CLIENTS;i++) {
-      client[i].running=0;
-      if(client[i].fd!=-1) {
-        g_print("setting SO_LINGER to 0 for client_socket: %d\n",client[i].fd);
-        if(setsockopt(client[i].fd,SOL_SOCKET,SO_LINGER,(const char *)&linger,sizeof(linger))==-1) {
+      tcp_client[i].running=0;
+      if(tcp_client[i].fd!=-1) {
+        g_print("setting SO_LINGER to 0 for client_socket: %d\n",tcp_client[i].fd);
+        if(setsockopt(tcp_client[i].fd,SOL_SOCKET,SO_LINGER,(const char *)&linger,sizeof(linger))==-1) {
           perror("setsockopt(...,SO_LINGER,...) failed for client");
         }
-        g_print("closing client socket: %d\n",client[i].fd);
-        close(client[i].fd);
-        client[i].fd=-1;
+        g_print("closing client socket: %d\n",tcp_client[i].fd);
+        close(tcp_client[i].fd);
+        tcp_client[i].fd=-1;
       }
-      if (client[i].thread_id) {
-        g_thread_join(client[i].thread_id);
-        client[i].thread_id=NULL;
+      if (tcp_client[i].thread_id) {
+        g_thread_join(tcp_client[i].thread_id);
+        tcp_client[i].thread_id=NULL;
       }
   }
 
@@ -195,9 +193,8 @@ static int dashsamples;
 // before we have to act, and then wait several times for 1 msec until we can shoot.
 //
 void send_dash() {
-  int TimeToGo;
   for(;;) {
-    TimeToGo=cw_key_up+cw_key_down;
+    int TimeToGo=cw_key_up+cw_key_down;
     // TimeToGo is invalid if local CW keying has set in
     if (cw_key_hit || cw_not_ready) return;
     if (TimeToGo == 0) break;
@@ -213,9 +210,8 @@ void send_dash() {
 }
 
 void send_dot() {
-  int TimeToGo;
   for(;;) {
-    TimeToGo=cw_key_up+cw_key_down;
+    int TimeToGo=cw_key_up+cw_key_down;
     // TimeToGo is invalid if local CW keying has set in
     if (cw_key_hit || cw_not_ready) return;
     if (TimeToGo == 0) break;
@@ -231,9 +227,8 @@ void send_dot() {
 }
 
 void send_space(int len) {
-  int TimeToGo;
     for(;;) {
-    TimeToGo=cw_key_up+cw_key_down;
+    int TimeToGo=cw_key_up+cw_key_down;
     // TimeToGo is invalid if local CW keying has set in
     if (cw_key_hit || cw_not_ready) return;
     if (TimeToGo == 0) break;
@@ -249,7 +244,6 @@ void send_space(int len) {
 
 void rigctl_send_cw_char(char cw_char) {
     char pattern[9],*ptr;
-    strcpy(pattern,"");
     ptr = &pattern[0];
     switch (cw_char) {
        case 'a':
@@ -435,19 +429,19 @@ static gpointer rigctl_cw_thread(gpointer data)
     dashsamples = (3456 * cw_keyer_weight) / cw_keyer_speed;
     CAT_cw_is_active=1;
     if (!mox) {
-	// activate PTT
+        // activate PTT
         g_idle_add(ext_mox_update ,GINT_TO_POINTER(1));
-	// have to wait until it is really there
-	// Note that if out-of-band, we would wait
-	// forever here, so allow at most 200 msec
-	// We also have to wait for cw_not_ready becoming zero
-	i=200;
+        // have to wait until it is really there
+        // Note that if out-of-band, we would wait
+        // forever here, so allow at most 200 msec
+        // We also have to wait for cw_not_ready becoming zero
+        i=200;
         while ((!mox || cw_not_ready) && i-- > 0) usleep(1000L);
-	// still no MOX? --> silently discard CW character and give up
-	if (!mox) {
-	    CAT_cw_is_active=0;
-	    continue;
-	}
+        // still no MOX? --> silently discard CW character and give up
+        if (!mox) {
+            CAT_cw_is_active=0;
+            continue;
+        }
     }
     // At this point, mox==1 and CAT_cw_active == 1
     if (cw_key_hit || cw_not_ready) {
@@ -510,7 +504,6 @@ static gpointer rigctl_cw_thread(gpointer data)
 void send_resp (int fd,char * msg) {
   if(rigctl_debug) g_print("RIGCTL: RESP=%s\n",msg);
   int length=strlen(msg);
-  int rc;
   int count=0;
 
 //
@@ -519,7 +512,7 @@ void send_resp (int fd,char * msg) {
 // since we are in the GTK idle loop
 //
   while(length>0) {
-    rc=write(fd,msg,length);
+    int rc=write(fd,msg,length);
     if (rc < 0) return;
     if (rc == 0) {
       count++;
@@ -562,7 +555,7 @@ static gpointer rigctl_server(gpointer data) {
   }
 
   for(i=0;i<MAX_CLIENTS;i++) {
-    client[i].fd=-1;
+    tcp_client[i].fd=-1;
   }
   // listen with a max queue of 3
   if(listen(server_socket,3)<0) {
@@ -582,7 +575,7 @@ static gpointer rigctl_server(gpointer data) {
     //
     spare = -1;
     for(i=0;i<MAX_CLIENTS;i++) {
-      if(client[i].fd == -1) {
+      if(tcp_client[i].fd == -1) {
         spare=i;
         break;
       }
@@ -597,22 +590,22 @@ static gpointer rigctl_server(gpointer data) {
     // A slot is available, try to get connection via accept()
     //
     g_print("rigctl: slot= %d waiting for connection\n",spare);
-    client[spare].fd=accept(server_socket,(struct sockaddr*)&client[spare].address,&client[spare].address_length);
-    if(client[spare].fd<0) {
+    tcp_client[spare].fd=accept(server_socket,(struct sockaddr*)&tcp_client[spare].address,&tcp_client[spare].address_length);
+    if(tcp_client[spare].fd<0) {
       perror("rigctl_server: client accept failed");
-      client[spare].fd = -1;
+      tcp_client[spare].fd = -1;
       continue;
     }
-    g_print("rigctl: slot= %d connected with fd=%d\n",spare,client[spare].fd);
+    g_print("rigctl: slot= %d connected with fd=%d\n",spare,tcp_client[spare].fd);
 
     //
     // Setting TCP_NODELAY may (or may not) improve responsiveness
     // by *disabling* Nagle's algorithm for clustering small packets
     //
 #ifdef __APPLE__
-    if(setsockopt(client[spare].fd, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(on))<0) {
+    if(setsockopt(tcp_client[spare].fd, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(on))<0) {
 #else
-    if(setsockopt(client[spare].fd, SOL_TCP, TCP_NODELAY, (void *)&on, sizeof(on))<0) {
+    if(setsockopt(tcp_client[spare].fd, SOL_TCP, TCP_NODELAY, (void *)&on, sizeof(on))<0) {
 #endif
       perror("TCP_NODELAY");
     }
@@ -620,9 +613,8 @@ static gpointer rigctl_server(gpointer data) {
     //
     // Spawn off a thread for handling this new connection
     //
-    client[spare].running=1;
-    client[spare].thread_id = g_thread_new("rigctl client", rigctl_client, (gpointer)&client[spare]);
-    // note that g_thread_new() never returns from a failure.
+    tcp_client[spare].running=1;
+    tcp_client[spare].thread_id = g_thread_new("rigctl client", rigctl_client, (gpointer)&tcp_client[spare]);
   }
 
   close(server_socket);
@@ -687,31 +679,6 @@ static gpointer rigctl_client (gpointer data) {
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update,NULL);
   return NULL;
-}
-
-//
-// FT command intepret vfo_sm state - used by IF command
-//
-int ft_read() {
-   return(active_transmitter);
-}
-//
-// Determines RIT state - used by IF command
-//
-int rit_on () {
-  if(receivers == 1) { // Worry about 1 versus 2 radios
-      if(vfo[VFO_A].rit != 0) {
-         return 1;
-      } else {
-         return 0;
-      }
-  } else { // Well - we have two so use active_reciever->id
-      if(vfo[active_receiver->id].rit != 0) {
-          return 1 ;
-      } else {
-          return 0;
-      }
-  }
 }
 
 static int ts2000_mode(int m) {
@@ -1062,7 +1029,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
         case 'B': //ZZCB: VFO A to B
           if(!locked) {
             if(command[4]==';') {
-	      vfo_a_to_b();
+              vfo_a_to_b();
             }
           }
           break;
@@ -1389,7 +1356,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           } else if(command[6]==';') {
             int filter=atoi(&command[4]);
             // update RX1 filter
-	    vfo_filter_changed(filter);
+            vfo_filter_changed(filter);
           }
           break;
         case 'J': //ZZFJ
@@ -2121,7 +2088,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             sprintf(reply,"ZZSP%d;",split);
             send_resp(client->fd,reply) ;
           } else if(command[5]==';') {
-	    int val=atoi(&command[4]);
+            int val=atoi(&command[4]);
             radio_set_split(val);
           }
           break;
@@ -2529,16 +2496,16 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
       break;
     case 'Y': //ZZYx
       switch(command[3]) {
-	case 'A': //ZZYA
+        case 'A': //ZZYA
           implemented=FALSE;
           break;
-	case 'B': //ZZYB
+        case 'B': //ZZYB
           implemented=FALSE;
           break;
-	case 'C': //ZZYC
+        case 'C': //ZZYC
           implemented=FALSE;
           break;
-	case 'R': //ZZYR
+        case 'R': //ZZYR
           // switch receivers
           if(command[5]==';') {
             int v=atoi(&command[4]);
@@ -2560,7 +2527,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
         case 'A': //ZZZA
           implemented=FALSE;
           break;
-	case 'B': //ZZZB
+        case 'B': //ZZZB
           implemented=FALSE;
           break;
 #ifdef ANDROMEDA
@@ -2578,7 +2545,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
 case 'E': //ZZZE
          // Encoders
          if(command[7]==';') {
-           int v,p,d=command[6]-0x30;
+           int v,p;
            if((command[4]-0x30)<2) {
              p=(command[4]-0x2b)*10;
              v=0;
@@ -2648,7 +2615,7 @@ case 'E': //ZZZE
       case 'P': //ZZZP
          // Push Buttons
          if(command[7]==';') {
-           static int shift=0, startstop=1, longpress=0;
+           static int longpress=0;
            int v=(command[6]-0x30);
            int p=(command[4]-0x30)*10;
            p+=command[5]-0x30;
@@ -2670,23 +2637,9 @@ case 'E': //ZZZE
                  if (longpress) {
                    longpress=0;
                  } else {
+                   static int startstop=1;
                    startstop^=1;
-                   switch (protocol) {
-                     case ORIGINAL_PROTOCOL:
-                       startstop ? old_protocol_run() : old_protocol_stop();
-                       break;
-                     case NEW_PROTOCOL:
-                       startstop ? new_protocol_menu_start() : new_protocol_menu_stop();
-                       break;
-#ifdef SOAPYSDR
-                     case SOAPYSDR_PROTOCOL:
-                       // dunno how to do this for soapy
-                       break;
-#endif
-                     default:
-                       // should not occur
-                       break;
-                   }
+                   startstop ? protocol_run() : protocol_stop();
                  }
                } else if (v==2) {
                  new_menu();
@@ -2695,6 +2648,7 @@ case 'E': //ZZZE
                break;
            }
            if (!locked) switch(p) {
+             static int shift=0;
              case 1: // Rx1 AF Mute
                if(v==0) receiver[0]->mute_radio^=1;
                break;
@@ -2908,7 +2862,7 @@ case 'E': //ZZZE
          }
          break;
 #endif
-	case 'Z': //ZZZZ
+        case 'Z': //ZZZZ
           implemented=FALSE;
           break;
         default:
@@ -3303,9 +3257,7 @@ int parse_cmd(void *data) {
             int speed=atoi(&command[2]);
             if(speed>=1 && speed<=60) {
               cw_keyer_speed=speed;
-#ifdef LOCALCW
               keyer_update();
-#endif
               g_idle_add(ext_vfo_update,NULL);
             }
           } else {
@@ -3759,7 +3711,7 @@ int parse_cmd(void *data) {
           break;
         case 'H': //SH
           // set/read filter high, switch to Var1 only when setting
-	  if(command[2]==';') {
+          if(command[2]==';') {
             FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
             FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
             int fh=5;
@@ -3884,7 +3836,7 @@ int parse_cmd(void *data) {
           break;
         case 'L': //SL
           // set/read filter low, switch to Var1 only when setting
-	  if(command[2]==';') {
+          if(command[2]==';') {
             FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
             FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
             int fl=2;
@@ -4283,7 +4235,6 @@ static gpointer serial_server(gpointer data) {
      char cmd_input[MAXDATASIZE];
      char *command=g_new(char,MAXDATASIZE);
      int command_index=0;
-     int numbytes;
      int i;
      g_mutex_lock(&mutex_a->m);
      cat_control++;
@@ -4319,7 +4270,7 @@ static gpointer serial_server(gpointer data) {
        // ATTN: if the "serial line" is a FIFO, the "NONBLOCK" flag
        //       has not been set so we might get stuck in the read()
        //
-       numbytes = read (client->fd, cmd_input, sizeof cmd_input);
+       int numbytes = read (client->fd, cmd_input, sizeof cmd_input);
        if (!client->running || numbytes < 0) break;
        if(numbytes>0) {
          for(i=0;i<numbytes;i++) {

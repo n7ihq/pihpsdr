@@ -136,11 +136,13 @@ g_print("delete_client: clients=%p\n",clients);
 
 static int recv_bytes(int s,char *buffer,int bytes) {
   int bytes_read=0;
-  int rc;
   while(bytes_read!=bytes) {
-    rc=recv(s,&buffer[bytes_read],bytes-bytes_read,0);
+    int rc=recv(s,&buffer[bytes_read],bytes-bytes_read,0);
     if(rc<0) {
-      bytes_read=rc;
+      // return -1, so we need not check downstream
+      // on incomplete messages received
+      g_print("%s: read %d bytes, but expected %d.\n", __FUNCTION__,bytes_read, bytes);
+      bytes_read=-1;
       perror("recv_bytes");
       break;
     } else {
@@ -152,12 +154,14 @@ static int recv_bytes(int s,char *buffer,int bytes) {
 
 static int send_bytes(int s,char *buffer,int bytes) {
   int bytes_sent=0;
-  int rc;
   if(s<0) return -1;
   while(bytes_sent!=bytes) {
-    rc=send(s,&buffer[bytes_sent],bytes-bytes_sent,0);
+    int rc=send(s,&buffer[bytes_sent],bytes-bytes_sent,0);
     if(rc<0) {
-      bytes_sent=rc;
+      // return -1, so we need not check downstream
+      // on incomplete messages sent
+      g_print("%s: sent %d bytes, but tried %d.\n", __FUNCTION__,bytes_sent, bytes);
+      bytes_sent=-1;
       perror("send_bytes");
       break;
     } else {
@@ -184,9 +188,7 @@ void remote_audio(RECEIVER *rx,short left_sample,short right_sample) {
       int bytes_sent=send_bytes(c->socket,(char *)&audio_data,sizeof(audio_data));
       if(bytes_sent<0) {
         perror("remote_audio");
-        if(c->socket!=-1) {
-          close(c->socket);
-        }
+        close(c->socket);
       }
       c=c->next;
     }
@@ -250,8 +252,8 @@ void send_radio_data(REMOTE_CLIENT *client) {
   radio_data.header.data_type=htons(INFO_RADIO);
   radio_data.header.version=htonl(CLIENT_SERVER_VERSION);
   strcpy(radio_data.name,radio->name);
-  radio_data.protocol=htons(radio->protocol);
-  radio_data.device=htons(radio->device);
+  radio_data.protocol=htons(protocol);
+  radio_data.device=htons(device);
   uint64_t temp=(uint64_t)radio->frequency_min;
   radio_data.frequency_min=htonll(temp);
   temp=(uint64_t)radio->frequency_max;
@@ -383,7 +385,6 @@ void send_vfo_data(REMOTE_CLIENT *client,int v) {
 
 static void *server_client_thread(void *arg) {
   REMOTE_CLIENT *client=(REMOTE_CLIENT *)arg;
-  int bytes_read;
   HEADER header;
 
 g_print("Client connected on port %d\n",client->address.sin_port);
@@ -398,9 +399,9 @@ g_print("Client connected on port %d\n",client->address.sin_port);
 
   // get and parse client commands
   while(client->running) {
-    bytes_read=recv_bytes(client->socket,(char *)&header.sync,sizeof(header.sync));
+    int bytes_read=recv_bytes(client->socket,(char *)&header.sync,sizeof(header.sync));
     if(bytes_read<=0) {
-      g_print("server_client_thread: read %d bytes for HEADER SYNC\n",bytes_read);
+      g_print("server_client_thread: short read for HEADER SYNC\n");
       perror("server_client_thread");
       client->running=FALSE;
       continue;
@@ -416,7 +417,7 @@ g_print("header.sync is %x wanted %x\n",header.sync,REMOTE_SYNC);
         // try to resync on 2 0xFA bytes
         bytes_read=recv_bytes(client->socket,(char *)&c,1);
         if(bytes_read<=0) {
-          g_print("server_client_thread: read %d bytes for HEADER RESYNC\n",bytes_read);
+          g_print("server_client_thread: short read for HEADER RESYNC\n");
           perror("server_client_thread");
           client->running=FALSE;
           continue;
@@ -431,12 +432,11 @@ g_print("header.sync is %x wanted %x\n",header.sync,REMOTE_SYNC);
 
     bytes_read=recv_bytes(client->socket,(char *)&header.data_type,sizeof(header)-sizeof(header.sync));
     if(bytes_read<=0) {
-      g_print("server_client_thread: read %d bytes for HEADER\n",bytes_read);
+      g_print("server_client_thread: short read for HEADER\n");
       perror("server_client_thread");
       client->running=FALSE;
       continue;
     }
-g_print("header remaining bytes %d\n",bytes_read);
 
 g_print("server_client_thread: received header: type=%d\n",ntohs(header.data_type));
 
@@ -445,8 +445,8 @@ g_print("server_client_thread: received header: type=%d\n",ntohs(header.data_typ
          {
          SPECTRUM_COMMAND spectrum_command;
          bytes_read=recv_bytes(client->socket,(char *)&spectrum_command.id,sizeof(SPECTRUM_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for SPECTRUM_COMMAND\n",bytes_read);
+         if(bytes_read <= 0) {
+           g_print("server_client_thread: short read for SPECTRUM_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -480,8 +480,8 @@ g_print("server_client_thread: CMD_RESP_RX_FREQ\n");
          freq_command->header.version=header.version;
          freq_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&freq_command->id,sizeof(FREQ_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for FREQ_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for FREQ_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -497,8 +497,8 @@ g_print("server_client_thread: CMD_RESP_RX_STEP\n");
          step_command->header.version=header.version;
          step_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&step_command->id,sizeof(STEP_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for STEP_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for STEP_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -514,8 +514,8 @@ g_print("server_client_thread: CMD_RESP_RX_MOVE\n");
          move_command->header.version=header.version;
          move_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&move_command->id,sizeof(MOVE_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for MOVE_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for MOVE_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -531,8 +531,8 @@ g_print("server_client_thread: CMD_RESP_RX_MOVETO\n");
          move_to_command->header.version=header.version;
          move_to_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&move_to_command->id,sizeof(MOVE_TO_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for MOVE_TO_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for MOVE_TO_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -548,8 +548,8 @@ g_print("server_client_thread: CMD_RESP_RX_ZOOM\n");
          zoom_command->header.version=header.version;
          zoom_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&zoom_command->id,sizeof(ZOOM_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for ZOOM_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for ZOOM_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -565,8 +565,8 @@ g_print("server_client_thread: CMD_RESP_RX_PAN\n");
          pan_command->header.version=header.version;
          pan_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&pan_command->id,sizeof(PAN_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for PAN_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for PAN_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -582,8 +582,8 @@ g_print("server_client_thread: CMD_RESP_RX_VOLUME\n");
          volume_command->header.version=header.version;
          volume_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&volume_command->id,sizeof(VOLUME_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for VOLUME_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for VOLUME_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -599,8 +599,8 @@ g_print("server_client_thread: CMD_RESP_RX_AGC\n");
          agc_command->header.version=header.version;
          agc_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&agc_command->id,sizeof(AGC_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for AGC_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for AGC_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -617,8 +617,8 @@ g_print("server_client_thread: CMD_RESP_RX_AGC_GAIN\n");
          agc_gain_command->header.version=header.version;
          agc_gain_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&agc_gain_command->id,sizeof(AGC_GAIN_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for AGC_GAIN_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for AGC_GAIN_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -634,8 +634,8 @@ g_print("server_client_thread: CMD_RESP_RX_GAIN\n");
          command->header.version=header.version;
          command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&command->id,sizeof(RFGAIN_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RFGAIN_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RFGAIN_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -651,8 +651,8 @@ g_print("server_client_thread: CMD_RESP_RX_ATTENUATION\n");
          attenuation_command->header.version=header.version;
          attenuation_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&attenuation_command->id,sizeof(ATTENUATION_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for ATTENUATION_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for ATTENUATION_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -668,8 +668,8 @@ g_print("server_client_thread: CMD_RESP_RX_SQUELCH\n");
          squelch_command->header.version=header.version;
          squelch_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&squelch_command->id,sizeof(SQUELCH_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for SQUELCH_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for SQUELCH_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -685,8 +685,8 @@ g_print("server_client_thread: CMD_RESP_RX_NOISE\n");
          noise_command->header.version=header.version;
          noise_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&noise_command->id,sizeof(NOISE_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for NOISE_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for NOISE_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -702,8 +702,8 @@ g_print("server_client_thread: CMD_RESP_RX_BAND\n");
          band_command->header.version=header.version;
          band_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&band_command->id,sizeof(BAND_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for BAND_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for BAND_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -719,8 +719,8 @@ g_print("server_client_thread: CMD_RESP_RX_MODE\n");
          mode_command->header.version=header.version;
          mode_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&mode_command->id,sizeof(MODE_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for MODE_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for MODE_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -736,8 +736,8 @@ g_print("server_client_thread: CMD_RESP_RX_FILTER\n");
          filter_command->header.version=header.version;
          filter_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&filter_command->id,sizeof(FILTER_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for FILTER_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for FILTER_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -753,8 +753,8 @@ g_print("server_client_thread: CMD_RESP_RX_SPLIT\n");
          split_command->header.version=header.version;
          split_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&split_command->split,sizeof(SPLIT_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for SPLIT_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for SPLIT_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -770,8 +770,8 @@ g_print("server_client_thread: CMD_RESP_RX_SAT\n");
          sat_command->header.version=header.version;
          sat_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&sat_command->sat,sizeof(SAT_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for SAT_COMMAND\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for SAT_COMMAND\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -787,8 +787,8 @@ g_print("server_client_thread: CMD_RESP_DUP\n");
          dup_command->header.version=header.version;
          dup_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&dup_command->dup,sizeof(DUP_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for DUP\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for DUP\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -804,8 +804,8 @@ g_print("server_client_thread: CMD_RESP_LOCK\n");
          lock_command->header.version=header.version;
          lock_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&lock_command->lock,sizeof(LOCK_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for LOCK\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for LOCK\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -821,8 +821,8 @@ g_print("server_client_thread: CMD_RESP_CTUN\n");
          ctun_command->header.version=header.version;
          ctun_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&ctun_command->id,sizeof(CTUN_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for CTUN\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for CTUN\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -838,8 +838,8 @@ g_print("server_client_thread: CMD_RESP_RX_FPS\n");
          fps_command->header.version=header.version;
          fps_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&fps_command->id,sizeof(FPS_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for FPS\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for FPS\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -855,8 +855,8 @@ g_print("server_client_thread: CMD_RESP_RX_SELECT\n");
          rx_select_command->header.version=header.version;
          rx_select_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&rx_select_command->id,sizeof(RX_SELECT_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RX_SELECT\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RX_SELECT\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -872,8 +872,8 @@ g_print("server_client_thread: CMD_RESP_VFO\n");
          vfo_command->header.version=header.version;
          vfo_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&vfo_command->id,sizeof(VFO_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for VFO\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for VFO\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -889,8 +889,8 @@ g_print("server_client_thread: CMD_RESP_RIT_UPDATE\n");
          rit_update_command->header.version=header.version;
          rit_update_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&rit_update_command->id,sizeof(RIT_UPDATE_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RIT_UPDATE\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RIT_UPDATE\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -906,8 +906,8 @@ g_print("server_client_thread: CMD_RESP_RIT_CLEAR\n");
          rit_clear_command->header.version=header.version;
          rit_clear_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&rit_clear_command->id,sizeof(RIT_CLEAR_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RIT_CLEAR\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RIT_CLEAR\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -923,8 +923,8 @@ g_print("server_client_thread: CMD_RESP_RIT\n");
          rit_command->header.version=header.version;
          rit_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&rit_command->id,sizeof(RIT_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RIT\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RIT\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -970,8 +970,8 @@ g_print("server_client_thread: CMD_RESP_SAMPLE_RATE\n");
          sample_rate_command->header.version=header.version;
          sample_rate_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&sample_rate_command->id,sizeof(SAMPLE_RATE_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for SAMPLE_RATE\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for SAMPLE_RATE\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -987,8 +987,8 @@ g_print("server_client_thread: CMD_RESP_RECEIVERS\n");
          receivers_command->header.version=header.version;
          receivers_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&receivers_command->receivers,sizeof(RECEIVERS_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RECEIVERS\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RECEIVERS\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -1004,8 +1004,8 @@ g_print("server_client_thread: CMD_RESP_RIT_INCREMENT\n");
          rit_increment_command->header.version=header.version;
          rit_increment_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&rit_increment_command->increment,sizeof(RIT_INCREMENT_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for RIT_INCREMENT\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for RIT_INCREMENT\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -1021,8 +1021,8 @@ g_print("server_client_thread: CMD_RESP_FILTER_BOARD\n");
          filter_board_command->header.version=header.version;
          filter_board_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&filter_board_command->filter_board,sizeof(FILTER_BOARD_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for FILTER_BOARD\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for FILTER_BOARD\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -1038,8 +1038,8 @@ g_print("server_client_thread: CMD_RESP_SWAP_IQ\n");
          swap_iq_command->header.version=header.version;
          swap_iq_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&swap_iq_command->iqswap,sizeof(SWAP_IQ_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for SWAP_IQ\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for SWAP_IQ\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -1055,8 +1055,8 @@ g_print("server_client_thread: CMD_RESP_REGION\n");
          region_command->header.version=header.version;
          region_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&region_command->region,sizeof(REGION_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for REGION\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for REGION\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -1072,8 +1072,8 @@ g_print("server_client_thread: CMD_RESP_MUTE_RX\n");
          mute_rx_command->header.version=header.version;
          mute_rx_command->header.context.client=client;
          bytes_read=recv_bytes(client->socket,(char *)&mute_rx_command->mute,sizeof(MUTE_RX_COMMAND)-sizeof(header));
-         if(bytes_read<0) {
-           g_print("server_client_thread: read %d bytes for MUTE_RX\n",bytes_read);
+         if(bytes_read<=0) {
+           g_print("server_client_thread: short read for MUTE_RX\n");
            perror("server_client_thread");
            // dialog box?
            return NULL;
@@ -1578,6 +1578,7 @@ g_print("send_rit rx=%d rit=%d\n",rx,rit);
   }
 }
 
+// NOTYETUSED
 void send_xit_update(int s) {
   XIT_UPDATE_COMMAND command;
 g_print("send_xit_update\n");
@@ -1592,6 +1593,7 @@ g_print("send_xit_update\n");
   }
 }
 
+//NOTYETUSED
 void send_xit_clear(int s) {
   XIT_CLEAR_COMMAND command;
 g_print("send_xit_clear\n");
@@ -1606,6 +1608,7 @@ g_print("send_xit_clear\n");
   }
 }
 
+//NOTYETUSED
 void send_xit(int s,int xit) {
   XIT_COMMAND command;
 g_print("send_xit xit=%d\n",xit);
@@ -1788,7 +1791,7 @@ g_print("Client_connected from %s\n",s);
     client->thread_id=g_thread_new("SSDR_client",server_client_thread,client);
     add_client(client);
     close(listen_socket);
-    gpointer thread_result=g_thread_join(client->thread_id);
+    (void) g_thread_join(client->thread_id);
   }
   return NULL;
 }
@@ -1862,8 +1865,8 @@ static void *client_thread(void* arg) {
 
   while(running) {
     bytes_read=recv_bytes(client_socket,(char *)&header,sizeof(header));
-    if(bytes_read<0) {
-      g_print("client_thread: read %d bytes for HEADER\n",bytes_read);
+    if(bytes_read<=0) {
+      g_print("client_thread: short read for HEADER\n");
       perror("client_thread");
       // dialog box?
       return NULL;
@@ -1874,8 +1877,8 @@ static void *client_thread(void* arg) {
         {
         RADIO_DATA radio_data;
         bytes_read=recv_bytes(client_socket,(char *)&radio_data.name,sizeof(radio_data)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for RADIO_DATA\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for RADIO_DATA\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -1885,8 +1888,9 @@ g_print("INFO_RADIO: %d\n",bytes_read);
         // build a radio (discovered) structure
         radio=g_new(DISCOVERED,1);
         strcpy(radio->name,radio_data.name);
-        radio->protocol=ntohs(radio_data.protocol);
-        radio->device=ntohs(radio_data.device);
+        // Note we use "protocol" and "device" througout the program
+        protocol=radio->protocol=ntohs(radio_data.protocol);
+        device=radio->device=ntohs(radio_data.device);
         uint64_t temp=ntohll(radio_data.frequency_min);
         radio->frequency_min=(double)temp;
         temp=ntohll(radio_data.frequency_max);
@@ -1902,15 +1906,12 @@ g_print("INFO_RADIO: %d\n",bytes_read);
         display_filled=radio_data.display_filled;
         locked=radio_data.locked;
         receivers=ntohs(radio_data.receivers);
-        can_transmit=radio_data.can_transmit;
-
-	can_transmit=0;  // forced temporarily until Client/Server supports transmitters
-
+        //can_transmit=radio_data.can_transmit;
+        can_transmit=0;  // forced temporarily until Client/Server supports transmitters
         step=ntohll(radio_data.step);
         split=radio_data.split;
         sat_mode=radio_data.sat_mode;
         duplex=radio_data.duplex;
-        protocol=radio->protocol;
         have_rx_gain=radio_data.have_rx_gain;
         short s=ntohs(radio_data.rx_gain_calibration);
         rx_gain_calibration=(int)s;
@@ -1930,8 +1931,8 @@ g_print("have_rx_gain=%d rx_gain_calibration=%d filter_board=%d\n",have_rx_gain,
         {
         ADC_DATA adc_data;
         bytes_read=recv_bytes(client_socket,(char *)&adc_data.adc,sizeof(adc_data)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for ADC_DATA\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for ADC_DATA\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -1955,8 +1956,8 @@ g_print("INFO_ADC: %d\n",bytes_read);
         {
         RECEIVER_DATA receiver_data;
         bytes_read=recv_bytes(client_socket,(char *)&receiver_data.rx,sizeof(receiver_data)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for RECEIVER_DATA\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for RECEIVER_DATA\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2036,8 +2037,8 @@ g_print("INFO_TRANSMITTER\n");
         {
         VFO_DATA vfo_data;
         bytes_read=recv_bytes(client_socket,(char *)&vfo_data.vfo,sizeof(vfo_data)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for VFO_DATA\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for VFO_DATA\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2072,8 +2073,8 @@ g_print("g_idle_add: ext_vfo_update\n");
         {
         SPECTRUM_DATA spectrum_data;
         bytes_read=recv_bytes(client_socket,(char *)&spectrum_data.rx,sizeof(spectrum_data)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for SPECTRUM_DATA\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for SPECTRUM_DATA\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2091,9 +2092,8 @@ g_print("g_idle_add: ext_vfo_update\n");
           receiver[r]->pixel_samples=g_new(float,(int)samples);
         }
 
-        short sample;
         for(int i=0;i<samples;i++) {
-          sample=ntohs(spectrum_data.sample[i]);
+          short sample=ntohs(spectrum_data.sample[i]);
           receiver[r]->pixel_samples[i]=(float)sample;
         }
         if(vfo[VFO_A].frequency!=frequency_a || vfo[VFO_B].frequency!=frequency_b || vfo[VFO_A].ctun_frequency!=ctun_frequency_a || vfo[VFO_B].ctun_frequency!=ctun_frequency_b || vfo[VFO_A].offset!=offset_a || vfo[VFO_B].offset!=offset_b) {
@@ -2110,22 +2110,20 @@ g_print("g_idle_add: ext_vfo_update\n");
         break;
       case INFO_AUDIO:
         {
-        AUDIO_DATA audio_data;
-        bytes_read=recv_bytes(client_socket,(char *)&audio_data.rx,sizeof(audio_data)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for AUDIO_DATA\n",bytes_read);
+        AUDIO_DATA adata;
+        bytes_read=recv_bytes(client_socket,(char *)&adata.rx,sizeof(adata)-sizeof(header));
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for AUDIO_DATA\n");
           perror("client_thread");
           // dialog box?
           return NULL;
         }
-        RECEIVER *rx=receiver[audio_data.rx];
-        short left_sample;
-        short right_sample;
-        int samples=ntohs(audio_data.samples);
+        RECEIVER *rx=receiver[adata.rx];
+        int samples=ntohs(adata.samples);
         if(rx->local_audio) {
           for(int i=0;i<samples;i++) {
-            left_sample=ntohs(audio_data.sample[(i*2)]);
-            right_sample=ntohs(audio_data.sample[(i*2)+1]);
+            short left_sample=ntohs(adata.sample[(i*2)]);
+            short right_sample=ntohs(adata.sample[(i*2)+1]);
             audio_write(rx,(float)left_sample/32767.0,(float)right_sample/32767.0);
           }
         }
@@ -2135,8 +2133,8 @@ g_print("g_idle_add: ext_vfo_update\n");
         {
         ZOOM_COMMAND zoom_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&zoom_cmd.id,sizeof(zoom_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for ZOOM_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for ZOOM_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2155,8 +2153,8 @@ g_print("CMD_RESP_RX_ZOOM: zoom=%d rx[%d]->zoom=%d\n",zoom,rx,receiver[rx]->zoom
         {
         PAN_COMMAND pan_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&pan_cmd.id,sizeof(pan_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for PAN_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for PAN_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2171,8 +2169,8 @@ g_print("CMD_RESP_RX_PAN: pan=%d rx[%d]->pan=%d\n",pan,rx,receiver[rx]->pan);
         {
         VOLUME_COMMAND volume_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&volume_cmd.id,sizeof(volume_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for VOLUME_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for VOLUME_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2187,8 +2185,8 @@ g_print("CMD_RESP_RX_VOLUME: volume=%f rx[%d]->volume=%f\n",volume,rx,receiver[r
         {
         AGC_COMMAND agc_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&agc_cmd.id,sizeof(agc_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for AGC_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for AGC_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2204,8 +2202,8 @@ g_print("AGC_COMMAND: rx=%d agc=%d\n",rx,a);
         {
         AGC_GAIN_COMMAND agc_gain_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&agc_gain_cmd.id,sizeof(agc_gain_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for AGC_GAIN_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for AGC_GAIN_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2221,10 +2219,10 @@ g_print("AGC_COMMAND: rx=%d agc=%d\n",rx,a);
         break;
       case CMD_RESP_RX_GAIN:
         {
-	RFGAIN_COMMAND command;
+        RFGAIN_COMMAND command;
         bytes_read=recv_bytes(client_socket,(char *)&command.id,sizeof(command)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for RFGAIN_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for RFGAIN_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2239,8 +2237,8 @@ g_print("CMD_RESP_RX_GAIN: new=%f rx=%d old=%f\n",gain,rx,adc[receiver[rx]->adc]
         {
         ATTENUATION_COMMAND attenuation_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&attenuation_cmd.id,sizeof(attenuation_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for ATTENUATION_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for ATTENUATION_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2255,8 +2253,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         NOISE_COMMAND noise_command;
         bytes_read=recv_bytes(client_socket,(char *)&noise_command.id,sizeof(noise_command)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for NOISE_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for NOISE_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2281,8 +2279,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         MODE_COMMAND mode_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&mode_cmd.id,sizeof(mode_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for MODE_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for MODE_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2297,8 +2295,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         FILTER_COMMAND filter_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&filter_cmd.id,sizeof(filter_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for FILTER_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for FILTER_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2315,8 +2313,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         SPLIT_COMMAND split_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&split_cmd.split,sizeof(split_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for SPLIT_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for SPLIT_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2329,8 +2327,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         SAT_COMMAND sat_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&sat_cmd.sat,sizeof(sat_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for SAT_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for SAT_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2343,8 +2341,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         DUP_COMMAND dup_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&dup_cmd.dup,sizeof(dup_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for DUP_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for DUP_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2357,8 +2355,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         LOCK_COMMAND lock_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&lock_cmd.lock,sizeof(lock_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for LOCK_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for LOCK_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2371,8 +2369,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         FPS_COMMAND fps_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&fps_cmd.id,sizeof(fps_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for FPS_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for FPS_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2386,8 +2384,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         RX_SELECT_COMMAND rx_select_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&rx_select_cmd.id,sizeof(rx_select_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for RX_SELECT_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for RX_SELECT_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2401,8 +2399,8 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         {
         SAMPLE_RATE_COMMAND sample_rate_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&sample_rate_cmd.id,sizeof(sample_rate_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for SAMPLE_RATE_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for SAMPLE_RATE_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2426,8 +2424,8 @@ g_print("CMD_RESP_SAMPLE_RATE: rx=%d rate=%lld\n",rx,rate);
         {
         RECEIVERS_COMMAND receivers_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&receivers_cmd.receivers,sizeof(receivers_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for RECEIVERS_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for RECEIVERS_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2441,8 +2439,8 @@ g_print("CMD_RESP_RECEIVERS: receivers=%d\n",r);
         {
         RIT_INCREMENT_COMMAND rit_increment_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&rit_increment_cmd.increment,sizeof(rit_increment_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for RIT_INCREMENT_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for RIT_INCREMENT_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2456,8 +2454,8 @@ g_print("CMD_RESP_RIT_INCREMENT: increment=%d\n",increment);
         {
         FILTER_BOARD_COMMAND filter_board_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&filter_board_cmd.filter_board,sizeof(filter_board_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for FILTER_BOARD_CMD\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for FILTER_BOARD_CMD\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2470,8 +2468,8 @@ g_print("CMD_RESP_FILTER_BOARD: board=%d\n",filter_board);
         {
         SWAP_IQ_COMMAND swap_iq_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&swap_iq_cmd.iqswap,sizeof(swap_iq_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for SWAP_IQ_COMMAND\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for SWAP_IQ_COMMAND\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2484,8 +2482,8 @@ g_print("CMD_RESP_IQ_SWAP: iqswap=%d\n",iqswap);
         {
         REGION_COMMAND region_cmd;
         bytes_read=recv_bytes(client_socket,(char *)&region_cmd.region,sizeof(region_cmd)-sizeof(header));
-        if(bytes_read<0) {
-          g_print("client_thread: read %d bytes for REGION_COMMAND\n",bytes_read);
+        if(bytes_read<=0) {
+          g_print("client_thread: short read for REGION_COMMAND\n");
           perror("client_thread");
           // dialog box?
           return NULL;
@@ -2563,15 +2561,14 @@ static int remote_command(void *data) {
   HEADER *header=(HEADER *)data;
   REMOTE_CLIENT *client=header->context.client;
   int temp;
-  double dtmp;
   switch(ntohs(header->data_type)) {
     case CMD_RESP_RX_FREQ:
       {
       FREQ_COMMAND *freq_command=(FREQ_COMMAND *)data;
       temp=active_receiver->pan;
-      int vfo=freq_command->id;
+      int v=freq_command->id;
       long long f=ntohll(freq_command->hz);
-      vfo_set_frequency(vfo,f);
+      vfo_set_frequency(v,f);
       vfo_update();
       send_vfo_data(client,VFO_A);
       send_vfo_data(client,VFO_B);
@@ -2639,7 +2636,7 @@ static int remote_command(void *data) {
     case CMD_RESP_RX_VOLUME:
       {
       VOLUME_COMMAND *volume_command=(VOLUME_COMMAND *)data;
-      dtmp=ntohd(volume_command->volume);
+      double dtmp=ntohd(volume_command->volume);
       set_af_gain(volume_command->id,dtmp);
       }
       break;
@@ -2718,7 +2715,6 @@ static int remote_command(void *data) {
       BAND_COMMAND *band_command=(BAND_COMMAND *)data;
       int r=band_command->id;
       CHECK_RX(r);
-      RECEIVER *rx=receiver[r];
       short b=htons(band_command->band);
       vfo_band_changed(r,b);
       send_vfo_data(client,VFO_A);
@@ -2729,8 +2725,6 @@ static int remote_command(void *data) {
       {
       MODE_COMMAND *mode_command=(MODE_COMMAND *)data;
       int r=mode_command->id;
-      CHECK_RX(r);
-      RECEIVER *rx=receiver[r];
       short m=htons(mode_command->mode);
       vfo_mode_changed(m);
       send_vfo_data(client,VFO_A);
@@ -2865,22 +2859,18 @@ static int remote_command(void *data) {
       break;
     case CMD_RESP_XIT_UPDATE:
       {
-      XIT_UPDATE_COMMAND *xit_update_command=(XIT_UPDATE_COMMAND *)data;
       send_vfo_data(client,VFO_A);
       send_vfo_data(client,VFO_B);
       }
       break;
     case CMD_RESP_XIT_CLEAR:
       {
-      XIT_CLEAR_COMMAND *xit_clear_command=(XIT_CLEAR_COMMAND *)data;
       send_vfo_data(client,VFO_A);
       send_vfo_data(client,VFO_B);
       }
       break;
     case CMD_RESP_XIT:
       {
-      XIT_COMMAND *xit_command=(XIT_COMMAND *)data;
-      short xit=ntohs(xit_command->xit);
       send_vfo_data(client,VFO_A);
       send_vfo_data(client,VFO_B);
       }

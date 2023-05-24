@@ -35,12 +35,8 @@ static GtkWidget *dialog;
 
 gboolean enable_protocol_1;
 gboolean enable_protocol_2;
-#ifdef SOAPYSDR
 gboolean enable_soapy_protocol;
-#endif
-#ifdef STEMLAB_DISCOVERY
 gboolean enable_stemlab;
-#endif
 gboolean autostart;
 
 void protocols_save_state() {
@@ -51,14 +47,10 @@ void protocols_save_state() {
   setProperty("enable_protocol_1",value);
   sprintf(value,"%d",enable_protocol_2);
   setProperty("enable_protocol_2",value);
-#ifdef SOAPYSDR
   sprintf(value,"%d",enable_soapy_protocol);
   setProperty("enable_soapy_protocol",value);
-#endif
-#ifdef STEMLAB_DISCOVERY
   sprintf(value,"%d",enable_stemlab);
   setProperty("enable_stemlab",value);
-#endif
 
   sprintf(value,"%d",autostart);
   setProperty("autostart",value);
@@ -76,16 +68,12 @@ void protocols_restore_state() {
   enable_protocol_2=TRUE;
   value=getProperty("enable_protocol_2");
   if(value) enable_protocol_2=atoi(value);
-#ifdef SOAPYSDR
   enable_soapy_protocol=TRUE;
   value=getProperty("enable_soapy_protocol");
   if(value) enable_soapy_protocol=atoi(value);
-#endif
-#ifdef STEMLAB_DISCOVERY
   enable_stemlab=TRUE;
   value=getProperty("enable_stemlab");
   if(value) enable_stemlab=atoi(value);
-#endif
   autostart=FALSE;
   value=getProperty("autostart");
   if(value) autostart=atoi(value);

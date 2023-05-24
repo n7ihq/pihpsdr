@@ -49,11 +49,9 @@ double vox_get_peak() {
 void update_vox(TRANSMITTER *tx) {
   // calculate peak microphone input
   // assumes it is interleaved left and right channel with length samples
-  int i;
-  double sample;
   peak=0.0;
-  for(i=0;i<tx->buffer_size;i++) {
-    sample=tx->mic_input_buffer[i*2];
+  for(int i=0;i<tx->buffer_size;i++) {
+    double sample=tx->mic_input_buffer[i*2];
     if(sample<0.0) {
       sample=-sample;
     }
@@ -72,8 +70,9 @@ void update_vox(TRANSMITTER *tx) {
       if(vox_timeout) {
         g_source_remove(vox_timeout);
       } else {
-	//
-	// no hanging time-out, assume that we just fired VOX
+        //
+        // no hanging time-out, assume that we just fired VOX
+        //
         g_idle_add(ext_vox_changed,GINT_TO_POINTER(1));
         g_idle_add(ext_vfo_update,NULL);
       }

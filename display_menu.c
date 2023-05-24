@@ -27,11 +27,8 @@
 #include "main.h"
 #include "new_menu.h"
 #include "display_menu.h"
-#include "channel.h"
 #include "radio.h"
 #include "wdsp.h"
-
-static GtkWidget *parent_window=NULL;
 
 static GtkWidget *menu_b=NULL;
 
@@ -139,10 +136,9 @@ static void display_sequence_errors_cb(GtkWidget *widget, gpointer data) {
 }
 
 void display_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Display");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

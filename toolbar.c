@@ -44,7 +44,7 @@
 #include "property.h"
 #include "new_menu.h"
 #include "button_text.h"
-#include "ext.h"	
+#include "ext.h"
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
@@ -54,12 +54,11 @@ int function=0;
 static int width;
 static int height;
 
-static GtkWidget *parent_window;
 static GtkWidget *toolbar;
 
 static GtkWidget *last_dialog;
 
-static GtkWidget *sim_mox;
+static GtkWidget *sim_mox=NULL;
 static GtkWidget *sim_s1;
 static GtkWidget *sim_s2;
 static GtkWidget *sim_s3;
@@ -82,14 +81,20 @@ static gint xit_minus_timer=-1;
 SWITCH *toolbar_switches=switches_controller1[0];
 
 void update_toolbar_labels() {
-  gtk_button_set_label(GTK_BUTTON(sim_mox),ActionTable[toolbar_switches[0].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_s1),ActionTable[toolbar_switches[1].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_s2),ActionTable[toolbar_switches[2].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_s3),ActionTable[toolbar_switches[3].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_s4),ActionTable[toolbar_switches[4].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_s5),ActionTable[toolbar_switches[5].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_s6),ActionTable[toolbar_switches[6].switch_function].button_str);
-  gtk_button_set_label(GTK_BUTTON(sim_function),ActionTable[toolbar_switches[7].switch_function].button_str);
+  if (sim_mox) {
+    //
+    // If the toolbar has not yet been on display,
+    // sim_mox and friends are NULL
+    //
+    gtk_button_set_label(GTK_BUTTON(sim_mox),ActionTable[toolbar_switches[0].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s1),ActionTable[toolbar_switches[1].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s2),ActionTable[toolbar_switches[2].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s3),ActionTable[toolbar_switches[3].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s4),ActionTable[toolbar_switches[4].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s5),ActionTable[toolbar_switches[5].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s6),ActionTable[toolbar_switches[6].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_function),ActionTable[toolbar_switches[7].switch_function].button_str);
+  }
 }
 
 //
@@ -98,7 +103,7 @@ void update_toolbar_labels() {
 //
 
 void mox_update(int state) {
-//fprintf(stderr,"mox_update: state=%d\n",state);
+//g_print("mox_update: state=%d\n",state);
   if (!can_transmit) return;
   if(getTune()==1) {
     setTune(0);
@@ -135,24 +140,23 @@ void tune_update(int state) {
 
 void switch_pressed_cb(GtkWidget *widget, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
-fprintf(stderr,"%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
+g_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
   schedule_action(toolbar_switches[i].switch_function, PRESSED, 0);
 }
 
 void switch_released_cb(GtkWidget *widget, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
-fprintf(stderr,"%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
+g_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
   schedule_action(toolbar_switches[i].switch_function, RELEASED, 0);
 }
 
-GtkWidget *toolbar_init(int my_width, int my_height, GtkWidget* parent) {
+GtkWidget *toolbar_init(int my_width, int my_height) {
     width=my_width;
     height=my_height;
-    parent_window=parent;
 
     int button_width=width/8;
 
-    fprintf(stderr,"toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
+    g_print("toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
 
     toolbar_switches=switches_controller1[function];
     toolbar=gtk_grid_new();

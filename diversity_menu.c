@@ -34,8 +34,6 @@
 
 #include <math.h>
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
 static GtkWidget *gain_coarse_scale=NULL;
 static GtkWidget *gain_fine_scale=NULL;
@@ -100,7 +98,7 @@ static void set_gain_phase() {
   arg=div_phase*0.017453292519943295769236907684886;
   div_cos=amplitude*cos(arg);
   div_sin=amplitude*sin(arg);
-//fprintf(stderr,"GAIN=%f PHASE=%f\n", div_gain, div_phase);
+//g_print("%s: GAIN=%f PHASE=%f\n", __FUNCTION__,div_gain, div_phase);
 }
 
 static void gain_coarse_changed_cb(GtkWidget *widget, gpointer data) {
@@ -171,10 +169,8 @@ void update_diversity_phase(double increment) {
 
 void diversity_menu(GtkWidget *parent) {
 
-  parent_window=parent;
-
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Diversity");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

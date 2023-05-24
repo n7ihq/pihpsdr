@@ -48,6 +48,6 @@ void sim_s6_pressed_cb(GtkWidget *widget, gpointer data);
 void sim_s6_released_cb(GtkWidget *widget, gpointer data);
 void sim_function_cb(GtkWidget *widget, gpointer data);
 
-GtkWidget *toolbar_init(int my_width, int my_height, GtkWidget* parent);
+GtkWidget *toolbar_init(int my_width, int my_height);
 
 #endif

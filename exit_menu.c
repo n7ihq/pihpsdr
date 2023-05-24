@@ -37,8 +37,6 @@
 #include "gpio.h"
 #endif
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
@@ -165,10 +163,9 @@ static gboolean shutdown_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
 
 
 void exit_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Exit");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);

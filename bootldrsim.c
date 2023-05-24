@@ -113,7 +113,7 @@ int main(int argc, char **argv)
       //
       if (pcap_findalldevs(&devlist, errbuf) == -1)
       {
-          fprintf(stderr,"Error in pcap_findalldevs_ex: %s\n", errbuf);
+          printf("Error in pcap_findalldevs_ex: %s\n", errbuf);
           exit(1);
       }
 
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
                   count=100;  // timeout is 10msec so we wait for 1 sec.
                 }
                 sendRawCommand(descr, hismac, SEND_MORE, NULL, 0);
-	        break;
+                break;
               case GET_JTAG_DEVICE_ID:
                 printf("JTAG GetDeviceID received, should not happen.\n");
                 break;

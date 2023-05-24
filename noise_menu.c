@@ -26,7 +26,6 @@
 
 #include "new_menu.h"
 #include "noise_menu.h"
-#include "channel.h"
 #include "band.h"
 #include "bandstack.h"
 #include "filter.h"
@@ -35,8 +34,6 @@
 #include "vfo.h"
 #include "button_text.h"
 #include "ext.h"
-
-static GtkWidget *parent_window=NULL;
 
 static GtkWidget *dialog=NULL;
 
@@ -156,10 +153,9 @@ static void snb_cb(GtkWidget *widget, gpointer data) {
 }
 
 void noise_menu(GtkWidget *parent) {
-  parent_window=parent;
 
   dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent_window));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   char title[64];
   sprintf(title,"piHPSDR - Noise (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
