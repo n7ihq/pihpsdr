@@ -186,7 +186,6 @@ static void audio_channel_cb(GtkWidget *widget, gpointer data) {
 }
 
 void rx_menu(GtkWidget *parent) {
-  char label[32];
   int i;
 
   dialog=gtk_dialog_new();
@@ -206,11 +205,11 @@ void rx_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
-  int row, col;
+  int row;
 
   row=1;
   switch(protocol) {
-    case NEW_PROTOCOL:
+    case NEW_PROTOCOL:  // Sample rate in RX menu only for P2
       {
       GtkWidget *sample_rate_label=gtk_label_new(NULL);
       gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate</b>");
@@ -221,10 +220,8 @@ void rx_menu(GtkWidget *parent) {
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"96000");
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"192000");
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"384000");
-#ifndef raspberrypi
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"768000");
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"1536000");
-#endif
       switch (active_receiver->sample_rate) {
          case 48000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
@@ -238,46 +235,18 @@ void rx_menu(GtkWidget *parent) {
          case 384000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),3);
             break;
-#ifndef raspberrypi
          case 768000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),4);
             break;
          case 1536000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),5);
             break;
-#endif
       }
       my_combo_attach(GTK_GRID(grid),sample_rate_combo_box,1,row,1,1);
       g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
       }
       row++;
       break;
-
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      {
-      GtkWidget *sample_rate_label=gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate</b>");
-      gtk_grid_attach(GTK_GRID(grid),sample_rate_label,0,row,1,1);
-
-      char rate_string[16];
-      sprintf(rate_string,"%d",radio->info.soapy.sample_rate);
-      GtkWidget *sample_rate_combo_box=gtk_combo_box_text_new();
-      gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,rate_string);
-      gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,1,row,1,1);
-
-      int rate=radio->info.soapy.sample_rate/2;
-      while(rate>=48000) {
-          sprintf(rate_string,"%d",rate);
-          gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,rate_string);
-          rate=rate/2;
-      }
-      my_combo_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
-      g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
-      }
-      row++;
-      break;
-#endif
   }
 
   if (filter_board == ALEX && active_receiver->adc == 0 && have_alex_att) {
@@ -312,6 +281,7 @@ void rx_menu(GtkWidget *parent) {
 
     GtkWidget *adc_combo_box=gtk_combo_box_text_new();
     for(i=0;i<n_adc;i++) {
+      char label[32];
       sprintf(label,"ADC-%d",i);
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(adc_combo_box),NULL,label);
     }
