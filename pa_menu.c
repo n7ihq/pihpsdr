@@ -32,7 +32,7 @@ static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static GtkWidget *grid2;
+static GtkWidget *calibgrid;
 
 //
 // we need all these "spin" widgets as a static variable
@@ -117,7 +117,7 @@ static void show_1W(gboolean reset) {
     sprintf(text,"<b>%dmW</b>",pa_trim[i]);
     GtkWidget *label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(label), text);
-    gtk_grid_attach(GTK_GRID(grid2),label,0,i,1,1);
+    gtk_grid_attach(GTK_GRID(calibgrid),label,0,i,1,1);
 
     //
     // We *need* a maximum value for the spinner, but a quite large
@@ -125,7 +125,7 @@ static void show_1W(gboolean reset) {
     // value.
     //
     spin[i]=gtk_spin_button_new_with_range(0.0,(double)(5*i*100),1.0);
-    gtk_grid_attach(GTK_GRID(grid2),spin[i],1,i,1,1);
+    gtk_grid_attach(GTK_GRID(calibgrid),spin[i],1,i,1,1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]),(double)pa_trim[i]);
     g_signal_connect(spin[i],"value_changed",G_CALLBACK(trim_changed_cb),GINT_TO_POINTER(i));
   }
@@ -146,7 +146,7 @@ static void show_W(int watts,gboolean reset) {
     sprintf(text,"<b>%dW</b>",i*increment);
     GtkWidget *label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(label), text);
-    gtk_grid_attach(GTK_GRID(grid2),label,0,i,1,1);
+    gtk_grid_attach(GTK_GRID(calibgrid),label,0,i,1,1);
 
     //
     // We *need* a maximum value for the spinner, but a quite large
@@ -154,7 +154,7 @@ static void show_W(int watts,gboolean reset) {
     // value.
     //
     spin[i]=gtk_spin_button_new_with_range(0.0,(double)(5*i*increment),1.0);
-    gtk_grid_attach(GTK_GRID(grid2),spin[i],1,i,1,1);
+    gtk_grid_attach(GTK_GRID(calibgrid),spin[i],1,i,1,1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]),(double)pa_trim[i]);
     g_signal_connect(spin[i],"value_changed",G_CALLBACK(trim_changed_cb),GINT_TO_POINTER(i));
   }
@@ -163,7 +163,7 @@ static void show_W(int watts,gboolean reset) {
 static void clear_W() {
   int i;
   for(i=0;i<10;i++) {
-    gtk_grid_remove_row(GTK_GRID(grid2),1);
+    gtk_grid_remove_row(GTK_GRID(calibgrid),1);
     spin[i]=NULL;
   }
 }
@@ -195,7 +195,7 @@ g_print("max_power_changed_cb: %d\n",pa_power);
       show_W(500,TRUE);
       break;
   }
-  gtk_widget_show_all(grid2);
+  gtk_widget_show_all(calibgrid);
 }
 
 void pa_menu(GtkWidget *parent) {
@@ -240,55 +240,57 @@ void pa_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid0),tx_out_of_band_b,3,0,1,1);
   g_signal_connect(tx_out_of_band_b,"toggled",G_CALLBACK(tx_out_of_band_cb),NULL);
 
-  GtkWidget *grid1=gtk_grid_new();
-  gtk_grid_set_column_spacing (GTK_GRID(grid1),10);
+  if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
+    GtkWidget *grid=gtk_grid_new();
+    gtk_grid_set_column_spacing (GTK_GRID(grid),10);
 
-  int bands=max_band();
-  int b=0;
+    int bands=max_band();
+    int b=0;
 
-  for(int i=0;i<=bands;i++) {
-    BAND *band=band_get_band(i);
+    for(int i=0;i<=bands;i++) {
+      BAND *band=band_get_band(i);
 
-    GtkWidget *band_label=gtk_label_new(NULL);
-    char band_text[32];
-    sprintf(band_text,"<b>%s</b>",band->title);
-    gtk_label_set_markup(GTK_LABEL(band_label), band_text);
-    gtk_widget_show(band_label);
-    gtk_grid_attach(GTK_GRID(grid1),band_label,(b/6)*2,(b%6)+1,1,1);
-
-    GtkWidget *pa_r=gtk_spin_button_new_with_range(38.8,100.0,0.1);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(pa_r),(double)band->pa_calibration);
-    gtk_widget_show(pa_r);
-    gtk_grid_attach(GTK_GRID(grid1),pa_r,((b/6)*2)+1,(b%6)+1,1,1);
-    g_signal_connect(pa_r,"value_changed",G_CALLBACK(pa_value_changed_cb),band);
-
-    b++;
-  }
-
-  for(int i=BANDS;i<BANDS+XVTRS;i++) {
-    BAND *band=band_get_band(i);
-    if(strlen(band->title)>0) {
       GtkWidget *band_label=gtk_label_new(NULL);
       char band_text[32];
       sprintf(band_text,"<b>%s</b>",band->title);
       gtk_label_set_markup(GTK_LABEL(band_label), band_text);
       gtk_widget_show(band_label);
-      gtk_grid_attach(GTK_GRID(grid1),band_label,(b/6)*2,(b%6)+1,1,1);
+      gtk_grid_attach(GTK_GRID(grid),band_label,(b/6)*2,(b%6)+1,1,1);
 
       GtkWidget *pa_r=gtk_spin_button_new_with_range(38.8,100.0,0.1);
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(pa_r),(double)band->pa_calibration);
       gtk_widget_show(pa_r);
-      gtk_grid_attach(GTK_GRID(grid1),pa_r,((b/6)*2)+1,(b%6)+1,1,1);
+      gtk_grid_attach(GTK_GRID(grid),pa_r,((b/6)*2)+1,(b%6)+1,1,1);
       g_signal_connect(pa_r,"value_changed",G_CALLBACK(pa_value_changed_cb),band);
 
       b++;
     }
+
+    for(int i=BANDS;i<BANDS+XVTRS;i++) {
+      BAND *band=band_get_band(i);
+      if(strlen(band->title)>0) {
+        GtkWidget *band_label=gtk_label_new(NULL);
+        char band_text[32];
+        sprintf(band_text,"<b>%s</b>",band->title);
+        gtk_label_set_markup(GTK_LABEL(band_label), band_text);
+        gtk_widget_show(band_label);
+        gtk_grid_attach(GTK_GRID(grid),band_label,(b/6)*2,(b%6)+1,1,1);
+
+        GtkWidget *pa_r=gtk_spin_button_new_with_range(38.8,100.0,0.1);
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(pa_r),(double)band->pa_calibration);
+        gtk_widget_show(pa_r);
+        gtk_grid_attach(GTK_GRID(grid),pa_r,((b/6)*2)+1,(b%6)+1,1,1);
+        g_signal_connect(pa_r,"value_changed",G_CALLBACK(pa_value_changed_cb),band);
+
+        b++;
+      }
+    }
+
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new("Calibrate"));
   }
 
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid1,gtk_label_new("Calibrate"));
-
-  grid2=gtk_grid_new();
-  gtk_grid_set_column_spacing (GTK_GRID(grid2),10);
+  calibgrid=gtk_grid_new();
+  gtk_grid_set_column_spacing (GTK_GRID(calibgrid),10);
 
   switch(pa_power) {
     case PA_1W:
@@ -314,7 +316,7 @@ void pa_menu(GtkWidget *parent) {
       break;
   }
 
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid2,gtk_label_new("Watt Meter Calibrate"));
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),calibgrid,gtk_label_new("Watt Meter Calibrate"));
 
   gtk_grid_attach(GTK_GRID(grid0),notebook,0,1,6,1);
   gtk_container_add(GTK_CONTAINER(content),grid0);
