@@ -1324,15 +1324,12 @@ g_print("radio_change_receivers: from %d to %d\n",receivers,r);
 void radio_change_sample_rate(int rate) {
   int i;
 
+  //
+  // The radio menu calls this function even if the sample rate
+  // has not changed. Do nothing in this case.
+  //
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
-      //
-      // The radio menu calls this function even if the sample rate
-      // has not changed. Do nothing in this case.
-      //
-      // Note P2 and SOAPY directly call receiver_change_sample_rate
-      // and handle changes in the RX menu.
-      //
       if (receiver[0]->sample_rate != rate) {
         protocol_stop();
         for(i=0;i<receivers;i++) {
@@ -2805,9 +2802,11 @@ void protocol_stop() {
     case NEW_PROTOCOL:
       new_protocol_menu_stop();
       break;
+#ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
       soapy_protocol_stop_receiver(receiver[0]);
       break;
+#endif
   }
 }
 
@@ -2819,9 +2818,11 @@ void protocol_run() {
     case NEW_PROTOCOL:
       new_protocol_menu_start();
       break;
+#ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
       soapy_protocol_start_receiver(receiver[0]);
       break;
+#endif
   }
 }
 
