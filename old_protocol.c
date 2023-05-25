@@ -116,21 +116,11 @@ enum {
 };
 static int state=SYNC_0;
 
-static int display_width;
-
-static int speed;
-
-static int dsp_rate=48000;
-static int output_rate=48000;
-
 static int data_socket=-1;
 static int tcp_socket=-1;
 static struct sockaddr_in data_addr;
 
 static unsigned char control_in[5]={0x00,0x00,0x00,0x00,0x00};
-
-static double tuning_phase;
-static double phase=0.0;
 
 static int running;
 static long ep4_sequence;
@@ -315,8 +305,6 @@ void old_protocol_init(int rx,int pixels,int rate) {
       transmitter->local_microphone=0;
     }
   }
-
-  display_width=pixels;
 
 #ifdef USBOZY
 //
