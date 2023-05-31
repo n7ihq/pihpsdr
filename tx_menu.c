@@ -296,6 +296,8 @@ void tx_menu(GtkWidget *parent) {
     case DEVICE_ANGELIA:
     case DEVICE_ORION:
     case DEVICE_ORION2:
+    case DEVICE_STEMLAB:
+    case DEVICE_STEMLAB_Z20:
     case NEW_DEVICE_ATLAS:
     case NEW_DEVICE_HERMES:
     case NEW_DEVICE_HERMES2:
