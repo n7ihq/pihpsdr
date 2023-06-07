@@ -288,26 +288,22 @@ static int info_thread(gpointer arg) {
 
 //
 // select route for PS feedback signal.
-// note: we need new code numbers such that we can
-//       distinguish "normal RX" and "feedback" use
-//       of EXT1. In the latter case, any RX filters have
-//       to by bypassed, which is of particular importance
-//       on the 6m band.
-//
 //
 static void ps_ant_cb(GtkWidget *widget, gpointer data) {
-  int val = GPOINTER_TO_INT(data);
-  if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
-    switch (val) {
-      case 0:   // Internal
-      case 6:   // EXT1; RX filters switched to "BYPASS"
-      case 7:   // Bypass
-        receiver[PS_RX_FEEDBACK]->alex_antenna = val;
-        if (protocol == NEW_PROTOCOL) {
-          schedule_high_priority();
-        }
-        break;
-    }
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  switch (val) {
+    case 0:
+      receiver[PS_RX_FEEDBACK]->alex_antenna = 0;
+      break;
+    case 1:
+      receiver[PS_RX_FEEDBACK]->alex_antenna = 6;
+      break;
+    case 2:
+      receiver[PS_RX_FEEDBACK]->alex_antenna = 7;
+      break;
+  }
+  if (protocol == NEW_PROTOCOL) {
+    schedule_high_priority();
   }
 }
 
@@ -475,33 +471,23 @@ void ps_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), ps_ant_label, col, row, 1, 1);
   col++;
 
-  GtkWidget *ps_ant_auto=gtk_radio_button_new_with_label(NULL,"Internal");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ps_ant_auto), (receiver[PS_RX_FEEDBACK]->alex_antenna == 0) );
-  gtk_widget_show(ps_ant_auto);
-  gtk_grid_attach(GTK_GRID(grid), ps_ant_auto, col, row, 1, 1);
-  g_signal_connect(ps_ant_auto,"toggled", G_CALLBACK(ps_ant_cb), (gpointer) (long) 0);
-  col++;
-
-  //
-  // ANAN-7000:           you can use both EXT1 and ByPass (although Bypass is to be preferred),
-  // ANAN-100/200 old PA: you can only use EXT1
-  // ANAN-100/200 new PA: you can only use ByPass
-  //
-  // We would need much logic at various places to guarantee that non-reasonable settings
-  // cannot become effective, therefore we let the user choose both possibilities on all hardware
-  //
-  GtkWidget *ps_ant_ext1=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(ps_ant_auto),"EXT1");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ps_ant_ext1), (receiver[PS_RX_FEEDBACK]->alex_antenna==6) );
-  gtk_widget_show(ps_ant_ext1);
-  gtk_grid_attach(GTK_GRID(grid), ps_ant_ext1, col, row, 1, 1);
-  g_signal_connect(ps_ant_ext1,"toggled", G_CALLBACK(ps_ant_cb), (gpointer) (long) 6);
-  col++;
-
-  GtkWidget *ps_ant_ext2=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(ps_ant_auto),"ByPass");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ps_ant_ext2), (receiver[PS_RX_FEEDBACK]->alex_antenna==7) );
-  gtk_widget_show(ps_ant_ext2);
-  gtk_grid_attach(GTK_GRID(grid), ps_ant_ext2, col, row, 1, 1);
-  g_signal_connect(ps_ant_ext2,"toggled", G_CALLBACK(ps_ant_cb), (gpointer) (long) 7);
+  GtkWidget *ps_ant_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ps_ant_combo),NULL,"Internal");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ps_ant_combo),NULL,"Ext1");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ps_ant_combo),NULL,"ByPass");
+  switch(receiver[PS_RX_FEEDBACK]->alex_antenna) {
+    case 0:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(ps_ant_combo), 0);
+      break;
+    case 6:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(ps_ant_combo), 1);
+      break;
+    case 7:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(ps_ant_combo), 2);
+      break;
+  }
+  my_combo_attach(GTK_GRID(grid), ps_ant_combo, col, row, 1, 1);
+  g_signal_connect(ps_ant_combo, "changed", G_CALLBACK(ps_ant_cb), NULL);
 
   row++;
 

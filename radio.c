@@ -1440,6 +1440,10 @@ static void rxtx(int state) {
         // importance in SSB. On the other hand, one want a very fast turnaround in CW.
         // So there is no "muting" for CW, 31 msec "muting" for TUNE/AM/FM, and 16 msec for other modes.
         //
+        // Note that for doing "TwoTone" we should also use the long silence, but it is difficult
+        // to detect at this point whether this TX/RX transition comes from ending a TwoTone
+        // experiment.
+        //
         switch(get_tx_mode()) {
           case modeCWU:
           case modeCWL:
