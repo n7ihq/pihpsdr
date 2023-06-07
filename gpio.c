@@ -663,8 +663,8 @@ void gpio_set_defaults(int ctrlr) {
   g_print("%s: %d\n",__FUNCTION__,ctrlr);
   switch(ctrlr) {
     case NO_CONTROLLER:
-      CWL_BUTTON=9;
-      CWR_BUTTON=11;
+      CWL_BUTTON=7;
+      CWR_BUTTON=21;
       PTT_BUTTON=14;
       CWKEY_BUTTON=10;
       encoders=encoders_no_controller;
