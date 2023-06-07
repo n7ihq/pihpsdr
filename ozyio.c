@@ -83,7 +83,6 @@ static libusb_device_handle* ozy_handle;
 static char ozy_firmware[64] = {0};
 static char ozy_fpga[64] = {0};
 static unsigned char ozy_firmware_version[9];
-static unsigned char ozy_output_buffer[OZY_BUFFER_SIZE];
 
 // variables accessed via ozy_i2c_readvars:
 unsigned char penny_fw =0, mercury_fw = 0;

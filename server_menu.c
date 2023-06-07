@@ -31,8 +31,6 @@
 #include "radio.h"
 #include "client_server.h"
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static void cleanup() {

@@ -1572,6 +1572,7 @@ static gpointer command_response_thread(gpointer data) {
     process_command_response();
     command_response_buffer->free=1;
   }
+  return NULL;
 }
 
 static gpointer high_priority_thread(gpointer data) {
@@ -1587,6 +1588,7 @@ g_print("high_priority_thread\n");
     process_high_priority();
     high_priority_buffer->free=1;
   }
+  return NULL;
 }
 
 static gpointer mic_line_thread(gpointer data) {
@@ -1606,6 +1608,7 @@ g_print("mic_line_thread\n");
     process_mic_data(mic_bytes_read);
     mic_line_buffer->free=1;
   }
+  return NULL;
 }
 
 static gpointer iq_thread(gpointer data) {
@@ -1653,6 +1656,7 @@ static gpointer iq_thread(gpointer data) {
     }
     iq_buffer[ddc]->free=1;
   }
+  return NULL;
 }
 
 static void process_iq_data(unsigned char *buffer, RECEIVER *rx) {

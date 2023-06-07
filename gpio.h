@@ -80,13 +80,4 @@ extern void gpio_save_actions(void);
 extern int gpio_init(void);
 extern void gpio_close(void);
 
-extern int CWL_BUTTON;
-extern int CWR_BUTTON;
-extern int SIDETONE_GPIO;
-extern int ENABLE_GPIO_SIDETONE;
-extern int ENABLE_CW_BUTTONS;
-extern int CW_ACTIVE_LOW;
-extern void gpio_cw_sidetone_set(int level);
-extern int  gpio_cw_sidetone_enabled(void);
-
 #endif

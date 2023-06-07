@@ -34,7 +34,6 @@
 
 static GtkWidget *serial_enable_b[MAX_SERIAL];
 
-static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *serial_port_entry;
 

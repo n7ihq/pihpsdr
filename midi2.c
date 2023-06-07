@@ -355,6 +355,7 @@ int ReadLegacyMidiFile(char *filename) {
       type=TYPE_NONE;
       key=0;
       delay=0;
+      action=NO_ACTION;
 
       //
       // The KEY=, CTRL=, and PITCH= cases are mutually exclusive

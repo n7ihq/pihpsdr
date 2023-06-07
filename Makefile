@@ -3,7 +3,7 @@ UNAME_S := $(shell uname -s)
 
 # Get git commit version and date
 GIT_DATE := $(firstword $(shell git --no-pager show --date=short --format="%ai" --name-only))
-GIT_VERSION := $(shell git describe --abbrev=0 --tags)
+GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 
 # uncomment the following line to force 480x320 screen
 #SMALL_SCREEN_OPTIONS=-D SMALL_SCREEN
@@ -35,10 +35,13 @@ MIDI_INCLUDE=MIDI
 # uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
 #AUDIO_MODULE=ALSA
 
+# un-comment if you link with an extended WDSP library containing new noise reduction capabilities
+#EXTENDED_NOISE_REDUCTION_OPTIONS= -DEXTNR
+
 # very early code not included yet
 # SERVER_INCLUDE=SERVER
 
-CFLAGS?= -O -Wno-deprecated-declarations
+CFLAGS?= -O3 -Wno-deprecated-declarations -Wall
 LINK?=   $(CC)
 
 PKG_CONFIG = pkg-config
@@ -167,7 +170,7 @@ OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
 	$(ANDROMEDA_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
-	$(AUDIO_OPTIONS) \
+	$(AUDIO_OPTIONS) $(EXTENDED_NOISE_REDUCTION_OPTION)\
 	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' $(DEBUG_OPTION)
 
 #
@@ -206,7 +209,6 @@ radio_menu.c \
 rx_menu.c \
 ant_menu.c \
 display_menu.c \
-dsp_menu.c \
 pa_menu.c \
 cw_menu.c \
 oc_menu.c \
@@ -284,7 +286,6 @@ exit_menu.h \
 radio_menu.h \
 ant_menu.h \
 display_menu.h \
-dsp_menu.h \
 pa_menu.h \
 cw_menu.h \
 oc_menu.h \
@@ -360,7 +361,6 @@ exit_menu.o \
 radio_menu.o \
 ant_menu.o \
 display_menu.o \
-dsp_menu.o \
 pa_menu.o \
 cw_menu.o \
 oc_menu.o \

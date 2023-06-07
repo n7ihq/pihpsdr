@@ -201,7 +201,7 @@ static int dot_memory = 0;
 static int dash_memory = 0;
 static int dot_held = 0;
 static int dash_held = 0;
-static int key_state = 0;
+static int key_state = CHECK;
 static int dot_length = 0;
 static int dot_samples = 0;
 static int dash_samples = 0;
@@ -307,8 +307,7 @@ static void* keyer_thread(void *arg) {
     struct timespec loop_delay;
     int interval = 1000000; // 1 ms
     int i;
-    int kdelay;
-    int old_volume;
+    int kdelay=0;
     int txmode;
     int moxbefore;
     int cwvox;
@@ -324,15 +323,6 @@ static void* keyer_thread(void *arg) {
 
         // swallow any cw_events posted during the last "cw hang" time.
         if (!kcwl && !kcwr) continue;
-
-        //
-        // If using GPIO side tone information, mute CW side tone
-        // as long as the keyer thread is active
-        //
-        if (gpio_cw_sidetone_enabled()) {
-          old_volume=cw_keyer_sidetone_volume;
-          cw_keyer_sidetone_volume=0;
-        }
 
         //
         // Normally the keyer will be used in "break-in" mode, that is, we switch to TX
@@ -420,7 +410,6 @@ static void* keyer_thread(void *arg) {
                     if (*kdash) {                  // send manual dashes
                       cw_key_down=960000;  // max. 20 sec to protect hardware
                       cw_key_up=0;
-                      gpio_cw_sidetone_set(1);
                       key_state=STRAIGHT;
                     }
                 } else {
@@ -440,7 +429,6 @@ static void* keyer_thread(void *arg) {
                 if (! *kdash) {
                   cw_key_down=0;
                   cw_key_up=0;
-                  gpio_cw_sidetone_set(0);
                   key_state=CHECK;
                 }
                 break;
@@ -453,7 +441,6 @@ static void* keyer_thread(void *arg) {
                 dash_held = *kdash;
                 cw_key_down=dot_samples;
                 cw_key_up=dot_samples;
-                gpio_cw_sidetone_set(1);
                 key_state=SENDDOT;
                 break;
 
@@ -462,7 +449,6 @@ static void* keyer_thread(void *arg) {
                 // wait for dot being complete
                 //
                 if (cw_key_down == 0) {
-                  gpio_cw_sidetone_set(0);
                   key_state=DOTDELAY;
                 }
                 break;
@@ -508,7 +494,6 @@ static void* keyer_thread(void *arg) {
                 dot_held = *kdot;  // remember if dot is still held at beginning of the dash
                 cw_key_down=dash_samples;
                 cw_key_up=dot_samples;
-                gpio_cw_sidetone_set(1);
                 key_state=SENDDASH;
                 break;
 
@@ -517,7 +502,6 @@ static void* keyer_thread(void *arg) {
                 // wait for dash being complete
                 //
                 if (cw_key_down == 0) {
-                  gpio_cw_sidetone_set(0);
                   key_state=DASHDELAY;
                 }
                 break;
@@ -571,12 +555,6 @@ static void* keyer_thread(void *arg) {
                 loop_delay.tv_sec++;
             }
             clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &loop_delay, NULL);
-        }
-        //
-        // If we have reduced the side tone volume, restore it!
-        //
-        if (gpio_cw_sidetone_enabled()) {
-          cw_keyer_sidetone_volume = old_volume;
         }
 
     }

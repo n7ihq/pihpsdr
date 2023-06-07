@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <ifaddrs.h>
 #include <sys/socket.h>
 #include <net/if.h>
 #include <arpa/inet.h>
@@ -46,9 +45,6 @@
 
 // As we only run in the GTK+ main event loop, which is single-threaded and
 // non-preemptive, we shouldn't need any additional synchronisation mechanisms.
-static bool discovery_done = FALSE;
-static int pending_callbacks = 0;
-static struct ifaddrs *ifaddrs = NULL;
 static bool curl_initialised = FALSE;
 extern void status_text(const char *);
 

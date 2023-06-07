@@ -49,13 +49,12 @@
 #include "client_server.h"
 #endif
 
-static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
+#ifdef SOAPYSDR
 static GtkWidget *rx_gains[3];
 static GtkWidget *tx_gain;
-static GtkWidget *tx_gains[2];
-static GtkWidget *sat_b;
-static GtkWidget *rsat_b;
+//static GtkWidget *tx_gains[2];  // used in temporarily deactivated code
+#endif
 
 static GtkWidget *duplex_b;
 static GtkWidget *mute_rx_b;
@@ -78,24 +77,21 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
+#ifdef SOAPYSDR
 static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   ADC *myadc=(ADC *)data;
   myadc->gain=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
 
-#ifdef SOAPYSDR
   if(device==SOAPYSDR_USB_DEVICE) {
     soapy_protocol_set_gain(receiver[0]);
   }
-#endif
 }
 
 static void rx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   ADC *myadc=(ADC *)data;
   if(device==SOAPYSDR_USB_DEVICE) {
     myadc->gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-#ifdef SOAPYSDR
     soapy_protocol_set_gain_element(receiver[0],(char *)gtk_widget_get_name(widget),myadc->gain);
-#endif
   }
 }
 
@@ -103,7 +99,6 @@ static void drive_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   if(device==SOAPYSDR_USB_DEVICE) {
     // should use setDrive here to move the main drive slider
     transmitter->drive=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-#ifdef SOAPYSDR
     soapy_protocol_set_tx_gain(transmitter,(double)transmitter->drive);
 /*
     for(int i=0;i<radio->info.soapy.tx_gains;i++) {
@@ -111,7 +106,6 @@ static void drive_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_gains[i]),(double)value);
     }
 */
-#endif
   }
 }
 
@@ -120,28 +114,23 @@ static void tx_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   int gain;
   if(device==SOAPYSDR_USB_DEVICE) {
     gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-#ifdef SOAPYSDR
     soapy_protocol_set_tx_gain_element(transmitter,(char *)gtk_widget_get_name(widget),gain);
-#endif
   }
 }
 #endif
 
 static void agc_changed_cb(GtkWidget *widget, gpointer data) {
   gboolean agc=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-#ifdef SOAPYSDR
   soapy_protocol_set_automatic_gain(active_receiver,agc);
   if(!agc) {
     soapy_protocol_set_gain(active_receiver);
   }
-#endif
 }
 
 /*
 static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   DAC *dac=(DAC *)data;
   int gain;
-#ifdef SOAPYSDR
   if(device==SOAPYSDR_USB_DEVICE) {
     gain=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     soapy_protocol_set_tx_gain_element(radio->transmitter,(char *)gtk_widget_get_name(widget),gain);
@@ -152,9 +141,9 @@ static void dac0_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
       }
     }
   }
-#endif
 }
 */
+#endif
 
 static void calibration_value_changed_cb(GtkWidget *widget, gpointer data) {
   frequency_calibration=(long long)gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
@@ -164,9 +153,11 @@ static void rx_gain_calibration_value_changed_cb(GtkWidget *widget, gpointer dat
   rx_gain_calibration=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
+#ifdef GPIO
 static void vfo_divisor_value_changed_cb(GtkWidget *widget, gpointer data) {
   vfo_encoder_divisor=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
+#endif
 
 static void ptt_cb(GtkWidget *widget, gpointer data) {
   mic_ptt_enabled=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));

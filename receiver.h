@@ -81,18 +81,80 @@ typedef struct _receiver {
   gint random;
   gint preamp;
 
+  //
+  // Encodings for "QRM fighters"
+  //
+  // nr = 0:         No noise reduction
+  // nr = 1:         Variable-Leak LMS Algorithm, "NR", "ANR"
+  // nr = 2:         Spectral Noise Reduction, "NR2", "AEMNR"
+  // nr = 3:         non-standard extension to WDSP
+  // nr = 4:         non-standard extension to WDSP
+  //
+  // nb = 0:         No noise blanker
+  // nb = 1:         Preemptive Wideband Blanker, "NB", "ANB"
+  // nb = 2:         Interpolating Wideband Blanker, "NB2", "NOB"
+  // 
+  // anf= 0/1:       Automatic notch filter off/on
+  // snb= 0/1:       Spectral noise blanker off/on
+  //
   gint nb;
-  gint nb2;
   gint nr;
-  gint nr2;
   gint anf;
   gint snb;
 
+  //
+  // NR/NR2/ANF: position
+  // 0: execute NR/NR2/ANF before AGC
+  // 1: execute NR/NR2/ANF after AGC
+  //
   int nr_agc;
+
+  //
+  // Noise reduction parameters for "NR2"
+  // To be modified in the DSP menu.
+  //
+  //  Gain method: 0=GaussianSpeechLin, 1=GaussianSpeechLog, 2=GammaSpeech
+  //  NPE  method: 0=OSMS, 1=MMSE
+  //  AE         : Artifact elimination filter on(1)/off(0)
+  //
   int nr2_gain_method;
   int nr2_npe_method;
   int nr2_ae;
 
+  //
+  // Noise blanker parameters. These parameters have
+  // similar meanings for NB/NB2 so we only take one set.
+  // To be modified in the DSP menu. Note the "times"
+  // are stored internally in seconds, while in the DSP menu they
+  // are specified in milli-seconds. 
+  // The "NB value" nb_thresh, as obtained from the DSP menu,
+  // is multiplied with 0.165 merely since this is done in other
+  // SDR programs as well.
+  // The comments indicate the names of the parameters in the Thetis menu
+  // as well as the internal name used in Thetis.
+  //
+  gdouble nb_tau;       // "Slew",                         NBTransision
+  gdouble nb_advtime;   // "Lead",                         NBLead
+  gdouble nb_hang;      // "Lag",                          NBLag
+  gdouble nb_thresh;    // "Threshold",                    NBThreshold
+  gint    nb2_mode;     // NB mode, only NB2
+  //
+  // nb2_mode = 0:  zero mode
+  // nb2_mode = 1:  sample-hold
+  // nb2_mode = 2:  mean-hold
+  // nb2_mode = 3:  hold-sample
+  // nb2_mode = 4:  interpolate
+  
+#ifdef EXTNR
+  //
+  // NR4 parameters
+  //
+  gdouble nr4_reduction_amount;
+  gdouble nr4_smoothing_factor;
+  gdouble nr4_whitening_factor;
+  gdouble nr4_noise_rescale;
+  gdouble nr4_post_filter_threshold;
+#endif
 
   gint alex_antenna;
   gint alex_attenuation;

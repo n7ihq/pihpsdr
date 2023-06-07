@@ -59,8 +59,6 @@ static double bandwidth=2000000.0;
 static GThread *receive_thread_id=NULL;
 static gpointer receive_thread(gpointer data);
 
-static int actual_rate;
-
 #ifdef TIMING
 static int rate_samples;
 #endif

@@ -36,8 +36,6 @@
 #include "iambic.h"
 #include "ext.h"
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 void cw_changed() {
@@ -174,31 +172,31 @@ void cw_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_straight), cw_keyer_mode==KEYER_STRAIGHT);
   gtk_widget_show(cw_keyer_straight);
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_straight,0,3,1,1);
-  g_signal_connect(cw_keyer_straight,"toggled",G_CALLBACK(cw_keyer_mode_cb),(gpointer *)KEYER_STRAIGHT);
+  g_signal_connect(cw_keyer_straight,"toggled",G_CALLBACK(cw_keyer_mode_cb),(gpointer)KEYER_STRAIGHT);
 
   GtkWidget *cw_keyer_mode_a=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(cw_keyer_straight),"CW KEYER MODE A");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_mode_a), cw_keyer_mode==KEYER_MODE_A);
   gtk_widget_show(cw_keyer_mode_a);
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_mode_a,0,4,1,1);
-  g_signal_connect(cw_keyer_mode_a,"toggled",G_CALLBACK(cw_keyer_mode_cb),(gpointer *)KEYER_MODE_A);
+  g_signal_connect(cw_keyer_mode_a,"toggled",G_CALLBACK(cw_keyer_mode_cb),(gpointer)KEYER_MODE_A);
 
   GtkWidget *cw_keyer_mode_b=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(cw_keyer_mode_a),"CW KEYER MODE B");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_mode_b), cw_keyer_mode==KEYER_MODE_B);
   gtk_widget_show(cw_keyer_mode_b);
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_mode_b,0,5,1,1);
-  g_signal_connect(cw_keyer_mode_b,"toggled",G_CALLBACK(cw_keyer_mode_cb),(gpointer *)KEYER_MODE_B);
+  g_signal_connect(cw_keyer_mode_b,"toggled",G_CALLBACK(cw_keyer_mode_cb),(gpointer)KEYER_MODE_B);
 
   GtkWidget *cw_vfo=gtk_radio_button_new_with_label(NULL,"CW on VFO freq");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_vfo), cw_is_on_vfo_freq);
   gtk_widget_show(cw_vfo);
   gtk_grid_attach(GTK_GRID(grid),cw_vfo,1,3,1,1);
-  g_signal_connect(cw_vfo,"toggled",G_CALLBACK(cw_vfo_cb),(gpointer *)1);
+  g_signal_connect(cw_vfo,"toggled",G_CALLBACK(cw_vfo_cb),(gpointer)1);
 
   GtkWidget *cw_vfo_pm=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(cw_vfo),"CW on VFO +/- sidetone");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_vfo_pm), cw_is_on_vfo_freq==0);
   gtk_widget_show(cw_vfo_pm);
   gtk_grid_attach(GTK_GRID(grid),cw_vfo_pm,1,4,1,1);
-  g_signal_connect(cw_vfo_pm,"toggled",G_CALLBACK(cw_vfo_cb),(gpointer *)0);
+  g_signal_connect(cw_vfo_pm,"toggled",G_CALLBACK(cw_vfo_cb),(gpointer)0);
 
   GtkWidget *cw_keys_reversed_b=gtk_check_button_new_with_label("Keys reversed");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keys_reversed_b), cw_keys_reversed);

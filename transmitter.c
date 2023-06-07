@@ -56,8 +56,10 @@
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
+#ifdef AUDIO_WATERFALL
 static int waterfall_samples=0;
 static int waterfall_resample=8;
+#endif
 
 //
 // CW pulses are timed by the heart-beat of the mic samples.
@@ -547,13 +549,6 @@ static gboolean update_display(gpointer data) {
       case DEVICE_HERMES_LITE2:
       case NEW_DEVICE_HERMES_LITE:
       case NEW_DEVICE_HERMES_LITE2:
-        // possible reversed depending polarity of current sense transformer
-        if(rev_power>fwd_power) {
-          fwd_power=alex_reverse_power;
-          rev_power=alex_forward_power;
-          fwd_average=alex_reverse_power_average;
-          rev_average=alex_forward_power_average;
-        }
         constant1=3.3;
         constant2=1.5;      // Thetis: 1.8 for ref, 1.4 for fwd
         rev_cal_offset=3;
@@ -571,6 +566,13 @@ static gboolean update_display(gpointer data) {
         ex_power=exciter_power;
         if(device==DEVICE_HERMES_LITE || device==DEVICE_HERMES_LITE2 ||
            device==NEW_DEVICE_HERMES_LITE || device==NEW_DEVICE_HERMES_LITE2) {
+          // possible reversed depending polarity of current sense transformer
+          if(rev_power>fwd_power) {
+            fwd_power=alex_reverse_power;
+            rev_power=alex_forward_power;
+            fwd_average=alex_reverse_power_average; 
+            rev_average=alex_forward_power_average; 
+          } 
           ex_power=0;
           tx->exciter=0.0;
         } else {
@@ -604,6 +606,7 @@ static gboolean update_display(gpointer data) {
         if (fwd_average < 0) fwd_average=0;
         break;
       case SOAPYSDR_PROTOCOL:
+      default:
         tx->fwd=0.0;
         tx->exciter=0.0;
         tx->rev=0.0;
@@ -915,6 +918,9 @@ g_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d 
   SetTXAFMEmphPosition(tx->id,pre_emphasize);
 
   SetTXACFIRRun(tx->id, protocol==NEW_PROTOCOL?1:0); // turned on if new protocol
+  //
+  // enable_tx_equalizer and tx_equalizer should be part of TX
+  //
   if(enable_tx_equalizer) {
     SetTXAGrphEQ(tx->id, tx_equalizer);
     SetTXAEQRun(tx->id, 1);
@@ -1079,7 +1085,6 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   int cwmode;
   int sidetone=0;
   static int txflag=0;
-  static long last_qsample=0;
 
   // It is important to query tx->mode and tune only *once* within this function, to assure that
   // the two "if (cwmode)" clauses give the same result.
@@ -1095,7 +1100,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
       gain=8388607.0; // 24 bit
       break;
     case SOAPYSDR_PROTOCOL:
+    default:
       // gain is not used, since samples are floating point
+      gain=1.0;
       break;
   }
 
@@ -1118,13 +1125,13 @@ static void full_tx_buffer(TRANSMITTER *tx) {
         *dp++ = 0.0;
         *dp++ = cw_shape_buffer48[j];
         }
-    break;
+        break;
       case NEW_PROTOCOL:
         for (j = 0; j < tx->output_samples; j++) {
         *dp++ = 0.0;
         *dp++ = cw_shape_buffer192[j];
         }
-    break;
+        break;
     }
   } else {
     update_vox(tx);

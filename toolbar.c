@@ -67,17 +67,6 @@ static GtkWidget *sim_s5;
 static GtkWidget *sim_s6;
 static GtkWidget *sim_function;
 
-
-static GtkWidget *last_band;
-static GtkWidget *last_bandstack;
-static GtkWidget *last_mode;
-static GtkWidget *last_filter;
-
-static gint rit_plus_timer=-1;
-static gint rit_minus_timer=-1;
-static gint xit_plus_timer=-1;
-static gint xit_minus_timer=-1;
-
 SWITCH *toolbar_switches=switches_controller1[0];
 
 void update_toolbar_labels() {

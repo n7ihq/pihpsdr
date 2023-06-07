@@ -170,6 +170,10 @@ g_print("%s: local_audio_buffer: size=%d sample=%ld\n",__FUNCTION__,out_buffer_s
 g_print("%s: local_audio_buffer: size=%d sample=%ld\n",__FUNCTION__,out_buffer_size,sizeof(gfloat));
       rx->local_audio_buffer=g_new(gfloat,2*out_buffer_size);
       break;
+    default:
+      g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
+      rx->local_audio_buffer=NULL;
+      break;
   }
 
   g_print("%s: rx=%d audio_device=%d handle=%p buffer=%p size=%d\n",__FUNCTION__,rx->id,rx->audio_device,rx->playback_handle,rx->local_audio_buffer,out_buffer_size);
@@ -252,6 +256,10 @@ g_print("%s: mic_buffer: size=%d channels=%d sample=%ld bytes\n",__FUNCTION__,mi
 g_print("%s: mic_buffer: size=%d channels=%d sample=%ld bytes\n",__FUNCTION__,mic_buffer_size,channels,sizeof(gfloat));
       mic_buffer=g_new(gfloat,mic_buffer_size);
       break;
+    default:
+      g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
+      mic_buffer=NULL;
+      break;
   }
 
 g_print("%s: allocating ring buffer\n", __FUNCTION__);
@@ -326,14 +334,11 @@ g_print("%s: free mic buffer\n", __FUNCTION__);
 
 int cw_audio_write(RECEIVER *rx, float sample){
   snd_pcm_sframes_t delay;
-  long rc;
-  float *float_buffer;
-  gint32 *long_buffer;
-  gint16 *short_buffer;
-  static int count=0;
         
   g_mutex_lock(&rx->local_audio_mutex);
   if(rx->playback_handle!=NULL && rx->local_audio_buffer!=NULL) {
+
+    static int count=0;
 
     if (snd_pcm_delay(rx->playback_handle, &delay) == 0) {
       if (delay > out_cw_border) {
@@ -351,19 +356,28 @@ int cw_audio_write(RECEIVER *rx, float sample){
     //
     switch(rx->local_audio_format) {
       case SND_PCM_FORMAT_S16_LE:
-        short_buffer=(gint16 *)rx->local_audio_buffer;
+        {
+        gint16 *short_buffer=(gint16 *)rx->local_audio_buffer;
         short_buffer[rx->local_audio_buffer_offset*2]=(gint16)(sample*32767.0F);
         short_buffer[(rx->local_audio_buffer_offset*2)+1]=(gint16)(sample*32767.0F);
+        }
         break;
       case SND_PCM_FORMAT_S32_LE:
-        long_buffer=(gint32 *)rx->local_audio_buffer;
+        {
+        gint32 *long_buffer=(gint32 *)rx->local_audio_buffer;
         long_buffer[rx->local_audio_buffer_offset*2]=(gint32)(sample*4294967295.0F);
         long_buffer[(rx->local_audio_buffer_offset*2)+1]=(gint32)(sample*4294967295.0F);
+        }
         break;
       case SND_PCM_FORMAT_FLOAT_LE:
-        float_buffer=(float *)rx->local_audio_buffer;
+        {
+        gfloat *float_buffer=(float *)rx->local_audio_buffer;
         float_buffer[rx->local_audio_buffer_offset*2]=sample;
         float_buffer[(rx->local_audio_buffer_offset*2)+1]=sample;
+        }
+        break;
+      default:
+        g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
         break;
     }
     rx->local_audio_buffer_offset++;
@@ -386,19 +400,28 @@ int cw_audio_write(RECEIVER *rx, float sample){
           // insert another zero sample
           switch(rx->local_audio_format) {
             case SND_PCM_FORMAT_S16_LE:
-              short_buffer=(gint16 *)rx->local_audio_buffer;
+              {
+              gint16 *short_buffer=(gint16 *)rx->local_audio_buffer;
               short_buffer[rx->local_audio_buffer_offset*2]=0;
               short_buffer[(rx->local_audio_buffer_offset*2)+1]=0;
+              }
               break;
             case SND_PCM_FORMAT_S32_LE:
-              long_buffer=(gint32 *)rx->local_audio_buffer;
+              {
+              gint32* long_buffer=(gint32 *)rx->local_audio_buffer;
               long_buffer[rx->local_audio_buffer_offset*2]=0;
               long_buffer[(rx->local_audio_buffer_offset*2)+1]=0;
+              }
               break;
             case SND_PCM_FORMAT_FLOAT_LE:
-              float_buffer=(float *)rx->local_audio_buffer;
+              {
+              gfloat *float_buffer=(float *)rx->local_audio_buffer;
               float_buffer[rx->local_audio_buffer_offset*2]=0.0;
               float_buffer[(rx->local_audio_buffer_offset*2)+1]=0.0;
+              }
+              break;
+            default:
+              g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
               break;
           }
           rx->local_audio_buffer_offset++;
@@ -408,6 +431,7 @@ int cw_audio_write(RECEIVER *rx, float sample){
 
     if(rx->local_audio_buffer_offset>=out_buffer_size) {
 
+      long rc;
       if ((rc = snd_pcm_writei (rx->playback_handle, rx->local_audio_buffer, out_buffer_size)) != out_buffer_size) {
         if(rc<0) {
           switch (rc) {
@@ -443,9 +467,6 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
   snd_pcm_sframes_t delay;
   long rc;
   int txmode=get_tx_mode();
-  float *float_buffer;
-  gint32 *long_buffer;
-  gint16 *short_buffer;
 
   //
   // We have to stop the stream here if a CW side tone may occur.
@@ -467,19 +488,28 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
 
     switch(rx->local_audio_format) {
       case SND_PCM_FORMAT_S16_LE:
-        short_buffer=(gint16 *)rx->local_audio_buffer;
+        {
+        gint16 *short_buffer=(gint16 *)rx->local_audio_buffer;
         short_buffer[rx->local_audio_buffer_offset*2]=(gint16)(left_sample*32767.0F);
         short_buffer[(rx->local_audio_buffer_offset*2)+1]=(gint16)(right_sample*32767.0F);
+        }
         break;
       case SND_PCM_FORMAT_S32_LE:
-        long_buffer=(gint32 *)rx->local_audio_buffer;
+        {
+        gint32 *long_buffer=(gint32 *)rx->local_audio_buffer;
         long_buffer[rx->local_audio_buffer_offset*2]=(gint32)(left_sample*4294967295.0F);
         long_buffer[(rx->local_audio_buffer_offset*2)+1]=(gint32)(right_sample*4294967295.0F);
+        }
         break;
       case SND_PCM_FORMAT_FLOAT_LE:
-        float_buffer=(float *)rx->local_audio_buffer;
+        {
+        gfloat *float_buffer=(float *)rx->local_audio_buffer;
         float_buffer[rx->local_audio_buffer_offset*2]=left_sample;
         float_buffer[(rx->local_audio_buffer_offset*2)+1]=right_sample;
+        }
+        break;
+      default:
+        g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
         break;
     }
     rx->local_audio_buffer_offset++;
@@ -511,6 +541,11 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
             case SND_PCM_FORMAT_FLOAT_LE:
               silence=g_new(float,2*num);
               len=2*num*sizeof(float);
+              break;
+            default:
+              g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
+              silence=NULL;
+              len=0;
               break;
           }
           if (silence) {
@@ -595,6 +630,10 @@ g_print("%s: snd_pcm_start\n", __FUNCTION__);
             float_buffer=(gfloat *)mic_buffer;
             sample=float_buffer[i];
             break;
+          default:
+            g_print("%s: CATASTROPHIC ERROR: unknown sound format\n",__FUNCTION__);
+            sample=0.0;
+            break;
         }
         //
         // put sample into ring buffer
@@ -626,14 +665,13 @@ g_print("%s: exiting\n", __FUNCTION__);
 // from ring buffer
 //
 float audio_get_next_mic_sample() {
-  int newpt;
   float sample;
   g_mutex_lock(&audio_mutex);
   if ((mic_ring_buffer == NULL) || (mic_ring_read_pt == mic_ring_write_pt)) {
     // no buffer, or nothing in buffer: insert silence
     sample=0.0;
   } else {
-    newpt = mic_ring_read_pt+1;
+    int newpt = mic_ring_read_pt+1;
     if (newpt == MICRINGLEN) newpt=0;
     sample=mic_ring_buffer[mic_ring_read_pt];
     // atomic update of read pointer
@@ -781,9 +819,5 @@ g_print("input_device: name=%s descr=%s\n",name,descr);
     n++;
   }
   snd_device_name_free_hint(hints);
-}
-
-char * audio_get_error_string(int err) {
-  return (char *)snd_strerror(err);
 }
 #endif

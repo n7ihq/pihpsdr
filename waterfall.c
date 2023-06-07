@@ -36,19 +36,9 @@ static int colorLowR=0; // black
 static int colorLowG=0;
 static int colorLowB=0;
 
-static int colorMidR=255; // red
-static int colorMidG=0;
-static int colorMidB=0;
-
 static int colorHighR=255; // yellow
 static int colorHighG=255;
 static int colorHighB=0;
-
-
-static gint first_x;
-static gint last_x;
-static gboolean has_moved=FALSE;
-static gboolean pressed=FALSE;
 
 static double hz_per_pixel;
 

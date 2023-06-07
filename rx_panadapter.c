@@ -54,7 +54,6 @@ static gfloat filter_right;
 static gfloat cw_frequency;
 
 static gint sequence_error_count=0;
-static gint fexchange_error_count=0;
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean

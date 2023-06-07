@@ -37,9 +37,22 @@
 #include "gpio.h"
 #endif
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
+
+void stop_program() {
+#ifdef GPIO
+  gpio_close();
+#endif
+#ifdef CLIENT_SERVER
+  if(!radio_is_remote) {
+#endif
+    protocol_stop();
+    radio_stop();
+#ifdef CLIENT_SERVER
+  }
+#endif
+  radioSaveState();
+}
 
 static void cleanup() {
   if(dialog!=NULL) {
@@ -52,24 +65,7 @@ static void cleanup() {
 #if 0
 static gboolean discovery_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
-#ifdef GPIO
-  gpio_close();
-#endif
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      old_protocol_stop();
-      break;
-    case NEW_PROTOCOL:
-      new_protocol_stop();
-      break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_stop();
-      break;
-#endif
-  }
-  radioSaveState();
-  radio_stop();
+  stop_program();
   gtk_container_remove(GTK_CONTAINER(top_window), fixed);
   gtk_widget_destroy(fixed);
   gtk_container_add(GTK_CONTAINER(top_window), grid);
@@ -90,73 +86,18 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 
 static gboolean exit_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
 g_print("exit_cb\n");
-#ifdef GPIO
-  gpio_close();
-#endif
-#ifdef CLIENT_SERVER
-  if(!radio_is_remote) {
-#endif
-    switch(protocol) {
-      case ORIGINAL_PROTOCOL:
-        old_protocol_stop();
-        break;
-      case NEW_PROTOCOL:
-        new_protocol_stop();
-        break;
-#ifdef SOAPYSDR
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_stop();
-        break;
-#endif
-    }
-#ifdef CLIENT_SERVER
-  }
-#endif
-  radioSaveState();
-
+  stop_program();
   _exit(0);
 }
 
 static gboolean reboot_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-#ifdef GPIO
-  gpio_close();
-#endif
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      old_protocol_stop();
-      break;
-    case NEW_PROTOCOL:
-      new_protocol_stop();
-      break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_stop();
-      break;
-#endif
-  }
-  radioSaveState();
+  stop_program();
   (void) system("reboot");
   _exit(0);
 }
 
 static gboolean shutdown_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-#ifdef GPIO
-  gpio_close();
-#endif
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      old_protocol_stop();
-      break;
-    case NEW_PROTOCOL:
-      new_protocol_stop();
-      break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_stop();
-      break;
-#endif
-  }
-  radioSaveState();
+  stop_program();
   (void) system("shutdown -h -P now");
   _exit(0);
 }

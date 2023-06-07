@@ -30,7 +30,6 @@
 #include "rx_menu.h"
 #include "ant_menu.h"
 #include "display_menu.h"
-#include "dsp_menu.h"
 #include "pa_menu.h"
 #include "rigctl_menu.h"
 #include "oc_menu.h"
@@ -69,8 +68,6 @@
 #include "midi_menu.h"
 #endif
 
-
-static GtkWidget *menu_b=NULL;
 
 static GtkWidget *dialog=NULL;
 
@@ -138,8 +135,7 @@ static gboolean radio_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
 }
 
 static gboolean rx_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  cleanup();
-  rx_menu(top_window);
+  start_rx();
   return TRUE;
 }
 
@@ -152,12 +148,6 @@ static gboolean ant_cb (GtkWidget *widget, GdkEventButton *event, gpointer data)
 static gboolean display_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
   display_menu(top_window);
-  return TRUE;
-}
-
-static gboolean dsp_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  cleanup();
-  dsp_menu(top_window);
   return TRUE;
 }
 
@@ -468,11 +458,6 @@ void new_menu()
     GtkWidget *ant_b=gtk_button_new_with_label("Ant");
     g_signal_connect (ant_b, "button-press-event", G_CALLBACK(ant_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid),ant_b,(i%5),i/5,1,1);
-    i++;
-
-    GtkWidget *dsp_b=gtk_button_new_with_label("DSP");
-    g_signal_connect (dsp_b, "button-press-event", G_CALLBACK(dsp_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid),dsp_b,(i%5),i/5,1,1);
     i++;
 
     if(protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL) {

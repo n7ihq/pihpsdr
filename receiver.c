@@ -64,8 +64,10 @@ static gboolean has_moved=FALSE;
 static gboolean pressed=FALSE;
 static gboolean making_active=FALSE;
 
+#ifdef AUDIO_WATERFALL
 static int waterfall_samples=0;
 static int waterfall_resample=6;
+#endif
 
 void receiver_weak_notify(gpointer data,GObject  *obj) {
   RECEIVER *rx=(RECEIVER *)data;
@@ -297,14 +299,8 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(name,"receiver.%d.nb",rx->id);
     sprintf(value,"%d",rx->nb);
     setProperty(name,value);
-    sprintf(name,"receiver.%d.nb2",rx->id);
-    sprintf(value,"%d",rx->nb2);
-    setProperty(name,value);
     sprintf(name,"receiver.%d.nr",rx->id);
     sprintf(value,"%d",rx->nr);
-    setProperty(name,value);
-    sprintf(name,"receiver.%d.nr2",rx->id);
-    sprintf(value,"%d",rx->nr2);
     setProperty(name,value);
     sprintf(name,"receiver.%d.anf",rx->id);
     sprintf(value,"%d",rx->anf);
@@ -324,6 +320,38 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(name,"receiver.%d.nr2_ae",rx->id);
     sprintf(value,"%d",rx->nr2_ae);
     setProperty(name,value);
+    sprintf(name,"receiver.%d.nb2_mode",rx->id);
+    sprintf(value,"%d",rx->nb2_mode);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nb_tau",rx->id);
+    sprintf(value,"%f",rx->nb_tau);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nb_advtime",rx->id);
+    sprintf(value,"%f",rx->nb_advtime);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nb_hang",rx->id);
+    sprintf(value,"%f",rx->nb_hang);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nb_thresh",rx->id);
+    sprintf(value,"%f",rx->nb_thresh);
+    setProperty(name,value);
+#ifdef EXTNR
+    sprintf(name,"receiver.%d.nr4_reduction_amount",rx->id);
+    sprintf(value,"%f",rx->nr4_reduction_amount);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nr4_smoothing_factor",rx->id);
+    sprintf(value,"%f",rx->nr4_smoothing_factor);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nr4_whitening_factor",rx->id);
+    sprintf(value,"%f",rx->nr4_whitening_factor);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nr4_noise_rescale",rx->id);
+    sprintf(value,"%f",rx->nr4_noise_rescale);
+    setProperty(name,value);
+    sprintf(name,"receiver.%d.nr4_post_filter_threshold",rx->id);
+    sprintf(value,"%f",rx->nr4_post_filter_threshold);
+    setProperty(name,value);
+#endif
 
     sprintf(name,"receiver.%d.low_latency",rx->id);
     sprintf(value,"%d",rx->low_latency);
@@ -488,15 +516,9 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.nb",rx->id);
     value=getProperty(name);
     if(value) rx->nb=atoi(value);
-    sprintf(name,"receiver.%d.nb2",rx->id);
-    value=getProperty(name);
-    if(value) rx->nb2=atoi(value);
     sprintf(name,"receiver.%d.nr",rx->id);
     value=getProperty(name);
     if(value) rx->nr=atoi(value);
-    sprintf(name,"receiver.%d.nr2",rx->id);
-    value=getProperty(name);
-    if(value) rx->nr2=atoi(value);
     sprintf(name,"receiver.%d.anf",rx->id);
     value=getProperty(name);
     if(value) rx->anf=atoi(value);
@@ -515,6 +537,38 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.ae",rx->id);
     value=getProperty(name);
     if(value) rx->nr2_ae=atoi(value);
+    sprintf(name,"receiver.%d.nb2_mode",rx->id);
+    value=getProperty(name);
+    if(value) rx->nb2_mode=atoi(value);
+    sprintf(name,"receiver.%d.nb_tau",rx->id);
+    value=getProperty(name);
+    if(value) rx->nb_tau=atof(value);
+    sprintf(name,"receiver.%d.nb_advtime",rx->id);
+    value=getProperty(name);
+    if(value) rx->nb_advtime=atof(value);
+    sprintf(name,"receiver.%d.nb_hang",rx->id);
+    value=getProperty(name);
+    if(value) rx->nb_hang=atof(value);
+    sprintf(name,"receiver.%d.nb_thresh",rx->id);
+    value=getProperty(name);
+    if(value) rx->nb_thresh=atof(value);
+#ifdef EXTNR
+    sprintf(name,"receiver.%d.nr4_reduction_amount",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_reduction_amount=atof(value);
+    sprintf(name,"receiver.%d.nr4_smoothing_factor",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_smoothing_factor=atof(value);
+    sprintf(name,"receiver.%d.nr4_whitening_factor",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_whitening_factor=atof(value);
+    sprintf(name,"receiver.%d.nr4_noise_rescale",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_noise_rescale=atof(value);
+    sprintf(name,"receiver.%d.nr4_post_filter_threshold",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_post_filter_threshold=atof(value);
+#endif
 
     sprintf(name,"receiver.%d.low_latency",rx->id);
     value=getProperty(name);
@@ -866,6 +920,10 @@ g_print("%s: waterfall height=%d y=%d %p\n",__FUNCTION__,height,y,rx->waterfall)
 
 RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int width) {
 g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
+  //
+  // For a PureSignal receiver, most parameters are just set to zero since
+  // they are not used
+  //
   RECEIVER *rx=malloc(sizeof(RECEIVER));
   rx->id=id;
 
@@ -914,11 +972,11 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->display_panadapter=0;
   rx->display_waterfall=0;
 
-  rx->panadapter_high=-40;
-  rx->panadapter_low=-140;
-  rx->panadapter_step=20;
+  rx->panadapter_high=0;
+  rx->panadapter_low=0;
+  rx->panadapter_step=0;
 
-  rx->volume=-40.0;
+  rx->volume=0.0;
 
   rx->squelch_enable=0;
   rx->squelch=0;
@@ -928,27 +986,39 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->preamp=0;
 
   rx->nb=0;
-  rx->nb2=0;
   rx->nr=0;
-  rx->nr2=0;
   rx->anf=0;
   rx->snb=0;
 
   rx->nr_agc=0;
-  rx->nr2_gain_method=2;
+  rx->nr2_gain_method=0;
   rx->nr2_npe_method=0;
-  rx->nr2_ae=1;
+  rx->nr2_ae=0;
+
+  rx->nb_tau = 0.0;
+  rx->nb_advtime = 0.0;
+  rx->nb_hang = 0.0;
+  rx->nb_thresh = 0.0;
+  rx->nb2_mode = 0.0;
+
+#ifdef EXTNR
+  rx->nr4_reduction_amount = 0.0;
+  rx->nr4_smoothing_factor = 0.0;
+  rx->nr4_whitening_factor = 0.0;
+  rx->nr4_noise_rescale = 0.0;
+  rx->nr4_post_filter_threshold = 0.0;
+#endif
 
   rx->alex_antenna=0;
   rx->alex_attenuation=0;
 
   rx->agc=AGC_MEDIUM;
-  rx->agc_gain=80.0;
-  rx->agc_slope=35.0;
+  rx->agc_gain=0.0;
+  rx->agc_slope=0.0;
   rx->agc_hang_threshold=0.0;
 
   rx->local_audio_buffer=NULL;
-  rx->local_audio_buffer_size=2048;
+  rx->local_audio_buffer_size=0;
   rx->local_audio=0;
   g_mutex_init(&rx->local_audio_mutex);
   rx->audio_name=NULL;
@@ -1045,16 +1115,41 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->preamp=0;
 
   rx->nb=0;
-  rx->nb2=0;
   rx->nr=0;
-  rx->nr2=0;
   rx->anf=0;
   rx->snb=0;
 
-  rx->nr_agc=0;
-  rx->nr2_gain_method=2;
-  rx->nr2_npe_method=0;
-  rx->nr2_ae=1;
+  rx->nr_agc=0;                // NR/NR2/ANF before AGC
+
+  rx->nr2_gain_method=2;       // Gamma
+  rx->nr2_npe_method=0;        // OSMS
+  rx->nr2_ae=1;                // Artifact Elimination is "on"
+
+  //
+  // It has been reported that the piHPSDR noise blankers do not function
+  // satisfactorily. I could reproduce this after building an "impulse noise source"
+  // into the HPSDR simulator, and also confirmed that a popular Windows SDR program
+  // has much better NB/NB2 performance.
+  //
+  // Digging into it, I found these SDR programs used NB default parameters *very*
+  // different from those recommended in the WDSP manual: slewtime, hangtime and advtime
+  // default to 0.01 msec, and the threshold to 30 (which is internally multiplied with 0.165
+  // to obtain the WDSP threshold parameter).
+  //
+
+  rx->nb_tau=     0.00001;        // Slew=0.01    in the DSP menu
+  rx->nb_advtime= 0.00001;        // Lead=0.01    in the DSP menu
+  rx->nb_hang=    0.00001;        // Lag=0.01     in the DSP menu
+  rx->nb_thresh=  4.95;           // Threshold=30 in the DSP menu
+  rx->nb2_mode=0;                 // Zero mode
+
+#ifdef EXTNR
+  rx->nr4_reduction_amount = 10.0;
+  rx->nr4_smoothing_factor = 0.0;
+  rx->nr4_whitening_factor = 0.0;
+  rx->nr4_noise_rescale = 2.0;
+  rx->nr4_post_filter_threshold = -10.0;
+#endif
 
   BAND *b=band_get_band(vfo[rx->id].band);
   rx->alex_antenna=b->alexRxAntenna;
@@ -1133,47 +1228,82 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
               1, // run
               0.010, 0.025, 0.0, 0.010, 0);
 
-//
-// It has been reported that the piHPSDR noise blankers do not function
-// satisfactorily. I could reproduce this after building an "impulse noise source"
-// into the HPSDR simulator, and also confirmed that a popular Windows SDR program
-// has much better NB/NB2 performance.
-//
-// Digging into it, I found the Windows SDR program used NB default parameters *very*
-// different from those recommended in the WDSP manual: slewtime, hangtime and advtime
-// default to 0.01 msec, and the threshold to 30 (which is internally multiplied with 0.165
-// to obtain the WDSP threshold parameter).
-//
-// Since there is currently no GUI in piHPSDR to change these values, they are now hard-
-// coded here (0.01 msec ==> 0.00001 sec, 30 ==> 4.95).
-//
-  create_anbEXT(rx->id,1,  rx->buffer_size,rx->sample_rate,0.00001,0.00001,0.00001,0.05, 4.95);
-  create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.00001,0.00001,0.00001,0.05, 4.95);
+  //
+  // NB noise blanker
+  //
+  create_anbEXT(rx->id,1,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
+  SetEXTANBTau(rx->id, rx->nb_tau);
+  SetEXTANBHangtime(rx->id, rx->nb_hang);
+  SetEXTANBAdvtime(rx->id, rx->nb_advtime);
+  SetEXTANBThreshold(rx->id, rx->nb_thresh);
+  SetEXTANBRun(rx->id, (rx->nb == 1));
 
-  //OLD create_anbEXT(rx->id,1,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
-  //OLD create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
+  //
+  // NB2 noise blanker
+  //
+  create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
+  SetEXTNOBMode(rx->id, rx->nb2_mode);
+  SetEXTNOBTau(rx->id, rx->nb_tau);
+  SetEXTNOBHangtime(rx->id, rx->nb_hang);
+  SetEXTNOBAdvtime(rx->id, rx->nb_advtime);
+  SetEXTNOBThreshold(rx->id, rx->nb_thresh);
+  SetEXTNOBRun(rx->id, (rx->nb == 2));
 
-  RXASetNC(rx->id, rx->fft_size);
-  RXASetMP(rx->id, rx->low_latency);
+  //
+  // NR (default values, no GUI)
+  //
+  SetRXAANRVals(rx->id, 64, 16, 16e-4, 10e-7);
+  SetRXAANRPosition(rx->id, rx->nr_agc);
+  SetRXAANRRun(rx->id, (rx->nr == 1));
 
-  SetRXAAMDSBMode(rx->id, 0);
-  SetRXAShiftRun(rx->id, 0);
-
-  SetEXTANBRun(rx->id, rx->nb);
-  SetEXTNOBRun(rx->id, rx->nb2);
-
+  //
+  // NR2
+  //
   SetRXAEMNRPosition(rx->id, rx->nr_agc);
   SetRXAEMNRgainMethod(rx->id, rx->nr2_gain_method);
   SetRXAEMNRnpeMethod(rx->id, rx->nr2_npe_method);
-  SetRXAEMNRRun(rx->id, rx->nr2);
   SetRXAEMNRaeRun(rx->id, rx->nr2_ae);
+  SetRXAEMNRRun(rx->id, (rx->nr == 2));
 
-  SetRXAANRVals(rx->id, 64, 16, 16e-4, 10e-7); // defaults
-  SetRXAANRRun(rx->id, rx->nr);
+  //
+  // ANF
+  //
   SetRXAANFRun(rx->id, rx->anf);
+  SetRXAANFPosition(rx->id, rx->nr_agc);
+
+  //
+  // SNB
+  //
   SetRXASNBARun(rx->id, rx->snb);
 
+#ifdef EXTNR
+  //
+  // NR3
+  //
+  SetRXARNNRRun(rx->id, (rx->nr==3));
 
+  //
+  // NR4
+  //
+  SetRXASBNRreductionAmount(rx->id, rx->nr4_reduction_amount);
+  SetRXASBNRsmoothingFactor(rx->id, rx->nr4_smoothing_factor);
+  SetRXASBNRwhiteningFactor(rx->id, rx->nr4_whitening_factor);
+  SetRXASBNRnoiseRescale(rx->id, rx->nr4_noise_rescale);
+  SetRXASBNRpostFilterThreshold(rx->id, rx->nr4_post_filter_threshold);
+
+  SetRXASBNRRun(rx->id, (rx->nr == 4));
+#endif
+
+  RXASetNC(rx->id, rx->fft_size);     // length of all RXA filter impulse responses
+  RXASetMP(rx->id, rx->low_latency);  // Linear phase or low latency
+
+  SetRXAAMDSBMode(rx->id, 0);         // use both sidebands in SAM
+  SetRXAShiftRun(rx->id, 0);          // Frequency shifter OFF
+
+
+  //
+  // Compute audio amplitude from the logarithmic "volume"
+  //
   if (rx->volume < -39.5) {
     amplitude = 0.0;
   } else {
@@ -1183,6 +1313,9 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   SetRXAPanelBinaural(rx->id, binaural);
   SetRXAPanelRun(rx->id, 1);
 
+  //
+  // enable_rx_equalizer and rx_equalizer should be part of rx
+  //
   if(enable_rx_equalizer) {
     SetRXAGrphEQ(rx->id, rx_equalizer);
     SetRXAEQRun(rx->id, 1);
@@ -1509,12 +1642,19 @@ void full_rx_buffer(RECEIVER *rx) {
   //g_print("%s: rx=%p\n",__FUNCTION__,rx);
   g_mutex_lock(&rx->mutex);
 
+  //
   // noise blanker works on original IQ samples
-  if(rx->nb) {
-     xanbEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
-  }
-  if(rx->nb2) {
-     xnobEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
+  //
+  switch (rx->nb) {
+    case 1:
+      xanbEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
+      break;
+    case 2:
+      xnobEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
+      break;
+    default:
+      // do nothing
+     break;
   }
 
   fexchange0(rx->id, rx->iq_input_buffer, rx->audio_output_buffer, &error);
@@ -1531,9 +1671,6 @@ void full_rx_buffer(RECEIVER *rx) {
   process_rx_buffer(rx);
   g_mutex_unlock(&rx->mutex);
 }
-
-static int rx_buffer_seen=0;
-static int tx_buffer_seen=0;
 
 void add_iq_samples(RECEIVER *rx, double i_sample,double q_sample) {
 

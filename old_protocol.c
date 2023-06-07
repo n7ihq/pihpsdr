@@ -123,14 +123,12 @@ static struct sockaddr_in data_addr;
 static unsigned char control_in[5]={0x00,0x00,0x00,0x00,0x00};
 
 static int running;
-static long ep4_sequence;
 
 static uint32_t last_seq_num=-0xffffffff;
 static int tx_fifo_flag = 0;
 
 static int current_rx=0;
 
-static int samples=0;
 static int mic_samples=0;
 static int mic_sample_divisor=1;
 static int micsamplecount=0;
@@ -139,22 +137,13 @@ static int local_ptt=0;
 static int dash=0;
 static int dot=0;
 
-static double micinputbuffer[MAX_BUFFER_SIZE*2];
-
-static int left_rx_sample;
-static int right_rx_sample;
-static int left_tx_sample;
-static int right_tx_sample;
-
 static unsigned char output_buffer[OZY_BUFFER_SIZE];
-static int output_buffer_index=8;
 
 static int command=1;
 
 static GThread *receive_thread_id;
 static gpointer receive_thread(gpointer arg);
 static void process_ozy_input_buffer(unsigned const char  *buffer);
-static void process_bandscope_buffer(char  *buffer);
 void ozy_send_buffer(void);
 
 static unsigned char metis_buffer[1032];
@@ -179,17 +168,13 @@ static int how_many_receivers(void);
 //
 #include "ozyio.h"
 
-static GThread *ozy_EP4_rx_thread_id;
 static GThread *ozy_EP6_rx_thread_id;
 static gpointer ozy_ep6_rx_thread(gpointer arg);
 static void start_usb_receive_threads(void);
 static void ozyusb_write(unsigned char* buffer,int length);
-#define EP6_IN_ID  0x86                         // end point = 6, direction toward PC
+#define EP6_IN_ID   0x86                        // end point = 6, direction toward PC
 #define EP2_OUT_ID  0x02                        // end point = 2, direction from PC
 #define EP6_BUFFER_SIZE 2048
-static unsigned char usb_output_buffer[EP6_BUFFER_SIZE];
-static unsigned char ep6_inbuffer[EP6_BUFFER_SIZE];
-static unsigned char usb_buffer_block = 0;
 #define USB_TIMEOUT -7
 #endif
 
@@ -352,13 +337,14 @@ static void start_usb_receive_threads()
 }
 
 //
-// receive threat for USB EP6 (512 byte USB Ozy frames)
+// receive thread for USB EP6 (512 byte USB Ozy frames)
 // this function loops reading 4 frames at a time through USB
 // then processes them one at a time.
 //
 static gpointer ozy_ep6_rx_thread(gpointer arg) {
   g_print( "old_protocol: USB EP6 receive_thread\n");
   running=1;
+  static unsigned char ep6_inbuffer[EP6_BUFFER_SIZE];
 
   while (running)
   {
@@ -580,19 +566,7 @@ static gpointer receive_thread(gpointer arg) {
                   process_ozy_input_buffer(&buffer[520]);
                   break;
                 case 4: // EP4
-/*
-                  ep4_sequence++;
-                  if(sequence!=ep4_sequence) {
-                    ep4_sequence=sequence;
-                  } else {
-                    int seq=(int)(sequence%32L);
-                    if((sequence%32L)==0L) {
-                      reset_bandscope_buffer_index();
-                    }
-                    process_bandscope_buffer(&buffer[8]);
-                    process_bandscope_buffer(&buffer[520]);
-                  }
-*/
+                  // not implemented
                   break;
                 default:
                   g_print("unexpected EP %d length=%d\n",ep,bytes_read);
@@ -1935,6 +1909,8 @@ void ozy_send_buffer() {
 static void ozyusb_write(unsigned char* buffer,int length)
 {
   int i;
+  //static unsigned char usb_output_buffer[EP6_BUFFER_SIZE];
+  //static unsigned char usb_buffer_block = 0;
   i = ozy_write(EP2_OUT_ID,buffer,length);
   if(i!=length) {
     if(i==USB_TIMEOUT) {

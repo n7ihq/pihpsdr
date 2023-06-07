@@ -73,9 +73,6 @@ char *step_labels[]={"1Hz","10Hz","25Hz","50Hz","100Hz","250Hz","500Hz","1kHz","
 //
 #define ROUND(f,n)  (((f+step/2)/step + n)*step)
 
-static GtkWidget* menu=NULL;
-static GtkWidget* band_menu=NULL;
-
 struct _vfo vfo[MAX_VFOS];
 struct _mode_settings mode_settings[MODES];
 
@@ -99,14 +96,8 @@ void modesettings_save_state() {
     sprintf(name,"modeset.%d.nr", i);
     sprintf(value,"%d", mode_settings[i].nr);
     setProperty(name,value);
-    sprintf(name,"modeset.%d.nr2", i);
-    sprintf(value,"%d", mode_settings[i].nr2);
-    setProperty(name,value);
     sprintf(name,"modeset.%d.nb", i);
     sprintf(value,"%d", mode_settings[i].nb);
-    setProperty(name,value);
-    sprintf(name,"modeset.%d.nb2", i);
-    sprintf(value,"%d", mode_settings[i].nb2);
     setProperty(name,value);
     sprintf(name,"modeset.%d.anf", i);
     sprintf(value,"%d", mode_settings[i].anf);
@@ -165,9 +156,7 @@ void modesettings_restore_state() {
     char name[80];
     mode_settings[i].filter=filterF6;
     mode_settings[i].nr=0;
-    mode_settings[i].nr2=0;
     mode_settings[i].nb=0;
-    mode_settings[i].nb2=0;
     mode_settings[i].anf=0;
     mode_settings[i].snb=0;
     mode_settings[i].en_txeq=0;
@@ -190,15 +179,9 @@ void modesettings_restore_state() {
     sprintf(name,"modeset.%d.nr",i);
     value=getProperty(name);
     if(value) mode_settings[i].nr=atoi(value);
-    sprintf(name,"modeset.%d.nr2",i);
-    value=getProperty(name);
-    if(value) mode_settings[i].nr2=atoi(value);
     sprintf(name,"modeset.%d.nb",i);
     value=getProperty(name);
     if(value) mode_settings[i].nb=atoi(value);
-    sprintf(name,"modeset.%d.nb2",i);
-    value=getProperty(name);
-    if(value) mode_settings[i].nb2=atoi(value);
     sprintf(name,"modeset.%d.anf",i);
     value=getProperty(name);
     if(value) mode_settings[i].anf=atoi(value);
@@ -367,9 +350,7 @@ void vfo_apply_mode_settings(RECEIVER *rx) {
 
   vfo[id].filter       = mode_settings[m].filter;
   rx->nr               = mode_settings[m].nr;
-  rx->nr2              = mode_settings[m].nr2;
   rx->nb               = mode_settings[m].nb;
-  rx->nb2              = mode_settings[m].nb2;
   rx->anf              = mode_settings[m].anf;
   rx->snb              = mode_settings[m].snb;
   enable_rx_equalizer  = mode_settings[m].en_rxeq;
@@ -699,7 +680,6 @@ void vfo_step(int steps) {
   int id=active_receiver->id;
   long long delta;
   int sid;
-  RECEIVER *other_receiver;
 
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -735,10 +715,6 @@ void vfo_step(int steps) {
     }
 
     sid=id==0?1:0;
-    if (sid < receivers) {
-      other_receiver=receiver[sid];
-    }
-    // other_receiver will be accessed only if receivers == 2
 
     switch(sat_mode) {
       case SAT_NONE:
@@ -751,7 +727,7 @@ void vfo_step(int steps) {
           vfo[sid].frequency      += delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
       case RSAT_MODE:
@@ -762,7 +738,7 @@ void vfo_step(int steps) {
           vfo[sid].frequency      -= delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
     }
@@ -778,7 +754,6 @@ void vfo_step(int steps) {
 void vfo_id_step(int id, int steps) {
 
   if(!locked) {
-    RECEIVER *other_receiver;
     long long delta;
     if(vfo[id].ctun) {
       delta=vfo[id].ctun_frequency;
@@ -791,9 +766,6 @@ void vfo_id_step(int id, int steps) {
     }
 
     int sid=id==0?1:0;
-    if (sid < receivers) {
-      other_receiver=receiver[sid];
-    }
 
     switch(sat_mode) {
       case SAT_NONE:
@@ -806,7 +778,7 @@ void vfo_id_step(int id, int steps) {
           vfo[sid].frequency      += delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
       case RSAT_MODE:
@@ -817,7 +789,7 @@ void vfo_id_step(int id, int steps) {
           vfo[sid].frequency      -= delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
     }
@@ -844,7 +816,6 @@ void vfo_id_step(int id, int steps) {
 void vfo_id_move(int id,long long hz,int round) {
   long long delta;
   int sid;
-  RECEIVER *other_receiver;
 
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -888,9 +859,6 @@ void vfo_id_move(int id,long long hz,int round) {
     }
 
     sid=id==0?1:0;
-    if (sid < receivers) {
-      other_receiver=receiver[sid];
-    }
 
     switch(sat_mode) {
       case SAT_NONE:
@@ -903,7 +871,7 @@ void vfo_id_move(int id,long long hz,int round) {
           vfo[sid].frequency      += delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
       case RSAT_MODE:
@@ -914,7 +882,7 @@ void vfo_id_move(int id,long long hz,int round) {
           vfo[sid].frequency      -= delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
     }
@@ -935,7 +903,6 @@ void vfo_move_to(long long hz) {
   long long f;
   long long delta;
   int sid;
-  RECEIVER *other_receiver;
 
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -971,9 +938,6 @@ void vfo_move_to(long long hz) {
     }
 
     sid=id==0?1:0;
-    if (sid < receivers) {
-      other_receiver=receiver[sid];
-    }
 
     switch(sat_mode) {
       case SAT_NONE:
@@ -986,7 +950,7 @@ void vfo_move_to(long long hz) {
           vfo[sid].frequency      += delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
       case RSAT_MODE:
@@ -997,7 +961,7 @@ void vfo_move_to(long long hz) {
           vfo[sid].frequency      -= delta;
         }
         if(receivers==2) {
-          receiver_frequency_changed(other_receiver);
+          receiver_frequency_changed(receiver[sid]);
         }
         break;
     }
@@ -1185,8 +1149,8 @@ void vfo_update() {
         cairo_move_to(cr, 300, 38);
         cairo_show_text(cr, temp_text);
 
-        if(can_transmit) {
-          cairo_move_to(cr, 120, 50);
+        if ((protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) && can_transmit) {
+          cairo_move_to(cr, 115, 50);
           if(transmitter->puresignal) {
             cairo_set_source_rgba(cr, COLOUR_ATTN);
           } else {
@@ -1229,32 +1193,46 @@ void vfo_update() {
           cairo_show_text(cr, temp_text);
         }
 
-        // NB and NB2 are mutually exclusive, therefore
-        // they are put to the same place in order to save
-        // some space
-        cairo_move_to(cr, 145, 50);
-        if(active_receiver->nb) {
-          cairo_set_source_rgba(cr, COLOUR_ATTN);
-          cairo_show_text(cr, "NB");
-        } else if (active_receiver->nb2) {
-          cairo_set_source_rgba(cr, COLOUR_ATTN);
-          cairo_show_text(cr, "NB2");
-        } else {
-          cairo_set_source_rgba(cr, COLOUR_SHADE);
-          cairo_show_text(cr, "NB");
+        cairo_move_to(cr, 140, 50);
+        switch(active_receiver->nb) {
+          case 1:
+            cairo_set_source_rgba(cr, COLOUR_ATTN);
+            cairo_show_text(cr, "NB");
+            break;
+          case 2:
+            cairo_set_source_rgba(cr, COLOUR_ATTN);
+            cairo_show_text(cr, "NB2");
+            break;
+          default:
+            cairo_set_source_rgba(cr, COLOUR_SHADE);
+            cairo_show_text(cr, "NB");
+            break;
         }
 
-        // NR and NR2 are mutually exclusive
-        cairo_move_to(cr, 175, 50);
-        if(active_receiver->nr) {
-          cairo_set_source_rgba(cr, COLOUR_ATTN);
-          cairo_show_text(cr, "NR");
-        } else if (active_receiver->nr2) {
+        cairo_move_to(cr, 170, 50);
+        switch (active_receiver->nr) {
+          case 1:
+            cairo_set_source_rgba(cr, COLOUR_ATTN);
+            cairo_show_text(cr, "NR");
+            break;
+        case 2:
           cairo_set_source_rgba(cr, COLOUR_ATTN);
           cairo_show_text(cr, "NR2");
-        } else {
+          break;
+#ifdef EXTNR
+        case 3:
+          cairo_set_source_rgba(cr, COLOUR_ATTN);
+          cairo_show_text(cr, "NR3");
+          break;
+        case 4:
+          cairo_set_source_rgba(cr, COLOUR_ATTN);
+          cairo_show_text(cr, "NR4");
+          break;
+#endif
+        default:
           cairo_set_source_rgba(cr, COLOUR_SHADE);
           cairo_show_text(cr, "NR");
+          break;
         }
 
         cairo_move_to(cr, 200, 50);

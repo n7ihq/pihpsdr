@@ -100,9 +100,9 @@ static gboolean start_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
     // Since we have just started the app, we temporarily deactivate STEMlab detection
     //
     stemlab_cleanup();
-    sleep(2);          // let Stemlab SDR app start
     discover_only_stemlab=1;
     gtk_widget_destroy(discovery_dialog);
+    sleep(2);          // let Stemlab SDR app start
     g_idle_add(ext_discovery,NULL);
     return TRUE;
   }
@@ -149,8 +149,16 @@ static gboolean radio_ip_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
 
     cp = gtk_entry_get_text(GTK_ENTRY(tcpaddr));
     len=strnlen(cp,IPADDR_LEN);
-    if (len == 0) return TRUE;
-    if (inet_pton(AF_INET, cp, &(sa.sin_addr)) != 1) return TRUE;
+    if (len == 0) {
+      // if the text entry field is empty, delete ip.addr
+      unlink("ip.addr");
+      return TRUE;
+    }
+    if (inet_pton(AF_INET, cp, &(sa.sin_addr)) != 1) {
+      // if text is non-empty but also not a valid IP addr,
+      // do nothing
+      return TRUE;
+    }
 
     strncpy(ipaddr_radio, cp, IPADDR_LEN);
     ipaddr_radio[IPADDR_LEN-1]=0;
@@ -173,7 +181,7 @@ static gboolean connect_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
 g_print("connect_cb: %s:%d\n",host_addr,host_port);
   setProperty("host",host_addr);
   char temp[16];
-  sprintf(temp,"%d",host_port);
+  snprintf(temp,sizeof(temp),"%d",host_port);
   setProperty("port",temp);
   saveProperties("remote.props");
   if(radio_connect_remote(host_addr,host_port)==0) {
@@ -183,7 +191,7 @@ g_print("connect_cb: %s:%d\n",host_addr,host_port);
     GtkWidget *dialog=gtk_dialog_new_with_buttons("Remote Connect",GTK_WINDOW(discovery_dialog),GTK_DIALOG_DESTROY_WITH_PARENT,"OK",GTK_RESPONSE_NONE,NULL);
     GtkWidget *content_area=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     char message[128];
-    sprintf(message,"Connection failed to %s:%d",host_addr,host_port);
+    snprintf(message,sizeof(message),"Connection failed to %s:%d",host_addr,host_port);
     GtkWidget *label=gtk_label_new(message);
     g_signal_connect_swapped(dialog,"response",G_CALLBACK(gtk_widget_destroy),dialog);
     gtk_container_add(GTK_CONTAINER(content_area),label);
@@ -304,20 +312,20 @@ void discovery() {
       row++;
     } else {
       char version[16];
-      char text[256];
+      char text[512];
       for(row=0;row<devices;row++) {
         d=&discovered[row];
 g_print("%p Protocol=%d name=%s\n",d,d->protocol,d->name);
-        sprintf(version,"v%d.%d",
+        snprintf(version,sizeof(version), "v%d.%d",
                           d->software_version/10,
                           d->software_version%10);
         switch(d->protocol) {
           case ORIGINAL_PROTOCOL:
           case NEW_PROTOCOL:
             if(d->device==DEVICE_OZY) {
-              sprintf(text,"%s (%s) on USB /dev/ozy", d->name, d->protocol==ORIGINAL_PROTOCOL?"Protocol 1":"Protocol 2");
+              snprintf(text,sizeof(text),"%s (%s) on USB /dev/ozy", d->name, d->protocol==ORIGINAL_PROTOCOL?"Protocol 1":"Protocol 2");
             } else {
-              sprintf(text,"%s (%s %s) %s (%02X:%02X:%02X:%02X:%02X:%02X) on %s: ",
+              snprintf(text,sizeof(text),"%s (%s %s) %s (%02X:%02X:%02X:%02X:%02X:%02X) on %s: ",
                             d->name,
                             d->protocol==ORIGINAL_PROTOCOL?"Protocol 1":"Protocol 2",
                             version,
@@ -333,12 +341,12 @@ g_print("%p Protocol=%d name=%s\n",d,d->protocol,d->name);
             break;
           case SOAPYSDR_PROTOCOL:
 #ifdef SOAPYSDR
-            sprintf(text,"%s (Protocol SOAPY_SDR %s) on %s",d->name,d->info.soapy.version,d->info.soapy.address);
+            snprintf(text,sizeof(text),"%s (Protocol SOAPY_SDR %s) on %s",d->name,d->info.soapy.version,d->info.soapy.address);
 #endif
             break;
 
           case STEMLAB_PROTOCOL:
-            sprintf(text,"Choose RedPitaya App from %s and re-discover: ",inet_ntoa(d->info.network.address.sin_addr));
+            snprintf(text,sizeof(text),"Choose RedPitaya App from %s and re-discover: ",inet_ntoa(d->info.network.address.sin_addr));
         }
 
         GtkWidget *label=gtk_label_new(text);

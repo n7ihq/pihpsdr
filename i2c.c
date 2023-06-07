@@ -66,6 +66,7 @@ static int write_byte_data(unsigned char reg, unsigned char data) {
   return rc;
 }
 
+#if 0
 //NOTUSED
 static unsigned char read_byte_data(unsigned char reg) {
   __s32 data;
@@ -73,6 +74,7 @@ static unsigned char read_byte_data(unsigned char reg) {
   data=i2c_smbus_read_byte_data(i2cfd,reg);
   return data&0xFF;
 }
+#endif
 
 static unsigned int read_word_data(unsigned char reg) {
   __s32 data;

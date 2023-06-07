@@ -100,13 +100,9 @@ gint controller=NO_CONTROLLER;
 GtkWidget *fixed;
 static GtkWidget *vfo_panel;
 static GtkWidget *meter;
-static GtkWidget *menu;
 static GtkWidget *zoompan;
 static GtkWidget *sliders;
 static GtkWidget *toolbar;
-static GtkWidget *panadapter;
-static GtkWidget *waterfall;
-static GtkWidget *audio_waterfall;
 
 // RX and TX calibration
 long long frequency_calibration=0LL;
@@ -125,8 +121,6 @@ int echo=0;
 
 int radio_sample_rate;   // alias for radio->info.soapy.sample_rate
 gboolean iqswap;
-
-static gint save_timer_id;
 
 DISCOVERED *radio=NULL;
 #ifdef CLIENT_SERVER
@@ -304,8 +298,6 @@ int tx_filter_high=2850;
 
 static int pre_tune_mode;
 static int pre_tune_cw_internal;
-static int pre_tune_filter_low;
-static int pre_tune_filter_high;
 
 int enable_tx_equalizer=0;
 int tx_equalizer[4]={0,0,0,0};
@@ -356,7 +348,8 @@ gint rx_height;
 // theme in use.
 //
 void set_backgnd(GtkWidget *widget) {
-   static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
+   //static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
+   //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColor);
 }
 
 void radio_stop() {
@@ -453,10 +446,16 @@ g_print("reconfigure_radio: receivers=%d\n",receivers);
   }
 }
 
+#if 0
+//
+// used to regularly write props file, currently not active
+//
+static gint save_timer_id;
 static gboolean save_cb(gpointer data) {
     radioSaveState();
     return TRUE;
 }
+#endif
 
 static gboolean minimize_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   gtk_window_iconify(GTK_WINDOW(top_window));
@@ -589,6 +588,11 @@ if(!radio_is_remote) {
               pk = 0.4067;
               break;
           }
+          break;
+        default:
+          // NOTREACHED
+          pk = 1.000;
+          break;
       }
       SetPSHWPeak(transmitter->id, pk);
     }

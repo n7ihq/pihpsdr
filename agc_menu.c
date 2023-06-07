@@ -54,20 +54,24 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-static void agc_select_cb (GtkToggleButton *widget, gpointer        data) {
-  if(gtk_toggle_button_get_active(widget)) {
-    active_receiver->agc=GPOINTER_TO_INT(data);
+static void agc_hang_threshold_value_changed_cb(GtkWidget *widget, gpointer data) {
+  active_receiver->agc_hang_threshold=(int)gtk_range_get_value(GTK_RANGE(widget));
+  set_agc(active_receiver, active_receiver->agc);
+}
+
+static void agc_cb (GtkToggleButton *widget, gpointer data) {
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  active_receiver->agc=val;
 #ifdef CLIENT_SERVER
-    if(radio_is_remote) {
-      send_agc(client_socket,active_receiver->id,active_receiver->agc);
-    } else {
+  if(radio_is_remote) {
+    send_agc(client_socket,active_receiver->id,active_receiver->agc);
+  } else {
 #endif
-      set_agc(active_receiver, active_receiver->agc);
-      g_idle_add(ext_vfo_update, NULL);
+    set_agc(active_receiver, active_receiver->agc);
 #ifdef CLIENT_SERVER
-    }
-#endif
   }
+#endif
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 void agc_menu(GtkWidget *parent) {
@@ -93,46 +97,33 @@ void agc_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
-  int row=1;
-  int col=0;
 
-  GtkWidget *b_off=gtk_radio_button_new_with_label(NULL,"Off");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_off), active_receiver->agc==AGC_OFF);
-  gtk_widget_show(b_off);
-  gtk_grid_attach(GTK_GRID(grid),b_off,col,row,1,1);
-  g_signal_connect(b_off,"toggled",G_CALLBACK(agc_select_cb),(gpointer)(long)AGC_OFF);
+  GtkWidget *agc_title=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(agc_title), "<b>AGC</b>");
+  gtk_widget_show(agc_title);
+  gtk_grid_attach(GTK_GRID(grid),agc_title,0,1,1,1);
 
-  col++;
+  GtkWidget *agc_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(agc_combo),NULL,"Off");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(agc_combo),NULL,"Long");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(agc_combo),NULL,"Slow");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(agc_combo),NULL,"Medium");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(agc_combo),NULL,"Fast");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(agc_combo),active_receiver->agc);
+  my_combo_attach(GTK_GRID(grid), agc_combo, 1, 1, 1, 1);
+  g_signal_connect(agc_combo,"changed",G_CALLBACK(agc_cb),NULL);
 
-  GtkWidget *b_long=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_off),"Long");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_long), active_receiver->agc==AGC_LONG);
-  gtk_widget_show(b_long);
-  gtk_grid_attach(GTK_GRID(grid),b_long,col,row,1,1);
-  g_signal_connect(b_long,"toggled",G_CALLBACK(agc_select_cb),(gpointer)(long)AGC_LONG);
+  GtkWidget *agc_hang_threshold_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(agc_hang_threshold_label), "<b>Hang Threshold</b>");
+  gtk_widget_show(agc_hang_threshold_label);
+  gtk_grid_attach(GTK_GRID(grid),agc_hang_threshold_label,0,2,1,1);
+  GtkWidget *agc_hang_threshold_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(agc_hang_threshold_scale),1.0,1.0);
+  gtk_range_set_value (GTK_RANGE(agc_hang_threshold_scale),active_receiver->agc_hang_threshold);
+  gtk_widget_show(agc_hang_threshold_scale);
+  gtk_grid_attach(GTK_GRID(grid),agc_hang_threshold_scale,1,2,2,1);
+  g_signal_connect(G_OBJECT(agc_hang_threshold_scale),"value_changed",G_CALLBACK(agc_hang_threshold_value_changed_cb),NULL);
 
-  col++;
-
-  GtkWidget *b_slow=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_long),"Slow");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_slow), active_receiver->agc==AGC_SLOW);
-  gtk_widget_show(b_slow);
-  gtk_grid_attach(GTK_GRID(grid),b_slow,col,row,1,1);
-  g_signal_connect(b_slow,"toggled",G_CALLBACK(agc_select_cb),(gpointer)(long)AGC_SLOW);
-
-  col++;
-
-  GtkWidget *b_medium=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_slow),"Medium");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_medium), active_receiver->agc==AGC_MEDIUM);
-  gtk_widget_show(b_medium);
-  gtk_grid_attach(GTK_GRID(grid),b_medium,col,row,1,1);
-  g_signal_connect(b_medium,"toggled",G_CALLBACK(agc_select_cb),(gpointer)(long)AGC_MEDIUM);
-
-  col++;
-
-  GtkWidget *b_fast=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_medium),"Fast");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_fast), active_receiver->agc==AGC_FAST);
-  gtk_widget_show(b_fast);
-  gtk_grid_attach(GTK_GRID(grid),b_fast,col,row,1,1);
-  g_signal_connect(b_fast,"toggled",G_CALLBACK(agc_select_cb),(gpointer)(long)AGC_FAST);
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

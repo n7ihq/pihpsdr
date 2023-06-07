@@ -28,8 +28,6 @@
 #include "radio.h"
 #include "vfo.h"
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static GtkWidget *calibgrid;

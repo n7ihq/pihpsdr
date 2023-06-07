@@ -28,8 +28,6 @@
 #include "fft_menu.h"
 #include "radio.h"
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static void cleanup() {
@@ -94,14 +92,14 @@ void fft_menu(GtkWidget *parent) {
   GtkWidget *linear_phase=gtk_radio_button_new_with_label(NULL,"Linear Phase");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (linear_phase), receiver[0]->low_latency==0);
   gtk_grid_attach(GTK_GRID(grid),linear_phase,col,row,1,1);
-  g_signal_connect(linear_phase,"toggled",G_CALLBACK(filter_type_cb),(gpointer *)0);
+  g_signal_connect(linear_phase,"toggled",G_CALLBACK(filter_type_cb),(gpointer)0);
 
   col++;
 
   GtkWidget *low_latency=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(linear_phase),"Low Latency");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (low_latency), receiver[0]->low_latency==1);
   gtk_grid_attach(GTK_GRID(grid),low_latency,col,row,1,1);
-  g_signal_connect(low_latency,"toggled",G_CALLBACK(filter_type_cb),(gpointer *)1);
+  g_signal_connect(low_latency,"toggled",G_CALLBACK(filter_type_cb),(gpointer)1);
 
 #ifdef SET_FILTER_SIZE
 
@@ -117,35 +115,35 @@ void fft_menu(GtkWidget *parent) {
   GtkWidget *filter_1024=gtk_radio_button_new_with_label(NULL,"1024");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_1024), receiver[0]->fft_size==1024);
   gtk_grid_attach(GTK_GRID(grid),filter_1024,col,row,1,1);
-  g_signal_connect(filter_1024,"toggled",G_CALLBACK(filter_size_cb),(gpointer *)1024);
+  g_signal_connect(filter_1024,"toggled",G_CALLBACK(filter_size_cb),(gpointer)1024);
 
   col++;
 
   GtkWidget *filter_2048=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"2048");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_2048), receiver[0]->fft_size==2048);
   gtk_grid_attach(GTK_GRID(grid),filter_2048,col,row,1,1);
-  g_signal_connect(filter_2048,"toggled",G_CALLBACK(filter_size_cb),(gpointer *)2048);
+  g_signal_connect(filter_2048,"toggled",G_CALLBACK(filter_size_cb),(gpointer)2048);
 
   col++;
 
   GtkWidget *filter_4096=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"4096");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_4096), receiver[0]->fft_size==4096);
   gtk_grid_attach(GTK_GRID(grid),filter_4096,col,row,1,1);
-  g_signal_connect(filter_4096,"toggled",G_CALLBACK(filter_size_cb),(gpointer *)4096);
+  g_signal_connect(filter_4096,"toggled",G_CALLBACK(filter_size_cb),(gpointer)4096);
 
   col++;
 
   GtkWidget *filter_8192=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"8192");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_8192), receiver[0]->fft_size==8192);
   gtk_grid_attach(GTK_GRID(grid),filter_8192,col,row,1,1);
-  g_signal_connect(filter_8192,"toggled",G_CALLBACK(filter_size_cb),(gpointer *)8192);
+  g_signal_connect(filter_8192,"toggled",G_CALLBACK(filter_size_cb),(gpointer)8192);
 
   col++;
 
   GtkWidget *filter_16384=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"16384");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_16384), receiver[0]->fft_size==16384);
   gtk_grid_attach(GTK_GRID(grid),filter_16384,col,row,1,1);
-  g_signal_connect(filter_16384,"toggled",G_CALLBACK(filter_size_cb),(gpointer *)16394);
+  g_signal_connect(filter_16384,"toggled",G_CALLBACK(filter_size_cb),(gpointer)16394);
 
 #endif
   gtk_container_add(GTK_CONTAINER(content),grid);

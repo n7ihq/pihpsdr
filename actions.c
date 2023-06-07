@@ -310,7 +310,7 @@ int process_action(void *data) {
     case AGC:
       if(a->mode==PRESSED) {
         active_receiver->agc++;
-        if(active_receiver->agc>+AGC_LAST) {
+        if(active_receiver->agc>=AGC_LAST) {
           active_receiver->agc=0;
         }
         set_agc(active_receiver, active_receiver->agc);
@@ -606,7 +606,9 @@ int process_action(void *data) {
               function=0;
             }
             toolbar_switches=switches_controller1[function];
-            switches=switches_controller1[function];
+            if (controller == CONTROLLER1) {
+              switches=switches_controller1[function];
+            }
             update_toolbar_labels();
             break;
           case CONTROLLER2_V1:
@@ -738,43 +740,21 @@ int process_action(void *data) {
       break;
     case NB:
       if(a->mode==PRESSED) {
-        if(active_receiver->nb==0 && active_receiver->nb2==0) {
-          active_receiver->nb=1;
-          active_receiver->nb2=0;
-          mode_settings[vfo[active_receiver->id].mode].nb=1;
-          mode_settings[vfo[active_receiver->id].mode].nb2=0;
-        } else if(active_receiver->nb==1 && active_receiver->nb2==0) {
-          active_receiver->nb=0;
-          active_receiver->nb2=1;
-          mode_settings[vfo[active_receiver->id].mode].nb=0;
-          mode_settings[vfo[active_receiver->id].mode].nb2=1;
-        } else if(active_receiver->nb==0 && active_receiver->nb2==1) {
-          active_receiver->nb=0;
-          active_receiver->nb2=0;
-          mode_settings[vfo[active_receiver->id].mode].nb=0;
-          mode_settings[vfo[active_receiver->id].mode].nb2=0;
-        }
+        active_receiver->nb++;
+        if (active_receiver->nb > 2) active_receiver->nb=0;
+        mode_settings[vfo[active_receiver->id].mode].nb=active_receiver->nb;
         update_noise();
       }
       break;
     case NR:
       if(a->mode==PRESSED) {
-        if(active_receiver->nr==0 && active_receiver->nr2==0) {
-          active_receiver->nr=1;
-          active_receiver->nr2=0;
-          mode_settings[vfo[active_receiver->id].mode].nr=1;
-          mode_settings[vfo[active_receiver->id].mode].nr2=0;
-        } else if(active_receiver->nr==1 && active_receiver->nr2==0) {
-          active_receiver->nr=0;
-          active_receiver->nr2=1;
-          mode_settings[vfo[active_receiver->id].mode].nr=0;
-          mode_settings[vfo[active_receiver->id].mode].nr2=1;
-        } else if(active_receiver->nr==0 && active_receiver->nr2==1) {
-          active_receiver->nr=0;
-          active_receiver->nr2=0;
-          mode_settings[vfo[active_receiver->id].mode].nr=0;
-          mode_settings[vfo[active_receiver->id].mode].nr2=0;
-        }
+        active_receiver->nr++;
+#ifdef EXTNR
+        if (active_receiver->nr > 4) active_receiver->nr=0;
+#else
+        if (active_receiver->nr > 2) active_receiver->nr=0;
+#endif
+        mode_settings[vfo[active_receiver->id].mode].nr=active_receiver->nr;
         update_noise();
       }
       break;

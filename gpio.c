@@ -66,16 +66,22 @@
 #include "iambic.h"
 
 //
-// Broadcom pins #9, 10, 11 are not used
-// by Controller1 and Controller2_V1
-// (and keep #2,3 reserved for I2C extensions)
+// for controllers which have spare GPIO lines,
+// these lines can be associated to certain
+// functions, namely
 //
-int CWL_BUTTON=9;
-int CWR_BUTTON=11;
-int SIDETONE_GPIO=10;
-int ENABLE_GPIO_SIDETONE=0;
-int ENABLE_CW_BUTTONS=1;
-int CW_ACTIVE_LOW=1;
+// CWL:      input:  left paddle for internal (iambic) keyer
+// CWR:      input:  right paddle for internal (iambic) keyer
+// CWKEY:    input:  key-down from external keyer
+// PTT:      input:  PTT from external keyer or microphone
+//
+// a value <0 indicates "do not use". All inputs are active-low.
+//
+
+static int CWL_BUTTON=-1;
+static int CWR_BUTTON=-1;
+static int CWKEY_BUTTON=-1;
+static int PTT_BUTTON=-1;
 
 enum {
   TOP_ENCODER,
@@ -125,15 +131,14 @@ char *consumer="pihpsdr";
 char *gpio_device="/dev/gpiochip0";
 
 static struct gpiod_chip *chip=NULL;
-#endif
-
 static GMutex encoder_mutex;
 static GThread *monitor_thread_id;
+#endif
 
 int I2C_INTERRUPT=15;
 
 #define MAX_LINES 32
-int monitor_lines[MAX_LINES];
+unsigned int monitor_lines[MAX_LINES];
 int lines=0;
 
 long settle_time=50;  // ms
@@ -360,13 +365,11 @@ SWITCH switches_g2_frontpanel[MAX_SWITCHES]={
 
 SWITCH *switches=switches_controller1[0];
 
-static int running=0;
+#ifdef GPIO
 
 static GThread *rotary_encoder_thread_id;
-
 static uint64_t epochMilli;
 
-#ifdef GPIO
 static void initialiseEpoch() {
   struct timespec ts ;
 
@@ -381,7 +384,6 @@ static unsigned int millis () {
   now  = (uint64_t)ts.tv_sec * (uint64_t)1000 + (uint64_t)(ts.tv_nsec / 1000000L) ;
   return (uint32_t)(now - epochMilli) ;
 }
-#endif
 
 static gpointer rotary_encoder_thread(gpointer data) {
   int i;
@@ -424,9 +426,8 @@ static gpointer rotary_encoder_thread(gpointer data) {
     g_mutex_unlock(&encoder_mutex);
     usleep(100000); // sleep for 100ms
   }
+  return NULL;
 }
-
-#ifdef GPIO
 
 static void process_encoder(int e,int l,int addr,int val) {
   guchar pinstate;
@@ -533,20 +534,9 @@ static void process_edge(int offset,int value) {
   //g_print("%s: offset=%d value=%d\n",__FUNCTION__,offset,value);
   found=FALSE;
 
-  if(ENABLE_CW_BUTTONS) {
-    if(offset==CWL_BUTTON) {
-      keyer_event(1, CW_ACTIVE_LOW ? (value==PRESSED) : value);
-      cw_key_hit=1;  // this is to stop CAT CW messages that may be running
-      found=TRUE;
-    } else if(offset==CWR_BUTTON) {
-      keyer_event(1, CW_ACTIVE_LOW ? (value==PRESSED) : value);
-      cw_key_hit=1;  // this is to stop CAT CW messages that may be running
-      found=TRUE;
-    }
-  }
-  if(found) return;
-
-  // check encoders
+  //
+  // Priority 1 (highst): check encoder
+  //
   for(i=0;i<MAX_ENCODERS;i++) {
     if(encoders[i].bottom_encoder_enabled && encoders[i].bottom_encoder_address_a==offset) {
       //g_print("%s: found %d encoder %d bottom A\n",__FUNCTION__,offset,i);
@@ -581,7 +571,33 @@ static void process_edge(int offset,int value) {
       break;
     }
   }
+  if(found) return;
 
+  //
+  // Priority 2: check "non-controller" inputs
+  // take care for "external" debouncing!
+  //
+  if (offset == CWL_BUTTON) {
+    schedule_action(CW_LEFT, value, 0);
+    found=TRUE;
+  }
+  if (offset == CWR_BUTTON) {
+    schedule_action(CW_RIGHT, value, 0);
+    found=TRUE;
+  }
+  if (offset == CWKEY_BUTTON) {
+    schedule_action(CW_KEYER_KEYDOWN, value, 0);
+    found=TRUE;
+  }
+  if (offset == PTT_BUTTON) {
+    schedule_action(CW_KEYER_PTT, value, 0);
+    found=TRUE;
+  }
+  if (found) return;
+
+  //
+  // Priority 3: handle i2c interrupt
+  //
   if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2 || controller==G2_FRONTPANEL) {
     if(I2C_INTERRUPT==offset) {
       if(value==PRESSED) {
@@ -590,28 +606,28 @@ static void process_edge(int offset,int value) {
       found=TRUE;
     }
   }
+  if(found) return;
 
-  if(!found) {
-    for(i=0;i<MAX_SWITCHES;i++) {
-      if(switches[i].switch_enabled && switches[i].switch_address==offset) {
-        t=millis();
-        //g_print("%s: found %d switch %d value=%d t=%u\n",__FUNCTION__,offset,i,value,t);
-        found=TRUE;
-        if(t<switches[i].switch_debounce) {
-          return;
-        }
+  //
+  // Priority 4: handle "normal" switches
+  //
+  for(i=0;i<MAX_SWITCHES;i++) {
+    if(switches[i].switch_enabled && switches[i].switch_address==offset) {
+      t=millis();
+      //g_print("%s: found %d switch %d value=%d t=%u\n",__FUNCTION__,offset,i,value,t);
+      found=TRUE;
+      if(t<switches[i].switch_debounce) {
+        return;
+    }
 //g_print("%s: switches=%p function=%d (%s)\n",__FUNCTION__,switches,switches[i].switch_function,sw_string[switches[i].switch_function]);
-        switches[i].switch_debounce=t+settle_time;
-        schedule_action(switches[i].switch_function, value, 0);
-        break;
-      }
+      switches[i].switch_debounce=t+settle_time;
+      schedule_action(switches[i].switch_function, value, 0);
+      break;
     }
   }
+  if(found) return;
 
-
-  if(!found) {
-    g_print("%s: could not find %d\n",__FUNCTION__,offset);
-  }
+  g_print("%s: could not find %d\n",__FUNCTION__,offset);
 }
 
 static int interrupt_cb(int event_type, unsigned int line, const struct timespec *timeout, void* data) {
@@ -634,40 +650,53 @@ static int interrupt_cb(int event_type, unsigned int line, const struct timespec
 }
 #endif
 
+//
+// If there is non-standard hardware at the GPIO lines
+// the code below in the NO_CONTROLLER section must
+// be adjusted such that "occupied" GPIO lines are not
+// used for CW or PTT.
+// For CONTROLLER1 and CONTROLLER2_V1, GPIO
+// lines 9,10,11,14 are "free" and can be
+// used for CW and PTT.
+//
 void gpio_set_defaults(int ctrlr) {
   g_print("%s: %d\n",__FUNCTION__,ctrlr);
   switch(ctrlr) {
     case NO_CONTROLLER:
+      CWL_BUTTON=9;
+      CWR_BUTTON=11;
+      PTT_BUTTON=14;
+      CWKEY_BUTTON=10;
       encoders=encoders_no_controller;
       switches=switches_controller1[0];
       break;
     case CONTROLLER1:
+      CWL_BUTTON=9;
+      CWR_BUTTON=11;
+      PTT_BUTTON=14;
+      CWKEY_BUTTON=10;
       encoders=encoders_controller1;
       switches=switches_controller1[0];
       break;
     case CONTROLLER2_V1:
+      CWL_BUTTON=9;
+      CWR_BUTTON=11;
+      PTT_BUTTON=14;
+      CWKEY_BUTTON=10;
       encoders=encoders_controller2_v1;
       switches=switches_controller2_v1;
       break;
     case CONTROLLER2_V2:
       //
-      // This controller uses nearly all GPIO lines,
-      // so lines 9, 10, 11 are not available for
-      // CW keys and producing a side tone
+      // no GPIO lines available for CW etc.
       //
-      ENABLE_GPIO_SIDETONE=0;
-      ENABLE_CW_BUTTONS=0;
       encoders=encoders_controller2_v2;
       switches=switches_controller2_v2;
       break;
     case G2_FRONTPANEL:
       //
-      // This controller uses nearly all GPIO lines,
-      // so lines 9, 10, 11 are not available for
-      // CW keys and producing a side tone
+      // no GPIO lines available for CW etc.
       //
-      ENABLE_GPIO_SIDETONE=0;
-      ENABLE_CW_BUTTONS=0;
       encoders=encoders_g2_frontpanel;
       switches=switches_g2_frontpanel;
       break;
@@ -925,7 +954,7 @@ static gpointer monitor_thread(gpointer arg) {
   g_print("%s: start event monitor lines=%d\n",__FUNCTION__,lines);
   g_print("%s:",__FUNCTION__);
   for(int i=0;i<lines;i++) {
-    g_print(" %d",monitor_lines[i]);
+    g_print(" %ud",monitor_lines[i]);
   }
   g_print("\n");
   t.tv_sec=60;
@@ -974,6 +1003,8 @@ static int setup_line(struct gpiod_chip *chip, int offset, gboolean pullup) {
   return 0;
 }
 
+#if 0
+//unused
 static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_value) {
   int ret;
   struct gpiod_line_request_config config;
@@ -1000,6 +1031,7 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
 
   return 0;
 }
+#endif
 #endif
 
 int gpio_init() {
@@ -1068,31 +1100,39 @@ int gpio_init() {
     }
   }
 
-  g_print("%s: ENABLE_CW_BUTTONS=%d  CWL_BUTTON=%d CWR_BUTTON=%d\n", __FUNCTION__, ENABLE_CW_BUTTONS, CWL_BUTTON, CWR_BUTTON);
-  if(ENABLE_CW_BUTTONS) {
-    if((ret=setup_line(chip,CWL_BUTTON,CW_ACTIVE_LOW==1))<0) {
+  int have_button=0;
+  if (CWL_BUTTON >= 0) {
+    if((ret=setup_line(chip,CWL_BUTTON,TRUE))<0) {
       goto err;
     }
-    if((ret=setup_line(chip,CWR_BUTTON,CW_ACTIVE_LOW==1))<0) {
-      goto err;
-    }
+    have_button=1;
   }
-  if (ENABLE_GPIO_SIDETONE) {
-//
-//  use this pin as an output pin and
-//  set its value to LOW
-//
-    if((ret=setup_output_line(chip,SIDETONE_GPIO,0))<0) {
+  if (CWR_BUTTON >= 0) {
+    if((ret=setup_line(chip,CWR_BUTTON,TRUE))<0) {
       goto err;
     }
+    have_button=1;
+  }
+  if (CWKEY_BUTTON >= 0) {
+    if((ret=setup_line(chip,CWKEY_BUTTON,TRUE))<0) {
+      goto err;
+    }
+    have_button=1;
+  }
+  if (PTT_BUTTON >= 0) {
+    if((ret=setup_line(chip,PTT_BUTTON,TRUE))<0) {
+      goto err;
+    }
+    have_button=1;
   }
 
-  if(controller!=NO_CONTROLLER || ENABLE_CW_BUTTONS) {
+  if(have_button || controller != NO_CONTROLLER) {
     monitor_thread_id = g_thread_new( "gpiod monitor", monitor_thread, NULL);
-    if(controller!=NO_CONTROLLER) {
-      rotary_encoder_thread_id = g_thread_new( "encoders", rotary_encoder_thread, NULL);
-      g_print("%s: rotary_encoder_thread: id=%p\n",__FUNCTION__,rotary_encoder_thread_id);
-    }
+    g_print("%s: monitor_thread: id=%p\n",__FUNCTION__,rotary_encoder_thread_id);
+  }
+  if(controller!=NO_CONTROLLER) {
+    rotary_encoder_thread_id = g_thread_new( "encoders", rotary_encoder_thread, NULL);
+    g_print("%s: rotary_encoder_thread: id=%p\n",__FUNCTION__,rotary_encoder_thread_id);
   }
 
 #endif
@@ -1113,23 +1153,4 @@ void gpio_close() {
 #ifdef GPIO
   if(chip!=NULL) gpiod_chip_close(chip);
 #endif
-}
-
-void gpio_cw_sidetone_set(int level) {
-#ifdef GPIO
-  int rc;
-  if (ENABLE_GPIO_SIDETONE) {
-#ifdef OLD_GPIOD
-    if((rc=gpiod_ctxless_set_value(gpio_device,SIDETONE_GPIO,level,FALSE,consumer,NULL,NULL))<0) {
-#else
-    if((rc=gpiod_ctxless_set_value_ext(gpio_device,SIDETONE_GPIO,level,FALSE,consumer,NULL,NULL,0))<0) {
-#endif
-      g_print("%s: err=%d\n",__FUNCTION__,rc);
-    }
-  }
-#endif
-}
-
-int  gpio_cw_sidetone_enabled() {
-  return ENABLE_GPIO_SIDETONE;
 }

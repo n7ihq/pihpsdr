@@ -40,8 +40,6 @@ static GtkWidget *gain_fine_scale=NULL;
 static GtkWidget *phase_fine_scale=NULL;
 static GtkWidget *phase_coarse_scale=NULL;
 
-static GtkWidget *level;
-
 static double gain_coarse, gain_fine;
 static double phase_coarse, phase_fine;
 

@@ -57,10 +57,8 @@ extern struct _vfo vfo[MAX_VFOS];
 //
 struct _mode_settings {
   int filter;               // actual filter used
-  int nb;                   // Noise blanker #1
-  int nb2;                  // Noise blanker #2
-  int nr;                   // Noise reduction #1
-  int nr2;                  // Noise reduction #2
+  int nb;                   // Noise blanker (0..2)
+  int nr;                   // Noise reduction (0..2 or 0..4)
   int anf;                  // Automatic notch filter
   int snb;                  // Spectral noise blanker
   int en_txeq;              // TX equalizer on/off

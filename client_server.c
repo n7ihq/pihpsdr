@@ -84,9 +84,6 @@ gint start_spectrum(void *data);
 gboolean remote_started=FALSE;
 
 static GThread *listen_thread_id;
-static char status[1024];
-static int n_status=0;
-static char reply[64];
 static gboolean running;
 static gint listen_socket;
 
