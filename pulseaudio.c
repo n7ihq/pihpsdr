@@ -203,6 +203,7 @@ static void *mic_read_thread(gpointer arg) {
     }
   }
   g_print("%s: exit\n",__FUNCTION__);
+  return NULL;
 }
 
 int audio_open_input() {
