@@ -768,26 +768,16 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect(split_b,"toggled",G_CALLBACK(split_cb),NULL);
 
   col++;
-
   duplex_b=gtk_check_button_new_with_label("Duplex");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplex_b), duplex);
   gtk_grid_attach(GTK_GRID(grid),duplex_b,col,row,1,1);
   g_signal_connect(duplex_b,"toggled",G_CALLBACK(duplex_cb),NULL);
 
   col++;
-
   mute_rx_b=gtk_check_button_new_with_label("Mute RX when TX");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_rx_b), mute_rx_while_transmitting);
   gtk_grid_attach(GTK_GRID(grid),mute_rx_b,col,row,1,1);
   g_signal_connect(mute_rx_b,"toggled",G_CALLBACK(mute_rx_cb),NULL);
-
-  row++;
-
-  col=0;
-  GtkWidget *touchscreen_b=gtk_check_button_new_with_label("TouchScreen");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (touchscreen_b), optimize_for_touchscreen);
-  gtk_grid_attach(GTK_GRID(grid),touchscreen_b,col,row,1,1);
-  g_signal_connect(touchscreen_b,"toggled",G_CALLBACK(touchscreen_cb),NULL);
 
   col++;
   GtkWidget *PA_enable_b=gtk_check_button_new_with_label("PA enable");
@@ -795,21 +785,30 @@ void radio_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),PA_enable_b,col,row,1,1);
   g_signal_connect(PA_enable_b,"toggled",G_CALLBACK(PA_enable_cb),NULL);
 
+  row++;
+
+  col=0;
+
   if (device==DEVICE_HERMES_LITE2) {
-    col++;
     GtkWidget *hl2audio_b=gtk_check_button_new_with_label("HL2 audio codec");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hl2audio_b), hl2_audio_codec);
     gtk_grid_attach(GTK_GRID(grid),hl2audio_b,col,row,1,1);
     g_signal_connect(hl2audio_b,"toggled",G_CALLBACK(hl2audio_cb),NULL);
+    col++;
   }
 
   if (protocol == SOAPYSDR_PROTOCOL) {
-    col++;
     GtkWidget *iqswap_b=gtk_check_button_new_with_label("Swap IQ");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (iqswap_b), iqswap);
     gtk_grid_attach(GTK_GRID(grid),iqswap_b,col,row,1,1);
     g_signal_connect(iqswap_b,"toggled",G_CALLBACK(iqswap_cb),NULL);
+    col++;
   }
+
+  GtkWidget *touchscreen_b=gtk_check_button_new_with_label("Optimize pop-up menus for TouchScreen");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (touchscreen_b), optimize_for_touchscreen);
+  gtk_grid_attach(GTK_GRID(grid),touchscreen_b,col,row,2,1);
+  g_signal_connect(touchscreen_b,"toggled",G_CALLBACK(touchscreen_cb),NULL);
 
   row++;
   col=0;

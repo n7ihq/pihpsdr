@@ -36,7 +36,11 @@
 #define DISPLAY_FONT_SIZE3 16                       // Default: 16
 #define DISPLAY_FONT_SIZE4 22                       // Default: 22
 
+#ifdef __APPLE__
+#define SLIDERS_FONT "FreeSans Bold 12"             // Default: FreeSans Bold 10
+#else
 #define SLIDERS_FONT "FreeSans Bold 10"             // Default: FreeSans Bold 10
+#endif
 
 //
 // Colours. They are given as a 4-tuple (RGB and opacity).
