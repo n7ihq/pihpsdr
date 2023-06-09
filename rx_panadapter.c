@@ -383,15 +383,26 @@ void rx_panadapter_update(RECEIVER *rx) {
     x=(double)(f-min_display)/HzPerPixel;
     cairo_move_to(cr,(double)x,0.0);
     cairo_line_to(cr,(double)x,(double)display_height);
-
     //
-    // Frequencies beyond 10 GHz do not "fit" in the frequency
-    // markers, so calculate the "khz" modulo 10000
+    // For frequency marker lines very close to the left or right
+    // edge, do not print a frequency since this probably won't fit
+    // on the screen
     //
-    sprintf(v,"%0lld.%03lld",(f/1000000)%10000,(f%1000000)/1000);
-    cairo_text_extents(cr, v, &extents);
-    cairo_move_to(cr, x-(extents.width/2.0), 10.0);
-    cairo_show_text(cr, v);
+    if ((f >= min_display + divisor/2) && (f <= max_display - divisor/2)) {
+      //
+      // For frequencies larger than 10 GHz, we cannot
+      // display all digits here so we give three dots
+      // and three "Mhz" digits
+      //
+      if (f > 10000000000LL) {
+        sprintf(v,"...%03lld.%03lld",(f/1000000)%1000,(f%1000000)/1000);
+      } else {
+        sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
+      }
+      cairo_text_extents(cr, v, &extents);
+      cairo_move_to(cr, x-(extents.width/2.0), 10.0);
+      cairo_show_text(cr, v);
+    }
     f+=divisor;
   }
   cairo_set_line_width(cr, LINE_THIN);

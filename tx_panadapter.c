@@ -189,39 +189,55 @@ void tx_panadapter_update(TRANSMITTER *tx) {
       vfofreq +=  (double) cw_keyer_sidetone_frequency/hz_per_pixel;
     }
   }
-
-#ifdef TX_FREQ_MARKERS
-  cairo_text_extents_t extents;
-  long long f;
-  long long divisor=2000;
-  for(i=0;i<display_width;i++) {
-    f = frequency - half + (long) (hz_per_pixel * i);
-    if (f > 0) {
-      if ((f % divisor) < (long) hz_per_pixel) {
-        cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
-        cairo_set_line_width(cr, 1.0);
-        cairo_move_to(cr,(double)i,10.0);
-        cairo_line_to(cr,(double)i,(double)display_height);
-
-        cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
-        cairo_select_font_face(cr, DISPLAY_FONT,
-                            CAIRO_FONT_SLANT_NORMAL,
-                            CAIRO_FONT_WEIGHT_BOLD);
-        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-        char v[32];
-        sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
-        cairo_text_extents(cr, v, &extents);
-        cairo_move_to(cr, (double)i-(extents.width/2.0), 10.0);
-        cairo_show_text(cr, v);
-      }
-    }
-  }
-  cairo_stroke(cr);
-#endif
-
-  // band edges
   long long min_display=frequency-half;
   long long max_display=frequency+half;
+
+  if (tx->dialog == NULL) {
+    long long f;
+    const long long divisor=2000;
+    double x;
+    //
+    // in DUPLEX, space in the TX window is so limited
+    // that we cannot print the frequencies
+    //
+    cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
+    cairo_select_font_face(cr, DISPLAY_FONT,
+                               CAIRO_FONT_SLANT_NORMAL,
+                               CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
+    cairo_set_line_width(cr, 1.0);
+    cairo_text_extents_t extents;
+    f = ((min_display/divisor)*divisor)+divisor;
+    while (f < max_display) {
+      x=(double)(f-min_display)/hz_per_pixel;
+      cairo_move_to(cr,x,10.0);
+      cairo_line_to(cr,x,(double)display_height);
+      //
+      // For frequency marker lines very close to the left or right
+      // edge, do not print a frequency since this probably won't fit
+      // on the screen
+      //
+      if ((f >= min_display + divisor/2) && (f <= max_display - divisor/2)) {
+        char v[32];
+        //
+        // For frequencies larger than 10 GHz, we cannot
+        // display all digits here
+        //
+        if (f > 10000000000LL) {
+          sprintf(v,"...%03lld.%03lld",(f/1000000)%1000,(f%1000000)/1000);
+        } else {
+          sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
+        }
+        cairo_text_extents(cr, v, &extents);
+        cairo_move_to(cr, x-(extents.width/2.0), 10.0);
+        cairo_show_text(cr, v);
+      }
+      f += divisor;
+    }
+    cairo_stroke(cr);
+  }
+
+  // band edges
   int b=vfo[txvfo].band;
   BAND *band=band_get_band(b);
   if(band->frequencyMin!=0LL) {
