@@ -384,7 +384,11 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_move_to(cr,(double)x,0.0);
     cairo_line_to(cr,(double)x,(double)display_height);
 
-    sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
+    //
+    // Frequencies beyond 10 GHz do not "fit" in the frequency
+    // markers, so calculate the "khz" modulo 10000
+    //
+    sprintf(v,"%0lld.%03lld",(f/1000000)%10000,(f%1000000)/1000);
     cairo_text_extents(cr, v, &extents);
     cairo_move_to(cr, x-(extents.width/2.0), 10.0);
     cairo_show_text(cr, v);
