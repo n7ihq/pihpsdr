@@ -324,11 +324,7 @@ double div_gain=0.0;       // gain for diversity (in dB)
 double div_phase=0.0;      // phase for diversity (in degrees, 0 ... 360)
 
 int can_transmit=0;
-#ifdef ANDROMEDA
-int optimize_for_touchscreen=1;
-#else
 int optimize_for_touchscreen=0;
-#endif
 
 gboolean duplex=FALSE;
 gboolean mute_rx_while_transmitting=FALSE;
@@ -683,12 +679,22 @@ void start_radio() {
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_WATCH));
 
   //
-  // In the discovery dialog, we have set the combobox behaviour to
-  // "touchscreen friendly". Now we set it to "mouse friendly"
-  // but this can be overridden in the RADIO menu or when reading
-  // from the props file
+  // The behaviour of pop-up menus (Combo-Boxes) can be set to
+  // "mouse friendly" (standard case) and "touchscreen friendly"
+  // menu pops up upon press, and stays upon release, and the selection can
+  // be made with a second press).
   //
-  optimize_for_touchscreen=0;
+  // Here we set it to "mouse friendly" in the NO_CONTROLLER case,
+  // since if we use one of the GPIO controllers, chances are high that
+  // we operate with a touch-screen.
+  // 
+  // The setting can be changed in the RADIO menu and is stored in the
+  // props file, so will be restored therefrom as well.
+  //
+  optimize_for_touchscreen=1;
+#ifndef ANDROMEDA
+  if (controller == NO_CONTROLLER) optimize_for_touchscreen=0;
+#endif
 
   protocol=radio->protocol;
   device=radio->device;
