@@ -60,7 +60,24 @@ static void save_xvtr () {
         loerr=gtk_entry_get_text(GTK_ENTRY(lo_error[i]));
         xvtr->errorLO=atoll(loerr);
         xvtr->disablePA=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(disable_pa[i]));
-
+        //
+        // Patch up the frequencies:
+        // frequencyMax must be at most frequencyLO + max radio frequency
+        // frequencyMin must be at least frequencyLO + min radio frequency
+        //
+        if ((xvtr->frequencyMin < xvtr->frequencyLO + radio->frequency_min) ||
+            (xvtr->frequencyMin > xvtr->frequencyLO + radio->frequency_max)) {
+          xvtr->frequencyMin = xvtr->frequencyLO + radio->frequency_min;
+          g_print("XVTR band %s MinFrequency changed to %lld\n", t, xvtr->frequencyMin);
+        }
+        if (xvtr->frequencyMax < xvtr->frequencyMin) {
+          xvtr->frequencyMax = xvtr->frequencyMin + 1000000LL;
+          g_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
+        }
+        if (xvtr->frequencyMax > xvtr->frequencyLO + radio->frequency_max) {
+          xvtr->frequencyMax = xvtr->frequencyLO + radio->frequency_max;
+          g_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
+        }
         for(int b=0;b<bandstack->entries;b++) {
           BANDSTACK_ENTRY *entry=&bandstack->entry[b];
           entry->frequency=xvtr->frequencyMin+((xvtr->frequencyMax-xvtr->frequencyMin)/2);
@@ -79,70 +96,10 @@ static void save_xvtr () {
   }
 }
 
-void update_receiver(int band,gboolean error) {
-  //
-  // TODO: find out what this is *exactly* doing, and try
-  //       to use receiver_frequency_change() instead of
-  //       frequency_changed()
-  //
-//g_print("update_receiver: band=%d error=%d\n",band,error);
-  if(vfo[0].band==band) {
-    RECEIVER *rx=active_receiver;
-    BAND *xvtr=band_get_band(band);
-//g_print("update_receiver: found band: %s\n",xvtr->title);
-    vfo[0].lo=xvtr->frequencyLO+xvtr->errorLO;
-    gboolean saved_ctun=vfo[0].ctun;
-    if(saved_ctun) {
-      vfo[0].ctun=FALSE;
-    }
-    frequency_changed(rx);
-    if(saved_ctun) {
-      vfo[0].ctun=TRUE;
-    }
-  }
-}
-
-void min_frequency_cb(GtkEditable *editable,gpointer user_data) {
-  int band=GPOINTER_TO_INT(user_data);
-  BAND *xvtr=band_get_band(band);
-  const char* minf=gtk_entry_get_text(GTK_ENTRY(min_frequency[band]));
-  xvtr->frequencyMin=(long long)(atof(minf)*1000000.0);
-  update_receiver(band,FALSE);
-}
-
-void max_frequency_cb(GtkEditable *editable,gpointer user_data) {
-  int band=GPOINTER_TO_INT(user_data);
-  BAND *xvtr=band_get_band(band);
-  const char* maxf=gtk_entry_get_text(GTK_ENTRY(max_frequency[band]));
-  xvtr->frequencyMin=(long long)(atof(maxf)*1000000.0);
-  update_receiver(band,FALSE);
-}
-
-void lo_frequency_cb(GtkEditable *editable,gpointer user_data) {
-  int band=GPOINTER_TO_INT(user_data);
-  BAND *xvtr=band_get_band(band);
-  const char* lof=gtk_entry_get_text(GTK_ENTRY(lo_frequency[band]));
-  xvtr->frequencyLO=(long long)(atof(lof)*1000000.0);
-  update_receiver(band,FALSE);
-}
-
-void lo_error_cb(GtkEditable *editable,gpointer user_data) {
-  int band=GPOINTER_TO_INT(user_data);
-  BAND *xvtr=band_get_band(band);
-  const char* errorf=gtk_entry_get_text(GTK_ENTRY(lo_error[band]));
-  xvtr->errorLO=atoll(errorf);
-  update_receiver(band,TRUE);
-}
-
-void lo_error_update(RECEIVER *rx,long long offset) {
-  BAND *xvtr=band_get_band(vfo[0].band);
-  if(dialog!=NULL) {
-    char temp[32];
-    sprintf(temp,"%lld",xvtr->errorLO);
-    gtk_entry_set_text(GTK_ENTRY(lo_error[vfo[0].band]),temp);
-  }
-  xvtr->errorLO=xvtr->errorLO+offset;
-  update_receiver(vfo[0].band,TRUE);
+void pa_disable_cb(GtkWidget *widget, gpointer data) {
+  int i = GPOINTER_TO_INT(data);
+  BAND *xvtr=band_get_band(i);
+  xvtr->disablePA=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void cleanup() {
@@ -205,6 +162,12 @@ void xvtr_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),label,7,1,1,1);
 
 
+  //
+  // Note  no signal connect for the text fields:
+  // this will lead to intermediate frequency values that are unreasonable.
+  // Set all parameters only when leaving the menu, except for disablePA
+  // which can be applied immediately
+  //
   for(i=BANDS;i<BANDS+XVTRS;i++) {
     BAND *xvtr=band_get_band(i);
 
@@ -218,32 +181,29 @@ void xvtr_menu(GtkWidget *parent) {
     sprintf(f,"%5.3f",(double)xvtr->frequencyMin/1000000.0);
     gtk_entry_set_text(GTK_ENTRY(min_frequency[i]),f);
     gtk_grid_attach(GTK_GRID(grid),min_frequency[i],1,i+2,1,1);
-    g_signal_connect(min_frequency[i],"changed",G_CALLBACK(min_frequency_cb),GINT_TO_POINTER(i));
 
     max_frequency[i]=gtk_entry_new();
     gtk_entry_set_width_chars(GTK_ENTRY(max_frequency[i]),7);
     sprintf(f,"%5.3f",(double)xvtr->frequencyMax/1000000.0);
     gtk_entry_set_text(GTK_ENTRY(max_frequency[i]),f);
     gtk_grid_attach(GTK_GRID(grid),max_frequency[i],2,i+2,1,1);
-    g_signal_connect(max_frequency[i],"changed",G_CALLBACK(max_frequency_cb),GINT_TO_POINTER(i));
 
     lo_frequency[i]=gtk_entry_new();
     gtk_entry_set_width_chars(GTK_ENTRY(lo_frequency[i]),7);
     sprintf(f,"%5.3f",(double)xvtr->frequencyLO/1000000.0);
     gtk_entry_set_text(GTK_ENTRY(lo_frequency[i]),f);
     gtk_grid_attach(GTK_GRID(grid),lo_frequency[i],3,i+2,1,1);
-    g_signal_connect(lo_frequency[i],"changed",G_CALLBACK(lo_frequency_cb),GINT_TO_POINTER(i));
 
     lo_error[i]=gtk_entry_new();
     gtk_entry_set_width_chars(GTK_ENTRY(lo_error[i]),9);
     sprintf(f,"%lld",xvtr->errorLO);
     gtk_entry_set_text(GTK_ENTRY(lo_error[i]),f);
     gtk_grid_attach(GTK_GRID(grid),lo_error[i],4,i+2,1,1);
-    g_signal_connect(lo_error[i],"changed",G_CALLBACK(lo_error_cb),GINT_TO_POINTER(i));
 
     disable_pa[i]=gtk_check_button_new();
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disable_pa[i]),xvtr->disablePA);
     gtk_grid_attach(GTK_GRID(grid),disable_pa[i],7,i+2,1,1);
+    g_signal_connect(disable_pa[i],"toggled",G_CALLBACK(pa_disable_cb),GINT_TO_POINTER(i));
 
   }
 

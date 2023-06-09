@@ -329,17 +329,38 @@ void vfo_restore_state() {
 }
 
 void vfo_xvtr_changed() {
+  //
+  // It may happen that the XVTR band is messed up in the sense
+  // that the resulting radio frequency exceeds the limits.
+  // In this case, change the VFO frequencies to get into
+  // the allowed range, which is from LO + radio_min_frequency
+  // to LO + radio_max_frequency
+  //
   if(vfo[0].band>=BANDS) {
     BAND *band=band_get_band(vfo[0].band);
     vfo[0].lo=band->frequencyLO+band->errorLO;
+    if ((vfo[0].frequency > vfo[0].lo + radio->frequency_max)  ||
+        (vfo[0].frequency < vfo[0].lo + radio->frequency_min)) {
+      vfo[0].frequency = vfo[0].lo + (radio->frequency_min+radio->frequency_max)/2;
+      receiver_set_frequency(receiver[0], vfo[0].frequency);
+    }
   }
   if(vfo[1].band>=BANDS) {
     BAND *band=band_get_band(vfo[1].band);
     vfo[1].lo=band->frequencyLO+band->errorLO;
+    if ((vfo[1].frequency > vfo[1].lo + radio->frequency_max)  ||
+        (vfo[1].frequency < vfo[1].lo + radio->frequency_min)) {
+      vfo[1].frequency = vfo[1].lo + (radio->frequency_min+radio->frequency_max)/2;
+      if (receivers == 2) {
+        receiver_set_frequency(receiver[1], vfo[1].frequency);
+      }
+    }
   }
   if (protocol == NEW_PROTOCOL) {
-    schedule_general();   // for disablePA
+    schedule_general();        // for disablePA
+    schedule_high_priority();  // for Frequencies
   }
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 void vfo_apply_mode_settings(RECEIVER *rx) {
