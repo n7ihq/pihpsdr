@@ -68,7 +68,7 @@ static GtkWidget *agc_gain_label;
 static GtkWidget *agc_scale;
 static GtkWidget *attenuation_label=NULL;
 static GtkWidget *attenuation_scale=NULL;
-static GtkWidget *c25_att_label=NULL;
+static GtkWidget *c25_container=NULL;
 static GtkWidget *c25_att_combobox=NULL;
 static GtkWidget *mic_gain_label;
 static GtkWidget *mic_gain_scale;
@@ -196,16 +196,17 @@ void att_type_changed() {
     if(attenuation_label!=NULL)   gtk_widget_hide(attenuation_label);
     if(rf_gain_label!=NULL)       gtk_widget_hide(rf_gain_label);
     if(attenuation_scale!=NULL)   gtk_widget_hide(attenuation_scale);
-    if(rf_gain_scale!=NULL)       gtk_widget_hide(rf_gain_scale);
-    if(c25_att_label!=NULL)       gtk_widget_show(c25_att_label);
-    if(c25_att_combobox!=NULL)    gtk_widget_show(c25_att_combobox);
+    if(c25_container!=NULL)       gtk_widget_show(c25_container);
+    //
+    // There is no step attenuator visible any more. Set to zero
+    //
+    set_attenuation_value(0.0);
+    set_rf_gain(active_receiver->id,0.0);  // this will be a no-op
   } else {
-    if (c25_att_label != NULL)    gtk_widget_hide(c25_att_label);
-    if (c25_att_combobox != NULL) gtk_widget_hide(c25_att_combobox);
     if(attenuation_label!=NULL)   gtk_widget_show(attenuation_label);
     if(rf_gain_label!=NULL)       gtk_widget_show(rf_gain_label);
     if(attenuation_scale!=NULL)   gtk_widget_show(attenuation_scale);
-    if(rf_gain_scale!=NULL)       gtk_widget_show(rf_gain_scale);
+    if (c25_container != NULL)    gtk_widget_hide(c25_container);
   }
   sliders_active_receiver_changed(NULL);
 }
@@ -918,10 +919,17 @@ g_print("sliders_init: width=%d height=%d\n", width,height);
   //
   // These handles need to be created because they are activated/deactivaded
   // depending on selecting/deselcting the CHARLY25 filter board
+  // Because "touch-screen friendly" comboboxes cannot be shown/hidden properly,
+  // we put this into a container
   //
-  c25_att_label = gtk_label_new("Attenuation/PreAmp");
+  c25_container=gtk_fixed_new();
+  gtk_grid_attach(GTK_GRID(sliders), c25_container, 6,0,3,1);
+  GtkWidget *c25_grid=gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(c25_grid),TRUE);
+
+  GtkWidget *c25_att_label = gtk_label_new("C25 Att/PreAmp:");
   gtk_widget_override_font(c25_att_label, pango_font_description_from_string(SLIDERS_FONT));
-  gtk_grid_attach(GTK_GRID(sliders), c25_att_label, 6, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(c25_grid), c25_att_label, 0, 0, 2, 1);
 
   //
   // One could achieve a finer granulation by combining attenuators and preamps,
@@ -935,8 +943,10 @@ g_print("sliders_init: width=%d height=%d\n", width,height);
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "0",   "  0 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "18",  "+18 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "36",  "+36 dB");
-  my_combo_attach(GTK_GRID(sliders), c25_att_combobox, 8, 0, 1, 1);
+  my_combo_attach(GTK_GRID(c25_grid), c25_att_combobox, 2, 0, 1, 1);
   g_signal_connect(G_OBJECT(c25_att_combobox), "changed", G_CALLBACK(c25_att_combobox_changed), NULL);
+
+  gtk_container_add(GTK_CONTAINER(c25_container), c25_grid);
 
   if(can_transmit) {
 

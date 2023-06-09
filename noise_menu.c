@@ -36,45 +36,11 @@
 #include "ext.h"
 
 static GtkWidget *dialog=NULL;
-//
-// NR controls
-//
-static GtkWidget *gain_title;
-static GtkWidget *gain_combo;
-static GtkWidget *npe_title;
-static GtkWidget *npe_combo;
-static GtkWidget *pos_title;
-static GtkWidget *pos_combo;
-static GtkWidget *b_ae;
 
-//
-// NB controls
-//
-static GtkWidget *mode_title;
-static GtkWidget *mode_combo;
-static GtkWidget *slew_title;
-static GtkWidget *slew_b;
-static GtkWidget *lead_title;
-static GtkWidget *lead_b;
-static GtkWidget *lag_title;
-static GtkWidget *lag_b;
-static GtkWidget *thresh_title;
-static GtkWidget *thresh_b;
-
+static GtkWidget *nr_container;
+static GtkWidget *nb_container;
 #ifdef EXTNR
-//
-// NR4 controls
-//
-static GtkWidget *nr4_reduction_title;
-static GtkWidget *nr4_reduction_b;
-static GtkWidget *nr4_smoothing_title;
-static GtkWidget *nr4_smoothing_b;
-static GtkWidget *nr4_whitening_title;
-static GtkWidget *nr4_whitening_b;
-static GtkWidget *nr4_rescale_title;
-static GtkWidget *nr4_rescale_b;
-static GtkWidget *nr4_threshold_title;
-static GtkWidget *nr4_threshold_b;
+static GtkWidget *nr4_container;
 #endif
 
 static void cleanup() {
@@ -253,76 +219,28 @@ static void thresh_cb(GtkWidget *widget, gpointer data) {
 static void nr_sel_changed(GtkWidget *widget, gpointer data) {
   // show or hide all controls for NR settings
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
-    gtk_widget_show(gain_title);
-    gtk_widget_show(gain_combo);
-    gtk_widget_show(npe_title);
-    gtk_widget_show(npe_combo);
-    gtk_widget_show(pos_title);
-    gtk_widget_show(pos_combo);
-    gtk_widget_show(b_ae);
+    gtk_widget_show(nr_container);
   } else {
-    gtk_widget_hide(gain_title);
-    gtk_widget_hide(gain_combo);
-    gtk_widget_hide(npe_title);
-    gtk_widget_hide(npe_combo);
-    gtk_widget_hide(pos_title);
-    gtk_widget_hide(pos_combo);
-    gtk_widget_hide(b_ae);
+    gtk_widget_hide(nr_container);
   }
 }
 
 static void nb_sel_changed(GtkWidget *widget, gpointer data) {
   // show or hide all controls for NB settings
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
-    gtk_widget_show(mode_title);
-    gtk_widget_show(mode_combo);
-    gtk_widget_show(slew_title);
-    gtk_widget_show(slew_b);
-    gtk_widget_show(lead_title);
-    gtk_widget_show(lead_b);
-    gtk_widget_show(lag_title);
-    gtk_widget_show(lag_b);
-    gtk_widget_show(thresh_title);
-    gtk_widget_show(thresh_b);
+    gtk_widget_show(nb_container);
   } else {
-    gtk_widget_hide(mode_title);
-    gtk_widget_hide(mode_combo);
-    gtk_widget_hide(slew_title);
-    gtk_widget_hide(slew_b);
-    gtk_widget_hide(lead_title);
-    gtk_widget_hide(lead_b);
-    gtk_widget_hide(lag_title);
-    gtk_widget_hide(lag_b);
-    gtk_widget_hide(thresh_title);
-    gtk_widget_hide(thresh_b);
+    gtk_widget_hide(nb_container);
   }
 }
 
 #ifdef EXTNR
 static void nr4_sel_changed(GtkWidget *widget, gpointer data) {
-  // show or hide all controls for NB settings
+  // show or hide all controls for NR4 settings
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
-    gtk_widget_show(nr4_reduction_title);
-    gtk_widget_show(nr4_reduction_b);
-    gtk_widget_show(nr4_smoothing_title);
-    gtk_widget_show(nr4_smoothing_b);
-    gtk_widget_show(nr4_whitening_title);
-    gtk_widget_show(nr4_whitening_b);
-    gtk_widget_show(nr4_rescale_title);
-    gtk_widget_show(nr4_rescale_b);
-    gtk_widget_show(nr4_threshold_title);
-    gtk_widget_show(nr4_threshold_b);
+    gtk_widget_show(nr4_container);
   } else {
-    gtk_widget_hide(nr4_reduction_title);
-    gtk_widget_hide(nr4_reduction_b);
-    gtk_widget_hide(nr4_smoothing_title);
-    gtk_widget_hide(nr4_smoothing_b);
-    gtk_widget_hide(nr4_whitening_title);
-    gtk_widget_hide(nr4_whitening_b);
-    gtk_widget_hide(nr4_rescale_title);
-    gtk_widget_hide(nr4_rescale_b);
-    gtk_widget_hide(nr4_threshold_title);
-    gtk_widget_hide(nr4_threshold_b);
+    gtk_widget_hide(nr4_container);
   }
 }
 
@@ -451,206 +369,224 @@ void noise_menu(GtkWidget *parent) {
 #endif
 
   //
-  // NR controls starting on row 4 SHOWN
+  // Hiding/Showing ComboBoxes optimized for Touch-Screens does not
+  // work. Therefore, we have to group the NR, NB, and NR4 controls
+  // in a container, which then can be shown/hidden
+  // 
+
   //
-  gain_title=gtk_label_new(NULL);
+  // NR controls
+  //
+  nr_container=gtk_fixed_new();
+  gtk_grid_attach(GTK_GRID(grid), nr_container, 0, 4, 4, 3);
+  GtkWidget *nr_grid=gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(nr_grid),TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(nr_grid),TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID(nr_grid),5);
+  gtk_grid_set_row_spacing (GTK_GRID(nr_grid),5);
+  
+  GtkWidget *gain_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(gain_title), "<b>NR2 Gain Method</b>");
   gtk_label_set_xalign(GTK_LABEL(gain_title), 1.0);
   gtk_widget_show(gain_title);
-  gtk_grid_attach(GTK_GRID(grid),gain_title,0,4,1,1);
+  gtk_grid_attach(GTK_GRID(nr_grid),gain_title,0,0,1,1);
 
-  gain_combo=gtk_combo_box_text_new();
+  GtkWidget *gain_combo=gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gain_combo),NULL,"Linear");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gain_combo),NULL,"Log");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gain_combo),NULL,"Gamma");
   gtk_combo_box_set_active(GTK_COMBO_BOX(gain_combo),active_receiver->nr2_gain_method);
-  my_combo_attach(GTK_GRID(grid), gain_combo, 1, 4, 1, 1);
+  my_combo_attach(GTK_GRID(nr_grid), gain_combo, 1, 0, 1, 1);
   g_signal_connect(gain_combo,"changed",G_CALLBACK(gain_cb),NULL);
 
-  npe_title=gtk_label_new(NULL);
+  GtkWidget *npe_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(npe_title), "<b>NR2 NPE Method</b>");
   gtk_label_set_xalign(GTK_LABEL(npe_title), 1.0);
   gtk_widget_show(npe_title);
-  gtk_grid_attach(GTK_GRID(grid),npe_title,2,4,1,1);
+  gtk_grid_attach(GTK_GRID(nr_grid),npe_title,2,0,1,1);
 
-  npe_combo=gtk_combo_box_text_new();
+  GtkWidget *npe_combo=gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(npe_combo),NULL,"OSMS");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(npe_combo),NULL,"MMSE");
   gtk_combo_box_set_active(GTK_COMBO_BOX(npe_combo),active_receiver->nr2_npe_method);
-  my_combo_attach(GTK_GRID(grid), npe_combo, 3, 4, 1, 1);
+  my_combo_attach(GTK_GRID(nr_grid), npe_combo, 3, 0, 1, 1);
   g_signal_connect(npe_combo,"changed",G_CALLBACK(npe_cb),NULL);
 
-  pos_title=gtk_label_new(NULL);
+  GtkWidget *pos_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(pos_title), "<b>NR/NR2/ANF Position</b>");
   gtk_label_set_xalign(GTK_LABEL(pos_title), 1.0);
   gtk_widget_show(pos_title);
-  gtk_grid_attach(GTK_GRID(grid),pos_title,0,5,1,1);
+  gtk_grid_attach(GTK_GRID(nr_grid),pos_title,0,1,1,1);
 
-  pos_combo=gtk_combo_box_text_new();
+  GtkWidget *pos_combo=gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(pos_combo),NULL,"Pre AGC");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(pos_combo),NULL,"Post AGC");
   gtk_combo_box_set_active(GTK_COMBO_BOX(pos_combo),active_receiver->nr_agc);
-  my_combo_attach(GTK_GRID(grid), pos_combo, 1, 5, 1, 1);
+  my_combo_attach(GTK_GRID(nr_grid), pos_combo, 1, 1, 1, 1);
   g_signal_connect(pos_combo,"changed",G_CALLBACK(pos_cb),NULL);
 
-  b_ae=gtk_check_button_new_with_label("NR2 Artifact Elimination");
+  GtkWidget *b_ae=gtk_check_button_new_with_label("NR2 Artifact Elimination");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_ae), active_receiver->nr2_ae);
   gtk_widget_show(b_ae);
-  gtk_grid_attach(GTK_GRID(grid),b_ae,2,5,2,1);
+  gtk_grid_attach(GTK_GRID(nr_grid),b_ae,2,1,2,1);
   g_signal_connect(b_ae,"toggled",G_CALLBACK(ae_cb),NULL);
+
+  gtk_container_add(GTK_CONTAINER(nr_container), nr_grid);
 
 
   //
   // NB controls starting on row 4
   //
-  mode_title=gtk_label_new(NULL);
+  nb_container=gtk_fixed_new();
+  gtk_grid_attach(GTK_GRID(grid), nb_container, 0, 4, 4, 3);
+  GtkWidget *nb_grid=gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(nb_grid),TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(nb_grid),TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID(nb_grid),5);
+  gtk_grid_set_row_spacing (GTK_GRID(nb_grid),5);
+
+  GtkWidget *mode_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(mode_title), "<b>NB2 mode</b>");
   gtk_label_set_xalign(GTK_LABEL(mode_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),mode_title,0,4,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),mode_title,0,0,1,1);
 
-  mode_combo=gtk_combo_box_text_new();
+  GtkWidget *mode_combo=gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Zero");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Sample&Hold");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Mean Hold");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Hold Sample");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Interpolate");
   gtk_combo_box_set_active(GTK_COMBO_BOX(mode_combo),active_receiver->nb2_mode);
-  my_combo_attach(GTK_GRID(grid), mode_combo, 1, 4, 1, 1);
+  my_combo_attach(GTK_GRID(nb_grid), mode_combo, 1, 0, 1, 1);
   g_signal_connect(mode_combo,"changed",G_CALLBACK(mode_cb),NULL);
 
-  slew_title=gtk_label_new(NULL);
+  GtkWidget *slew_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(slew_title), "<b>NB Slew time (ms)</b>");
   gtk_label_set_xalign(GTK_LABEL(slew_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),slew_title,0,5,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),slew_title,0,1,1,1);
 
-  slew_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
+  GtkWidget *slew_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(slew_b),active_receiver->nb_tau*1000.0);
-  gtk_grid_attach(GTK_GRID(grid),slew_b,1,5,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),slew_b,1,1,1,1);
   g_signal_connect(slew_b,"changed",G_CALLBACK(slew_cb),NULL);
 
-  lead_title=gtk_label_new(NULL);
+  GtkWidget *lead_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(lead_title), "<b>NB Lead time (ms)</b>");
   gtk_label_set_xalign(GTK_LABEL(lead_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),lead_title,2,5,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),lead_title,2,1,1,1);
 
-  lead_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
+  GtkWidget *lead_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(lead_b),active_receiver->nb_advtime*1000.0);
-  gtk_grid_attach(GTK_GRID(grid),lead_b,3,5,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),lead_b,3,1,1,1);
   g_signal_connect(lead_b,"changed",G_CALLBACK(lead_cb),NULL);
 
-  lag_title=gtk_label_new(NULL);
+  GtkWidget *lag_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(lag_title), "<b>NB Lag time (ms)</b>");
   gtk_label_set_xalign(GTK_LABEL(lag_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),lag_title,0,6,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),lag_title,0,2,1,1);
 
-  lag_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
+  GtkWidget *lag_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(lag_b),active_receiver->nb_hang*1000.0);
-  gtk_grid_attach(GTK_GRID(grid),lag_b,1,6,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),lag_b,1,2,1,1);
   g_signal_connect(lag_b,"changed",G_CALLBACK(lag_cb),NULL);
 
-  thresh_title=gtk_label_new(NULL);
+  GtkWidget *thresh_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(thresh_title), "<b>NB Threshold</b>");
   gtk_label_set_xalign(GTK_LABEL(thresh_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),thresh_title,2,6,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),thresh_title,2,2,1,1);
 
-  thresh_b=gtk_spin_button_new_with_range(15.0, 500.0, 1.0);
+  GtkWidget *thresh_b=gtk_spin_button_new_with_range(15.0, 500.0, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(thresh_b),active_receiver->nb_thresh*6.0606060606);  // 1.0/0.165
-  gtk_grid_attach(GTK_GRID(grid),thresh_b,3,6,1,1);
+  gtk_grid_attach(GTK_GRID(nb_grid),thresh_b,3,2,1,1);
   g_signal_connect(thresh_b,"changed",G_CALLBACK(thresh_cb),NULL);
 
+  gtk_container_add(GTK_CONTAINER(nb_container), nb_grid);
 #ifdef EXTNR
   //
   // NR4 controls starting at row 4
   //
-  nr4_reduction_title=gtk_label_new(NULL);
+  nr4_container=gtk_fixed_new();
+  gtk_grid_attach(GTK_GRID(grid), nr4_container, 0, 4, 4, 3);
+  GtkWidget *nr4_grid=gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(nr4_grid),TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(nr4_grid),TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID(nr4_grid),5);
+  gtk_grid_set_row_spacing (GTK_GRID(nr4_grid),5);
+
+  GtkWidget *nr4_reduction_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nr4_reduction_title), "<b>NR4 Reduction (dB)</b>");
   gtk_label_set_xalign(GTK_LABEL(nr4_reduction_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),nr4_reduction_title,0,4,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_reduction_title,0,0,1,1);
 
-  nr4_reduction_b=gtk_spin_button_new_with_range(0.0, 20.0, 1.0);
+  GtkWidget *nr4_reduction_b=gtk_spin_button_new_with_range(0.0, 20.0, 1.0);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(nr4_reduction_b),active_receiver->nr4_reduction_amount);
-  gtk_grid_attach(GTK_GRID(grid),nr4_reduction_b,1,4,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_reduction_b,1,0,1,1);
   g_signal_connect(G_OBJECT(nr4_reduction_b),"changed",G_CALLBACK(nr4_reduction_cb),NULL);
 
-  nr4_smoothing_title=gtk_label_new(NULL);
+  GtkWidget *nr4_smoothing_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nr4_smoothing_title), "<b>NR4 Smoothing (%)</b>");
   gtk_label_set_xalign(GTK_LABEL(nr4_smoothing_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),nr4_smoothing_title,2,4,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_smoothing_title,2,0,1,1);
 
-  nr4_smoothing_b=gtk_spin_button_new_with_range(0.0, 100.0, 1.0);
+  GtkWidget *nr4_smoothing_b=gtk_spin_button_new_with_range(0.0, 100.0, 1.0);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(nr4_smoothing_b),active_receiver->nr4_smoothing_factor);
-  gtk_grid_attach(GTK_GRID(grid),nr4_smoothing_b,3,4,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_smoothing_b,3,0,1,1);
   g_signal_connect(G_OBJECT(nr4_smoothing_b),"changed",G_CALLBACK(nr4_smoothing_cb),NULL);
 
-  nr4_whitening_title=gtk_label_new(NULL);
+  GtkWidget *nr4_whitening_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nr4_whitening_title), "<b>NR4 Whitening (%)</b>");
   gtk_label_set_xalign(GTK_LABEL(nr4_whitening_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),nr4_whitening_title,0,5,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_whitening_title,0,1,1,1);
 
-  nr4_whitening_b=gtk_spin_button_new_with_range(0.0, 100.0, 1.0);
+  GtkWidget *nr4_whitening_b=gtk_spin_button_new_with_range(0.0, 100.0, 1.0);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(nr4_whitening_b),active_receiver->nr4_whitening_factor);
-  gtk_grid_attach(GTK_GRID(grid),nr4_whitening_b,1,5,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_whitening_b,1,1,1,1);
   g_signal_connect(G_OBJECT(nr4_whitening_b),"changed",G_CALLBACK(nr4_whitening_cb),NULL);
 
-  nr4_rescale_title=gtk_label_new(NULL);
+  GtkWidget *nr4_rescale_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nr4_rescale_title), "<b>NR4 rescale (dB)</b>");
   gtk_label_set_xalign(GTK_LABEL(nr4_rescale_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),nr4_rescale_title,2,5,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_rescale_title,2,1,1,1);
 
-  nr4_rescale_b=gtk_spin_button_new_with_range(0.0, 12.0, 0.1);
+  GtkWidget *nr4_rescale_b=gtk_spin_button_new_with_range(0.0, 12.0, 0.1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(nr4_rescale_b),active_receiver->nr4_noise_rescale);
-  gtk_grid_attach(GTK_GRID(grid),nr4_rescale_b,3,5,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_rescale_b,3,1,1,1);
   g_signal_connect(G_OBJECT(nr4_rescale_b),"changed",G_CALLBACK(nr4_rescale_cb),NULL);
 
-  nr4_threshold_title=gtk_label_new(NULL);
+  GtkWidget *nr4_threshold_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nr4_threshold_title), "<b>NR4 post filter threshold (dB)</b>");
   gtk_label_set_xalign(GTK_LABEL(nr4_threshold_title), 1.0);
-  gtk_grid_attach(GTK_GRID(grid),nr4_threshold_title,1,6,2,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_threshold_title,1,2,2,1);
 
-  nr4_threshold_b=gtk_spin_button_new_with_range(-10.0, 10.0, 0.1);
+  GtkWidget *nr4_threshold_b=gtk_spin_button_new_with_range(-10.0, 10.0, 0.1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(nr4_threshold_b),active_receiver->nr4_post_filter_threshold);
-  gtk_grid_attach(GTK_GRID(grid),nr4_threshold_b,3,6,1,1);
+  gtk_grid_attach(GTK_GRID(nr4_grid),nr4_threshold_b,3,2,1,1);
   g_signal_connect(G_OBJECT(nr4_threshold_b),"changed",G_CALLBACK(nr4_threshold_cb),NULL);
-#endif
 
-  //
-  // the dummy takes care that the grid of the menu window does
-  // not change when switching between the NR/NB/NR4 settings
-  //
-  GtkWidget *dummy=gtk_label_new(NULL);
-  gtk_grid_attach(GTK_GRID(grid),dummy,0,4,1,1);
-  dummy=gtk_label_new(NULL);
-  gtk_grid_attach(GTK_GRID(grid),dummy,0,5,1,1);
-  dummy=gtk_label_new(NULL);
-  gtk_grid_attach(GTK_GRID(grid),dummy,0,6,1,1);
+  gtk_container_add(GTK_CONTAINER(nr4_container), nr4_grid);
+#endif
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 
   sub_menu=dialog;
 
   gtk_widget_show_all(dialog);
-  gtk_widget_hide(mode_title);
-  gtk_widget_hide(mode_combo);
-  gtk_widget_hide(slew_title);
-  gtk_widget_hide(slew_b);
-  gtk_widget_hide(lead_title);
-  gtk_widget_hide(lead_b);
-  gtk_widget_hide(lag_title);
-  gtk_widget_hide(lag_b);
-  gtk_widget_hide(thresh_title);
-  gtk_widget_hide(thresh_b);
 
+  //
+  // The width of the main grid is the largest, since it contains all containers.
+  // Determine this width and set the width of all containers to that value.
+  // This ensures that the column widths of he main grid and the containers
+  // line up so the whole menu looks well aligned.
+  //
+
+  int width=gtk_widget_get_allocated_width(grid);
+  gtk_widget_set_size_request(nr_grid, width, -1);
+  gtk_widget_set_size_request(nb_grid, width, -1);
+  gtk_widget_set_size_request(nr4_grid, width, -1);
+
+  gtk_widget_hide(nb_container);
 #ifdef EXTNR
-  gtk_widget_hide(nr4_reduction_title);
-  gtk_widget_hide(nr4_reduction_b);
-  gtk_widget_hide(nr4_smoothing_title);
-  gtk_widget_hide(nr4_smoothing_b);
-  gtk_widget_hide(nr4_whitening_title);
-  gtk_widget_hide(nr4_whitening_b);
-  gtk_widget_hide(nr4_rescale_title);
-  gtk_widget_hide(nr4_rescale_b);
-  gtk_widget_hide(nr4_threshold_title);
-  gtk_widget_hide(nr4_threshold_b);
+  gtk_widget_hide(nr4_container);
 #endif
 
 }
