@@ -123,7 +123,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   char text[64];
   cairo_text_extents_t extents;
   long long f;
-  long long divisor=20000;
+  long long divisor;
   double x=0.0;
   double soffset;
 
@@ -261,118 +261,23 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_set_line_width(cr, LINE_THIN);
   cairo_stroke(cr);
 
+  //
   // plot frequency markers
-  switch(rx->sample_rate) {
-    case 48000:
-      divisor=5000LL;
-      switch(rx->zoom) {
-        case 2:
-        case 3:
-        case 4:
-          divisor=2000LL;
-          break;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-          divisor=1000LL;
-          break;
-      }
-      break;
-    case 96000:
-    case 100000:
-      divisor=10000LL;
-      switch(rx->zoom) {
-        case 2:
-        case 3:
-        case 4:
-          divisor=5000LL;
-          break;
-        case 5:
-        case 6:
-          divisor=2000LL;
-          break;
-        case 7:
-        case 8:
-          divisor=1000LL;
-          break;
-      }
-      break;
-    case 192000:
-      divisor=20000LL;
-      switch(rx->zoom) {
-        case 2:
-        case 3:
-          divisor=10000LL;
-          break;
-        case 4:
-        case 5:
-        case 6:
-          divisor=5000LL;
-          break;
-        case 7:
-        case 8:
-          divisor=2000LL;
-          break;
-      }
-      break;
-    case 384000:
-      divisor=50000LL;
-      switch(rx->zoom) {
-        case 2:
-        case 3:
-          divisor=25000LL;
-          break;
-        case 4:
-        case 5:
-        case 6:
-          divisor=10000LL;
-          break;
-        case 7:
-        case 8:
-          divisor=5000LL;
-          break;
-      }
-      break;
-    case 768000:
-      divisor=100000LL;
-      switch(rx->zoom) {
-        case 2:
-        case 3:
-          divisor=50000LL;
-          break;
-        case 4:
-        case 5:
-        case 6:
-          divisor=25000LL;
-          break;
-        case 7:
-        case 8:
-          divisor=20000LL;
-          break;
-      }
-      break;
-    case 1024000:
-    case 1536000:
-    case 2097152:
-      divisor=200000LL;
-      switch(rx->zoom) {
-        case 2:
-        case 3:
-          divisor=100000LL;
-          break;
-        case 4:
-        case 5:
-        case 6:
-          divisor=50000LL;
-          break;
-        case 7:
-        case 8:
-          divisor=20000LL;
-          break;
-      }
-      break;
-  }
+  // calculate a divisor such that we have at most 12
+  // frequency markers, and then round upwards to the
+  // next 1/2/5 seris
+  //
+  divisor = rx->sample_rate / (12*rx->zoom);
+  if (divisor > 500000LL)      divisor=1000000LL;
+  else if (divisor > 200000LL) divisor= 500000LL;
+  else if (divisor > 100000LL) divisor= 200000LL;
+  else if (divisor >  50000LL) divisor= 100000LL;
+  else if (divisor >  20000LL) divisor=  50000LL;
+  else if (divisor >  10000LL) divisor=  20000LL;
+  else if (divisor >   5000LL) divisor=  10000LL;
+  else if (divisor >   2000LL) divisor=   5000LL;
+  else if (divisor >   1000LL) divisor=   2000LL;
+  else                         divisor=   1000LL;
 
   f = ((min_display/divisor)*divisor)+divisor;
   cairo_select_font_face(cr, DISPLAY_FONT,
