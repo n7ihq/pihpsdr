@@ -145,7 +145,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   double dbm_per_line=(double)display_height/((double)tx->panadapter_high-(double)tx->panadapter_low);
   cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
-  cairo_set_line_width(cr, 1.0);
+  cairo_set_line_width(cr, PAN_LINE_THICK);
   cairo_select_font_face(cr, DISPLAY_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
@@ -194,7 +194,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   if (tx->dialog == NULL) {
     long long f;
-    const long long divisor=2000;
+    const long long divisor=5000;
     double x;
     //
     // in DUPLEX, space in the TX window is so limited
@@ -205,13 +205,20 @@ void tx_panadapter_update(TRANSMITTER *tx) {
                                CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_BOLD);
     cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-    cairo_set_line_width(cr, 1.0);
+    cairo_set_line_width(cr, PAN_LINE_THIN);
     cairo_text_extents_t extents;
     f = ((min_display/divisor)*divisor)+divisor;
     while (f < max_display) {
       x=(double)(f-min_display)/hz_per_pixel;
-      cairo_move_to(cr,x,10.0);
-      cairo_line_to(cr,x,(double)display_height);
+      //
+      // Skip vertical line if it is in the filter area, since
+      // one might want to see a PureSignal Feedback there
+      // without any distraction.
+      //
+      if (x < filter_left || x >filter_right) {
+        cairo_move_to(cr,x,10.0);
+        cairo_line_to(cr,x,(double)display_height);
+      }
       //
       // For frequency marker lines very close to the left or right
       // edge, do not print a frequency since this probably won't fit
@@ -242,7 +249,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   BAND *band=band_get_band(b);
   if(band->frequencyMin!=0LL) {
     cairo_set_source_rgba(cr, COLOUR_ALARM);
-    cairo_set_line_width(cr, 2.0);
+    cairo_set_line_width(cr, PAN_LINE_EXTRA);
     if((min_display<band->frequencyMin)&&(max_display>band->frequencyMin)) {
       i=(band->frequencyMin-min_display)/(long long)hz_per_pixel;
       cairo_move_to(cr,(double)i,0.0);
@@ -259,7 +266,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   // cursor
   cairo_set_source_rgba(cr, COLOUR_ALARM);
-  cairo_set_line_width(cr, 1.0);
+  cairo_set_line_width(cr, PAN_LINE_THIN);
 //g_print("cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
   cairo_move_to(cr,vfofreq,0.0);
   cairo_line_to(cr,vfofreq,(double)display_height);
@@ -291,10 +298,10 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     cairo_close_path (cr);
     cairo_fill_preserve (cr);
     cairo_fill_preserve (cr);
-    cairo_set_line_width(cr, 0.5);
+    cairo_set_line_width(cr, PAN_LINE_THIN);
   } else {
     cairo_set_source_rgba(cr, COLOUR_PAN_FILL3);
-    cairo_set_line_width(cr, 1.0);
+    cairo_set_line_width(cr, PAN_LINE_THICK);
   }
   cairo_stroke(cr);
 

@@ -119,3 +119,11 @@
 #define COLOUR_PAN_FILL1     1.00, 1.00, 1.00, 0.25 // Default: 1.00, 1.00, 1.00, 0.25
 #define COLOUR_PAN_FILL2     1.00, 1.00, 1.00, 0.50 // Default: 1.00, 1.00, 1.00, 0.50
 #define COLOUR_PAN_FILL3     1.00, 1.00, 1.00, 0.75 // Default: 1.00, 1.00, 1.00, 0.75
+
+//
+// thin and thick line widths in the panadapers
+// "thick" and "extra" also used in the analog meter
+//
+#define PAN_LINE_THIN  0.5
+#define PAN_LINE_THICK 1.0
+#define PAN_LINE_EXTRA 2.0  // used for really important things such as band edges

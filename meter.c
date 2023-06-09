@@ -256,17 +256,17 @@ if(analog_meter) {
       double cx=(double)meter_width/2.0;
       double radius=cx-20.0;
 
-      cairo_set_line_width(cr, 1.0);
+      cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
       cairo_arc(cr, cx, cx, radius, 216.0*M_PI/180.0, 324.0*M_PI/180.0);
       cairo_stroke(cr);
 
-      cairo_set_line_width(cr, 2.0);
+      cairo_set_line_width(cr, PAN_LINE_EXTRA);
       cairo_set_source_rgba(cr, COLOUR_ALARM);
       cairo_arc(cr, cx, cx, radius+2, 264.0*M_PI/180.0, 324.0*M_PI/180.0);
       cairo_stroke(cr);
 
-      cairo_set_line_width(cr, 1.0);
+      cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
       for(i=1;i<10;i++) {
@@ -316,7 +316,7 @@ if(analog_meter) {
         cairo_new_path(cr);
       }
 
-      cairo_set_line_width(cr, 1.0);
+      cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
       angle=fmax(-127.0,max_rxlvl)+127.0+offset;
@@ -350,12 +350,12 @@ if(analog_meter) {
       double cx=(double)meter_width/2.0;
       double radius=cx-20.0;
 
-      cairo_set_line_width(cr, 1.0);
+      cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
       cairo_arc(cr, cx, cx, radius, 220.0*M_PI/180.0, 320.0*M_PI/180.0);
       cairo_stroke(cr);
 
-      cairo_set_line_width(cr, 1.0);
+      cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
       for(i=0;i<=100;i++) {
@@ -381,7 +381,7 @@ if(analog_meter) {
         cairo_new_path(cr);
       }
 
-      cairo_set_line_width(cr, 1.0);
+      cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
       angle=(max_pwr*10.0/(double)interval)+offset;
@@ -465,7 +465,7 @@ if(analog_meter) {
                 CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
-  cairo_set_line_width(cr, 1.0);
+  cairo_set_line_width(cr, PAN_LINE_THICK);
 
   if(can_transmit) {
     cairo_set_source_rgba(cr, COLOUR_METER);
@@ -509,7 +509,7 @@ if(analog_meter) {
       if(meter_width>=114) {
         int db=1;
         int i;
-        cairo_set_line_width(cr, 1.0);
+        cairo_set_line_width(cr, PAN_LINE_THICK);
         cairo_set_source_rgba(cr, COLOUR_METER);
         for(i=0;i<54;i++) {
           cairo_move_to(cr,offset+(double)(i*db),(double)meter_height-10);
