@@ -34,7 +34,8 @@
 #define DISPLAY_FONT_SIZE1 10                       // Default: 10
 #define DISPLAY_FONT_SIZE2 12                       // Default: 12
 #define DISPLAY_FONT_SIZE3 16                       // Default: 16
-#define DISPLAY_FONT_SIZE4 22                       // Default: 22
+#define DISPLAY_FONT_SIZE4 20                       // Default: 22
+#define DISPLAY_FONT_SIZE5 26                       // Default: 22
 
 #ifdef __APPLE__
 #define SLIDERS_FONT "FreeSans Bold 12"             // Default: FreeSans Bold 10
