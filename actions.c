@@ -33,161 +33,162 @@
 //
 // The "short button text" (button_str) needs to be present in ALL cases, and must be different
 // for each case. button_str is used to identify the action in the props files and therefore
-// it should not contain white space.
+// it should not contain white space. Apart from the props files, the button_str determines
+// what is written on the buttons in the toolbar (but that's it).
 //
 ACTION_TABLE ActionTable[] = {
   {NO_ACTION,           "NONE",                 "NONE",         TYPE_NONE},
-  {A_SWAP_B,            "A<>B",                 "A<>B",         MIDI_KEY | CONTROLLER_SWITCH},
-  {A_TO_B,              "A>B",                  "A>B",          MIDI_KEY | CONTROLLER_SWITCH},
-  {AF_GAIN,             "AF GAIN",              "AFGAIN",       MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {AF_GAIN_RX1,         "AF GAIN\nRX1",         "AFGAIN1",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {AF_GAIN_RX2,         "AF GAIN\nRX2",         "AFGAIN2",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {AGC,                 "AGC",                  "AGCT",         MIDI_KEY | CONTROLLER_SWITCH},
-  {AGC_GAIN,            "AGC GAIN",             "AGCGain",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {AGC_GAIN_RX1,        "AGC GAIN\nRX1",        "AGCGain1",     MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {AGC_GAIN_RX2,        "AGC GAIN\nRX2",        "AGCGain2",     MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {ANF,                 "ANF",                  "ANF",          MIDI_KEY | CONTROLLER_SWITCH},
-  {ATTENUATION,         "ATTEN",                "ATTEN",        MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {B_TO_A,              "A<B",                  "A<B",          MIDI_KEY | CONTROLLER_SWITCH},
-  {BAND_10,             "BAND 10",              "10",           MIDI_KEY},
-  {BAND_12,             "BAND 12",              "12",           MIDI_KEY},
-  {BAND_1240,           "BAND 1240",            "1240",         MIDI_KEY},
-  {BAND_144,            "BAND 144",             "144",          MIDI_KEY},
-  {BAND_15,             "BAND 15",              "15",           MIDI_KEY},
-  {BAND_160,            "BAND 160",             "160",          MIDI_KEY},
-  {BAND_17,             "BAND 17",              "17",           MIDI_KEY},
-  {BAND_20,             "BAND 20",              "20",           MIDI_KEY},
-  {BAND_220,            "BAND 220",             "220",          MIDI_KEY},
-  {BAND_2300,           "BAND 2300",            "2300",         MIDI_KEY},
-  {BAND_30,             "BAND 30",              "30",           MIDI_KEY},
-  {BAND_3400,           "BAND 3400",            "3400",         MIDI_KEY},
-  {BAND_40,             "BAND 40",              "40",           MIDI_KEY},
-  {BAND_430,            "BAND 430",             "430",          MIDI_KEY},
-  {BAND_6,              "BAND 6",               "6",            MIDI_KEY},
-  {BAND_60,             "BAND 60",              "60",           MIDI_KEY},
-  {BAND_70,             "BAND 70",              "70",           MIDI_KEY},
-  {BAND_80,             "BAND 80",              "80",           MIDI_KEY},
-  {BAND_902,            "BAND 902",             "902",          MIDI_KEY},
-  {BAND_AIR,            "BAND AIR",             "AIR",          MIDI_KEY},
-  {BAND_GEN,            "BAND GEN",             "GEN",          MIDI_KEY},
-  {BAND_MINUS,          "BAND -",               "BND-",         MIDI_KEY | CONTROLLER_SWITCH},
-  {BAND_PLUS,           "BAND +",               "BND+",         MIDI_KEY | CONTROLLER_SWITCH},
-  {BAND_WWV,            "BAND WWV",             "WWV",          MIDI_KEY},
-  {BANDSTACK_MINUS,     "BANDSTACK -",          "BSTK-",        MIDI_KEY | CONTROLLER_SWITCH},
-  {BANDSTACK_PLUS,      "BANDSTACK +",          "BSTK+",        MIDI_KEY | CONTROLLER_SWITCH},
-  {COMP_ENABLE,         "COMP ON/OFF",          "COMP",         MIDI_KEY | CONTROLLER_SWITCH},
-  {COMPRESSION,         "COMPRESSION",          "COMPVAL",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {CTUN,                "CTUN",                 "CTUN",         MIDI_KEY | CONTROLLER_SWITCH},
-  {CW_FREQUENCY,        "CW FREQUENCY",         "CWFREQ",       MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {CW_LEFT,             "CW LEFT",              "CWL",          MIDI_KEY | CONTROLLER_SWITCH},
-  {CW_RIGHT,            "CW RIGHT",             "CWR",          MIDI_KEY | CONTROLLER_SWITCH},
-  {CW_SPEED,            "CW SPEED",             "CWSPD",        MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {CW_KEYER_KEYDOWN,    "CW Key\n(keyer)",      "CWKy",         MIDI_KEY | CONTROLLER_SWITCH},
-  {CW_KEYER_SPEED,      "CW Speed\n(keyer)",    "CWKySpd",      MIDI_KNOB},
-  {CW_KEYER_SIDETONE,   "CW pitch\n(keyer)",    "CWKyPtch",     MIDI_KNOB},
-  {CW_KEYER_PTT,        "PTT\n(CW keyer)",      "CWKyPTT",      MIDI_KEY | CONTROLLER_SWITCH},
-  {DIV,                 "DIV ON/OFF",           "DIVT",         MIDI_KEY | CONTROLLER_SWITCH},
+  {A_SWAP_B,            "A<>B",                 "A<>B",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {A_TO_B,              "A>B",                  "A>B",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {AF_GAIN,             "AF GAIN",              "AFGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {AF_GAIN_RX1,         "AF GAIN\nRX1",         "AFGAIN1",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {AF_GAIN_RX2,         "AF GAIN\nRX2",         "AFGAIN2",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {AGC,                 "AGC",                  "AGCT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {AGC_GAIN,            "AGC GAIN",             "AGCGain",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {AGC_GAIN_RX1,        "AGC GAIN\nRX1",        "AGCGain1",     MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {AGC_GAIN_RX2,        "AGC GAIN\nRX2",        "AGCGain2",     MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {ANF,                 "ANF",                  "ANF",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {ATTENUATION,         "ATTEN",                "ATTEN",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {B_TO_A,              "A<B",                  "A<B",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_10,             "BAND 10",              "10",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_12,             "BAND 12",              "12",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_1240,           "BAND 1240",            "1240",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_144,            "BAND 144",             "144",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_15,             "BAND 15",              "15",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_160,            "BAND 160",             "160",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_17,             "BAND 17",              "17",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_20,             "BAND 20",              "20",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_220,            "BAND 220",             "220",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_2300,           "BAND 2300",            "2300",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_30,             "BAND 30",              "30",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_3400,           "BAND 3400",            "3400",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_40,             "BAND 40",              "40",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_430,            "BAND 430",             "430",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_6,              "BAND 6",               "6",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_60,             "BAND 60",              "60",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_70,             "BAND 70",              "70",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_80,             "BAND 80",              "80",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_902,            "BAND 902",             "902",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_AIR,            "BAND AIR",             "AIR",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_GEN,            "BAND GEN",             "GEN",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_MINUS,          "BAND -",               "BND-",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_PLUS,           "BAND +",               "BND+",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {BAND_WWV,            "BAND WWV",             "WWV",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {BANDSTACK_MINUS,     "BANDSTACK -",          "BSTK-",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {BANDSTACK_PLUS,      "BANDSTACK +",          "BSTK+",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {COMP_ENABLE,         "COMP ON/OFF",          "COMP",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {COMPRESSION,         "COMPRESSION",          "COMPVAL",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {CTUN,                "CTUN",                 "CTUN",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_FREQUENCY,        "CW FREQUENCY",         "CWFREQ",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {CW_LEFT,             "CW LEFT",              "CWL",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_RIGHT,            "CW RIGHT",             "CWR",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_SPEED,            "CW SPEED",             "CWSPD",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {CW_KEYER_KEYDOWN,    "CW Key\n(keyer)",      "CWKy",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_KEYER_SPEED,      "CW Speed\n(keyer)",    "CWKySpd",      MIDI_KNOB                     },
+  {CW_KEYER_SIDETONE,   "CW pitch\n(keyer)",    "CWKyPtch",     MIDI_KNOB                     },
+  {CW_KEYER_PTT,        "PTT\n(CW keyer)",      "CWKyPTT",      MIDI_KEY   | CONTROLLER_SWITCH},
+  {DIV,                 "DIV ON/OFF",           "DIVT",         MIDI_KEY   | CONTROLLER_SWITCH},
   {DIV_GAIN,            "DIV GAIN",             "DIVG",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_GAIN_COARSE,     "DIV GAIN\nCOARSE",     "DIVGC",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_GAIN_FINE,       "DIV GAIN\nFINE",       "DIVGF",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_PHASE,           "DIV PHASE",            "DIVP",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_PHASE_COARSE,    "DIV PHASE\nCOARSE",    "DIVPC",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_PHASE_FINE,      "DIV PHASE\nFINE",      "DIVPF",        MIDI_WHEEL | CONTROLLER_ENCODER},
-  {DRIVE,               "TX DRIVE",             "TXDRV",        MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {DUPLEX,              "DUPLEX",               "DUP",          MIDI_KEY | CONTROLLER_SWITCH},
-  {FILTER_MINUS,        "FILTER -",             "FL-",          MIDI_KEY | CONTROLLER_SWITCH},
-  {FILTER_PLUS,         "FILTER +",             "FL+",          MIDI_KEY | CONTROLLER_SWITCH},
-  {FILTER_CUT_LOW,      "FILTER CUT\nLOW",      "FCUTL",        MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {FILTER_CUT_HIGH,     "FILTER CUT\nHIGH",     "FCUTH",        MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {FILTER_CUT_DEFAULT,  "FILTER CUT\nDEFAULT",  "FCUTDEF",      MIDI_KEY | CONTROLLER_SWITCH},
-  {FUNCTION,            "FUNC",                 "FUNC",         CONTROLLER_SWITCH},
+  {DRIVE,               "TX DRIVE",             "TXDRV",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {DUPLEX,              "DUPLEX",               "DUP",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {FILTER_MINUS,        "FILTER -",             "FL-",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {FILTER_PLUS,         "FILTER +",             "FL+",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {FILTER_CUT_LOW,      "FILTER CUT\nLOW",      "FCUTL",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {FILTER_CUT_HIGH,     "FILTER CUT\nHIGH",     "FCUTH",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {FILTER_CUT_DEFAULT,  "FILTER CUT\nDEFAULT",  "FCUTDEF",      MIDI_KEY   | CONTROLLER_SWITCH},
+  {FUNCTION,            "FUNC",                 "FUNC",         MIDI_KEY   | CONTROLLER_SWITCH},
   {IF_SHIFT,            "IF SHIFT",             "IFSHFT",       MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_SHIFT_RX1,        "IF SHIFT\nRX1",        "IFSHFT1",      MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_SHIFT_RX2,        "IF SHIFT\nRX2",        "IFSHFT2",      MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_WIDTH,            "IF WIDTH",             "IFWIDTH",      MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_WIDTH_RX1,        "IF WIDTH\nRX1",        "IFWIDTH1",     MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_WIDTH_RX2,        "IF WIDTH\nRX2",        "IFWIDTH2",     MIDI_WHEEL | CONTROLLER_ENCODER},
-  {LINEIN_GAIN,         "LINEIN\nGAIN",         "LIGAIN",       MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {LOCK,                "LOCK",                 "LOCKM",        MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_AGC,            "AGC\nMENU",            "AGC",          MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_BAND,           "BAND\nMENU",           "BAND",         MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_BANDSTACK,      "BSTK\nMENU",           "BSTK",         MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_DIVERSITY,      "DIV\nMENU",            "DIV",          MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_FILTER,         "FILT\nMENU",           "FILT",         MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_FREQUENCY,      "FREQ\nMENU",           "FREQ",         MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_MEMORY,         "MEM\nMENU",            "MEM",          MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_MODE,           "MODE\nMENU",           "MODE",         MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_NOISE,          "NOISE\nMENU",          "NOISE",        MIDI_KEY | CONTROLLER_SWITCH},
-  {MENU_PS,             "PS MENU",              "PS",           MIDI_KEY | CONTROLLER_SWITCH},
-  {MIC_GAIN,            "MIC GAIN",             "MICGAIN",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {MODE_MINUS,          "MODE -",               "MD-",          MIDI_KEY | CONTROLLER_SWITCH},
-  {MODE_PLUS,           "MODE +",               "MD+",          MIDI_KEY | CONTROLLER_SWITCH},
-  {MOX,                 "MOX",                  "MOX",          MIDI_KEY | CONTROLLER_SWITCH},
-  {MUTE,                "MUTE",                 "MUTE",         MIDI_KEY | CONTROLLER_SWITCH},
-  {NB,                  "NB",                   "NB",           MIDI_KEY | CONTROLLER_SWITCH},
-  {NR,                  "NR",                   "NR",           MIDI_KEY | CONTROLLER_SWITCH},
-  {NUMPAD_0,            "NUMPAD 0",             "0",            MIDI_KEY},
-  {NUMPAD_1,            "NUMPAD 1",             "1",            MIDI_KEY},
-  {NUMPAD_2,            "NUMPAD 2",             "2",            MIDI_KEY},
-  {NUMPAD_3,            "NUMPAD 3",             "3",            MIDI_KEY},
-  {NUMPAD_4,            "NUMPAD 4",             "4",            MIDI_KEY},
-  {NUMPAD_5,            "NUMPAD 5",             "5",            MIDI_KEY},
-  {NUMPAD_6,            "NUMPAD 6",             "6",            MIDI_KEY},
-  {NUMPAD_7,            "NUMPAD 7",             "7",            MIDI_KEY},
-  {NUMPAD_8,            "NUMPAD 8",             "8",            MIDI_KEY},
-  {NUMPAD_9,            "NUMPAD 9",             "9",            MIDI_KEY},
-  {NUMPAD_CL,           "NUMPAD\nCL",           "CL",           MIDI_KEY},
-  {NUMPAD_ENTER,        "NUMPAD\nENTER",        "EN",           MIDI_KEY},
+  {LINEIN_GAIN,         "LINEIN\nGAIN",         "LIGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {LOCK,                "LOCK",                 "LOCKM",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_AGC,            "AGC\nMENU",            "AGC",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_BAND,           "BAND\nMENU",           "BAND",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_BANDSTACK,      "BSTK\nMENU",           "BSTK",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_DIVERSITY,      "DIV\nMENU",            "DIV",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_FILTER,         "FILT\nMENU",           "FILT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_FREQUENCY,      "FREQ\nMENU",           "FREQ",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_MEMORY,         "MEM\nMENU",            "MEM",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_MODE,           "MODE\nMENU",           "MODE",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_NOISE,          "NOISE\nMENU",          "NOISE",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_PS,             "PS MENU",              "PS",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {MIC_GAIN,            "MIC GAIN",             "MICGAIN",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {MODE_MINUS,          "MODE -",               "MD-",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MODE_PLUS,           "MODE +",               "MD+",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MOX,                 "MOX",                  "MOX",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MUTE,                "MUTE",                 "MUTE",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {NB,                  "NB",                   "NB",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {NR,                  "NR",                   "NR",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_0,            "NUMPAD 0",             "0",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_1,            "NUMPAD 1",             "1",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_2,            "NUMPAD 2",             "2",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_3,            "NUMPAD 3",             "3",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_4,            "NUMPAD 4",             "4",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_5,            "NUMPAD 5",             "5",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_6,            "NUMPAD 6",             "6",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_7,            "NUMPAD 7",             "7",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_8,            "NUMPAD 8",             "8",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_9,            "NUMPAD 9",             "9",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_CL,           "NUMPAD\nCL",           "CL",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_ENTER,        "NUMPAD\nENTER",        "EN",           MIDI_KEY   | CONTROLLER_SWITCH},
   {PAN,                 "PAN",                  "PAN",          MIDI_WHEEL | CONTROLLER_ENCODER},
-  {PAN_MINUS,           "PAN -",                "PAN-",         MIDI_KEY | CONTROLLER_SWITCH},
-  {PAN_PLUS,            "PAN +",                "PAN+",         MIDI_KEY | CONTROLLER_SWITCH},
-  {PANADAPTER_HIGH,     "PAN HIGH",             "PANH",         MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {PANADAPTER_LOW,      "PAN LOW",              "PANL",         MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {PANADAPTER_STEP,     "PAN STEP",             "PANS",         MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {PREAMP,              "PREAMP\nON/OFF",       "PRE",          MIDI_KEY | CONTROLLER_SWITCH},
-  {PS,                  "PS ON/OFF",            "PST",          MIDI_KEY | CONTROLLER_SWITCH},
-  {PTT,                 "PTT",                  "PTT",          MIDI_KEY | CONTROLLER_SWITCH},
-  {RF_GAIN,             "RF GAIN",              "RFGAIN",       MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {RF_GAIN_RX1,         "RF GAIN\nRX1",         "RFGAIN1",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {RF_GAIN_RX2,         "RF GAIN\nRX2",         "RFGAIN2",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {PAN_MINUS,           "PAN -",                "PAN-",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {PAN_PLUS,            "PAN +",                "PAN+",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {PANADAPTER_HIGH,     "PAN HIGH",             "PANH",         MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {PANADAPTER_LOW,      "PAN LOW",              "PANL",         MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {PANADAPTER_STEP,     "PAN STEP",             "PANS",         MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {PREAMP,              "PREAMP\nON/OFF",       "PRE",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {PS,                  "PS ON/OFF",            "PST",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {PTT,                 "PTT",                  "PTT",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {RF_GAIN,             "RF GAIN",              "RFGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {RF_GAIN_RX1,         "RF GAIN\nRX1",         "RFGAIN1",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {RF_GAIN_RX2,         "RF GAIN\nRX2",         "RFGAIN2",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {RIT,                 "RIT",                  "RIT",          MIDI_WHEEL | CONTROLLER_ENCODER},
-  {RIT_CLEAR,           "RIT\nCLEAR",           "RITCL",        MIDI_KEY | CONTROLLER_SWITCH},
-  {RIT_ENABLE,          "RIT\nON/OFF",          "RITT",         MIDI_KEY | CONTROLLER_SWITCH},
-  {RIT_MINUS,           "RIT +",                "RIT-",         MIDI_KEY | CONTROLLER_SWITCH},
-  {RIT_PLUS,            "RIT -",                "RIT+",         MIDI_KEY | CONTROLLER_SWITCH},
+  {RIT_CLEAR,           "RIT\nCLEAR",           "RITCL",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {RIT_ENABLE,          "RIT\nON/OFF",          "RITT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RIT_MINUS,           "RIT +",                "RIT-",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RIT_PLUS,            "RIT -",                "RIT+",         MIDI_KEY   | CONTROLLER_SWITCH},
   {RIT_RX1,             "RIT\nRX1",             "RIT1",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {RIT_RX2,             "RIT\nRX2",             "RIT2",         MIDI_WHEEL | CONTROLLER_ENCODER},
-  {RIT_STEP,            "RIT\nSTEP",            "RITST",        MIDI_KEY | CONTROLLER_SWITCH},
-  {RSAT,                "RSAT",                 "RSAT",         MIDI_KEY | CONTROLLER_SWITCH},
-  {SAT,                 "SAT",                  "SAT",          MIDI_KEY | CONTROLLER_SWITCH},
-  {SNB,                 "SNB",                  "SNB",          MIDI_KEY | CONTROLLER_SWITCH},
-  {SPLIT,               "SPLIT",                "SPLIT",        MIDI_KEY | CONTROLLER_SWITCH},
-  {SQUELCH,             "SQUELCH",              "SQUELCH",      MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {SQUELCH_RX1,         "SQUELCH\nRX1",         "SQUELCH1",     MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {SQUELCH_RX2,         "SQUELCH\nRX2",         "SQUELCH2",             MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {SWAP_RX,             "SWAP RX",              "SWAPRX",       MIDI_KEY | CONTROLLER_SWITCH},
-  {TUNE,                "TUNE",                 "TUNE",         MIDI_KEY | CONTROLLER_SWITCH},
-  {TUNE_DRIVE,          "TUNE\nDRV",            "TUNDRV",       MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {TUNE_FULL,           "TUNE\nFUL",            "TUNF",         MIDI_KEY | CONTROLLER_SWITCH},
-  {TUNE_MEMORY,         "TUNE\nMEM",            "TUNM",         MIDI_KEY | CONTROLLER_SWITCH},
-  {TWO_TONE,            "TWO TONE",             "2TONE",        MIDI_KEY | CONTROLLER_SWITCH},
+  {RIT_STEP,            "RIT\nSTEP",            "RITST",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {RSAT,                "RSAT",                 "RSAT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {SAT,                 "SAT",                  "SAT",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {SNB,                 "SNB",                  "SNB",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {SPLIT,               "SPLIT",                "SPLIT",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {SQUELCH,             "SQUELCH",              "SQUELCH",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {SQUELCH_RX1,         "SQUELCH\nRX1",         "SQUELCH1",     MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {SQUELCH_RX2,         "SQUELCH\nRX2",         "SQUELCH2",     MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {SWAP_RX,             "SWAP RX",              "SWAPRX",       MIDI_KEY   | CONTROLLER_SWITCH},
+  {TUNE,                "TUNE",                 "TUNE",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {TUNE_DRIVE,          "TUNE\nDRV",            "TUNDRV",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {TUNE_FULL,           "TUNE\nFUL",            "TUNF",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {TUNE_MEMORY,         "TUNE\nMEM",            "TUNM",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {TWO_TONE,            "TWO TONE",             "2TONE",        MIDI_KEY   | CONTROLLER_SWITCH},
   {VFO,                 "VFO",                  "VFO",          MIDI_WHEEL | CONTROLLER_ENCODER},
-  {VFO_STEP_MINUS,      "VFO STEP -",           "STEP-",        MIDI_KEY | CONTROLLER_SWITCH},
-  {VFO_STEP_PLUS,       "VFO STEP +",           "STEP+",        MIDI_KEY | CONTROLLER_SWITCH},
+  {VFO_STEP_MINUS,      "VFO STEP -",           "STEP-",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {VFO_STEP_PLUS,       "VFO STEP +",           "STEP+",        MIDI_KEY   | CONTROLLER_SWITCH},
   {VFOA,                "VFO A",                "VFOA",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {VFOB,                "VFO B",                "VFOB",         MIDI_WHEEL | CONTROLLER_ENCODER},
-  {VOX,                 "VOX\nON/OFF",          "VOX",          MIDI_KEY | CONTROLLER_SWITCH},
+  {VOX,                 "VOX\nON/OFF",          "VOX",          MIDI_KEY   | CONTROLLER_SWITCH},
   {VOXLEVEL,            "VOX\nLEVEL",           "VOXLEV",       MIDI_WHEEL | CONTROLLER_ENCODER},
   {WATERFALL_HIGH,      "WFALL\nHIGH",          "WFALLH",       MIDI_WHEEL | CONTROLLER_ENCODER},
   {WATERFALL_LOW,       "WFALL\nLOW",           "WFALLL",       MIDI_WHEEL | CONTROLLER_ENCODER},
   {XIT  ,               "XIT",                  "XIT",          MIDI_WHEEL | CONTROLLER_ENCODER},
-  {XIT_CLEAR,           "XIT\nCLEAR",           "XITCL",        MIDI_KEY | CONTROLLER_SWITCH},
-  {XIT_ENABLE,          "XIT\nON/OFF",          "XITT",         MIDI_KEY | CONTROLLER_SWITCH},
-  {XIT_MINUS,           "XIT -",                "XIT-",         MIDI_KEY | CONTROLLER_SWITCH},
-  {XIT_PLUS,            "XIT +",                "XIT+",         MIDI_KEY | CONTROLLER_SWITCH},
+  {XIT_CLEAR,           "XIT\nCLEAR",           "XITCL",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {XIT_ENABLE,          "XIT\nON/OFF",          "XITT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {XIT_MINUS,           "XIT -",                "XIT-",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {XIT_PLUS,            "XIT +",                "XIT+",         MIDI_KEY   | CONTROLLER_SWITCH},
   {ZOOM,                "ZOOM",                 "ZOOM",         MIDI_WHEEL | CONTROLLER_ENCODER},
-  {ZOOM_MINUS,          "ZOOM -",               "ZOOM-",        MIDI_KEY | CONTROLLER_SWITCH},
-  {ZOOM_PLUS,           "ZOOM +",               "ZOOM+",        MIDI_KEY | CONTROLLER_SWITCH},
+  {ZOOM_MINUS,          "ZOOM -",               "ZOOM-",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {ZOOM_PLUS,           "ZOOM +",               "ZOOM+",        MIDI_KEY   | CONTROLLER_SWITCH},
   {ACTIONS,             "NONE",                 "NONE",         TYPE_NONE}
 };
 
@@ -1089,7 +1090,7 @@ int process_action(void *data) {
       active_receiver->waterfall_low=(int)value;
       break;
     case XIT:
-      value=KnobOrWheel(a, (double)transmitter->xit, -10000.0, 10000.0, (double) rit_increment);
+      value=KnobOrWheel(a, (double)transmitter->xit, -9999.0, 9999.0, (double) rit_increment);
       transmitter->xit=(int)value;
       transmitter->xit_enabled=(value!=0);
       if(protocol==NEW_PROTOCOL) {
@@ -1121,14 +1122,14 @@ int process_action(void *data) {
       }
       break;
     case XIT_MINUS:
-      if(a->mode==PRESSED) {
-        if(can_transmit) {
+      if (can_transmit) {
+        if(a->mode==PRESSED) {
           value=(double)transmitter->xit;
           value-=(double)rit_increment;
-          if(value<-10000.0) {
-            value=-10000.0;
-          } else if(value>10000.0) {
-            value=10000.0;
+          if(value<-9999.0) {
+            value=-9999.0;
+          } else if(value>9999.0) {
+            value=9999.0;
           }
           transmitter->xit=(int)value;
           transmitter->xit_enabled=(transmitter->xit!=0);
@@ -1136,12 +1137,19 @@ int process_action(void *data) {
             schedule_high_priority();
           }
           g_idle_add(ext_vfo_update,NULL);
+          if(timer==0) {
+            timer=g_timeout_add(250,timeout_cb,a);
+            timer_released=FALSE;
+          }
+          free_action=FALSE;
+        } else {
+          timer_released=TRUE;
         }
       }
       break;
     case XIT_PLUS:
-      if(a->mode==PRESSED) {
-        if(can_transmit) {
+      if (can_transmit) {
+        if(a->mode==PRESSED) {
           value=(double)transmitter->xit;
           value+=(double)rit_increment;
           if(value<-10000.0) {
@@ -1155,6 +1163,13 @@ int process_action(void *data) {
             schedule_high_priority();
           }
           g_idle_add(ext_vfo_update,NULL);
+          if(timer==0) {
+            timer=g_timeout_add(250,timeout_cb,a);
+            timer_released=FALSE;
+          }
+          free_action=FALSE;
+        } else {
+          timer_released=TRUE;
         }
       }
       break;
