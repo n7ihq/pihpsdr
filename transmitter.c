@@ -484,7 +484,7 @@ static gboolean update_display(gpointer data) {
     double constant2;
     int fwd_cal_offset;
     int rev_cal_offset;
-    
+
     int fwd_power;
     int rev_power;
     int fwd_average;  // only used for SWR calculation, VOLTAGE value
@@ -570,9 +570,9 @@ static gboolean update_display(gpointer data) {
           if(rev_power>fwd_power) {
             fwd_power=alex_reverse_power;
             rev_power=alex_forward_power;
-            fwd_average=alex_reverse_power_average; 
-            rev_average=alex_forward_power_average; 
-          } 
+            fwd_average=alex_reverse_power_average;
+            rev_average=alex_forward_power_average;
+          }
           ex_power=0;
           tx->exciter=0.0;
         } else {
@@ -1193,13 +1193,13 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     }
 
     if (txflag == 0 && protocol == NEW_PROTOCOL) {
-    //
-    // this is the first time (after a pause) that we send TX samples
-    // so send some "silence" to prevent FIFO underflows
-    //
-    for (j=0; j< 480; j++) {
-          new_protocol_iq_samples(0,0);
-    }   
+      //
+      // this is the first time (after a pause) that we send TX samples
+      // so send some "silence" to prevent FIFO underflows
+      //
+      for (j=0; j< 480; j++) {
+        new_protocol_iq_samples(0,0);
+      }
     }
     txflag=1;
     //

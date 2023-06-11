@@ -93,7 +93,7 @@ typedef struct _receiver {
   // nb = 0:         No noise blanker
   // nb = 1:         Preemptive Wideband Blanker, "NB", "ANB"
   // nb = 2:         Interpolating Wideband Blanker, "NB2", "NOB"
-  // 
+  //
   // anf= 0/1:       Automatic notch filter off/on
   // snb= 0/1:       Spectral noise blanker off/on
   //
@@ -126,7 +126,7 @@ typedef struct _receiver {
   // similar meanings for NB/NB2 so we only take one set.
   // To be modified in the DSP menu. Note the "times"
   // are stored internally in seconds, while in the DSP menu they
-  // are specified in milli-seconds. 
+  // are specified in milli-seconds.
   // The "NB value" nb_thresh, as obtained from the DSP menu,
   // is multiplied with 0.165 merely since this is done in other
   // SDR programs as well.
@@ -144,7 +144,7 @@ typedef struct _receiver {
   // nb2_mode = 2:  mean-hold
   // nb2_mode = 3:  hold-sample
   // nb2_mode = 4:  interpolate
-  
+
 #ifdef EXTNR
   //
   // NR4 parameters

@@ -85,8 +85,7 @@ static gboolean configure=FALSE;
 static void ReadMIDIdevice(const MIDIPacketList *pktlist, void *refCon, void *connRefCon) {
     int i,j,byte,chan,arg1,arg2;
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
-        
-        
+
     // loop through all packets in the current list
     for (j=0; j < pktlist->numPackets; ++j) {
         for (i=0; i<packet->length; i++) {

@@ -890,7 +890,6 @@ void *rx_thread(void *data) {
     // ADC1 TX: HERMES only: original TX signal
     // ADC2   : original TX signal
     //
-    
         p=buffer;
         *p++ =(seqnum >> 24) & 0xFF;
         *p++ =(seqnum >> 16) & 0xFF;
@@ -942,7 +941,7 @@ void *rx_thread(void *data) {
         i0sample += cos(tonearg) * 0.0002239 * rxatt0_dbl;
         q0sample += sin(tonearg) * 0.0002239 * rxatt0_dbl;
             tonearg += tonedelta;
-            if (tonearg > 6.3)  tonearg -= 6.283185307179586476925286766559;         
+            if (tonearg > 6.3)  tonearg -= 6.283185307179586476925286766559;
             if (tonearg < -6.3) tonearg += 6.283185307179586476925286766559;
       }
       if (diversity && !sync && myadc == 0) {

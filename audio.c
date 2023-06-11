@@ -181,7 +181,7 @@ g_print("%s: local_audio_buffer: size=%d sample=%ld\n",__FUNCTION__,out_buffer_s
   g_mutex_unlock(&rx->local_audio_mutex);
   return 0;
 }
-        
+
 int audio_open_input() {
   int err;
   unsigned int rate=48000;
@@ -334,7 +334,7 @@ g_print("%s: free mic buffer\n", __FUNCTION__);
 
 int cw_audio_write(RECEIVER *rx, float sample){
   snd_pcm_sframes_t delay;
-        
+
   g_mutex_lock(&rx->local_audio_mutex);
   if(rx->playback_handle!=NULL && rx->local_audio_buffer!=NULL) {
 

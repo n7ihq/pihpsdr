@@ -94,9 +94,7 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
    if (radio != NULL) {
       if (event->keyval == GDK_KEY_space) {
-        
-          g_print( "space");
-        
+        //g_print( "space");
         if(getTune()==1) {
           setTune(0);
         }

@@ -178,7 +178,7 @@ static void show_xvtr() {
   gtk_grid_set_column_homogeneous(GTK_GRID(mygrid),FALSE);
   gtk_grid_set_row_homogeneous(GTK_GRID(mygrid),TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(mygrid),5);
-      
+
   GtkWidget *band_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(band_label), "<b>Band</b>");
   GtkWidget *rx_label=gtk_label_new(NULL);
@@ -188,11 +188,11 @@ static void show_xvtr() {
   GtkWidget *tx_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(tx_label), "<b>TX Ant</b>");
   gtk_grid_attach(GTK_GRID(mygrid), tx_label, 2, 0, 1, 1);
-  
-  band_label=gtk_label_new(NULL); 
+
+  band_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(band_label), "    ");
   gtk_grid_attach(GTK_GRID(mygrid), band_label, 3, 0, 1, 1);
-  
+
   band_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(band_label), "<b>Band</b>");
   rx_label=gtk_label_new(NULL);

@@ -822,7 +822,7 @@ void vfo_id_step(int id, int steps) {
 
 //
 // vfo_move (and vfo_id_move) are exclusively used
-// to update the radio while dragging with the 
+// to update the radio while dragging with the
 // pointer device in the panadapter area. Therefore,
 // the behaviour is different whether we use CTUN or not.
 //
@@ -1151,7 +1151,7 @@ void vfo_update() {
               cairo_set_source_rgba(cr, COLOUR_OK_WEAK);
         else
               cairo_set_source_rgba(cr, COLOUR_OK);
-        
+
         f_m = af / 1000000LL;
         f_k = (af - 1000000LL*f_m) / 1000;
         f_h = (af - 1000000LL*f_m - 1000*f_k);
@@ -1169,9 +1169,9 @@ void vfo_update() {
           //
           cairo_save(cr);
           cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-          if (f_m < 10) 
+          if (f_m < 10)
             cairo_show_text(cr, "0000");
-          else if (f_m < 100) 
+          else if (f_m < 100)
             cairo_show_text(cr, "000");
           else if (f_m < 1000)
             cairo_show_text(cr, "00");
@@ -1216,7 +1216,7 @@ void vfo_update() {
           //
           cairo_save(cr);
           cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-          if (f_m < 10) 
+          if (f_m < 10)
             cairo_show_text(cr, "0000");
           else if (f_m < 100)
             cairo_show_text(cr, "000");

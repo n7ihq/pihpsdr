@@ -87,7 +87,7 @@ static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
   char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
   int samplerate;
 
-  //  
+  //
   // There are so many different possibilities for sample rates, so
   // we just "scanf" from the combobox text entry
   //
@@ -249,7 +249,7 @@ void rx_menu(GtkWidget *parent) {
   }
 
   if (filter_board == ALEX && active_receiver->adc == 0 && have_alex_att) {
-    // 
+    //
     // The "Alex ATT" value is stored in receiver[0] no matter how the ADCs are selected
     //
     GtkWidget *alex_att_label=gtk_label_new(NULL);

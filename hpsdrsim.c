@@ -354,7 +354,6 @@ int main(int argc, char *argv[])
              for (j=(i*LENDIV)/nb_pulse; j< (i*LENDIV)/nb_pulse+nb_width; j++) divtab[j]=off;
            }
         }
-        
 //
 //      clear TX fifo
 //
@@ -796,7 +795,6 @@ int main(int argc, char *argv[])
                                   buffer[8]=0xFF; // encodes old protocol
                                   sendto(sock_udp, buffer, 60, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
                                   break;
-                                
                                 }
                                 if (bytes_read == 63 && buffer[0] == 0xEF && buffer[1] == 0xFE && buffer[2] == 0x03) {
                                   printf("OldProtocol SetIP packet received:\n");
@@ -1357,14 +1355,13 @@ void *handler_ep6(void *arg)
                             // AIN4:
                             // AIN5: supply voltage
                             *(pointer+6) = 0;
-                            *(pointer+7) = 63;  
+                            *(pointer+7) = 63;
                             header_offset=32;
                             break;
                         case 32:
                             header_offset=0;
                             break;
                     }
-                        
                     pointer += 8;
                     memset(pointer, 0, 504);
                     fac1 = do_tone ?  rxatt_dbl[0]*0.0002239 : 0.0;

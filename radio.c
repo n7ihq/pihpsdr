@@ -687,7 +687,7 @@ void start_radio() {
   // Here we set it to "mouse friendly" in the NO_CONTROLLER case,
   // since if we use one of the GPIO controllers, chances are high that
   // we operate with a touch-screen.
-  // 
+  //
   // The setting can be changed in the RADIO menu and is stored in the
   // props file, so will be restored therefrom as well.
   //
@@ -941,7 +941,7 @@ void start_radio() {
   status_text(text);
 
   //
-  // text for top bar of piHPSDR Window 
+  // text for top bar of piHPSDR Window
   //
   switch (protocol) {
     case ORIGINAL_PROTOCOL:
@@ -2134,7 +2134,7 @@ g_print("radioRestoreState: %s\n",property_path);
       if (value) strcpy(SerialPorts[id].port, value);
     }
 
-        
+
     value=getProperty("split");
     if(value) split=atoi(value);
     value=getProperty("duplex");
@@ -2234,8 +2234,6 @@ g_print("radioRestoreState: %s\n",property_path);
     value=getProperty("radio.display_sequence_errors");
     if(value!=NULL) display_sequence_errors=atoi(value);
 
-
-        
 #ifdef CLIENT_SERVER
   }
 #endif
@@ -2553,10 +2551,10 @@ g_print("radioSaveState: %s\n",property_path);
 
     sprintf(value,"%d",receivers);
     setProperty("receivers",value);
-        
+
     sprintf(value,"%d",iqswap);
     setProperty("iqswap",value);
-        
+
     sprintf(value,"%d",optimize_for_touchscreen);
     setProperty("optimize_touchscreen", value);
 

@@ -301,7 +301,7 @@ void noise_menu(GtkWidget *parent) {
   gtk_widget_show(b_snb);
   gtk_grid_attach(GTK_GRID(grid),b_snb,0,1,1,1);
   g_signal_connect(b_snb,"toggled",G_CALLBACK(snb_cb),NULL);
-  
+
   GtkWidget *b_anf=gtk_check_button_new_with_label("ANF");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_anf), active_receiver->anf);
   gtk_widget_show(b_anf);
@@ -334,7 +334,7 @@ void noise_menu(GtkWidget *parent) {
   gtk_label_set_xalign(GTK_LABEL(nb_title), 1.0);
   gtk_widget_show(nb_title);
   gtk_grid_attach(GTK_GRID(grid),nb_title,2,2,1,1);
-  
+
   GtkWidget *nb_combo=gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(nb_combo),NULL,"NONE");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(nb_combo),NULL,"NB");
@@ -372,7 +372,7 @@ void noise_menu(GtkWidget *parent) {
   // Hiding/Showing ComboBoxes optimized for Touch-Screens does not
   // work. Therefore, we have to group the NR, NB, and NR4 controls
   // in a container, which then can be shown/hidden
-  // 
+  //
 
   //
   // NR controls
@@ -384,7 +384,7 @@ void noise_menu(GtkWidget *parent) {
   gtk_grid_set_row_homogeneous(GTK_GRID(nr_grid),TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(nr_grid),5);
   gtk_grid_set_row_spacing (GTK_GRID(nr_grid),5);
-  
+
   GtkWidget *gain_title=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(gain_title), "<b>NR2 Gain Method</b>");
   gtk_label_set_xalign(GTK_LABEL(gain_title), 1.0);

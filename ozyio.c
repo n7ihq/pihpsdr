@@ -428,7 +428,7 @@ void ozy_i2c_readpwr(int addr) {
 
     switch (addr) {
         case I2C_PENNY_ALC:
-        rc = ozy_i2c_read(buffer,2,I2C_PENNY_ALC);  
+        rc = ozy_i2c_read(buffer,2,I2C_PENNY_ALC);
         if(rc<0) {
             perror("ozy_i2c_readpwr alc: failed");
         }
@@ -436,7 +436,7 @@ void ozy_i2c_readpwr(int addr) {
         break;
 
         case I2C_PENNY_FWD:
-        rc = ozy_i2c_read(buffer,2,I2C_PENNY_FWD);  
+        rc = ozy_i2c_read(buffer,2,I2C_PENNY_FWD);
         if(rc<0) {
             perror("ozy_i2c_readpwr fwd: failed");
         }
@@ -444,7 +444,7 @@ void ozy_i2c_readpwr(int addr) {
         break;
 
         case I2C_PENNY_REV:
-        rc = ozy_i2c_read(buffer,2,I2C_PENNY_REV);  
+        rc = ozy_i2c_read(buffer,2,I2C_PENNY_REV);
         if(rc<0) {
             perror("ozy_i2c_readpwr rev: failed");
         }
@@ -472,9 +472,9 @@ void ozy_i2c_readvars() {
     unsigned char buffer[8];
 
 
-    g_print("ozy_i2c_init: starting\n"); 
+    g_print("ozy_i2c_init: starting\n");
 
-    rc = ozy_i2c_read(buffer,2,I2C_MERC1_FW);   
+    rc = ozy_i2c_read(buffer,2,I2C_MERC1_FW);
     if(rc<0) {
         perror("ozy_i2c_readvars MercFW: failed");
         //
@@ -486,7 +486,7 @@ void ozy_i2c_readvars() {
     mercury_fw = buffer[1];
     g_print("mercury firmware=%d\n",(int)buffer[1]);
 
-    rc = ozy_i2c_read(buffer,2,I2C_PENNY_FW);   
+    rc = ozy_i2c_read(buffer,2,I2C_PENNY_FW);
     if(rc<0) {
         perror("ozy_i2c_readvars PennyFW: failed");
         //
@@ -496,7 +496,7 @@ void ozy_i2c_readvars() {
         return;
     }
     penny_fw = buffer[1];
-    g_print("penny firmware=%d\n",(int)buffer[1]);   
+    g_print("penny firmware=%d\n",(int)buffer[1]);
 
     writepenny((unsigned char)1);
 }
@@ -647,7 +647,6 @@ int ozy_initialise()
     ozy_open();
     ozy_get_firmware_string(ozy_firmware_version,8);
     g_print("Ozy FX2 version: %s\n",ozy_firmware_version);
-        
     //
     // NOTE (thanks Rick): For I2C to work you need to place jumpers on SCL and SDA on
     // the OZY/Magister board. This enables firmware detection on adjacent cards
@@ -656,7 +655,7 @@ int ozy_initialise()
     ozy_i2c_readvars();
     ozy_close();
     sleep(1);
-    ozy_open();     
+    ozy_open();
     return 0;
 }
 
@@ -700,7 +699,7 @@ int ozy_discover()
 // if we get this far, we have an ozy on the bus so discover successful.
 // we don't know that it will be selected for use, so close it again
 // for now; re-open if the user selects Ozy
-//  
+//
     libusb_close(ozy_handle);
     return success;
 }

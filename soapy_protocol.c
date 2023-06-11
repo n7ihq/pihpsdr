@@ -111,7 +111,7 @@ void soapy_protocol_change_sample_rate(RECEIVER *rx) {
 #endif
 //
 // We stick to the hardware sample rate and use the WDSP resampler
-//   
+//
   if(rx->sample_rate==radio_sample_rate) {
     if(rx->resample_buffer!=NULL) {
       g_free(rx->resample_buffer);

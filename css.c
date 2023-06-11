@@ -7,7 +7,7 @@
 //
 // Here, only the color for the "selected" state
 // (white text on a red button) is specified
-// 
+//
 //
 char *css=
 "  @define-color TOGGLE_ON  rgb(100%,0%,0%);\n"
