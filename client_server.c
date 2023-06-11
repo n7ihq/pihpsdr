@@ -323,9 +323,7 @@ void send_receiver_data(REMOTE_CLIENT *client,int rx) {
   s=(short)receiver[rx]->agc_thresh;
   receiver_data.agc_thresh=htons(s);
   receiver_data.nb=receiver[rx]->nb;
-  receiver_data.nb2=receiver[rx]->nb2;
   receiver_data.nr=receiver[rx]->nr;
-  receiver_data.nr2=receiver[rx]->nr2;
   receiver_data.anf=receiver[rx]->anf;
   receiver_data.snb=receiver[rx]->snb;
   receiver_data.filter_low=htons(receiver[rx]->filter_low);
@@ -1336,17 +1334,15 @@ g_print("send_squelch rx=%d enable=%d squelch=%d\n",rx,enable,squelch);
   }
 }
 
-void send_noise(int s,int rx,int nb,int nb2,int nr,int nr2,int anf,int snb) {
+void send_noise(int s,int rx,int nb,int nr,int anf,int snb) {
   NOISE_COMMAND command;
-g_print("send_noise rx=%d nb=%d nb2=%d nr=%d nr2=%d anf=%d snb=%d\n",rx,nb,nb2,nr,nr2,anf,snb);
+g_print("send_noise rx=%d nb=%d nr=%d anf=%d snb=%d\n",rx,nb,nr,anf,snb);
   command.header.sync=REMOTE_SYNC;
   command.header.data_type=htons(CMD_RESP_RX_NOISE);
   command.header.version=htonl(CLIENT_SERVER_VERSION);
   command.id=rx;
   command.nb=nb;
-  command.nb2=nb2;
   command.nr=nr;
-  command.nr2=nr2;
   command.anf=anf;
   command.snb=snb;
   int bytes_sent=send_bytes(s,(char *)&command,sizeof(command));
@@ -1977,9 +1973,7 @@ g_print("INFO_RECEIVER: %d\n",bytes_read);
         s=ntohs(receiver_data.agc_thresh);
         receiver[rx]->agc_thresh=(double)s;
         receiver[rx]->nb=receiver_data.nb;
-        receiver[rx]->nb2=receiver_data.nb2;
         receiver[rx]->nr=receiver_data.nr;
-        receiver[rx]->nr2=receiver_data.nr2;
         receiver[rx]->anf=receiver_data.anf;
         receiver[rx]->snb=receiver_data.snb;
         s=ntohs(receiver_data.filter_low);
@@ -2258,13 +2252,9 @@ g_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n",
         }
         RECEIVER *rx=receiver[noise_command.id];
         rx->nb=noise_command.nb;
-        rx->nb2=noise_command.nb2;
         mode_settings[vfo[rx->id].mode].nb=rx->nb;
-        mode_settings[vfo[rx->id].mode].nb2=rx->nb2;
         rx->nr=noise_command.nr;
-        rx->nr2=noise_command.nr2;
         mode_settings[vfo[rx->id].mode].nr=rx->nr;
-        mode_settings[vfo[rx->id].mode].nr2=rx->nr2;
         rx->snb=noise_command.snb;
         mode_settings[vfo[rx->id].mode].snb=rx->snb;
         rx->anf=noise_command.anf;
@@ -2692,19 +2682,15 @@ static int remote_command(void *data) {
       CHECK_RX(r);
       RECEIVER *rx=receiver[r];
       rx->nb=noise_command->nb;
-      rx->nb2=noise_command->nb2;
       mode_settings[vfo[rx->id].mode].nb=rx->nb;
-      mode_settings[vfo[rx->id].mode].nb2=rx->nb2;
       rx->nr=noise_command->nr;
-      rx->nr2=noise_command->nr2;
       mode_settings[vfo[rx->id].mode].nr=rx->nr;
-      mode_settings[vfo[rx->id].mode].nr2=rx->nr2;
       rx->anf=noise_command->anf;
       mode_settings[vfo[rx->id].mode].anf=rx->anf;
       rx->snb=noise_command->snb;
       mode_settings[vfo[rx->id].mode].snb=rx->snb;
       set_noise();
-      send_noise(client->socket,rx->id,rx->nb,rx->nb2,rx->nr,rx->nr2,rx->anf,rx->snb);
+      send_noise(client->socket,rx->id,rx->nb,rx->nr,rx->anf,rx->snb);
       }
       break;
     case CMD_RESP_RX_BAND:

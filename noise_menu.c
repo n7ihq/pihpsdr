@@ -132,7 +132,7 @@ void update_noise() {
   // TODO: include parameters
   //
   if(radio_is_remote) {
-    send_noise(client_socket,active_receiver->id,active_receiver->nb,active_receiver->nb2,active_receiver->nr,active_receiver->nr2,active_receiver->anf,active_receiver->snb);
+    send_noise(client_socket,active_receiver->id,active_receiver->nb,active_receiver->nr,active_receiver->anf,active_receiver->snb);
   } else {
 #endif
     set_noise();

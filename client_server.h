@@ -186,9 +186,7 @@ typedef struct __attribute__((__packed__)) _receiver_data {
   uint16_t agc_hang;
   uint16_t agc_thresh;
   uint8_t nb;
-  uint8_t nb2;
   uint8_t nr;
-  uint8_t nr2;
   uint8_t anf;
   uint8_t snb;
   uint16_t filter_low;
@@ -364,9 +362,7 @@ typedef struct __attribute__((__packed__)) _noise_command {
   HEADER header;
   uint8_t id;
   uint8_t nb;
-  uint8_t nb2;
   uint8_t nr;
-  uint8_t nr2;
   uint8_t anf;
   uint8_t snb;
 } NOISE_COMMAND;
@@ -504,7 +500,7 @@ extern void send_agc_gain(int s,int rx,int gain,int hang,int thresh);
 extern void send_attenuation(int s,int rx,int attenuation);
 extern void send_rfgain(int s,int rx, double gain);
 extern void send_squelch(int s,int rx,int enable,int squelch);
-extern void send_noise(int s,int rx,int nb,int nb2,int nr,int nr2,int anf,int snb);
+extern void send_noise(int s,int rx,int nb, int nr, int anf,int snb);
 extern void send_band(int s,int rx,int band);
 extern void send_mode(int s,int rx,int mode);
 extern void send_filter(int s,int rx,int filter);
