@@ -1169,7 +1169,9 @@ void vfo_update() {
           //
           cairo_save(cr);
           cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-          if (f_m < 100) 
+          if (f_m < 10) 
+            cairo_show_text(cr, "0000");
+          else if (f_m < 100) 
             cairo_show_text(cr, "000");
           else if (f_m < 1000)
             cairo_show_text(cr, "00");
@@ -1214,7 +1216,9 @@ void vfo_update() {
           //
           cairo_save(cr);
           cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-          if (f_m < 100)
+          if (f_m < 10) 
+            cairo_show_text(cr, "0000");
+          else if (f_m < 100)
             cairo_show_text(cr, "000");
           else if (f_m < 1000)
             cairo_show_text(cr, "00");
