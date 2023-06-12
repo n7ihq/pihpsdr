@@ -2007,7 +2007,6 @@ g_print("INFO_RECEIVER: %d\n",bytes_read);
 
         //receiver[rx]->playback_handle=NULL;
         receiver[rx]->local_audio_buffer=NULL;
-        receiver[rx]->local_audio_buffer_size=2048;
         receiver[rx]->local_audio=0;
         g_mutex_init(&receiver[rx]->local_audio_mutex);
         receiver[rx]->audio_name=NULL;

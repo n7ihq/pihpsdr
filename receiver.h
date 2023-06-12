@@ -198,7 +198,6 @@ typedef struct _receiver {
   gboolean output_started;
   float *local_audio_buffer;
 #endif
-  gint local_audio_buffer_size;
   gint local_audio_buffer_offset;
   GMutex local_audio_mutex;
 

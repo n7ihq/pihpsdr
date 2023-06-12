@@ -780,9 +780,9 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
 
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
-      tx->mic_sample_rate=48000;
-      tx->mic_dsp_rate=48000;
-      tx->iq_output_rate=48000;
+      tx->mic_sample_rate=48000;     // sample rate of incoming audio signal
+      tx->mic_dsp_rate=48000;        // sample rate of TX signal processing within WDSP
+      tx->iq_output_rate=48000;      // output TX IQ sample rate
       break;
     case NEW_PROTOCOL:
       tx->mic_sample_rate=48000;

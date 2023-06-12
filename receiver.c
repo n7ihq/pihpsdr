@@ -198,9 +198,6 @@ void receiver_save_state(RECEIVER *rx) {
   sprintf(name,"receiver.%d.local_audio",rx->id);
   sprintf(value,"%d",rx->local_audio);
   setProperty(name,value);
-  sprintf(name,"receiver.%d.local_audio_buffer_size",rx->id);
-  sprintf(value,"%d",rx->local_audio_buffer_size);
-  setProperty(name,value);
   if(rx->audio_name!=NULL) {
     sprintf(name,"receiver.%d.audio_name",rx->id);
     sprintf(value,"%s",rx->audio_name);
@@ -391,11 +388,6 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
   sprintf(name,"receiver.%d.local_audio",rx->id);
   value=getProperty(name);
   if(value) rx->local_audio=atoi(value);
-  sprintf(name,"receiver.%d.local_audio_buffer_size",rx->id);
-  value=getProperty(name);
-  if(value) rx->local_audio_buffer_size=atoi(value);
-// force minimum of 2048 samples for buffer size
-  if(rx->local_audio_buffer_size<2048) rx->local_audio_buffer_size=2048;
   sprintf(name,"receiver.%d.audio_name",rx->id);
   value=getProperty(name);
   if(value) {
@@ -737,6 +729,18 @@ void set_filter(RECEIVER *rx) {
   FILTER *mode_filters=filters[m];
   FILTER *filter=&mode_filters[vfo[rx->id].filter]; // ignored in FMN
 
+  if ((m == modeCWU || m == modeCWL) && cw_audio_peak_filter) {
+    //
+    // Possibly engage cw peak filter
+    //
+    SetRXASPCWFreq(rx->id, (double) cw_keyer_sidetone_frequency);
+    SetRXASPCWBandwidth(rx->id, (double) cw_audio_peak_width);
+    SetRXASPCWGain(rx->id, 1.5);
+    SetRXASPCWRun(rx->id, 1);
+  } else {
+    SetRXASPCWRun(rx->id, 0);
+  }
+
   switch (m) {
     case modeCWL:
       //
@@ -1018,7 +1022,6 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->agc_hang_threshold=0.0;
 
   rx->local_audio_buffer=NULL;
-  rx->local_audio_buffer_size=0;
   rx->local_audio=0;
   g_mutex_init(&rx->local_audio_mutex);
   rx->audio_name=NULL;
@@ -1166,7 +1169,6 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->local_audio=0;
   g_mutex_init(&rx->local_audio_mutex);
   rx->local_audio_buffer=NULL;
-  rx->local_audio_buffer_size=2048;
   rx->audio_name=NULL;
   rx->mute_when_not_active=0;
   rx->audio_channel=STEREO;

@@ -219,19 +219,22 @@ long long step=100;
 
 int rit_increment=10;
 
-int cw_keys_reversed=0; // 0=disabled 1=enabled
-int cw_keyer_speed=16; // 1-60 WPM
-int cw_keyer_mode=KEYER_MODE_A;
-int cw_keyer_weight=50; // 0-100
-int cw_keyer_spacing=0; // 0=on 1=off
-int cw_keyer_internal=1; // 0=external 1=internal
-int cw_keyer_sidetone_volume=50; // 0-127
-int cw_keyer_ptt_delay=30; // 0-255ms
-int cw_keyer_hang_time=500; // ms
-int cw_keyer_sidetone_frequency=800; // Hz
-int cw_breakin=1; // 0=disabled 1=enabled
+int cw_keys_reversed=0;                // 0=disabled 1=enabled
+int cw_keyer_speed=16;                 // 1-60 WPM
+int cw_keyer_mode=KEYER_MODE_A;        // Modes A/B and STRAIGHT
+int cw_keyer_weight=50;                // 0-100
+int cw_keyer_spacing=0;                // 0=on 1=off
+int cw_keyer_internal=1;               // 0=external 1=internal
+int cw_keyer_sidetone_volume=50;       // 0-127
+int cw_keyer_ptt_delay=30;             // 0-255ms
+int cw_keyer_hang_time=500;            // ms
+int cw_keyer_sidetone_frequency=800;   // Hz
+int cw_breakin=1;                      // 0=disabled 1=enabled
+int cw_audio_peak_filter=1;            // 0=disables 1=enabled, only in CW mode
+int cw_audio_peak_width=75;            // Width of CW audio peak filter
 
-int cw_is_on_vfo_freq=1;   // 1= signal on VFO freq, 0= signal offset by side tone
+int cw_is_on_vfo_freq=1;               // 1= signal on VFO freq, 0= signal offset by side tone
+                                       // shall hard-wire this to "1"
 
 int vfo_encoder_divisor=15;
 
@@ -1636,6 +1639,7 @@ void setTune(int state) {
       pre_tune_mode=txmode;
       pre_tune_cw_internal=cw_keyer_internal;
 
+#if 0
       //
       // in USB/DIGU      tune 1000 Hz above carrier
       // in LSB/DIGL,     tune 1000 Hz below carrier
@@ -1654,6 +1658,12 @@ void setTune(int state) {
           SetTXAPostGenToneFreq(transmitter->id,(double)0.0);
           break;
       }
+#else
+      //
+      // Perhaps it it best to *always* tune on the dial frequency
+      //
+      SetTXAPostGenToneFreq(transmitter->id,(double)0.0);
+#endif
 
       SetTXAPostGenToneMag(transmitter->id,0.99999);
       SetTXAPostGenMode(transmitter->id,0);
@@ -1989,8 +1999,13 @@ g_print("radioRestoreState: %s\n",property_path);
 
     value=getProperty("step");
     if(value) step=atoll(value);
-    value=getProperty("cw_is_on_vfo_freq");
-    if(value) cw_is_on_vfo_freq=atoi(value);
+
+    //value=getProperty("cw_is_on_vfo_freq");
+    //if(value) cw_is_on_vfo_freq=atoi(value);
+    value=getProperty("cw_audio_peak_filter");
+    if(value) cw_audio_peak_filter=atoi(value);
+    value=getProperty("cw_audio_peak_width");
+    if(value) cw_audio_peak_width=atoi(value);
     value=getProperty("cw_keys_reversed");
     if(value) cw_keys_reversed=atoi(value);
     value=getProperty("cw_keyer_speed");
@@ -2368,8 +2383,12 @@ g_print("radioSaveState: %s\n",property_path);
 
     sprintf(value,"%lld",step);
     setProperty("step",value);
-    sprintf(value,"%d",cw_is_on_vfo_freq);
-    setProperty("cw_is_on_vfo_freq",value);
+    //sprintf(value,"%d",cw_is_on_vfo_freq);
+    //setProperty("cw_is_on_vfo_freq",value);
+    sprintf(value,"%d",cw_audio_peak_filter);
+    setProperty("cw_audio_peak_filter",value);
+    sprintf(value,"%d",cw_audio_peak_width);
+    setProperty("cw_audio_peak_width",value);
     sprintf(value,"%d",cw_keys_reversed);
     setProperty("cw_keys_reversed",value);
     sprintf(value,"%d",cw_keyer_speed);
