@@ -1056,6 +1056,9 @@ void vfo_update() {
             CAIRO_FONT_SLANT_NORMAL,
             CAIRO_FONT_WEIGHT_BOLD);
 
+        //
+        // X = 5 - 170;  Y=0-15:  Mode/filter/CW speed
+        //
         switch(vfo[id].mode) {
           case modeFMN:
             //
@@ -1086,6 +1089,10 @@ void vfo_update() {
         cairo_move_to(cr, 5, 15);
         cairo_show_text(cr, temp_text);
 
+        //
+        // X =   5 - 235, Y=15-41:  VFO A dial freq
+        // X = 300 - 530, Y=15-41:  VFO B dial freq
+        //
         // In what follows, we want to display the VFO frequency
         // on which we currently transmit a signal with red colour.
         // If it is out-of-band, we display "Out of band" in red.
@@ -1232,6 +1239,22 @@ void vfo_update() {
           cairo_show_text(cr, temp_text);
         }
 
+        //
+        // X =  55 - 115, Y = 42-45: "Zoom" indicator
+        //
+        cairo_move_to(cr, 55, 54);
+        if(active_receiver->zoom>1) {
+          cairo_set_source_rgba(cr, COLOUR_ATTN);
+        } else {
+          cairo_set_source_rgba(cr, COLOUR_SHADE);
+        }
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
+        sprintf(temp_text,"Zoom x%d",active_receiver->zoom);
+        cairo_show_text(cr, temp_text);
+
+        //
+        // X =  115 - 140, Y =  42 -  54: "PS" indicator
+        //
         if ((protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) && can_transmit) {
           cairo_move_to(cr, 115, 54);
           if(transmitter->puresignal) {
@@ -1243,16 +1266,9 @@ void vfo_update() {
           cairo_show_text(cr, "PS");
         }
 
-        cairo_move_to(cr, 55, 54);
-        if(active_receiver->zoom>1) {
-          cairo_set_source_rgba(cr, COLOUR_ATTN);
-        } else {
-          cairo_set_source_rgba(cr, COLOUR_SHADE);
-        }
-        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-        sprintf(temp_text,"Zoom x%d",active_receiver->zoom);
-        cairo_show_text(cr, temp_text);
-
+        //
+        // X =  170 - 270, Y = 1-15: "RIT" indicator
+        //
         if(vfo[id].rit_enabled==0) {
             cairo_set_source_rgba(cr, COLOUR_SHADE);
         } else {
@@ -1264,6 +1280,9 @@ void vfo_update() {
         cairo_show_text(cr, temp_text);
 
 
+        //
+        // X = 300 - 420, Y = 1-15: "XIT" indicator
+        //
         if(can_transmit) {
           if(transmitter->xit_enabled==0) {
               cairo_set_source_rgba(cr, COLOUR_SHADE);
@@ -1271,11 +1290,14 @@ void vfo_update() {
               cairo_set_source_rgba(cr, COLOUR_ATTN);
           }
           sprintf(temp_text,"XIT: %lldHz",transmitter->xit);
-          cairo_move_to(cr, 310, 15);
+          cairo_move_to(cr, 300, 15);
           cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
           cairo_show_text(cr, temp_text);
         }
 
+        //
+        // X = 140 - 170, Y = 41-54: "NB" indicator
+        //
         cairo_move_to(cr, 140, 54);
         switch(active_receiver->nb) {
           case 1:
@@ -1292,6 +1314,9 @@ void vfo_update() {
             break;
         }
 
+        //
+        // X = 170 - 200, Y = 41-54: "NR" indicator
+        //
         cairo_move_to(cr, 170, 54);
         switch (active_receiver->nr) {
           case 1:
@@ -1318,6 +1343,9 @@ void vfo_update() {
           break;
         }
 
+        //
+        // X = 200 - 235, Y = 41-54 "ANF" indicator
+        //
         cairo_move_to(cr, 200, 54);
         if(active_receiver->anf) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1326,7 +1354,10 @@ void vfo_update() {
         }
         cairo_show_text(cr, "ANF");
 
-        cairo_move_to(cr, 230, 54);
+        //
+        // X = 235 - 270, Y = 41-54: "SNB" indicator
+        //
+        cairo_move_to(cr, 235, 54);
         if(active_receiver->snb) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1334,36 +1365,39 @@ void vfo_update() {
         }
         cairo_show_text(cr, "SNB");
 
-        cairo_move_to(cr, 265, 54);
+        //
+        // X = 350 - 420, Y = 41-54: "AGC" indicator
+        //
+        cairo_move_to(cr, 350, 54);
         switch(active_receiver->agc) {
           case AGC_OFF:
             cairo_set_source_rgba(cr, COLOUR_SHADE);
-            cairo_show_text(cr, "AGC OFF");
+            cairo_show_text(cr, "AGC off");
             break;
           case AGC_LONG:
             cairo_set_source_rgba(cr, COLOUR_ATTN);
-            cairo_show_text(cr, "AGC LONG");
+            cairo_show_text(cr, "AGC long");
             break;
           case AGC_SLOW:
             cairo_set_source_rgba(cr, COLOUR_ATTN);
-            cairo_show_text(cr, "AGC SLOW");
+            cairo_show_text(cr, "AGC slow");
             break;
           case AGC_MEDIUM:
             cairo_set_source_rgba(cr, COLOUR_ATTN);
-            cairo_show_text(cr, "AGC MED");
+            cairo_show_text(cr, "AGC med");
             break;
           case AGC_FAST:
             cairo_set_source_rgba(cr, COLOUR_ATTN);
-            cairo_show_text(cr, "AGC FAST");
+            cairo_show_text(cr, "AGC fast");
             break;
         }
 
         //
-        // Since we can now change it by a MIDI controller,
-        // we should display the compressor (level)
+        // X = 420 - 420, Y = 41-54: "CMPR" indicator
+        //
         //
         if(can_transmit) {
-          cairo_move_to(cr, 335, 54);
+          cairo_move_to(cr, 420, 54);
           if (transmitter->compressor) {
               sprintf(temp_text,"CMPR %d",(int) transmitter->compressor_level);
               cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1373,18 +1407,27 @@ void vfo_update() {
               cairo_show_text(cr, "CMPR");
           }
         }
+
         //
-        // Indicate whether an equalizer is active
+        // X = 500 - 530, Y = 41-54: Equalizer indicator
         //
-        cairo_move_to(cr, 400, 54);
-        if ((isTransmitting() && enable_tx_equalizer) || (!isTransmitting() && enable_rx_equalizer)) {
+        //
+        cairo_move_to(cr, 500, 54);
+        if (isTransmitting() && enable_tx_equalizer) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
+          cairo_show_text(cr, "TxEQ");
+        } else if (!isTransmitting() && enable_rx_equalizer) {
+          cairo_set_source_rgba(cr, COLOUR_ATTN);
+          cairo_show_text(cr, "RxEQ");
         } else {
           cairo_set_source_rgba(cr, COLOUR_SHADE);
+          cairo_show_text(cr, "EQ");
         }
-        cairo_show_text(cr, "EQ");
 
-        cairo_move_to(cr, 500, 54);
+        //
+        // X = 270 - 300, Y = 41-54: Diversity indicator
+        //
+        cairo_move_to(cr, 270, 54);
         if(diversity_enabled) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1392,6 +1435,9 @@ void vfo_update() {
         }
         cairo_show_text(cr, "DIV");
 
+        //
+        // X = 420 - 500, Y = 1-15: Step size indicator
+        //
         int s;
         for(s=0;s<STEPS;s++) {
           if(steps[s]==step) break;
@@ -1399,11 +1445,14 @@ void vfo_update() {
         if(s>=STEPS) s=0;
 
         sprintf(temp_text,"Step %s",step_labels[s]);
-        cairo_move_to(cr, 400, 15);
+        cairo_move_to(cr, 420, 15);
         cairo_set_source_rgba(cr, COLOUR_ATTN);
         cairo_show_text(cr, temp_text);
 
-        cairo_move_to(cr, 425, 54);
+        //
+        // X = 300 - 350, Y = 41-54: CTUN indicator
+        //
+        cairo_move_to(cr, 300, 54);
         if(vfo[id].ctun) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1411,7 +1460,10 @@ void vfo_update() {
         }
         cairo_show_text(cr, "CTUN");
 
-        cairo_move_to(cr, 468, 54);
+        //
+        // X = 235 - 350, Y = 15-28: CAT indicator
+        //
+        cairo_move_to(cr, 235, 28);
         if(cat_control>0) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1419,6 +1471,9 @@ void vfo_update() {
         }
         cairo_show_text(cr, "CAT");
 
+        //
+        // X = 500 - 530, Y = 1-15: VOX indicator
+        //
         if(can_transmit) {
           cairo_move_to(cr, 500, 15);
           if(vox_enabled) {
@@ -1429,6 +1484,9 @@ void vfo_update() {
           cairo_show_text(cr, "VOX");
         }
 
+        //
+        // X = 5 - 55, Y = 1-15: Locked indicator
+        //
         cairo_move_to(cr, 5, 54);
         if(locked) {
           cairo_set_source_rgba(cr, COLOUR_ALARM);
@@ -1437,7 +1495,10 @@ void vfo_update() {
         }
         cairo_show_text(cr, "Locked");
 
-        cairo_move_to(cr, 265, 15);
+        //
+        // X = 235 - 270, Y = 1-15: Split indicator
+        //
+        cairo_move_to(cr, 235, 41);
         if(split) {
           cairo_set_source_rgba(cr, COLOUR_ALARM);
         } else {
@@ -1445,7 +1506,10 @@ void vfo_update() {
         }
         cairo_show_text(cr, "Split");
 
-        cairo_move_to(cr, 265, 28);
+        //
+        // X = 270 - 300, Y = 1-15: SAT indicator
+        //
+        cairo_move_to(cr, 270, 28);
         if(sat_mode!=SAT_NONE) {
           cairo_set_source_rgba(cr, COLOUR_ALARM);
         } else {
@@ -1458,13 +1522,16 @@ void vfo_update() {
         }
 
 
+        //
+        // X = 270 - 300, Y = 28-41: duplex indicator
+        //
         if(duplex) {
             cairo_set_source_rgba(cr, COLOUR_ALARM);
         } else {
             cairo_set_source_rgba(cr, COLOUR_SHADE);
         }
         sprintf(temp_text,"DUP");
-        cairo_move_to(cr, 265, 41);
+        cairo_move_to(cr, 270, 41);
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         cairo_show_text(cr, temp_text);
 
