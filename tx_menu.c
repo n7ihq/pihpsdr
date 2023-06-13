@@ -477,28 +477,30 @@ void tx_menu(GtkWidget *parent) {
   row++;
   col=0;
 
-  GtkWidget *swr_protection_b=gtk_check_button_new_with_label("SWR Protection");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (swr_protection_b), transmitter->swr_protection);
-  gtk_widget_show(swr_protection_b);
-  gtk_grid_attach(GTK_GRID(grid),swr_protection_b,col,row,1,1);
-  g_signal_connect(swr_protection_b,"toggled",G_CALLBACK(swr_protection_cb),NULL);
+  if (protocol != SOAPYSDR_PROTOCOL) {
+    GtkWidget *swr_protection_b=gtk_check_button_new_with_label("SWR Protection");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (swr_protection_b), transmitter->swr_protection);
+    gtk_widget_show(swr_protection_b);
+    gtk_grid_attach(GTK_GRID(grid),swr_protection_b,col,row,1,1);
+    g_signal_connect(swr_protection_b,"toggled",G_CALLBACK(swr_protection_cb),NULL);
 
-  col++;
+    col++;
 
-  GtkWidget *swr_alarm_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(swr_alarm_label), "<b>SWR alarm at:</b>");
-  gtk_widget_set_halign(swr_alarm_label, GTK_ALIGN_START);
-  gtk_widget_show(swr_alarm_label);
-  gtk_grid_attach(GTK_GRID(grid),swr_alarm_label,col,row,1,1);
+    GtkWidget *swr_alarm_label=gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(swr_alarm_label), "<b>SWR alarm at:</b>");
+    gtk_widget_set_halign(swr_alarm_label, GTK_ALIGN_START);
+    gtk_widget_show(swr_alarm_label);
+    gtk_grid_attach(GTK_GRID(grid),swr_alarm_label,col,row,1,1);
 
-  col++;
-  GtkWidget *swr_alarm=gtk_spin_button_new_with_range(1.0,10.0,0.1);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(swr_alarm),(double)transmitter->swr_alarm);
-  gtk_grid_attach(GTK_GRID(grid),swr_alarm,col,row,1,1);
-  g_signal_connect(swr_alarm,"value-changed",G_CALLBACK(swr_alarm_cb),NULL);
+    col++;
+    GtkWidget *swr_alarm=gtk_spin_button_new_with_range(1.0,10.0,0.1);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(swr_alarm),(double)transmitter->swr_alarm);
+    gtk_grid_attach(GTK_GRID(grid),swr_alarm,col,row,1,1);
+    g_signal_connect(swr_alarm,"value-changed",G_CALLBACK(swr_alarm_cb),NULL);
 
-  row++;
-  col=0;
+    row++;
+    col=0;
+  }
 
   GtkWidget *emp_b=gtk_check_button_new_with_label("FM TX Pre-emphasize before limiting");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
