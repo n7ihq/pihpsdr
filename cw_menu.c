@@ -159,7 +159,7 @@ void cw_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_speed_b,1,1,1,1);
   g_signal_connect(cw_keyer_speed_b,"value_changed",G_CALLBACK(cw_keyer_speed_value_changed_cb),NULL);
 
-  GtkWidget *cw_breakin_b=gtk_check_button_new_with_label("CW Break In - Delay (ms)");
+  GtkWidget *cw_breakin_b=gtk_check_button_new_with_label("CW Break-In Delay (ms)");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_breakin_b), cw_breakin);
   gtk_widget_show(cw_breakin_b);
   gtk_grid_attach(GTK_GRID(grid),cw_breakin_b,0,2,1,1);
@@ -171,73 +171,73 @@ void cw_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_hang_time_b,1,2,1,1);
   g_signal_connect(cw_keyer_hang_time_b,"value_changed",G_CALLBACK(cw_keyer_hang_time_value_changed_cb),NULL);
 
+  GtkWidget *cw_keyer_sidetone_level_label=gtk_label_new("Sidetone Level:");
+  gtk_widget_show(cw_keyer_sidetone_level_label);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_level_label,0,3,1,1);
+
+  GtkWidget *cw_keyer_sidetone_level_b=gtk_spin_button_new_with_range(0.0,protocol==NEW_PROTOCOL?255.0:127.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_keyer_sidetone_level_b),(double)cw_keyer_sidetone_volume);
+  gtk_widget_show(cw_keyer_sidetone_level_b);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_level_b,1,3,1,1);
+  g_signal_connect(cw_keyer_sidetone_level_b,"value_changed",G_CALLBACK(cw_keyer_sidetone_level_value_changed_cb),NULL);
+
+  GtkWidget *cw_keyer_sidetone_frequency_label=gtk_label_new("Sidetone Freq:");
+  gtk_widget_show(cw_keyer_sidetone_frequency_label);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_frequency_label,0,4,1,1);
+
+  GtkWidget *cw_keyer_sidetone_frequency_b=gtk_spin_button_new_with_range(100.0,1000.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_keyer_sidetone_frequency_b),(double)cw_keyer_sidetone_frequency);
+  gtk_widget_show(cw_keyer_sidetone_frequency_b);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_frequency_b,1,4,1,1);
+  g_signal_connect(cw_keyer_sidetone_frequency_b,"value_changed",G_CALLBACK(cw_keyer_sidetone_frequency_value_changed_cb),NULL);
+
+  GtkWidget *cw_keyer_weight_label=gtk_label_new("Weight:");
+  gtk_widget_show(cw_keyer_weight_label);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_weight_label,0,5,1,1);
+
+  GtkWidget *cw_keyer_weight_b=gtk_spin_button_new_with_range(0.0,100.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_keyer_weight_b),(double)cw_keyer_weight);
+  gtk_widget_show(cw_keyer_weight_b);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_weight_b,1,5,1,1);
+  g_signal_connect(cw_keyer_weight_b,"value_changed",G_CALLBACK(cw_keyer_weight_value_changed_cb),NULL);
+
+  GtkWidget *cw_peak_b=gtk_check_button_new_with_label("CW audio peak filter");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_peak_b), cw_audio_peak_filter);
+  gtk_widget_show(cw_peak_b);
+  gtk_grid_attach(GTK_GRID(grid), cw_peak_b, 0, 6, 1, 1);
+  g_signal_connect(cw_peak_b, "toggled", G_CALLBACK(cw_peak_cb), NULL);
+
+  GtkWidget *cw_width_b=gtk_spin_button_new_with_range(25.0,150.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_width_b),(double)cw_audio_peak_width);
+  gtk_widget_show(cw_width_b);
+  gtk_grid_attach(GTK_GRID(grid),cw_width_b,1,6,1,1);
+  g_signal_connect(cw_width_b,"value_changed",G_CALLBACK(cw_audio_peak_width_changed_cb),NULL);
+
   GtkWidget *mode_combo=gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Straight Key");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Iambic Mode A");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mode_combo),NULL,"Iambic Mode B");
   gtk_combo_box_set_active(GTK_COMBO_BOX(mode_combo),cw_keyer_mode);
   gtk_widget_show(mode_combo);
-  my_combo_attach(GTK_GRID(grid), mode_combo, 0, 3, 1, 1);
+  my_combo_attach(GTK_GRID(grid), mode_combo, 0, 7, 1, 1);
   g_signal_connect(mode_combo,"changed",G_CALLBACK(cw_keyer_mode_cb), NULL);
 
   GtkWidget *cw_keys_reversed_b=gtk_check_button_new_with_label("Keys reversed");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keys_reversed_b), cw_keys_reversed);
   gtk_widget_show(cw_keys_reversed_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keys_reversed_b,0,4,1,1);
+  gtk_grid_attach(GTK_GRID(grid),cw_keys_reversed_b,1,7,1,1);
   g_signal_connect(cw_keys_reversed_b,"toggled",G_CALLBACK(cw_keys_reversed_cb),NULL);
-
-  GtkWidget *cw_keyer_sidetone_level_label=gtk_label_new("Sidetone Level:");
-  gtk_widget_show(cw_keyer_sidetone_level_label);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_level_label,0,5,1,1);
-
-  GtkWidget *cw_keyer_sidetone_level_b=gtk_spin_button_new_with_range(0.0,protocol==NEW_PROTOCOL?255.0:127.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_keyer_sidetone_level_b),(double)cw_keyer_sidetone_volume);
-  gtk_widget_show(cw_keyer_sidetone_level_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_level_b,1,5,1,1);
-  g_signal_connect(cw_keyer_sidetone_level_b,"value_changed",G_CALLBACK(cw_keyer_sidetone_level_value_changed_cb),NULL);
-
-  GtkWidget *cw_keyer_sidetone_frequency_label=gtk_label_new("Sidetone Freq:");
-  gtk_widget_show(cw_keyer_sidetone_frequency_label);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_frequency_label,0,6,1,1);
-
-  GtkWidget *cw_keyer_sidetone_frequency_b=gtk_spin_button_new_with_range(100.0,1000.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_keyer_sidetone_frequency_b),(double)cw_keyer_sidetone_frequency);
-  gtk_widget_show(cw_keyer_sidetone_frequency_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_sidetone_frequency_b,1,6,1,1);
-  g_signal_connect(cw_keyer_sidetone_frequency_b,"value_changed",G_CALLBACK(cw_keyer_sidetone_frequency_value_changed_cb),NULL);
-
-  GtkWidget *cw_keyer_weight_label=gtk_label_new("Weight:");
-  gtk_widget_show(cw_keyer_weight_label);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_weight_label,0,7,1,1);
-
-  GtkWidget *cw_keyer_weight_b=gtk_spin_button_new_with_range(0.0,100.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_keyer_weight_b),(double)cw_keyer_weight);
-  gtk_widget_show(cw_keyer_weight_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_weight_b,1,7,1,1);
-  g_signal_connect(cw_keyer_weight_b,"value_changed",G_CALLBACK(cw_keyer_weight_value_changed_cb),NULL);
-
-  GtkWidget *cw_peak_b=gtk_check_button_new_with_label("CW audio peak filter");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_peak_b), cw_audio_peak_filter);
-  gtk_widget_show(cw_peak_b);
-  gtk_grid_attach(GTK_GRID(grid), cw_peak_b, 0, 8, 1, 1);
-  g_signal_connect(cw_peak_b, "toggled", G_CALLBACK(cw_peak_cb), NULL);
-
-  GtkWidget *cw_width_b=gtk_spin_button_new_with_range(25.0,150.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(cw_width_b),(double)cw_audio_peak_width);
-  gtk_widget_show(cw_width_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_width_b,1,8,1,1);
-  g_signal_connect(cw_width_b,"value_changed",G_CALLBACK(cw_audio_peak_width_changed_cb),NULL);
 
   GtkWidget *cw_keyer_internal_b=gtk_check_button_new_with_label("CW handled in Radio");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_internal_b), cw_keyer_internal);
   gtk_widget_show(cw_keyer_internal_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_internal_b,1,3,1,1);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_internal_b,0,8,1,1);
   g_signal_connect(cw_keyer_internal_b,"toggled",G_CALLBACK(cw_keyer_internal_cb),NULL);
 
   GtkWidget *cw_keyer_spacing_b=gtk_check_button_new_with_label("CW enforce letter spacing");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_spacing_b), cw_keyer_spacing);
   gtk_widget_show(cw_keyer_spacing_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_spacing_b,1,4,1,1);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_spacing_b,1,8,1,1);
   g_signal_connect(cw_keyer_spacing_b,"toggled",G_CALLBACK(cw_keyer_spacing_cb),NULL);
 
   gtk_container_add(GTK_CONTAINER(content),grid);
