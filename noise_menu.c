@@ -582,7 +582,9 @@ void noise_menu(GtkWidget *parent) {
   int width=gtk_widget_get_allocated_width(grid);
   gtk_widget_set_size_request(nr_grid, width, -1);
   gtk_widget_set_size_request(nb_grid, width, -1);
+#ifdef EXTNR
   gtk_widget_set_size_request(nr4_grid, width, -1);
+#endif
 
   gtk_widget_hide(nb_container);
 #ifdef EXTNR
