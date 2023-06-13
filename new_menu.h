@@ -1,4 +1,5 @@
 extern GtkWidget *sub_menu;
+extern GtkWidget *main_menu;
 
 extern void new_menu(void);
 

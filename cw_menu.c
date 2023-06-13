@@ -159,7 +159,7 @@ void cw_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_speed_b,1,1,1,1);
   g_signal_connect(cw_keyer_speed_b,"value_changed",G_CALLBACK(cw_keyer_speed_value_changed_cb),NULL);
 
-  GtkWidget *cw_breakin_b=gtk_check_button_new_with_label("CW Break-In Delay (ms)");
+  GtkWidget *cw_breakin_b=gtk_check_button_new_with_label("CW Break-In, Delay (ms):");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_breakin_b), cw_breakin);
   gtk_widget_show(cw_breakin_b);
   gtk_grid_attach(GTK_GRID(grid),cw_breakin_b,0,2,1,1);
@@ -201,7 +201,7 @@ void cw_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_weight_b,1,5,1,1);
   g_signal_connect(cw_keyer_weight_b,"value_changed",G_CALLBACK(cw_keyer_weight_value_changed_cb),NULL);
 
-  GtkWidget *cw_peak_b=gtk_check_button_new_with_label("CW audio peak filter");
+  GtkWidget *cw_peak_b=gtk_check_button_new_with_label("Audio peak filter, Width:");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_peak_b), cw_audio_peak_filter);
   gtk_widget_show(cw_peak_b);
   gtk_grid_attach(GTK_GRID(grid), cw_peak_b, 0, 6, 1, 1);
@@ -234,10 +234,10 @@ void cw_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_internal_b,0,8,1,1);
   g_signal_connect(cw_keyer_internal_b,"toggled",G_CALLBACK(cw_keyer_internal_cb),NULL);
 
-  GtkWidget *cw_keyer_spacing_b=gtk_check_button_new_with_label("CW enforce letter spacing");
+  GtkWidget *cw_keyer_spacing_b=gtk_check_button_new_with_label("Enforce letter spacing");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_spacing_b), cw_keyer_spacing);
   gtk_widget_show(cw_keyer_spacing_b);
-  gtk_grid_attach(GTK_GRID(grid),cw_keyer_spacing_b,1,8,1,1);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_spacing_b,0,9,1,1);
   g_signal_connect(cw_keyer_spacing_b,"toggled",G_CALLBACK(cw_keyer_spacing_cb),NULL);
 
   gtk_container_add(GTK_CONTAINER(content),grid);

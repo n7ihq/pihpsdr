@@ -60,7 +60,6 @@ typedef struct _switch {
   gulong switch_debounce;
 } SWITCH;
 
-extern SWITCH switches_no_controller[MAX_SWITCHES];
 extern SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES];
 extern SWITCH switches_controller2_v1[MAX_SWITCHES];
 extern SWITCH switches_controller2_v2[MAX_SWITCHES];

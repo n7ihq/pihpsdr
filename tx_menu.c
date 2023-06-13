@@ -463,7 +463,7 @@ void tx_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *tune_drive_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(tune_drive_label), "<b>Drive for Tune:</b>");
+  gtk_label_set_markup(GTK_LABEL(tune_drive_label), "<b>Drive level for Tune:</b>");
   gtk_widget_set_halign(tune_drive_label, GTK_ALIGN_START);
   gtk_widget_show(tune_drive_label);
   gtk_grid_attach(GTK_GRID(grid),tune_drive_label,col,row,1,1);

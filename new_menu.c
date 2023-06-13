@@ -69,8 +69,7 @@
 #endif
 
 
-static GtkWidget *dialog=NULL;
-
+GtkWidget *main_menu=NULL;
 GtkWidget *sub_menu=NULL;
 
 int active_menu=NO_MENU;
@@ -84,9 +83,9 @@ int menu_active_receiver_changed(void *data) {
 }
 
 static void cleanup() {
-  if(dialog!=NULL) {
-    gtk_widget_destroy(dialog);
-    dialog=NULL;
+  if(main_menu!=NULL) {
+    gtk_widget_destroy(main_menu);
+    main_menu=NULL;
   }
   if(sub_menu!=NULL) {
     gtk_widget_destroy(sub_menu);
@@ -382,20 +381,20 @@ void new_menu()
 {
   int i;
 
-  if(dialog==NULL) {
+  if(main_menu==NULL) {
 
     if(sub_menu!=NULL) {
       gtk_widget_destroy(sub_menu);
       sub_menu=NULL;
     }
 
-    dialog=gtk_dialog_new();
-    gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(top_window));
-    gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Menu");
-    g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-    set_backgnd(dialog);
+    main_menu=gtk_dialog_new();
+    gtk_window_set_transient_for(GTK_WINDOW(main_menu),GTK_WINDOW(top_window));
+    gtk_window_set_title(GTK_WINDOW(main_menu),"piHPSDR - Menu");
+    g_signal_connect (main_menu, "delete_event", G_CALLBACK (delete_event), NULL);
+    set_backgnd(main_menu);
 
-    GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(main_menu));
 
     GtkWidget *grid=gtk_grid_new();
     gtk_grid_set_column_spacing (GTK_GRID(grid),10);
@@ -586,11 +585,11 @@ void new_menu()
 
     gtk_container_add(GTK_CONTAINER(content),grid);
 
-    gtk_widget_show_all(dialog);
+    gtk_widget_show_all(main_menu);
 
   } else {
-    gtk_widget_destroy(dialog);
-    dialog=NULL;
+    gtk_widget_destroy(main_menu);
+    main_menu=NULL;
   }
 
 }

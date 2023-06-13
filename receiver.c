@@ -76,6 +76,23 @@ void receiver_weak_notify(gpointer data,GObject  *obj) {
 
 gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   RECEIVER *rx=(RECEIVER *)data;
+  //
+  // TEMPORARY FIX:
+  //
+  // There seems to be a bug in GTK (June 2023).
+  // If clicking into a sub-menu window that does not have the focus
+  // (especially when clicking on the title bar), it does not get focus
+  // immediatedly and we end up HERE with a button-press event, without
+  // receiving the following button-release event.
+  // As a consequence, the VFO starts to move with motions of the non-pressed mouse.
+  // Therefore, as long as this behaviour is observed, we must ingnore
+  // button-press-events if there is a submenu window open.
+  //
+  // This means that with an open menu, you cannot "drag" the receiver. So check
+  // from time to time if this is still necessary.
+  //
+  if (sub_menu || main_menu) return TRUE;
+
   if(rx==active_receiver) {
     if (event->button == 1) {
       last_x=(int)event->x;
