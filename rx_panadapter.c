@@ -121,7 +121,6 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_text_extents_t extents;
   long long f;
   long long divisor;
-  double x=0.0;
   double soffset;
 
   gboolean active=active_receiver==rx;
@@ -282,7 +281,7 @@ void rx_panadapter_update(RECEIVER *rx) {
                             CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
   while(f<max_display) {
-    x=(double)(f-min_display)/HzPerPixel;
+    double x=(double)(f-min_display)/HzPerPixel;
     cairo_move_to(cr,(double)x,0.0);
     cairo_line_to(cr,(double)x,(double)display_height);
     //
@@ -301,6 +300,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       } else {
         sprintf(v,"%0lld.%03lld",f/1000000,(f%1000000)/1000);
       }
+      // center text at "x" position
       cairo_text_extents(cr, v, &extents);
       cairo_move_to(cr, x-(extents.width/2.0), 10.0);
       cairo_show_text(cr, v);

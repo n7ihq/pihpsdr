@@ -107,8 +107,6 @@ tx_panadapter_button_press_event_cb (GtkWidget      *widget,
 }
 
 void tx_panadapter_update(TRANSMITTER *tx) {
-  int i;
-  float *samples;
 
   if(tx->panadapter_surface) {
 
@@ -119,7 +117,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   int txvfo = get_tx_vfo();
   int txmode = get_tx_mode();
 
-  samples=tx->pixel_samples;
+  float *samples=tx->pixel_samples;
 
   hz_per_pixel=(double)tx->iq_output_rate/(double)tx->pixels;
 
@@ -149,7 +147,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   cairo_select_font_face(cr, DISPLAY_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
-  for(i=tx->panadapter_high;i>=tx->panadapter_low;i--) {
+  for(int i=tx->panadapter_high;i>=tx->panadapter_low;i--) {
     if((abs(i)%tx->panadapter_step) ==0) {
       double y = (double)(tx->panadapter_high-i)*dbm_per_line;
       if ((abs(i) % 20) == 0) {
@@ -195,7 +193,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   if (tx->dialog == NULL) {
     long long f;
     const long long divisor=5000;
-    double x;
     //
     // in DUPLEX, space in the TX window is so limited
     // that we cannot print the frequencies
@@ -209,7 +206,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     cairo_text_extents_t extents;
     f = ((min_display/divisor)*divisor)+divisor;
     while (f < max_display) {
-      x=(double)(f-min_display)/hz_per_pixel;
+      double x=(double)(f-min_display)/hz_per_pixel;
       //
       // Skip vertical line if it is in the filter area, since
       // one might want to see a PureSignal Feedback there
@@ -251,13 +248,13 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     cairo_set_source_rgba(cr, COLOUR_ALARM);
     cairo_set_line_width(cr, PAN_LINE_EXTRA);
     if((min_display<band->frequencyMin)&&(max_display>band->frequencyMin)) {
-      i=(band->frequencyMin-min_display)/(long long)hz_per_pixel;
+      int i=(band->frequencyMin-min_display)/(long long)hz_per_pixel;
       cairo_move_to(cr,(double)i,0.0);
       cairo_line_to(cr,(double)i,(double)display_height);
       cairo_stroke(cr);
     }
     if((min_display<band->frequencyMax)&&(max_display>band->frequencyMax)) {
-      i=(band->frequencyMax-min_display)/(long long)hz_per_pixel;
+      int i=(band->frequencyMax-min_display)/(long long)hz_per_pixel;
       cairo_move_to(cr,(double)i,0.0);
       cairo_line_to(cr,(double)i,(double)display_height);
       cairo_stroke(cr);
@@ -284,7 +281,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
                         * (double) display_height
                         / (tx->panadapter_high - tx->panadapter_low));
   cairo_move_to(cr, 0.0, s1);
-  for(i=1;i<display_width;i++) {
+  for(int i=1;i<display_width;i++) {
     double s2;
     s2=(double)samples[i+offset];
     s2 = floor((tx->panadapter_high - s2)

@@ -98,6 +98,7 @@ static void dac0_antenna_cb(GtkComboBox *widget,gpointer data) {
 #endif
 
 static void show_hf() {
+  GtkWidget *label;
   int bands=max_band();
   hf_container=gtk_fixed_new();
   gtk_grid_attach(GTK_GRID(grid), hf_container, 0, 1, 6, 1);
@@ -106,29 +107,33 @@ static void show_hf() {
   gtk_grid_set_row_homogeneous(GTK_GRID(mygrid),TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(mygrid),5);
 
-  GtkWidget *band_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(band_label), "<b>Band</b>");
-  GtkWidget *rx_label=gtk_label_new(NULL);
-  gtk_grid_attach(GTK_GRID(mygrid), band_label, 0, 0, 1, 1);
-  gtk_label_set_markup(GTK_LABEL(rx_label), "<b>RX Ant</b>");
-  gtk_grid_attach(GTK_GRID(mygrid), rx_label, 1, 0, 1, 1);
-  GtkWidget *tx_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(tx_label), "<b>TX Ant</b>");
-  gtk_grid_attach(GTK_GRID(mygrid), tx_label, 2, 0, 1, 1);
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>Band</b>");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 0, 0, 1, 1);
 
-  band_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(band_label), "    ");
-  gtk_grid_attach(GTK_GRID(mygrid), band_label, 3, 0, 1, 1);
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>RX Ant</b>");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 1, 0, 1, 1);
 
-  band_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(band_label), "<b>Band</b>");
-  rx_label=gtk_label_new(NULL);
-  gtk_grid_attach(GTK_GRID(mygrid), band_label, 4, 0, 1, 1);
-  gtk_label_set_markup(GTK_LABEL(rx_label), "<b>RX Ant</b>");
-  gtk_grid_attach(GTK_GRID(mygrid), rx_label, 5, 0, 1, 1);
-  tx_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(tx_label), "<b>TX Ant</b>");
-  gtk_grid_attach(GTK_GRID(mygrid), tx_label, 6, 0, 1, 1);
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Ant</b>");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 2, 0, 1, 1);
+
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "    ");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 3, 0, 1, 1);
+
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>Band</b>");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 4, 0, 1, 1);
+
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>RX Ant</b>");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 5, 0, 1, 1);
+
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Ant</b>");
+  gtk_grid_attach(GTK_GRID(mygrid), label, 6, 0, 1, 1);
 
   int col=0;
   int row=1;
@@ -139,10 +144,10 @@ static void show_hf() {
         row++;
         col=0;
       }
-      GtkWidget *band_label=gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(band_label), band->title);
-      gtk_widget_show(band_label);
-      gtk_grid_attach(GTK_GRID(mygrid),band_label,col,row,1,1);
+      label=gtk_label_new(NULL);
+      gtk_label_set_markup(GTK_LABEL(label), band->title);
+      gtk_widget_show(label);
+      gtk_grid_attach(GTK_GRID(mygrid),label,col,row,1,1);
       col++;
 
       GtkWidget *rxcombo=gtk_combo_box_text_new();

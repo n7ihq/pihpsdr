@@ -35,7 +35,11 @@ MIDI_INCLUDE=MIDI
 # uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
 #AUDIO_MODULE=ALSA
 
-# un-comment if you link with an extended WDSP library containing new noise reduction capabilities
+# un-comment if you link with an extended WDSP library containing new "external"
+# noise reduction capabilities ("rnnoise" and "libspecbleach")
+# (see: github.com/vu3rdd/wdsp). To use this, the "rnnoise" and "libspecbleach"
+# libraries have to be installed, as well as an extended version of the WDSP
+# library that uses these.
 #EXTENDED_NOISE_REDUCTION_OPTIONS= -DEXTNR
 
 # very early code not included yet
@@ -46,8 +50,14 @@ LINK?=   $(CC)
 
 PKG_CONFIG = pkg-config
 
+##############################################################################
 #
-# Add modules for MIDI if required. Note these are different for Linux/MacOS
+# Settings for optional features, to be requested by un-commenting lines above
+#
+##############################################################################
+#
+# Add modules for MIDI if requested.
+# Note these are different for Linux/MacOS
 #
 ifeq ($(MIDI_INCLUDE),MIDI)
 MIDI_OPTIONS=-D MIDI
@@ -64,6 +74,9 @@ MIDI_LIBS= -lasound
 endif
 endif
 
+#
+# Add libraries for USB OZY support, if requested
+#
 ifeq ($(USBOZY_INCLUDE),USBOZY)
 USBOZY_OPTIONS=-D USBOZY
 USBOZY_LIBS=-lusb-1.0
@@ -75,7 +88,9 @@ USBOZY_OBJS= \
 ozyio.o
 endif
 
-
+#
+# Add libraries for SoapySDR support, if requested
+#
 ifeq ($(SOAPYSDR_INCLUDE),SOAPYSDR)
 SOAPYSDR_OPTIONS=-D SOAPYSDR
 SOAPYSDRLIBS=-lSoapySDR
@@ -91,12 +106,15 @@ soapy_protocol.o
 endif
 
 #
-# disable GPIO for MacOS
+# disable GPIO for MacOS, in case it has erroneously been requested
 #
 ifeq ($(UNAME_S), Darwin)
 GPIO_INCLUDE=
 endif
 
+#
+# Add libraries for GPIO support, if requested
+#
 ifeq ($(GPIO_INCLUDE),GPIO)
 GPIO_OPTIONS=-D GPIO
 GPIOD_VERSION=$(shell pkg-config --modversion libgpiod)
@@ -106,6 +124,12 @@ endif
 GPIO_LIBS=-lgpiod -li2c
 endif
 
+#
+# Activate code for RedPitaya (Stemlab/Hamlab/plain vanilla), if requested
+# This code detects the RedPitaya by its WWW interface and starts the SDR
+# application. If the SDR application starts automatically, this is
+# not needed!
+#
 ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
@@ -114,6 +138,14 @@ STEMLAB_HEADERS=stemlab_discovery.h
 STEMLAB_OBJS=stemlab_discovery.o
 endif
 
+#
+# Activate code for remote operation, if requested.
+# This feature is not yet finished. If finished, it
+# allows to run two instances of piHPSDR on two
+# different computers, one interacting with the operator
+# and the other talking to the radio, and both computers
+# may be connected by a long-distance internet connection.
+#
 ifeq ($(SERVER_INCLUDE), SERVER)
 SERVER_OPTIONS=-D CLIENT_SERVER
 SERVER_SOURCES= \
@@ -124,18 +156,14 @@ SERVER_OBJS= \
 client_server.o server_menu.o
 endif
 
-GTKINCLUDES=`$(PKG_CONFIG) --cflags gtk+-3.0`
-GTKLIBS=`$(PKG_CONFIG) --libs gtk+-3.0`
-
 #
-# set options for audio module
+# Options for audio module
 #  - MacOS: only PORTAUDIO tested (although PORTAUDIO might work)
 #  - Linux: either PULSEAUDIO (default) or ALSO (upon request)
 #
 ifeq ($(UNAME_S), Darwin)
     AUDIO_MODULE=PORTAUDIO
 endif
-
 ifeq ($(UNAME_S), Linux)
   ifeq ($(AUDIO_MODULE) , ALSA)
     AUDIO_MODULE=ALSA
@@ -144,6 +172,9 @@ ifeq ($(UNAME_S), Linux)
   endif
 endif
 
+#
+# Add libraries for using PulseAudio, if requested
+#
 ifeq ($(AUDIO_MODULE), PULSEAUDIO)
 AUDIO_OPTIONS=-DPULSEAUDIO
 AUDIO_LIBS=-lpulse-simple -lpulse -lpulse-mainloop-glib
@@ -151,6 +182,9 @@ AUDIO_SOURCES=pulseaudio.c
 AUDIO_OBJS=pulseaudio.o
 endif
 
+#
+# Add libraries for using ALSA, if requested
+#
 ifeq ($(AUDIO_MODULE), ALSA)
 AUDIO_OPTIONS=-DALSA
 AUDIO_LIBS=-lasound
@@ -158,6 +192,9 @@ AUDIO_SOURCES=audio.c
 AUDIO_OBJS=audio.o
 endif
 
+#
+# Add libraries for using PortAudio, if requested
+#
 ifeq ($(AUDIO_MODULE), PORTAUDIO)
 AUDIO_OPTIONS=-DPORTAUDIO `$(PKG_CONFIG) --cflags portaudio-2.0`
 AUDIO_LIBS=`$(PKG_CONFIG) --libs portaudio-2.0`
@@ -165,16 +202,24 @@ AUDIO_SOURCES=portaudio.c
 AUDIO_OBJS=portaudio.o
 endif
 
-OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
-	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) \
-	$(ANDROMEDA_OPTIONS) \
-	$(STEMLAB_OPTIONS) \
-	$(SERVER_OPTIONS) \
-	$(AUDIO_OPTIONS) $(EXTENDED_NOISE_REDUCTION_OPTIONS)\
-	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' $(DEBUG_OPTION)
+##############################################################################
+#
+# End of "libraries for optional features" section
+#
+##############################################################################
 
 #
+# Includes and Libraries for the graphical user interface (GTK)
+#
+GTKINCLUDES=`$(PKG_CONFIG) --cflags gtk+-3.0`
+GTKLIBS=`$(PKG_CONFIG) --libs gtk+-3.0`
+
+#
+# non-standard libraries used additionally
+#
+#
 # Specify additional OS-dependent system libraries
+# (OS dependent)
 #
 ifeq ($(UNAME_S), Linux)
 SYSLIBS=-lrt
@@ -184,17 +229,37 @@ ifeq ($(UNAME_S), Darwin)
 SYSLIBS=-framework IOKit
 endif
 
-LIBS=	$(LDFLAGS) $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(STEMLAB_LIBS) \
-	$(MIDI_LIBS) -lwdsp -lpthread -lm $(SYSLIBS)
-INCLUDES=$(GTKINCLUDES)
+#
+# All the command-line options to compile the *.c files
+#
+OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
+	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) \
+	$(ANDROMEDA_OPTIONS) \
+	$(STEMLAB_OPTIONS) \
+	$(SERVER_OPTIONS) \
+	$(AUDIO_OPTIONS) $(EXTENDED_NOISE_REDUCTION_OPTIONS)\
+	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' $(DEBUG_OPTION)
 
+INCLUDES=$(GTKINCLUDES)
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
 
 .c.o:
 	$(COMPILE) -c -o $@ $<
 
+#
+# All the libraries we need to link with, including WDSP
+#
+LIBS=	$(LDFLAGS) $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(STEMLAB_LIBS) \
+	$(MIDI_LIBS) -lwdsp -lpthread -lm $(SYSLIBS)
+
+#
+# The main target, the pihpsdr program
+#
 PROGRAM=pihpsdr
 
+#
+# All the *.c files
+#
 SOURCES= \
 MacOS.c \
 band.c \
@@ -268,8 +333,9 @@ sintab.c \
 ps_menu.c \
 iambic.c
 
-
-
+#
+# All the *.h (header) files
+#
 HEADERS= \
 MacOS.h \
 agc.h \
@@ -344,8 +410,9 @@ sintab.h \
 ps_menu.h \
 iambic.h
 
-
-
+#
+# All the *.o (object) files
+#
 OBJS= \
 MacOS.o \
 band.o \
@@ -419,6 +486,9 @@ sintab.o \
 ps_menu.o \
 iambic.o
 
+#
+# How to link the program
+#
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
@@ -435,9 +505,11 @@ prebuild:
 	rm -f version.o
 
 #
+# "make check" invokes the cppcheck program to do a source-code checking.
+#
 # On some platforms, INCLUDES contains "-pthread"  (from a pkg-config output)
 # which is not a valid cppcheck option
-# Therefore, correct this here. Furthermore, we can add additional options to CPP
+# Therefore, correct this here. Furthermore, we can add additional options to cppcheck
 # in the variable CPPOPTIONS
 #
 CPPOPTIONS= --enable=all
