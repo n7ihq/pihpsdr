@@ -224,7 +224,7 @@ void receiver_save_state(RECEIVER *rx) {
     // for PS_RX_RECEIVER, *only* save the ALEX antenna setting
     // and then return quickly.
     //
-    if (rx->id == PS_RX_FEEDBACK && protocol!=SOAPYSDR_PROTOCOL) return;
+    if (rx->id == PS_RX_FEEDBACK) return;
 
     sprintf(name,"receiver.%d.sample_rate",rx->id);
     sprintf(value,"%d",rx->sample_rate);
@@ -415,7 +415,7 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     // for PS_RX_RECEIVER, *only* restore the ALEX antenna and setting
     // and then return quickly
     //
-    if (rx->id == PS_RX_FEEDBACK && protocol!=SOAPYSDR_PROTOCOL) return;
+    if (rx->id == PS_RX_FEEDBACK) return;
 
     sprintf(name,"receiver.%d.sample_rate",rx->id);
     value=getProperty(name);

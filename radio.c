@@ -135,8 +135,7 @@ RECEIVER *active_receiver;
 TRANSMITTER *transmitter;
 
 int RECEIVERS;
-int MAX_RECEIVERS;
-int MAX_DDC;
+int MAX_DDC;  // only used in new_protocol.c
 int PS_TX_FEEDBACK;
 int PS_RX_FEEDBACK;
 
@@ -548,6 +547,11 @@ static void create_visual() {
   }
 
   active_receiver=receiver[0];
+  //
+  // This is to detect illegal accesses to the PS receivers
+  //
+  receiver[PS_RX_FEEDBACK]=NULL;
+  receiver[PS_TX_FEEDBACK]=NULL;
 
 // TEMP
 #ifdef CLIENT_SERVER
@@ -595,7 +599,6 @@ if(!radio_is_remote) {
       }
       SetPSHWPeak(transmitter->id, pk);
     }
-
   }
 #ifdef CLIENT_SERVER
 }
@@ -1144,15 +1147,13 @@ void start_radio() {
     case SOAPYSDR_PROTOCOL:
   g_print("%s: setup RECEIVERS SOAPYSDR\n",__FUNCTION__);
       RECEIVERS=1;
-      MAX_RECEIVERS=RECEIVERS;
-      PS_TX_FEEDBACK=0;
-      PS_RX_FEEDBACK=0;
-      MAX_DDC=1;
+      PS_TX_FEEDBACK=1;
+      PS_RX_FEEDBACK=1;
+      MAX_DDC=1;  // unused in SOAPY protocol
       break;
     default:
   g_print("%s: setup RECEIVERS default\n",__FUNCTION__);
       RECEIVERS=2;
-      MAX_RECEIVERS=(RECEIVERS+2);
       PS_TX_FEEDBACK=(RECEIVERS);
       PS_RX_FEEDBACK=(RECEIVERS+1);
       MAX_DDC=(RECEIVERS+2);
@@ -1373,9 +1374,8 @@ static void rxtx(int state) {
     // switch to tx
     RECEIVER *rx_feedback=receiver[PS_RX_FEEDBACK];
     RECEIVER *tx_feedback=receiver[PS_TX_FEEDBACK];
-
-    rx_feedback->samples=0;
-    tx_feedback->samples=0;
+    if (rx_feedback) rx_feedback->samples=0;
+    if (tx_feedback) tx_feedback->samples=0;
 
     if(!duplex) {
       for(i=0;i<receivers;i++) {
@@ -2294,7 +2294,9 @@ g_print("radioSaveState: %s\n",property_path);
   if(can_transmit) {
     // The only variables of interest in this receiver are
     // the alex_antenna an the adc
-    receiver_save_state(receiver[PS_RX_FEEDBACK]);
+    if (receiver[PS_RX_FEEDBACK]) {
+      receiver_save_state(receiver[PS_RX_FEEDBACK]);
+    }
     transmitter_save_state(transmitter);
   }
 
