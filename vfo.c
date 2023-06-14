@@ -1738,7 +1738,10 @@ void num_pad(int val) {
       vfo[rx->id].entering_frequency=FALSE;
       break;
     default:
-      vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+val;
+      //
+      // NumPad: enter the frequency in kHz, not Hz
+      //
+      vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+1000*val;
       break;
   }
   g_idle_add(ext_vfo_update, NULL);
