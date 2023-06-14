@@ -24,7 +24,7 @@ MIDI_INCLUDE=MIDI
 # ANDROMEDA_OPTIONS=-D ANDROMEDA
 
 # uncomment the line below to include USB Ozy support (needs libusb)
-# USBOZY_INCLUDE=USBOZY
+#USBOZY_INCLUDE=USBOZY
 
 # uncomment the line below for SoapySDR (needs SOAPY libs)
 # SOAPYSDR_INCLUDE=SOAPYSDR
@@ -37,13 +37,14 @@ MIDI_INCLUDE=MIDI
 
 # un-comment if you link with an extended WDSP library containing new "external"
 # noise reduction capabilities ("rnnoise" and "libspecbleach")
-# (see: github.com/vu3rdd/wdsp). To use this, the "rnnoise" and "libspecbleach"
-# libraries have to be installed, as well as an extended version of the WDSP
-# library that uses these.
+# (see: github.com/vu3rdd/wdsp). To use this, an extended version of WDSP has
+# to be installed that contains calls to the "rnnoise" and "libspecbleach"
+# libraries. The new features are called "NR3" (rnnoise) and "NR4" (libspecbleach),
+# and the noise menu allows to speficy the NR4 parameters.
 #EXTENDED_NOISE_REDUCTION_OPTIONS= -DEXTNR
 
 # very early code not included yet
-# SERVER_INCLUDE=SERVER
+#SERVER_INCLUDE=SERVER
 
 CFLAGS?= -O3 -Wno-deprecated-declarations -Wall
 LINK?=   $(CC)
@@ -215,11 +216,7 @@ GTKINCLUDES=`$(PKG_CONFIG) --cflags gtk+-3.0`
 GTKLIBS=`$(PKG_CONFIG) --libs gtk+-3.0`
 
 #
-# non-standard libraries used additionally
-#
-#
 # Specify additional OS-dependent system libraries
-# (OS dependent)
 #
 ifeq ($(UNAME_S), Linux)
 SYSLIBS=-lrt
@@ -247,7 +244,7 @@ COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
 	$(COMPILE) -c -o $@ $<
 
 #
-# All the libraries we need to link with, including WDSP
+# All the libraries we need to link with, including WDSP, libpthread, and libm
 #
 LIBS=	$(LDFLAGS) $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(STEMLAB_LIBS) \
 	$(MIDI_LIBS) -lwdsp -lpthread -lm $(SYSLIBS)
@@ -262,229 +259,234 @@ PROGRAM=pihpsdr
 #
 SOURCES= \
 MacOS.c \
-band.c \
-discovered.c \
-discovery.c \
-filter.c \
-main.c \
-new_menu.c \
 about_menu.c \
-exit_menu.c \
-radio_menu.c \
-rx_menu.c \
+actions.c \
+action_dialog.c \
+agc_menu.c \
 ant_menu.c \
-display_menu.c \
-pa_menu.c \
-cw_menu.c \
-oc_menu.c \
-xvtr_menu.c \
-equalizer_menu.c \
-step_menu.c \
-meter_menu.c \
+band.c \
 band_menu.c \
 bandstack_menu.c \
-mode_menu.c \
-filter_menu.c \
-noise_menu.c \
-agc_menu.c \
-vox_menu.c \
-fft_menu.c \
+button_text.c \
+css.c \
+configure.c \
+cw_menu.c \
+cwramp.c \
+discovered.c \
+discovery.c \
+display_menu.c \
 diversity_menu.c \
-tx_menu.c \
-vfo_menu.c \
+encoder_menu.c \
+equalizer_menu.c \
+exit_menu.c \
+ext.c \
+fft_menu.c \
+filter.c \
+filter_menu.c \
+gpio.c \
+i2c.c \
+iambic.c \
+led.c \
+main.c \
 meter.c \
+meter_menu.c \
 mode.c \
-old_discovery.c \
+mode_menu.c \
 new_discovery.c \
-old_protocol.c \
+new_menu.c \
 new_protocol.c \
-rx_panadapter.c \
-tx_panadapter.c \
+noise_menu.c \
+oc_menu.c \
+old_discovery.c \
+old_protocol.c \
+pa_menu.c \
 property.c \
+protocols.c \
+ps_menu.c \
 radio.c \
+radio_menu.c \
 receiver.c \
 rigctl.c \
 rigctl_menu.c \
-toolbar.c \
-transmitter.c \
-zoompan.c \
+rx_menu.c \
+rx_panadapter.c \
+sintab.c \
 sliders.c \
-version.c \
-vfo.c \
-waterfall.c \
-button_text.c \
-vox.c \
+step_menu.c \
 store.c \
 store_menu.c \
-led.c \
-ext.c \
-cwramp.c \
-protocols.c \
-css.c \
-actions.c \
-action_dialog.c \
-configure.c \
-i2c.c \
-gpio.c \
-encoder_menu.c \
 switch_menu.c \
+toolbar.c \
 toolbar_menu.c \
-sintab.c \
-ps_menu.c \
-iambic.c
+transmitter.c \
+tx_menu.c \
+tx_panadapter.c \
+version.c \
+vfo.c \
+vfo_menu.c \
+vox.c \
+vox_menu.c \
+waterfall.c \
+xvtr_menu.c \
+zoompan.c
 
 #
 # All the *.h (header) files
 #
 HEADERS= \
 MacOS.h \
-agc.h \
-alex.h \
-band.h \
-bandstack.h \
-discovered.h \
-discovery.h \
-filter.h \
-new_menu.h \
 about_menu.h \
-rx_menu.h \
-exit_menu.h \
-radio_menu.h \
+actions.h \
+action_dialog.h \
+adc.h \
+agc.h \
+agc_menu.h \
+alex.h \
 ant_menu.h \
-display_menu.h \
-pa_menu.h \
-cw_menu.h \
-oc_menu.h \
-xvtr_menu.h \
-equalizer_menu.h \
-step_menu.h \
-meter_menu.h \
+appearance.h \
+band.h \
 band_menu.h \
 bandstack_menu.h \
-mode_menu.h \
-filter_menu.h \
-noise_menu.h \
-agc_menu.h \
-vox_menu.h \
-fft_menu.h \
+bandstack.h \
+button_text.h \
+channel.h \
+configure.h \
+css.h \
+cw_menu.h \
+dac.h \
+discovered.h \
+discovery.h \
+display_menu.h \
 diversity_menu.h \
-tx_menu.h \
-vfo_menu.h \
+encoder_menu.h \
+equalizer_menu.h \
+exit_menu.h \
+ext.h \
+fft_menu.h \
+filter.h \
+filter_menu.h \
+gpio.h \
+iambic.h \
+i2c.h \
+led.h \
+main.h \
 meter.h \
+meter_menu.h \
 mode.h \
-old_discovery.h \
+mode_menu.h \
 new_discovery.h \
-old_protocol.h \
+new_menu.h \
 new_protocol.h \
-rx_panadapter.h \
-tx_panadapter.h \
+noise_menu.h \
+oc_menu.h \
+old_discovery.h \
+old_protocol.h \
+pa_menu.h \
 property.h \
+protocols.h \
+ps_menu.h \
 radio.h \
+radio_menu.h \
 receiver.h \
 rigctl.h \
 rigctl_menu.h \
-toolbar.h \
-transmitter.h \
-zoompan.h \
+rx_menu.h \
+rx_panadapter.h \
+sintab.h \
 sliders.h \
-version.h \
-vfo.h \
-waterfall.h \
-button_text.h \
-vox.h \
+step_menu.h \
 store.h \
 store_menu.h \
-led.h \
-ext.h \
-protocols.h \
-css.h \
-actions.h \
-action_dialog.h \
-configure.h \
-i2c.h \
-gpio.h \
-encoder_menu.h \
 switch_menu.h \
+toolbar.h \
 toolbar_menu.h \
-sintab.h \
-ps_menu.h \
-iambic.h
+transmitter.h \
+tx_menu.h \
+tx_panadapter.h \
+version.h \
+vfo.h \
+vfo_menu.h \
+vox.h \
+vox_menu.h \
+waterfall.h \
+xvtr_menu.h \
+zoompan.h
 
 #
 # All the *.o (object) files
 #
 OBJS= \
 MacOS.o \
-band.o \
-discovered.o \
-discovery.o \
-filter.o \
-version.o \
-main.o \
-new_menu.o \
 about_menu.o \
-rx_menu.o \
-exit_menu.o \
-radio_menu.o \
+actions.o \
+action_dialog.o \
+agc_menu.o \
 ant_menu.o \
-display_menu.o \
-pa_menu.o \
-cw_menu.o \
-oc_menu.o \
-xvtr_menu.o \
-equalizer_menu.o \
-step_menu.o \
-meter_menu.o \
+band.o \
 band_menu.o \
 bandstack_menu.o \
-mode_menu.o \
-filter_menu.o \
-noise_menu.o \
-agc_menu.o \
-vox_menu.o \
-fft_menu.o \
+button_text.o \
+configure.o \
+css.o \
+cw_menu.o \
+cwramp.o \
+discovered.o \
+discovery.o \
+display_menu.o \
 diversity_menu.o \
-tx_menu.o \
-vfo_menu.o \
+encoder_menu.o \
+equalizer_menu.o \
+exit_menu.o \
+ext.o \
+fft_menu.o \
+filter.o \
+filter_menu.o \
+gpio.o \
+iambic.o \
+i2c.o \
+led.o \
+main.o \
 meter.o \
+meter_menu.o \
 mode.o \
-old_discovery.o \
+mode_menu.o \
 new_discovery.o \
-old_protocol.o \
+new_menu.o \
 new_protocol.o \
-rx_panadapter.o \
-tx_panadapter.o \
+noise_menu.o \
+oc_menu.o \
+old_discovery.o \
+old_protocol.o \
+pa_menu.o \
 property.o \
+protocols.o \
+ps_menu.o \
 radio.o \
+radio_menu.o \
 receiver.o \
 rigctl.o \
 rigctl_menu.o \
-toolbar.o \
-transmitter.o \
-zoompan.o \
+rx_menu.o \
+rx_panadapter.o \
+sintab.o \
 sliders.o \
-vfo.o \
-waterfall.o \
-button_text.o \
-vox.o \
+step_menu.o \
 store.o \
 store_menu.o \
-led.o \
-ext.o \
-cwramp.o \
-protocols.o \
-css.o \
-actions.o \
-action_dialog.o \
-configure.o \
-i2c.o \
-gpio.o \
-encoder_menu.o \
 switch_menu.o \
+toolbar.o \
 toolbar_menu.o \
-sintab.o \
-ps_menu.o \
-iambic.o
+transmitter.o \
+tx_menu.o \
+tx_panadapter.o \
+version.o \
+vfo.o \
+vfo_menu.o \
+vox.o \
+vox_menu.o \
+xvtr_menu.o \
+waterfall.o \
+zoompan.o
 
 #
 # How to link the program
