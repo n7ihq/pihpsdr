@@ -248,9 +248,7 @@ int dash;
 int adc_overload;
 int pll_locked;
 unsigned int exciter_power;
-unsigned int temperature;
 unsigned int average_temperature;
-unsigned int n_temperature;
 unsigned int pa_current;
 unsigned int average_current;
 unsigned int n_current;
@@ -1131,9 +1129,7 @@ void start_radio() {
   display_toolbar=1;
 #endif
 
-  temperature=0;
   average_temperature=0;
-  n_temperature=0;
   pa_current=0;
   average_current=0;
   tx_fifo_underrun=0;

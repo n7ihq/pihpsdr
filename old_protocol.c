@@ -906,24 +906,16 @@ static void process_control_bytes() {
         // HL2 uses C1/C2 for measuring the temperature
         //
         exciter_power=((control_in[1]&0xFF)<<8)|(control_in[2]&0xFF); // from Penelope or Hermes
-        temperature=0;
       } else {
         exciter_power=0;
-        temperature+=((control_in[1]&0xFF)<<8)|(control_in[2]&0xFF); // HL2
-        n_temperature++;
-        if(n_temperature==10) {
-          average_temperature=temperature/10;
-          temperature=0;
-          n_temperature=0;
-        }
+        unsigned int temperature=((control_in[1]&0xFF)<<8)|(control_in[2]&0xFF); // HL2
+	// moving average
+	average_temperature=(temperature + 7*average_temperature) >> 3;
       }
       //
       //  calculate moving averages of fwd and rev voltages to have a correct SWR
       //  at the edges of an RF pulse. Otherwise a false trigger of the SWR
-      //  protection may occur. Note that the rate at which these packets arrive strongly
-      //  depend on the sample rate and the number of receivers.
-      //  This exponential average means that the power drops to 1 percent within 16 hits
-      //  (at most 16 msec).
+      //  alarm may occur.
       //
       alex_forward_power=((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF); // from Alex or Apollo
       alex_forward_power_average = (alex_forward_power + 3*alex_forward_power_average) >> 2;
