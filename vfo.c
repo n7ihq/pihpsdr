@@ -1741,5 +1741,6 @@ void num_pad(int val) {
       vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+val;
       break;
   }
+  g_idle_add(ext_vfo_update, NULL);
 }
 
