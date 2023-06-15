@@ -739,6 +739,10 @@ void set_displaying(RECEIVER *rx,int state) {
 void set_mode(RECEIVER *rx,int m) {
   vfo[rx->id].mode=m;
   SetRXAMode(rx->id, vfo[rx->id].mode);
+  //
+  // The choice of the squelch method depends on the mode
+  //
+  setSquelch(rx);
 }
 
 void set_filter(RECEIVER *rx) {

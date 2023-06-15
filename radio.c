@@ -1770,13 +1770,63 @@ void setDrive(double value) {
 }
 
 void setSquelch(RECEIVER *rx) {
-  double am_sq=((rx->squelch/100.0)*160.0)-160.0;
-  SetRXAAMSQThreshold(rx->id, am_sq);
-  SetRXAAMSQRun(rx->id, rx->squelch_enable);
+  //
+  // This is now called whenever
+  // - "squelch enable" changes
+  // - "squelch value"  changes
+  // - mode changes
+  //
+  double value;
+  int    fm_squelch=0;
+  int    am_squelch=0;
+  int    voice_squelch=0;
 
-  double fm_sq=pow(10.0, -2.0*rx->squelch/100.0);
-  SetRXAFMSQThreshold(rx->id, fm_sq);
-  SetRXAFMSQRun(rx->id, rx->squelch_enable);
+  //
+  // "our" squelch value goes from 0 (no squelch) to 100 (fully engaged)
+  // and has to be mapped to
+  //
+  // AM    squelch:   -160.0 ... 0.00 dBm  linear interpolation
+  // FM    squelch:      1.0 ... 0.01      expon. interpolation
+  // Voice squelch:      0.0 ... 0.50      linear interpolation
+  //
+  switch (vfo[rx->id].mode) {
+    case modeAM:
+    case modeSAM:
+      //
+      // Use AM squelch
+      //
+      value=((rx->squelch/100.0)*160.0)-160.0;
+      SetRXAAMSQThreshold(rx->id, value);
+      am_squelch=rx->squelch_enable;
+      break;
+    case modeLSB:
+    case modeUSB:
+    case modeCWU:
+    case modeCWL:
+      //
+      // Use Voice squelch (new in WDSP 1.21)
+      //
+      value = 0.5 * rx->squelch;
+      voice_squelch=rx->squelch_enable;
+      SetRXASSQLThreshold(rx->id, value);
+      SetRXASSQLTauMute(rx->id, 0.1);
+      SetRXASSQLTauUnMute(rx->id, 0.1);
+      break;
+    case modeFMN:
+      //
+      // Use FM squelch
+      //
+      value=pow(10.0, -2.0*rx->squelch/100.0);
+      SetRXAFMSQThreshold(rx->id, value);
+      fm_squelch=rx->squelch_enable;
+      break;
+    default:
+      // no squelch for digital and other modes
+      break;
+  }
+  SetRXAAMSQRun(rx->id, am_squelch);
+  SetRXAFMSQRun(rx->id, fm_squelch);
+  SetRXASSQLRun(rx->id, voice_squelch);
 }
 
 void radio_set_rf_gain(RECEIVER *rx) {

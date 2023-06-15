@@ -1724,12 +1724,6 @@ void num_pad(int val) {
       vfo[rx->id].entered_frequency=0;
       vfo[rx->id].entering_frequency=FALSE;
       break;
-    case -4: // enter as MHz
-      vfo[rx->id].entered_frequency *= 1000;
-      // FALLTHROUGH
-    case -3: // enter as kHz
-      vfo[rx->id].entered_frequency *= 1000;
-      // FALLTHROUGH
     case -2: // enter
       if(vfo[rx->id].entered_frequency!=0) {
         receiver_set_frequency(rx, vfo[rx->id].entered_frequency);

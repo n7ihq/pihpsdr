@@ -166,7 +166,6 @@ static int init(void *data) {
   // Let WDSP (via FFTW) check for wisdom file in current dir
   // If there is one, the "wisdom thread" takes no time
   // Depending on the WDSP version, the file is wdspWisdom or wdspWisdom00.
-  // sem_trywait() is not elegant, replaced this with wisdom_running variable.
   //
   (void) getcwd(wisdom_directory, sizeof(wisdom_directory));
   strcpy(&wisdom_directory[strlen(wisdom_directory)],"/");
