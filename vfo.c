@@ -1708,6 +1708,9 @@ void vfo_ctun_update(int id,int state) {
 // helper function for numerically entering a new VFO frequency
 //
 void num_pad(int val) {
+  static long long freq_w, freq_d, d_count=0;
+  int mult=1;
+  char fstr[64];
   //
   // The numpad may be difficult to use since the frequency has to be given in Hz
   // TODO: add a multiplier button like "kHz"
@@ -1716,26 +1719,52 @@ void num_pad(int val) {
   //
   RECEIVER *rx=active_receiver;
   if(!vfo[rx->id].entering_frequency) {
+    freq_w=freq_d=d_count=0;
     vfo[rx->id].entered_frequency=0;
     vfo[rx->id].entering_frequency=TRUE;
   }
+
+
   switch(val) {
     case -1: // clear
+      freq_w=freq_d=d_count=0;
       vfo[rx->id].entered_frequency=0;
       vfo[rx->id].entering_frequency=FALSE;
       break;
-    case -2: // enter
-      if(vfo[rx->id].entered_frequency!=0) {
+    case -5: // Decimal point
+      // shift whole part over past decimal point
+      freq_w=vfo[rx->id].entered_frequency;
+      vfo[rx->id].entered_frequency*=1000000;
+      break;
+    case -4: // enter as MHz
+      mult*=1000;
+      // FALLTHROUGH
+    case -3: // enter as KHz
+      mult*=1000;
+      // FALLTHROUGH
+    case -2: // enter as Hz
+      // TODO: calculated the frequency without using atof,
+      //       because of "LOCALE" problems
+      if(freq_w) { // handle the decimal point
+        sprintf(fstr, "%lld.%lld", freq_w, freq_d);
+        vfo[rx->id].entered_frequency=(long long)(atof(fstr)*mult);
+      } else
+        vfo[rx->id].entered_frequency*=mult;
+
+      if(vfo[rx->id].entered_frequency!=0)
         receiver_set_frequency(rx, vfo[rx->id].entered_frequency);
-        g_idle_add(ext_vfo_update, NULL);
-      }
       vfo[rx->id].entering_frequency=FALSE;
       break;
     default:
       //
-      // NumPad: enter the frequency in kHz, not Hz
+      // NumPad: enter the frequency in MHz, KHz, or Hz
       //
-      vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+1000*val;
+      if (freq_w) { // we have a decimal point
+        if(d_count++ > 6) break;
+        freq_d=(freq_d*10)+val;
+        vfo[rx->id].entered_frequency=freq_w*1000000+freq_d*pow(10, 6-d_count);
+      } else
+        vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+val;
       break;
   }
   g_idle_add(ext_vfo_update, NULL);
