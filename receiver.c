@@ -752,11 +752,11 @@ void set_filter(RECEIVER *rx) {
 
   if ((m == modeCWU || m == modeCWL) && cw_audio_peak_filter) {
     //
-    // Possibly engage cw peak filter
+    // Possibly engage cw peak filter. Use a fixed gain
     //
     SetRXASPCWFreq(rx->id, (double) cw_keyer_sidetone_frequency);
     SetRXASPCWBandwidth(rx->id, (double) cw_audio_peak_width);
-    SetRXASPCWGain(rx->id, 1.5);
+    SetRXASPCWGain(rx->id, 1.75);
     SetRXASPCWRun(rx->id, 1);
   } else {
     SetRXASPCWRun(rx->id, 0);

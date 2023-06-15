@@ -1787,7 +1787,10 @@ void setSquelch(RECEIVER *rx) {
   //
   // AM    squelch:   -160.0 ... 0.00 dBm  linear interpolation
   // FM    squelch:      1.0 ... 0.01      expon. interpolation
-  // Voice squelch:      0.0 ... 0.50      linear interpolation
+  // Voice squelch:      0.0 ... 0.75      linear interpolation
+  //
+  // My personal experience is that squelch is of little use
+  // when doing CW, but we do not prevent users from using it
   //
   switch (vfo[rx->id].mode) {
     case modeAM:
@@ -1801,12 +1804,13 @@ void setSquelch(RECEIVER *rx) {
       break;
     case modeLSB:
     case modeUSB:
-    case modeCWU:
-    case modeCWL:
+    case modeDSB:
+    case modeCWU:  // most likely, squelch makes no sense here
+    case modeCWL:  // most likely, squelch makes no sense here
       //
       // Use Voice squelch (new in WDSP 1.21)
       //
-      value = 0.5 * rx->squelch;
+      value = 0.0075 * rx->squelch;
       voice_squelch=rx->squelch_enable;
       SetRXASSQLThreshold(rx->id, value);
       SetRXASSQLTauMute(rx->id, 0.1);
@@ -1822,8 +1826,13 @@ void setSquelch(RECEIVER *rx) {
       break;
     default:
       // no squelch for digital and other modes
+      // (this can be discussed).
       break;
   }
+  //
+  // activate the desired squelch, and deactivate
+  // all others
+  //
   SetRXAAMSQRun(rx->id, am_squelch);
   SetRXAFMSQRun(rx->id, fm_squelch);
   SetRXASSQLRun(rx->id, voice_squelch);
