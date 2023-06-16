@@ -301,7 +301,11 @@ void num_pad(int action, int id) {
       strcat(buffer,"9");
       break;
     case -5:  // Decimal point
-      strcat(buffer, decimalpoint);
+      // if there is already a decimal point in the string,
+      // do not add another one
+      if (index(buffer, decimalpoint[0]) == NULL) {
+        strcat(buffer, decimalpoint);
+      }
       break;
     case -1:  // Clear
       *buffer = 0;
