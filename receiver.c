@@ -108,6 +108,13 @@ gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, g
 }
 
 void receiver_set_active(RECEIVER *rx) {
+  //
+  // Abort any frequency entering in the current receiver
+  //
+  num_pad(-1, active_receiver->id);
+  //
+  // Make rx the new active receiver
+  //
   active_receiver=rx;
   g_idle_add(menu_active_receiver_changed,NULL);
   g_idle_add(ext_vfo_update,NULL);
@@ -1052,6 +1059,9 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->mute_radio=0;
 
   rx->low_latency=0;
+
+  rx->pan=0;
+  rx->zoom=1;
 
   // not much to be restored, except alex_antenna and adc
   if (id == PS_RX_FEEDBACK) receiver_restore_state(rx);

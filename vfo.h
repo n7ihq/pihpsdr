@@ -44,8 +44,7 @@ struct _vfo {
   long long lo;
   long long offset;
 
-  gboolean entering_frequency;
-  gint64 entered_frequency;
+  char entered_frequency[24];
 
 };
 
@@ -113,6 +112,6 @@ extern void vfo_set_frequency(int vfo, long long f);
 
 extern void vfo_ctun_update(int id, int state);
 
-extern void num_pad(int val);
+extern void num_pad(int val, int vfo);
 
 #endif

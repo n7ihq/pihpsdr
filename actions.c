@@ -137,6 +137,7 @@ ACTION_TABLE ActionTable[] = {
   {NUMPAD_7,            "NUMPAD 7",             "7",            MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_8,            "NUMPAD 8",             "8",            MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_9,            "NUMPAD 9",             "9",            MIDI_KEY   | CONTROLLER_SWITCH},
+  {NUMPAD_BS,           "NUMPAD\nBS",           "BS",           MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_CL,           "NUMPAD\nCL",           "CL",           MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_DEC,          "NUMPAD\nDEC",          "DEC",          MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_KHZ,          "NUMPAD\nKHZ",          "KHZ",          MIDI_KEY   | CONTROLLER_SWITCH},
@@ -764,79 +765,84 @@ int process_action(void *data) {
       break;
     case NUMPAD_0:
       if(a->mode==PRESSED) {
-        num_pad(0);
+        num_pad(0,active_receiver->id);
       }
       break;
     case NUMPAD_1:
       if(a->mode==PRESSED) {
-        num_pad(1);
+        num_pad(1,active_receiver->id);
       }
       break;
     case NUMPAD_2:
       if(a->mode==PRESSED) {
-        num_pad(2);
+        num_pad(2,active_receiver->id);
       }
       break;
     case NUMPAD_3:
       if(a->mode==PRESSED) {
-        num_pad(3);
+        num_pad(3,active_receiver->id);
       }
       break;
     case NUMPAD_4:
       if(a->mode==PRESSED) {
-        num_pad(4);
+        num_pad(4,active_receiver->id);
       }
       break;
     case NUMPAD_5:
       if(a->mode==PRESSED) {
-        num_pad(5);
+        num_pad(5,active_receiver->id);
       }
       break;
     case NUMPAD_6:
       if(a->mode==PRESSED) {
-        num_pad(6);
+        num_pad(6,active_receiver->id);
       }
       break;
     case NUMPAD_7:
       if(a->mode==PRESSED) {
-        num_pad(7);
+        num_pad(7,active_receiver->id);
       }
       break;
     case NUMPAD_8:
       if(a->mode==PRESSED) {
-        num_pad(8);
+        num_pad(8,active_receiver->id);
       }
       break;
     case NUMPAD_9:
       if(a->mode==PRESSED) {
-        num_pad(9);
+        num_pad(9,active_receiver->id);
+      }
+      break;
+    case NUMPAD_BS:
+      if(a->mode==PRESSED) {
+        num_pad(-6,active_receiver->id);
       }
       break;
     case NUMPAD_CL:
       if(a->mode==PRESSED) {
-        num_pad(-1);
+        num_pad(-1,active_receiver->id);
       }
       break;
     case NUMPAD_ENTER:
       if(a->mode==PRESSED) {
-        num_pad(-2);
+        num_pad(-2,active_receiver->id);
       }
       break;
-    case NUMPAD_KHZ:    
+    case NUMPAD_KHZ:
       if(a->mode==PRESSED) {
-        num_pad(-3);    
+        num_pad(-3,active_receiver->id);
       }
       break;
-    case NUMPAD_MHZ:    
+    case NUMPAD_MHZ:
       if(a->mode==PRESSED) {
-        num_pad(-4);    
-      }                 
-      break;            
-    case NUMPAD_DEC:    
-      if(a->mode==PRESSED) {
-        num_pad(-5);    
+        num_pad(-4,active_receiver->id);
       }
-      break;            
+      break;
+    case NUMPAD_DEC:
+      if(a->mode==PRESSED) {
+        num_pad(-5,active_receiver->id);
+      }
+      break;
     case PAN:
       update_pan((double)a->val*100);
       break;

@@ -1104,13 +1104,6 @@ void vfo_update() {
         long long af = vfo[0].ctun ? vfo[0].ctun_frequency : vfo[0].frequency;
         long long bf = vfo[1].ctun ? vfo[1].ctun_frequency : vfo[1].frequency;
 
-        if(vfo[0].entering_frequency) {
-          af=vfo[0].entered_frequency;
-        }
-        if(vfo[1].entering_frequency) {
-          bf=vfo[1].entered_frequency;
-        }
-
 #if 0
         //
         // DL1YCF:
@@ -1152,7 +1145,7 @@ void vfo_update() {
         cairo_move_to(cr, 5, 41);
         if (txvfo == 0 && (isTransmitting() || oob))
             cairo_set_source_rgba(cr, COLOUR_ALARM);
-        else if (vfo[0].entering_frequency)
+        else if (vfo[0].entered_frequency[0])
               cairo_set_source_rgba(cr, COLOUR_ATTN);
         else if (id != 0)
               cairo_set_source_rgba(cr, COLOUR_OK_WEAK);
@@ -1168,6 +1161,9 @@ void vfo_update() {
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE5);
         if (txvfo == 0 && oob) {
           cairo_show_text(cr, "Out of band");
+        } else if (vfo[0].entered_frequency[0]) {
+          snprintf(temp_text,sizeof(temp_text),"%s",vfo[0].entered_frequency);
+          cairo_show_text(cr, temp_text);
         } else {
           //
           // poor man's right alignment:
@@ -1198,7 +1194,7 @@ void vfo_update() {
         cairo_move_to(cr, 300, 41);
         if (txvfo == 1 && (isTransmitting() || oob))
             cairo_set_source_rgba(cr, COLOUR_ALARM);
-        else if (vfo[1].entering_frequency)
+        else if (vfo[1].entered_frequency[0])
               cairo_set_source_rgba(cr, COLOUR_ATTN);
         else if (id != 1)
               cairo_set_source_rgba(cr, COLOUR_OK_WEAK);
@@ -1210,11 +1206,13 @@ void vfo_update() {
         f_h = (bf - 1000000LL*f_m - 1000*f_k);
 
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE4);
-        cairo_set_source_rgba(cr, COLOUR_OK);
         cairo_show_text(cr, "VFO B:");
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE5);
         if (txvfo == 0 && oob) {
           cairo_show_text(cr, "Out of band");
+        } else if (vfo[1].entered_frequency[0]) {
+          snprintf(temp_text,sizeof(temp_text),"%s",vfo[1].entered_frequency);
+          cairo_show_text(cr, temp_text);
         } else {
           //
           // poor man's right alignment:
@@ -1703,70 +1701,3 @@ void vfo_ctun_update(int id,int state) {
     }
   }
 }
-
-//
-// helper function for numerically entering a new VFO frequency
-//
-void num_pad(int val) {
-  static long long freq_w, freq_d, d_count=0;
-  int mult=1;
-  char fstr[64];
-  //
-  // The numpad may be difficult to use since the frequency has to be given in Hz
-  // TODO: add a multiplier button like "kHz"
-  // TODO: display the current "entered_frequency" somewhere
-  //       (not all of us are good in typing blind)
-  //
-  RECEIVER *rx=active_receiver;
-  if(!vfo[rx->id].entering_frequency) {
-    freq_w=freq_d=d_count=0;
-    vfo[rx->id].entered_frequency=0;
-    vfo[rx->id].entering_frequency=TRUE;
-  }
-
-
-  switch(val) {
-    case -1: // clear
-      freq_w=freq_d=d_count=0;
-      vfo[rx->id].entered_frequency=0;
-      vfo[rx->id].entering_frequency=FALSE;
-      break;
-    case -5: // Decimal point
-      // shift whole part over past decimal point
-      freq_w=vfo[rx->id].entered_frequency;
-      vfo[rx->id].entered_frequency*=1000000;
-      break;
-    case -4: // enter as MHz
-      mult*=1000;
-      // FALLTHROUGH
-    case -3: // enter as KHz
-      mult*=1000;
-      // FALLTHROUGH
-    case -2: // enter as Hz
-      // TODO: calculated the frequency without using atof,
-      //       because of "LOCALE" problems
-      if(freq_w) { // handle the decimal point
-        sprintf(fstr, "%lld.%lld", freq_w, freq_d);
-        vfo[rx->id].entered_frequency=(long long)(atof(fstr)*mult);
-      } else
-        vfo[rx->id].entered_frequency*=mult;
-
-      if(vfo[rx->id].entered_frequency!=0)
-        receiver_set_frequency(rx, vfo[rx->id].entered_frequency);
-      vfo[rx->id].entering_frequency=FALSE;
-      break;
-    default:
-      //
-      // NumPad: enter the frequency in MHz, KHz, or Hz
-      //
-      if (freq_w) { // we have a decimal point
-        if(d_count++ > 6) break;
-        freq_d=(freq_d*10)+val;
-        vfo[rx->id].entered_frequency=freq_w*1000000+freq_d*pow(10, 6-d_count);
-      } else
-        vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+val;
-      break;
-  }
-  g_idle_add(ext_vfo_update, NULL);
-}
-

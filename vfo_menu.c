@@ -36,7 +36,7 @@
 #include "button_text.h"
 #include "ext.h"
 
-static gint v;
+static gint v;  //  VFO the menu is referring to
 static GtkWidget *dialog=NULL;
 static GtkWidget *label;
 
@@ -56,6 +56,11 @@ static char *btn_labels[] = {"1","2","3",
                ,"CL"
               };
 
+//
+// The parameters for num_pad corresponding to the button labels
+//
+static int btn_actions[] = {1,2,3,4,5,6,7,8,9,-5,0,-6,-2,-3,-4,-1};
+
 static GtkWidget *btn[16];
 
 static void cleanup() {
@@ -65,6 +70,7 @@ static void cleanup() {
     sub_menu=NULL;
     active_menu=NO_MENU;
   }
+  num_pad(-1, v);
 }
 
 static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -82,92 +88,16 @@ static void squelch_enable_cb(GtkWidget *widget, gpointer data) {
   setSquelch(active_receiver);
 }
 
-static gboolean freqent_select_cb (GtkWidget *widget, gpointer data) {
-  char *str = (char *) data;
-  const char *labelText;
-  char output[BUF_SIZE+12], buffer[BUF_SIZE];
-  int  len;
-  double  mult;
-  long long f;
-  static int set = 0;
-
-  // Instead of messing with LOCALE settings,
-  // we print a "0.0" and look what the decimal
-  // point is. What comes out of sprintf should be
-  // OK for atof.
-  char decimalpoint;
-  mult=0.0;
-  sprintf(output,"%1.1f",mult);
-  decimalpoint=output[1];
-
-
-  if (set) {
-    set = 0;
-    strcpy (buffer, "0");
-    sprintf(output, "<big>%s</big>", buffer);
-    gtk_label_set_markup (GTK_LABEL (label), output);
-    len = 1;
+static gboolean num_pad_cb(GtkWidget *widget, gpointer data) {
+  int val = GPOINTER_TO_INT(data);
+  char output[64];
+  num_pad(btn_actions[val],v);
+  if (vfo[v].entered_frequency[0]) {
+    sprintf(output, "<big>%s</big>", vfo[v].entered_frequency);
   } else {
-    labelText = gtk_label_get_text (GTK_LABEL (label));
-    strcpy (buffer, labelText);
-    len = strlen (buffer);
+    sprintf(output, "<big>0</big>");
   }
-
-  if (isdigit (str[0]) || str[0] == '.') {
-
-    // substitute decimal point by the LOCALE character for the decimal point
-    // otherwise atof() does not understand it.
-    if (str[0] == '.') {
-      buffer[len] = (gchar) decimalpoint;
-    } else {
-      buffer[len] = (gchar) str[0];
-    }
-    buffer[len+1] = (gchar) 0;
-
-    len = (buffer[0] == '0') ? 1 : 0;
-
-    sprintf(output, "<big>%s</big>", buffer+len);
-    gtk_label_set_markup (GTK_LABEL (label), output);
-  } else {
-
-    if (strcmp (str, "BS") == 0) {
-      /* --- Remove the last character on it. --- */
-      if (len > 0) buffer[len-1] = (gchar) 0;
-
-      /* --- Remove digit from field. --- */
-      sprintf(output, "<big>%s</big>", buffer);
-      gtk_label_set_markup (GTK_LABEL (label), output);
-
-    /* --- clear? --- */
-    mult=0.0;
-    } else if (strcmp (str, "CL") == 0) {
-      strcpy (buffer, "0");
-      sprintf(output, "<big>%s</big>", buffer);
-      gtk_label_set_markup (GTK_LABEL (label), output);
-    } else if(strcmp(str,"Hz")==0) {
-      mult = 10.0;
-    } else if(strcmp(str,"kHz")==0) {
-      mult = 10000.0;
-    } else if(strcmp(str,"MHz")==0) {
-      mult = 10000000.0;
-    }
-    if(mult!=0.0) {
-      f = ((long long)(atof(buffer)*mult)+5)/10;
-      sprintf(output, "<big>%lld</big>", f);
-      gtk_label_set_markup (GTK_LABEL (label), output);
-#ifdef CLIENT_SERVER
-      if(radio_is_remote) {
-        send_vfo_frequency(client_socket,active_receiver->id,f);
-      } else {
-#endif
-        vfo_set_frequency(v, f);
-#ifdef CLIENT_SERVER
-      }
-#endif
-      set = 1;
-    }
-  }
-  g_idle_add(ext_vfo_update,NULL);
+  gtk_label_set_markup (GTK_LABEL (label), output);
   return FALSE;
 }
 
@@ -211,7 +141,7 @@ static void lock_cb(GtkWidget *widget, gpointer data) {
 
 void vfo_menu(GtkWidget *parent,int vfo) {
   int i;
-  v=vfo;
+  v=vfo;  // store this for cleanup()
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
@@ -249,7 +179,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
     set_button_text_color(btn[i],"default");
     gtk_widget_show(btn[i]);
     gtk_grid_attach(GTK_GRID(grid),btn[i],i%3,2+(i/3),1,1);
-    g_signal_connect(btn[i],"pressed",G_CALLBACK(freqent_select_cb),(gpointer)btn_labels[i]);
+    g_signal_connect(btn[i],"pressed",G_CALLBACK(num_pad_cb),GINT_TO_POINTER(i));
   }
   set_btn_state();
 
@@ -313,4 +243,102 @@ void vfo_menu(GtkWidget *parent,int vfo) {
 
   gtk_widget_show_all(dialog);
 
+}
+
+//
+// This is also called when hitting buttons on the
+// numpad of the MIDI device or the controller
+//
+void num_pad(int action, int id) {
+  char decimalpoint[2];
+  char scr[16];
+  double mult=1.0; 
+  double fd;
+  long long fl;
+  int len;
+
+  //
+  // On a localized system, a decimal point may be something
+  // else (in Germany, a comma, for example). Therefore do
+  // a dummy "printf" to determine the character atof() 
+  // expects. Construct a one-character string ready for strcat().
+  //
+  sprintf(scr,"%1.1f",mult);
+  decimalpoint[0]=scr[1];
+  decimalpoint[1]=0;
+
+  char *buffer=vfo[id].entered_frequency;
+
+  switch (action) {
+    case 0:
+      strcat(buffer,"0");
+      break;
+    case 1:
+      strcat(buffer,"1");
+      break;
+    case 2:
+      strcat(buffer,"2");
+      break;
+    case 3:
+      strcat(buffer,"3");
+      break;
+    case 4:
+      strcat(buffer,"4");
+      break;
+    case 5:
+      strcat(buffer,"5");
+      break;
+    case 6:
+      strcat(buffer,"6");
+      break;
+    case 7:
+      strcat(buffer,"7");
+      break;
+    case 8:
+      strcat(buffer,"8");
+      break;
+    case 9:
+      strcat(buffer,"9");
+      break;
+    case -5:  // Decimal point
+      strcat(buffer, decimalpoint);
+      break;
+    case -1:  // Clear
+      *buffer = 0;
+      break;
+    case -6:  // Backspace
+      len=strlen(buffer);
+      if (len > 0) buffer[len-1] = 0;
+      break;
+    case -4:  // Enter as MHz
+      mult *= 1000.0;
+      //FALLTHROUGH
+    case -3:  // Enter as kHz
+      mult *= 1000.0;
+      //FALLTHROUGH 
+    case -2:  // Enter
+      fd = atof(buffer) * mult;
+      fl = (long long) (fd + 0.5);
+      *buffer=0;
+      //
+      // If the frequency is less than 10 kHz, this
+      // is most likely not intended by the user,
+      // so we do not set the frequency. This guards
+      // against setting the frequency to zero just
+      // by hitting the "NUMPAD enter" button.
+      //
+      if (fl >= 10000ll) {
+#ifdef CLIENT_SERVER
+        if(radio_is_remote) {
+          send_vfo_frequency(client_socket,id,fl);
+        } else {
+#endif
+          vfo_set_frequency(id, fl);
+#ifdef CLIENT_SERVER
+        }
+#endif
+      }
+      break;
+  }
+  g_idle_add(ext_vfo_update, NULL);
 }
