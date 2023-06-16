@@ -217,7 +217,10 @@ void start_step() {
 }
 
 static gboolean step_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_step();
+  //
+  // The step choice is part of the VFO menu, so open that one
+  //
+  start_vfo(active_receiver->id);
   return TRUE;
 }
 
