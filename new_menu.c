@@ -211,18 +211,15 @@ void start_rx() {
   rx_menu(top_window);
 }
 
-void start_step() {
-  cleanup();
-  step_menu(top_window);
-}
-
-static gboolean step_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  //
-  // The step choice is part of the VFO menu, so open that one
-  //
-  start_vfo(active_receiver->id);
-  return TRUE;
-}
+//void start_step() {
+//  cleanup();
+//  step_menu(top_window);
+//}
+//
+//static gboolean step_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+//  start_step();
+//  return TRUE;
+//}
 
 void start_meter() {
   cleanup();
@@ -484,10 +481,10 @@ void new_menu()
     gtk_grid_attach(GTK_GRID(grid),equalizer_b,(i%5),i/5,1,1);
     i++;
 
-    GtkWidget *step_b=gtk_button_new_with_label("Step");
-    g_signal_connect (step_b, "button-press-event", G_CALLBACK(step_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid),step_b,(i%5),i/5,1,1);
-    i++;
+    //GtkWidget *step_b=gtk_button_new_with_label("Step");
+    //g_signal_connect (step_b, "button-press-event", G_CALLBACK(step_cb), NULL);
+    //gtk_grid_attach(GTK_GRID(grid),step_b,(i%5),i/5,1,1);
+    //i++;
 
     GtkWidget *meter_b=gtk_button_new_with_label("Meter");
     g_signal_connect (meter_b, "button-press-event", G_CALLBACK(meter_cb), NULL);

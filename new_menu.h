@@ -3,10 +3,7 @@ extern GtkWidget *main_menu;
 
 extern void new_menu(void);
 
-/*
-extern GtkWidget* new_menu_init(int width,int height,GtkWidget *parent);
-*/
-extern void start_step(void);
+//extern void start_step(void);
 extern void start_meter(void);
 extern void start_band(void);
 extern void start_bandstack(void);
