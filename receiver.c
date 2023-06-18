@@ -763,7 +763,7 @@ void set_filter(RECEIVER *rx) {
     //
     SetRXASPCWFreq(rx->id, (double) cw_keyer_sidetone_frequency);
     SetRXASPCWBandwidth(rx->id, (double) cw_audio_peak_width);
-    SetRXASPCWGain(rx->id, 1.75);
+    SetRXASPCWGain(rx->id, 1.50);
     SetRXASPCWRun(rx->id, 1);
   } else {
     SetRXASPCWRun(rx->id, 0);
