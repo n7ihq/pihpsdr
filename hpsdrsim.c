@@ -244,20 +244,21 @@ int main(int argc, char *argv[])
         nb_pulse=0;
         nb_width=0;
         MAC5=0x66;
-        OLDDEVICE=DEVICE_ORION2;
-        NEWDEVICE=NEW_DEVICE_ORION2;
+        OLDDEVICE=ODEV_ORION2;
+        NEWDEVICE=NDEV_ORION2;
 
         for (i=1; i<argc; i++) {
-            if (!strncmp(argv[i],"-atlas"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11; continue;}
-            if (!strncmp(argv[i],"-metis"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11; continue;}
-            if (!strncmp(argv[i],"-hermeslite2", 12))  {OLDDEVICE=DEVICE_HERMES_LITE2;NEWDEVICE=NEW_DEVICE_HERMES_LITE2;  MAC5=0x88; continue;}
-            if (!strncmp(argv[i],"-hermeslite" , 11))  {OLDDEVICE=DEVICE_HERMES_LITE; NEWDEVICE=NEW_DEVICE_HERMES_LITE;   MAC5=0x77; continue;}
-            if (!strncmp(argv[i],"-hermes" ,      7))  {OLDDEVICE=DEVICE_HERMES;      NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x22; continue;}
-            if (!strncmp(argv[i],"-griffin" ,     8))  {OLDDEVICE=DEVICE_GRIFFIN;     NEWDEVICE=NEW_DEVICE_HERMES2;       MAC5=0x33; continue;}
-            if (!strncmp(argv[i],"-angelia" ,     8))  {OLDDEVICE=DEVICE_ANGELIA;     NEWDEVICE=NEW_DEVICE_ANGELIA;       MAC5=0x44; continue;}
-            if (!strncmp(argv[i],"-orion2" ,      7))  {OLDDEVICE=DEVICE_ORION2;      NEWDEVICE=NEW_DEVICE_ORION2;        MAC5=0x66; continue;}
-            if (!strncmp(argv[i],"-orion" ,       6))  {OLDDEVICE=DEVICE_ORION;       NEWDEVICE=NEW_DEVICE_ORION;         MAC5=0x55; continue;}
-            if (!strncmp(argv[i],"-c25"    ,      4))  {OLDDEVICE=DEVICE_C25;         NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x99; continue;}
+            if (!strncmp(argv[i],"-atlas"  ,      6))  {OLDDEVICE=ODEV_METIS;        NEWDEVICE=NDEV_ATLAS;         MAC5=0x11; continue;}
+            if (!strncmp(argv[i],"-metis"  ,      6))  {OLDDEVICE=ODEV_METIS;        NEWDEVICE=NDEV_ATLAS;         MAC5=0x11; continue;}
+            if (!strncmp(argv[i],"-hermeslite2", 12))  {OLDDEVICE=ODEV_HERMES_LITE2; NEWDEVICE=NDEV_HERMES_LITE2;  MAC5=0x88; continue;}
+            if (!strncmp(argv[i],"-hermeslite" , 11))  {OLDDEVICE=ODEV_HERMES_LITE;  NEWDEVICE=NDEV_HERMES_LITE;   MAC5=0x77; continue;}
+            if (!strncmp(argv[i],"-hermes" ,      7))  {OLDDEVICE=ODEV_HERMES;       NEWDEVICE=NDEV_HERMES;        MAC5=0x22; continue;}
+            if (!strncmp(argv[i],"-griffin" ,     8))  {OLDDEVICE=ODEV_GRIFFIN;      NEWDEVICE=NDEV_HERMES2;       MAC5=0x33; continue;}
+            if (!strncmp(argv[i],"-angelia" ,     8))  {OLDDEVICE=ODEV_ANGELIA;      NEWDEVICE=NDEV_ANGELIA;       MAC5=0x44; continue;}
+            if (!strncmp(argv[i],"-orion2" ,      7))  {OLDDEVICE=ODEV_ORION2;       NEWDEVICE=NDEV_ORION2;        MAC5=0x66; continue;}
+            if (!strncmp(argv[i],"-g2",           3))  {OLDDEVICE=ODEV_NONE;         NEWDEVICE=NDEV_SATURN;        MAC5=0xAA; oldnew=2; continue;}
+            if (!strncmp(argv[i],"-orion" ,       6))  {OLDDEVICE=ODEV_ORION;        NEWDEVICE=NDEV_ORION;         MAC5=0x55; continue;}
+            if (!strncmp(argv[i],"-c25"    ,      4))  {OLDDEVICE=ODEV_C25;          NEWDEVICE=NDEV_C25;           MAC5=0x99; continue;}
             if (!strncmp(argv[i],"-diversity",   10))  {diversity=1; continue;}
             if (!strncmp(argv[i],"-P1",           3))  {oldnew=1; continue;}
             if (!strncmp(argv[i],"-P2",           3))  {oldnew=2; continue;}
@@ -277,16 +278,17 @@ int main(int argc, char *argv[])
             exit(8);
         }
 
-        switch (OLDDEVICE) {
-            case   DEVICE_METIS:        printf("DEVICE is ATLAS/METIS\n");   c1=3.3; c2=0.090; break;
-            case   DEVICE_HERMES:       printf("DEVICE is HERMES\n");        c1=3.3; c2=0.095; break;
-            case   DEVICE_GRIFFIN:      printf("DEVICE is GRIFFIN\n");       c1=3.3; c2=0.095; break;
-            case   DEVICE_ANGELIA:      printf("DEVICE is ANGELIA\n");       c1=3.3; c2=0.095; break;
-            case   DEVICE_HERMES_LITE:  printf("DEVICE is HermesLite V1\n"); c1=3.3; c2=0.095; break;
-            case   DEVICE_HERMES_LITE2: printf("DEVICE is HermesLite V2\n"); c1=3.3; c2=0.095; break;
-            case   DEVICE_ORION:        printf("DEVICE is ORION\n");         c1=5.0; c2=0.108; break;
-            case   DEVICE_ORION2:       printf("DEVICE is ORION MkII\n");    c1=5.0; c2=0.108; break;
-            case   DEVICE_C25:          printf("DEVICE is STEMlab/C25\n");   c1=3.3; c2=0.090; break;
+        switch (NEWDEVICE) {
+            case   NDEV_ATLAS:        printf("DEVICE is ATLAS/METIS\n");     c1=3.3; c2=0.090; break;
+            case   NDEV_HERMES:       printf("DEVICE is HERMES\n");          c1=3.3; c2=0.095; break;
+            case   NDEV_HERMES2:      printf("DEVICE is HERMES2/GRIFFIN\n"); c1=3.3; c2=0.095; break;
+            case   NDEV_ANGELIA:      printf("DEVICE is ANGELIA\n");         c1=3.3; c2=0.095; break;
+            case   NDEV_HERMES_LITE:  printf("DEVICE is HermesLite V1\n");   c1=3.3; c2=0.095; break;
+            case   NDEV_HERMES_LITE2: printf("DEVICE is HermesLite V2\n");   c1=3.3; c2=0.095; break;
+            case   NDEV_ORION:        printf("DEVICE is ORION\n");           c1=5.0; c2=0.108; break;
+            case   NDEV_ORION2:       printf("DEVICE is ORION MkII\n");      c1=5.0; c2=0.108; break;
+            case   NDEV_SATURN:       printf("DEVICE is SATURN/G2\n");       c1=5.0; c2=0.108; break;
+            case   NDEV_C25:          printf("DEVICE is STEMlab/C25\n");     c1=3.3; c2=0.090; break;
         }
 
 //
@@ -827,8 +829,8 @@ int main(int argc, char *argv[])
                                   buffer[21]=1;
                                   buffer[22]=3;
                                   // HERMES_LITE2 is a HermesLite with a new software version
-                                  if (NEWDEVICE == NEW_DEVICE_HERMES_LITE2) {
-                                    buffer[11]=NEW_DEVICE_HERMES_LITE;
+                                  if (NEWDEVICE == NDEV_HERMES_LITE2) {
+                                    buffer[11]=NDEV_HERMES_LITE;
                                   }
                                   sendto(sock_udp, buffer, 60, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
                                   break;

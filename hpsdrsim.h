@@ -16,24 +16,28 @@
 // differes in old and new protocol
 //
 
-#define DEVICE_METIS           0
-#define DEVICE_HERMES          1
-#define DEVICE_GRIFFIN         2
-#define DEVICE_ANGELIA         4
-#define DEVICE_ORION           5
-#define DEVICE_HERMES_LITE     6
-#define DEVICE_HERMES_LITE2 1006
-#define DEVICE_ORION2         10
-#define DEVICE_C25           100
+#define ODEV_NONE          999
+#define ODEV_METIS           0
+#define ODEV_HERMES          1
+#define ODEV_GRIFFIN         2
+#define ODEV_ANGELIA         4
+#define ODEV_ORION           5
+#define ODEV_HERMES_LITE     6
+#define ODEV_ORION2         10
+#define ODEV_C25           100
+#define ODEV_HERMES_LITE2  506
 
-#define NEW_DEVICE_ATLAS        0
-#define NEW_DEVICE_HERMES       1
-#define NEW_DEVICE_HERMES2      2
-#define NEW_DEVICE_ANGELIA      3
-#define NEW_DEVICE_ORION        4
-#define NEW_DEVICE_ORION2       5
-#define NEW_DEVICE_HERMES_LITE  6
-#define NEW_DEVICE_HERMES_LITE2 1006
+#define NDEV_NONE          999
+#define NDEV_ATLAS           0
+#define NDEV_HERMES          1
+#define NDEV_HERMES2         2
+#define NDEV_ANGELIA         3
+#define NDEV_ORION           4
+#define NDEV_ORION2          5
+#define NDEV_SATURN         10
+#define NDEV_HERMES_LITE     6
+#define NDEV_HERMES_LITE2  506
+#define NDEV_C25           100
 
 EXTERN int OLDDEVICE;
 EXTERN int NEWDEVICE;
