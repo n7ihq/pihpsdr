@@ -289,51 +289,56 @@ gpointer new_discover_receive_thread(gpointer data) {
                     //
                     discovered[devices].device += 1000;
                     switch(discovered[devices].device) {
-                                  case NEW_DEVICE_ATLAS:
-                            strcpy(discovered[devices].name,"Atlas");
-                            frequency_min=0.0;
-                            frequency_max=61440000.0;
-                            break;
-                                  case NEW_DEVICE_HERMES:
-                            strcpy(discovered[devices].name,"Hermes");
-                            frequency_min=0.0;
-                            frequency_max=61440000.0;
-                            break;
-                                  case NEW_DEVICE_HERMES2:
-                            strcpy(discovered[devices].name,"Hermes2");
-                            frequency_min=0.0;
-                            frequency_max=61440000.0;
-                            break;
-                                  case NEW_DEVICE_ANGELIA:
-                            strcpy(discovered[devices].name,"Angelia");
-                            frequency_min=0.0;
-                            frequency_max=61440000.0;
-                            break;
-                                  case NEW_DEVICE_ORION:
-                            strcpy(discovered[devices].name,"Orion");
-                            frequency_min=0.0;
-                            frequency_max=61440000.0;
-                            break;
-                                  case NEW_DEVICE_ORION2:
-                            strcpy(discovered[devices].name,"Orion2");
-                            frequency_min=0.0;
-                            frequency_max=61440000.0;
-                            break;
-                                  case NEW_DEVICE_HERMES_LITE:
-                                        if (discovered[devices].software_version < 40) {
-                              strcpy(discovered[devices].name,"Hermes Lite V1");
-                                        } else {
-                              strcpy(discovered[devices].name,"Hermes Lite V2");
-                                          discovered[devices].device = NEW_DEVICE_HERMES_LITE2;
-                                        }
-                            frequency_min=0.0;
-                            frequency_max=30720000.0;
-                            break;
-                        default:
-                            strcpy(discovered[devices].name,"Unknown");
-                            frequency_min=0.0;
-                            frequency_max=30720000.0;
-                            break;
+                      case NEW_DEVICE_ATLAS:
+                        strcpy(discovered[devices].name,"Atlas");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_HERMES:
+                        strcpy(discovered[devices].name,"Hermes");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_HERMES2:
+                        strcpy(discovered[devices].name,"Hermes2");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_ANGELIA:
+                        strcpy(discovered[devices].name,"Angelia");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_ORION:
+                        strcpy(discovered[devices].name,"Orion");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_ORION2:
+                        strcpy(discovered[devices].name,"Orion2");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_SATURN:
+                        strcpy(discovered[devices].name,"Saturn/G2");
+                        frequency_min=0.0;
+                        frequency_max=61440000.0;
+                        break;
+                      case NEW_DEVICE_HERMES_LITE:
+                        if (discovered[devices].software_version < 40) {
+                          strcpy(discovered[devices].name,"Hermes Lite V1");
+                        } else {
+                          strcpy(discovered[devices].name,"Hermes Lite V2");
+                          discovered[devices].device = NEW_DEVICE_HERMES_LITE2;
+                        }
+                        frequency_min=0.0;
+                        frequency_max=30720000.0;
+                        break;
+                      default:
+                        strcpy(discovered[devices].name,"Unknown");
+                        frequency_min=0.0;
+                        frequency_max=30720000.0;
+                        break;
                     }
                     for(i=0;i<6;i++) {
                         discovered[devices].info.network.mac_address[i]=buffer[i+5];

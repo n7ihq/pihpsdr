@@ -85,9 +85,9 @@ static int dash=0;
 static int dot=0;
 
 #ifdef __APPLE__
-sem_t *response_sem;
+static sem_t *response_sem;
 #else
-sem_t response_sem;
+static sem_t response_sem;
 #endif
 
 static struct sockaddr_in base_addr;
@@ -172,9 +172,6 @@ static int audioindex;
 static struct sockaddr_in addr;
 static socklen_t length=sizeof(addr);
 
-// Network buffers
-#define NET_BUFFER_SIZE 2048
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -229,22 +226,6 @@ sem_t *apple_sem(int initial_value) {
 // new_protocol_thread(), so this need not be thread-safe.
 //
 ////////////////////////////////////////////////////////////////////////////
-
-//
-// One buffer. The fences can be used to detect over-writing
-// (feature currently not used).
-//
-//
-
-struct mybuffer_ {
-   struct mybuffer_ *next;
-   int             free;
-   long            lowfence;
-   unsigned char   buffer[NET_BUFFER_SIZE];
-   long            highfence;
-} mybuffer_;
-
-typedef struct mybuffer_ mybuffer;
 
 //
 // number of buffers allocated (for statistics)
@@ -365,7 +346,8 @@ void update_action_table() {
 
   int flag=0;
   int xmit=isTransmitting();  // store such that it cannot change while building the flag
-  int newdev=(device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2);
+  int newdev=(device==NEW_DEVICE_ANGELIA  || device==NEW_DEVICE_ORION || 
+              device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN);
 
   if (duplex && xmit)                   flag +=10000;
   if (newdev)                           flag +=1000;
@@ -625,7 +607,7 @@ static void new_protocol_general() {
     }
 
     if(filter_board==ALEX) {
-      if(device==NEW_DEVICE_ORION2) {
+      if(device==NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
         general_buffer[59]=0x03;  // enable Alex 0 and 1
       } else {
         general_buffer[59]=0x01;  // enable Alex 0
@@ -746,7 +728,8 @@ static void new_protocol_high_priority() {
         // note that for HERMES, receiver[i] is associated with DDC(i) but beyond
         // (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
         int ddc=0;
-        if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2;
+        if (device==NEW_DEVICE_ANGELIA  || device==NEW_DEVICE_ORION || 
+            device == NEW_DEVICE_ORION2 || device==NEW_DEVICE_SATURN) ddc=2;
 
         phase=(unsigned long)(((double)rx1Frequency)*34.952533333333333333333333333333);
         high_priority_buffer_to_radio[ 9+(ddc*4)]=phase>>24;
@@ -830,13 +813,14 @@ static void new_protocol_high_priority() {
     }
 
 //
-//  ANAN-7000/8000: route TXout to XvtrOut out when using XVTR input
+//  ANAN-7000/8000 and G2:
+//                  route TXout to XvtrOut out when using XVTR input
 //                  (this is the condition also implemented in old_protocol)
 //                  Note: the firmware does a logical AND with the T/R bit
 //                  such that upon RX, Xvtr port is input, and on TX, Xvrt port
 //                  is output if the XVTR_OUT bit is set.
 //
-    if ((device==NEW_DEVICE_ORION2) && receiver[0]->alex_antenna == 5) {
+    if ((device==NEW_DEVICE_ORION2 || device==NEW_DEVICE_SATURN) && receiver[0]->alex_antenna == 5) {
       high_priority_buffer_to_radio[1400] |= ANAN7000_XVTR_OUT;
     }
 
@@ -890,9 +874,10 @@ static void new_protocol_high_priority() {
 //
 
     switch(device) {
+      case NEW_DEVICE_SATURN:
       case NEW_DEVICE_ORION2:
 //
-//      new ANAN-7000/8000 band-pass RX filters
+//      new ANAN-7000/8000/G2 band-pass RX filters
 //
 //      To support the ANAN-8000 we
 //      should bypass BPFs while transmitting in PureSignal,
@@ -990,7 +975,7 @@ static void new_protocol_high_priority() {
 //                      in either case.
 //
     LPFfreq=txFrequency;
-    if (!xmit && device != NEW_DEVICE_ORION2 && receiver[0]->alex_antenna < 3) {
+    if (!xmit && (device != NEW_DEVICE_ORION2 && device != NEW_DEVICE_SATURN) && receiver[0]->alex_antenna < 3) {
         LPFfreq = rx1Frequency;
         if (receivers > 1) {
           if (receiver[1]->adc == 0 && rx2Frequency > rx1Frequency) {
@@ -1027,7 +1012,7 @@ static void new_protocol_high_priority() {
     if (xmit && transmitter->puresignal) {
         i=receiver[PS_RX_FEEDBACK]->alex_antenna;       // 0, 6, or 7
     }
-    if (device == NEW_DEVICE_ORION2) {
+    if (device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
       i +=100;
     } else if (new_pa_board) {
       // New-PA setting invalid on ANAN-7000,8000
@@ -1119,7 +1104,7 @@ static void new_protocol_high_priority() {
 
 //g_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1432],high_priority_buffer_to_radio[1433],high_priority_buffer_to_radio[1434],high_priority_buffer_to_radio[1435],rxFrequency,txFrequency);
 
-    if (device == NEW_DEVICE_ORION2) {
+    if (device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
 
         high_priority_buffer_to_radio[1430]=(alex1>>8)&0xFF;
         high_priority_buffer_to_radio[1431]=alex1&0xFF;
@@ -1272,9 +1257,10 @@ static void new_protocol_receive_specific() {
 
     for(i=0;i<receivers;i++) {
         // note that for HERMES, receiver[i] is associated with DDC(i) but beyond
-        // (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
+        // (that is, ANGELIA, ORION, ORION2, G2) receiver[i] is associated with DDC(i+2)
         int ddc=i;
-        if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2+i;
+        if (device==NEW_DEVICE_ANGELIA  || device==NEW_DEVICE_ORION || 
+            device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) ddc=2+i;
         //
         // If there is at least one RX which has the dither or random bit set,
         // this bit is set for the corresponding ADC
@@ -1495,6 +1481,7 @@ g_print("new_protocol_thread\n");
 //g_print("iq packet from port=%d ddc=%d\n",sourceport,ddc);
               if(ddc>=MAX_DDC)  {
                 g_print("unexpected iq data from ddc %d\n",ddc);
+                mybuf->free=1;
               } else {
 #ifdef __APPLE__
                 sem_wait(iq_sem_ready[ddc]);

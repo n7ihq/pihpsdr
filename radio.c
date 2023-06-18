@@ -578,7 +578,14 @@ if(!radio_is_remote) {
       receiver[PS_RX_FEEDBACK]=create_pure_signal_receiver(PS_RX_FEEDBACK, buffer_size,protocol==ORIGINAL_PROTOCOL?active_receiver->sample_rate:192000,display_width);
       switch (protocol) {
         case NEW_PROTOCOL:
-          pk = 0.2899;
+          switch (device) {
+            case NEW_DEVICE_SATURN:
+              pk = 0.6121;
+              break;
+            default:
+              pk = 0.2899;
+              break;
+          }
           break;
         case ORIGINAL_PROTOCOL:
           switch (device) {
@@ -740,6 +747,7 @@ void start_radio() {
     case NEW_DEVICE_HERMES2:
     case NEW_DEVICE_ANGELIA:
     case NEW_DEVICE_ORION:
+    case NEW_DEVICE_SATURN:  // make 100W the default for G2
       pa_power=PA_100W;
       break;
     case DEVICE_ORION2:
@@ -820,7 +828,8 @@ void start_radio() {
       break;
     case DEVICE_ORION2:
     case NEW_DEVICE_ORION2:
-      // ANAN7000/8000 boards have no ALEX attenuator
+    case NEW_DEVICE_SATURN:
+      // ANAN7000/8000/G2 boards have no ALEX attenuator
       have_rx_att=1;
       break;
     case DEVICE_HERMES_LITE:
@@ -1782,19 +1791,20 @@ void setSquelch(RECEIVER *rx) {
   int    voice_squelch=0;
 
   //
-  // "our" squelch value goes from 0 (no squelch) to 100 (fully engaged)
+  // the "slider" value goes from 0 (no squelch) to 100 (fully engaged)
   // and has to be mapped to
   //
   // AM    squelch:   -160.0 ... 0.00 dBm  linear interpolation
   // FM    squelch:      1.0 ... 0.01      expon. interpolation
   // Voice squelch:      0.0 ... 0.75      linear interpolation
   //
-  // My personal experience is that squelch is of little use
-  // when doing CW, but we do not prevent users from using it
-  //
   switch (vfo[rx->id].mode) {
     case modeAM:
     case modeSAM:
+    // My personal experience is that "Voice squelch" is of very
+    // little use  when doing CW
+    case modeCWU:
+    case modeCWL:
       //
       // Use AM squelch
       //
@@ -1805,8 +1815,6 @@ void setSquelch(RECEIVER *rx) {
     case modeLSB:
     case modeUSB:
     case modeDSB:
-    case modeCWU:  // most likely, squelch makes no sense here
-    case modeCWL:  // most likely, squelch makes no sense here
       //
       // Use Voice squelch (new in WDSP 1.21)
       //

@@ -527,8 +527,9 @@ static gboolean update_display(gpointer data) {
         fwd_cal_offset=4;
         if (is6m) constant2=0.5;
         break;
-      case DEVICE_ORION2:  // Anan7000/8000
+      case DEVICE_ORION2:  // Anan7000/8000/G2
       case NEW_DEVICE_ORION2:
+      case NEW_DEVICE_SATURN:
         if (pa_power == PA_100W) {
           // ANAN-7000  values.
           // Thetis uses a highly improbable value for the
