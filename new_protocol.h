@@ -46,32 +46,31 @@
 #define RX_IQ_TO_HOST_PORT_6 1041
 #define RX_IQ_TO_HOST_PORT_7 1042
 
+// Network buffers
+#define NET_BUFFER_SIZE 2048 // max length of a buffer from the radio
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PEDESTRIAN BUFFER MANAGEMENT
+//
+////////////////////////////////////////////////////////////////////////////
+//
+// One buffer. The fences can be used to detect over-writing
+// (feature currently not used).
+//
+////////////////////////////////////////////////////////////////////////////
+
+struct mybuffer_ {
+   struct mybuffer_ *next;
+   int             free;
+   long            lowfence;
+   unsigned char   buffer[NET_BUFFER_SIZE];
+   long            highfence;
+};
+
+typedef struct mybuffer_ mybuffer;
 
 #define MIC_SAMPLES 64
-
-extern int data_socket;
-#ifdef __APPLE__
-extern sem_t *response_sem;
-#else
-extern sem_t response_sem;
-#endif
-
-/*
-extern long response_sequence;
-*/
-// DL1YCF: "response" is global (used in new_protocol_programmer.c)
-extern int response;
-
-/*
-extern unsigned int exciter_power;
-extern unsigned int alex_forward_power;
-extern unsigned int alex_reverse_power;
-*/
-
-/*
-extern int send_high_priority;
-extern int send_general;
-*/
 
 extern void schedule_high_priority(void);
 extern void schedule_general(void);
