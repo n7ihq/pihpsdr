@@ -44,7 +44,7 @@ struct _vfo {
   long long lo;
   long long offset;
 
-  char entered_frequency[24];
+  char entered_frequency[16];  // need 13, but rounded up to next multiple of 4
 
 };
 

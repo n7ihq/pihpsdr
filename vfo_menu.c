@@ -23,6 +23,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <locale.h>
+
 #include <wdsp.h>
 
 #include "new_menu.h"
@@ -93,7 +95,7 @@ static gboolean num_pad_cb(GtkWidget *widget, gpointer data) {
   char output[64];
   num_pad(btn_actions[val],v);
   if (vfo[v].entered_frequency[0]) {
-    sprintf(output, "<big>%s</big>", vfo[v].entered_frequency);
+    sprintf(output, "<big><b>%s</b></big>", vfo[v].entered_frequency);
   } else {
     sprintf(output, "<big>0</big>");
   }
@@ -125,6 +127,20 @@ static void enable_ps_cb(GtkWidget *widget, gpointer data) {
   tx_set_ps(transmitter,gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
 }
 
+static void ctun_cb(GtkWidget *widget, gpointer data) {
+  int state=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  vfo_ctun_update(v,state);
+  g_idle_add(ext_vfo_update, NULL);
+}
+
+static void split_cb(GtkWidget *widget, gpointer data) {
+  int state=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  radio_set_split(state);
+  g_idle_add(ext_vfo_update, NULL);
+}
+
+
+
 static void set_btn_state() {
   int i;
 
@@ -139,14 +155,14 @@ static void lock_cb(GtkWidget *widget, gpointer data) {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void vfo_menu(GtkWidget *parent,int vfo) {
-  int i;
-  v=vfo;  // store this for cleanup()
+void vfo_menu(GtkWidget *parent,int id) {
+  int i, row;
+  v=id;  // store this for cleanup()
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   char title[64];
-  sprintf(title,"piHPSDR - VFO %s",vfo==0?"A":"B");
+  sprintf(title,"piHPSDR - VFO %s",id==0?"A":"B");
   gtk_window_set_title(GTK_WINDOW(dialog),title);
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
@@ -164,9 +180,9 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,2,1);
 
-  GtkWidget *lock_b=gtk_check_button_new_with_label("Lock VFO");
+  GtkWidget *lock_b=gtk_check_button_new_with_label("Lock VFOs");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (lock_b), locked);
-  gtk_grid_attach(GTK_GRID(grid),lock_b,2,0,2,1);
+  gtk_grid_attach(GTK_GRID(grid),lock_b,3,0,2,1);
   g_signal_connect(lock_b,"toggled",G_CALLBACK(lock_cb),NULL);
 
   label = gtk_label_new (NULL);
@@ -219,6 +235,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   my_combo_attach(GTK_GRID(grid),vfo_b,4,3,1,1);
 
 
+  row=4;
   if (!display_sliders) {
     //
     // If the sliders are "on display", then we also have a squelch-enable checkbox
@@ -226,16 +243,30 @@ void vfo_menu(GtkWidget *parent,int vfo) {
     //
     GtkWidget *enable_squelch=gtk_check_button_new_with_label("Enable Squelch");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_squelch), active_receiver->squelch_enable);
-    gtk_grid_attach(GTK_GRID(grid),enable_squelch,3,5,1,1);
+    gtk_grid_attach(GTK_GRID(grid),enable_squelch,3,row,2,1);
     g_signal_connect(enable_squelch,"toggled",G_CALLBACK(squelch_enable_cb),NULL);
+    row++;
   }
 
   if(can_transmit && (protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL)) {
     GtkWidget *enable_ps=gtk_check_button_new_with_label("Enable Pure Signal");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_ps), transmitter->puresignal);
-    gtk_grid_attach(GTK_GRID(grid),enable_ps,3,7,1,1);
+    gtk_grid_attach(GTK_GRID(grid),enable_ps,3,row,2,1);
     g_signal_connect(enable_ps,"toggled",G_CALLBACK(enable_ps_cb),NULL);
+    row++;
   }
+
+  GtkWidget *ctun_b=gtk_check_button_new_with_label("CTUN");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctun_b), vfo[id].ctun);
+  gtk_grid_attach(GTK_GRID(grid),ctun_b,3,row,2,1);
+  g_signal_connect(ctun_b,"toggled",G_CALLBACK(ctun_cb),NULL);
+  row++;
+
+  GtkWidget *split_b=gtk_check_button_new_with_label("Split");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (split_b), split);
+  gtk_grid_attach(GTK_GRID(grid),split_b,3,row,2,1);
+  g_signal_connect(split_b,"toggled",G_CALLBACK(split_cb),NULL);
+  row++;
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 
@@ -250,68 +281,34 @@ void vfo_menu(GtkWidget *parent,int vfo) {
 // numpad of the MIDI device or the controller
 //
 void num_pad(int action, int id) {
-  char decimalpoint[2];
-  char scr[16];
   double mult=1.0; 
   double fd;
   long long fl;
-  int len;
 
-  //
-  // On a localized system, a decimal point may be something
-  // else (in Germany, a comma, for example). Therefore do
-  // a dummy "printf" to determine the character atof() 
-  // expects. Construct a one-character string ready for strcat().
-  //
-  sprintf(scr,"%1.1f",mult);
-  decimalpoint[0]=scr[1];
-  decimalpoint[1]=0;
-
+  struct lconv *locale=localeconv();
   char *buffer=vfo[id].entered_frequency;
+  int len=strlen(buffer);
 
   switch (action) {
-    case 0:
-      strcat(buffer,"0");
-      break;
-    case 1:
-      strcat(buffer,"1");
-      break;
-    case 2:
-      strcat(buffer,"2");
-      break;
-    case 3:
-      strcat(buffer,"3");
-      break;
-    case 4:
-      strcat(buffer,"4");
-      break;
-    case 5:
-      strcat(buffer,"5");
-      break;
-    case 6:
-      strcat(buffer,"6");
-      break;
-    case 7:
-      strcat(buffer,"7");
-      break;
-    case 8:
-      strcat(buffer,"8");
-      break;
-    case 9:
-      strcat(buffer,"9");
+    default:  // digit 0...9
+      if (len <= sizeof(vfo[id].entered_frequency)-2) {
+        buffer[len++]='0'+action;
+        buffer[len]=0;
+      }
       break;
     case -5:  // Decimal point
       // if there is already a decimal point in the string,
       // do not add another one
-      if (index(buffer, decimalpoint[0]) == NULL) {
-        strcat(buffer, decimalpoint);
+      if (index(buffer, *(locale->decimal_point)) == NULL &&
+           len <= sizeof(vfo[id].entered_frequency)-2) {
+        buffer[len++]=*(locale->decimal_point);
+        buffer[len]=0;
       }
       break;
     case -1:  // Clear
       *buffer = 0;
       break;
     case -6:  // Backspace
-      len=strlen(buffer);
       if (len > 0) buffer[len-1] = 0;
       break;
     case -4:  // Enter as MHz
