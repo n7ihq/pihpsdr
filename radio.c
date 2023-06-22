@@ -576,6 +576,12 @@ if(!radio_is_remote) {
       tx_set_ps_sample_rate(transmitter,protocol==NEW_PROTOCOL?192000:active_receiver->sample_rate);
       receiver[PS_TX_FEEDBACK]=create_pure_signal_receiver(PS_TX_FEEDBACK, buffer_size,protocol==ORIGINAL_PROTOCOL?active_receiver->sample_rate:192000,display_width);
       receiver[PS_RX_FEEDBACK]=create_pure_signal_receiver(PS_RX_FEEDBACK, buffer_size,protocol==ORIGINAL_PROTOCOL?active_receiver->sample_rate:192000,display_width);
+      //
+      // If the pk value is slightly too large, this does no harm, but
+      // if it is slightly too small, very strange things can happen.
+      // Therefore it is good to "measure" this value and then slightly
+      // increase it.
+      //
       switch (protocol) {
         case NEW_PROTOCOL:
           switch (device) {
@@ -583,6 +589,7 @@ if(!radio_is_remote) {
               pk = 0.6121;
               break;
             default:
+              // recommended "new protocol value"
               pk = 0.2899;
               break;
           }
@@ -590,9 +597,15 @@ if(!radio_is_remote) {
         case ORIGINAL_PROTOCOL:
           switch (device) {
             case DEVICE_HERMES_LITE2:
-              pk = 0.2330;
+              // measured value: 0.2386
+              pk = 0.2400;
+              break;
+            case DEVICE_STEMLAB:
+              // measured value: 0.4155
+              pk = 0.4160;
               break;
             default:
+              // recommended "old protocol" value
               pk = 0.4067;
               break;
           }

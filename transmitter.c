@@ -1509,6 +1509,20 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
 
   if(rx_feedback->samples>=rx_feedback->buffer_size) {
     if(isTransmitting()) {
+#if 0
+    //
+    // Special code to document the amplitude of the TX IQ samples.
+    // This can be used to determine the "PK" value for an unknown
+    // radio.
+    //
+    double pkmax=0.0, pkval;
+    for (int i=0; i< rx_feedback->buffer_size; i++) {
+      pkval = tx_feedback->iq_input_buffer[2*i  ]*tx_feedback->iq_input_buffer[2*i  ]+
+              tx_feedback->iq_input_buffer[2*i+1]*tx_feedback->iq_input_buffer[2*i+1];
+      if (pkval > pkmax) pkmax=pkval;
+    }
+    g_print("PK MEASURED: %f\n", sqrt(pkmax));
+#endif
       pscc(tx->id, rx_feedback->buffer_size, tx_feedback->iq_input_buffer, rx_feedback->iq_input_buffer);
       if(tx->displaying && tx->feedback) {
         Spectrum0(1, rx_feedback->id, 0, 0, rx_feedback->iq_input_buffer);
@@ -1590,7 +1604,7 @@ void tx_set_twotone(TRANSMITTER *tx,int state) {
     SetTXAPostGenTTFreq(tx->id, 900.0, 1700.0);
     break;
     }
-    SetTXAPostGenTTMag (tx->id, 0.49, 0.49);
+    SetTXAPostGenTTMag (tx->id, 0.49999, 0.49999);
     SetTXAPostGenMode(tx->id, 1);
     SetTXAPostGenRun(tx->id, 1);
   } else {
