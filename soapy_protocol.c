@@ -97,17 +97,13 @@ void soapy_protocol_change_sample_rate(RECEIVER *rx) {
     double d;
     g_print("%s: setting samplerate=%f\n",__FUNCTION__,(double)rx->sample_rate);
     d=SoapySDRDevice_getSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc);
-    fprintf(stderr,"OLD SAMPLE RATE=%f\n", d);
     d=SoapySDRDevice_getBandwidth(soapy_device,SOAPY_SDR_RX,rx->adc);
-    fprintf(stderr,"OLD BAND WIDTH =%f\n", d);
     rc=SoapySDRDevice_setSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc,(double)rx->sample_rate);
     if(rc!=0) {
       g_print("%s: SoapySDRDevice_setSampleRate(%f) failed: %s\n",__FUNCTION__,(double)rx->sample_rate,SoapySDR_errToStr(rc));
     }
     d=SoapySDRDevice_getSampleRate(soapy_device,SOAPY_SDR_RX,rx->adc);
-    fprintf(stderr,"NEW SAMPLE RATE=%f\n", d);
     d=SoapySDRDevice_getBandwidth(soapy_device,SOAPY_SDR_RX,rx->adc);
-    fprintf(stderr,"NEW BAND WIDTH =%f\n", d);
 #endif
 //
 // We stick to the hardware sample rate and use the WDSP resampler

@@ -453,8 +453,34 @@ static gboolean save_cb(gpointer data) {
 }
 #endif
 
-static gboolean minimize_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  gtk_window_iconify(GTK_WINDOW(top_window));
+static GtkWidget *hide_b;
+static gboolean hideall_cb  (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  static int hide=0;
+  static int old_zoom=0;
+  static int old_tool=0;
+  static int old_slid=0;
+  if (hide == 0) {
+    //
+    // Hide everything but store old status
+    //
+    hide=1;
+    gtk_button_set_label(GTK_BUTTON(hide_b),"Show");
+    old_zoom=display_zoompan;
+    old_slid=display_sliders;
+    old_tool=display_toolbar;
+    display_toolbar = display_sliders = display_zoompan = 0;
+    reconfigure_radio();
+  } else {
+    //
+    // Re-display everything
+    //
+    hide=0;
+    gtk_button_set_label(GTK_BUTTON(hide_b),"Hide");
+    display_zoompan=old_zoom;
+    display_sliders=old_slid;
+    display_toolbar=old_tool;
+    reconfigure_radio();
+  }
   return TRUE;
 }
 
@@ -480,11 +506,11 @@ static void create_visual() {
   gtk_fixed_put(GTK_FIXED(fixed),meter,VFO_WIDTH,y);
 
 
-  GtkWidget *minimize_b=gtk_button_new_with_label("Hide");
-  gtk_widget_override_font(minimize_b, pango_font_description_from_string(SLIDERS_FONT));
-  gtk_widget_set_size_request (minimize_b, MENU_WIDTH, MENU_HEIGHT);
-  g_signal_connect (minimize_b, "button-press-event", G_CALLBACK(minimize_cb), NULL) ;
-  gtk_fixed_put(GTK_FIXED(fixed),minimize_b,VFO_WIDTH+METER_WIDTH,y);
+  hide_b=gtk_button_new_with_label("Hide");
+  gtk_widget_override_font(hide_b, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_size_request (hide_b, MENU_WIDTH, MENU_HEIGHT);
+  g_signal_connect(hide_b, "button-press-event", G_CALLBACK(hideall_cb), NULL);
+  gtk_fixed_put(GTK_FIXED(fixed),hide_b,VFO_WIDTH+METER_WIDTH,y);
   y+=MENU_HEIGHT;
 
   GtkWidget *menu_b=gtk_button_new_with_label("Menu");

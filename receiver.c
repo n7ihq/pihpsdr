@@ -94,11 +94,11 @@ gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, g
   if (sub_menu || main_menu) return TRUE;
 
   if(rx==active_receiver) {
-    if (event->button == 1) {
+    if (event->button == GDK_BUTTON_PRIMARY) {
       last_x=(int)event->x;
       has_moved=FALSE;
       pressed=TRUE;
-    } else if(event->button==3) {
+    } else if(event->button==GDK_BUTTON_SECONDARY) {
       g_idle_add(ext_start_rx,NULL);
     }
   } else {
@@ -137,7 +137,7 @@ gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event,
     } else {
 #endif
       receiver_set_active(rx);
-      if(event->button==3) {
+      if(event->button==GDK_BUTTON_SECONDARY) {
         g_idle_add(ext_start_rx,NULL);
       }
 #ifdef CLIENT_SERVER
@@ -146,7 +146,7 @@ gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event,
   } else {
     if(pressed) {
       int x=(int)event->x;
-      if (event->button == 1) {
+      if (event->button == GDK_BUTTON_PRIMARY) {
         if(has_moved) {
           // drag
           vfo_move((long long)((float)(x-last_x)*rx->hz_per_pixel),TRUE);
