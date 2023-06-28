@@ -97,11 +97,13 @@ tx_panadapter_button_press_event_cb (GtkWidget      *widget,
                GdkEventButton *event,
                gpointer        data)
 {
-  if (event->button == 1) {
-    // do nothing for left mouse button
-  } else {
-    // start TX menu for other mouse buttons
-    g_idle_add(ext_start_tx,NULL);
+  switch (event->button) {
+    case GDK_BUTTON_SECONDARY:
+      g_idle_add(ext_start_tx,NULL);
+      break;
+    default:
+      // do nothing for left mouse button
+      break;
   }
   return TRUE;
 }

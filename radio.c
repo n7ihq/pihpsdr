@@ -454,16 +454,21 @@ static gboolean save_cb(gpointer data) {
 #endif
 
 static GtkWidget *hide_b;
+//
+// These variables are defined outside hideall_cb, since
+// their value is written to the props file if "Hide"ing
+//
+static int hide_status=0;
+static int old_zoom=0;
+static int old_tool=0;
+static int old_slid=0;
+
 static gboolean hideall_cb  (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  static int hide=0;
-  static int old_zoom=0;
-  static int old_tool=0;
-  static int old_slid=0;
-  if (hide == 0) {
+  if (hide_status == 0) {
     //
     // Hide everything but store old status
     //
-    hide=1;
+    hide_status=1;
     gtk_button_set_label(GTK_BUTTON(hide_b),"Show");
     old_zoom=display_zoompan;
     old_slid=display_sliders;
@@ -474,7 +479,7 @@ static gboolean hideall_cb  (GtkWidget *widget, GdkEventButton *event, gpointer 
     //
     // Re-display everything
     //
-    hide=0;
+    hide_status=0;
     gtk_button_set_label(GTK_BUTTON(hide_b),"Hide");
     display_zoompan=old_zoom;
     display_sliders=old_slid;
@@ -2386,11 +2391,16 @@ g_print("radioSaveState: %s\n",property_path);
   setProperty("display_filled",value);
   sprintf(value,"%d",display_gradient);
   setProperty("display_gradient",value);
-  sprintf(value,"%d",display_zoompan);
+
+  //
+  // Use the "saved" Zoompan/Slider/Toolbar display status
+  // if they are currently hidden via the "Hide" button
+  //
+  sprintf(value,"%d",hide_status ? old_zoom : display_zoompan);
   setProperty("display_zoompan",value);
-  sprintf(value,"%d",display_sliders);
+  sprintf(value,"%d",hide_status ? old_slid : display_sliders);
   setProperty("display_sliders",value);
-  sprintf(value,"%d",display_toolbar);
+  sprintf(value,"%d",hide_status ? old_tool : display_toolbar);
   setProperty("display_toolbar",value);
 
   if(can_transmit) {

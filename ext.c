@@ -78,6 +78,17 @@ int ext_sliders_update(void *data) {
   return 0;
 }
 
+int ext_start_band(void *data) {
+  start_band();
+  return 0;
+}
+
+int ext_start_vfo(void *data) {
+  int val=GPOINTER_TO_INT(data);
+  start_vfo(val);
+  return 0;
+}
+
 int ext_start_rx(void *data) {
   start_rx();
   return 0;
