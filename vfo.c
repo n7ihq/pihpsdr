@@ -468,6 +468,14 @@ void vfo_band_changed(int id,int b) {
 }
 
 void vfo_bandstack_changed(int b) {
+
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
+
   int id=active_receiver->id;
   if(id==0) {
     vfo_save_bandstack();
@@ -547,6 +555,14 @@ void vfo_filter_changed(int f) {
 }
 
 void vfo_a_to_b() {
+
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
+
   vfo[VFO_B].band=vfo[VFO_A].band;
   vfo[VFO_B].bandstack=vfo[VFO_A].bandstack;
   vfo[VFO_B].frequency=vfo[VFO_A].frequency;
@@ -568,6 +584,14 @@ void vfo_a_to_b() {
 }
 
 void vfo_b_to_a() {
+
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
+
   vfo[VFO_A].band=vfo[VFO_B].band;
   vfo[VFO_A].bandstack=vfo[VFO_B].bandstack;
   vfo[VFO_A].frequency=vfo[VFO_B].frequency;
@@ -598,6 +622,13 @@ void vfo_a_swap_b() {
   long long temp_rit;
   long long temp_lo;
   long long temp_offset;
+
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
 
   temp_band=vfo[VFO_A].band;
   temp_bandstack=vfo[VFO_A].bandstack;
@@ -773,6 +804,13 @@ void vfo_step(int steps) {
 //         changing the VFO of the active receiver
 //
 void vfo_id_step(int id, int steps) {
+
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
 
   if(!locked) {
     long long delta;
@@ -1613,7 +1651,14 @@ long long get_tx_freq() {
     return vfo[txvfo].frequency;
   }
 }
+
 void vfo_rit_update(int id) {
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
   vfo[id].rit_enabled=vfo[id].rit_enabled==1?0:1;
   if (id < receivers) {
     receiver_frequency_changed(receiver[id]);
@@ -1622,6 +1667,12 @@ void vfo_rit_update(int id) {
 }
 
 void vfo_rit_clear(int id) {
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
   vfo[id].rit=0;
   vfo[id].rit_enabled=0;
   if (id < receivers) {
@@ -1631,6 +1682,12 @@ void vfo_rit_clear(int id) {
 }
 
 void vfo_rit(int id,int i) {
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
+    return;
+  }
+#endif
   double value=(double)vfo[id].rit;
   value+=(double)(i*rit_increment);
   if(value<-9999.0) {
@@ -1656,6 +1713,12 @@ void vfo_rit(int id,int i) {
 // - CAT "set frequency" command
 //
 void vfo_set_frequency(int v,long long f) {
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
+    return;
+  }
+#endif
   int b=get_band_from_frequency(f);
   if (b != vfo[v].band) {
     vfo_band_changed(v, b);
@@ -1692,6 +1755,12 @@ void vfo_ctun_update(int id,int state) {
   //       we should update ctun_frequency and offset
   //
   if (vfo[id].ctun == state) return;  // no-op if no change
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
+    return;
+  }
+#endif
   vfo[id].ctun=state;
   if(vfo[id].ctun) {
     // CTUN turned OFF->ON

@@ -185,6 +185,7 @@ typedef struct __attribute__((__packed__)) _receiver_data {
   uint8_t agc;
   uint16_t agc_hang;
   uint16_t agc_thresh;
+  uint16_t agc_hang_thresh;
   uint8_t nb;
   uint8_t nr;
   uint8_t anf;
@@ -337,6 +338,7 @@ typedef struct __attribute__((__packed__)) _agc_gain_command {
   uint16_t gain;
   uint16_t hang;
   uint16_t thresh;
+  uint16_t hang_thresh;
 } AGC_GAIN_COMMAND;
 
 typedef struct __attribute__((__packed__)) _attenuation_command {
@@ -496,7 +498,7 @@ extern void send_zoom(int s,int rx,int zoom);
 extern void send_pan(int s,int rx,int pan);
 extern void send_volume(int s,int rx,double volume);
 extern void send_agc(int s,int rx,int agc);
-extern void send_agc_gain(int s,int rx,int gain,int hang,int thresh);
+extern void send_agc_gain(int s,int rx,double gain,double hang,double thresh,double hang_thresh);
 extern void send_attenuation(int s,int rx,int attenuation);
 extern void send_rfgain(int s,int rx, double gain);
 extern void send_squelch(int s,int rx,int enable,int squelch);

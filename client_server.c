@@ -318,10 +318,9 @@ void send_receiver_data(REMOTE_CLIENT *client,int rx) {
   receiver_data.display_waterfall=receiver[rx]->display_waterfall;
   receiver_data.fps=htons(receiver[rx]->fps);
   receiver_data.agc=receiver[rx]->agc;
-  short s=(short)receiver[rx]->agc_hang;
-  receiver_data.agc_hang=htons(s);
-  s=(short)receiver[rx]->agc_thresh;
-  receiver_data.agc_thresh=htons(s);
+  receiver_data.agc_hang=htond(receiver[rx]->agc_hang);
+  receiver_data.agc_thresh=htond(receiver[rx]->agc_thresh);
+  receiver_data.agc_hang_thresh=htond(receiver[rx]->agc_hang_threshold);
   receiver_data.nb=receiver[rx]->nb;
   receiver_data.nr=receiver[rx]->nr;
   receiver_data.anf=receiver[rx]->anf;
@@ -1262,19 +1261,17 @@ g_print("send_agc rx=%d agc=%d\n",rx,agc);
   }
 }
 
-void send_agc_gain(int s,int rx,int gain,int hang,int thresh) {
+void send_agc_gain(int s,int rx, double gain, double hang, double thresh, double hang_thresh) {
   AGC_GAIN_COMMAND command;
-  short g=(short)gain;
-  short h=(short)hang;
-  short t=(short)thresh;
-g_print("send_agc_gain rx=%d gain=%d\n",rx,gain);
+g_print("send_agc_gain rx=%d gain=%f hang=%f thresh=%f hang_thresh=%f\n",rx,gain,hang,thresh,hang_thresh);
   command.header.sync=REMOTE_SYNC;
   command.header.data_type=htons(CMD_RESP_RX_AGC_GAIN);
   command.header.version=htonl(CLIENT_SERVER_VERSION);
   command.id=rx;
-  command.gain=htons(g);
-  command.hang=htons(h);
-  command.thresh=htons(t);
+  command.gain=htond(gain);
+  command.hang=htond(hang);
+  command.thresh=htond(thresh);
+  command.hang_thresh=htond(hang_thresh);
   int bytes_sent=send_bytes(s,(char *)&command,sizeof(command));
   if(bytes_sent<0) {
     perror("send_command");
@@ -1968,15 +1965,14 @@ g_print("INFO_RECEIVER: %d\n",bytes_read);
         receiver[rx]->display_waterfall=receiver_data.display_waterfall;
         receiver[rx]->fps=ntohs(receiver_data.fps);
         receiver[rx]->agc=receiver_data.agc;
-        short s=ntohs(receiver_data.agc_hang);
-        receiver[rx]->agc_hang=(double)s;
-        s=ntohs(receiver_data.agc_thresh);
-        receiver[rx]->agc_thresh=(double)s;
+        receiver[rx]->agc_hang=ntohd(receiver_data.agc_hang);
+        receiver[rx]->agc_thresh=ntohd(receiver_data.agc_thresh);
+        receiver[rx]->agc_hang_threshold=ntohd(receiver_data.agc_hang_thresh);
         receiver[rx]->nb=receiver_data.nb;
         receiver[rx]->nr=receiver_data.nr;
         receiver[rx]->anf=receiver_data.anf;
         receiver[rx]->snb=receiver_data.snb;
-        s=ntohs(receiver_data.filter_low);
+        short s=ntohs(receiver_data.filter_low);
         receiver[rx]->filter_low=(int)s;
         s=ntohs(receiver_data.filter_high);
         receiver[rx]->filter_high=(int)s;
@@ -2199,12 +2195,10 @@ g_print("AGC_COMMAND: rx=%d agc=%d\n",rx,a);
           return NULL;
         }
         int rx=agc_gain_cmd.id;
-        short gain=ntohs(agc_gain_cmd.gain);
-        short hang=ntohs(agc_gain_cmd.hang);
-        short thresh=ntohs(agc_gain_cmd.thresh);
-        receiver[rx]->agc_gain=(double)gain;
-        receiver[rx]->agc_hang=(double)hang;
-        receiver[rx]->agc_thresh=(double)thresh;
+        receiver[rx]->agc_gain=ntohd(agc_gain_cmd.gain);
+        receiver[rx]->agc_hang=ntohd(agc_gain_cmd.hang);
+        receiver[rx]->agc_thresh=ntohd(agc_gain_cmd.thresh);
+        receiver[rx]->agc_hang_threshold=ntohd(agc_gain_cmd.hang_thresh);
         }
         break;
       case CMD_RESP_RX_GAIN:
@@ -2643,10 +2637,13 @@ static int remote_command(void *data) {
       AGC_GAIN_COMMAND *agc_gain_command=(AGC_GAIN_COMMAND *)data;
       int r=agc_gain_command->id;
       CHECK_RX(r);
-      temp=ntohs(agc_gain_command->gain);
-      set_agc_gain(r,(double)temp);
       RECEIVER *rx=receiver[r];
-      send_agc_gain(client->socket,rx->id,(int)rx->agc_gain,(int)rx->agc_hang,(int)rx->agc_thresh);
+      rx->agc_hang=ntohd(agc_gain_command->hang);
+      rx->agc_thresh=ntohd(agc_gain_command->thresh);
+      rx->agc_hang_threshold=ntohd(agc_gain_command->hang_thresh);
+      set_agc_gain(r,ntohd(agc_gain_command->gain));
+      set_agc(rx, rx->agc);
+      send_agc_gain(client->socket,rx->id,rx->agc_gain,rx->agc_hang,rx->agc_thresh,rx->agc_hang_threshold);
       }
       break;
     case CMD_RESP_RX_GAIN:

@@ -292,7 +292,8 @@ static void agcgain_value_changed_cb(GtkWidget *widget, gpointer data) {
   active_receiver->agc_gain=gtk_range_get_value(GTK_RANGE(agc_scale));
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
-    send_agc_gain(client_socket,active_receiver->id,(int)active_receiver->agc_gain,(int)active_receiver->agc_hang,(int)active_receiver->agc_thresh);
+    send_agc_gain(client_socket,active_receiver->id,active_receiver->agc_gain,active_receiver->agc_hang,
+                  active_receiver->agc_thresh,active_receiver->agc_hang_threshold);
   } else {
 #endif
   set_agc(active_receiver, active_receiver->agc);
