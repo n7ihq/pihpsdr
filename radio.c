@@ -2832,6 +2832,8 @@ int remote_start(void *data) {
       break;
   }
   RECEIVERS=2;
+  PS_RX_FEEDBACK=2;
+  PS_TX_FEEDBACK=2;
   radioRestoreState();
   create_visual();
   if (can_transmit) {
