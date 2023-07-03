@@ -129,16 +129,15 @@ void set_noise() {
 void update_noise() {
 #ifdef CLIENT_SERVER
   //
-  // TODO: include parameters
+  // TODO: include NR2 and NB2 parameters
   //
   if(radio_is_remote) {
-    send_noise(client_socket,active_receiver->id,active_receiver->nb,active_receiver->nr,active_receiver->anf,active_receiver->snb);
-  } else {
-#endif
-    set_noise();
-#ifdef CLIENT_SERVER
+    send_noise(client_socket,active_receiver->id,active_receiver->nb,active_receiver->nr,
+                             active_receiver->anf,active_receiver->snb);
+     return;
   }
 #endif
+    set_noise();
 }
 
 static void nb_cb(GtkToggleButton *widget, gpointer data) {

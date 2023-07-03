@@ -974,6 +974,7 @@ int process_action(void *data) {
         } else {
           sat_mode=RSAT_MODE;
         }
+        g_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
         g_idle_add(ext_vfo_update, NULL);
       }
       break;
@@ -984,6 +985,7 @@ int process_action(void *data) {
         } else {
           sat_mode=SAT_MODE;
         }
+        g_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
         g_idle_add(ext_vfo_update, NULL);
       }
       break;

@@ -534,6 +534,9 @@ void rx_panadapter_update(RECEIVER *rx) {
   }
 
   if(rx->id==0 && device==DEVICE_HERMES_LITE2) {
+#ifdef CLIENT_SERVER
+    if (!radio_is_remote) {
+#endif
     cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
 
@@ -546,6 +549,9 @@ void rx_panadapter_update(RECEIVER *rx) {
     sprintf(text,"%0.0fmA",c);
     cairo_move_to(cr, 160.0, 30.0);
     cairo_show_text(cr, text);
+#ifdef CLIENT_SERVER
+    }
+#endif
   }
 
   cairo_destroy (cr);

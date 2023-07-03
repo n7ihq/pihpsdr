@@ -721,6 +721,12 @@ void vfo_set_stepsize(int newstep) {
   // Set current VFO step size.
   // and store the value in mode_settings of the current mode
   //
+#ifdef CLIENT_SERVER
+  if (radio_is_remote) {
+    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    return;
+  }
+#endif
   int id=active_receiver->id;
   int m=vfo[id].mode;
 

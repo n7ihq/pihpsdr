@@ -247,7 +247,12 @@ g_print("display_width=%d display_height=%d\n", display_width, display_height);
   }
   gtk_widget_set_size_request(top_window, display_width, display_height);
   gtk_window_set_title (GTK_WINDOW (top_window), "piHPSDR");
-  gtk_window_set_position(GTK_WINDOW(top_window),GTK_WIN_POS_CENTER_ALWAYS);
+  //
+  // do not use GTK_WIN_POS_CENTER_ALWAYS, since this will let the
+  // window jump back to the center each time the window is 
+  // re-created, e.g. in reconfigure_radio()
+  //
+  gtk_window_set_position(GTK_WINDOW(top_window),GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(top_window), FALSE);
   g_print("setting top window icon\n");
   GError *error;
