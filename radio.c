@@ -435,10 +435,8 @@ g_print("reconfigure_radio: receivers=%d\n",receivers);
     }
   }
 
-  if(can_transmit) {
-    if(!duplex) {
-      reconfigure_transmitter(transmitter,display_width,rx_height);
-    }
+  if(can_transmit && !duplex) {
+    reconfigure_transmitter(transmitter,display_width,rx_height);
   }
 }
 
@@ -455,8 +453,10 @@ static gboolean save_cb(gpointer data) {
 
 static GtkWidget *hide_b;
 //
-// These variables are defined outside hideall_cb, since
-// their value is written to the props file if "Hide"ing
+// These variables are defined outside hideall_cb.
+// If the props file is written while "Hide"-ing,
+// these values are written instead of the current
+// hide/show status of the Zoom/Sliders/Toolbar area.
 //
 static int hide_status=0;
 static int old_zoom=0;
@@ -464,6 +464,13 @@ static int old_tool=0;
 static int old_slid=0;
 
 static gboolean hideall_cb  (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  //
+  // reconfigure_radio must not be called during TX
+  //
+  if (isTransmitting()) {
+    if (!duplex) return TRUE;
+  }
+
   if (hide_status == 0) {
     //
     // Hide everything but store old status
@@ -1444,7 +1451,7 @@ static void rxtx(int state) {
       }
     }
 
-    if(duplex) {
+    if(transmitter->dialog) {
       gtk_widget_show_all(transmitter->dialog);
       if(transmitter->dialog_x!=-1 && transmitter->dialog_y!=-1) {
        gtk_window_move(GTK_WINDOW(transmitter->dialog),transmitter->dialog_x,transmitter->dialog_y);
@@ -1474,7 +1481,7 @@ static void rxtx(int state) {
     }
     SetChannelState(transmitter->id,0,1);
     tx_set_displaying(transmitter,0);
-    if(duplex) {
+    if(transmitter->dialog) {
       gtk_window_get_position(GTK_WINDOW(transmitter->dialog),&transmitter->dialog_x,&transmitter->dialog_y);
       gtk_widget_hide(transmitter->dialog);
     } else {
