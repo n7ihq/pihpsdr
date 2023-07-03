@@ -925,16 +925,9 @@ static void process_control_bytes() {
       alex_reverse_power_average = (alex_reverse_power + 3*alex_reverse_power_average) >> 2;
       if (device != DEVICE_HERMES_LITE2) {
         AIN3=((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF); // For Penelope or Hermes
-        pa_current=0;
       } else {
         AIN3=0;
-        pa_current+=((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF); // HL2
-        n_current++;
-        if(n_current==10) {
-          average_current=pa_current/10;
-          pa_current=0;
-          n_current=0;
-        }
+        average_current=(3*average_current +((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF)) >> 2;
       }
       break;
     case 3:

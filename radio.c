@@ -249,9 +249,7 @@ int adc_overload;
 int pll_locked;
 unsigned int exciter_power;
 unsigned int average_temperature;
-unsigned int pa_current;
 unsigned int average_current;
-unsigned int n_current;
 unsigned int tx_fifo_underrun;
 unsigned int tx_fifo_overrun;
 unsigned int alex_forward_power;
@@ -1190,11 +1188,9 @@ void start_radio() {
 #endif
 
   average_temperature=0;
-  pa_current=0;
   average_current=0;
   tx_fifo_underrun=0;
   tx_fifo_overrun=0;
-  n_current=0;
 
   display_sequence_errors=TRUE;
 
