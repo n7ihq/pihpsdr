@@ -308,7 +308,6 @@ int pre_emphasize=0;
 int vox_setting=0;
 int vox_enabled=0;
 double vox_threshold=0.001;
-double vox_gain=10.0;
 double vox_hang=250.0;
 int vox=0;
 int CAT_cw_is_active=0;
@@ -327,7 +326,8 @@ int optimize_for_touchscreen=0;
 gboolean duplex=FALSE;
 gboolean mute_rx_while_transmitting=FALSE;
 
-double drive_max=100;
+double drive_max=100.0;
+double drive_digi_max=100.0;  // maximum drive in DIGU/DIGL
 
 gboolean display_sequence_errors=TRUE;
 gboolean display_swr_protection=FALSE;
@@ -815,6 +815,7 @@ void start_radio() {
       pa_power=PA_1W;
       break;
   }
+  drive_digi_max=drive_max; // To be updated when reading props file
 
   switch(pa_power) {
     case PA_1W:
@@ -2021,8 +2022,6 @@ g_print("radioRestoreState: %s\n",property_path);
 
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
-#ifdef CLIENT_SERVER
-#endif
   } else {
 #endif
 
@@ -2181,10 +2180,6 @@ g_print("radioRestoreState: %s\n",property_path);
     if(value) vox_enabled=atoi(value);
     value=getProperty("vox_threshold");
     if(value) vox_threshold=atof(value);
-/*
-    value=getProperty("vox_gain");
-    if(value) vox_gain=atof(value);
-*/
     value=getProperty("vox_hang");
     if(value) vox_hang=atof(value);
 
@@ -2218,6 +2213,11 @@ g_print("radioRestoreState: %s\n",property_path);
     value=getProperty("optimize_touchscreen");
     if (value) optimize_for_touchscreen=atoi(value);
 
+    value=getProperty("drive_digi_max");
+    if (value) {
+      drive_digi_max=atof(value);
+      if (drive_digi_max > drive_max) drive_digi_max=drive_max;
+    }
 
     filterRestoreState();
     bandRestoreState();
@@ -2258,7 +2258,6 @@ g_print("radioRestoreState: %s\n",property_path);
       value=getProperty(name);
       if (value) strcpy(SerialPorts[id].port, value);
     }
-
 
     value=getProperty("split");
     if(value) split=atoi(value);
@@ -2406,18 +2405,19 @@ g_print("radioSaveState: %s\n",property_path);
   sprintf(value,"%d",hide_status ? old_tool : display_toolbar);
   setProperty("display_toolbar",value);
 
-  if(can_transmit) {
-    // The only variables of interest in this receiver are
-    // the alex_antenna an the adc
-    if (receiver[PS_RX_FEEDBACK]) {
-      receiver_save_state(receiver[PS_RX_FEEDBACK]);
-    }
-    transmitter_save_state(transmitter);
-  }
-
 #ifdef CLIENT_SERVER
   if(!radio_is_remote) {
 #endif
+
+    if(can_transmit) {
+      // The only variables of interest in this receiver are
+      // the alex_antenna an the adc
+      if (receiver[PS_RX_FEEDBACK]) {
+        receiver_save_state(receiver[PS_RX_FEEDBACK]);
+      }
+      transmitter_save_state(transmitter);
+    }
+
     sprintf(value,"%d",radio_sample_rate);
     setProperty("radio_sample_rate",value);
     sprintf(value,"%d",diversity_enabled);
@@ -2492,6 +2492,7 @@ g_print("radioSaveState: %s\n",property_path);
     setProperty("pa_enabled",value);
     sprintf(value,"%d",pa_power);
     setProperty("pa_power",value);
+
     for(i=0;i<11;i++) {
       sprintf(name,"pa_trim[%d]",i);
       sprintf(value,"%d",pa_trim[i]);
@@ -2542,13 +2543,6 @@ g_print("radioSaveState: %s\n",property_path);
     setProperty("smeter",value);
     sprintf(value,"%d",alc);
     setProperty("alc",value);
-//    sprintf(value,"%d",local_audio);
-//    setProperty("local_audio",value);
-//    sprintf(value,"%d",n_selected_output_device);
-//    setProperty("n_selected_output_device",value);
-//    sprintf(value,"%d",local_microphone);
-//    setProperty("local_microphone",value);
-
     sprintf(value,"%d",enable_tx_equalizer);
     setProperty("enable_tx_equalizer",value);
     sprintf(value,"%d",tx_equalizer[0]);
@@ -2694,6 +2688,9 @@ g_print("radioSaveState: %s\n",property_path);
     sprintf(value,"%d",optimize_for_touchscreen);
     setProperty("optimize_touchscreen", value);
 
+    sprintf(value,"%f",drive_digi_max);
+    setProperty("drive_digi_max", value);
+     
 #ifdef CLIENT_SERVER
     sprintf(value,"%d",hpsdr_server);
     setProperty("radio.hpsdr_server",value);

@@ -978,6 +978,11 @@ g_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d 
 
 void tx_set_mode(TRANSMITTER* tx,int mode) {
   if(tx!=NULL) {
+    if (mode == modeDIGU || mode == modeDIGL) {
+      if (tx->drive > drive_digi_max+0.5) {
+        set_drive(drive_digi_max);
+      }
+    }
     tx->mode=mode;
     SetTXAMode(tx->id, tx->mode);
     tx_set_filter(tx);
