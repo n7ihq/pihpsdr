@@ -465,8 +465,8 @@ g_print("%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 
 #ifdef GPIO
     controller=NO_CONTROLLER;
-    gpio_set_defaults(controller);
     gpio_restore_state();
+    gpio_set_defaults(controller);
 
     GtkWidget *gpio=gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(gpio),NULL,"No Controller");

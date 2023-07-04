@@ -671,6 +671,10 @@ void gpio_set_defaults(int ctrlr) {
       //
       // no GPIO lines available for CW etc.
       //
+      CWL_BUTTON=-1;
+      CWR_BUTTON=-1;
+      PTT_BUTTON=-1;
+      CWKEY_BUTTON=-1;
       encoders=encoders_controller2_v2;
       switches=switches_controller2_v2;
       break;
@@ -678,6 +682,10 @@ void gpio_set_defaults(int ctrlr) {
       //
       // no GPIO lines available for CW etc.
       //
+      CWL_BUTTON=-1;
+      CWR_BUTTON=-1;
+      PTT_BUTTON=-1;
+      CWKEY_BUTTON=-1;
       encoders=encoders_g2_frontpanel;
       switches=switches_g2_frontpanel;
       break;
