@@ -755,7 +755,7 @@ void radio_menu(GtkWidget *parent) {
     col++;
   }
 
-#ifdef SOAPYSDSR
+#ifdef SOAPYSDR
   if (device==SOAPYSDR_USB_DEVICE) {
     GtkWidget *iqswap_b=gtk_check_button_new_with_label("Swap IQ");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (iqswap_b), iqswap);
