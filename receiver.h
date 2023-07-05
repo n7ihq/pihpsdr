@@ -265,7 +265,7 @@ extern void receiver_save_state(RECEIVER *rx);
 extern gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data);
 extern gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data);
 extern gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer data);
-extern gboolean receiver_scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer data);
+extern gboolean receiver_scroll_event(GtkWidget *widget, const GdkEventScroll *event, gpointer data);
 
 extern void set_displaying(RECEIVER *rx,int state);
 

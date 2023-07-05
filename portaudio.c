@@ -282,7 +282,7 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
              PaStreamCallbackFlags statusFlags,
              void *userdata)
 {
-  float *in = (float *)inputBuffer;
+  const float *in = (float *)inputBuffer;
 
   if (in == NULL) {
     // This should not happen, so we do not send silence etc.

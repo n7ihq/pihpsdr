@@ -72,7 +72,7 @@ waterfall_draw_cb (GtkWidget *widget,
  cairo_t   *cr,
  gpointer   data)
 {
-  RECEIVER *rx=(RECEIVER *)data;
+  const RECEIVER *rx=(RECEIVER *)data;
   gdk_cairo_set_source_pixbuf (cr, rx->pixbuf, 0, 0);
   cairo_paint (cr);
   return FALSE;

@@ -62,7 +62,7 @@ static void pa_value_changed_cb(GtkWidget *widget, gpointer data) {
   band->pa_calibration=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
   int txvfo=get_tx_vfo();
   int b=vfo[txvfo].band;
-  BAND *current=band_get_band(b);
+  const BAND *current=band_get_band(b);
   if(band==current) {
     calcDriveLevel();
   }

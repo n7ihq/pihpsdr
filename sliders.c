@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <wdsp.h>
 
 #include "appearance.h"
 #include "receiver.h"
@@ -39,7 +40,6 @@
 #include "alex.h"
 #include "agc.h"
 #include "channel.h"
-#include "wdsp.h"
 #include "radio.h"
 #include "transmitter.h"
 #include "property.h"
@@ -771,7 +771,7 @@ void set_squelch(RECEIVER *rx) {
   }
 }
 
-void set_compression(TRANSMITTER* tx) {
+void set_compression(const TRANSMITTER* tx) {
   g_print("%s\n",__FUNCTION__);
   // Update VFO panel to reflect changed value
   g_idle_add(ext_vfo_update, NULL);

@@ -715,7 +715,7 @@ static int ts2000_mode(int m) {
 }
 
 
-gboolean parse_extended_cmd (char *command,CLIENT *client) {
+gboolean parse_extended_cmd (const char *command,const CLIENT *client) {
   gboolean implemented=TRUE;
   char reply[256];
   reply[0]='\0';
@@ -3170,7 +3170,7 @@ int parse_cmd(void *data) {
           if(command[2]==';') {
             int val=0;
             FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
-            FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
+            const FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
             switch(vfo[active_receiver->id].mode) {
               case modeCWL:
               case modeCWU:
@@ -3747,7 +3747,7 @@ int parse_cmd(void *data) {
           // set/read filter high, switch to Var1 only when setting
           if(command[2]==';') {
             FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
-            FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
+            const FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
             int fh=5;
             int high=filter->high;
             if(vfo[active_receiver->id].mode==modeLSB) {
@@ -3872,7 +3872,7 @@ int parse_cmd(void *data) {
           // set/read filter low, switch to Var1 only when setting
           if(command[2]==';') {
             FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
-            FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
+            const FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
             int fl=2;
             int low=filter->low;
             if(vfo[active_receiver->id].mode==modeLSB) {

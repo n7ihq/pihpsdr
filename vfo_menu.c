@@ -266,7 +266,6 @@ void vfo_menu(GtkWidget *parent,int id) {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (split_b), split);
   gtk_grid_attach(GTK_GRID(grid),split_b,3,row,2,1);
   g_signal_connect(split_b,"toggled",G_CALLBACK(split_cb),NULL);
-  row++;
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

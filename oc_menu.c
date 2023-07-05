@@ -175,7 +175,7 @@ g_print("oc_menu: parent=%p\n",parent);
   //
   i=bandGen;
   for(;;) {
-    BAND *band=band_get_band(i);
+    const BAND *band=band_get_band(i);
     if(strlen(band->title)>0) {
       GtkWidget *band_label=gtk_label_new(NULL);
       char band_text[32];

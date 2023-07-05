@@ -164,7 +164,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     mode=vfo[0].mode;
   }
 
-  BAND *band=band_get_band(vfoband);
+  const BAND *band=band_get_band(vfoband);
   long long half=(long long)rx->sample_rate/2LL;
   double vfofreq=((double) rx->pixels * 0.5)-(double)rx->pan;
 

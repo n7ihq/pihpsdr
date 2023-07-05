@@ -20,7 +20,7 @@
 #include <gtk/gtk.h>
 
 static gboolean draw_led_cb (GtkWidget *widget, cairo_t *cr, gpointer data) {
-  GdkRGBA *color=(GdkRGBA *)data;
+  const GdkRGBA *color=(GdkRGBA *)data;
 //g_print("%s: %p color=%p r=%f g=%f b=%f\n",__FUNCTION__,widget,color,color->red,color->green,color->blue);
   cairo_set_source_rgb(cr, color->red, color->green, color->blue);
   cairo_paint(cr);

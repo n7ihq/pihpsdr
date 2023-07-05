@@ -23,12 +23,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wdsp.h>
 
 #include "main.h"
 #include "new_menu.h"
 #include "display_menu.h"
 #include "radio.h"
-#include "wdsp.h"
 
 static GtkWidget *dialog=NULL;
 

@@ -38,7 +38,6 @@
 #include "xvtr_menu.h"
 #include "equalizer_menu.h"
 #include "radio.h"
-#include "step_menu.h"
 #include "meter_menu.h"
 #include "band_menu.h"
 #include "bandstack_menu.h"
@@ -210,16 +209,6 @@ void start_rx() {
   cleanup();
   rx_menu(top_window);
 }
-
-//void start_step() {
-//  cleanup();
-//  step_menu(top_window);
-//}
-//
-//static gboolean step_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-//  start_step();
-//  return TRUE;
-//}
 
 void start_meter() {
   cleanup();

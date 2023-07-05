@@ -112,7 +112,7 @@ void bandstack_menu(GtkWidget *parent) {
   int row=1;
   int col=0;
   for(i=0;i<bandstack->entries;i++) {
-    BANDSTACK_ENTRY *entry=&bandstack->entry[i];
+    const BANDSTACK_ENTRY *entry=&bandstack->entry[i];
     if (entry->ctun) {
       sprintf(label,"%lld %s",entry->ctun_frequency,mode_string[entry->mode]);
     } else {

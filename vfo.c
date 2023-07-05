@@ -30,6 +30,7 @@
 #include <net/if_arp.h>
 #include <net/if.h>
 #include <ifaddrs.h>
+#include <wdsp.h>
 
 #include "appearance.h"
 #include "discovered.h"
@@ -50,7 +51,6 @@
 #include "vfo.h"
 #include "channel.h"
 #include "toolbar.h"
-#include "wdsp.h"
 #include "new_menu.h"
 #include "rigctl.h"
 #ifdef CLIENT_SERVER
@@ -337,7 +337,7 @@ void vfo_xvtr_changed() {
   // to LO + radio_max_frequency
   //
   if(vfo[0].band>=BANDS) {
-    BAND *band=band_get_band(vfo[0].band);
+    const BAND *band=band_get_band(vfo[0].band);
     vfo[0].lo=band->frequencyLO+band->errorLO;
     if ((vfo[0].frequency > vfo[0].lo + radio->frequency_max)  ||
         (vfo[0].frequency < vfo[0].lo + radio->frequency_min)) {
@@ -346,7 +346,7 @@ void vfo_xvtr_changed() {
     }
   }
   if(vfo[1].band>=BANDS) {
-    BAND *band=band_get_band(vfo[1].band);
+    const BAND *band=band_get_band(vfo[1].band);
     vfo[1].lo=band->frequencyLO+band->errorLO;
     if ((vfo[1].frequency > vfo[1].lo + radio->frequency_max)  ||
         (vfo[1].frequency < vfo[1].lo + radio->frequency_min)) {
@@ -430,8 +430,8 @@ void vfo_band_changed(int id,int b) {
     vfo[id].bandstack=bandstack->current_entry;
   }
 
-  BAND *band=band_set_current(b);
-  BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
+  const BAND *band=band_set_current(b);
+  const BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
   vfo[id].band=b;
   vfo[id].frequency=entry->frequency;
   vfo[id].ctun=entry->ctun;
@@ -483,7 +483,7 @@ void vfo_bandstack_changed(int b) {
   vfo[id].bandstack=b;
 
   BANDSTACK *bandstack=bandstack_get_bandstack(vfo[id].band);
-  BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
+  const BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
   vfo[id].frequency=entry->frequency;
   vfo[id].ctun_frequency=entry->ctun_frequency;
   vfo[id].ctun=entry->ctun;
@@ -1088,7 +1088,7 @@ void vfo_update() {
     int txvfo=get_tx_vfo();
 
     FILTER* band_filters=filters[vfo[id].mode];
-    FILTER* band_filter=&band_filters[vfo[id].filter];
+    const FILTER* band_filter=&band_filters[vfo[id].filter];
     if(vfo_surface) {
         char temp_text[32];
         cairo_t *cr;

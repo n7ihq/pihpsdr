@@ -167,7 +167,7 @@ g_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
   gtk_widget_set_size_request(tx->panadapter, width, height);
 }
 
-void transmitter_save_state(TRANSMITTER *tx) {
+void transmitter_save_state(const TRANSMITTER *tx) {
   char name[128];
   char value[128];
 
@@ -1004,7 +1004,7 @@ void tx_set_filter(TRANSMITTER *tx) {
     int id=active_receiver->id;
     int rxmode=vfo[id].mode;
     FILTER *mode_filters=filters[rxmode];
-    FILTER *filter=&mode_filters[vfo[id].filter];
+    const FILTER *filter=&mode_filters[vfo[id].filter];
 
     switch (rxmode) {
       case modeDSB:

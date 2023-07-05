@@ -37,7 +37,6 @@
 #include "alex.h"
 #include "agc.h"
 #include "channel.h"
-#include "wdsp.h"
 #include "radio.h"
 #include "receiver.h"
 #include "transmitter.h"

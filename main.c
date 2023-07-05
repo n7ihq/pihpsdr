@@ -68,7 +68,7 @@ GtkWidget *topgrid;
 
 static GtkWidget *status_label;
 
-void status_text(char *text) {
+void status_text(const char *text) {
   gtk_label_set_text(GTK_LABEL(status_label),text);
   usleep(100000);
   while (gtk_events_pending ())

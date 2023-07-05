@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <math.h>
+#include <wdsp.h>
 
 #include "main.h"
 #include "discovery.h"
@@ -19,7 +20,6 @@
 #include "band.h"
 #include "bandstack.h"
 #include "noise_menu.h"
-#include "wdsp.h"
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
@@ -210,7 +210,7 @@ static int timeout_cb(gpointer data) {
   return TRUE;
 }
 
-static inline double KnobOrWheel(PROCESS_ACTION *a, double oldval, double minval, double maxval, double inc) {
+static inline double KnobOrWheel(const PROCESS_ACTION *a, double oldval, double minval, double maxval, double inc) {
   //
   // Knob ("Potentiometer"):  set value
   // Wheel("Rotary Encoder"): increment/decrement the value (by "inc" per tick)
@@ -482,8 +482,8 @@ int process_action(void *data) {
       break;
     case BANDSTACK_MINUS:
       if(a->mode==PRESSED) {
-        BAND *band=band_get_band(vfo[active_receiver->id].band);
-        BANDSTACK *bandstack=band->bandstack;
+        const BAND *band=band_get_band(vfo[active_receiver->id].band);
+        const BANDSTACK *bandstack=band->bandstack;
         int b=vfo[active_receiver->id].bandstack-1;
         if(b<0) b=bandstack->entries-1;;
         vfo_bandstack_changed(b);
@@ -491,8 +491,8 @@ int process_action(void *data) {
       break;
     case BANDSTACK_PLUS:
       if(a->mode==PRESSED) {
-        BAND *band=band_get_band(vfo[active_receiver->id].band);
-        BANDSTACK *bandstack=band->bandstack;
+        const BAND *band=band_get_band(vfo[active_receiver->id].band);
+        const BANDSTACK *bandstack=band->bandstack;
         int b=vfo[active_receiver->id].bandstack+1;
         if(b>=bandstack->entries) b=0;
         vfo_bandstack_changed(b);

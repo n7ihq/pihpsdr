@@ -52,7 +52,6 @@
 #include "main.h"
 #include "property.h"
 #include "vfo.h"
-#include "wdsp.h"
 #include "new_menu.h"
 #include "encoder_menu.h"
 #include "diversity_menu.h"

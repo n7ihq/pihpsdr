@@ -1779,7 +1779,7 @@ static int calcLevel(double d) {
   int level=0;
   int v=get_tx_vfo();
 
-  BAND *band=band_get_band(vfo[v].band);
+  const BAND *band=band_get_band(vfo[v].band);
   double target_dbm = 10.0 * log10(d * 1000.0);
   double gbb=band->pa_calibration;
   target_dbm-=gbb;

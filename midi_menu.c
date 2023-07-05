@@ -469,7 +469,7 @@ static void load_original_cb(GtkWidget *widget,gpointer user_data) {
   gtk_widget_destroy(load_dialog);
 }
 
-static void add_store(int key,struct desc *cmd) {
+static void add_store(int key,const struct desc *cmd) {
   char str_event[16];
   char str_channel[16];
   char str_note[16];
@@ -1291,7 +1291,7 @@ int ProcessNewMidiConfigureEvent(void * data) {
   // This is now running in the GTK idle queue
   //
 
-  myevent *mydata = (myevent *) data;
+  const myevent *mydata = (myevent *) data;
   enum MIDIevent event=mydata->event;
   int  channel = mydata->channel;
   int  note = mydata->note;

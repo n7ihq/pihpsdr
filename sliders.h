@@ -53,7 +53,7 @@ extern GtkWidget *sliders_init(int my_width, int my_height);
 extern void sliders_update(void);
 
 extern void set_squelch(RECEIVER *rx);
-extern void set_compression(TRANSMITTER *tx);
+extern void set_compression(const TRANSMITTER *tx);
 
 extern void show_diversity_gain(void);
 extern void show_diversity_phase(void);

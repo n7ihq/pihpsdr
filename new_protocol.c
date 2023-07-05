@@ -1811,7 +1811,7 @@ static void process_ps_iq_data(unsigned char *buffer) {
 
 static void process_command_response() {
     long sequence;
-    unsigned char *buffer = command_response_buffer->buffer;
+    const unsigned char *buffer = command_response_buffer->buffer;
     sequence=((buffer[0]&0xFF)<<24)+((buffer[1]&0xFF)<<16)+((buffer[2]&0xFF)<<8)+(buffer[3]&0xFF);
     if (sequence != response_sequence) {
         g_print("CommRes SeqErr: expected=%ld seen=%ld\n", response_sequence, sequence);
@@ -1832,7 +1832,7 @@ static void process_high_priority() {
     int previous_ptt;
     int previous_dot;
     int previous_dash;
-    unsigned char *buffer=high_priority_buffer->buffer;
+    const unsigned char *buffer=high_priority_buffer->buffer;
 
     sequence=((buffer[0]&0xFF)<<24)+((buffer[1]&0xFF)<<16)+((buffer[2]&0xFF)<<8)+(buffer[3]&0xFF);
     if (sequence != highprio_rcvd_sequence) {
@@ -1886,7 +1886,7 @@ static void process_mic_data(int bytes) {
   int b;
   int i;
   float fsample;
-  unsigned char *buffer=mic_line_buffer->buffer;
+  const unsigned char *buffer=mic_line_buffer->buffer;
 
   sequence=((buffer[0]&0xFF)<<24)+((buffer[1]&0xFF)<<16)+((buffer[2]&0xFF)<<8)+(buffer[3]&0xFF);
   if (sequence != micsamples_sequence) {

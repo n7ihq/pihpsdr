@@ -245,7 +245,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
   // band edges
   int b=vfo[txvfo].band;
-  BAND *band=band_get_band(b);
+  const BAND *band=band_get_band(b);
   if(band->frequencyMin!=0LL) {
     cairo_set_source_rgba(cr, COLOUR_ALARM);
     cairo_set_line_width(cr, PAN_LINE_EXTRA);
