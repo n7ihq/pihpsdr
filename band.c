@@ -575,8 +575,29 @@ void bandRestoreState() {
 int get_band_from_frequency(long long f) {
   int b;
   int found=-1;
-  for(b=0;b<BANDS+XVTRS;b++) {
-    BAND *band=band_get_band(b);
+
+  //
+  // do not search non-xvtr bands if frequency not supported
+  // by the radio
+  //
+  if (f >= radio->frequency_min && f <= radio->frequency_max) {
+    for(b=0;b<BANDS;b++) {
+      const BAND *band=band_get_band(b);
+      if(strlen(band->title)>0) {
+        if(f>=band->frequencyMin && f<=band->frequencyMax) {
+          found=b;
+          break;
+        }
+      }
+    }
+  }
+
+  //
+  // start a new search on the xvtr bands such that if a xvtr
+  // band produces a match, it will take precedence
+  //
+  for(b=BANDS;b<BANDS+XVTRS;b++) {
+    const BAND *band=band_get_band(b);
     if(strlen(band->title)>0) {
       if(f>=band->frequencyMin && f<=band->frequencyMax) {
         found=b;
@@ -584,7 +605,12 @@ int get_band_from_frequency(long long f) {
       }
     }
   }
+
+  //
+  // If the frequency is out of range, use bandGen
+  //
   if (found < 0) found=bandGen;
+
   return found;
 }
 
