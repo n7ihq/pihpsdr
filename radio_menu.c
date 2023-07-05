@@ -88,6 +88,10 @@ static void tx_gain_element_changed_cb(GtkWidget *widget, gpointer data) {
   }
 }
 
+static void iqswap_cb(GtkWidget *widget, gpointer data) {
+  iqswap=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 static void agc_changed_cb(GtkWidget *widget, gpointer data) {
   gboolean agc=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   soapy_protocol_set_automatic_gain(active_receiver,agc);
@@ -129,10 +133,6 @@ static void ptt_tip_cb(GtkWidget *widget, gpointer data) {
 
 static void bias_cb(GtkWidget *widget, gpointer data) {
   mic_bias_enabled=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-}
-
-static void iqswap_cb(GtkWidget *widget, gpointer data) {
-  iqswap=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void touchscreen_cb(GtkWidget *widget, gpointer data) {
