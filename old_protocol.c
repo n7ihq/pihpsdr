@@ -34,6 +34,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <signal.h>
 #include <wdsp.h>
 
 #include "audio.h"
@@ -45,7 +46,6 @@
 #include "radio.h"
 #include "receiver.h"
 #include "transmitter.h"
-#include "signal.h"
 #include "vfo.h"
 #include "ext.h"
 #include "iambic.h"

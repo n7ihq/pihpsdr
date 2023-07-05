@@ -40,6 +40,7 @@
 #include <semaphore.h>
 #include <math.h>
 #include <sys/select.h>
+#include <signal.h>
 
 #include <wdsp.h>
 
@@ -53,7 +54,6 @@
 #include "radio.h"
 #include "receiver.h"
 #include "transmitter.h"
-#include "signal.h"
 #include "vfo.h"
 #include "toolbar.h"
 #include "vox.h"

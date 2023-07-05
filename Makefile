@@ -511,9 +511,16 @@ prebuild:
 # Therefore, correct this here. Furthermore, we can add additional options to cppcheck
 # in the variable CPPOPTIONS
 #
-CPPOPTIONS= --enable=all
+# Normally cppcheck complains about variables that could be declared "const".
+# Suppress this warning for callback functions because adding "const" would need
+# an API change in many cases.
+#
+# On MacOS, cppcheck usually cannot find the system include files so we suppress any
+# warnings therefrom.
+#
+CPPOPTIONS= --enable=all --check-level=exhaustive --suppress=constParameterCallback
 ifeq ($(UNAME_S), Darwin)
-CPPOPTIONS += -D__APPLE__
+CPPOPTIONS += -D__APPLE__ --suppress=missingIncludeSystem
 else
 CPPOPTIONS += -D__linux__
 endif

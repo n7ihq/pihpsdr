@@ -751,7 +751,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hl2audio_b), hl2_audio_codec);
     gtk_grid_attach(GTK_GRID(grid),hl2audio_b,col,row,1,1);
     g_signal_connect(hl2audio_b,"toggled",G_CALLBACK(hl2audio_cb),NULL);
-    col++;
+    col++;  // value used below if SOAPY is active
   }
 
 #ifdef SOAPYSDR
@@ -798,11 +798,10 @@ void radio_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),rx_gain_calibration_b,col,row,1,1);
   g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
 
+#ifdef SOAPYSDR
   row++;
-
   col=0;
 
-#ifdef SOAPYSDR
   if (device==SOAPYSDR_USB_DEVICE) {
     //
     // If there is only a single RX or TX gain element, then we need not display it

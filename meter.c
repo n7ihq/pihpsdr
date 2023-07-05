@@ -29,7 +29,6 @@
 #include "receiver.h"
 #include "meter.h"
 #include "radio.h"
-#include "wdsp.h"
 #include "radio.h"
 #include "version.h"
 #include "mode.h"

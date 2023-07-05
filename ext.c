@@ -131,9 +131,9 @@ int ext_remote_set_pan(void *data) {
   remote_set_pan(active_receiver->id,(double)pan);
   return 0;
 }
-#endif
 
 int ext_set_title(void *data) {
   gtk_window_set_title(GTK_WINDOW(top_window),(char *)data);
   return 0;
 }
+#endif

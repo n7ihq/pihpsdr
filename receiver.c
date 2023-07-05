@@ -709,6 +709,7 @@ static gint update_display(gpointer data) {
   return FALSE;
 }
 
+#ifdef CLIENT_SERVER
 void receiver_remote_update_display(RECEIVER *rx) {
   if(rx->displaying) {
     if(rx->pixels>0) {
@@ -726,6 +727,7 @@ void receiver_remote_update_display(RECEIVER *rx) {
     }
   }
 }
+#endif
 
 void set_displaying(RECEIVER *rx,int state) {
   rx->displaying=state;
