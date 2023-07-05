@@ -519,7 +519,7 @@ void tx_menu(GtkWidget *parent) {
 
   GtkWidget *digi_drive_b=gtk_spin_button_new_with_range(1.0,drive_max,1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(digi_drive_b),drive_digi_max);
-  gtk_widget_show(dig_idrive);
+  gtk_widget_show(digi_drive_b);
   gtk_grid_attach(GTK_GRID(grid),digi_drive_b,col,row,1,1);
   g_signal_connect(digi_drive_b,"value-changed",G_CALLBACK(digi_drive_cb),NULL);
 
