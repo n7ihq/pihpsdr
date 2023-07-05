@@ -312,7 +312,6 @@ rx_menu.c \
 rx_panadapter.c \
 sintab.c \
 sliders.c \
-step_menu.c \
 store.c \
 store_menu.c \
 switch_menu.c \
@@ -394,7 +393,6 @@ rx_menu.h \
 rx_panadapter.h \
 sintab.h \
 sliders.h \
-step_menu.h \
 store.h \
 store_menu.h \
 switch_menu.h \
@@ -470,7 +468,6 @@ rx_menu.o \
 rx_panadapter.o \
 sintab.o \
 sliders.o \
-step_menu.o \
 store.o \
 store_menu.o \
 switch_menu.o \
