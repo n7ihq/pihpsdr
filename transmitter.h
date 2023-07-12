@@ -87,13 +87,16 @@ typedef struct _transmitter {
 
   double am_carrier_level;
 
-  int attenuation;
+  int attenuation;      // Attenuation in the RX ADC0 chain (!) if TX is active
 
-  int drive;
+  int drive;            // value of the drive slider
   int tune_use_drive;
   int tune_drive;
 
-  int drive_level;
+  int drive_level;      // amplitude (0-255) corresponding to "drive"
+  int    do_scale;      // apply TX iq scaling
+  double drive_scale;   // additional TX iq scaling required
+  double drive_iscal;   // inverse of drive_scale
 
   int compressor;
   double compressor_level;

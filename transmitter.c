@@ -250,6 +250,15 @@ void transmitter_save_state(const TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.drive_level",tx->id);
   sprintf(value,"%d",tx->drive_level);
   setProperty(name,value);
+  sprintf(name,"transmitter.%d.drive_scale",tx->id);
+  sprintf(value,"%f",tx->drive_scale);
+  setProperty(name,value);
+  sprintf(name,"transmitter.%d.drive_iscal",tx->id);
+  sprintf(value,"%f",tx->drive_iscal);
+  setProperty(name,value);
+  sprintf(name,"transmitter.%d.do_scale",tx->id);
+  sprintf(value,"%d",tx->do_scale);
+  setProperty(name,value);
   sprintf(name,"transmitter.%d.compressor",tx->id);
   sprintf(value,"%d",tx->compressor);
   setProperty(name,value);
@@ -355,6 +364,15 @@ void transmitter_restore_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.drive_level",tx->id);
   value=getProperty(name);
   if(value) tx->drive_level=atoi(value);
+  sprintf(name,"transmitter.%d.drive_scale",tx->id);
+  value=getProperty(name);
+  if(value) tx->drive_scale=atof(value);
+  sprintf(name,"transmitter.%d.drive_iscal",tx->id);
+  value=getProperty(name);
+  if(value) tx->drive_iscal=atof(value);
+  sprintf(name,"transmitter.%d.do_scale",tx->id);
+  value=getProperty(name);
+  if(value) tx->do_scale=atoi(value);
   sprintf(name,"transmitter.%d.compressor",tx->id);
   value=getProperty(name);
   if(value) tx->compressor=atoi(value);
@@ -839,6 +857,10 @@ g_print("create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rat
   tx->drive=50;
   tx->tune_drive=10;
   tx->tune_use_drive=0;
+  tx->drive_level=0;
+  tx->drive_scale=1.0;
+  tx->drive_iscal=1.0;
+  tx->do_scale=0;
 
   tx->compressor=0;
   tx->compressor_level=0.0;
@@ -1181,21 +1203,8 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
   if (isTransmitting()) {
 
-    if((device==NEW_DEVICE_ATLAS || device==DEVICE_OZY || device==DEVICE_METIS) && atlas_penelope == 1) {
-      //
-      // Note that the atlas_penelope flag can have three values, namely
-      //   0 "no penelope"  : no scaling
-      //   1 "penelope"     : scale
-      //   2 "pennylane"    : no scaling
-      //
-      // On Penelope boards, the TX drive level as reported by the P1 protocol has
-      // no effect, and TX drive level changes are instead realized by
-      // scaling the TX IQ samples. Pennylane is a slightly updated Penelope board
-      // that has drive scaling just as Hermes and later.
-      //
-      // "The magic factor" 0.00392 is slightly less than 1/255.
-      //
-      gain=gain*(double)tx->drive_level*0.00392;
+    if(tx->do_scale) {
+      gain=gain*tx->drive_scale;
     }
 
     if (txflag == 0 && protocol == NEW_PROTOCOL) {
@@ -1504,8 +1513,13 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
 
 //g_print("add_ps_iq_samples: samples=%d i_rx=%f q_rx=%f i_tx=%f q_tx=%f\n",rx_feedback->samples, i_sample_rx,q_sample_rx,i_sample_tx,q_sample_tx);
 
-  tx_feedback->iq_input_buffer[tx_feedback->samples*2]=i_sample_tx;
-  tx_feedback->iq_input_buffer[(tx_feedback->samples*2)+1]=q_sample_tx;
+  if (tx->do_scale) {
+    tx_feedback->iq_input_buffer[tx_feedback->samples*2]=i_sample_tx*tx->drive_iscal;
+    tx_feedback->iq_input_buffer[(tx_feedback->samples*2)+1]=q_sample_tx*tx->drive_iscal;
+  } else {
+    tx_feedback->iq_input_buffer[tx_feedback->samples*2]=i_sample_tx;
+    tx_feedback->iq_input_buffer[(tx_feedback->samples*2)+1]=q_sample_tx;
+  }
   rx_feedback->iq_input_buffer[rx_feedback->samples*2]=i_sample_rx;
   rx_feedback->iq_input_buffer[(rx_feedback->samples*2)+1]=q_sample_rx;
 

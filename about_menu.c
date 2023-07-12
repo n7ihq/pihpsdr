@@ -87,7 +87,7 @@ void about_menu(GtkWidget *parent) {
   strcat(text,"\n    Laurence Barker, G8NJJ: USB OZY Support");
   strcat(text,"\n    Johan Maas, PA3GSB: RadioBerry support");
   strcat(text,"\n    Ken Hopper, N9VV: Testing and Documentation");
-  strcat(text,"\n    Christoph van Wüllen, DL1YCF: CW, Pure Signal, Diversity, MIDI ");
+  strcat(text,"\n    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI ");
 
   sprintf(line,"\n\nBuild date: %s", build_date);
   strcat(text,line);

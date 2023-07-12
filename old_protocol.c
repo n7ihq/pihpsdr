@@ -1544,53 +1544,7 @@ void ozy_send_buffer() {
             //
         if(isTransmitting() || (txmode == modeCWU) || (txmode == modeCWL)) {
           power=transmitter->drive_level;
-          if (device == DEVICE_HERMES_LITE2) {
-            //
-            // from the "intended" drive level power, calculate the
-            // next lower TX attenuation which can be from 0.0 to -7.5 dB
-            // in 0.5 dB steps, encode the step in a four-bit word and shift
-            // it to the upper 4 bits.
-            //
-            int hl2power;
-            if (power < 102) {
-              hl2power=0;                   // -7.5 dB TX attenuation
-            } else if (power < 108) {
-              hl2power=16;                  // -7.0 dB TX attenuation
-            } else if (power < 114) {
-              hl2power=32;                  // -6.5 dB TX attenuation
-            } else if (power < 121) {
-              hl2power=48;                  // -6.0 dB TX attenuation
-            } else if (power < 128) {
-              hl2power=64;                  // -5.5 dB TX attenuation
-            } else if (power < 136) {
-              hl2power=80;                  // -5.0 dB TX attenuation
-            } else if (power < 144) {
-              hl2power=96;                  // -4.5 dB TX attenuation
-            } else if (power < 152) {
-              hl2power=112;                 // -4.0 dB TX attenuation
-            } else if (power < 161) {
-              hl2power=128;                 // -3.5 dB TX attenuation
-            } else if (power < 171) {
-              hl2power=144;                 // -3.0 dB TX attenuation
-            } else if (power < 181) {
-              hl2power=160;                 // -2.5 dB TX attenuation
-            } else if (power < 192) {
-              hl2power=176;                 // -2.0 dB TX attenuation
-            } else if (power < 203) {
-              hl2power=192;                 // -1.5 dB TX attenuation
-            } else if (power < 215) {
-              hl2power=208;                 // -1.0 dB TX attenuation
-            } else if (power < 228) {
-              hl2power=224;                 // -0.5 dB TX attenuation
-            } else {
-              hl2power=240;                 // no      TX attenuation
-            }
-            power=hl2power;
-          }
         }
-
-        //g_print("%s: TXband=%s disablePA=%d\n",__FUNCTION__,txband->title,txband->disablePA);
-
 
         output_buffer[C0]=0x12;
         output_buffer[C1]=power&0xFF;

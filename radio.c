@@ -1799,12 +1799,97 @@ static int calcLevel(double d) {
 }
 
 void calcDriveLevel() {
+  int level;
   if (tune && !transmitter->tune_use_drive) {
-    transmitter->drive_level=calcLevel(transmitter->tune_drive);
-g_print("calcDriveLevel: tune=%d drive_level=%d\n",transmitter->tune_drive,transmitter->drive_level);
+    level=calcLevel(transmitter->tune_drive);
   } else {
-    transmitter->drive_level=calcLevel(transmitter->drive);
-g_print("calcDriveLevel: drive=%d drive_level=%d\n",transmitter->drive,transmitter->drive_level);
+    level=calcLevel(transmitter->drive);
+  }
+  //
+  // For most of the radios, just copy the "level" and switch off scaling
+  //
+  transmitter->do_scale=0;
+  transmitter->drive_level=level;
+  //
+  // For the original Penelope transmitter, the drive level has no effect. Instead, the TX IQ
+  // samples must be scaled.
+  // The HermesLite-II needs a combination of hardware attenuation and TX IQ scaling.
+  // The inverse of the scale factor is needed to reverse the scaling for the TX DAC feedback
+  // samples used in the PureSignal case.
+  //
+  // The constants have been rounded off so the drive_scale is slightly (0.01%) smaller then needed
+  // so we have to reduce the inverse a little bit to avoid overflows.
+  //
+  if((device==NEW_DEVICE_ATLAS || device==DEVICE_OZY || device==DEVICE_METIS) && atlas_penelope == 1) {
+    transmitter->drive_scale = level * 0.0039215;
+    transmitter->drive_level = 255;
+    transmitter->drive_iscal = 0.9999 / transmitter->drive_scale;
+    transmitter->do_scale=1;
+  }
+  if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2) {
+    //
+    // Calculate a combination of TX attenuation (values from -7.5 to 0 dB are encoded as 0, 16, 32, ..., 240)
+    // and a TX IQ scaling. If level is above 107, the scale factor will be between 0.94 and 1.00, but if
+    // level is smaller than 107 it may adopt any value between 0.0 and 1.0
+    //
+    double d = level;
+
+    if (level > 240) {
+      transmitter->drive_level = 240;                     //  0.0 dB hardware ATT
+      transmitter->drive_scale = d * 0.0039215;
+    } else if (level > 227) {
+      transmitter->drive_level = 224;                     // -0.5 dB hardware ATT
+      transmitter->drive_scale = d * 0.0041539;
+    } else if (level > 214) {
+      transmitter->drive_level = 208;                     // -1.0 dB hardware ATT
+      transmitter->drive_scale = d * 0.0044000;
+    } else if (level > 202) {
+      transmitter->drive_level = 192;
+      transmitter->drive_scale = d * 0.0046607;
+    } else if (level > 191) {
+      transmitter->drive_level = 176;
+      transmitter->drive_scale = d * 0.0049369;
+    } else if (level > 180) {
+      transmitter->drive_level = 160;
+      transmitter->drive_scale = d * 0.0052295;
+    } else if (level > 170) {
+      transmitter->drive_level = 144;
+      transmitter->drive_scale = d * 0.0055393;
+    } else if (level > 160) {
+      transmitter->drive_level = 128;
+      transmitter->drive_scale = d * 0.0058675;
+    } else if (level > 151) {
+      transmitter->drive_level = 112;
+      transmitter->drive_scale = d * 0.0062152;
+    } else if (level > 143) {
+      transmitter->drive_level = 96; 
+      transmitter->drive_scale = d * 0.0065835;
+    } else if (level > 135) {
+      transmitter->drive_level = 80;
+      transmitter->drive_scale = d * 0.0069736;
+    } else if (level > 127) {
+      transmitter->drive_level = 64;
+      transmitter->drive_scale = d * 0.0073868;
+    } else if (level > 120) {
+      transmitter->drive_level = 48;
+      transmitter->drive_scale = d * 0.0078245;
+    } else if (level > 113) {
+      transmitter->drive_level = 32; 
+      transmitter->drive_scale = d * 0.0082881;
+    } else if (level > 107) {
+      transmitter->drive_level = 16;
+      transmitter->drive_scale = d * 0.0087793;
+    } else {
+      transmitter->drive_level = 0;
+      transmitter->drive_scale = d * 0.0092995;    // can be between 0.0 and 0.995
+    }
+    transmitter->drive_iscal=0.9999/transmitter->drive_scale;
+    transmitter->do_scale=1;
+  }
+  if (transmitter->do_scale) {
+    g_print("%s: Level=%d Fac=%f\n", __FUNCTION__, transmitter->drive_level, transmitter->drive_scale);
+  } else {
+    g_print("%s: Level=%d\n", __FUNCTION__, transmitter->drive_level);
   }
   if(isTransmitting()  && protocol==NEW_PROTOCOL) {
     schedule_high_priority();
