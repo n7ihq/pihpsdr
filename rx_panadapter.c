@@ -545,10 +545,12 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_move_to(cr, 100.0, 30.0);
     cairo_show_text(cr, text);
 
-    double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
-    sprintf(text,"%0.0fmA",c);
-    cairo_move_to(cr, 160.0, 30.0);
-    cairo_show_text(cr, text);
+    if (isTransmitting()) {
+      double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
+      sprintf(text,"%0.0fmA",c);
+      cairo_move_to(cr, 160.0, 30.0);
+      cairo_show_text(cr, text);
+    }
 #ifdef CLIENT_SERVER
     }
 #endif
