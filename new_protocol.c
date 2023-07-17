@@ -503,8 +503,46 @@ void new_protocol_init(int pixels) {
     }
 
     int optval = 1;
-    setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-    setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+    socklen_t optlen = sizeof(optval);
+    setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
+    setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
+    //
+    // We need a receive buffer with a decent size, to be able to
+    // store several incoming packets if they arrive in a burst.
+    // My personal feeling is to let the kernel decide, but other
+    // program explicitly specify the buffer sizes. What I  do here
+    // is to query the buffer sizes after they have been set.
+    // Note in the UDP case one normally does not need a large
+    // send buffer because data is sent immediately.
+    //
+    // UDP RaspPi default values: RCVBUF: 0x34000, SNDBUF: 0x34000
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x68000, SNDBUF: 0x20000
+    //
+    // UDP MacOS  default values: RCVBUF: 0xC01D0, SNDBUF: 0x02400
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x40000, SNDBUF: 0x10000
+    //
+    optval=0x40000;
+    if (setsockopt(data_socket, SOL_SOCKET, SO_RCVBUF, &optval, optlen)<0) {
+      perror("data_socket: set SO_RCVBUF");
+    }
+    optval=0x10000;
+    if (setsockopt(data_socket, SOL_SOCKET, SO_SNDBUF, &optval, optlen)<0) {
+      perror("data_socket: set SO_SNDBUF");
+    }
+    optlen=sizeof(optval);
+    if (getsockopt(data_socket, SOL_SOCKET, SO_RCVBUF, &optval, &optlen)<0) {
+      perror("data_socket: get SO_RCVBUF");
+    } else {
+      if (optlen==sizeof(optval)) g_print("UDP Socket RCV buf size=%d\n", optval);
+    }
+    optlen=sizeof(optval);
+    if (getsockopt(data_socket, SOL_SOCKET, SO_SNDBUF, &optval, &optlen)<0) {
+      perror("data_socket: get SO_SNDBUF");
+    } else {
+      if (optlen==sizeof(optval)) g_print("UDP Socket SND buf size=%d\n", optval);
+    }
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF

@@ -393,23 +393,55 @@ static void open_udp_socket() {
     }
 
     int optval = 1;
-    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))<0) {
+    socklen_t optlen=sizeof(optval);
+    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEADDR, &optval, optlen)<0) {
       perror("data_socket: SO_REUSEADDR");
     }
-    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval))<0) {
+    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEPORT, &optval, optlen)<0) {
       perror("data_socket: SO_REUSEPORT");
     }
-    optval=0xffff;
-    if (setsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, sizeof(optval))<0) {
-      perror("data_socket: SO_SNDBUF");
+    //
+    // We need a receive buffer with a decent size, to be able to
+    // store several incoming packets if they arrive in a burst.
+    // My personal feeling is to let the kernel decide, but other
+    // program explicitly specify the buffer sizes. What I  do here
+    // is to query the buffer sizes after they have been set.
+    // Note in the UDP case one normally does not need a large
+    // send buffer because data is sent immediately.
+    //
+    // UDP RaspPi default values: RCVBUF: 0x34000, SNDBUF: 0x34000
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x68000, SNDBUF: 0x20000
+    //
+    // UDP MacOS  default values: RCVBUF: 0xC01D0, SNDBUF: 0x02400
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x40000, SNDBUF: 0x10000
+    //
+    optval=0x40000;
+    if (setsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, optlen)<0) {
+      perror("data_socket: set SO_RCVBUF");
     }
-    if (setsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, sizeof(optval))<0) {
-      perror("data_socket: SO_RCVBUF");
+    optval=0x10000;
+    if (setsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, optlen)<0) {
+      perror("data_socket: set SO_SNDBUF");
+    }
+    optlen=sizeof(optval);
+    if (getsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, &optlen)<0) {
+      perror("data_socket: get SO_RCVBUF");
+    } else {
+      if (optlen==sizeof(optval)) g_print("UDP Socket RCV buf size=%d\n", optval);
+    }
+    optlen=sizeof(optval);
+    if (getsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, &optlen)<0) {
+      perror("data_socket: get SO_SNDBUF");
+    } else {
+      if (optlen==sizeof(optval)) g_print("UDP Socket SND buf size=%d\n", optval);
     }
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF
-    if(setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, sizeof(optval))<0) {
+    optlen=sizeof(optval);
+    if(setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen)<0) {
       perror("data_socket: IP_TOS");
     }
 #endif
@@ -436,6 +468,9 @@ g_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_
 
     memcpy(&data_addr,&radio->info.network.address,radio->info.network.address_length);
     data_addr.sin_port=htons(DATA_PORT);
+    //
+    // Set value of data_socket only after everything succeeded
+    //
     data_socket=tmp;
     g_print("%s: UDP socket established: %d for %s:%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
 }
@@ -460,29 +495,64 @@ static void open_tcp_socket() {
       exit(-1);
     }
     int optval = 1;
-    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))<0) {
+    socklen_t optlen = sizeof(optval);
+    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEADDR, &optval, optlen)<0) {
       perror("tcp_socket: SO_REUSEADDR");
     }
-    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval))<0) {
+    if(setsockopt(tmp, SOL_SOCKET, SO_REUSEPORT, &optval, optlen)<0) {
       perror("tcp_socket: SO_REUSEPORT");
     }
     if (connect(tmp,(const struct sockaddr *)&data_addr,sizeof(data_addr)) < 0) {
       perror("tcp_socket: connect");
     }
-    optval=0xffff;
-    if (setsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, sizeof(optval))<0) {
-      perror("tcp_socket: SO_SNDBUF");
+    //
+    // We need a receive buffer with a decent size, to be able to
+    // store several incoming packets if they arrive in a burst.
+    // My personal feeling is to let the kernel decide, but other
+    // program explicitly specify the buffer sizes. What I  do here
+    // is to query the buffer sizes after they have been set.
+    // Note in the UDP case one normally does not need a large
+    // send buffer because data is sent immediately.
+    //
+    // TCP RaspPi default values: RCVBUF: 0x20000, SNDBUF: 0x15400
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x68000, SNDBUF: 0x20000
+    //
+    // TCP MacOS  default values: RCVBUF: 0x63AEC, SNDBUF: 0x23E2C
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x40000, SNDBUF: 0x10000
+    //
+    optval=0x40000;
+    if (setsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, optlen)<0) {
+      perror("tcp_socket: set SO_RCVBUF");
     }
-    if (setsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, sizeof(optval))<0) {
-      perror("tcp_socket: SO_RCVBUF");
+    optval=0x10000;
+    if (setsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, optlen)<0) {
+      perror("tcp_socket: set SO_SNDBUF");
+    }
+    optlen=sizeof(optval);
+    if (getsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, &optlen)<0) {
+      perror("tcp_socket: get SO_RCVBUF");
+    } else {
+      if (optlen==sizeof(optval)) g_print("TCP Socket RCV buf size=%d\n", optval);
+    }
+    optlen=sizeof(optval);
+    if (getsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, &optlen)<0) {
+      perror("tcp_socket: get SO_SNDBUF");
+    } else {
+      if (optlen==sizeof(optval)) g_print("TCP Socket SND buf size=%d\n", optval);
     }
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF
-    if(setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, sizeof(optval))<0) {
-      perror("data_socket: IP_TOS");
+    optlen=sizeof(optval);
+    if(setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen)<0) {
+      perror("tcp_socket: IP_TOS");
     }
 #endif
+    //
+    // Set value of tcp_socket only after everything succeeded
+    //
     tcp_socket=tmp;
     g_print("TCP socket established: %d\n", tcp_socket);
 }
@@ -926,8 +996,9 @@ static void process_control_bytes() {
       if (device != DEVICE_HERMES_LITE2) {
         AIN3=((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF); // For Penelope or Hermes
       } else {
-        AIN3=0;
-        average_current=(3*average_current +((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF)) >> 2;
+        unsigned int current=((control_in[3]&0xFF)<<8)|(control_in[4]&0xFF); // HL2
+        // moving average
+        average_current=(3*average_current + current) >> 2;
       }
       break;
     case 3:
