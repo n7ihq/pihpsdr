@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 
+#include "message.h"
+
 //
 // set_button_default_color:
 // The actual text color of the button is recorded and stored
@@ -51,7 +53,7 @@ void set_button_default_color(GtkWidget *widget) {
                     (int) (RGBA.green * 255),
                     (int) (RGBA.blue  * 255),
                     alpha1,alpha2);
-    g_print("Default Color Probed: %s\n",default_color);
+    t_print("Default Color Probed: %s\n",default_color);
 }
 
 void set_button_text_color(GtkWidget *widget,char *color) {

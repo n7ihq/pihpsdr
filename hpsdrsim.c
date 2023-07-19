@@ -27,6 +27,7 @@
  * RF4 is the TX DAC signal. Upon TX, it goes to RX2 for Metis, RX4 for Hermes, and RX5 beyond.
  * Since the feedback runs at the RX sample rate while the TX sample rate is fixed (48000 Hz),
  * we have to re-sample and do this in a very stupid way (linear interpolation).
+ * NOTE: anan10E flag: use RX2 for TX DAC in the HERMES case.
  *
  * The "noise" is a random number of amplitude 0.00003 (last bit on a 16-bit ADC),
  * that is about -90 dBm spread onto a spectrum whose width is the sample rate. Therefore
@@ -149,6 +150,7 @@ static int              cw_delay = -1;
 static int              CommonMercuryFreq = -1;
 static int              freq=-1;
 static int              rx2gnd=-1;
+static int              TXDAC=1;
 
 
 struct hl2word {
@@ -185,6 +187,7 @@ static double  last_i_sample=0.0;
 static double  last_q_sample=0.0;
 static int  txptr=0;
 static int  oldnew=3;    // 1: only P1, 2: only P2, 3: P1 and P2,
+static int  anan10e=0;   // HERMES with anan10e set behaves like METIS
 
 static double txlevel;
 
@@ -226,7 +229,7 @@ int main(int argc, char *argv[])
 
 /*
  *      Examples for METIS:     ATLAS bus with Mercury/Penelope boards
- *      Examples for HERMES:    ANAN10, ANAN100
+ *      Examples for HERMES:    ANAN10, ANAN100 (Note ANAN-10E/100B behave like METIS)
  *      Examples for ANGELIA:   ANAN100D
  *      Examples for ORION:     ANAN200D
  *      Examples for ORION2:    ANAN7000, ANAN8000
@@ -262,6 +265,7 @@ int main(int argc, char *argv[])
             if (!strncmp(argv[i],"-diversity",   10))  {diversity=1; continue;}
             if (!strncmp(argv[i],"-P1",           3))  {oldnew=1; continue;}
             if (!strncmp(argv[i],"-P2",           3))  {oldnew=2; continue;}
+            if (!strncmp(argv[i],"-anan10e",      8))  {anan10e=1;continue;}
             if (!strncmp(argv[i],"-nb",           3))  {
                 noiseblank=1;
                 if (i < argc-1) sscanf(argv[++i],"%d",&nb_pulse);
@@ -279,16 +283,71 @@ int main(int argc, char *argv[])
         }
 
         switch (NEWDEVICE) {
-            case   NDEV_ATLAS:        printf("DEVICE is ATLAS/METIS\n");     c1=3.3; c2=0.090; break;
-            case   NDEV_HERMES:       printf("DEVICE is HERMES\n");          c1=3.3; c2=0.095; break;
-            case   NDEV_HERMES2:      printf("DEVICE is HERMES2/GRIFFIN\n"); c1=3.3; c2=0.095; break;
-            case   NDEV_ANGELIA:      printf("DEVICE is ANGELIA\n");         c1=3.3; c2=0.095; break;
-            case   NDEV_HERMES_LITE:  printf("DEVICE is HermesLite V1\n");   c1=3.3; c2=0.095; break;
-            case   NDEV_HERMES_LITE2: printf("DEVICE is HermesLite V2\n");   c1=3.3; c2=0.095; break;
-            case   NDEV_ORION:        printf("DEVICE is ORION\n");           c1=5.0; c2=0.108; break;
-            case   NDEV_ORION2:       printf("DEVICE is ORION MkII\n");      c1=5.0; c2=0.108; break;
-            case   NDEV_SATURN:       printf("DEVICE is SATURN/G2\n");       c1=5.0; c2=0.108; break;
-            case   NDEV_C25:          printf("DEVICE is STEMlab/C25\n");     c1=3.3; c2=0.090; break;
+            case   NDEV_ATLAS:
+              printf("DEVICE is ATLAS/METIS\n");
+              c1=3.3;
+              c2=0.090;
+              TXDAC=1;
+              break;
+            case   NDEV_HERMES:
+              printf("DEVICE is HERMES\n");
+              c1=3.3;
+              c2=0.095;
+              if (anan10e) {
+                TXDAC=1;
+                printf("Anan10E/Anan100B simulation\n");
+              } else {
+                TXDAC=3;
+              }
+              break;
+            case   NDEV_HERMES2:
+              printf("DEVICE is HERMES2/GRIFFIN\n");
+              c1=3.3;
+              c2=0.095;
+              TXDAC=3;
+              break;
+            case   NDEV_ANGELIA:
+              printf("DEVICE is ANGELIA\n");
+              c1=3.3;
+              c2=0.095;
+              TXDAC=4;
+              break;
+            case   NDEV_HERMES_LITE:
+              printf("DEVICE is HermesLite V1\n");
+              c1=3.3;
+              c2=0.095;
+              TXDAC=1;
+              break;
+            case   NDEV_HERMES_LITE2:
+              printf("DEVICE is HermesLite V2\n");
+              c1=3.3;
+              c2=0.095;
+              TXDAC=3;
+              break;
+            case   NDEV_ORION:
+              printf("DEVICE is ORION\n");
+              c1=5.0;
+              c2=0.108;
+              TXDAC=4;
+              break;
+            case   NDEV_ORION2:
+              printf("DEVICE is ORION MkII\n");
+              c1=5.0;
+              c2=0.108;
+              TXDAC=4;
+              break;
+            case   NDEV_SATURN:
+              printf("DEVICE is SATURN/G2\n");
+              c1=5.0;
+              c2=0.108;
+              TXDAC=4;
+              break;
+            case   NDEV_C25:
+              printf("DEVICE is STEMlab/C25\n");
+              c1=3.3;
+              c2=0.090;
+              TXDAC=3;
+              break;
         }
 
 //
@@ -659,7 +718,7 @@ int main(int argc, char *argv[])
                                 buffer[10] = OLDDEVICE;
                                 if (OLDDEVICE == ODEV_HERMES_LITE2) {
                                     // use HL1 device ID and new software version
-                                    buffer[9]=71;
+                                    buffer[9]=73;
                                     buffer[10]=ODEV_HERMES_LITE;
                                     buffer[19]=4;  // number of receivers
                                 }
@@ -1435,18 +1494,7 @@ void *handler_ep6(void *arg)
                                 myqsample=0;
                                 break;
                             }
-                            if ((OLDDEVICE == ODEV_METIS || OLDDEVICE == ODEV_HERMES_LITE) && ptt && (k==1)) {
-                                // METIS: TX DAC signal goes to RX2 when TXing
-                                myisample=dacisample;
-                                myqsample=dacqsample;
-                            }
-                            if ((OLDDEVICE==ODEV_HERMES || OLDDEVICE==ODEV_GRIFFIN || OLDDEVICE==ODEV_C25 || OLDDEVICE==ODEV_HERMES_LITE2) && ptt && (k==3)) {
-                                // HERMES: TX DAC signal goes to RX4 when TXing
-                                myisample=dacisample;
-                                myqsample=dacqsample;
-                            }
-                            if ((OLDDEVICE==ODEV_ANGELIA || OLDDEVICE == ODEV_ORION || OLDDEVICE== ODEV_ORION2) && ptt && (k==4)) {
-                                // ANGELIA and beyond: TX DAC signal goes to RX5 when TXing
+                            if (ptt && (k==TXDAC)) {
                                 myisample=dacisample;
                                 myqsample=dacqsample;
                             }

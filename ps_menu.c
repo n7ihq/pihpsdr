@@ -38,9 +38,11 @@ static GtkWidget *get_pk;
 static GtkWidget *set_pk;
 static GtkWidget *tx_att;
 static GtkWidget *tx_att_spin;
+static int tx_att_min, tx_att_max;
 
 static double pk_val;
 static char   pk_text[16];
+
 /*
  * PureSignal 2.0 parameters and declarations
  */
@@ -76,16 +78,10 @@ static int running=0;
 
 static GtkWidget *entry[INFO_SIZE];
 
-static void destroy_cb(GtkWidget *widget, gpointer data) {
-  running=0;
-  // wait for one instance of info_thread to complete
-  usleep(100000);
-}
-
 static void cleanup() {
   running=0;
   // wait for one instance of info_thread to complete
-  usleep(100000);
+  usleep(200000);
 
   if(transmitter->twotone) {
     tx_set_twotone(transmitter,0);
@@ -102,11 +98,6 @@ static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
   return TRUE;
 }
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
-
 static void att_spin_cb(GtkWidget *widget, gpointer data) {
   transmitter->attenuation=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
@@ -116,11 +107,11 @@ static void setpk_cb(GtkWidget *widget, gpointer data) {
   const gchar *text;
   text = gtk_entry_get_text(GTK_ENTRY(widget));
   sscanf(text,"%lf",&newpk);
-  if (newpk > 0.01 && newpk < 1.01 && fabs(newpk-pk_val) > 0.01) {
+  if (newpk > 0.01 && newpk < 1.01 && fabs(newpk-pk_val) > 0.001) {
     pk_val=newpk;
     SetPSHWPeak(transmitter->id, pk_val);
   }
-  // Display new value. If illegal text has been entered, display new one.
+  // Display new value
   sprintf(pk_text,"%6.3f",pk_val);
   gtk_entry_set_text(GTK_ENTRY(set_pk),pk_text);
 }
@@ -237,32 +228,35 @@ static int info_thread(gpointer arg) {
       switch(state) {
         case 0:
           //
-              // A value of 175 means 1.2 dB too strong
-              // A value of 132 means 1.2 dB too weak
-              //
-          if(newcal && ((info[4]>175 && transmitter->attenuation < 31) || (info[4]<=132 && transmitter->attenuation>0))) {
-            double ddb;
+          // A value of 175 means 1.2 dB too strong
+          // A value of 132 means 1.2 dB too weak
+          //
+          if(newcal && ((info[4]>175 && transmitter->attenuation < tx_att_max) || (info[4]<=132 && transmitter->attenuation>tx_att_min))) {
+            int delta_att;
             int new_att;
-            if (info[4] > 256) {
-                  // If signal is very strong, start with large attenuation and then step up
-                  ddb = 100.0;  // this makes the attenuation 31 dB in the next step
-            } else if (info[4] > 0) {
-              ddb= 20.0 * log10((double)info[4]/152.293);
-                } else {
-                  // This happens when the "Drive" slider is moved to zero
-                  ddb= -100.0;  // this makes the attenuation zero in the next step
-                }
-            new_att=transmitter->attenuation + (int)lround(ddb);
-                // keep new value of attenuation in allowed range
-                if (new_att <  0) new_att= 0;
-                if (new_att > 31) new_att=31;
-                // A "PS reset" is only necessary if the attenuation
-                // has actually changed. This prevents firing "reset"
-                // constantly if the SDR board does not have a TX attenuator
-                // (in this case, att will fast reach 31 and stay there if the
-                // feedback level is too high).
-                // Actually, we first adjust the attenuation (state=0),
-                // then do a PS reset (state=1), and then restart PS (state=2).
+            if (info[4] > 300) {
+              // If signal is very strong, increase attenuation by 15 dB
+              // Note the value is limited to about 350 due to ADC clipping/IQ overflow,
+              // so the feedback level might be much stronger than indicated here
+              delta_att = 15;
+            } else if (info[4] < 25) {
+              // If signal is very weak, decrease attenuation by 15 dB
+              delta_att = -15;
+            } else {
+              // calculate new delta, this mostly succeeds in one step
+              delta_att= (int) lround(20.0 * log10((double)info[4]/152.293));
+            }
+            new_att=transmitter->attenuation + delta_att;
+            // keep new value of attenuation in allowed range
+            if (new_att < tx_att_min) new_att=tx_att_min;
+            if (new_att > tx_att_max) new_att=tx_att_max;
+            // A "PS reset" is only necessary if the attenuation
+            // has actually changed. This prevents firing "reset"
+            // constantly if the SDR board does not have a TX attenuator
+            // (in this case, att will fast reach tx_att_max and stay there if the
+            // feedback level is too high).
+            // Actually, we first adjust the attenuation (state=0),
+            // then do a PS reset (state=1), and then restart PS (state=2).
             if (transmitter->attenuation != new_att) {
               SetPSControl(transmitter->id, 1, 0, 0, 0);
                   transmitter->attenuation=new_att;
@@ -270,14 +264,16 @@ static int info_thread(gpointer arg) {
                         schedule_transmit_specific();
                   }
               state=1;
-                }
+            }
           }
           break;
         case 1:
+          // Perform a PS reset and proceed to a PS restart
           state=2;
           SetPSControl(transmitter->id, 1, 0, 0, 0);
           break;
         case 2:
+          // Perform a PS restart and proceed to the calibration loop
           state=0;
           SetPSControl(transmitter->id, 0, 0, 1, 0);
           break;
@@ -385,11 +381,23 @@ static void twotone_cb(GtkWidget *widget, gpointer data) {
 void ps_menu(GtkWidget *parent) {
   int i;
 
+  //
+  // Standard HPSDR gear has a step-attenuator that goes from 0-31 dB.
+  // The HermesLite has a "preamp" that goes from -12 to +48 dB,
+  // and this is mapped onto an "attenuation" that goes from +31 downto -29 dB
+  // 
+  if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2) {
+    tx_att_min=-29;
+    tx_att_max= 31;
+  } else {
+    tx_att_min=0;
+    tx_att_max= 31;
+  }
   dialog=gtk_dialog_new();
-  g_signal_connect (dialog, "destroy", G_CALLBACK(destroy_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK(close_cb), NULL);
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Pure Signal");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   set_backgnd(dialog);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -578,7 +586,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),tx_att,col,row,1,1);
   gtk_entry_set_width_chars(GTK_ENTRY(tx_att), 10);
 
-  tx_att_spin=gtk_spin_button_new_with_range(0.0, 31.0, 1.0);
+  tx_att_spin=gtk_spin_button_new_with_range((double) tx_att_min, (double) tx_att_max, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_att_spin), (double) transmitter->attenuation);
   gtk_grid_attach(GTK_GRID(grid), tx_att_spin, col,row,1,1);
   g_signal_connect(tx_att_spin,"value-changed",G_CALLBACK(att_spin_cb), NULL);

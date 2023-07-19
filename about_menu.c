@@ -127,7 +127,7 @@ void about_menu(GtkWidget *parent) {
   }
 
   label=gtk_label_new(text);
-  gtk_label_set_justify(GTK_LABEL(label),GTK_JUSTIFY_LEFT);
+  gtk_label_set_xalign(GTK_LABEL(label),0.0);
   gtk_grid_attach(GTK_GRID(grid),label,1,row,4,1);
   gtk_container_add(GTK_CONTAINER(content),grid);
 

@@ -36,22 +36,27 @@
 #ifdef GPIO
 #include "gpio.h"
 #endif
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
 void stop_program() {
 #ifdef GPIO
   gpio_close();
+t_print("%s: GPIO closed\n", __FUNCTION__);
 #endif
 #ifdef CLIENT_SERVER
   if(!radio_is_remote) {
 #endif
     protocol_stop();
+t_print("%s: protocol stopped\n", __FUNCTION__);
     radio_stop();
+t_print("%s: radio stopped\n", __FUNCTION__);
 #ifdef CLIENT_SERVER
   }
 #endif
   radioSaveState();
+t_print("%s: radio state saved\n", __FUNCTION__);
 }
 
 static void cleanup() {
@@ -63,13 +68,27 @@ static void cleanup() {
 }
 
 #if 0
+//
+// This one is not really working:
+// a) GTK complains when trying to destroy "fixed"
+// b) when stopping the radio, not everything is tidied up such that it can be 
+//    restarted
+//
+// so it is preferable to re-start the piHPSDR application if one wants to switch
+// to another radio.
+//
 static gboolean discovery_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
   stop_program();
+  t_print("%s: program stopped\n",__FUNCTION__);
+  gtk_widget_hide(fixed);
   gtk_container_remove(GTK_CONTAINER(top_window), fixed);
+  t_print("%s: container removed\n",__FUNCTION__);
   gtk_widget_destroy(fixed);
-  gtk_container_add(GTK_CONTAINER(top_window), grid);
-  discovery();
+  t_print("%s: destroy complete\n",__FUNCTION__);
+  gtk_container_add(GTK_CONTAINER(top_window), topgrid);
+  t_print("%s: topgrid added\n",__FUNCTION__);
+  g_timeout_add(100,ext_discovery,NULL);
   return TRUE;
 }
 #endif
@@ -85,7 +104,6 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean exit_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-g_print("exit_cb\n");
   stop_program();
   _exit(0);
 }

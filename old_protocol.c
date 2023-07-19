@@ -49,6 +49,7 @@
 #include "vfo.h"
 #include "ext.h"
 #include "iambic.h"
+#include "message.h"
 
 #define min(x,y) (x<y?x:y)
 
@@ -234,22 +235,22 @@ static unsigned int txring_flag=0;    // 0: RX, 1: TX
 // This function is used in debug code
 void dump_buffer(unsigned char *buffer,int length,const char *who) {
   g_mutex_lock(&dump_mutex);
-  g_print("%s: %s: %d\n",__FUNCTION__,who,length);
+  t_print("%s: %s: %d\n",__FUNCTION__,who,length);
   int i=0;
   int line=0;
   while(i<length) {
-    g_print("%02X",buffer[i]);
+    t_print("%02X",buffer[i]);
     i++;
     line++;
     if(line==16) {
-      g_print("\n");
+      t_print("\n");
       line=0;
     }
   }
   if(line!=0) {
-    g_print("\n");
+    t_print("\n");
   }
-  g_print("\n");
+  t_print("\n");
   g_mutex_unlock(&dump_mutex);
 }
 
@@ -260,14 +261,14 @@ void old_protocol_stop() {
   //
   pthread_mutex_lock(&send_ozy_mutex);
   if(device!=DEVICE_OZY) {
-    g_print("%s\n",__FUNCTION__);
+    t_print("%s\n",__FUNCTION__);
     metis_start_stop(0);
   }
   pthread_mutex_unlock(&send_ozy_mutex);
 }
 
 void old_protocol_run() {
-    g_print("%s\n",__FUNCTION__);
+    t_print("%s\n",__FUNCTION__);
     pthread_mutex_lock(&send_ozy_mutex);
     metis_restart();
     pthread_mutex_unlock(&send_ozy_mutex);
@@ -279,14 +280,14 @@ void old_protocol_set_mic_sample_rate(int rate) {
 
 void old_protocol_init(int rx,int pixels,int rate) {
   int i;
-  g_print("old_protocol_init: num_hpsdr_receivers=%d\n",how_many_receivers());
+  t_print("old_protocol_init: num_hpsdr_receivers=%d\n",how_many_receivers());
   pthread_mutex_lock(&send_ozy_mutex);
 
   old_protocol_set_mic_sample_rate(rate);
 
   if(transmitter->local_microphone) {
     if(audio_open_input()!=0) {
-      g_print("audio_open_input failed\n");
+      t_print("audio_open_input failed\n");
       transmitter->local_microphone=0;
     }
   }
@@ -296,24 +297,24 @@ void old_protocol_init(int rx,int pixels,int rate) {
 // if we have a USB interfaced Ozy device:
 //
   if (device == DEVICE_OZY) {
-    g_print("old_protocol_init: initialise ozy on USB\n");
+    t_print("old_protocol_init: initialise ozy on USB\n");
     ozy_initialise();
     start_usb_receive_threads();
   }
   else
 #endif
   {
-    g_print("old_protocol starting receive thread\n");
+    t_print("old_protocol starting receive thread\n");
     if (radio->use_tcp) {
       open_tcp_socket();
     } else  {
       open_udp_socket();
     }
     receive_thread_id = g_thread_new( "old protocol", receive_thread, NULL);
-    g_print( "receive_thread: id=%p\n",receive_thread_id);
+    t_print( "receive_thread: id=%p\n",receive_thread_id);
   }
 
-  g_print("old_protocol_init: prime radio\n");
+  t_print("old_protocol_init: prime radio\n");
   for(i=8;i<OZY_BUFFER_SIZE;i++) {
     output_buffer[i]=0;
   }
@@ -331,7 +332,7 @@ void old_protocol_init(int rx,int pixels,int rate) {
 //
 static void start_usb_receive_threads()
 {
-  g_print("old_protocol starting USB receive thread\n");
+  t_print("old_protocol starting USB receive thread\n");
 
   ozy_EP6_rx_thread_id = g_thread_new( "OZY EP6 RX", ozy_ep6_rx_thread, NULL);
 }
@@ -342,7 +343,7 @@ static void start_usb_receive_threads()
 // then processes them one at a time.
 //
 static gpointer ozy_ep6_rx_thread(gpointer arg) {
-  g_print( "old_protocol: USB EP6 receive_thread\n");
+  t_print( "old_protocol: USB EP6 receive_thread\n");
   running=1;
   static unsigned char ep6_inbuffer[EP6_BUFFER_SIZE];
 
@@ -350,18 +351,18 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
   {
     int bytes = ozy_read(EP6_IN_ID,ep6_inbuffer,EP6_BUFFER_SIZE); // read a 2K buffer at a time
 
-    //g_print("%s: read %d bytes\n",__FUNCTION__,bytes);
+    //t_print("%s: read %d bytes\n",__FUNCTION__,bytes);
     //dump_buffer(ep6_inbuffer,bytes,__FUNCTION__);
 
     if (bytes == 0)
     {
-      g_print("old_protocol_ep6_read: ozy_read returned 0 bytes... retrying\n");
+      t_print("old_protocol_ep6_read: ozy_read returned 0 bytes... retrying\n");
       continue;
     }
     else if (bytes != EP6_BUFFER_SIZE)
     {
-      g_print("old_protocol_ep6_read: OzyBulkRead failed %d bytes\n",bytes);
-      perror("ozy_read(EP6 read failed");
+      t_print("old_protocol_ep6_read: OzyBulkRead failed %d bytes\n",bytes);
+      t_perror("ozy_read(EP6 read failed");
     }
     else
 // process the received data normally
@@ -388,17 +389,17 @@ static void open_udp_socket() {
     }
     tmp=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
     if(tmp<0) {
-      perror("old_protocol: create socket failed for data_socket\n");
+      t_perror("old_protocol: create socket failed for data_socket\n");
       exit(-1);
     }
 
     int optval = 1;
     socklen_t optlen=sizeof(optval);
     if(setsockopt(tmp, SOL_SOCKET, SO_REUSEADDR, &optval, optlen)<0) {
-      perror("data_socket: SO_REUSEADDR");
+      t_perror("data_socket: SO_REUSEADDR");
     }
     if(setsockopt(tmp, SOL_SOCKET, SO_REUSEPORT, &optval, optlen)<0) {
-      perror("data_socket: SO_REUSEPORT");
+      t_perror("data_socket: SO_REUSEPORT");
     }
     //
     // We need a receive buffer with a decent size, to be able to
@@ -419,30 +420,30 @@ static void open_udp_socket() {
     //
     optval=0x40000;
     if (setsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, optlen)<0) {
-      perror("data_socket: set SO_RCVBUF");
+      t_perror("data_socket: set SO_RCVBUF");
     }
     optval=0x10000;
     if (setsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, optlen)<0) {
-      perror("data_socket: set SO_SNDBUF");
+      t_perror("data_socket: set SO_SNDBUF");
     }
     optlen=sizeof(optval);
     if (getsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, &optlen)<0) {
-      perror("data_socket: get SO_RCVBUF");
+      t_perror("data_socket: get SO_RCVBUF");
     } else {
-      if (optlen==sizeof(optval)) g_print("UDP Socket RCV buf size=%d\n", optval);
+      if (optlen==sizeof(optval)) t_print("UDP Socket RCV buf size=%d\n", optval);
     }
     optlen=sizeof(optval);
     if (getsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, &optlen)<0) {
-      perror("data_socket: get SO_SNDBUF");
+      t_perror("data_socket: get SO_SNDBUF");
     } else {
-      if (optlen==sizeof(optval)) g_print("UDP Socket SND buf size=%d\n", optval);
+      if (optlen==sizeof(optval)) t_print("UDP Socket SND buf size=%d\n", optval);
     }
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF
     optlen=sizeof(optval);
     if(setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen)<0) {
-      perror("data_socket: IP_TOS");
+      t_perror("data_socket: IP_TOS");
     }
 #endif
 
@@ -456,13 +457,13 @@ static void open_udp_socket() {
     tv.tv_sec=0;
     tv.tv_usec=100000;
     if(setsockopt(tmp, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv))<0) {
-      perror("data_socket: SO_RCVTIMEO");
+      t_perror("data_socket: SO_RCVTIMEO");
     }
 
     // bind to the interface
-g_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
+t_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
     if(bind(tmp,(struct sockaddr*)&radio->info.network.interface_address,radio->info.network.interface_length)<0) {
-      perror("old_protocol: bind socket failed for data_socket\n");
+      t_perror("old_protocol: bind socket failed for data_socket\n");
       exit(-1);
     }
 
@@ -472,7 +473,7 @@ g_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_
     // Set value of data_socket only after everything succeeded
     //
     data_socket=tmp;
-    g_print("%s: UDP socket established: %d for %s:%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
+    t_print("%s: UDP socket established: %d for %s:%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
 }
 
 static void open_tcp_socket() {
@@ -487,23 +488,23 @@ static void open_tcp_socket() {
     memcpy(&data_addr,&radio->info.network.address,radio->info.network.address_length);
     data_addr.sin_port=htons(DATA_PORT);
     data_addr.sin_family = AF_INET;
-    g_print("Trying to open TCP connection to %s\n", inet_ntoa(radio->info.network.address.sin_addr));
+    t_print("Trying to open TCP connection to %s\n", inet_ntoa(radio->info.network.address.sin_addr));
 
     tmp=socket(AF_INET, SOCK_STREAM, 0);
     if (tmp < 0) {
-      perror("tcp_socket: create socket failed for TCP socket");
+      t_perror("tcp_socket: create socket failed for TCP socket");
       exit(-1);
     }
     int optval = 1;
     socklen_t optlen = sizeof(optval);
     if(setsockopt(tmp, SOL_SOCKET, SO_REUSEADDR, &optval, optlen)<0) {
-      perror("tcp_socket: SO_REUSEADDR");
+      t_perror("tcp_socket: SO_REUSEADDR");
     }
     if(setsockopt(tmp, SOL_SOCKET, SO_REUSEPORT, &optval, optlen)<0) {
-      perror("tcp_socket: SO_REUSEPORT");
+      t_perror("tcp_socket: SO_REUSEPORT");
     }
     if (connect(tmp,(const struct sockaddr *)&data_addr,sizeof(data_addr)) < 0) {
-      perror("tcp_socket: connect");
+      t_perror("tcp_socket: connect");
     }
     //
     // We need a receive buffer with a decent size, to be able to
@@ -524,37 +525,37 @@ static void open_tcp_socket() {
     //
     optval=0x40000;
     if (setsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, optlen)<0) {
-      perror("tcp_socket: set SO_RCVBUF");
+      t_perror("tcp_socket: set SO_RCVBUF");
     }
     optval=0x10000;
     if (setsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, optlen)<0) {
-      perror("tcp_socket: set SO_SNDBUF");
+      t_perror("tcp_socket: set SO_SNDBUF");
     }
     optlen=sizeof(optval);
     if (getsockopt(tmp, SOL_SOCKET, SO_RCVBUF, &optval, &optlen)<0) {
-      perror("tcp_socket: get SO_RCVBUF");
+      t_perror("tcp_socket: get SO_RCVBUF");
     } else {
-      if (optlen==sizeof(optval)) g_print("TCP Socket RCV buf size=%d\n", optval);
+      if (optlen==sizeof(optval)) t_print("TCP Socket RCV buf size=%d\n", optval);
     }
     optlen=sizeof(optval);
     if (getsockopt(tmp, SOL_SOCKET, SO_SNDBUF, &optval, &optlen)<0) {
-      perror("tcp_socket: get SO_SNDBUF");
+      t_perror("tcp_socket: get SO_SNDBUF");
     } else {
-      if (optlen==sizeof(optval)) g_print("TCP Socket SND buf size=%d\n", optval);
+      if (optlen==sizeof(optval)) t_print("TCP Socket SND buf size=%d\n", optval);
     }
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF
     optlen=sizeof(optval);
     if(setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen)<0) {
-      perror("tcp_socket: IP_TOS");
+      t_perror("tcp_socket: IP_TOS");
     }
 #endif
     //
     // Set value of tcp_socket only after everything succeeded
     //
     tcp_socket=tmp;
-    g_print("TCP socket established: %d\n", tcp_socket);
+    t_print("TCP socket established: %d\n", tcp_socket);
 }
 
 static gpointer receive_thread(gpointer arg) {
@@ -566,7 +567,7 @@ static gpointer receive_thread(gpointer arg) {
   int ep;
   uint32_t sequence;
 
-  g_print( "old_protocol: receive_thread\n");
+  t_print( "old_protocol: receive_thread\n");
   running=1;
 
   length=sizeof(addr);
@@ -596,8 +597,8 @@ static gpointer receive_thread(gpointer arg) {
             }
           } else if (data_socket >= 0) {
             bytes_read=recvfrom(data_socket,buffer,sizeof(buffer),0,(struct sockaddr*)&addr,&length);
-            if(bytes_read < 0 && errno != EAGAIN) perror("old_protocol recvfrom UDP:");
-            //g_print("%s: bytes_read=%d\n",__FUNCTION__,bytes_read);
+            if(bytes_read < 0 && errno != EAGAIN) t_perror("old_protocol recvfrom UDP:");
+            //t_print("%s: bytes_read=%d\n",__FUNCTION__,bytes_read);
           } else {
             // This could happen in METIS start/stop sequences
             usleep(100000);
@@ -625,7 +626,7 @@ static gpointer receive_thread(gpointer arg) {
                 double now;
                 clock_gettime(CLOCK_MONOTONIC, &ts);
                 now=ts.tv_sec + 1E-9*ts.tv_nsec;
-                g_print("SEQ ERROR: T=%0.3f last %ld, recvd %ld\n", now, (long) last_seq_num, (long) sequence);
+                t_print("SEQ ERROR: T=%0.3f last %ld, recvd %ld\n", now, (long) last_seq_num, (long) sequence);
                 sequence_errors++;
               }
               last_seq_num=sequence;
@@ -639,19 +640,19 @@ static gpointer receive_thread(gpointer arg) {
                   // not implemented
                   break;
                 default:
-                  g_print("unexpected EP %d length=%d\n",ep,bytes_read);
+                  t_print("unexpected EP %d length=%d\n",ep,bytes_read);
                   break;
               }
               break;
             case 2:  // response to a discovery packet
-              g_print("unexepected discovery response when not in discovery mode\n");
+              t_print("unexepected discovery response when not in discovery mode\n");
               break;
             default:
-              g_print("unexpected packet type: 0x%02X\n",buffer[2]);
+              t_print("unexpected packet type: 0x%02X\n",buffer[2]);
               break;
           }
         } else {
-          g_print("received bad header bytes on data port %02X,%02X\n",buffer[0],buffer[1]);
+          t_print("received bad header bytes on data port %02X,%02X\n",buffer[0],buffer[1]);
         }
         break;
     }
@@ -682,6 +683,9 @@ static int rx_feedback_channel() {
       ret=0;
       break;
     case DEVICE_HERMES:
+      // Note Anan-10E and Anan-100B behave like METIS
+      ret = anan10E ? 0 : 2;
+      break;
     case DEVICE_STEMLAB:
     case DEVICE_STEMLAB_Z20:
     case DEVICE_HERMES_LITE2:
@@ -715,6 +719,9 @@ static int tx_feedback_channel() {
       ret=1;
       break;
     case DEVICE_HERMES:
+      // Note Anan-10E and Anan-100B behave like METIS
+      ret=anan10E ? 1 : 3;
+      break;
     case DEVICE_STEMLAB:
     case DEVICE_STEMLAB_Z20:
     case DEVICE_HERMES_LITE2:
@@ -840,7 +847,8 @@ static int how_many_receivers() {
 
     // for PureSignal, the number of receivers needed is hard-coded below.
     // we need at least 2, and up to 5 for Orion2 boards. This is so because
-    // the TX DAC is hard-wired to RX4 for HERMES,STEMLAB and to RX5 for ANGELIA
+    // the TX DAC is hard-wired to RX for limited-capacity FPGAS, to
+    // RX4 for HERMES, STEMLAB and to RX5 for ANGELIA
     // and beyond.
   if (transmitter->puresignal) {
     switch (device) {
@@ -850,6 +858,9 @@ static int how_many_receivers() {
         ret=2;  // TX feedback hard-wired to RX2
         break;
       case DEVICE_HERMES:
+        // Note Anan-10E and Anan-100B behave like METIS
+        ret=anan10E ? 2 : 4;
+        break;
       case DEVICE_STEMLAB:
       case DEVICE_STEMLAB_Z20:
       case DEVICE_HERMES_LITE2:
@@ -929,11 +940,11 @@ static void process_control_bytes() {
         IO3=(control_in[1]&0x08)?0:1;
         if(mercury_software_version!=control_in[2]) {
           mercury_software_version=control_in[2];
-          g_print("  Mercury Software version: %d (0x%0X)\n",mercury_software_version,mercury_software_version);
+          t_print("  Mercury Software version: %d (0x%0X)\n",mercury_software_version,mercury_software_version);
         }
         if(penelope_software_version!=control_in[3]) {
           penelope_software_version=control_in[3];
-          g_print("  Penelope Software version: %d (0x%0X)\n",penelope_software_version,penelope_software_version);
+          t_print("  Penelope Software version: %d (0x%0X)\n",penelope_software_version,penelope_software_version);
         }
       }
       //
@@ -967,7 +978,7 @@ static void process_control_bytes() {
       }
       if(ozy_software_version!=control_in[4]) {
         ozy_software_version=control_in[4];
-        g_print("FPGA firmware version: %d.%d\n",ozy_software_version/10,ozy_software_version%10);
+        t_print("FPGA firmware version: %d.%d\n",ozy_software_version/10,ozy_software_version%10);
       }
       break;
     case 1:
@@ -1536,7 +1547,7 @@ void ozy_send_buffer() {
       // Out of paranoia: print warning and choose ANT1
       //
       if (i<0 || i>2) {
-          g_print("WARNING: illegal TX antenna chosen, using ANT1\n");
+          t_print("WARNING: illegal TX antenna chosen, using ANT1\n");
           transmitter->alex_antenna=0;
           i=0;
       }
@@ -1714,36 +1725,23 @@ void ozy_send_buffer() {
         // upon TX, use transmitter->attenuation
         // Usually the firmware takes care of this, but it is no
         // harm to do this here as well
-        if (have_rx_gain) {
+        if (device == DEVICE_HERMES_LITE2) {
           //
           // HERMESlite has a RXgain value in the range 0-60 that
           // is stored in rx_gain_slider. The firmware uses bit 6
-          // of C4 to determine this case.
+          // of C4 to allow using the full range in bits 0-5.
           //
           int rxgain = adc[active_receiver->adc].gain+12; // -12..48 to 0..60
-          if (rxgain <  0) rxgain=0;
-          if (rxgain > 60) rxgain=60;
-          // encode all 6 bits of RXgain in ATT value and set bit6
           if (isTransmitting()) {
             //
-            // The "TX attenuation" value (0 ... 31 dB) has to be mapped to a
-            // a range of preamp settings. This range is very different on the
-            // HermesLite when using "internal" feedback (crosstalk from the
-            // RX/TX releay) or "external" feedback (attenuator output
-            // connected with RF3 input of the HermesLite2).
-            // To cope with both situations, the preamp range is
-            // +2 ... +33 dB if "Internal" feedback is selected in the
-            // PS menu (this is optimal for "crosstalk" feedback) and
-            // if external feedback is used (check either EXT1 or ByPass
-            // in the PS menu) the preamp range is -12 ... +19 dB.
+            // If have_rx_gain, the "TX attenuation range" is extended from
+            // -29 to +31 which is then mapped to 60 ... 0
             //
-           output_buffer[C4] = 0x40 | (33 - (transmitter->attenuation & 0x1F));
-           if (receiver[PS_RX_FEEDBACK]->alex_antenna == 0) {
-             output_buffer[C4] = 0x40 | (45 - (transmitter->attenuation & 0x1F));
-            }
-          } else {
-            output_buffer[C4] = 0x40 | (rxgain & 0x3F);
+            rxgain = 31-transmitter->attenuation;
           }
+          if (rxgain <  0) rxgain=0;
+          if (rxgain > 60) rxgain=60;
+          output_buffer[C4] = 0x40 | rxgain;
         } else {
           if (isTransmitting()) {
             output_buffer[C4]=0x20 | (transmitter->attenuation & 0x1F);
@@ -1795,15 +1793,11 @@ void ozy_send_buffer() {
             }
         }
         if (device == DEVICE_HERMES_LITE2) {
-          //
-          // On the HermesLite2, we need bit7 set to make this feature active,
-          // and need bit6 set to tell HL2 to directly use the lowest 6 bits
-          // for the built-in preamp. For the effect of choosing different
-          // "alex antennas" see above.
-          output_buffer[C3] = 0xC0 | (33 - (transmitter->attenuation & 0x1F));
-          if (receiver[PS_RX_FEEDBACK]->alex_antenna == 0) {
-            output_buffer[C3] = 0xC0 | (45 - (transmitter->attenuation & 0x1F));
-          }
+          // bit7: enable TX att, bit6: enable 6-bit value, bit5:0 value
+          int rxgain = 31-transmitter->attenuation;
+          if (rxgain <  0) rxgain=0;
+          if (rxgain > 60) rxgain=60;
+          output_buffer[C3] = 0xC0 | rxgain;
         } else {
           output_buffer[C3]=transmitter->attenuation & 0x1F;  // Step attenuator of first ADC, value used when TXing
         }
@@ -1911,7 +1905,7 @@ void ozy_send_buffer() {
 #endif
   metis_write(0x02,output_buffer,OZY_BUFFER_SIZE);
 
-  //g_print("C0=%02X C1=%02X C2=%02X C3=%02X C4=%02X\n",
+  //t_print("C0=%02X C1=%02X C2=%02X C3=%02X C4=%02X\n",
   //                output_buffer[C0],output_buffer[C1],output_buffer[C2],output_buffer[C3],output_buffer[C4]);
 }
 
@@ -1924,9 +1918,9 @@ static void ozyusb_write(unsigned char* buffer,int length)
   i = ozy_write(EP2_OUT_ID,buffer,length);
   if(i!=length) {
     if(i==USB_TIMEOUT) {
-      g_print("%s: ozy_write timeout for %d bytes\n",__FUNCTION__,length);
+      t_print("%s: ozy_write timeout for %d bytes\n",__FUNCTION__,length);
     } else {
-      g_print("%s: ozy_write for %d bytes returned %d\n",__FUNCTION__,length,i);
+      t_print("%s: ozy_write for %d bytes returned %d\n",__FUNCTION__,length,i);
     }
   }
 
@@ -1955,19 +1949,19 @@ static void ozyusb_write(unsigned char* buffer,int length)
 
       //dump_buffer(usb_output_buffer,EP6_BUFFER_SIZE,__FUNCTION__);
 
-      //g_print("%s: written %d\n",__FUNCTION__,i);
+      //t_print("%s: written %d\n",__FUNCTION__,i);
       //dump_buffer(usb_output_buffer,EP6_BUFFER_SIZE);
 
       if(i != EP6_BUFFER_SIZE)
       {
         if(i==USB_TIMEOUT) {
           while(i==USB_TIMEOUT) {
-            g_print("%s: USB_TIMEOUT: ozy_write ...\n",__FUNCTION__);
+            t_print("%s: USB_TIMEOUT: ozy_write ...\n",__FUNCTION__);
             i = ozy_write(EP2_OUT_ID,usb_output_buffer,EP6_BUFFER_SIZE);
           }
-          g_print("%s: ozy_write TIMEOUT\n",__FUNCTION__);
+          t_print("%s: ozy_write TIMEOUT\n",__FUNCTION__);
         } else {
-          perror("old_protocol: OzyWrite ozy failed");
+          t_perror("old_protocol: OzyWrite ozy failed");
         }
       }
 
@@ -2022,7 +2016,7 @@ static int metis_write(unsigned char ep,unsigned const char* buffer,int length) 
 static void metis_restart() {
   int i;
 
-  g_print("%s\n",__FUNCTION__);
+  t_print("%s\n",__FUNCTION__);
   //
   // In TCP-ONLY mode, we possibly need to re-connect
   // since if we come from a METIS-stop, the server
@@ -2075,7 +2069,7 @@ static void metis_start_stop(int command) {
   int i;
   unsigned char buffer[1032];
 
-  g_print("%s: %d\n",__FUNCTION__,command);
+  t_print("%s: %d\n",__FUNCTION__,command);
   //
   // Clear TX IQ ring buffer
   //
@@ -2118,7 +2112,7 @@ static void metis_start_stop(int command) {
     tcp_socket=-1;
     usleep(100000);  // give some time to swallow incoming TCP packets
     close(tmp);
-    g_print("TCP socket closed\n");
+    t_print("TCP socket closed\n");
   }
 }
 
@@ -2129,25 +2123,25 @@ static void metis_send_buffer(unsigned char* buffer,int length) {
   // packets that are not 1032 bytes long
   //
 
-  //g_print("%s: length=%d\n",__FUNCTION__,length);
+  //t_print("%s: length=%d\n",__FUNCTION__,length);
 
   if (tcp_socket >= 0) {
     if (length != 1032) {
-       g_print("PROGRAMMING ERROR: TCP LENGTH != 1032\n");
+       t_print("PROGRAMMING ERROR: TCP LENGTH != 1032\n");
        exit(-1);
     }
     if(sendto(tcp_socket,buffer,length,0,NULL, 0) != length) {
-      perror("sendto socket failed for TCP metis_send_data\n");
+      t_perror("sendto socket failed for TCP metis_send_data\n");
     }
   } else if (data_socket >= 0) {
-//g_print("%s: sendto %d for %s:%d length=%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port),length);
+//t_print("%s: sendto %d for %s:%d length=%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port),length);
     bytes_sent=sendto(data_socket,buffer,length,0,(struct sockaddr*)&data_addr,sizeof(data_addr));
     if(bytes_sent!=length) {
-      g_print("%s: UDP sendto failed: %d: %s\n",__FUNCTION__,errno,strerror(errno));
+      t_print("%s: UDP sendto failed: %d: %s\n",__FUNCTION__,errno,strerror(errno));
     }
   } else {
     // This should not happen
-    g_print("METIS send: neither UDP nor TCP socket available!\n");
+    t_print("METIS send: neither UDP nor TCP socket available!\n");
     exit(-1);
   }
 }

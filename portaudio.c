@@ -31,6 +31,7 @@
 #include "mode.h"
 #include "portaudio.h"
 #include "audio.h"
+#include "message.h"
 
 static PaStream *record_handle=NULL;
 
@@ -101,7 +102,7 @@ void audio_get_cards()
   g_mutex_init(&audio_mutex);
   err = Pa_Initialize();
   if( err != paNoError ) {
-    g_print("%s: init error %s\n", __FUNCTION__,Pa_GetErrorText(err));
+    t_print("%s: init error %s\n", __FUNCTION__,Pa_GetErrorText(err));
     return;
   }
   numDevices = Pa_GetDeviceCount();
@@ -130,7 +131,7 @@ void audio_get_cards()
         input_devices[n_input_devices].index=i;
         n_input_devices++;
       }
-      g_print("%s: INPUT DEVICE, No=%d, Name=%s\n", __FUNCTION__, i, deviceInfo->name);
+      t_print("%s: INPUT DEVICE, No=%d, Name=%s\n", __FUNCTION__, i, deviceInfo->name);
     }
 
     outputParameters.device = i;
@@ -145,7 +146,7 @@ void audio_get_cards()
         output_devices[n_output_devices].index=i;
         n_output_devices++;
       }
-      g_print("%s: OUTPUT DEVICE, No=%d, Name=%s\n", __FUNCTION__, i, deviceInfo->name);
+      t_print("%s: OUTPUT DEVICE, No=%d, Name=%s\n", __FUNCTION__, i, deviceInfo->name);
     }
   }
 }
@@ -181,7 +182,7 @@ int audio_open_input()
         break;
     }
   }
-  g_print("%s: name=%s PADEV=%d\n", __FUNCTION__, transmitter->microphone_name, padev);
+  t_print("%s: name=%s PADEV=%d\n", __FUNCTION__, transmitter->microphone_name, padev);
   //
   // Device name possibly came from props file and device is no longer there
   //
@@ -202,7 +203,7 @@ int audio_open_input()
   err = Pa_OpenStream(&record_handle, &inputParameters, NULL, 48000.0, (unsigned long) MY_AUDIO_BUFFER_SIZE,
                       paNoFlag, pa_mic_cb, NULL);
   if (err != paNoError) {
-    g_print("%s: open stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
+    t_print("%s: open stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
     record_handle=NULL;
     g_mutex_unlock(&audio_mutex);
     return -1;
@@ -214,14 +215,14 @@ int audio_open_input()
   if (mic_ring_buffer == NULL) {
     Pa_CloseStream(record_handle);
     record_handle=NULL;
-    g_print("%s: alloc buffer failed.\n", __FUNCTION__);
+    t_print("%s: alloc buffer failed.\n", __FUNCTION__);
     g_mutex_unlock(&audio_mutex);
     return -1;
   }
 
   err = Pa_StartStream(record_handle);
   if (err != paNoError) {
-    g_print("%s: start stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
+    t_print("%s: start stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
     Pa_CloseStream(record_handle);
     record_handle=NULL;
     g_free(mic_ring_buffer);
@@ -249,7 +250,7 @@ int pa_out_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
   RECEIVER *rx = (RECEIVER *)userdata;
 
   if (out == NULL) {
-    g_print("%s: bogus audio buffer in callback\n", __FUNCTION__);
+    t_print("%s: bogus audio buffer in callback\n", __FUNCTION__);
     return paContinue;
   }
   g_mutex_lock(&rx->local_audio_mutex);
@@ -286,7 +287,7 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
 
   if (in == NULL) {
     // This should not happen, so we do not send silence etc.
-    g_print("%s: bogus audio buffer in callback\n", __FUNCTION__);
+    t_print("%s: bogus audio buffer in callback\n", __FUNCTION__);
     return paContinue;
   }
   g_mutex_lock(&audio_mutex);
@@ -338,7 +339,7 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
   // print mic input buffer water mark for debugging
   // i=mic_ring_inpt - mic_ring_outpt;
   // if (mic_ring_inpt < mic_ring_outpt) i +=MY_RING_BUFFER_SIZE;
-  // g_print("MIC IN BUF=%d\n", i);
+  // t_print("MIC IN BUF=%d\n", i);
   g_mutex_unlock(&audio_mutex);
   return paContinue;
 }
@@ -394,7 +395,7 @@ int audio_open_output(RECEIVER *rx)
         break;
     }
   }
-  g_print("%s: name=%s PADEV=%d\n", __FUNCTION__, rx->audio_name, padev);
+  t_print("%s: name=%s PADEV=%d\n", __FUNCTION__, rx->audio_name, padev);
   //
   // Device name possibly came from props file and device is no longer there
   //
@@ -416,7 +417,7 @@ int audio_open_output(RECEIVER *rx)
   err = Pa_OpenStream(&(rx->playstream), NULL, &outputParameters, 48000.0, (unsigned long) MY_AUDIO_BUFFER_SIZE,
                       paNoFlag, pa_out_cb, rx);
   if (err != paNoError) {
-    g_print("%s: open stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
+    t_print("%s: open stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
     rx->playstream = NULL;
     g_mutex_unlock(&rx->local_audio_mutex);
     return -1;
@@ -430,7 +431,7 @@ int audio_open_output(RECEIVER *rx)
   rx->local_audio_buffer_outpt=0;
 
   if (rx->local_audio_buffer == NULL) {
-    g_print("%s: allocate buffer failed\n", __FUNCTION__);
+    t_print("%s: allocate buffer failed\n", __FUNCTION__);
     Pa_CloseStream(rx->playstream);
     rx->playstream=NULL;
     g_mutex_unlock(&rx->local_audio_mutex);
@@ -439,7 +440,7 @@ int audio_open_output(RECEIVER *rx)
 
   err = Pa_StartStream(rx->playstream);
   if (err != paNoError) {
-    g_print("%s: error starting stream:%s\n",__FUNCTION__,Pa_GetErrorText(err));
+    t_print("%s: error starting stream:%s\n",__FUNCTION__,Pa_GetErrorText(err));
     Pa_CloseStream(rx->playstream);
     rx->playstream=NULL;
     g_free(rx->local_audio_buffer);
@@ -461,17 +462,17 @@ int audio_open_output(RECEIVER *rx)
 //
 void audio_close_input()
 {
-  g_print("%s: micname=%s\n", __FUNCTION__,transmitter->microphone_name);
+  t_print("%s: micname=%s\n", __FUNCTION__,transmitter->microphone_name);
 
   g_mutex_lock(&audio_mutex);
   if(record_handle!=NULL) {
     PaError err = Pa_StopStream(record_handle);
     if (err != paNoError) {
-      g_print("%s: error stopping stream: %s\n",__FUNCTION__,Pa_GetErrorText(err));
+      t_print("%s: error stopping stream: %s\n",__FUNCTION__,Pa_GetErrorText(err));
     }
     err = Pa_CloseStream(record_handle);
     if (err != paNoError) {
-      g_print("%s: %s\n",__FUNCTION__,Pa_GetErrorText(err));
+      t_print("%s: %s\n",__FUNCTION__,Pa_GetErrorText(err));
     }
     record_handle=NULL;
   }
@@ -487,7 +488,7 @@ void audio_close_input()
 // shut down the stream connected with audio from one of the RX
 //
 void audio_close_output(RECEIVER *rx) {
-  g_print("%s: device=%sn", __FUNCTION__,rx->audio_name);
+  t_print("%s: device=%sn", __FUNCTION__,rx->audio_name);
 
   g_mutex_lock(&rx->local_audio_mutex);
   if(rx->local_audio_buffer!=NULL) {
@@ -498,11 +499,11 @@ void audio_close_output(RECEIVER *rx) {
   if(rx->playstream!=NULL) {
     PaError err = Pa_StopStream(rx->playstream);
     if (err != paNoError) {
-      g_print("%s: stop stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
+      t_print("%s: stop stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
     }
     err = Pa_CloseStream(rx->playstream);
     if (err != paNoError) {
-      g_print("%s: close stream error %s\n",__FUNCTION__,Pa_GetErrorText(err));
+      t_print("%s: close stream error %s\n",__FUNCTION__,Pa_GetErrorText(err));
     }
     rx->playstream=NULL;
   }
@@ -563,7 +564,7 @@ int audio_write (RECEIVER *rx, float left, float right)
         if (oldpt >= MY_RING_BUFFER_SIZE) oldpt=0;
       }
       rx->local_audio_buffer_inpt=oldpt;
-      //g_print("%s: buffer was nearly empty, inserted silence.\n", __FUNCTION__);
+      //t_print("%s: buffer was nearly empty, inserted silence.\n", __FUNCTION__);
     }
     if (avail > MY_RING_HIGH_WATER) {
       //
@@ -577,7 +578,7 @@ int audio_write (RECEIVER *rx, float left, float right)
       int oldpt=rx->local_audio_buffer_inpt -avail + MY_RING_BUFFER_SIZE/2;
       if (oldpt < 0) oldpt += MY_RING_BUFFER_SIZE;
       rx->local_audio_buffer_inpt=oldpt;
-      g_print("%s: buffer was nearly full, deleted audio\n", __FUNCTION__);
+      t_print("%s: buffer was nearly full, deleted audio\n", __FUNCTION__);
     }
     //
     // put sample into ring buffer

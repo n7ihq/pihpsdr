@@ -31,6 +31,7 @@
 #include "band.h"
 #include "radio.h"
 #include "vfo.h"
+#include "message.h"
 
 static GtkWidget *serial_enable_b[MAX_SERIAL];
 
@@ -61,7 +62,7 @@ static void rigctl_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 static void rigctl_debug_cb(GtkWidget *widget, gpointer data) {
   rigctl_debug=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  g_print("---------- RIGCTL DEBUG %s ----------\n",rigctl_debug?"ON":"OFF");
+  t_print("---------- RIGCTL DEBUG %s ----------\n",rigctl_debug?"ON":"OFF");
 }
 
 static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
@@ -87,7 +88,7 @@ static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
 static void serial_port_cb(GtkWidget *widget, gpointer data) {
   int id=GPOINTER_TO_INT(data);
   const char *cp=gtk_entry_get_text(GTK_ENTRY(widget));
-  g_print("%s: ID=%d port=%s\n", __FUNCTION__, id, cp);
+  t_print("%s: ID=%d port=%s\n", __FUNCTION__, id, cp);
   strcpy(SerialPorts[id].port, cp);
 }
 
@@ -122,7 +123,7 @@ static void serial_enable_cb(GtkWidget *widget, gpointer data) {
   } else {
      disable_serial(id);
   }
-  g_print("RIGCTL_MENU: Serial enable : ID=%d Enabled=%d\n",id,SerialPorts[id].enable);
+  t_print("RIGCTL_MENU: Serial enable : ID=%d Enabled=%d\n",id,SerialPorts[id].enable);
 }
 
 // Set Baud Rate
@@ -143,7 +144,7 @@ static void baud_cb(GtkWidget *widget, gpointer data) {
        SerialPorts[id].baud=B38400;
        break;
    }
-   g_print("RIGCTL_MENU: Baud rate changed: ID=%d Baud=%d\n",id,SerialPorts[id].baud);
+   t_print("RIGCTL_MENU: Baud rate changed: ID=%d Baud=%d\n",id,SerialPorts[id].baud);
 }
 
 void rigctl_menu(GtkWidget *parent) {

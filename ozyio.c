@@ -42,6 +42,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include "ozyio.h"
+#include "message.h"
 
 #define OZY_PID (0x0007)
 #define OZY_VID (0xfffe)
@@ -101,7 +102,7 @@ int ozy_open() {
     if(init==0) {
         rc=libusb_init(NULL);
         if(rc<0) {
-            g_print("libusb_init failed: %d\n",rc);
+            t_print("libusb_init failed: %d\n",rc);
             return rc;
         }
         init=1;
@@ -109,18 +110,18 @@ int ozy_open() {
 
     ozy_handle=libusb_open_device_with_vid_pid(NULL, OZY_VID, OZY_PID);
     if(ozy_handle==NULL) {
-        g_print("libusbio: cannot find ozy device\n");
+        t_print("libusbio: cannot find ozy device\n");
         return -1;
     }
 
     rc=libusb_detach_kernel_driver(ozy_handle,0);
     if(rc<0) {
-        //        g_print("libusb_detach_kernel_driver failed: %d\n",rc);
+        //        t_print("libusb_detach_kernel_driver failed: %d\n",rc);
     }
 
     rc=libusb_claim_interface(ozy_handle,0);
     if(rc<0) {
-        g_print("libusb_claim_interface failed: %d\n",rc);
+        t_print("libusb_claim_interface failed: %d\n",rc);
         return rc;
     }
 
@@ -132,7 +133,7 @@ int ozy_close() {
 
     rc=libusb_attach_kernel_driver(ozy_handle,0);
     if(rc<0) {
-        //        g_print("libusb_attach_kernel_driver failed: %d\n",rc);
+        //        t_print("libusb_attach_kernel_driver failed: %d\n",rc);
     }
 
     libusb_close(ozy_handle);
@@ -145,7 +146,7 @@ int ozy_get_firmware_string(unsigned char* buffer,int buffer_size) {
 
     rc=libusb_control_transfer(ozy_handle, VRT_VENDOR_IN, VRQ_SDR1K_CTL, SDR1KCTRL_READ_VERSION, 0, buffer, buffer_size, OZY_IO_TIMEOUT);
     if(rc<0) {
-        g_print("ozy__get_firmware_string failed: %d\n",rc);
+        t_print("ozy__get_firmware_string failed: %d\n",rc);
         return rc;
     }
     buffer[rc]='\0';
@@ -160,7 +161,7 @@ int ozy_write(int ep,unsigned char* buffer,int buffer_size) {
     bytes=0;
     rc = libusb_bulk_transfer(ozy_handle,(unsigned char)ep,buffer,buffer_size,&bytes,OZY_IO_TIMEOUT);
     if(rc == USB_TIMEOUT) {
-      g_print("%s: timeout bytes=%d ep=%d\n",__FUNCTION__,bytes,ep);
+      t_print("%s: timeout bytes=%d ep=%d\n",__FUNCTION__,bytes,ep);
       libusb_clear_halt(ozy_handle,(unsigned char)ep);
     }
         // this returns OK in all cases (?)
@@ -256,25 +257,25 @@ int ozy_load_firmware(char *fnamep) {
     int this_val;
     int i;
 
-    g_print("loading ozy firmware: %s\n",fnamep);
+    t_print("loading ozy firmware: %s\n",fnamep);
 
     ifile = fopen(fnamep, "r");
     if ( ifile == NULL ) {
-        g_print( "Could not open: \'%s\'\n", fnamep);
+        t_print( "Could not open: \'%s\'\n", fnamep);
         return 0;
     }
 
     while (  fgets(readbuf, sizeof(readbuf), ifile) != NULL ) {
         ++linecount;
         if ( readbuf[0] != ':' ) {
-            g_print( "ozy_upload_firmware: bad record\n");
+            t_print( "ozy_upload_firmware: bad record\n");
             return 0;
         }
         length = hexitsToUInt(readbuf+1, 2);
         addr = hexitsToUInt(readbuf+3, 4);
         type = hexitsToUInt(readbuf+7, 2);
         if ( length < 0 || addr < 0 || type < 0 ) {
-            g_print( "ozy_upload_firmware: bad length, addr or type\n");
+            t_print( "ozy_upload_firmware: bad length, addr or type\n");
             return 0;
         }
         switch ( type ) {
@@ -283,11 +284,11 @@ int ozy_load_firmware(char *fnamep) {
             for ( i = 0; i < length; i++ ) {
                 this_val = hexitsToUInt(readbuf+9+(i*2),2);
                 #if 0
-                printf("i: %d val: 0x%02x\n", i, this_val);
+                t_print("i: %d val: 0x%02x\n", i, this_val);
                 #endif
 
                 if ( this_val < 0 ) {
-                    g_print( "ozy_upload_firmware: bad record data\n");
+                    t_print( "ozy_upload_firmware: bad record data\n");
                     return 0;
                 }
                 wbuf[i] = (unsigned char)this_val;
@@ -296,22 +297,22 @@ int ozy_load_firmware(char *fnamep) {
 
             this_val = hexitsToUInt(readbuf+9+(length*2),2);
             if ( this_val < 0 ) {
-                g_print( "ozy_upload_firmware: bad checksum data\n");
+                t_print( "ozy_upload_firmware: bad checksum data\n");
                 return 0;
             }
             cksum = (unsigned char)this_val;
             #if 0
-            printf("\n%s", readbuf);
-            printf("len: %d (0x%02x) addr: 0x%04x mychk: 0x%02x chk: 0x%02x",
+            t_print("\n%s", readbuf);
+            t_print("len: %d (0x%02x) addr: 0x%04x mychk: 0x%02x chk: 0x%02x",
                    length, length, addr, my_cksum, cksum);
             #endif
 
             if ( ((cksum + my_cksum) & 0xff) != 0 ) {
-                g_print( "ozy_upload_firmware: bad checksum\n");
+                t_print( "ozy_upload_firmware: bad checksum\n");
                 return 0;
             }
             if ( ozy_write_ram(addr, wbuf, length) < 1 ) {
-                g_print( "ozy_upload_firmware: bad write\n");
+                t_print( "ozy_upload_firmware: bad write\n");
                 return 0;
             }
             break;
@@ -320,12 +321,12 @@ int ozy_load_firmware(char *fnamep) {
             break;
 
             default: /* invalid */
-            g_print( "ozy_upload_firmware: invalid type\n");
+            t_print( "ozy_upload_firmware: invalid type\n");
             return 0;
 
         }
     }
-    //        g_print( "ozy_upload_firmware: Processed %d lines.\n", linecount);
+    //        t_print( "ozy_upload_firmware: Processed %d lines.\n", linecount);
     return linecount;
 }
 
@@ -357,11 +358,11 @@ int ozy_load_fpga(char *rbf_fnamep) {
     int total_bytes_xferd = 0;
     int rc;
 
-    g_print("loading ozy fpga: %s\n",rbf_fnamep);
+    t_print("loading ozy fpga: %s\n",rbf_fnamep);
 
     rbffile = fopen(rbf_fnamep, "rb");
     if ( rbffile == NULL ) {
-        g_print( "Failed to open: \'%s\'\n", rbf_fnamep);
+        t_print( "Failed to open: \'%s\'\n", rbf_fnamep);
         return 0;
     }
 
@@ -369,7 +370,7 @@ int ozy_load_fpga(char *rbf_fnamep) {
                                  0, FL_BEGIN, NULL, 0, OZY_IO_TIMEOUT);
 
     if ( rc < 0 ) {
-        g_print( "ozy_load_fpga: failed @ FL_BEGIN rc=%d\n",rc);
+        t_print( "ozy_load_fpga: failed @ FL_BEGIN rc=%d\n",rc);
         fclose(rbffile);
         return 0;
     }
@@ -382,17 +383,17 @@ int ozy_load_fpga(char *rbf_fnamep) {
                                      0, FL_XFER, buf, bytes_read, OZY_IO_TIMEOUT);
         total_bytes_xferd += bytes_read;
         if ( rc < 0 ) {
-            g_print( "ozy_load_fpga: failed @ FL_XFER\n");
+            t_print( "ozy_load_fpga: failed @ FL_XFER\n");
             fclose(rbffile);
             return 0;
         }
     }
-    printf("%d bytes transferred.\n", total_bytes_xferd);
+    t_print("%d bytes transferred.\n", total_bytes_xferd);
     fclose(rbffile);
     rc = libusb_control_transfer(ozy_handle, VENDOR_REQ_TYPE_OUT, VENDOR_REQ_FPGA_LOAD,
                                  0, FL_END, NULL, 0, OZY_IO_TIMEOUT);
     if ( rc < 0 ) {
-        g_print( "ozy_load_fpga: failed @ FL_END\n");
+        t_print( "ozy_load_fpga: failed @ FL_END\n");
         return 0;
     }
 
@@ -404,7 +405,7 @@ int ozy_i2c_write(unsigned char* buffer,int buffer_size, unsigned char cmd) {
 
     rc=libusb_control_transfer(ozy_handle, VRT_VENDOR_OUT, VRQ_I2C_WRITE, cmd, 0, buffer, buffer_size, OZY_IO_TIMEOUT);
     if(rc<0) {
-        g_print("ozy_i2c_write failed: %d\n",rc);
+        t_print("ozy_i2c_write failed: %d\n",rc);
         return rc;
     }
     return rc;
@@ -415,7 +416,7 @@ int ozy_i2c_read(unsigned char* buffer,int buffer_size, unsigned char cmd) {
 
     rc=libusb_control_transfer(ozy_handle, VRT_VENDOR_IN, VRQ_I2C_READ, cmd, 0, buffer, buffer_size, OZY_IO_TIMEOUT);
     if(rc<0) {
-        g_print("ozy_i2c_read failed: %d\n",rc);
+        t_print("ozy_i2c_read failed: %d\n",rc);
         return rc;
     }
     return rc;
@@ -430,7 +431,7 @@ void ozy_i2c_readpwr(int addr) {
         case I2C_PENNY_ALC:
         rc = ozy_i2c_read(buffer,2,I2C_PENNY_ALC);
         if(rc<0) {
-            perror("ozy_i2c_readpwr alc: failed");
+            t_perror("ozy_i2c_readpwr alc: failed");
         }
         penny_alc = (buffer[0] << 8) + buffer[1];
         break;
@@ -438,7 +439,7 @@ void ozy_i2c_readpwr(int addr) {
         case I2C_PENNY_FWD:
         rc = ozy_i2c_read(buffer,2,I2C_PENNY_FWD);
         if(rc<0) {
-            perror("ozy_i2c_readpwr fwd: failed");
+            t_perror("ozy_i2c_readpwr fwd: failed");
         }
         penny_fp = (buffer[0] << 8) + buffer[1];
         break;
@@ -446,7 +447,7 @@ void ozy_i2c_readpwr(int addr) {
         case I2C_PENNY_REV:
         rc = ozy_i2c_read(buffer,2,I2C_PENNY_REV);
         if(rc<0) {
-            perror("ozy_i2c_readpwr rev: failed");
+            t_perror("ozy_i2c_readpwr rev: failed");
         }
         penny_rp = (buffer[0] << 8) + buffer[1];
         break;
@@ -455,7 +456,7 @@ void ozy_i2c_readpwr(int addr) {
         // adc overload
         rc = ozy_i2c_read(buffer,2,I2C_MERC1_ADC_OFS);  // adc1 overflow status
         if(rc<0) {
-            perror("ozy_i2c_readpwr adc: failed");
+            t_perror("ozy_i2c_readpwr adc: failed");
         }
         if (buffer[0] == 0) {       // its overloaded
             adc_overflow = 2000;    // counts down to give hold time to client
@@ -472,11 +473,11 @@ void ozy_i2c_readvars() {
     unsigned char buffer[8];
 
 
-    g_print("ozy_i2c_init: starting\n");
+    t_print("ozy_i2c_init: starting\n");
 
     rc = ozy_i2c_read(buffer,2,I2C_MERC1_FW);
     if(rc<0) {
-        perror("ozy_i2c_readvars MercFW: failed");
+        t_perror("ozy_i2c_readvars MercFW: failed");
         //
         // quickly return: if this fails, probably the I2C jumpers are not set
         // correctly and it is not worth to continue
@@ -484,11 +485,11 @@ void ozy_i2c_readvars() {
         return;
     }
     mercury_fw = buffer[1];
-    g_print("mercury firmware=%d\n",(int)buffer[1]);
+    t_print("mercury firmware=%d\n",(int)buffer[1]);
 
     rc = ozy_i2c_read(buffer,2,I2C_PENNY_FW);
     if(rc<0) {
-        perror("ozy_i2c_readvars PennyFW: failed");
+        t_perror("ozy_i2c_readvars PennyFW: failed");
         //
         // If this fails, writing the TLV320 data to Penny
         // need not be attempted
@@ -496,7 +497,7 @@ void ozy_i2c_readvars() {
         return;
     }
     penny_fw = buffer[1];
-    g_print("penny firmware=%d\n",(int)buffer[1]);
+    t_print("penny firmware=%d\n",(int)buffer[1]);
 
     writepenny((unsigned char)1);
 }
@@ -528,7 +529,7 @@ void writepenny(unsigned char mode)
     //    XX=0x14: Use Mic in, no Mic boost
     //    XX=0x10: Use Line in
 
-    g_print("write Penny\n");
+    t_print("write Penny\n");
 
     //
     // update mic gain on Penny or PennyLane TLV320
@@ -543,7 +544,7 @@ void writepenny(unsigned char mode)
     //      // set the I2C interface speed to 400kHZ
     //      if (!(OZY.Set_I2C_Speed(hdev, 1)))
     //      {
-    //          g_print("Unable to set I2C speed to 400kHz", "System Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    //          t_print("Unable to set I2C speed to 400kHz", "System Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
     //          return;
 
     // send the configuration data to the TLV320 on Penelope or PennyLane
@@ -553,12 +554,12 @@ void writepenny(unsigned char mode)
         Penny_TLV320[0] = Penny_TLV320_data[x]; Penny_TLV320[1] = Penny_TLV320_data[x + 1];
         if (ozy_i2c_write(Penny_TLV320,2, I2C_PENNY_TLV320) < 0)
         {
-            g_print("Unable to configure TLV320 on Penelope via I2C\n");
+            t_print("Unable to configure TLV320 on Penelope via I2C\n");
             // break out of the configuration loop
             break;
         }
     }
-    g_print("write Penny done..\n");
+    t_print("write Penny done..\n");
 }
 
 
@@ -587,28 +588,28 @@ int filePath (char *sOut, const char *sIn) {
             char *p;
 
             if ( (p = strrchr (xPath, '/')) ) *(p+1) = '\0';
-            g_print( "%d, Path of executable: [%s]\n", rc, xPath);
+            t_print( "%d, Path of executable: [%s]\n", rc, xPath);
 
             strcpy (s, xPath); strcat (s, sIn);
 
             if ((rc = file_exists (s))) {
                 // found in the same dir of executable
-                g_print( "File: [%s]\n", s);
+                t_print( "File: [%s]\n", s);
                 strcpy(sOut, s);
             } else {
                 char cwd[PATH_MAX];
                 if (getcwd(cwd, sizeof(cwd)) != NULL) {
-                    g_print( "Current working dir: %s\n", cwd);
+                    t_print( "Current working dir: %s\n", cwd);
 
                     strcpy (s, cwd); strcat (s, "/"); strcat (s, sIn);
                     if ((rc = file_exists (s))) {
-                        g_print( "File: [%s]\n", s);
+                        t_print( "File: [%s]\n", s);
                         strcpy(sOut, s);
                     }
                 }
             }
         } else {
-            g_print( "%d: %s\n", errno, strerror(errno));
+            t_print( "%d: %s\n", errno, strerror(errno));
         }
     }
     return rc;
@@ -631,7 +632,7 @@ int ozy_initialise()
 // open ozy
     rc = ozy_open();
     if (rc != 0) {
-        g_print("Cannot locate Ozy\n");
+        t_print("Cannot locate Ozy\n");
     }
 // load Ozy FW
     ozy_reset_cpu(1);
@@ -646,7 +647,7 @@ int ozy_initialise()
     ozy_close();
     ozy_open();
     ozy_get_firmware_string(ozy_firmware_version,8);
-    g_print("Ozy FX2 version: %s\n",ozy_firmware_version);
+    t_print("Ozy FX2 version: %s\n",ozy_firmware_version);
     //
     // NOTE (thanks Rick): For I2C to work you need to place jumpers on SCL and SDA on
     // the OZY/Magister board. This enables firmware detection on adjacent cards
@@ -676,7 +677,7 @@ int ozy_discover()
         int rc=libusb_init(NULL);
         if(rc<0)
         {
-            g_print("libusb_init failed: %d\n",rc);
+            t_print("libusb_init failed: %d\n",rc);
             return success;
         }
         init=1;
@@ -687,13 +688,13 @@ int ozy_discover()
     ozy_handle=libusb_open_device_with_vid_pid(NULL, OZY_VID, OZY_PID);
     if(ozy_handle==NULL)
     {
-        g_print("libusbio: cannot find ozy device\n");
+        t_print("libusbio: cannot find ozy device\n");
         return success;
     }
     else
     {
             success = 1;
-            g_print("libusbio: ozy device found on USB port\n");
+            t_print("libusbio: ozy device found on USB port\n");
     }
 //
 // if we get this far, we have an ozy on the bus so discover successful.

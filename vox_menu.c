@@ -32,6 +32,7 @@
 #include "vox_menu.h"
 #include "vox.h"
 #include "ext.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
@@ -115,7 +116,7 @@ static gboolean enable_cb (GtkWidget *widget, GdkEventButton *event, gpointer da
 static void start_level_thread() {
   run_level=1;
   level_thread_id = g_thread_new( "VOX level", level_thread, NULL);
-  g_print("level_thread: id=%p\n",level_thread_id);
+  t_print("level_thread: id=%p\n",level_thread_id);
 }
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {

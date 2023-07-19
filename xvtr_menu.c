@@ -30,6 +30,7 @@
 #include "xvtr_menu.h"
 #include "radio.h"
 #include "vfo.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 static GtkWidget *title[BANDS+XVTRS];
@@ -68,15 +69,15 @@ static void save_xvtr () {
         if ((xvtr->frequencyMin < xvtr->frequencyLO + radio->frequency_min) ||
             (xvtr->frequencyMin > xvtr->frequencyLO + radio->frequency_max)) {
           xvtr->frequencyMin = xvtr->frequencyLO + radio->frequency_min;
-          g_print("XVTR band %s MinFrequency changed to %lld\n", t, xvtr->frequencyMin);
+          //t_print("XVTR band %s MinFrequency changed to %lld\n", t, xvtr->frequencyMin);
         }
         if (xvtr->frequencyMax < xvtr->frequencyMin) {
           xvtr->frequencyMax = xvtr->frequencyMin + 1000000LL;
-          g_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
+          //t_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
         }
         if (xvtr->frequencyMax > xvtr->frequencyLO + radio->frequency_max) {
           xvtr->frequencyMax = xvtr->frequencyLO + radio->frequency_max;
-          g_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
+          //t_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
         }
         for(int b=0;b<bandstack->entries;b++) {
           BANDSTACK_ENTRY *entry=&bandstack->entry[b];

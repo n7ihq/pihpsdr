@@ -29,6 +29,7 @@
 #include "store_menu.h"
 #include "button_text.h"
 #include "store.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
@@ -54,7 +55,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 
 static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
    int ind = GPOINTER_TO_INT(data);
-   g_print("STORE BUTTON PUSHED=%d\n",ind);
+   t_print("STORE BUTTON PUSHED=%d\n",ind);
    char workstr[40];
 
    store_memory_slot(ind);

@@ -54,6 +54,7 @@
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
+#include "message.h"
 
 
 #define min(x,y) (x<y?x:y)
@@ -64,14 +65,9 @@ static gboolean has_moved=FALSE;
 static gboolean pressed=FALSE;
 static gboolean making_active=FALSE;
 
-#ifdef AUDIO_WATERFALL
-static int waterfall_samples=0;
-static int waterfall_resample=6;
-#endif
-
 void receiver_weak_notify(gpointer data,GObject  *obj) {
   RECEIVER *rx=(RECEIVER *)data;
-  g_print("%s: id=%d obj=%p\n",__FUNCTION__,rx->id, obj);
+  t_print("%s: id=%d obj=%p\n",__FUNCTION__,rx->id, obj);
 }
 
 gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -215,7 +211,7 @@ void receiver_save_state(RECEIVER *rx) {
   char name[128];
   char value[128];
 
-  g_print("%s: %d\n",__FUNCTION__,rx->id);
+  t_print("%s: RX=%d\n",__FUNCTION__,rx->id);
   sprintf(name,"receiver.%d.audio_channel",rx->id);
   sprintf(value,"%d",rx->audio_channel);
   setProperty(name,value);
@@ -404,7 +400,7 @@ void receiver_restore_state(RECEIVER *rx) {
   char name[128];
   char *value;
 
-g_print("%s: id=%d\n",__FUNCTION__,rx->id);
+  t_print("%s: id=%d\n",__FUNCTION__,rx->id);
 
   sprintf(name,"receiver.%d.audio_channel",rx->id);
   value=getProperty(name);
@@ -627,7 +623,7 @@ void reconfigure_receiver(RECEIVER *rx,int height) {
 
   if(rx->display_panadapter) {
     if(rx->panadapter==NULL) {
-g_print("%s: panadapter_init: width:%d height:%d\n",__FUNCTION__,rx->width,myheight);
+      t_print("%s: panadapter_init: width:%d height:%d\n",__FUNCTION__,rx->width,myheight);
       rx_panadapter_init(rx, rx->width,myheight);
       gtk_fixed_put(GTK_FIXED(rx->panel),rx->panadapter,0,y);  // y=0 here always
     } else {
@@ -646,12 +642,12 @@ g_print("%s: panadapter_init: width:%d height:%d\n",__FUNCTION__,rx->width,myhei
 
   if(rx->display_waterfall) {
     if(rx->waterfall==NULL) {
-g_print("%s: waterfall_init: width:%d height:%d\n",__FUNCTION__,rx->width,myheight);
+      t_print("%s: waterfall_init: width:%d height:%d\n",__FUNCTION__,rx->width,myheight);
       waterfall_init(rx,rx->width,myheight);
       gtk_fixed_put(GTK_FIXED(rx->panel),rx->waterfall,0,y);  // y=0 if ONLY waterfall is present
     } else {
       // set the size
-g_print("%s: waterfall set_size_request: width:%d height:%d\n",__FUNCTION__,rx->width,myheight);
+      t_print("%s: waterfall set_size_request: width:%d height:%d\n",__FUNCTION__,rx->width,myheight);
       gtk_widget_set_size_request(rx->waterfall, rx->width, myheight);
       // move the current one
       gtk_fixed_move(GTK_FIXED(rx->panel),rx->waterfall,0,y);
@@ -735,9 +731,10 @@ void set_displaying(RECEIVER *rx,int state) {
   if(!radio_is_remote) {
 #endif
     if(state) {
-      if(rx->update_timer_id>=0) g_source_remove(rx->update_timer_id);
+      if(rx->update_timer_id>0) g_source_remove(rx->update_timer_id);
       rx->update_timer_id=gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE,1000/rx->fps, update_display, rx, NULL);
     } else {
+      if(rx->update_timer_id>0) g_source_remove(rx->update_timer_id);
       rx->update_timer_id=-1;
     }
 #ifdef CLIENT_SERVER
@@ -893,28 +890,28 @@ static void init_analyzer(RECEIVER *rx) {
 
     overlap = (int)fmax(0.0, ceil(afft_size - (double)rx->sample_rate / (double)rx->fps));
 
-    //g_print("%s: id=%d buffer_size=%d overlap=%d\n",_FUNCTION__,rx->id,rx->buffer_size,overlap);
+    //t_print("%s: RXid=%d buffer_size=%d overlap=%d\n",__FUNCTION__,rx->id,rx->buffer_size,overlap);
 
 
     SetAnalyzer(rx->id,
             n_pixout,
-            spur_elimination_ffts, //number of LO frequencies = number of ffts used in elimination
-            data_type, //0 for real input data (I only); 1 for complex input data (I & Q)
-            flp, //vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
-            afft_size, //size of the fft, i.e., number of input samples
-            rx->buffer_size, //number of samples transferred for each OpenBuffer()/CloseBuffer()
-            window_type, //integer specifying which window function to use
-            kaiser_pi, //PiAlpha parameter for Kaiser window
-            overlap, //number of samples each fft (other than the first) is to re-use from the previous
-            clip, //number of fft output bins to be clipped from EACH side of each sub-span
-            span_clip_l, //number of bins to clip from low end of entire span
-            span_clip_h, //number of bins to clip from high end of entire span
-            pixels, //number of pixel values to return.  may be either <= or > number of bins
-            stitches, //number of sub-spans to concatenate to form a complete span
-            calibration_data_set, //identifier of which set of calibration data to use
-            span_min_freq, //frequency at first pixel value8192
-            span_max_freq, //frequency at last pixel value
-            max_w //max samples to hold in input ring buffers
+            spur_elimination_ffts,                // number of LO frequencies = number of ffts used in elimination
+            data_type,                            // 0 for real input data (I only); 1 for complex input data (I & Q)
+            flp,                                  // vector with one element for each LO frequency, 1 if high-side LO, 0 otherwise
+            afft_size,                            // size of the fft, i.e., number of input samples
+            rx->buffer_size,                      // number of samples transferred for each OpenBuffer()/CloseBuffer()
+            window_type,                          // integer specifying which window function to use
+            kaiser_pi,                            // PiAlpha parameter for Kaiser window
+            overlap,                              // number of samples each fft (other than the first) is to re-use from the previous
+            clip,                                 // number of fft output bins to be clipped from EACH side of each sub-span
+            span_clip_l,                          // number of bins to clip from low end of entire span
+            span_clip_h,                          // number of bins to clip from high end of entire span
+            pixels,                               // number of pixel values to return.  may be either <= or > number of bins
+            stitches,                             // number of sub-spans to concatenate to form a complete span
+            calibration_data_set,                 // identifier of which set of calibration data to use
+            span_min_freq,                        // frequency at first pixel value
+            span_max_freq,                        // frequency at last pixel value
+            max_w                                 // max samples to hold in input ring buffers
     );
 
 
@@ -924,7 +921,7 @@ static void create_visual(RECEIVER *rx) {
   int y=0;
 
   rx->panel=gtk_fixed_new();
-g_print("%s: id=%d width=%d height=%d %p\n",__FUNCTION__,rx->id, rx->width, rx->height, rx->panel);
+  t_print("%s: RXid=%d width=%d height=%d %p\n",__FUNCTION__,rx->id, rx->width, rx->height, rx->panel);
   g_object_weak_ref(G_OBJECT(rx->panel),receiver_weak_notify,(gpointer)rx);
   gtk_widget_set_size_request (rx->panel, rx->width, rx->height);
 
@@ -937,14 +934,14 @@ g_print("%s: id=%d width=%d height=%d %p\n",__FUNCTION__,rx->id, rx->width, rx->
   }
 
   rx_panadapter_init(rx, rx->width,height);
-g_print("%s: panadapter height=%d y=%d %p\n",__FUNCTION__,height,y,rx->panadapter);
+  t_print("%s: panadapter height=%d y=%d %p\n",__FUNCTION__,height,y,rx->panadapter);
   g_object_weak_ref(G_OBJECT(rx->panadapter),receiver_weak_notify,(gpointer)rx);
   gtk_fixed_put(GTK_FIXED(rx->panel),rx->panadapter,0,y);
   y+=height;
 
   if(rx->display_waterfall) {
     waterfall_init(rx,rx->width,height);
-g_print("%s: waterfall height=%d y=%d %p\n",__FUNCTION__,height,y,rx->waterfall);
+    t_print("%s: waterfall height=%d y=%d %p\n",__FUNCTION__,height,y,rx->waterfall);
     g_object_weak_ref(G_OBJECT(rx->waterfall),receiver_weak_notify,(gpointer)rx);
     gtk_fixed_put(GTK_FIXED(rx->panel),rx->waterfall,0,y);
   }
@@ -953,7 +950,7 @@ g_print("%s: waterfall height=%d y=%d %p\n",__FUNCTION__,height,y,rx->waterfall)
 }
 
 RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int width) {
-g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
+  t_print("%s: RXid=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   //
   // For a PureSignal receiver, most parameters are just set to zero since
   // they are not used
@@ -1071,7 +1068,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   int result;
   XCreateAnalyzer(rx->id, &result, 262144, 1, 1, NULL);
   if(result != 0) {
-    g_print( "%s: XCreateAnalyzer id=%d failed: %d\n",__FUNCTION__, rx->id, result);
+    t_print( "%s: XCreateAnalyzer RXid=%d failed: %d\n",__FUNCTION__, rx->id, result);
   } else {
     init_analyzer(rx);
   }
@@ -1087,7 +1084,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
 }
 
 RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int fps, int width, int height) {
-g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,id,buffer_size, fft_size, pixels, fps);
+  t_print("%s: RXid=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,id,buffer_size, fft_size, pixels, fps);
   RECEIVER *rx=malloc(sizeof(RECEIVER));
   double amplitude;
   rx->id=id;
@@ -1113,7 +1110,7 @@ g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,i
           break;
       }
   }
-g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
+  t_print("%s: RXid=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
   rx->sample_rate=48000;
   if(device==SOAPYSDR_USB_DEVICE) {
 #ifdef SOAPYSDR
@@ -1122,7 +1119,7 @@ g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
     rx->resampler=NULL;
     rx->resample_buffer=NULL;
   }
-g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
+  t_print("%s: RXid=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->buffer_size=buffer_size;
   rx->fft_size=fft_size;
   rx->fps=fps;
@@ -1219,8 +1216,6 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
 
   rx->mute_radio=0;
 
-  rx->fexchange_errors=0;
-
   rx->zoom=1;
   rx->pan=0;
 
@@ -1228,26 +1223,25 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
 
   // allocate buffers
   rx->iq_input_buffer=g_new(double,2*rx->buffer_size);
-  rx->audio_buffer_size=480;
   rx->audio_sequence=0L;
   rx->pixels=pixels*rx->zoom;
   rx->pixel_samples=g_new(float,rx->pixels);
 
 
-g_print("%s (after restore): rx=%p id=%d audio_buffer_size=%d local_audio=%d\n",__FUNCTION__,rx,rx->id,rx->audio_buffer_size,rx->local_audio);
+  t_print("%s (after restore): rx=%p id=%d local_audio=%d\n",__FUNCTION__,rx,rx->id,rx->local_audio);
   int scale=rx->sample_rate/48000;
   rx->output_samples=rx->buffer_size/scale;
   rx->audio_output_buffer=g_new(gdouble,2*rx->output_samples);
 
-g_print("%s: id=%d output_samples=%d audio_output_buffer=%p\n",__FUNCTION__,rx->id,rx->output_samples,rx->audio_output_buffer);
+  t_print("%s: RXid=%d output_samples=%d audio_output_buffer=%p\n",__FUNCTION__,rx->id,rx->output_samples,rx->audio_output_buffer);
 
   rx->hz_per_pixel=(double)rx->sample_rate/(double)rx->pixels;
 
   // setup wdsp for this receiver
 
-g_print("%s: id=%d after restore adc=%d\n",__FUNCTION__,rx->id, rx->adc);
+  t_print("%s: RXid=%d after restore adc=%d\n",__FUNCTION__,rx->id, rx->adc);
 
-g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
+  t_print("%s: OpenChannel RXid=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
         __FUNCTION__,
         rx->id,
         rx->buffer_size,
@@ -1363,7 +1357,7 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   int result;
   XCreateAnalyzer(rx->id, &result, 262144, 1, 1, NULL);
   if(result != 0) {
-    g_print( "%s: XCreateAnalyzer id=%d failed: %d\n",__FUNCTION__,rx->id, result);
+    t_print( "%s: XCreateAnalyzer RXid=%d failed: %d\n",__FUNCTION__,rx->id, result);
   } else {
     init_analyzer(rx);
   }
@@ -1375,7 +1369,7 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
 
   create_visual(rx);
 
-g_print("%s: rx=%p id=%d local_audio=%d\n",__FUNCTION__,rx,rx->id,rx->local_audio);
+  t_print("%s: rx=%p id=%d local_audio=%d\n",__FUNCTION__,rx,rx->id,rx->local_audio);
   if(rx->local_audio) {
     if(audio_open_output(rx)<0) {
       rx->local_audio=0;
@@ -1403,7 +1397,7 @@ void receiver_change_sample_rate(RECEIVER *rx,int sample_rate) {
   rx->output_samples=rx->buffer_size/scale;
   rx->hz_per_pixel=(double)rx->sample_rate/(double)rx->width;
 
-g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTION__,rx->id,sample_rate,scale,rx->buffer_size,rx->output_samples);
+  t_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTION__,rx->id,sample_rate,scale,rx->buffer_size,rx->output_samples);
 
   //
   // In the old protocol, the RX_FEEDBACK sample rate is tied
@@ -1417,7 +1411,7 @@ g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTI
     g_free(rx->pixel_samples);
     rx->pixel_samples=g_new(float,rx->pixels);
     init_analyzer(rx);
-    g_print("%s: PS FEEDBACK: id=%d rate=%d buffer_size=%d output_samples=%d\n",
+    t_print("%s: PS RX FEEDBACK: id=%d rate=%d buffer_size=%d output_samples=%d\n",
             __FUNCTION__,rx->id, rx->sample_rate, rx->buffer_size, rx->output_samples);
     g_mutex_unlock(&rx->mutex);
     return;
@@ -1453,7 +1447,7 @@ g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTI
 
   g_mutex_unlock(&rx->mutex);
 
-g_print("%s: id=%d rate=%d buffer_size=%d output_samples=%d\n",__FUNCTION__,rx->id, rx->sample_rate, rx->buffer_size, rx->output_samples);
+  t_print("%s: RXid=%d rate=%d buffer_size=%d output_samples=%d\n",__FUNCTION__,rx->id, rx->sample_rate, rx->buffer_size, rx->output_samples);
 }
 
 void receiver_set_frequency(RECEIVER *rx, long long f) {
@@ -1488,7 +1482,7 @@ void receiver_frequency_changed(RECEIVER *rx) {
       // reset such that the CTUN center frequency is placed at
       // the new frequency
       //
-      g_print("%s: CTUN freq out of range\n", __FUNCTION__);
+      t_print("%s: CTUN freq out of range\n", __FUNCTION__);
       vfo[id].frequency=vfo[id].ctun_frequency;
     }
 
@@ -1584,7 +1578,7 @@ static void process_rx_buffer(RECEIVER *rx) {
   short left_audio_sample,right_audio_sample;
   int i;
 
-  //g_print("%s: rx=%p id=%d output_samples=%d audio_output_buffer=%p\n",__FUNCTION__,rx,rx->id,rx->output_samples,rx->audio_output_buffer);
+  //t_print("%s: rx=%p id=%d output_samples=%d audio_output_buffer=%p\n",__FUNCTION__,rx,rx->id,rx->output_samples,rx->audio_output_buffer);
 
   for(i=0;i<rx->output_samples;i++) {
     if(isTransmitting() && (!duplex || mute_rx_while_transmitting)) {
@@ -1654,24 +1648,6 @@ static void process_rx_buffer(RECEIVER *rx) {
         case SOAPYSDR_PROTOCOL:
           break;
       }
-
-#ifdef AUDIO_WATERFALL
-      if(audio_samples!=NULL) {
-        if(waterfall_samples==0) {
-          audio_samples[audio_samples_index]=(float)left_audio_sample;
-          audio_samples_index++;
-          if(audio_samples_index>=AUDIO_WATERFALL_SAMPLES) {
-            //Spectrum(CHANNEL_AUDIO,0,0,audio_samples,audio_samples);
-            audio_samples_index=0;
-          }
-        }
-        waterfall_samples++;
-        if(waterfall_samples==waterfall_resample) {
-          waterfall_samples=0;
-        }
-      }
-#endif
-
     }
 
   }
@@ -1680,7 +1656,7 @@ static void process_rx_buffer(RECEIVER *rx) {
 void full_rx_buffer(RECEIVER *rx) {
   int error;
 
-  //g_print("%s: rx=%p\n",__FUNCTION__,rx);
+  //t_print("%s: rx=%p\n",__FUNCTION__,rx);
   g_mutex_lock(&rx->mutex);
 
   //
@@ -1700,7 +1676,7 @@ void full_rx_buffer(RECEIVER *rx) {
 
   fexchange0(rx->id, rx->iq_input_buffer, rx->audio_output_buffer, &error);
   if(error!=0) {
-    rx->fexchange_errors++;
+    t_print("%s: id=%d fexchange0: error=%d\n",__FUNCTION__,rx->id,error);
   }
 
   if(rx->displaying) {

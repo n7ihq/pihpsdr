@@ -32,6 +32,7 @@
 #include "vfo.h"
 #include "button_text.h"
 #include "ext.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
@@ -72,7 +73,7 @@ static gboolean default_cb (GtkWidget *widget, gpointer data) {
       high=var2_default_high[mode];
       break;
     default:
-      g_print("%s: illegal data = %p (%d)\n",__FUNCTION__,data, f);
+      t_print("%s: illegal data = %p (%d)\n",__FUNCTION__,data, f);
       return FALSE;
       break;
   }
@@ -141,7 +142,7 @@ static void var_spin_low_cb (GtkWidget *widget, gpointer data) {
   } else {
     filter->low = val;
   }
-  g_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
+  t_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
   if(f==vfo[id].filter) {
     vfo_filter_changed(f);
   }
@@ -155,7 +156,7 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
   FILTER *filter=&mode_filters[f];
 
   filter->high=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  g_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
+  t_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
   if(f==vfo[id].filter) {
     vfo_filter_changed(f);
   }

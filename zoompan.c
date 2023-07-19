@@ -35,6 +35,7 @@
 #endif
 #include "actions.h"
 #include "ext.h"
+#include "message.h"
 
 static int width;
 static int height;
@@ -67,7 +68,7 @@ int zoompan_active_receiver_changed(void *data) {
 }
 
 static void zoom_value_changed_cb(GtkWidget *widget, gpointer data) {
-g_print("zoom_value_changed_cb\n");
+  //t_print("zoom_value_changed_cb\n");
   g_mutex_lock(&pan_zoom_mutex);
   g_mutex_lock(&active_receiver->display_mutex);
 #ifdef CLIENT_SERVER
@@ -96,7 +97,7 @@ g_print("zoom_value_changed_cb\n");
 }
 
 void set_zoom(int rx,double value) {
-//g_print("set_zoom: %f\n",value);
+  //t_print("set_zoom: %f\n",value);
   if (rx >= receivers) return;
   receiver[rx]->zoom=value;
   if(display_zoompan) {
@@ -134,7 +135,7 @@ void set_zoom(int rx,double value) {
 }
 
 void remote_set_zoom(int rx,double value) {
-g_print("remote_set_zoom: rx=%d zoom=%f\n",rx,value);
+  //t_print("remote_set_zoom: rx=%d zoom=%f\n",rx,value);
   g_mutex_lock(&pan_zoom_mutex);
   g_signal_handler_block(G_OBJECT(zoom_scale),zoom_signal_id);
   g_signal_handler_block(G_OBJECT(pan_scale),pan_signal_id);
@@ -142,11 +143,11 @@ g_print("remote_set_zoom: rx=%d zoom=%f\n",rx,value);
   g_signal_handler_unblock(G_OBJECT(pan_scale),pan_signal_id);
   g_signal_handler_unblock(G_OBJECT(zoom_scale),zoom_signal_id);
   g_mutex_unlock(&pan_zoom_mutex);
-g_print("remote_set_zoom: EXIT\n");
+  //t_print("remote_set_zoom: EXIT\n");
 }
 
 void update_zoom(double zoom) {
-//g_print("update_zoom: %f\n",zoom);
+  //t_print("update_zoom: value=%f\n",zoom);
   int z=active_receiver->zoom+(int)zoom;
   if(z>MAX_ZOOM) z=MAX_ZOOM;
   if(z<1) z=1;
@@ -154,7 +155,7 @@ void update_zoom(double zoom) {
 }
 
 static void pan_value_changed_cb(GtkWidget *widget, gpointer data) {
-g_print("pan_value_changed_cb\n");
+  //t_print("pan_value_changed_cb\n");
   g_mutex_lock(&pan_zoom_mutex);
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
@@ -169,7 +170,7 @@ g_print("pan_value_changed_cb\n");
 }
 
 void set_pan(int rx,double value) {
-g_print("set_pan: %f\n",value);
+  //t_print("set_pan: value=%f\n",value);
   if (rx >= receivers) return;
   receiver[rx]->pan=(int)value;
   if(display_zoompan) {
@@ -206,7 +207,7 @@ g_print("set_pan: %f\n",value);
 }
 
 void remote_set_pan(int rx,double value) {
-g_print("remote_set_pan: rx=%d pan=%f\n",rx,value);
+  //t_print("remote_set_pan: rx=%d pan=%f\n",rx,value);
   if (rx >= receivers) return;
   g_mutex_lock(&pan_zoom_mutex);
   g_signal_handler_block(G_OBJECT(pan_scale),pan_signal_id);
@@ -214,7 +215,7 @@ g_print("remote_set_pan: rx=%d pan=%f\n",rx,value);
   set_pan(rx,value);
   g_signal_handler_unblock(G_OBJECT(pan_scale),pan_signal_id);
   g_mutex_unlock(&pan_zoom_mutex);
-g_print("remote_set_pan: EXIT\n");
+  //t_print("remote_set_pan: EXIT\n");
 }
 
 void update_pan(double pan) {
@@ -230,7 +231,7 @@ GtkWidget *zoompan_init(int my_width, int my_height) {
   width=my_width;
   height=my_height;
 
-g_print("%s: width=%d height=%d\n", __FUNCTION__,width,height);
+  //t_print("%s: width=%d height=%d\n", __FUNCTION__,width,height);
 
   zoompan=gtk_grid_new();
   gtk_widget_set_size_request (zoompan, width, height);

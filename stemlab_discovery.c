@@ -34,13 +34,13 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <glib.h>
-#include <errno.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "discovered.h"
 #include "discovery.h"
 #include "radio.h"
+#include "message.h"
 
 
 // As we only run in the GTK+ main event loop, which is single-threaded and
@@ -60,7 +60,7 @@ static size_t get_list_cb(void *buffer, size_t size, size_t nmemb, void *data) {
   // fancy and will not show the name of the apps in the initial HEAD
   // request.
   //
-  //g_print("WEB-DEBUG:HEAD: %s\n", buffer);
+  //t_print("WEB-DEBUG:HEAD: %s\n", buffer);
   int *software_version = (int*) data;
   const gchar *pavel_rx = "\"sdr_receiver_hpsdr\"";
   if (g_strstr_len(buffer, size*nmemb, pavel_rx) != NULL) {
@@ -83,7 +83,7 @@ static size_t app_list_cb(void *buffer, size_t size, size_t nmemb, void *data) {
   // are not split across two buffers.
   // This is for STEMlab web servers.
   //
-  //g_print("WEB-DEBUG:APPLIST: %s\n", buffer);
+  //t_print("WEB-DEBUG:APPLIST: %s\n", buffer);
   int *software_version = (int*) data;
   const gchar *pavel_rx_json = "\"sdr_receiver_hpsdr\":";
   if (g_strstr_len(buffer, size*nmemb, pavel_rx_json) != NULL) {
@@ -111,7 +111,7 @@ static size_t app_list_cb(void *buffer, size_t size, size_t nmemb, void *data) {
 // the RedPitaya web server when starting the SDR application.
 //
 static size_t alpine_start_callback(void *buffer, size_t size, size_t nmemb, void *data) {
-  //g_print("WEB-DEBUG:ALPINE-START: %s\n", buffer);
+  //t_print("WEB-DEBUG:ALPINE-START: %s\n", buffer);
   return size * nmemb;
 }
 
@@ -120,9 +120,9 @@ static size_t alpine_start_callback(void *buffer, size_t size, size_t nmemb, voi
 // It should show a status:OK message in the JSON output.
 //
 static size_t app_start_callback(void *buffer, size_t size, size_t nmemb, void *data) {
-  //g_print("WEB-DEBUG:STEMLAB-START: %s\n", buffer);
+  //t_print("WEB-DEBUG:STEMLAB-START: %s\n", buffer);
   if (strncmp(buffer, "{\"status\":\"OK\"}", size*nmemb) != 0) {
-    g_print( "stemlab_start: Receiver error from STEMlab\n");
+    t_print( "stemlab_start: Receiver error from STEMlab\n");
     return 0;
   }
   return size * nmemb;
@@ -145,12 +145,12 @@ int alpine_start_app(const char * const app_id) {
   CURLcode curl_error = CURLE_OK;
 
   if (curl_handle == NULL) {
-    g_print( "alpine_start: Failed to create cURL handle\n");
+    t_print( "alpine_start: Failed to create cURL handle\n");
     return -1;
   }
 #define check_curl(description) do { \
   if (curl_error != CURLE_OK) { \
-    g_print( "ALPINE_start: " description ": %s\n", \
+    t_print( "ALPINE_start: " description ": %s\n", \
         curl_easy_strerror(curl_error)); \
      return -1; \
   } \
@@ -198,13 +198,13 @@ int stemlab_start_app(const char * const app_id) {
   CURLcode curl_error = CURLE_OK;
 
   if (curl_handle == NULL) {
-    g_print( "stemlab_start: Failed to create cURL handle\n");
+    t_print( "stemlab_start: Failed to create cURL handle\n");
     return -1;
   }
 
 #define check_curl(description) do { \
   if (curl_error != CURLE_OK) { \
-    g_print( "STEMLAB_start: " description ": %s\n", \
+    t_print( "STEMLAB_start: " description ": %s\n", \
         curl_easy_strerror(curl_error)); \
      return -1; \
   } \
@@ -276,11 +276,11 @@ void stemlab_discovery() {
   struct sockaddr_in ip_address;
   struct sockaddr_in netmask;
 
-   g_print("Stripped-down STEMLAB/HAMLAB discovery...\n");
-   g_print("STEMLAB: using inet addr %s\n", ipaddr_radio);
+   t_print("Stripped-down STEMLAB/HAMLAB discovery...\n");
+   t_print("STEMLAB: using inet addr %s\n", ipaddr_radio);
    ip_address.sin_family = AF_INET;
    if (inet_aton(ipaddr_radio, &ip_address.sin_addr) == 0) {
-     g_print("StemlabDiscovery: TCP %s is invalid!\n", ipaddr_radio);
+     t_print("StemlabDiscovery: TCP %s is invalid!\n", ipaddr_radio);
      return;
    }
 
@@ -294,7 +294,7 @@ void stemlab_discovery() {
 //
   curl_handle = curl_easy_init();
   if (curl_handle == NULL) {
-    g_print( "stemlab_start: Failed to create cURL handle\n");
+    t_print( "stemlab_start: Failed to create cURL handle\n");
     return;
   }
   app_list=0;
@@ -308,10 +308,10 @@ void stemlab_discovery() {
   if (curl_error ==  CURLE_OPERATION_TIMEDOUT) {
     sprintf(txt,"No response from web server at %s", ipaddr_radio);
     status_text(txt);
-    g_print("%s\n",txt);
+    t_print("%s\n",txt);
   }
   if (curl_error != CURLE_OK) {
-    g_print( "STEMLAB ping error: %s\n", curl_easy_strerror(curl_error));
+    t_print( "STEMLAB ping error: %s\n", curl_easy_strerror(curl_error));
     return;
   }
 
@@ -321,7 +321,7 @@ void stemlab_discovery() {
   if (app_list == 0) {
     curl_handle = curl_easy_init();
     if (curl_handle == NULL) {
-      g_print( "stemlab_start: Failed to create cURL handle\n");
+      t_print( "stemlab_start: Failed to create cURL handle\n");
       return;
     }
     sprintf(txt,"http://%s/bazaar?apps=", ipaddr_radio);
@@ -333,15 +333,15 @@ void stemlab_discovery() {
     curl_easy_cleanup(curl_handle);
     if (curl_error == CURLE_OPERATION_TIMEDOUT) {
       status_text("No Response from RedPitaya in 20 secs");
-      g_print("60-sec TimeOut met when trying to get list of HPSDR apps from RedPitaya\n");
+      t_print("60-sec TimeOut met when trying to get list of HPSDR apps from RedPitaya\n");
     }
     if (curl_error != CURLE_OK) {
-      g_print( "STEMLAB app-list error: %s\n", curl_easy_strerror(curl_error));
+      t_print( "STEMLAB app-list error: %s\n", curl_easy_strerror(curl_error));
       return;
     }
   }
   if (app_list == 0) {
-    g_print( "Could contact web server but no SDR apps found.\n");
+    t_print( "Could contact web server but no SDR apps found.\n");
     return;
   }
 

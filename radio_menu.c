@@ -143,6 +143,13 @@ static void hl2audio_cb(GtkWidget *widget, gpointer data) {
   hl2_audio_codec=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
+static void anan10e_cb(GtkWidget *widget, gpointer data) {
+  protocol_stop();
+  usleep(200000);
+  anan10E=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  protocol_run();
+}
+
 static void split_cb(GtkWidget *widget, gpointer data) {
   int new=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   radio_set_split(new);
@@ -381,7 +388,7 @@ void radio_menu(GtkWidget *parent) {
 
   GtkWidget *receivers_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(receivers_label), "<b>Receivers:</b>");
-  gtk_label_set_justify(GTK_LABEL(receivers_label),GTK_JUSTIFY_LEFT);
+  gtk_label_set_xalign(GTK_LABEL(receivers_label),0.0);
   gtk_grid_attach(GTK_GRID(grid),receivers_label,col,row,1,1);
 
   row++;
@@ -751,7 +758,15 @@ void radio_menu(GtkWidget *parent) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hl2audio_b), hl2_audio_codec);
     gtk_grid_attach(GTK_GRID(grid),hl2audio_b,col,row,1,1);
     g_signal_connect(hl2audio_b,"toggled",G_CALLBACK(hl2audio_cb),NULL);
-    col++;  // value used below if SOAPY is active
+    col++;
+  }
+
+  if (device==DEVICE_HERMES || device == NEW_DEVICE_HERMES) {
+    GtkWidget *anan10e_b=gtk_check_button_new_with_label("Anan-10E/100B");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(anan10e_b), anan10E);
+    gtk_grid_attach(GTK_GRID(grid),anan10e_b,col,row,1,1);
+    g_signal_connect(anan10e_b,"toggled",G_CALLBACK(anan10e_cb),NULL);
+    col++;
   }
 
 #ifdef SOAPYSDR
@@ -767,6 +782,7 @@ void radio_menu(GtkWidget *parent) {
       gtk_grid_attach(GTK_GRID(grid),agc,col,row,1,1);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(agc),adc[0].agc);
       g_signal_connect(agc,"toggled",G_CALLBACK(agc_changed_cb),&adc[0]);
+      col++;
     }
   }
 #endif
@@ -821,14 +837,14 @@ void radio_menu(GtkWidget *parent) {
       if(radio->info.soapy.rx_gains>1) {
         GtkWidget *rx_gain=gtk_label_new(NULL);
         gtk_label_set_markup(GTK_LABEL(rx_gain), "<b>RX Gains:</b>");
-        gtk_label_set_justify(GTK_LABEL(rx_gain),GTK_JUSTIFY_LEFT);
+        gtk_label_set_xalign(GTK_LABEL(rx_gain),0.0);
         gtk_grid_attach(GTK_GRID(grid),rx_gain,0,row,1,1);
       }
       if (can_transmit) {
         if(radio->info.soapy.rx_gains>1) {
           GtkWidget *tx_gain=gtk_label_new(NULL);
           gtk_label_set_markup(GTK_LABEL(tx_gain), "<b>TX Gains:</b>");
-          gtk_label_set_justify(GTK_LABEL(tx_gain),GTK_JUSTIFY_LEFT);
+          gtk_label_set_xalign(GTK_LABEL(tx_gain),0.0);
           gtk_grid_attach(GTK_GRID(grid),tx_gain,2,row,1,1);
         }
       }

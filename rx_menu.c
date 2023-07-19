@@ -33,6 +33,7 @@
 #include "receiver.h"
 #include "sliders.h"
 #include "new_protocol.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 static GtkWidget *local_audio_b=NULL;
@@ -101,7 +102,7 @@ static void adc_cb(GtkToggleButton *widget,gpointer data) {
 }
 
 static void local_audio_cb(GtkWidget *widget, gpointer data) {
-g_print("local_audio_cb: rx=%d\n",active_receiver->id);
+t_print("local_audio_cb: rx=%d\n",active_receiver->id);
 
   if(active_receiver->audio_name!=NULL) {
     g_free(active_receiver->audio_name);
@@ -109,14 +110,13 @@ g_print("local_audio_cb: rx=%d\n",active_receiver->id);
   }
 
   int i=gtk_combo_box_get_active(GTK_COMBO_BOX(output));
-  active_receiver->audio_name=g_new(gchar,strlen(output_devices[i].name)+1);
-  strcpy(active_receiver->audio_name,output_devices[i].name);
+  active_receiver->audio_name=g_strdup(output_devices[i].name);
 
   if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget))) {
     if(audio_open_output(active_receiver)==0) {
       active_receiver->local_audio=1;
     } else {
-g_print("local_audio_cb: audio_open_output failed\n");
+t_print("local_audio_cb: audio_open_output failed\n");
       active_receiver->local_audio=0;
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
     }
@@ -126,7 +126,7 @@ g_print("local_audio_cb: audio_open_output failed\n");
       audio_close_output(active_receiver);
     }
   }
-g_print("local_audio_cb: local_audio=%d\n",active_receiver->local_audio);
+t_print("local_audio_cb: local_audio=%d\n",active_receiver->local_audio);
 }
 
 static void mute_audio_cb(GtkWidget *widget, gpointer data) {
@@ -154,9 +154,8 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
   }
 
   if(i>=0) {
-    g_print("local_output_changed rx=%d %s\n",active_receiver->id,output_devices[i].name);
-    active_receiver->audio_name=g_new(gchar,strlen(output_devices[i].name)+1);
-    strcpy(active_receiver->audio_name,output_devices[i].name);
+    t_print("local_output_changed rx=%d %s\n",active_receiver->id,output_devices[i].name);
+    active_receiver->audio_name=g_strdup(output_devices[i].name);
   }
 
   if(active_receiver->local_audio) {
@@ -165,7 +164,7 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (local_audio_b),FALSE);
     }
   }
-  g_print("local_output_changed rx=%d local_audio=%d\n",active_receiver->id,active_receiver->local_audio);
+  t_print("local_output_changed rx=%d local_audio=%d\n",active_receiver->id,active_receiver->local_audio);
 }
 
 static void audio_channel_cb(GtkWidget *widget, gpointer data) {
@@ -181,7 +180,7 @@ static void audio_channel_cb(GtkWidget *widget, gpointer data) {
       active_receiver->audio_channel=RIGHT;
       break;
     }
-    g_print("CHANNEL=%d\n", active_receiver->audio_channel);
+    t_print("CHANNEL=%d\n", active_receiver->audio_channel);
 }
 
 void rx_menu(GtkWidget *parent) {
@@ -364,8 +363,7 @@ void rx_menu(GtkWidget *parent) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(output),0);
       if (active_receiver->audio_name != NULL) {
         g_free(active_receiver->audio_name);
-        active_receiver->audio_name=g_new(gchar,strlen(output_devices[0].name)+1);
-        strcpy(active_receiver->audio_name,output_devices[0].name);
+        active_receiver->audio_name=g_strdup(output_devices[0].name);
       }
     }
 

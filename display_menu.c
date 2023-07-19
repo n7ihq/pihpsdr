@@ -31,6 +31,8 @@
 #include "radio.h"
 
 static GtkWidget *dialog=NULL;
+static GtkWidget *waterfall_high_r=NULL;
+static GtkWidget *waterfall_low_r=NULL;
 
 static void cleanup() {
   if(dialog!=NULL) {
@@ -50,26 +52,51 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-static void detector_mode_cb(GtkToggleButton *widget, gpointer data) {
-  if(gtk_toggle_button_get_active(widget)) {
-    display_detector_mode=GPOINTER_TO_UINT(data);
-    SetDisplayDetectorMode(active_receiver->id, 0, display_detector_mode);
+static void detector_cb(GtkToggleButton *widget, gpointer data) {
+  int val=gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  switch (val) {
+    case 0:
+      display_detector_mode=DETECTOR_MODE_PEAK;
+      break;
+    case 1:
+      display_detector_mode=DETECTOR_MODE_ROSENFELL;
+      break;
+    case 2:
+      display_detector_mode=DETECTOR_MODE_AVERAGE;
+      break;
+    case 3:
+      display_detector_mode=DETECTOR_MODE_SAMPLE;
+      break;
   }
+  SetDisplayDetectorMode(active_receiver->id, 0, display_detector_mode);
 }
 
-static void average_mode_cb(GtkToggleButton *widget, gpointer data) {
-  if(gtk_toggle_button_get_active(widget)) {
-    display_average_mode=GPOINTER_TO_INT(data);
-    //
-    // I observed artifacts when changing the mode from "Log Recursive"
-    // to "Time Window", so I generally switch to NONE first, and then
-    // to the target averaging mode
-    //
-    SetDisplayAverageMode(active_receiver->id, 0, AVERAGE_MODE_NONE);
-    usleep(50000);
-    SetDisplayAverageMode(active_receiver->id, 0, display_average_mode);
-    calculate_display_average(active_receiver);
+static void average_cb(GtkToggleButton *widget, gpointer data) {
+  int val=gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  switch (val) {
+    case 0:
+      display_average_mode=AVERAGE_MODE_NONE;
+      break;
+    case 1:
+      display_average_mode=AVERAGE_MODE_RECURSIVE;
+      break;
+    case 2:
+      display_average_mode=AVERAGE_MODE_TIME_WINDOW;
+      break;
+    case 3:
+      display_average_mode=AVERAGE_MODE_LOG_RECURSIVE;
+      break;
   }
+  //
+  // I observed artifacts when changing the mode from "Log Recursive"
+  // to "Time Window", so I generally switch to NONE first, and then
+  // to the target averaging mode
+  //
+  SetDisplayAverageMode(active_receiver->id, 0, AVERAGE_MODE_NONE);
+  usleep(50000);
+  SetDisplayAverageMode(active_receiver->id, 0, display_average_mode);
+  calculate_display_average(active_receiver);
+ 
 }
 
 static void time_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -113,7 +140,10 @@ static void waterfall_low_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void waterfall_automatic_cb(GtkWidget *widget, gpointer data) {
-  active_receiver->waterfall_automatic=active_receiver->waterfall_automatic==1?0:1;
+  int val=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  active_receiver->waterfall_automatic=val;
+  gtk_widget_set_sensitive(waterfall_high_r, !val); 
+  gtk_widget_set_sensitive(waterfall_low_r, !val); 
 }
 
 static void display_waterfall_cb(GtkWidget *widget, gpointer data) {
@@ -153,6 +183,7 @@ void display_menu(GtkWidget *parent) {
 
   GtkWidget *grid=gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid),10);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
 
   int col=0;
   int row=0;
@@ -160,23 +191,6 @@ void display_menu(GtkWidget *parent) {
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
-
-  row++;
-  col=0;
-
-  GtkWidget *filled_b=gtk_check_button_new_with_label("Fill Panadapter");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), display_filled);
-  gtk_widget_show(filled_b);
-  gtk_grid_attach(GTK_GRID(grid),filled_b,col,row,1,1);
-  g_signal_connect(filled_b,"toggled",G_CALLBACK(filled_cb),NULL);
-
-  col++;
-
-  GtkWidget *gradient_b=gtk_check_button_new_with_label("Gradient");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gradient_b), display_gradient);
-  gtk_widget_show(gradient_b);
-  gtk_grid_attach(GTK_GRID(grid),gradient_b,col,row,1,1);
-  g_signal_connect(gradient_b,"toggled",G_CALLBACK(gradient_cb),NULL);
 
   row++;
   col=0;
@@ -245,36 +259,19 @@ void display_menu(GtkWidget *parent) {
   row++;
   col=0;
 
-  GtkWidget *waterfall_automatic_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(waterfall_automatic_label), "<b>Waterfall Automatic: </b>");
-  gtk_widget_show(waterfall_automatic_label);
-  gtk_grid_attach(GTK_GRID(grid),waterfall_automatic_label,col,row,1,1);
-
-  col++;
-
-  GtkWidget *waterfall_automatic_b=gtk_check_button_new();
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (waterfall_automatic_b), active_receiver->waterfall_automatic);
-  gtk_widget_show(waterfall_automatic_b);
-  gtk_grid_attach(GTK_GRID(grid),waterfall_automatic_b,col,row,1,1);
-  g_signal_connect(waterfall_automatic_b,"toggled",G_CALLBACK(waterfall_automatic_cb),NULL);
-
-  row++;
-  col=0;
-
   GtkWidget *waterfall_high_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(waterfall_high_label), "<b>Waterfall High: </b>");
   gtk_widget_show(waterfall_high_label);
   gtk_grid_attach(GTK_GRID(grid),waterfall_high_label,col,row,1,1);
-
   col++;
 
-  GtkWidget *waterfall_high_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
+  waterfall_high_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(waterfall_high_r),(double)active_receiver->waterfall_high);
   gtk_widget_show(waterfall_high_r);
   gtk_grid_attach(GTK_GRID(grid),waterfall_high_r,col,row,1,1);
   g_signal_connect(waterfall_high_r,"value_changed",G_CALLBACK(waterfall_high_value_changed_cb),NULL);
-
   row++;
+
   col=0;
 
   GtkWidget *waterfall_low_label=gtk_label_new(NULL);
@@ -284,11 +281,25 @@ void display_menu(GtkWidget *parent) {
 
   col++;
 
-  GtkWidget *waterfall_low_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
+  waterfall_low_r=gtk_spin_button_new_with_range(-220.0,100.0,1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(waterfall_low_r),(double)active_receiver->waterfall_low);
   gtk_widget_show(waterfall_low_r);
   gtk_grid_attach(GTK_GRID(grid),waterfall_low_r,col,row,1,1);
   g_signal_connect(waterfall_low_r,"value_changed",G_CALLBACK(waterfall_low_value_changed_cb),NULL);
+  row++;
+
+  col=0;
+  GtkWidget *waterfall_automatic_label=gtk_label_new(NULL); 
+  gtk_label_set_markup(GTK_LABEL(waterfall_automatic_label), "<b>Waterfall Automatic: </b>");
+  gtk_widget_show(waterfall_automatic_label);
+  gtk_grid_attach(GTK_GRID(grid),waterfall_automatic_label,col,row,1,1);
+  col++;
+
+  GtkWidget *waterfall_automatic_b=gtk_check_button_new();
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (waterfall_automatic_b), active_receiver->waterfall_automatic);
+  gtk_widget_show(waterfall_automatic_b);
+  gtk_grid_attach(GTK_GRID(grid),waterfall_automatic_b,col,row,1,1);
+  g_signal_connect(waterfall_automatic_b,"toggled",G_CALLBACK(waterfall_automatic_cb),NULL);
 
   col=2;
   row=1;
@@ -298,98 +309,81 @@ void display_menu(GtkWidget *parent) {
   gtk_widget_show(detector_mode_label);
   gtk_grid_attach(GTK_GRID(grid),detector_mode_label,col,row,1,1);
 
+  GtkWidget *detector_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(detector_combo), NULL, "Peak");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(detector_combo), NULL, "Rosenfell");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(detector_combo), NULL, "Average");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(detector_combo), NULL, "Sample");
+  switch (display_detector_mode) {
+    case DETECTOR_MODE_PEAK:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(detector_combo), 0);
+     break;
+    case DETECTOR_MODE_ROSENFELL:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(detector_combo), 1);
+     break;
+    case DETECTOR_MODE_AVERAGE:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(detector_combo), 2);
+     break;
+    case DETECTOR_MODE_SAMPLE:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(detector_combo), 2);
+     break;
+  }
+  my_combo_attach(GTK_GRID(grid), detector_combo, col+1, row, 1, 1);
+  g_signal_connect(detector_combo, "changed", G_CALLBACK(detector_cb), NULL);
   row++;
-
-  GtkWidget *detector_mode_peak=gtk_radio_button_new_with_label(NULL,"Peak");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (detector_mode_peak), display_detector_mode==DETECTOR_MODE_PEAK);
-  gtk_widget_show(detector_mode_peak);
-  gtk_grid_attach(GTK_GRID(grid),detector_mode_peak,col,row,1,1);
-  g_signal_connect(detector_mode_peak,"toggled",G_CALLBACK(detector_mode_cb),(gpointer)DETECTOR_MODE_PEAK);
-
-  row++;
-
-  GtkWidget *detector_mode_rosenfell=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(detector_mode_peak),"Rosenfell");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (detector_mode_rosenfell), display_detector_mode==DETECTOR_MODE_ROSENFELL);
-  gtk_widget_show(detector_mode_rosenfell);
-  gtk_grid_attach(GTK_GRID(grid),detector_mode_rosenfell,col,row,1,1);
-  g_signal_connect(detector_mode_rosenfell,"toggled",G_CALLBACK(detector_mode_cb),(gpointer)DETECTOR_MODE_ROSENFELL);
-
-  row++;
-
-  GtkWidget *detector_mode_average=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(detector_mode_rosenfell),"Average");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (detector_mode_average), display_detector_mode==DETECTOR_MODE_AVERAGE);
-  gtk_widget_show(detector_mode_average);
-  gtk_grid_attach(GTK_GRID(grid),detector_mode_average,col,row,1,1);
-  g_signal_connect(detector_mode_average,"toggled",G_CALLBACK(detector_mode_cb),(gpointer)DETECTOR_MODE_AVERAGE);
-
-  row++;
-
-  GtkWidget *detector_mode_sample=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(detector_mode_average),"Sample");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (detector_mode_sample), display_detector_mode==DETECTOR_MODE_SAMPLE);
-  gtk_widget_show(detector_mode_sample);
-  gtk_grid_attach(GTK_GRID(grid),detector_mode_sample,col,row,1,1);
-  g_signal_connect(detector_mode_sample,"toggled",G_CALLBACK(detector_mode_cb),(gpointer)DETECTOR_MODE_SAMPLE);
-
-
-  col=3;
-  row=1;
 
   GtkWidget *average_mode_label=gtk_label_new("Averaging: ");
   gtk_label_set_markup(GTK_LABEL(average_mode_label), "<b>Averaging:</b>");
   gtk_widget_show(average_mode_label);
   gtk_grid_attach(GTK_GRID(grid),average_mode_label,col,row,1,1);
 
+  GtkWidget *average_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "None");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Recursive");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Time Window");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Log Recursive");
+  switch (display_detector_mode) {
+    case AVERAGE_MODE_NONE:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 0);
+     break;
+    case AVERAGE_MODE_RECURSIVE:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 1);
+     break;
+    case AVERAGE_MODE_TIME_WINDOW:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 2);
+     break;
+    case AVERAGE_MODE_LOG_RECURSIVE:
+     gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 2);
+     break;
+  }
+  my_combo_attach(GTK_GRID(grid), average_combo, col+1, row, 1, 1);
+  g_signal_connect(average_combo, "changed", G_CALLBACK(average_cb), NULL);
   row++;
 
-  GtkWidget *average_mode_none=gtk_radio_button_new_with_label(NULL,"None");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (average_mode_none), display_detector_mode==AVERAGE_MODE_NONE);
-  gtk_widget_show(average_mode_none);
-  gtk_grid_attach(GTK_GRID(grid),average_mode_none,col,row,1,1);
-  g_signal_connect(average_mode_none,"toggled",G_CALLBACK(average_mode_cb),(gpointer)AVERAGE_MODE_NONE);
-
-  row++;
-
-  GtkWidget *average_mode_recursive=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(average_mode_none),"Recursive");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (average_mode_recursive), display_average_mode==AVERAGE_MODE_RECURSIVE);
-  gtk_widget_show(average_mode_recursive);
-  gtk_grid_attach(GTK_GRID(grid),average_mode_recursive,col,row,1,1);
-  g_signal_connect(average_mode_recursive,"toggled",G_CALLBACK(average_mode_cb),(gpointer)AVERAGE_MODE_RECURSIVE);
-
-  row++;
-
-  GtkWidget *average_mode_time_window=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(average_mode_recursive),"Time Window");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (average_mode_time_window), display_average_mode==AVERAGE_MODE_TIME_WINDOW);
-  gtk_widget_show(average_mode_time_window);
-  gtk_grid_attach(GTK_GRID(grid),average_mode_time_window,col,row,1,1);
-  g_signal_connect(average_mode_time_window,"toggled",G_CALLBACK(average_mode_cb),(gpointer)AVERAGE_MODE_TIME_WINDOW);
-
-  row++;
-
-  GtkWidget *average_mode_log_recursive=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(average_mode_time_window),"Log Recursive");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (average_mode_log_recursive), display_average_mode==AVERAGE_MODE_LOG_RECURSIVE);
-  gtk_widget_show(average_mode_log_recursive);
-  gtk_grid_attach(GTK_GRID(grid),average_mode_log_recursive,col,row,1,1);
-  g_signal_connect(average_mode_log_recursive,"toggled",G_CALLBACK(average_mode_cb),(gpointer)AVERAGE_MODE_LOG_RECURSIVE);
-
-  row++;
-
-  GtkWidget *time_label=gtk_label_new("Time (ms): ");
+  GtkWidget *time_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(time_label), "<b>Av. Time (ms):</b>");
   gtk_widget_show(time_label);
   gtk_grid_attach(GTK_GRID(grid),time_label,col,row,1,1);
-
-  col++;
 
   GtkWidget *time_r=gtk_spin_button_new_with_range(1.0,9999.0,1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(time_r),(double)display_average_time);
   gtk_widget_show(time_r);
-  gtk_grid_attach(GTK_GRID(grid),time_r,col,row,1,1);
+  gtk_grid_attach(GTK_GRID(grid),time_r,col+1,row,1,1);
   g_signal_connect(time_r,"value_changed",G_CALLBACK(time_value_changed_cb),NULL);
+  row++;
 
+  GtkWidget *filled_b=gtk_check_button_new_with_label("Fill Panadapter");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), display_filled);
+  gtk_widget_show(filled_b);
+  gtk_grid_attach(GTK_GRID(grid),filled_b,col,row,1,1);
+  g_signal_connect(filled_b,"toggled",G_CALLBACK(filled_cb),NULL);
+  
+  GtkWidget *gradient_b=gtk_check_button_new_with_label("Gradient");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gradient_b), display_gradient);
+  gtk_widget_show(gradient_b);
+  gtk_grid_attach(GTK_GRID(grid),gradient_b,col+1,row,1,1);
+  g_signal_connect(gradient_b,"toggled",G_CALLBACK(gradient_cb),NULL);
   row++;
-  row++;
-  row++;
-  col=0;
-
 
   GtkWidget *b_display_waterfall=gtk_check_button_new_with_label("Display Waterfall");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_waterfall), active_receiver->display_waterfall);
@@ -397,15 +391,12 @@ void display_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),b_display_waterfall,col,row,1,1);
   g_signal_connect(b_display_waterfall,"toggled",G_CALLBACK(display_waterfall_cb),(gpointer)NULL);
 
-  col++;
-
   GtkWidget *b_display_zoompan=gtk_check_button_new_with_label("Display Zoom/Pan");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_zoompan), display_zoompan);
   gtk_widget_show(b_display_zoompan);
-  gtk_grid_attach(GTK_GRID(grid),b_display_zoompan,col,row,1,1);
+  gtk_grid_attach(GTK_GRID(grid),b_display_zoompan,col+1,row,1,1);
   g_signal_connect(b_display_zoompan,"toggled",G_CALLBACK(display_zoompan_cb),(gpointer)NULL);
-
-  col++;
+  row++;
 
   GtkWidget *b_display_sliders=gtk_check_button_new_with_label("Display Sliders");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sliders), display_sliders);
@@ -413,15 +404,12 @@ void display_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),b_display_sliders,col,row,1,1);
   g_signal_connect(b_display_sliders,"toggled",G_CALLBACK(display_sliders_cb),(gpointer)NULL);
 
-  col++;
-
   GtkWidget *b_display_toolbar=gtk_check_button_new_with_label("Display Toolbar");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_toolbar), display_toolbar);
   gtk_widget_show(b_display_toolbar);
-  gtk_grid_attach(GTK_GRID(grid),b_display_toolbar,col,row,1,1);
+  gtk_grid_attach(GTK_GRID(grid),b_display_toolbar,col+1,row,1,1);
   g_signal_connect(b_display_toolbar,"toggled",G_CALLBACK(display_toolbar_cb),(gpointer)NULL);
-
-  col++;
+  row++;
 
   GtkWidget *b_display_sequence_errors=gtk_check_button_new_with_label("Display Seq Errs");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sequence_errors), display_sequence_errors);
@@ -432,6 +420,11 @@ void display_menu(GtkWidget *parent) {
   gtk_container_add(GTK_CONTAINER(content),grid);
 
   sub_menu=dialog;
+
+  if (active_receiver->waterfall_automatic) {
+    gtk_widget_set_sensitive(waterfall_high_r, FALSE);
+    gtk_widget_set_sensitive(waterfall_low_r,  FALSE); 
+  }
 
   gtk_widget_show_all(dialog);
 

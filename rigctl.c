@@ -21,7 +21,6 @@
  */
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <termios.h>
@@ -58,6 +57,7 @@
 #include "new_menu.h"
 #include "zoompan.h"
 #include "exit_menu.h"
+#include "message.h"
 
 #include <math.h>
 
@@ -138,16 +138,16 @@ void close_rigctl_ports() {
   linger.l_onoff = 1;
   linger.l_linger = 0;
 
-  g_print("close_rigctl_ports: server_socket=%d\n",server_socket);
+  t_print("close_rigctl_ports: server_socket=%d\n",server_socket);
   server_running=0;
   for(i=0;i<MAX_CLIENTS;i++) {
       tcp_client[i].running=0;
       if(tcp_client[i].fd!=-1) {
-        g_print("setting SO_LINGER to 0 for client_socket: %d\n",tcp_client[i].fd);
+        t_print("setting SO_LINGER to 0 for client_socket: %d\n",tcp_client[i].fd);
         if(setsockopt(tcp_client[i].fd,SOL_SOCKET,SO_LINGER,(const char *)&linger,sizeof(linger))==-1) {
-          perror("setsockopt(...,SO_LINGER,...) failed for client");
+          t_perror("setsockopt(...,SO_LINGER,...) failed for client");
         }
-        g_print("closing client socket: %d\n",tcp_client[i].fd);
+        t_print("closing client socket: %d\n",tcp_client[i].fd);
         close(tcp_client[i].fd);
         tcp_client[i].fd=-1;
       }
@@ -158,11 +158,11 @@ void close_rigctl_ports() {
   }
 
   if(server_socket>=0) {
-     g_print("setting SO_LINGER to 0 for server_socket: %d\n",server_socket);
+     t_print("setting SO_LINGER to 0 for server_socket: %d\n",server_socket);
     if(setsockopt(server_socket,SOL_SOCKET,SO_LINGER,(const char *)&linger,sizeof(linger))==-1) {
-      perror("setsockopt(...,SO_LINGER,...) failed for server");
+      t_perror("setsockopt(...,SO_LINGER,...) failed for server");
     }
-    g_print("closing server_socket: %d\n",server_socket);
+    t_print("closing server_socket: %d\n",server_socket);
     close(server_socket);
     server_socket=-1;
   }
@@ -501,7 +501,7 @@ static gpointer rigctl_cw_thread(gpointer data)
 }
 
 void send_resp (int fd,char * msg) {
-  if(rigctl_debug) g_print("RIGCTL: RESP=%s\n",msg);
+  if(rigctl_debug) t_print("RIGCTL: RESP=%s\n",msg);
   int length=strlen(msg);
   int count=0;
 
@@ -531,11 +531,11 @@ static gpointer rigctl_server(gpointer data) {
   int on=1;
   int i;
 
-  g_print("rigctl_server: starting server on port %d\n",port);
+  t_print("rigctl_server: starting server on port %d\n",port);
 
   server_socket=socket(AF_INET,SOCK_STREAM,0);
   if(server_socket<0) {
-    perror("rigctl_server: listen socket failed");
+    t_perror("rigctl_server: listen socket failed");
     return NULL;
   }
 
@@ -548,7 +548,7 @@ static gpointer rigctl_server(gpointer data) {
   server_address.sin_addr.s_addr=INADDR_ANY;
   server_address.sin_port=htons(port);
   if(bind(server_socket,(struct sockaddr*)&server_address,sizeof(server_address))<0) {
-    perror("rigctl_server: listen socket bind failed");
+    t_perror("rigctl_server: listen socket bind failed");
     close(server_socket);
     return NULL;
   }
@@ -558,7 +558,7 @@ static gpointer rigctl_server(gpointer data) {
   }
   // listen with a max queue of 3
   if(listen(server_socket,3)<0) {
-    perror("rigctl_server: listen failed");
+    t_perror("rigctl_server: listen failed");
     close(server_socket);
     return NULL;
   }
@@ -588,14 +588,14 @@ static gpointer rigctl_server(gpointer data) {
     //
     // A slot is available, try to get connection via accept()
     //
-    g_print("rigctl: slot= %d waiting for connection\n",spare);
+    t_print("rigctl: slot= %d waiting for connection\n",spare);
     tcp_client[spare].fd=accept(server_socket,(struct sockaddr*)&tcp_client[spare].address,&tcp_client[spare].address_length);
     if(tcp_client[spare].fd<0) {
-      perror("rigctl_server: client accept failed");
+      t_perror("rigctl_server: client accept failed");
       tcp_client[spare].fd = -1;
       continue;
     }
-    g_print("rigctl: slot= %d connected with fd=%d\n",spare,tcp_client[spare].fd);
+    t_print("rigctl: slot= %d connected with fd=%d\n",spare,tcp_client[spare].fd);
 
     //
     // Setting TCP_NODELAY may (or may not) improve responsiveness
@@ -606,7 +606,7 @@ static gpointer rigctl_server(gpointer data) {
 #else
     if(setsockopt(tcp_client[spare].fd, SOL_TCP, TCP_NODELAY, (void *)&on, sizeof(on))<0) {
 #endif
-      perror("TCP_NODELAY");
+      t_perror("TCP_NODELAY");
     }
 
     //
@@ -624,11 +624,11 @@ static gpointer rigctl_client (gpointer data) {
 
   CLIENT *client=(CLIENT *)data;
 
-  g_print("rigctl_client: starting rigctl_client: socket=%d\n",client->fd);
+  t_print("rigctl_client: starting rigctl_client: socket=%d\n",client->fd);
 
   g_mutex_lock(&mutex_a->m);
   cat_control++;
-  if(rigctl_debug) g_print("RIGCTL: CTLA INC cat_contro=%d\n",cat_control);
+  if(rigctl_debug) t_print("RIGCTL: CTLA INC cat_contro=%d\n",cat_control);
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update,NULL);
 
@@ -645,7 +645,7 @@ static gpointer rigctl_client (gpointer data) {
          command_index++;
          if(cmd_input[i]==';') {
            command[command_index]='\0';
-           if(rigctl_debug) g_print("RIGCTL: command=%s\n",command);
+           if(rigctl_debug) t_print("RIGCTL: command=%s\n",command);
            COMMAND *info=g_new(COMMAND,1);
            info->client=client;
            info->command=command;
@@ -655,18 +655,18 @@ static gpointer rigctl_client (gpointer data) {
          }
        }
      }
-  g_print("RIGCTL: Leaving rigctl_client thread\n");
+  t_print("RIGCTL: Leaving rigctl_client thread\n");
   //
   // If rigctl is disabled via the GUI, the connections are closed by close_rigctl_ports()
   // but even the we should decrement cat_control
   //
   if(client->fd!=-1) {
-    g_print("setting SO_LINGER to 0 for client_socket: %d\n",client->fd);
+    t_print("setting SO_LINGER to 0 for client_socket: %d\n",client->fd);
     struct linger linger = { 0 };
     linger.l_onoff = 1;
     linger.l_linger = 0;
     if(setsockopt(client->fd,SOL_SOCKET,SO_LINGER,(const char *)&linger,sizeof(linger))==-1) {
-      perror("setsockopt(...,SO_LINGER,...) failed for client");
+      t_perror("setsockopt(...,SO_LINGER,...) failed for client");
     }
     close(client->fd);
     client->fd=-1;
@@ -674,7 +674,7 @@ static gpointer rigctl_client (gpointer data) {
   // Decrement CAT_CONTROL
   g_mutex_lock(&mutex_a->m);
   cat_control--;
-  if(rigctl_debug) g_print("RIGCTL: CTLA DEC - cat_control=%d\n",cat_control);
+  if(rigctl_debug) t_print("RIGCTL: CTLA DEC - cat_control=%d\n",cat_control);
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update,NULL);
   return NULL;
@@ -2895,7 +2895,7 @@ case 'E': //ZZZE
         case 'S': //ZZZS
          // ANDROMEDA version info
          if(command[11]==';') {
-           g_print("rigctl: Andromeda FP Version: h/w:%c%c s/w:%c%c%c\n",
+           t_print("rigctl: Andromeda FP Version: h/w:%c%c s/w:%c%c%c\n",
                   command[6],command[7],command[8],command[9],command[10]);
          }
          break;
@@ -4194,7 +4194,7 @@ int parse_cmd(void *data) {
   }
 
   if(!implemented) {
-    if(rigctl_debug) g_print("RIGCTL: UNIMPLEMENTED COMMAND: %s\n",info->command);
+    if(rigctl_debug) t_print("RIGCTL: UNIMPLEMENTED COMMAND: %s\n",info->command);
     send_resp(client->fd,"?;");
   }
   client->done=1; // possibly inform server that command is finished
@@ -4211,7 +4211,7 @@ int set_interface_attribs (int fd, int speed, int parity)
         memset (&tty, 0, sizeof tty);
         if (tcgetattr (fd, &tty) != 0)
         {
-                g_print ("RIGCTL: Error %d from tcgetattr\n", errno);
+                t_perror ("RIGCTL (tcgetattr):");
                 return -1;
         }
 
@@ -4240,7 +4240,7 @@ int set_interface_attribs (int fd, int speed, int parity)
 
         if (tcsetattr (fd, TCSANOW, &tty) != 0)
         {
-                g_print( "RIGCTL: Error %d from tcsetattr\n", errno);
+                t_perror( "RIGCTL (tcsetattr):");
                 return -1;
         }
         return 0;
@@ -4252,14 +4252,14 @@ void set_blocking (int fd, int should_block)
         memset (&tty, 0, sizeof tty);
         if (tcgetattr (fd, &tty) != 0)
         {
-                g_print ("RIGCTL: Error %d from tggetattr\n", errno);
+                t_perror ("RIGCTL (tggetattr):");
                 return;
         }
         tty.c_cc[VMIN]  = should_block ? 1 : 0;
         tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
         if (tcsetattr (fd, TCSANOW, &tty) != 0)
-                g_print("RIGCTL: error %d setting term attributes\n", errno);
+                t_perror("RIGCTL (tcsetattr):");
 }
 
 static gpointer serial_server(gpointer data) {
@@ -4272,7 +4272,7 @@ static gpointer serial_server(gpointer data) {
      int i;
      g_mutex_lock(&mutex_a->m);
      cat_control++;
-     if(rigctl_debug) g_print("RIGCTL: SER INC cat_control=%d\n",cat_control);
+     if(rigctl_debug) t_print("RIGCTL: SER INC cat_control=%d\n",cat_control);
      g_mutex_unlock(&mutex_a->m);
      g_idle_add(ext_vfo_update,NULL);
      client->running=TRUE;
@@ -4312,7 +4312,7 @@ static gpointer serial_server(gpointer data) {
            command_index++;
            if(cmd_input[i]==';') {
              command[command_index]='\0';
-             if(rigctl_debug) g_print("RIGCTL: serial command=%s\n",command);
+             if(rigctl_debug) t_print("RIGCTL: serial command=%s\n",command);
              COMMAND *info=g_new(COMMAND,1);
              info->client=client;
              info->command=command;
@@ -4329,7 +4329,7 @@ static gpointer serial_server(gpointer data) {
      }
      g_mutex_lock(&mutex_a->m);
      cat_control--;
-     if(rigctl_debug) g_print("RIGCTL: SER DEC - cat_control=%d\n",cat_control);
+     if(rigctl_debug) t_print("RIGCTL: SER DEC - cat_control=%d\n",cat_control);
      g_mutex_unlock(&mutex_a->m);
      g_idle_add(ext_vfo_update,NULL);
      return NULL;
@@ -4424,22 +4424,22 @@ gboolean andromeda_init(gpointer data) {
 int launch_serial (int id) {
      int fd;
      int baud;
-     g_print("RIGCTL: Launch Serial port %s\n",SerialPorts[id].port);
+     t_print("RIGCTL: Launch Serial port %s\n",SerialPorts[id].port);
 
      if(mutex_busy==NULL) {
        mutex_busy = g_new(GT_MUTEX,1);
-       g_print("launch_serial: mutex_busy=%p\n",mutex_busy);
+       t_print("launch_serial: mutex_busy=%p\n",mutex_busy);
        g_mutex_init(&mutex_busy->m);
      }
 
      fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC);
      if (fd < 0)
      {
-        g_print("RIGCTL: Error %d opening %s: %s\n", errno, SerialPorts[id].port, strerror (errno));
+        t_perror("RIGCTL (open serial):");
         return 0 ;
      }
 
-     g_print("serial port fd=%d\n",fd);
+     t_print("serial port fd=%d\n",fd);
 
      serial_client[id].fd=fd;
      serial_client[id].busy=0;
@@ -4458,7 +4458,7 @@ int launch_serial (int id) {
        // This tells the server that fd is something else
        // than a serial line.
        //
-       g_print("serial port is probably a FIFO\n");
+       t_print("serial port is probably a FIFO\n");
        serial_client[id].fifo=1;
      }
 
@@ -4489,7 +4489,7 @@ void launch_andromeda (int id) {
 
 // Serial Port close
 void disable_serial (int id) {
-     g_print("RIGCTL: Disable Serial port %s\n",SerialPorts[id].port);
+     t_print("RIGCTL: Disable Serial port %s\n",SerialPorts[id].port);
 #ifdef ANDROMEDA
      disable_andromeda(id);
 #endif
@@ -4528,7 +4528,7 @@ void disable_andromeda (int id) {
 //
 void launch_rigctl () {
 
-   g_print( "LAUNCHING RIGCTL!!\n");
+   t_print( "LAUNCHING RIGCTL!!\n");
 
    rigctl_busy = 1;
    cat_control = 0;

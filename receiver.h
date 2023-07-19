@@ -66,7 +66,6 @@ typedef struct _receiver {
   gint output_samples;
   gdouble *iq_input_buffer;
   gdouble *audio_output_buffer;
-  gint audio_buffer_size;
   gint audio_index;
   guint32 audio_sequence;
   gfloat *pixel_samples;
@@ -219,8 +218,6 @@ typedef struct _receiver {
   void *resampler;
   gdouble *resample_buffer;
   gint resample_buffer_size;
-
-  gint fexchange_errors;
 
   gint zoom;
   gint pan;

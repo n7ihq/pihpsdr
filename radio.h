@@ -285,6 +285,7 @@ extern gint sequence_errors;
 extern GMutex property_mutex;
 
 extern int hl2_audio_codec;
+extern int anan10E;
 
 extern void radio_stop(void);
 extern void reconfigure_radio(void);
@@ -300,7 +301,6 @@ extern int getMox(void);
 extern void setTune(int state);
 extern int getTune(void);
 extern void vox_changed(int state);
-extern void frequency_changed(RECEIVER *rx);
 extern double getDrive(void);
 extern void setDrive(double d);
 extern void calcDriveLevel(void);

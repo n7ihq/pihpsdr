@@ -23,13 +23,14 @@
 #include <stdio.h>
 #include <string.h>
 #include "property.h"
+#include "message.h"
 
 PROPERTY* properties=NULL;
 
 static double version=0.0;
 
 void clearProperties() {
-g_print("clearProperties\n");
+t_print("clearProperties\n");
   if(properties!=NULL) {
     // free all the properties
     PROPERTY *next;
@@ -51,7 +52,7 @@ void loadProperties(char* filename) {
     FILE* f=fopen(filename,"r");
     PROPERTY* property;
 
-    g_print("loadProperties: %s\n",filename);
+    t_print("loadProperties: %s\n",filename);
     clearProperties();
     if(f) {
         char* value;
@@ -81,7 +82,7 @@ void loadProperties(char* filename) {
 
     if(version!=PROPERTY_VERSION) {
       properties=NULL;
-      g_print("loadProperties: version=%f expected version=%f ignoring\n",version,PROPERTY_VERSION);
+      t_print("loadProperties: version=%f expected version=%f ignoring\n",version,PROPERTY_VERSION);
     }
 }
 
@@ -96,10 +97,10 @@ void saveProperties(char* filename) {
     FILE* f=fopen(filename,"w+");
     char line[512];
 
-    g_print("saveProperties: %s\n",filename);
+    t_print("saveProperties: %s\n",filename);
 
     if(!f) {
-        g_print("can't open %s\n",filename);
+        t_print("can't open %s\n",filename);
         return;
     }
 

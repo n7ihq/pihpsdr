@@ -52,14 +52,10 @@
 #include "ext.h"
 #include "sliders.h"
 #include "sintab.h"
+#include "message.h"
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
-
-#ifdef AUDIO_WATERFALL
-static int waterfall_samples=0;
-static int waterfall_resample=8;
-#endif
 
 //
 // CW pulses are timed by the heart-beat of the mic samples.
@@ -136,7 +132,7 @@ void transmitter_set_am_carrier_level(TRANSMITTER *tx) {
 }
 
 void transmitter_set_ctcss(TRANSMITTER *tx,int state,int i) {
-g_print("transmitter_set_ctcss: state=%d i=%d frequency=%0.1f\n",state,i,ctcss_frequencies[i]);
+  //t_print("transmitter_set_ctcss: state=%d i=%d frequency=%0.1f\n",state,i,ctcss_frequencies[i]);
   tx->ctcss_enabled=state;
   tx->ctcss=i;
   SetTXACTCSSFreq(tx->id, ctcss_frequencies[tx->ctcss]);
@@ -154,7 +150,7 @@ void transmitter_set_compressor(TRANSMITTER *tx,int state) {
 }
 
 void reconfigure_transmitter(TRANSMITTER *tx,int width,int height) {
-g_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
+  t_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
   if(width!=tx->width) {
     tx->width=width;
     tx->height=height;
@@ -170,6 +166,8 @@ g_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
 void transmitter_save_state(const TRANSMITTER *tx) {
   char name[128];
   char value[128];
+
+  t_print("%s: TX=%d\n", __FUNCTION__, tx->id);
 
   sprintf(name,"transmitter.%d.fps",tx->id);
   sprintf(value,"%d",tx->fps);
@@ -436,7 +434,7 @@ static gboolean update_display(gpointer data) {
   TRANSMITTER *tx=(TRANSMITTER *)data;
   int rc;
 
-//g_print("update_display: tx id=%d\n",tx->id);
+  //t_print("update_display: tx id=%d\n",tx->id);
   if(tx->displaying) {
     // if "MON" button is active (tx->feedback is TRUE),
     // then obtain spectrum pixels from PS_RX_FEEDBACK,
@@ -634,7 +632,7 @@ static gboolean update_display(gpointer data) {
         break;
     }
 
-//g_print("transmitter: meter_update: fwd:%f->%f rev:%f->%f ex_fwd=%d alex_fwd=%d alex_rev=%d\n",tx->fwd,compute_power(tx->fwd),tx->rev,compute_power(tx->rev),exciter_power,alex_forward_power,alex_reverse_power);
+    //t_print("transmitter: meter_update: fwd:%f->%f rev:%f->%f ex_fwd=%d alex_fwd=%d alex_rev=%d\n",tx->fwd,compute_power(tx->fwd),tx->rev,compute_power(tx->rev),exciter_power,alex_forward_power,alex_reverse_power);
 
     //
     // compute_power does an interpolation is user-supplied pairs of
@@ -716,7 +714,7 @@ static void init_analyzer(TRANSMITTER *tx) {
 
     overlap = (int)max(0.0, ceil(afft_size - (double)tx->mic_sample_rate / (double)tx->fps));
 
-    g_print("SetAnalyzer id=%d buffer_size=%d overlap=%d pixels=%d\n",tx->id,tx->output_samples,overlap,tx->pixels);
+    t_print("SetAnalyzer id=%d buffer_size=%d overlap=%d pixels=%d\n",tx->id,tx->output_samples,overlap,tx->pixels);
 
 
     SetAnalyzer(tx->id,
@@ -750,13 +748,13 @@ static void init_analyzer(TRANSMITTER *tx) {
 }
 
 void create_dialog(TRANSMITTER *tx) {
-g_print("create_dialog\n");
+  //t_print("create_dialog\n");
   tx->dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(tx->dialog),GTK_WINDOW(top_window));
   gtk_window_set_title(GTK_WINDOW(tx->dialog),"TX");
   g_signal_connect (tx->dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(tx->dialog));
-g_print("create_dialog: add tx->panel\n");
+  //t_print("create_dialog: add tx->panel\n");
   gtk_widget_set_size_request (tx->panel, display_width/4, display_height/2);
   gtk_container_add(GTK_CONTAINER(content),tx->panel);
 
@@ -766,7 +764,7 @@ g_print("create_dialog: add tx->panel\n");
 
 static void create_visual(TRANSMITTER *tx) {
 
-  g_print("transmitter: create_visual: id=%d width=%d height=%d\n",tx->id, tx->width,tx->height);
+  t_print("transmitter: create_visual: id=%d width=%d height=%d\n",tx->id, tx->width,tx->height);
 
   tx->dialog=NULL;
 
@@ -831,7 +829,7 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
 
   tx->alex_antenna=0;  // default: ANT1
 
-g_print("create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d fps=%d width=%d height=%d\n",tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,tx->fps,tx->width,tx->height);
+  t_print("create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d fps=%d width=%d height=%d\n",tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,tx->fps,tx->width,tx->height);
 
   tx->filter_low=tx_filter_low;
   tx->filter_high=tx_filter_high;
@@ -883,7 +881,7 @@ g_print("create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rat
 
 
   // allocate buffers
-g_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d pixels=%d\n",tx->buffer_size,tx->output_samples,tx->pixels);
+  t_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d pixels=%d\n",tx->buffer_size,tx->output_samples,tx->pixels);
   tx->mic_input_buffer=g_new(double,2*tx->buffer_size);
   tx->iq_output_buffer=g_new(double,2*tx->output_samples);
   tx->samples=0;
@@ -910,10 +908,8 @@ g_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d 
       cw_shape_buffer192=g_new(double,tx->output_samples);
       break;
   }
-  g_print("transmitter: allocate buffers: mic_input_buffer=%p iq_output_buffer=%p pixels=%p\n",
-          tx->mic_input_buffer,tx->iq_output_buffer,tx->pixel_samples);
 
-  g_print("create_transmitter: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d dspRate=%d outputRate=%d\n",
+  t_print("create_transmitter: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d dspRate=%d outputRate=%d\n",
           tx->id,
           tx->buffer_size,
           2048, // tx->fft_size,
@@ -988,7 +984,7 @@ g_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d 
 
   XCreateAnalyzer(tx->id, &rc, 262144, 1, 1, "");
   if (rc != 0) {
-    g_print("XCreateAnalyzer id=%d failed: %d\n",tx->id,rc);
+    t_print("XCreateAnalyzer id=%d failed: %d\n",tx->id,rc);
   } else {
     init_analyzer(tx);
   }
@@ -1193,7 +1189,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
     fexchange0(tx->id, tx->mic_input_buffer, tx->iq_output_buffer, &error);
     if(error!=0) {
-      g_print("full_tx_buffer: id=%d fexchange0: error=%d\n",tx->id,error);
+      t_print("full_tx_buffer: id=%d fexchange0: error=%d\n",tx->id,error);
     }
   }
 
@@ -1488,30 +1484,13 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
     full_tx_buffer(tx);
     tx->samples=0;
   }
-
-#ifdef AUDIO_WATERFALL
-  if(audio_samples!=NULL && isTransmitting()) {
-    if(waterfall_samples==0) {
-       audio_samples[audio_samples_index]=(float)mic_sample;
-       audio_samples_index++;
-       if(audio_samples_index>=AUDIO_WATERFALL_SAMPLES) {
-         //Spectrum(CHANNEL_AUDIO,0,0,audio_samples,audio_samples);
-         audio_samples_index=0;
-       }
-    }
-    waterfall_samples++;
-    if(waterfall_samples==waterfall_resample) {
-       waterfall_samples=0;
-    }
-  }
-#endif
 }
 
 void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, double i_sample_rx, double q_sample_rx) {
   RECEIVER *tx_feedback=receiver[PS_TX_FEEDBACK];
   RECEIVER *rx_feedback=receiver[PS_RX_FEEDBACK];
 
-//g_print("add_ps_iq_samples: samples=%d i_rx=%f q_rx=%f i_tx=%f q_tx=%f\n",rx_feedback->samples, i_sample_rx,q_sample_rx,i_sample_tx,q_sample_tx);
+  //t_print("add_ps_iq_samples: samples=%d i_rx=%f q_rx=%f i_tx=%f q_tx=%f\n",rx_feedback->samples, i_sample_rx,q_sample_rx,i_sample_tx,q_sample_tx);
 
   if (tx->do_scale) {
     tx_feedback->iq_input_buffer[tx_feedback->samples*2]=i_sample_tx*tx->drive_iscal;
@@ -1540,7 +1519,7 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
               tx_feedback->iq_input_buffer[2*i+1]*tx_feedback->iq_input_buffer[2*i+1];
       if (pkval > pkmax) pkmax=pkval;
     }
-    g_print("PK MEASURED: %f\n", sqrt(pkmax));
+    t_print("PK MEASURED: %f\n", sqrt(pkmax));
 #endif
       pscc(tx->id, rx_feedback->buffer_size, tx_feedback->iq_input_buffer, rx_feedback->iq_input_buffer);
       if(tx->displaying && tx->feedback) {
@@ -1555,7 +1534,11 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
 void tx_set_displaying(TRANSMITTER *tx,int state) {
   tx->displaying=state;
   if(state) {
+    if (tx->update_timer_id > 0) g_source_remove(tx->update_timer_id);
     tx->update_timer_id=gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE,1000/tx->fps, update_display, (gpointer)tx, NULL);
+  } else {
+    if (tx->update_timer_id > 0) g_source_remove(tx->update_timer_id);
+    tx->update_timer_id=-1;
   }
 }
 

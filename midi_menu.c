@@ -42,6 +42,7 @@
 #include "new_menu.h"
 #include "midi_menu.h"
 #include "property.h"
+#include "message.h"
 
 enum {
   EVENT_COLUMN,
@@ -197,7 +198,7 @@ static void type_changed_cb(GtkWidget *widget, gpointer data) {
     //
     return;
   }
-  //g_print("%s: type=%s action=%d type=%d\n",__FUNCTION__,type,thisAction,thisType);
+  //t_print("%s: type=%s action=%d type=%d\n",__FUNCTION__,type,thisAction,thisType);
 
   if(strcmp(type,"KEY")==0) {
     thisType=MIDI_KEY;
@@ -231,7 +232,7 @@ static gboolean action_cb(GtkWidget *widget,gpointer data) {
   } else if(strcmp(type,"WHEEL")==0) {
     selection=MIDI_WHEEL | MIDI_KNOB;
   }
-g_print("%s: type=%s selection=%02X thisAction=%d\n",__FUNCTION__,type,selection,thisAction);
+t_print("%s: type=%s selection=%02X thisAction=%d\n",__FUNCTION__,type,selection,thisAction);
   int action=action_dialog(dialog,selection,thisAction);
   thisAction=action;
   gtk_button_set_label(GTK_BUTTON(newAction),ActionTable[action].str);
@@ -239,7 +240,7 @@ g_print("%s: type=%s selection=%02X thisAction=%d\n",__FUNCTION__,type,selection
 }
 
 static void row_inserted_cb(GtkTreeModel *tree_model,GtkTreePath *path, GtkTreeIter *iter,gpointer user_data) {
-  //g_print("%s\n",__FUNCTION__);
+  //t_print("%s\n",__FUNCTION__);
   gtk_tree_view_set_cursor(GTK_TREE_VIEW(view),path,NULL,FALSE);
 }
 
@@ -476,7 +477,7 @@ static void add_store(int key,const struct desc *cmd) {
   char str_type[32];
   char str_action[32];
 
-  //g_print("%s: key=%d desc=%p\n",__FUNCTION__,key,cmd);
+  //t_print("%s: key=%d desc=%p\n",__FUNCTION__,key,cmd);
   switch(cmd->event) {
     case EVENT_NONE:
       strcpy(str_event,"NONE");
@@ -526,7 +527,7 @@ static void add_store(int key,const struct desc *cmd) {
 
   if(scrolled_window!=NULL) {
     GtkAdjustment *adjustment=gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(scrolled_window));
-    //g_print("%s: adjustment=%f lower=%f upper=%f\n",__FUNCTION__,gtk_adjustment_get_value(adjustment),gtk_adjustment_get_lower(adjustment),gtk_adjustment_get_upper(adjustment));
+    //t_print("%s: adjustment=%f lower=%f upper=%f\n",__FUNCTION__,gtk_adjustment_get_value(adjustment),gtk_adjustment_get_lower(adjustment),gtk_adjustment_get_upper(adjustment));
     if(gtk_adjustment_get_value(adjustment)!=0.0) {
       gtk_adjustment_set_value(adjustment,0.0);
     }
@@ -577,7 +578,7 @@ static void add_cb(GtkButton *widget,gpointer user_data) {
     }
   }
 
-  g_print("%s: type=%s (%d) action=%s (%d)\n",__FUNCTION__,str_type,type,str_action,action);
+  t_print("%s: type=%s (%d) action=%s (%d)\n",__FUNCTION__,str_type,type,str_action,action);
 
   struct desc *desc;
   desc = (struct desc *) malloc(sizeof(struct desc));
@@ -625,10 +626,10 @@ static void update_cb(GtkButton *widget,gpointer user_data) {
   gchar *str_type=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(newType));
   const gchar *str_action=gtk_button_get_label(GTK_BUTTON(newAction));
 ;
-  //g_print("%s: type=%s action=%s\n",__FUNCTION__,str_type,str_action);
+  //t_print("%s: type=%s action=%s\n",__FUNCTION__,str_type,str_action);
 
   if (current_cmd == NULL) {
-    g_print("%s: current_cmd is NULL!\n", __FUNCTION__);
+    t_print("%s: current_cmd is NULL!\n", __FUNCTION__);
     return;
   }
 
@@ -691,7 +692,7 @@ static void update_cb(GtkButton *widget,gpointer user_data) {
   }
   sprintf(str_note,"%d",thisNote);
 
-  //g_print("%s: event=%s channel=%s note=%s type=%s action=%s\n",__FUNCTION__,str_event,str_channel,str_note,str_type,str_action);
+  //t_print("%s: event=%s channel=%s note=%s type=%s action=%s\n",__FUNCTION__,str_event,str_channel,str_note,str_type,str_action);
   gtk_list_store_set(store,&iter,
       EVENT_COLUMN,str_event,
       CHANNEL_COLUMN,str_channel,
@@ -705,10 +706,10 @@ static void delete_cb(GtkButton *widget,gpointer user_data) {
   struct desc *previous_cmd;
   struct desc *next_cmd;
   GtkTreeIter saved_iter;
-  g_print("%s: thisNote=%d current_cmd=%p\n",__FUNCTION__,thisNote,current_cmd);
+  t_print("%s: thisNote=%d current_cmd=%p\n",__FUNCTION__,thisNote,current_cmd);
 
   if (current_cmd == NULL) {
-    g_print("%s: current_cmd is NULL!\n", __FUNCTION__);
+    t_print("%s: current_cmd is NULL!\n", __FUNCTION__);
     return;
   }
 
@@ -717,7 +718,7 @@ static void delete_cb(GtkButton *widget,gpointer user_data) {
 
   // remove from MidiCommandsTable
   if(MidiCommandsTable[thisNote]==current_cmd) {
-    g_print("%s: remove first\n",__FUNCTION__);
+    t_print("%s: remove first\n",__FUNCTION__);
     MidiCommandsTable[thisNote]=current_cmd->next;
     g_free(current_cmd);
     current_cmd=NULL;
@@ -726,7 +727,7 @@ static void delete_cb(GtkButton *widget,gpointer user_data) {
     while(previous_cmd->next!=NULL) {
       next_cmd=previous_cmd->next;
       if(next_cmd==current_cmd) {
-        g_print("%s: remove next\n",__FUNCTION__);
+        t_print("%s: remove next\n",__FUNCTION__);
         previous_cmd->next=next_cmd->next;
         g_free(next_cmd);
         current_cmd=NULL;  // note next_cmd == current_cmd
@@ -776,7 +777,7 @@ void midi_menu(GtkWidget *parent) {
   if (n_midi_devices > 0) {
     GtkWidget *devices_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(devices_label), "<b>Select MIDI device(s)</b>");
-    gtk_label_set_justify(GTK_LABEL(devices_label),GTK_JUSTIFY_LEFT);
+    gtk_label_set_xalign(GTK_LABEL(devices_label), 0.0);
     gtk_grid_attach(GTK_GRID(grid),devices_label,col,row,2,1);
     //
     // Now put the device checkboxes in columns 3 (width: 1), 4 (width: 3), 7 (width: 1)
@@ -815,7 +816,7 @@ void midi_menu(GtkWidget *parent) {
   } else {
     GtkWidget *devices_label=gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(devices_label), "<b>No MIDI devices found!</b>");
-    gtk_label_set_justify(GTK_LABEL(devices_label),GTK_JUSTIFY_LEFT);
+    gtk_label_set_xalign(GTK_LABEL(devices_label), 0.0);
     gtk_grid_attach(GTK_GRID(grid),devices_label,col,row,3,1);
     row++;
     col=0;
@@ -1250,7 +1251,7 @@ static int update(void *data) {
       gtk_label_set_text(GTK_LABEL(newMax),text);
 
       find_current_cmd();
-      g_print("%s: current_cmd %p\n",__FUNCTION__,current_cmd);
+      t_print("%s: current_cmd %p\n",__FUNCTION__,current_cmd);
 
       if (current_cmd != NULL) {
         thisDelay = current_cmd->delay;
@@ -1406,7 +1407,7 @@ void NewMidiConfigureEvent(enum MIDIevent event, int channel, int note, int val)
   data->channel = channel;
   data->note = note;
   data->val = val;
-  //g_print("%s: Event=%d Chan=%d Note=%d Val=%d\n", __FUNCTION__, event, channel, note, val);
+  //t_print("%s: Event=%d Chan=%d Note=%d Val=%d\n", __FUNCTION__, event, channel, note, val);
   g_idle_add(ProcessNewMidiConfigureEvent, data);
 }
 
@@ -1432,7 +1433,7 @@ void midi_save_state() {
       entry=-1;
       while(cmd!=NULL) {
         entry++;
-        //g_print("%s:  channel=%d key=%d entry=%d event=%s type=%s action=%s\n",__FUNCTION__,cmd->channel,i,entry,midi_events[cmd->event],midi_types[cmd->type],ActionTable[cmd->action].str);
+        //t_print("%s:  channel=%d key=%d entry=%d event=%s type=%s action=%s\n",__FUNCTION__,cmd->channel,i,entry,midi_events[cmd->event],midi_types[cmd->type],ActionTable[cmd->action].str);
 
         sprintf(name,"midi[%d].entry[%d].channel",i,entry);
         sprintf(value,"%d",cmd->channel);
@@ -1538,7 +1539,7 @@ void midi_restore_state() {
   get_midi_devices();
   MidiReleaseCommands();
 
-  //g_print("%s\n",__FUNCTION__);
+  //t_print("%s\n",__FUNCTION__);
 
   //
   // Note this is too early to open the MIDI devices, since the
@@ -1553,7 +1554,7 @@ void midi_restore_state() {
       for (j=0; j<n_midi_devices; j++) {
         if(strcmp(midi_devices[j].name,value)==0) {
           midi_devices[j].active=1;
-          g_print("%s: mark device %s at %d as active\n",__FUNCTION__,value,j);
+          t_print("%s: mark device %s at %d as active\n",__FUNCTION__,value,j);
         }
       }
     }

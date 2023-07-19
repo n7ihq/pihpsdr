@@ -33,6 +33,7 @@
 #include "radio.h"
 #include "ext.h"
 #include "vfo.h"
+#include "message.h"
 
 MEM mem[NUM_OF_MEMORYS];  // This makes it a compile time option
 
@@ -68,7 +69,7 @@ void memRestoreState() {
        mem[b].filter = filterF0;
     }
 
-    g_print("memRestoreState: restore memory\n");
+    t_print("memRestoreState: restore memory\n");
 
     for(b=0;b<NUM_OF_MEMORYS;b++) {
       char* value;
@@ -76,21 +77,21 @@ void memRestoreState() {
       value=getProperty(name);
       if(value) {
          mem[b].frequency=atoll(value);
-         g_print("RESTORE MEM:Mem %d=FreqA %11lld\n",b,mem[b].frequency);
+         t_print("RESTORE MEM:Mem %d=FreqA %11lld\n",b,mem[b].frequency);
       }
 
       sprintf(name,"mem.%d.mode",b);
       value=getProperty(name);
       if(value) {
         mem[b].mode=atoi(value);
-        g_print("RESTORE: index=%d mode=%d\n",b,mem[b].mode);
+        t_print("RESTORE: index=%d mode=%d\n",b,mem[b].mode);
       }
 
       sprintf(name,"mem.%d.filter",b);
       value=getProperty(name);
       if(value) {
         mem[b].filter=atoi(value);
-        g_print("RESTORE: index=%d filter=%d\n",b,mem[b].filter);
+        t_print("RESTORE: index=%d filter=%d\n",b,mem[b].filter);
       }
     }
 }
@@ -99,10 +100,10 @@ void recall_memory_slot(int index) {
     long long new_freq;
 
     new_freq = mem[index].frequency;
-    g_print("recall_select_cb: Index=%d\n",index);
-    g_print("recall_select_cb: freqA=%11lld\n",new_freq);
-    g_print("recall_select_cb: mode=%d\n",mem[index].mode);
-    g_print("recall_select_cb: filter=%d\n",mem[index].filter);
+    t_print("recall_select_cb: Index=%d\n",index);
+    t_print("recall_select_cb: freqA=%11lld\n",new_freq);
+    t_print("recall_select_cb: mode=%d\n",mem[index].mode);
+    t_print("recall_select_cb: filter=%d\n",mem[index].filter);
 
     //
     // Recalling a memory slot is equivalent to the following actions
@@ -137,10 +138,10 @@ void store_memory_slot(int index) {
    mem[index].mode = vfo[id].mode;
    mem[index].filter=vfo[id].filter;
 
-   g_print("store_select_cb: Index=%d\n",index);
-   g_print("store_select_cb: freqA=%11lld\n",mem[index].frequency);
-   g_print("store_select_cb: mode=%d\n",mem[index].mode);
-   g_print("store_select_cb: filter=%d\n",mem[index].filter);
+   t_print("store_select_cb: Index=%d\n",index);
+   t_print("store_select_cb: freqA=%11lld\n",mem[index].frequency);
+   t_print("store_select_cb: mode=%d\n",mem[index].mode);
+   t_print("store_select_cb: filter=%d\n",mem[index].filter);
 
    memSaveState();
 }

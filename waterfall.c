@@ -214,10 +214,11 @@ void waterfall_update(RECEIVER *rx) {
       memmove(&pixels[rowstride],pixels,(height-1)*rowstride);
 
       float soffset;
-      int average=0;
+      float average;
       unsigned char *p;
       p=pixels;
       samples=rx->pixel_samples;
+      float wf_low, wf_high, rangei;
 
       //
       // soffset contains all corrections due to attenuation, preamps, etc.
@@ -229,21 +230,31 @@ void waterfall_update(RECEIVER *rx) {
       if (filter_board == CHARLY25 && rx->adc == 0) {
         soffset += (float)(12*rx->alex_attenuation-18*rx->preamp-18*rx->dither);
       }
+      average=0.0F;
+      for(i=0;i<width;i++) {
+        average += (samples[i+pan]+soffset);
+      }
+      if(rx->waterfall_automatic) {
+        wf_low = average/(float)width;
+        wf_high= wf_low+50.0F;
+      } else {
+        wf_low  = (float) rx->waterfall_low;
+        wf_high = (float) rx->waterfall_high;
+      }
+      rangei = 1.0F/(wf_high - wf_low);
+
       for(i=0;i<width;i++) {
             float sample=samples[i+pan]+soffset;
-            average+=(int)sample;
-            if(sample<(float)rx->waterfall_low) {
+            if(sample<wf_low) {
                 *p++=colorLowR;
                 *p++=colorLowG;
                 *p++=colorLowB;
-            } else if(sample>(float)rx->waterfall_high) {
+            } else if(sample>wf_high) {
                 *p++=colorHighR;
                 *p++=colorHighG;
                 *p++=colorHighB;
             } else {
-                float range=(float)rx->waterfall_high-(float)rx->waterfall_low;
-                float offset=sample-(float)rx->waterfall_low;
-                float percent=offset/range;
+                float percent=(sample-wf_low)*rangei;
                 if(percent<0.222222f) {
                     float local_percent = percent * 4.5f;
                     *p++ = (int)((1.0f-local_percent)*colorLowR);
@@ -282,12 +293,6 @@ void waterfall_update(RECEIVER *rx) {
                 }
             }
 
-      }
-
-
-      if(rx->waterfall_automatic) {
-        rx->waterfall_low=average/width;
-        rx->waterfall_high=rx->waterfall_low+50;
       }
     }
 

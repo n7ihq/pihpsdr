@@ -55,6 +55,7 @@
 #endif
 #include "property.h"
 #include "button_text.h"
+#include "message.h"
 
 static GtkWidget *discovery_dialog;
 static DISCOVERED *d;
@@ -102,13 +103,18 @@ static gboolean start_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
     stemlab_cleanup();
     discover_only_stemlab=1;
     gtk_widget_destroy(discovery_dialog);
-    sleep(2);          // let Stemlab SDR app start
-    g_idle_add(ext_discovery,NULL);
+    status_text("Wait for STEMlab app\n");
+    g_timeout_add(2000,ext_discovery, NULL);
     return TRUE;
   }
 #endif
+  //
+  // Starting the radio via the GTK queue ensures quick update
+  // of the status label
+  //
+  status_text("Starting Radio ...\n");
+  g_timeout_add(10,ext_start_radio, NULL);
   gtk_widget_destroy(discovery_dialog);
-  start_radio();
   return TRUE;
 }
 
@@ -164,7 +170,7 @@ static gboolean radio_ip_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
     ipaddr_radio[IPADDR_LEN-1]=0;
 
     // The new value is written upon each key stroke, so what?
-    // g_print("New TCP addr = %s.\n", ipaddr_radio);
+    // t_print("New TCP addr = %s.\n", ipaddr_radio);
     FILE *fp = fopen("ip.addr", "w");
     if (fp) {
         fprintf(fp,"%s\n",ipaddr_radio);
@@ -178,7 +184,7 @@ static gboolean connect_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
   // connect to remote host running piHPSDR
   strncpy(host_addr, gtk_entry_get_text(GTK_ENTRY(host_addr_entry)), 30);
   host_port=gtk_spin_button_get_value(GTK_SPIN_BUTTON(host_port_spinner));
-g_print("connect_cb: %s:%d\n",host_addr,host_port);
+t_print("connect_cb: %s:%d\n",host_addr,host_port);
   setProperty("host",host_addr);
   char temp[16];
   snprintf(temp,sizeof(temp),"%d",host_port);
@@ -230,7 +236,7 @@ void discovery() {
 //
 // first: look on USB for an Ozy
 //
-  g_print("looking for USB based OZY devices\n");
+  t_print("looking for USB based OZY devices\n");
 
   if (ozy_discover() != 0)
   {
@@ -250,7 +256,7 @@ void discovery() {
     discovered[devices].use_tcp=0;
     discovered[devices].use_routing=0;
     discovered[devices].supported_receivers=2;
-    g_print("discovery: found USB OZY device min=%f max=%f\n",
+    t_print("discovery: found USB OZY device min=%f max=%f\n",
                             discovered[devices].frequency_min,
                             discovered[devices].frequency_max);
 
@@ -266,7 +272,11 @@ void discovery() {
 #endif
 
   if(enable_protocol_1) {
-    status_text("Protocol 1 ... Discovering Devices");
+    if (discover_only_stemlab) {
+      status_text("Stemlab ... Looking for SDR apps");
+    } else {
+      status_text("Protocol 1 ... Discovering Devices");
+    }
     old_discovery();
   }
 
@@ -281,13 +291,12 @@ void discovery() {
     soapy_discovery();
   }
 #endif
+  status_text("Discovery completed.");
 
   // subsequent discoveries check all protocols enabled.
   discover_only_stemlab=0;
 
-  status_text("Discovery");
-
-    g_print("discovery: found %d devices\n", devices);
+    t_print("discovery: found %d devices\n", devices);
     gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_ARROW));
 
     discovery_dialog = gtk_dialog_new();
@@ -315,7 +324,7 @@ void discovery() {
       char text[512];
       for(row=0;row<devices;row++) {
         d=&discovered[row];
-g_print("%p Protocol=%d name=%s\n",d,d->protocol,d->name);
+t_print("%p Protocol=%d name=%s\n",d,d->protocol,d->name);
         snprintf(version,sizeof(version), "v%d.%d",
                           d->software_version/10,
                           d->software_version%10);
@@ -511,7 +520,7 @@ g_print("%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 
     gtk_container_add (GTK_CONTAINER (content), grid);
     gtk_widget_show_all(discovery_dialog);
-g_print("showing device dialog\n");
+t_print("showing device dialog\n");
     //
     // This call records the colour of the label and stores it.
     // Subsequent calls to set_button_text_color() with color == "default"
@@ -533,7 +542,7 @@ g_print("showing device dialog\n");
     // and then the discovery process is re-initiated for RedPitya
     // devices only.
     //
-    g_print("%s: devices=%d autostart=%d\n",__FUNCTION__,devices,autostart);
+    t_print("%s: devices=%d autostart=%d\n",__FUNCTION__,devices,autostart);
 
     if(devices==1 && autostart) {
         d=&discovered[0];

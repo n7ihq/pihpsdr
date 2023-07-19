@@ -20,16 +20,19 @@
 char build_date[]=GIT_DATE;
 char build_version[]=GIT_VERSION;
 
-char version[]=GIT_VERSION
-" includes PureSignal LocalCW"
+char version[]=
+#ifdef USBOZY
+" OZY(USB)"
+#endif
 #ifdef GPIO
-" GPIO"
+", GPIO"
 #endif
 #ifdef SOAPYSDR
-" SOAPYSDR"
+", SOAPYSDR"
 #endif
 #ifdef MIDI
-" MIDI"
+", MIDI"
 #endif
+"."
 
 ;

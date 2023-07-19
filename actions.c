@@ -29,6 +29,7 @@
 #include "gpio.h"
 #include "toolbar.h"
 #include "iambic.h"
+#include "message.h"
 
 //
 // The "short button text" (button_str) needs to be present in ALL cases, and must be different
@@ -285,7 +286,7 @@ int process_action(void *data) {
   int i;
   gboolean free_action=TRUE;
 
-  //g_print("%s: action=%d mode=%d value=%d\n",__FUNCTION__,a->action,a->mode,a->val);
+  //t_print("%s: action=%d mode=%d value=%d\n",__FUNCTION__,a->action,a->mode,a->val);
   switch(a->action) {
 
     case A_SWAP_B:
@@ -974,7 +975,7 @@ int process_action(void *data) {
         } else {
           sat_mode=RSAT_MODE;
         }
-        g_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
+        t_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
         g_idle_add(ext_vfo_update, NULL);
       }
       break;
@@ -985,7 +986,7 @@ int process_action(void *data) {
         } else {
           sat_mode=SAT_MODE;
         }
-        g_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
+        t_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
         g_idle_add(ext_vfo_update, NULL);
       }
       break;
@@ -1274,9 +1275,9 @@ int process_action(void *data) {
 
     default:
       if(a->action>=0 && a->action<ACTIONS) {
-        g_print("%s: UNKNOWN PRESSED SWITCH ACTION %d (%s)\n",__FUNCTION__,a->action,ActionTable[a->action].str);
+        t_print("%s: UNKNOWN PRESSED SWITCH ACTION %d (%s)\n",__FUNCTION__,a->action,ActionTable[a->action].str);
       } else {
-        g_print("%s: INVALID PRESSED SWITCH ACTION %d\n",__FUNCTION__,a->action);
+        t_print("%s: INVALID PRESSED SWITCH ACTION %d\n",__FUNCTION__,a->action);
       }
       break;
   }

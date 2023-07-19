@@ -57,6 +57,7 @@
 #include "client_server.h"
 #endif
 #include "ext.h"
+#include "message.h"
 
 static int my_width;
 static int my_height;
@@ -471,7 +472,7 @@ void vfo_bandstack_changed(int b) {
 
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -558,7 +559,7 @@ void vfo_a_to_b() {
 
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -587,7 +588,7 @@ void vfo_b_to_a() {
 
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -625,7 +626,7 @@ void vfo_a_swap_b() {
 
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -723,7 +724,7 @@ void vfo_set_stepsize(int newstep) {
   //
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -813,7 +814,7 @@ void vfo_id_step(int id, int steps) {
 
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -1580,7 +1581,7 @@ void vfo_update() {
         cairo_destroy (cr);
         gtk_widget_queue_draw (vfo_panel);
     } else {
-g_print("%s: no surface!\n",__FUNCTION__);
+t_print("%s: no surface!\n",__FUNCTION__);
     }
 }
 
@@ -1661,7 +1662,7 @@ long long get_tx_freq() {
 void vfo_rit_update(int id) {
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -1675,7 +1676,7 @@ void vfo_rit_update(int id) {
 void vfo_rit_clear(int id) {
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n", __FUNCTION__);
     return;
   }
 #endif
@@ -1690,7 +1691,7 @@ void vfo_rit_clear(int id) {
 void vfo_rit(int id,int i) {
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
     return;
   }
 #endif
@@ -1721,7 +1722,7 @@ void vfo_rit(int id,int i) {
 void vfo_set_frequency(int v,long long f) {
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
     return;
   }
 #endif
@@ -1763,7 +1764,7 @@ void vfo_ctun_update(int id,int state) {
   if (vfo[id].ctun == state) return;  // no-op if no change
 #ifdef CLIENT_SERVER
   if (radio_is_remote) {
-    g_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
+    t_print("%s: TODO: send VFO change to remote\n",__FUNCTION__);
     return;
   }
 #endif

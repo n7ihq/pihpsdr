@@ -650,7 +650,7 @@ char* getFrequencyInfo(long long frequency,int filter_low,int filter_high) {
       }
     }
 
-g_print("getFrequencyInfo %lld is %s\n",frequency,result);
+t_print("getFrequencyInfo %lld is %s\n",frequency,result);
 
     return result;
 }
@@ -713,21 +713,21 @@ if(info_band!=bandGen && info_band!=bandWWV && info_band!=bandAIR) {
       for(int i=0;i<channel_entries;i++) {
         long long low_freq=band_channels_60m[i].frequency-(band_channels_60m[i].width/(long long)2);
         long long hi_freq=band_channels_60m[i].frequency+(band_channels_60m[i].width/(long long)2);
-//g_print("TRY CHANNEL: low=%lld high=%lld SIGNAL: low=%lld high=%lld\n", low_freq, hi_freq, flow, fhigh);
+//t_print("TRY CHANNEL: low=%lld high=%lld SIGNAL: low=%lld high=%lld\n", low_freq, hi_freq, flow, fhigh);
         if(flow>=low_freq && fhigh<=hi_freq) {
-//g_print("60m channel OK: chan=%d flow=%lld fhigh=%lld\n", i, flow, fhigh);
+//t_print("60m channel OK: chan=%d flow=%lld fhigh=%lld\n", i, flow, fhigh);
           result = 1;
           break;
         }
       }
-//g_print("60m channel NOT FOUND: flow=%lld fhigh=%lld\n", flow, fhigh);
+//t_print("60m channel NOT FOUND: flow=%lld fhigh=%lld\n", flow, fhigh);
     } else {
       //
       // For other bands, return true if signal within band
       //
       result = flow >= txband->frequencyMin && fhigh <= txband->frequencyMax;
     }
-//g_print("CANTRANSMIT: low=%lld  high=%lld transmit=%d\n", flow, fhigh, result);
+//t_print("CANTRANSMIT: low=%lld  high=%lld transmit=%d\n", flow, fhigh, result);
     return result;
 }
 

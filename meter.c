@@ -35,6 +35,7 @@
 #include "vox.h"
 #include "new_menu.h"
 #include "vfo.h"
+#include "message.h"
 
 static GtkWidget *meter;
 static cairo_surface_t *meter_surface = NULL;
@@ -99,7 +100,7 @@ meter_press_event_cb (GtkWidget *widget,
 
 GtkWidget* meter_init(int width,int height) {
 
-g_print("meter_init: width=%d height=%d\n",width,height);
+t_print("meter_init: width=%d height=%d\n",width,height);
   meter_width=width;
   meter_height=height;
 

@@ -17,7 +17,7 @@
 
 void DoTheMidi(int action, enum ACTIONtype type, int val) {
 
-    //g_print("%s: action=%d type=%d val=%d\n",__FUNCTION__,action,type,val);
+    //t_print("%s: action=%d type=%d val=%d\n",__FUNCTION__,action,type,val);
 
     switch(type) {
       case MIDI_KEY:

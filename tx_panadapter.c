@@ -42,6 +42,7 @@
 #endif
 #include "ext.h"
 #include "new_menu.h"
+#include "message.h"
 
 static gdouble hz_per_pixel;
 static gdouble filter_left=0.0;
@@ -266,7 +267,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   // cursor
   cairo_set_source_rgba(cr, COLOUR_ALARM);
   cairo_set_line_width(cr, PAN_LINE_THIN);
-//g_print("cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
+  //t_print("cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
   cairo_move_to(cr,vfofreq,0.0);
   cairo_line_to(cr,vfofreq,(double)display_height);
   cairo_stroke(cr);
@@ -464,7 +465,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
 void tx_panadapter_init(TRANSMITTER *tx, int width,int height) {
 
-g_print("tx_panadapter_init: %d x %d\n",width,height);
+  t_print("tx_panadapter_init: %d x %d\n",width,height);
 
   tx->panadapter_surface=NULL;
   tx->panadapter=gtk_drawing_area_new ();

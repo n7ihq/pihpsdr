@@ -27,6 +27,7 @@
 #include "actions.h"
 #include "midi.h"
 #include "alsa_midi.h"
+#include "message.h"
 
 struct desc *MidiCommandsTable[129];
 
@@ -39,12 +40,7 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
     long delta;
 
 #ifdef MIDIDEBUG
-    struct timespec ts;  // used in debug code
-    double now;          // used in debug code
-
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    now=ts.tv_sec + 1E-9*ts.tv_nsec;
-    g_print("%s:%12.3f:EVENT=%d CHAN=%d NOTE=%d VAL=%d\n",__FUNCTION__,now,event,channel,note,val);
+    t_print("%s:EVENT=%d CHAN=%d NOTE=%d VAL=%d\n",__FUNCTION__,now,event,channel,note,val);
 #endif
 
     if (event == MIDI_PITCH) {
@@ -52,9 +48,9 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
     } else {
         desc=MidiCommandsTable[note];
     }
-//g_print("%s: init DESC=%p\n",__FUNCTION__,desc);
+//t_print("%s: init DESC=%p\n",__FUNCTION__,desc);
     while (desc) {
-//g_print("%s: DESC=%p next=%p CHAN=%d EVENT=%d\n",__FUNCTION__,desc,desc->next,desc->channel,desc->event);
+//t_print("%s: DESC=%p next=%p CHAN=%d EVENT=%d\n",__FUNCTION__,desc,desc->next,desc->channel,desc->event);
         if ((desc->channel == channel || desc->channel == -1) && (desc->event == event)) {
             // Found matching entry
             switch (desc->event) {
@@ -82,7 +78,7 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
                         if ((val >= desc->rgt1) && (val <= desc->rgt2)) new= 1;
                         if ((val >= desc-> fr1) && (val <= desc-> fr2)) new= 4;
                         if ((val >= desc->vfr1) && (val <= desc->vfr2)) new= 16;
-//                      g_print("%s: WHEEL PARAMS: val=%d new=%d thrs=%d/%d, %d/%d, %d/%d, %d/%d, %d/%d, %d/%d\n",
+//                      t_print("%s: WHEEL PARAMS: val=%d new=%d thrs=%d/%d, %d/%d, %d/%d, %d/%d, %d/%d, %d/%d\n",
 //                               __FUNCTION__,
 //                               val, new, desc->vfl1, desc->vfl2, desc->fl1, desc->fl2, desc->lft1, desc->lft2,
 //                               desc->rgt1, desc->rgt2, desc->fr1, desc->fr2, desc->vfr1, desc->vfr2);
@@ -107,9 +103,9 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
     }
     if (!desc) {
       // Nothing found. This is nothing to worry about, but log the key to stderr
-        if (event == MIDI_PITCH) g_print("%s: Unassigned PitchBend Value=%d\n",__FUNCTION__, val);
-        if (event == MIDI_NOTE ) g_print("%s: Unassigned Key Note=%d Val=%d\n",__FUNCTION__, note, val);
-        if (event == MIDI_CTRL ) g_print("%s: Unassigned Controller Ctl=%d Val=%d\n",__FUNCTION__, note, val);
+        if (event == MIDI_PITCH) t_print("%s: Unassigned PitchBend Value=%d\n",__FUNCTION__, val);
+        if (event == MIDI_NOTE ) t_print("%s: Unassigned Key Note=%d Val=%d\n",__FUNCTION__, note, val);
+        if (event == MIDI_CTRL ) t_print("%s: Unassigned Controller Ctl=%d Val=%d\n",__FUNCTION__, note, val);
     }
 }
 
@@ -292,7 +288,7 @@ static int keyword2action(char *s) {
     for (i=0; i< (sizeof(OLD_Mapping) / sizeof(OLD_Mapping[0])); i++) {
         if (!strcmp(s, OLD_Mapping[i].str)) return OLD_Mapping[i].action;
     }
-    g_print("MIDI: action keyword %s NOT FOUND.\n", s);
+    t_print("MIDI: action keyword %s NOT FOUND.\n", s);
     return NO_ACTION;
 }
 
@@ -312,12 +308,12 @@ int ReadLegacyMidiFile(char *filename) {
 
     MidiReleaseCommands();
 
-    g_print("%s: %s\n",__FUNCTION__,filename);
+    t_print("%s: %s\n",__FUNCTION__,filename);
     fpin=fopen(filename, "r");
 
-    //g_print("%s: fpin=%p\n",__FUNCTION__,fpin);
+    //t_print("%s: fpin=%p\n",__FUNCTION__,fpin);
     if (!fpin) {
-      g_print("%s: failed to open MIDI device\n",__FUNCTION__);
+      t_print("%s: failed to open MIDI device\n",__FUNCTION__);
       return -1;
     }
 
@@ -344,7 +340,7 @@ int ReadLegacyMidiFile(char *filename) {
         cp++;
       }
 
-//g_print("\n%s:INP:%s\n",__FUNCTION__,zeile);
+//t_print("\n%s:INP:%s\n",__FUNCTION__,zeile);
 
       chan=-1;                  // default: any channel
       t1 = t2 = t3 = t4 = -1;   // default threshold values
@@ -366,24 +362,24 @@ int ReadLegacyMidiFile(char *filename) {
         sscanf(cp+4, "%d", &key);
         event=MIDI_NOTE;
         type=MIDI_KEY;
-//g_print("%s: MIDI:KEY:%d\n",__FUNCTION__, key);
+//t_print("%s: MIDI:KEY:%d\n",__FUNCTION__, key);
       }
       if ((cp = strstr(zeile, "CTRL="))) {
         sscanf(cp+5, "%d", &key);
         event=MIDI_CTRL;
         type=MIDI_KNOB;
-//g_print("%s: MIDI:CTL:%d\n",__FUNCTION__, key);
+//t_print("%s: MIDI:CTL:%d\n",__FUNCTION__, key);
       }
       if ((cp = strstr(zeile, "PITCH "))) {
         event=MIDI_PITCH;
         type=MIDI_KNOB;
-//g_print("%s: MIDI:PITCH\n",__FUNCTION__);
+//t_print("%s: MIDI:PITCH\n",__FUNCTION__);
       }
       //
       // If event is still undefined, skip line
       //
       if (event == EVENT_NONE) {
-//g_print("%s: no event found: %s\n", __FUNCTION__, zeile);
+//t_print("%s: no event found: %s\n", __FUNCTION__, zeile);
         continue;
       }
 
@@ -397,21 +393,21 @@ int ReadLegacyMidiFile(char *filename) {
         sscanf(cp+5, "%d", &chan);
         chan--;
         if (chan<0 || chan>15) chan=-1;
-//g_print("%s:CHAN:%d\n",__FUNCTION__,chan);
+//t_print("%s:CHAN:%d\n",__FUNCTION__,chan);
       }
       if ((cp = strstr(zeile, "WHEEL")) && (type == MIDI_KNOB)) {
         // change type from MIDI_KNOB to MIDI_WHEEL
         type=MIDI_WHEEL;
-//g_print("%s:WHEEL\n",__FUNCTION__);
+//t_print("%s:WHEEL\n",__FUNCTION__);
       }
       if ((cp = strstr(zeile, "DELAY="))) {
         sscanf(cp+6, "%d", &delay);
-//g_print("%s:DELAY:%d\n",__FUNCTION__,delay);
+//t_print("%s:DELAY:%d\n",__FUNCTION__,delay);
       }
       if ((cp = strstr(zeile, "THR="))) {
         sscanf(cp+4, "%d %d %d %d %d %d %d %d %d %d %d %d",
                &t1,&t2,&t3,&t4,&t5,&t6,&t7,&t8,&t9,&t10,&t11,&t12);
-//g_print("%s: THR:%d/%d, %d/%d, %d/%d, %d/%d, %d/%d, %d/%d\n",__FUNCTION__,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12);
+//t_print("%s: THR:%d/%d, %d/%d, %d/%d, %d/%d, %d/%d, %d/%d\n",__FUNCTION__,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12);
       }
       if ((cp = strstr(zeile, "ACTION="))) {
         // cut zeile at the first blank character following
@@ -419,7 +415,7 @@ int ReadLegacyMidiFile(char *filename) {
         while (*cq != 0 && *cq != '\n' && *cq != ' ' && *cq != '\t') cq++;
         *cq=0;
         action=keyword2action(cp+7);
-//g_print("MIDI:ACTION:%s (%d)\n",cp+7, action);
+//t_print("MIDI:ACTION:%s (%d)\n",cp+7, action);
       }
       //
       // All data for a descriptor has been read. Construct it!
@@ -448,11 +444,11 @@ int ReadLegacyMidiFile(char *filename) {
       // We have a linked list for each key value to speed up searches
       //
       if (event == MIDI_PITCH) {
-//g_print("%s: Insert desc=%p in CMDS[128] table\n",__FUNCTION__,desc);
+//t_print("%s: Insert desc=%p in CMDS[128] table\n",__FUNCTION__,desc);
         MidiAddCommand(128, desc);
       }
       if (event == MIDI_NOTE || event == MIDI_CTRL) {
-//g_print("%s: Insert desc=%p in CMDS[%d] table\n",__FUNCTION__,desc,key);
+//t_print("%s: Insert desc=%p in CMDS[%d] table\n",__FUNCTION__,desc,key);
         MidiAddCommand(key, desc);
       }
     }

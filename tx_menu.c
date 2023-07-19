@@ -28,6 +28,7 @@
 #include "filter.h"
 #include "mode.h"
 #include "vfo.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 static GtkWidget *input;
@@ -162,8 +163,7 @@ static void local_microphone_cb(GtkWidget *widget, gpointer data) {
   if(gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget))) {
     if(transmitter->microphone_name==NULL) {
       int i=gtk_combo_box_get_active(GTK_COMBO_BOX(input));
-      transmitter->microphone_name=g_new(gchar,strlen(input_devices[i].name)+1);
-      strcpy(transmitter->microphone_name,input_devices[i].name);
+      transmitter->microphone_name=g_strdup(input_devices[i].name);
     }
     if(audio_open_input()==0) {
       transmitter->local_microphone=1;
@@ -184,7 +184,7 @@ static void local_microphone_cb(GtkWidget *widget, gpointer data) {
 
 static void local_input_changed_cb(GtkWidget *widget, gpointer data) {
   int i = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-g_print("local_input_changed_cb: %d %s\n",i,input_devices[i].name);
+  t_print("local_input_changed_cb: %d %s\n",i,input_devices[i].name);
   if(transmitter->local_microphone) {
     audio_close_input();
   }
@@ -193,8 +193,7 @@ g_print("local_input_changed_cb: %d %s\n",i,input_devices[i].name);
     g_free(transmitter->microphone_name);
   }
 
-  transmitter->microphone_name=g_new(gchar,strlen(input_devices[i].name)+1);
-  strcpy(transmitter->microphone_name,input_devices[i].name);
+  transmitter->microphone_name=g_strdup(input_devices[i].name);
 
   if(transmitter->local_microphone) {
     if(audio_open_input()<0) {
@@ -266,8 +265,7 @@ void tx_menu(GtkWidget *parent) {
       if(transmitter->microphone_name!=NULL) {
         g_free(transmitter->microphone_name);
       }
-      transmitter->microphone_name=g_new(gchar,strlen(input_devices[0].name)+1);
-      strcpy(transmitter->microphone_name,input_devices[0].name);
+      transmitter->microphone_name=g_strdup(input_devices[0].name);
     }
 
     my_combo_attach(GTK_GRID(grid),input,col,row,2,1);

@@ -9,6 +9,7 @@
 #include "audio.h"
 #include "mode.h"
 #include "vfo.h"
+#include "message.h"
 
 //
 // Used fixed buffer sizes.
@@ -49,14 +50,12 @@ GMutex audio_mutex;
 static void source_list_cb(pa_context *context,const pa_source_info *s,int eol,void *data) {
   if(eol>0) {
     for(int i=0;i<n_input_devices;i++) {
-      g_print("Input: %d: %s (%s)\n",input_devices[i].index,input_devices[i].name,input_devices[i].description);
+      t_print("Input: %d: %s (%s)\n",input_devices[i].index,input_devices[i].name,input_devices[i].description);
     }
     g_mutex_unlock(&audio_mutex);
   } else if(n_input_devices<MAX_AUDIO_DEVICES) {
-    input_devices[n_input_devices].name=g_new0(char,strlen(s->name)+1);
-    strncpy(input_devices[n_input_devices].name,s->name,strlen(s->name));
-    input_devices[n_input_devices].description=g_new0(char,strlen(s->description)+1);
-    strncpy(input_devices[n_input_devices].description,s->description,strlen(s->description));
+    input_devices[n_input_devices].name=g_strdup(s->name);
+    input_devices[n_input_devices].description=g_strdup(s->description);
     input_devices[n_input_devices].index=s->index;
     n_input_devices++;
   }
@@ -65,14 +64,13 @@ static void source_list_cb(pa_context *context,const pa_source_info *s,int eol,v
 static void sink_list_cb(pa_context *context,const pa_sink_info *s,int eol,void *data) {
   if(eol>0) {
     for(int i=0;i<n_output_devices;i++) {
-      g_print("Output: %d: %s (%s)\n",output_devices[i].index,output_devices[i].name,output_devices[i].description);
+      t_print("Output: %d: %s (%s)\n",output_devices[i].index,output_devices[i].name,output_devices[i].description);
     }
     op=pa_context_get_source_info_list(pa_ctx,source_list_cb,NULL);
   } else if(n_output_devices<MAX_AUDIO_DEVICES) {
-    output_devices[n_output_devices].name=g_new0(char,strlen(s->name)+1);
-    strncpy(output_devices[n_output_devices].name,s->name,strlen(s->name));
-    output_devices[n_output_devices].description=g_new0(char,strlen(s->description)+1);
-    strncpy(output_devices[n_output_devices].description,s->description,strlen(s->description));
+    output_devices[n_output_devices].name=g_strdup(s->name);
+    output_devices[n_output_devices].description=g_strdup(s->description);
+    strcpy(output_devices[n_output_devices].description,s->description);
     output_devices[n_output_devices].index=s->index;
     n_output_devices++;
   }
@@ -83,36 +81,36 @@ static void state_cb(pa_context *c, void *userdata) {
 
   state = pa_context_get_state(c);
 
-g_print("%s: %d\n",__FUNCTION__,state);
+t_print("%s: %d\n",__FUNCTION__,state);
   switch  (state) {
     // There are just here for reference
     case PA_CONTEXT_UNCONNECTED:
-g_print("audio: state_cb: PA_CONTEXT_UNCONNECTED\n");
+t_print("audio: state_cb: PA_CONTEXT_UNCONNECTED\n");
       break;
     case PA_CONTEXT_CONNECTING:
-g_print("audio: state_cb: PA_CONTEXT_CONNECTING\n");
+t_print("audio: state_cb: PA_CONTEXT_CONNECTING\n");
       break;
     case PA_CONTEXT_AUTHORIZING:
-g_print("audio: state_cb: PA_CONTEXT_AUTHORIZING\n");
+t_print("audio: state_cb: PA_CONTEXT_AUTHORIZING\n");
       break;
     case PA_CONTEXT_SETTING_NAME:
-g_print("audio: state_cb: PA_CONTEXT_SETTING_NAME\n");
+t_print("audio: state_cb: PA_CONTEXT_SETTING_NAME\n");
       break;
     case PA_CONTEXT_FAILED:
-g_print("audio: state_cb: PA_CONTEXT_FAILED\n");
+t_print("audio: state_cb: PA_CONTEXT_FAILED\n");
       break;
     case PA_CONTEXT_TERMINATED:
-g_print("audio: state_cb: PA_CONTEXT_TERMINATED\n");
+t_print("audio: state_cb: PA_CONTEXT_TERMINATED\n");
       break;
     case PA_CONTEXT_READY:
-g_print("audio: state_cb: PA_CONTEXT_READY\n");
+t_print("audio: state_cb: PA_CONTEXT_READY\n");
 // get a list of the output devices
       n_input_devices=0;
       n_output_devices=0;
       op = pa_context_get_sink_info_list(pa_ctx,sink_list_cb,NULL);
       break;
     default:
-      g_print("audio: state_cb: unknown state %d\n",state);
+      t_print("audio: state_cb: unknown state %d\n",state);
       break;
   }
 }
@@ -158,10 +156,10 @@ int audio_open_output(RECEIVER *rx) {
     if(rx->playstream!=NULL) {
       rx->local_audio_buffer_offset=0;
       rx->local_audio_buffer=g_new0(float,2*out_buffer_size);
-      g_print("%s: allocated local_audio_buffer %p size %ld bytes\n",__FUNCTION__,rx->local_audio_buffer,2*out_buffer_size*sizeof(float));
+      t_print("%s: allocated local_audio_buffer %p size %ld bytes\n",__FUNCTION__,rx->local_audio_buffer,2*out_buffer_size*sizeof(float));
     } else {
       result=-1;
-      g_print("%s: pa-simple_new failed: err=%d\n",__FUNCTION__,err);
+      t_print("%s: pa-simple_new failed: err=%d\n",__FUNCTION__,err);
     }
     g_mutex_unlock(&rx->local_audio_mutex);
   }
@@ -172,7 +170,7 @@ int audio_open_output(RECEIVER *rx) {
 static void *mic_read_thread(gpointer arg) {
   int err;
 
-  g_print("%s: running=%d\n",__FUNCTION__,running);
+  t_print("%s: running=%d\n",__FUNCTION__,running);
   while(running) {
     //
     // It is guaranteed that local_microphone_buffer, mic_ring_buffer, and microphone_stream
@@ -184,7 +182,7 @@ static void *mic_read_thread(gpointer arg) {
             &err);
     if(rc<0) {
       running=FALSE;
-      g_print("%s: simple_read returned %d error=%d (%s)\n",__FUNCTION__,rc,err,pa_strerror(err));
+      t_print("%s: simple_read returned %d error=%d (%s)\n",__FUNCTION__,rc,err,pa_strerror(err));
     } else {
       for(gint i=0;i<mic_buffer_size;i++) {
         gfloat sample=local_microphone_buffer[i];
@@ -202,7 +200,7 @@ static void *mic_read_thread(gpointer arg) {
       }
     }
   }
-  g_print("%s: exit\n",__FUNCTION__);
+  t_print("%s: exit\n",__FUNCTION__);
   return NULL;
 }
 
@@ -244,7 +242,7 @@ int audio_open_input() {
     local_microphone_buffer_offset=0;
     local_microphone_buffer=g_new0(float,mic_buffer_size);
 
-    g_print("%s: allocating ring buffer\n",__FUNCTION__);
+    t_print("%s: allocating ring buffer\n",__FUNCTION__);
     mic_ring_buffer=(float *) g_new(float,MICRINGLEN);
     mic_ring_read_pt = mic_ring_write_pt=0;
     if (mic_ring_buffer == NULL) {
@@ -254,10 +252,10 @@ int audio_open_input() {
     }
 
     running=TRUE;
-    g_print("%s: PULSEAUDIO mic_read_thread\n",__FUNCTION__);
+    t_print("%s: PULSEAUDIO mic_read_thread\n",__FUNCTION__);
     mic_read_thread_id=g_thread_new("mic_thread",mic_read_thread,NULL);
     if(!mic_read_thread_id ) {
-      g_print("%s: g_thread_new failed on mic_read_thread\n",__FUNCTION__);
+      t_print("%s: g_thread_new failed on mic_read_thread\n",__FUNCTION__);
       g_free(local_microphone_buffer);
       local_microphone_buffer=NULL;
       running=FALSE;
@@ -289,7 +287,7 @@ void audio_close_input() {
   g_mutex_lock(&audio_mutex);
 
   if(mic_read_thread_id!=NULL) {
-g_print("%s: wait for mic thread to complete\n", __FUNCTION__);
+t_print("%s: wait for mic thread to complete\n", __FUNCTION__);
     //
     // wait for the mic read thread to terminate,
     // then destroy the stream and the buffers
@@ -321,7 +319,7 @@ float audio_get_next_mic_sample() {
   g_mutex_lock(&audio_mutex);
   if ((mic_ring_buffer == NULL) || (mic_ring_read_pt == mic_ring_write_pt)) {
     // no buffer, or nothing in buffer: insert silence
-    //g_print("%s: no samples\n",__FUNCTION__);
+    //t_print("%s: no samples\n",__FUNCTION__);
     sample=0.0;
   } else {
     int newpt = mic_ring_read_pt+1;
@@ -355,7 +353,7 @@ int cw_audio_write(RECEIVER *rx,float sample) {
                          out_buffer_size*sizeof(float)*2,
                          &err);
       if(rc!=0) {
-        g_print("%s: simple_write failed err=%d\n",__FUNCTION__,err);
+        t_print("%s: simple_write failed err=%d\n",__FUNCTION__,err);
       }
       rx->local_audio_buffer_offset=0;
     }
@@ -390,7 +388,7 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
                          out_buffer_size*sizeof(float)*2,
                          &err);
       if(rc!=0) {
-        g_print("%s: simple_write failed err=%d\n",__FUNCTION__,err);
+        t_print("%s: simple_write failed err=%d\n",__FUNCTION__,err);
       }
       rx->local_audio_buffer_offset=0;
     }

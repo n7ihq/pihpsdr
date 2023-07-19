@@ -190,6 +190,7 @@
 #include "ext.h"
 #include "mode.h"
 #include "vfo.h"
+#include "message.h"
 
 static void* keyer_thread(void *arg);
 static pthread_t keyer_thread_id;
@@ -278,7 +279,7 @@ void keyer_update() {
 static int enforce_cw_vox;
 
 void keyer_event(int left, int state) {
-    //g_print("%s: running=%d left=%d state=%d\n",__FUNCTION__,running,left,state);
+    //t_print("%s: running=%d left=%d state=%d\n",__FUNCTION__,running,left,state);
     if (!running) return;
     if (state) {
         // This is to remember whether the key stroke interrupts a running CAT CW
@@ -312,7 +313,7 @@ static void* keyer_thread(void *arg) {
     int moxbefore;
     int cwvox;
 
-    g_print("keyer_thread  state running= %d\n", running);
+    t_print("keyer_thread  state running= %d\n", running);
     while(running) {
         enforce_cw_vox=0;
 #ifdef __APPLE__
@@ -544,7 +545,7 @@ static void* keyer_thread(void *arg) {
                 break;
 
             default:
-                g_print("KEYER THREAD: unknown state=%d",(int) key_state);
+                t_print("KEYER THREAD: unknown state=%d",(int) key_state);
                 key_state = EXITLOOP;
             }
 
@@ -558,12 +559,12 @@ static void* keyer_thread(void *arg) {
         }
 
     }
-    g_print("keyer_thread: EXIT\n");
+    t_print("keyer_thread: EXIT\n");
     return NULL;
 }
 
 void keyer_close() {
-    g_print(".... closing keyer thread.\n");
+    t_print(".... closing keyer thread.\n");
     running=0;
     // keyer thread may be sleeping, so wake it up
 #ifdef __APPLE__
@@ -583,7 +584,7 @@ void keyer_close() {
 int keyer_init() {
     int rc;
 
-    g_print(".... starting keyer thread.\n");
+    t_print(".... starting keyer thread.\n");
 
 #ifdef __APPLE__
     //
@@ -606,7 +607,7 @@ int keyer_init() {
     running = 1;
     rc |= pthread_create(&keyer_thread_id, NULL, keyer_thread, NULL);
     if(rc < 0) {
-        g_print("pthread_create for keyer_thread failed %d\n", rc);
+        t_print("pthread_create for keyer_thread failed %d\n", rc);
         exit(-1);
     }
     return 0;

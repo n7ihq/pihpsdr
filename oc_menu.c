@@ -31,6 +31,7 @@
 #include "filter.h"
 #include "radio.h"
 #include "new_protocol.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
@@ -57,7 +58,7 @@ static void oc_rx_cb(GtkWidget *widget, gpointer data) {
   int oc=(GPOINTER_TO_UINT(data))&0xF;
   BAND *band=band_get_band(b);
   int mask=0x01<<(oc-1);
-g_print("oc_rx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
+//t_print("oc_rx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     band->OCrx|=mask;
   } else {
@@ -75,7 +76,7 @@ static void oc_tx_cb(GtkWidget *widget, gpointer data) {
   BAND *band=band_get_band(b);
   int mask=0x01<<(oc-1);
 
-g_print("oc_tx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
+//t_print("oc_tx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
 
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     band->OCtx|=mask;
@@ -90,7 +91,7 @@ g_print("oc_tx_cb: band=%d oc=%d mask=%d\n",b,oc,mask);
 static void oc_tune_cb(GtkWidget *widget, gpointer data) {
   int oc=(GPOINTER_TO_UINT(data))&0xF;
   int mask=0x01<<(oc-1);
-g_print("oc_tune_cb: oc=%d mask=%d\n",oc,mask);
+//t_print("oc_tune_cb: oc=%d mask=%d\n",oc,mask);
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     OCtune|=mask;
   } else {
@@ -108,8 +109,6 @@ static void oc_memory_tune_time_cb(GtkWidget *widget, gpointer data) {
 
 void oc_menu(GtkWidget *parent) {
   int i,j;
-
-g_print("oc_menu: parent=%p\n",parent);
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));

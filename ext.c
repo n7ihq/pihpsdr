@@ -41,8 +41,14 @@
 
 int ext_discovery(void *data) {
   discovery();
-  return 0;
+  return G_SOURCE_REMOVE;
 }
+
+int ext_start_radio(void *data) {
+  start_radio();
+  return G_SOURCE_REMOVE;
+}
+
 
 //
 // ALL calls to vfo_update should go through g_idle_add(ext_vfo_update)

@@ -27,7 +27,7 @@ MIDI_INCLUDE=MIDI
 #USBOZY_INCLUDE=USBOZY
 
 # uncomment the line below for SoapySDR (needs SOAPY libs)
-# SOAPYSDR_INCLUDE=SOAPYSDR
+#SOAPYSDR_INCLUDE=SOAPYSDR
 
 # uncomment the line below to include support for STEMlab discovery (needs libcurl)
 #STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
@@ -107,7 +107,7 @@ soapy_protocol.o
 endif
 
 #
-# disable GPIO for MacOS, in case it has erroneously been requested
+# disable GPIO for MacOS, simply because it is not there
 #
 ifeq ($(UNAME_S), Darwin)
 GPIO_INCLUDE=
@@ -128,8 +128,9 @@ endif
 #
 # Activate code for RedPitaya (Stemlab/Hamlab/plain vanilla), if requested
 # This code detects the RedPitaya by its WWW interface and starts the SDR
-# application. If the SDR application starts automatically, this is
-# not needed!
+# application.
+# If the RedPitaya auto-starts the SDR application upon system start,
+# this option is not needed!
 #
 ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
@@ -160,7 +161,7 @@ endif
 #
 # Options for audio module
 #  - MacOS: only PORTAUDIO tested (although PORTAUDIO might work)
-#  - Linux: either PULSEAUDIO (default) or ALSO (upon request)
+#  - Linux: either PULSEAUDIO (default) or ALSA (upon request)
 #
 ifeq ($(UNAME_S), Darwin)
     AUDIO_MODULE=PORTAUDIO
@@ -255,7 +256,7 @@ LIBS=	$(LDFLAGS) $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDR
 PROGRAM=pihpsdr
 
 #
-# All the *.c files
+# The core *.c files in alphabetical order
 #
 SOURCES= \
 MacOS.c \
@@ -288,6 +289,7 @@ i2c.c \
 iambic.c \
 led.c \
 main.c \
+message.c \
 meter.c \
 meter_menu.c \
 mode.c \
@@ -330,7 +332,7 @@ xvtr_menu.c \
 zoompan.c
 
 #
-# All the *.h (header) files
+# The core *.h (header) files in alphabetical order
 #
 HEADERS= \
 MacOS.h \
@@ -369,6 +371,7 @@ iambic.h \
 i2c.h \
 led.h \
 main.h \
+message.h \
 meter.h \
 meter_menu.h \
 mode.h \
@@ -411,7 +414,7 @@ xvtr_menu.h \
 zoompan.h
 
 #
-# All the *.o (object) files
+# The core *.o (object) files in alphabetical order
 #
 OBJS= \
 MacOS.o \
@@ -444,6 +447,7 @@ iambic.o \
 i2c.o \
 led.o \
 main.o \
+message.o \
 meter.o \
 meter_menu.o \
 mode.o \
@@ -516,15 +520,18 @@ prebuild:
 # an API change in many cases.
 #
 # On MacOS, cppcheck usually cannot find the system include files so we suppress any
-# warnings therefrom.
+# warnings therefrom. Furthermore, we can use --check-level=exhaustive on MacOS
+# since there we have new newest version (2.11), while on RaspPi we still have 2.3.
 #
-CPPOPTIONS= --enable=all --check-level=exhaustive --suppress=constParameterCallback
+
+CPPOPTIONS= --enable=all --suppress=constParameterCallback --suppress=missingIncludeSystem
+CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
+
 ifeq ($(UNAME_S), Darwin)
-CPPOPTIONS += -D__APPLE__ --suppress=missingIncludeSystem
+CPPOPTIONS += -D__APPLE__ --check-level=exhaustive
 else
 CPPOPTIONS += -D__linux__
 endif
-CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 
 .PHONY:	cppcheck
 cppcheck:

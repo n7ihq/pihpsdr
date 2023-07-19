@@ -35,6 +35,7 @@
 
 #include "discovered.h"
 #include "discovery.h"
+#include "message.h"
 
 
 static char interface_name[64];
@@ -50,7 +51,7 @@ static GThread *discover_thread_id;
 gpointer new_discover_receive_thread(gpointer data);
 
 void print_device(int i) {
-    g_print("discovery: found protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
+    t_print("discovery: found protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
         discovered[i].protocol,
         discovered[i].device,
         discovered[i].software_version,
@@ -109,7 +110,7 @@ void new_discovery() {
     if (!is_local) new_discover(NULL,2);
 
 
-    g_print( "new_discovery found %d devices\n",devices);
+    t_print( "new_discovery found %d devices\n",devices);
 
     for(i=0;i<devices;i++) {
         print_device(i);
@@ -136,12 +137,12 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
         // prepeare socket for sending an UDP broadcast packet to interface ifa
         //
         strcpy(interface_name,iface->ifa_name);
-        g_print("new_discover: looking for HPSDR devices on %s\n",interface_name);
+        t_print("new_discover: looking for HPSDR devices on %s\n",interface_name);
 
         // send a broadcast to locate metis boards on the network
         discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
         if(discovery_socket<0) {
-          perror("new_discover: create socket failed for discovery_socket\n");
+          t_perror("new_discover: create socket failed for discovery_socket\n");
           return;
         }
 
@@ -154,19 +155,19 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
         interface_addr.sin_addr.s_addr = sa->sin_addr.s_addr;
         interface_addr.sin_port = htons(0); // system assigned port
         if(bind(discovery_socket,(struct sockaddr*)&interface_addr,sizeof(interface_addr))<0) {
-          perror("new_discover: bind socket failed for discovery_socket\n");
+          t_perror("new_discover: bind socket failed for discovery_socket\n");
           close (discovery_socket);
           return;
         }
         strcpy(addr,inet_ntoa(sa->sin_addr));
         strcpy(net_mask,inet_ntoa(mask->sin_addr));
-        g_print("new_discover: bound to %s %s %s\n",interface_name,addr,net_mask);
+        t_print("new_discover: bound to %s %s %s\n",interface_name,addr,net_mask);
 
         // allow broadcast on the socket
         int on=1;
         rc=setsockopt(discovery_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
         if(rc != 0) {
-            g_print("new_discover: cannot set SO_BROADCAST: rc=%d\n", rc);
+            t_print("new_discover: cannot set SO_BROADCAST: rc=%d\n", rc);
             close (discovery_socket);
             return;
         }
@@ -188,11 +189,11 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
         if (inet_aton(ipaddr_radio, &to_addr.sin_addr) == 0) {
           return;
         }
-        g_print("discover: looking for HPSDR device with IP %s\n", ipaddr_radio);
+        t_print("discover: looking for HPSDR device with IP %s\n", ipaddr_radio);
 
         discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
         if(discovery_socket<0) {
-            perror("discover: create socket failed for discovery_socket:");
+            t_perror("discover: create socket failed for discovery_socket:");
             return;
         }
         break;
@@ -220,7 +221,7 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
     }
 
     if(sendto(discovery_socket,buffer,60,0,(struct sockaddr*)&to_addr,sizeof(to_addr))<0) {
-        perror("new_discover: sendto socket failed for discovery_socket\n");
+        t_perror("new_discover: sendto socket failed for discovery_socket\n");
         close (discovery_socket);
         return;
     }
@@ -232,10 +233,10 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
 
     switch (discflag) {
        case 1:
-        g_print("new_discover: exiting discover for %s\n",iface->ifa_name);
+        t_print("new_discover: exiting discover for %s\n",iface->ifa_name);
         break;
       case 2:
-        g_print("discover: exiting HPSDR discover for IP %s\n",ipaddr_radio);
+        t_print("discover: exiting HPSDR discover for IP %s\n",ipaddr_radio);
         if (devices == rc+1) {
           //
           // METIS detection UDP packet sent to fixed IP address got a valid response.
@@ -266,11 +267,11 @@ gpointer new_discover_receive_thread(gpointer data) {
     while(1) {
         int bytes_read=recvfrom(discovery_socket,buffer,sizeof(buffer),0,(struct sockaddr*)&addr,&len);
         if(bytes_read<0) {
-            g_print("new_discover: bytes read %d\n", bytes_read);
-            perror("new_discover: recvfrom socket failed for discover_receive_thread");
+            t_print("new_discover: bytes read %d\n", bytes_read);
+            t_perror("new_discover: recvfrom socket failed for discover_receive_thread");
             break;
         }
-        g_print("new_discover: received %d bytes\n",bytes_read);
+        t_print("new_discover: received %d bytes\n",bytes_read);
         if(bytes_read==1444) {
             if(devices>0) {
                 break;
@@ -364,7 +365,7 @@ gpointer new_discover_receive_thread(gpointer data) {
                     // "discovered" data structure.
                     //
 
-                    g_print("new_discover: P2(%d)  device=%d (%dRX) software_version=%d(.%d) status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
+                    t_print("new_discover: P2(%d)  device=%d (%dRX) software_version=%d(.%d) status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
                             buffer[12] & 0xFF,
                             discovered[devices].device-1000,
                             buffer[20] & 0xFF,
@@ -387,7 +388,7 @@ gpointer new_discover_receive_thread(gpointer data) {
         }
         }
     }
-    g_print("new_discover: exiting new_discover_receive_thread\n");
+    t_print("new_discover: exiting new_discover_receive_thread\n");
     g_thread_exit(NULL);
     return NULL;
 }

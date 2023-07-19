@@ -49,6 +49,7 @@
 #include "client_server.h"
 #endif
 #include "actions.h"
+#include "message.h"
 
 static int width;
 static int height;
@@ -78,7 +79,6 @@ static GtkWidget *squelch_label;
 static GtkWidget *squelch_scale;
 static gulong     squelch_signal_id;
 static GtkWidget *squelch_enable;
-static GtkWidget *comp_scale;
 static GtkWidget *filter_cut_low_scale;
 static GtkWidget *filter_cut_high_scale;
 static GtkWidget *filter_width_scale;
@@ -150,7 +150,7 @@ static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 void set_attenuation_value(double value) {
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s value=%f\n",__FUNCTION__,value);
   if (!have_rx_att) return;
   adc[active_receiver->adc].attenuation=(int)value;
   set_attenuation(adc[active_receiver->adc].attenuation);
@@ -191,7 +191,7 @@ void att_type_changed() {
   // Note all sliders might be non-existent, e.g. if sliders are not
   // displayed at all. So verify all widgets are non-NULL
   //
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s\n",__FUNCTION__);
   if (filter_board == CHARLY25) {
     if(attenuation_label!=NULL)   gtk_widget_hide(attenuation_label);
     if(rf_gain_label!=NULL)       gtk_widget_hide(rf_gain_label);
@@ -303,7 +303,7 @@ static void agcgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 void set_agc_gain(int rx,double value) {
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s value=%f\n",__FUNCTION__, value);
   if (rx >= receivers) return;
   receiver[rx]->agc_gain=value;
   set_agc(receiver[rx], receiver[rx]->agc);
@@ -337,10 +337,6 @@ void set_agc_gain(int rx,double value) {
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
   }
-}
-
-void update_agc_gain(double gain) {
-  set_agc_gain(active_receiver->id,gain);
 }
 
 static void afgain_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -432,7 +428,7 @@ void set_rf_gain(int rx,double value) {
   if (!have_rx_gain) return;
   if (rx >= receivers) return;
   int rxadc=receiver[rx]->adc;
-  g_print("%s rx=%d adc=%d val=%f\n",__FUNCTION__, rx, rxadc, value);
+  //t_print("%s rx=%d adc=%d val=%f\n",__FUNCTION__, rx, rxadc, value);
   adc[rxadc].gain=value;
 #ifdef SOAPYSDR
   if(protocol==SOAPYSDR_PROTOCOL) {
@@ -472,7 +468,7 @@ void set_rf_gain(int rx,double value) {
 }
 
 void set_filter_width(int rx,int width) {
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s width=%d\n",__FUNCTION__, width);
     if(scale_status!=IF_WIDTH || scale_rx!=rx) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -510,7 +506,7 @@ void set_filter_width(int rx,int width) {
 }
 
 void set_filter_shift(int rx,int shift) {
-  g_print("%s\n",__FUNCTION__);
+    //t_print("%s shift=%d\n",__FUNCTION__, shift);
     if(scale_status!=IF_SHIFT || scale_rx!=rx) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -552,7 +548,7 @@ static void micgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 void set_mic_gain(double value) {
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s value=%f\n",__FUNCTION__, value);
   if(can_transmit) {
     mic_gain=value;
     SetTXAPanelGain1(transmitter->id,pow(10.0, mic_gain/20.0));
@@ -587,7 +583,7 @@ void set_mic_gain(double value) {
 }
 
 void set_drive(double value) {
-  g_print("%s val=%f\n",__FUNCTION__,value);
+  //t_print("%s value=%f\n",__FUNCTION__,value);
   int txmode = get_tx_mode();
   if (txmode == modeDIGU || txmode == modeDIGL) {
     if (value > drive_digi_max) value = drive_digi_max;
@@ -625,7 +621,7 @@ void set_drive(double value) {
 
 static void drive_value_changed_cb(GtkWidget *widget, gpointer data) {
   double value=gtk_range_get_value(GTK_RANGE(drive_scale));
-  g_print("%s: value=%f\n", __FUNCTION__, value);
+  //t_print("%s: value=%f\n", __FUNCTION__, value);
   int txmode = get_tx_mode();
   if (txmode == modeDIGU || txmode == modeDIGL) {
     if (value > drive_digi_max) value = drive_digi_max;
@@ -635,7 +631,7 @@ static void drive_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 void set_filter_cut_high(int rx,int var) {
-  //g_print("%s var=%d\n",__FUNCTION__,var);
+  //t_print("%s var=%d\n",__FUNCTION__,var);
     if(scale_status!=FILTER_CUT_HIGH || scale_rx!=rx) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -668,7 +664,7 @@ void set_filter_cut_high(int rx,int var) {
 }
 
 void set_filter_cut_low(int rx,int var) {
-  //g_print("%s var=%d\n",__FUNCTION__,var);
+  //t_print("%s var=%d\n",__FUNCTION__,var);
     if(scale_status!=FILTER_CUT_LOW || scale_rx!=rx) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -729,7 +725,7 @@ static void squelch_enable_cb(GtkWidget *widget, gpointer data) {
 }
 
 void set_squelch(RECEIVER *rx) {
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s\n",__FUNCTION__);
   //
   // automatically enable/disable squelch if squelch value changed
   // you can still enable/disable squelch via the check-box, but
@@ -771,38 +767,8 @@ void set_squelch(RECEIVER *rx) {
   }
 }
 
-void set_compression(const TRANSMITTER* tx) {
-  g_print("%s\n",__FUNCTION__);
-  // Update VFO panel to reflect changed value
-  g_idle_add(ext_vfo_update, NULL);
-    if(scale_status!=COMPRESSION) {
-      if(scale_status!=NO_ACTION) {
-        g_source_remove(scale_timer);
-        gtk_widget_destroy(scale_dialog);
-        scale_status=NO_ACTION;
-      }
-    }
-    if(scale_status==NO_ACTION) {
-      scale_status=COMPRESSION;
-      scale_dialog=gtk_dialog_new_with_buttons("COMP",GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
-      GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
-      comp_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 20.0, 1.00);
-      gtk_widget_override_font(comp_scale, pango_font_description_from_string(SLIDERS_FONT));
-      gtk_range_set_value (GTK_RANGE(comp_scale),tx->compressor_level);
-      gtk_widget_set_size_request (comp_scale, 400, 30);
-      gtk_widget_show(comp_scale);
-      gtk_container_add(GTK_CONTAINER(content),comp_scale);
-      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-      gtk_dialog_run(GTK_DIALOG(scale_dialog));
-    } else {
-      g_source_remove(scale_timer);
-      gtk_range_set_value (GTK_RANGE(comp_scale),tx->compressor_level);
-      scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
-    }
-}
-
 void show_diversity_gain() {
-  g_print("%s\n",__FUNCTION__);
+    //t_print("%s\n",__FUNCTION__);
     if(scale_status!=DIV_GAIN) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -829,7 +795,7 @@ void show_diversity_gain() {
 }
 
 void show_diversity_phase() {
-  g_print("%s\n",__FUNCTION__);
+  //t_print("%s\n",__FUNCTION__);
     if(scale_status!=DIV_PHASE) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -860,7 +826,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   width=my_width;
   height=my_height;
 
-g_print("sliders_init: width=%d height=%d\n", width,height);
+t_print("sliders_init: width=%d height=%d\n", width,height);
 
   sliders=gtk_grid_new();
   gtk_widget_set_size_request (sliders, width, height);

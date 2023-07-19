@@ -27,6 +27,7 @@
 #include "band.h"
 #include "radio.h"
 #include "vfo.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
@@ -168,7 +169,7 @@ static void clear_W() {
 
 static void max_power_changed_cb(GtkWidget *widget, gpointer data) {
   pa_power = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-g_print("max_power_changed_cb: %d\n",pa_power);
+t_print("max_power_changed_cb: %d\n",pa_power);
   clear_W();
   switch(pa_power) {
     case PA_1W:
