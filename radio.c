@@ -84,21 +84,23 @@
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
-#define MENU_HEIGHT (30)
-#define MENU_WIDTH (64)
-#define VFO_HEIGHT (60)
-#define VFO_WIDTH (display_width-METER_WIDTH-MENU_WIDTH)
-#define METER_HEIGHT (60)
-#define METER_WIDTH (200)
-#define PANADAPTER_HEIGHT (105)
-#define ZOOMPAN_HEIGHT (50)
-#define SLIDERS_HEIGHT (100)
-#define TOOLBAR_HEIGHT (30)
-#define WATERFALL_HEIGHT (105)
+int MENU_HEIGHT=30;
+int MENU_WIDTH=65;
+int VFO_HEIGHT=60;
+int VFO_WIDTH=700;
+int METER_HEIGHT=60;
+int METER_WIDTH=200;
+int ZOOMPAN_HEIGHT=50;
+int SLIDERS_HEIGHT=100;
+int TOOLBAR_HEIGHT=30;
+int PANADAPTER_HEIGHT=105;
+int WATERFALL_HEIGHT=105;
 
 gint controller=NO_CONTROLLER;
 
 GtkWidget *fixed;
+static GtkWidget *hide_b;
+static GtkWidget *menu_b;
 static GtkWidget *vfo_panel;
 static GtkWidget *meter;
 static GtkWidget *zoompan;
@@ -375,6 +377,41 @@ t_print("radio_stop: RX1: CloseChannel: %d\n",receiver[1]->id);
   }
 }
 
+void reconfigure_screen() {
+  //
+  // Re-configure the piHPSDR screen after dimensions have changed
+  // 
+  if (toolbar) {
+    gtk_container_remove(GTK_CONTAINER(fixed), toolbar);
+    toolbar=NULL;
+  }
+  if (sliders) {
+    gtk_container_remove(GTK_CONTAINER(fixed), sliders);
+    sliders=NULL;
+  }
+  if (zoompan) {
+    gtk_container_remove(GTK_CONTAINER(fixed), zoompan);
+    zoompan=NULL;
+  }
+  VFO_WIDTH = display_width - METER_WIDTH - MENU_WIDTH;
+  MENU_HEIGHT=VFO_HEIGHT/2;
+  METER_HEIGHT=VFO_HEIGHT;
+  gtk_widget_set_size_request(hide_b, MENU_WIDTH, MENU_HEIGHT);
+  gtk_widget_set_size_request(menu_b, MENU_WIDTH, MENU_HEIGHT);
+  gtk_widget_set_size_request(meter,  METER_WIDTH, METER_HEIGHT);
+  gtk_widget_set_size_request(vfo_panel, VFO_WIDTH, VFO_HEIGHT);
+  gtk_fixed_move(GTK_FIXED(fixed),hide_b,VFO_WIDTH+METER_WIDTH,0);
+  gtk_fixed_move(GTK_FIXED(fixed),menu_b,VFO_WIDTH+METER_WIDTH,MENU_HEIGHT);
+  gtk_fixed_move(GTK_FIXED(fixed),meter,VFO_WIDTH, 0);
+  for (int i=0; i<RECEIVERS; i++) {
+    RECEIVER *rx=receiver[i];
+    double zoom=(double)rx->zoom;
+    rx->width=display_width;
+    receiver_change_zoom(rx, zoom);
+  }
+  reconfigure_radio();
+}
+
 void reconfigure_radio() {
   int i;
   int y;
@@ -463,7 +500,6 @@ static gboolean save_cb(gpointer data) {
 }
 #endif
 
-static GtkWidget *hide_b;
 //
 // These variables are defined outside hideall_cb.
 // If the props file is written while "Hide"-ing,
@@ -521,6 +557,10 @@ static void create_visual() {
   gtk_container_remove(GTK_CONTAINER(top_window),topgrid);
   gtk_container_add(GTK_CONTAINER(top_window), fixed);
 
+  VFO_WIDTH = display_width - METER_WIDTH - MENU_WIDTH;
+  MENU_HEIGHT=VFO_HEIGHT/2;
+  METER_HEIGHT=VFO_HEIGHT;
+
 //t_print("radio: vfo_init\n");
   vfo_panel = vfo_init(VFO_WIDTH,VFO_HEIGHT);
   gtk_fixed_put(GTK_FIXED(fixed),vfo_panel,0,y);
@@ -537,7 +577,7 @@ static void create_visual() {
   gtk_fixed_put(GTK_FIXED(fixed),hide_b,VFO_WIDTH+METER_WIDTH,y);
   y+=MENU_HEIGHT;
 
-  GtkWidget *menu_b=gtk_button_new_with_label("Menu");
+  menu_b=gtk_button_new_with_label("Menu");
   gtk_widget_override_font(menu_b, pango_font_description_from_string(SLIDERS_FONT));
   gtk_widget_set_size_request (menu_b, MENU_WIDTH, MENU_HEIGHT);
   g_signal_connect (menu_b, "button-press-event", G_CALLBACK(menu_cb), NULL) ;

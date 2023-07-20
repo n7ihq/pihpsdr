@@ -59,6 +59,8 @@ struct utsname unameData;
 
 gint display_width;
 gint display_height;
+gint screen_height;
+gint screen_width;
 gint full_screen=1;
 
 static GdkCursor *cursor_arrow;
@@ -214,10 +216,12 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   }
 
 
+  screen_width=gdk_screen_get_width(screen);
+  screen_height=gdk_screen_get_height(screen);
+  t_print("Screen: width=%d height=%d\n", display_width, display_height);
+
   display_width=gdk_screen_get_width(screen);
   display_height=gdk_screen_get_height(screen);
-
-t_print("Screen: width=%d height=%d\n", display_width, display_height);
 
   // Go to "window" mode if there is enough space on the screen.
   // Do not forget extra space needed for window top bars, screen bars etc.
@@ -240,8 +244,7 @@ t_print("Screen: width=%d height=%d\n", display_width, display_height);
     }
     full_screen=1;
   }
-
-t_print("display_width=%d display_height=%d\n", display_width, display_height);
+  t_print("display_width=%d display_height=%d\n", display_width, display_height);
 
   t_print("create top level window\n");
   top_window = gtk_application_window_new (app);

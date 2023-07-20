@@ -312,6 +312,7 @@ rigctl.c \
 rigctl_menu.c \
 rx_menu.c \
 rx_panadapter.c \
+screen_menu.c \
 sintab.c \
 sliders.c \
 store.c \
@@ -394,6 +395,7 @@ rigctl.h \
 rigctl_menu.h \
 rx_menu.h \
 rx_panadapter.h \
+screen_menu.h \
 sintab.h \
 sliders.h \
 store.h \
@@ -470,6 +472,7 @@ rigctl.o \
 rigctl_menu.o \
 rx_menu.o \
 rx_panadapter.o \
+screen_menu.o \
 sintab.o \
 sliders.o \
 store.o \

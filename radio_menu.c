@@ -575,16 +575,18 @@ void radio_menu(GtkWidget *parent) {
   }
 
 #ifdef GPIO
-  GtkWidget *vfo_divisor_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(vfo_divisor_label), "<b>VFO Encoder Divisor:</b>");
-  gtk_grid_attach(GTK_GRID(grid),vfo_divisor_label,col,row,1,1);
-  row++;
+  if (controller != NO_CONTROLLER) {
+    GtkWidget *vfo_divisor_label=gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(vfo_divisor_label), "<b>VFO Encoder Divisor:</b>");
+    gtk_grid_attach(GTK_GRID(grid),vfo_divisor_label,col,row,1,1);
+    row++;
 
-  GtkWidget *vfo_divisor=gtk_spin_button_new_with_range(1.0,60.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(vfo_divisor),(double)vfo_encoder_divisor);
-  gtk_grid_attach(GTK_GRID(grid),vfo_divisor,col,row,1,1);
-  g_signal_connect(vfo_divisor,"value_changed",G_CALLBACK(vfo_divisor_value_changed_cb),NULL);
-  row++;
+    GtkWidget *vfo_divisor=gtk_spin_button_new_with_range(1.0,60.0,1.0);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(vfo_divisor),(double)vfo_encoder_divisor);
+    gtk_grid_attach(GTK_GRID(grid),vfo_divisor,col,row,1,1);
+    g_signal_connect(vfo_divisor,"value_changed",G_CALLBACK(vfo_divisor_value_changed_cb),NULL);
+    row++;
+  }
 #endif
 
   if(row>temp_row) temp_row=row;

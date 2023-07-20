@@ -287,8 +287,11 @@ extern GMutex property_mutex;
 extern int hl2_audio_codec;
 extern int anan10E;
 
+extern int VFO_HEIGHT;
+
 extern void radio_stop(void);
 extern void reconfigure_radio(void);
+extern void reconfigure_screen(void);
 extern void start_radio(void);
 extern void radio_change_receivers(int r);
 extern void radio_change_sample_rate(int rate);
@@ -335,7 +338,7 @@ extern int remote_start(void *data);
 extern int optimize_for_touchscreen;
 extern void my_combo_attach(GtkGrid *grid, GtkWidget *combo, int row, int col, int spanrow, int spancol);
 extern int max_band(void);
-extern void protocol_run();
-extern void protocol_stop();
-extern void protocol_restart();
+extern void protocol_run(void);
+extern void protocol_stop(void);
+extern void protocol_restart(void);
 #endif

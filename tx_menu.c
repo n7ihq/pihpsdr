@@ -268,7 +268,7 @@ void tx_menu(GtkWidget *parent) {
       transmitter->microphone_name=g_strdup(input_devices[0].name);
     }
 
-    my_combo_attach(GTK_GRID(grid),input,col,row,2,1);
+    my_combo_attach(GTK_GRID(grid),input,col,row,3,1);
     g_signal_connect(input,"changed",G_CALLBACK(local_input_changed_cb),NULL);
   }
 
@@ -508,7 +508,7 @@ void tx_menu(GtkWidget *parent) {
   col++;
 
   label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Maximum Drive level for DIGU and DIGL modes:</b>");
+  gtk_label_set_markup(GTK_LABEL(label), "<b>Max Drive level for DIGU/DIGL modes:</b>");
   gtk_widget_set_halign(label, GTK_ALIGN_START);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid),label,col,row,2,1);

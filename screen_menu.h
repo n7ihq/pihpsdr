@@ -1,6 +1,4 @@
-/* Copyright (C)
-* 2015 - John Melton, G0ORX/N6LYT
-*
+/*
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
@@ -17,20 +15,4 @@
 *
 */
 
-char build_date[]=GIT_DATE;
-char build_version[]=GIT_VERSION;
-
-char version[]=
-#ifdef USBOZY
-"OZY(USB), "
-#endif
-#ifdef GPIO
-"GPIO, "
-#endif
-#ifdef SOAPYSDR
-"SOAPYSDR, "
-#endif
-#ifdef MIDI
-"MIDI, "
-#endif
-;
+extern void screen_menu(GtkWidget *parent);

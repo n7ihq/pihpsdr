@@ -35,6 +35,9 @@ extern gint controller;
 
 extern gint display_width;
 extern gint display_height;
+extern gint screen_width;
+extern gint screen_height;
+
 extern gint full_screen;
 extern GtkWidget *top_window;
 extern GtkWidget *topgrid;
