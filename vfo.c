@@ -1103,7 +1103,7 @@ void vfo_update() {
       layout++;
     }
 
-    t_print("VFO width=%d height=%d fits (%d,%d).\n", VFO_WIDTH, VFO_HEIGHT, layout->width, layout->height);
+    //t_print("VFO width=%d height=%d fits (%d,%d).\n", VFO_WIDTH, VFO_HEIGHT, layout->width, layout->height);
    
     FILTER* band_filters=filters[vfo[id].mode];
     const FILTER* band_filter=&band_filters[vfo[id].filter];
