@@ -1,6 +1,8 @@
 # pihpsdr
-Raspberry Pi3 or Pi4 standalone code for HPSDR,
+Standalone code for HPSDR,
 supporting both the old (P1) and new (P2) HPSDR protocols, as well as the SoapySDR framework.
+
+It runs on Linux (including RaspPi 3/4) and MacOS (using the "Homebrew" working environment).
 
 Latest features:
 
@@ -15,7 +17,7 @@ Full source code download using git into your HOME folder:
 git clone https://github.com/dl1ycf/pihpsdr.git
 
 Installation by compiling from the sources is highly recommended,
-since binaries may cease to work across RaspberryPi OS upgrades.
+since binaries may cease to work across OS upgrades.
 
 A detailed instruction for this can be found in the source code
 folder file ..../pihpsdr/release/documentation/Linux-CompileFromSources.pdf.
