@@ -48,6 +48,14 @@ static gboolean apply_cb(GtkWidget *widget, gpointer data) {
   return TRUE;
 }
 
+static void vfo_cb(GtkWidget *widget, gpointer data) {
+  VFO_HEIGHT=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+}
+
+static void meter_cb(GtkWidget *widget, gpointer data) {
+  METER_WIDTH=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+}
+
 static void width_cb(GtkWidget *widget, gpointer data) {
   display_width=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
@@ -56,10 +64,6 @@ static void width_cb(GtkWidget *widget, gpointer data) {
 static void height_cb(GtkWidget *widget, gpointer data) {
   display_height=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
-}   
-
-static void vfo_cb(GtkWidget *widget, gpointer data) {
-  VFO_HEIGHT=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }   
 
 void screen_menu(GtkWidget *parent) {
@@ -113,10 +117,9 @@ void screen_menu(GtkWidget *parent) {
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) display_height);
     gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
     g_signal_connect(button,"value-changed", G_CALLBACK(height_cb), NULL);
-    col++;
     row++;
   }
- 
+
   col=0;
   label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(label), "<b>VFO Height: </b>");
@@ -124,12 +127,24 @@ void screen_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),label,col,row,1,1);
   col++;
 
-  button=gtk_spin_button_new_with_range(60.0, 180.0, 12.0);
+  button=gtk_spin_button_new_with_range(60.0, 96.0, 12.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) VFO_HEIGHT);
   gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
   g_signal_connect(button,"value-changed", G_CALLBACK(vfo_cb), NULL);
+  col++;
 
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>Meter Width: </b>");
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_grid_attach(GTK_GRID(grid),label,col,row,1,1);
+  col++;
+
+  button=gtk_spin_button_new_with_range(100.0, 250.0, 25.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) METER_WIDTH);
+  gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
+  g_signal_connect(button,"value-changed", G_CALLBACK(meter_cb), NULL);
   row++;
+ 
   button=gtk_button_new_with_label("Apply");
   g_signal_connect(button, "pressed", G_CALLBACK(apply_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), button, 5, row, 1, 1);

@@ -615,6 +615,7 @@ void reconfigure_receiver(RECEIVER *rx,int height) {
   // which is the full or half of the height depending on whether BOTH
   // are displayed
   //
+  t_print("%s: rx=%d width=%d height=%d\n", __FUNCTION__, rx->id, rx->width, rx->height);
 
   g_mutex_lock(&rx->display_mutex);
   int myheight=(rx->display_panadapter && rx->display_waterfall) ? height/2 : height;

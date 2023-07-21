@@ -128,3 +128,42 @@
 #define PAN_LINE_THIN  0.5
 #define PAN_LINE_THICK 1.0
 #define PAN_LINE_EXTRA 2.0  // used for really important things such as band edges
+
+
+struct _VFO_BAR_LAYOUT {
+  int width;               // overall width required
+  int height;              // overall height required
+  int size1;               // Font size for the "LED markers"
+  int size2;               // Font size for the "small dial digits"
+  int size3;               // Font size for the "large dial digits"
+
+  int vfo_a_x, vfo_a_y;    // coordinates of VFO A/B dial
+  int vfo_b_x, vfo_b_y;
+
+  int mode_x,  mode_y;     // Mode/Filter/CW wpm string
+  int zoom_x,  zoom_y;     // "Zoom x1"
+  int ps_x,    ps_y;       // "PS"
+  int rit_x,   rit_y ;     // "RIT +9999Hz"
+  int xit_x,   xit_y;      // "XIT +9999Hz"
+  int nb_x,    nb_y;       // NB/NB2
+  int nr_x,    nr_y;
+  int anf_x,   anf_y;
+  int snb_x,   snb_y;
+  int agc_x,   agc_y;      // "AGC slow"
+  int cmpr_x,  cmpr_y;
+  int eq_x,    eq_y;
+  int div_x,   div_y;
+  int step_x,  step_y;     // "Step 100 kHz"
+  int ctun_x,  ctun_y;
+  int cat_x,   cat_y;
+  int vox_x,   vox_y;
+  int lock_x,  lock_y;
+  int split_x, split_y;
+  int sat_x,   sat_y;
+  int dup_x,   dup_y;
+};
+
+typedef struct _VFO_BAR_LAYOUT VFO_BAR_LAYOUT;
+
+extern const VFO_BAR_LAYOUT vfo_layout[];
+

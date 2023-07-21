@@ -87,7 +87,7 @@
 int MENU_HEIGHT=30;
 int MENU_WIDTH=65;
 int VFO_HEIGHT=60;
-int VFO_WIDTH=700;
+int VFO_WIDTH=530;
 int METER_HEIGHT=60;
 int METER_WIDTH=200;
 int ZOOMPAN_HEIGHT=50;
@@ -393,9 +393,11 @@ void reconfigure_screen() {
     gtk_container_remove(GTK_CONTAINER(fixed), zoompan);
     zoompan=NULL;
   }
-  VFO_WIDTH = display_width - METER_WIDTH - MENU_WIDTH;
+  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
   MENU_HEIGHT=VFO_HEIGHT/2;
   METER_HEIGHT=VFO_HEIGHT;
+  t_print("%s: meter width=%d vfo width=%d vfo height=%d\n",
+              __FUNCTION__,METER_WIDTH, VFO_WIDTH, VFO_HEIGHT);
   gtk_widget_set_size_request(hide_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(menu_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(meter,  METER_WIDTH, METER_HEIGHT);
@@ -409,13 +411,15 @@ void reconfigure_screen() {
     rx->width=display_width;
     receiver_change_zoom(rx, zoom);
   }
+  transmitter->x=0;
+  transmitter->y=VFO_HEIGHT;
   reconfigure_radio();
 }
 
 void reconfigure_radio() {
   int i;
   int y;
-t_print("reconfigure_radio: receivers=%d\n",receivers);
+  t_print("%s: receivers=%d\n",__FUNCTION__,receivers);
   rx_height=display_height-VFO_HEIGHT;
   if(display_zoompan) {
     rx_height-=ZOOMPAN_HEIGHT;
@@ -557,7 +561,7 @@ static void create_visual() {
   gtk_container_remove(GTK_CONTAINER(top_window),topgrid);
   gtk_container_add(GTK_CONTAINER(top_window), fixed);
 
-  VFO_WIDTH = display_width - METER_WIDTH - MENU_WIDTH;
+  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
   MENU_HEIGHT=VFO_HEIGHT/2;
   METER_HEIGHT=VFO_HEIGHT;
 

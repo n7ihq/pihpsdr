@@ -287,7 +287,10 @@ extern GMutex property_mutex;
 extern int hl2_audio_codec;
 extern int anan10E;
 
+extern int VFO_WIDTH;
 extern int VFO_HEIGHT;
+extern int METER_WIDTH;
+extern int METER_HEIGHT;
 
 extern void radio_stop(void);
 extern void reconfigure_radio(void);

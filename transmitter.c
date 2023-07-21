@@ -150,8 +150,8 @@ void transmitter_set_compressor(TRANSMITTER *tx,int state) {
 }
 
 void reconfigure_transmitter(TRANSMITTER *tx,int width,int height) {
-  t_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
-  if(width!=tx->width) {
+  if(width!=tx->width || height != tx->height) {
+    t_print("reconfigure_transmitter: width=%d height=%d\n",width,height);
     tx->width=width;
     tx->height=height;
     int ratio=tx->iq_output_rate/tx->mic_sample_rate;

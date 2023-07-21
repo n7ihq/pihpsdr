@@ -40,8 +40,6 @@
 static GtkWidget *meter;
 static cairo_surface_t *meter_surface = NULL;
 
-static int meter_width;
-static int meter_height;
 static int last_meter_type=SMETER;
 
 #define min_rxlvl -200.0
@@ -63,9 +61,7 @@ meter_configure_event_cb (GtkWidget         *widget,
     cairo_surface_destroy (meter_surface);
 
   meter_surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-                                       CAIRO_CONTENT_COLOR,
-                                       gtk_widget_get_allocated_width (widget),
-                                       gtk_widget_get_allocated_height (widget));
+                                       CAIRO_CONTENT_COLOR,METER_WIDTH,METER_HEIGHT);
 
   /* Initialize the surface to black */
   cairo_t *cr;
@@ -101,8 +97,6 @@ meter_press_event_cb (GtkWidget *widget,
 GtkWidget* meter_init(int width,int height) {
 
 t_print("meter_init: width=%d height=%d\n",width,height);
-  meter_width=width;
-  meter_height=height;
 
   meter = gtk_drawing_area_new ();
   gtk_widget_set_size_request (meter, width, height);
@@ -253,7 +247,7 @@ if(analog_meter) {
       double y;
       double angle;
       double radians;
-      double cx=(double)meter_width/2.0;
+      double cx=(double)METER_WIDTH/2.0;
       double radius=cx-20.0;
 
       cairo_set_line_width(cr, PAN_LINE_THICK);
@@ -333,7 +327,7 @@ if(analog_meter) {
 
       cairo_set_source_rgba(cr, COLOUR_METER);
       sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
-      cairo_move_to(cr, 80, meter_height-2);
+      cairo_move_to(cr, 80, METER_HEIGHT-2);
       cairo_show_text(cr, sf);
 
       }
@@ -347,7 +341,7 @@ if(analog_meter) {
       double y;
       double angle;
       double radians;
-      double cx=(double)meter_width/2.0;
+      double cx=(double)METER_WIDTH/2.0;
       double radius=cx-20.0;
 
       cairo_set_line_width(cr, PAN_LINE_THICK);
@@ -393,7 +387,7 @@ if(analog_meter) {
 
       cairo_set_source_rgba(cr, COLOUR_METER);
       sprintf(sf,"%d%s",(int)(max_pwr+0.5),units);
-      cairo_move_to(cr, 80, meter_height-22);
+      cairo_move_to(cr, 80, METER_HEIGHT-22);
       cairo_show_text(cr, sf);
 
       if (swr > transmitter->swr_alarm) {
@@ -402,12 +396,12 @@ if(analog_meter) {
         cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
       }
       sprintf(sf,"SWR: %1.1f:1",swr);
-      cairo_move_to(cr, 60, meter_height-12);
+      cairo_move_to(cr, 60, METER_HEIGHT-12);
       cairo_show_text(cr, sf);
 
       cairo_set_source_rgba(cr, COLOUR_METER);
       sprintf(sf,"ALC: %2.1f dB",max_alc);
-      cairo_move_to(cr, 60, meter_height-2);
+      cairo_move_to(cr, 60, METER_HEIGHT-2);
       cairo_show_text(cr, sf);
 
 
@@ -416,7 +410,7 @@ if(analog_meter) {
   }
 
   if((meter_type==POWER) || (vox_enabled)) {
-    offset=((double)meter_width-100.0)/2.0;
+    offset=((double)METER_WIDTH-100.0)/2.0;
     double peak=vox_get_peak();
     peak=peak*100.0;
     cairo_set_source_rgba(cr, COLOUR_OK);
@@ -455,6 +449,12 @@ if(analog_meter) {
 
 } else {
   int text_location;
+  int Y1=METER_HEIGHT/4;
+  int Y2=Y1+METER_HEIGHT/3;
+  int Y4=4*Y1-6;
+  int size;
+
+
   // Section for the digital meter
   // clear the meter
   cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
@@ -463,40 +463,44 @@ if(analog_meter) {
   cairo_select_font_face(cr, DISPLAY_FONT,
                 CAIRO_FONT_SLANT_NORMAL,
                 CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
   cairo_set_line_width(cr, PAN_LINE_THICK);
 
   if(can_transmit) {
     cairo_set_source_rgba(cr, COLOUR_METER);
-    cairo_move_to(cr, 5.0, 15.0);
-    cairo_line_to(cr, 5.0, 5.0);
-    cairo_move_to(cr, 5.0+25.0, 15.0);
-    cairo_line_to(cr, 5.0+25.0, 10.0);
-    cairo_move_to(cr, 5.0+50.0, 15.0);
-    cairo_line_to(cr, 5.0+50.0, 5.0);
-    cairo_move_to(cr, 5.0+75.0, 15.0);
-    cairo_line_to(cr, 5.0+75.0, 10.0);
-    cairo_move_to(cr, 5.0+100.0, 15.0);
-    cairo_line_to(cr, 5.0+100.0, 5.0);
+    cairo_move_to(cr, 5.0, Y1);
+    cairo_line_to(cr, 5.0, Y1-10);
+    cairo_move_to(cr, 5.0+25.0, Y1);
+    cairo_line_to(cr, 5.0+25.0, Y1-5);
+    cairo_move_to(cr, 5.0+50.0, Y1);
+    cairo_line_to(cr, 5.0+50.0, Y1-10);
+    cairo_move_to(cr, 5.0+75.0, Y1);
+    cairo_line_to(cr, 5.0+75.0, Y1-5);
+    cairo_move_to(cr, 5.0+100.0, Y1);
+    cairo_line_to(cr, 5.0+100.0, Y1-10);
     cairo_stroke(cr);
 
     double peak=vox_get_peak();
     peak=peak*100.0;
     cairo_set_source_rgba(cr, COLOUR_OK);
-    cairo_rectangle(cr, 5.0, 5.0, peak, 5.0);
+    cairo_rectangle(cr, 5.0, Y1-10, peak, 5);
     cairo_fill(cr);
 
     if(vox_enabled) {
       cairo_set_source_rgba(cr, COLOUR_ALARM);
-      cairo_move_to(cr,5.0+(vox_threshold*100.0),5.0);
-      cairo_line_to(cr,5.0+(vox_threshold*100.0),15.0);
+      cairo_move_to(cr,5.0+(vox_threshold*100.0),Y1-10);
+      cairo_line_to(cr,5.0+(vox_threshold*100.0),Y1);
       cairo_stroke(cr);
     }
 
-    cairo_set_source_rgba(cr, COLOUR_ATTN);
-    cairo_move_to(cr, 120.0, 15.0);
-    cairo_show_text(cr, "Mic Level");
+    size=(METER_WIDTH-120)/6;
+    if (size > METER_HEIGHT/4) size = METER_HEIGHT/4;
+    if (size >= 10) {
+      cairo_set_source_rgba(cr, COLOUR_ATTN);
+      cairo_set_font_size(cr, size);
+      cairo_move_to(cr, 120.0, Y1);
+      cairo_show_text(cr, "Mic Level");
+    }
   }
 
   cairo_set_source_rgba(cr, COLOUR_METER);
@@ -504,47 +508,45 @@ if(analog_meter) {
     case SMETER:
       // value is dBm
       text_location=10;
-      offset=5.0;
 
-      if(meter_width>=114) {
-        int db=1;
+      if(METER_WIDTH>=150) {
         int i;
         cairo_set_line_width(cr, PAN_LINE_THICK);
         cairo_set_source_rgba(cr, COLOUR_METER);
         for(i=0;i<54;i++) {
-          cairo_move_to(cr,offset+(double)(i*db),(double)meter_height-10);
+          cairo_move_to(cr,5+i,METER_HEIGHT-10);
           if(i%18==0) {
-            cairo_line_to(cr,offset+(double)(i*db),(double)(meter_height-20));
+            cairo_line_to(cr,5+i,METER_HEIGHT-20);
           } else if(i%6==0) {
-            cairo_line_to(cr,offset+(double)(i*db),(double)(meter_height-15));
+            cairo_line_to(cr,5+i,METER_HEIGHT-15);
           }
         }
         cairo_stroke(cr);
 
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE1);
-        cairo_move_to(cr, offset+(double)(18*db)-3.0, (double)meter_height-1);
+        cairo_move_to(cr, 20, METER_HEIGHT-1);
         cairo_show_text(cr, "3");
-        cairo_move_to(cr, offset+(double)(36*db)-3.0, (double)meter_height-1);
+        cairo_move_to(cr, 38, METER_HEIGHT-1);
         cairo_show_text(cr, "6");
 
         cairo_set_source_rgba(cr, COLOUR_ALARM);
-        cairo_move_to(cr,offset+(double)(54*db),(double)meter_height-10);
-        cairo_line_to(cr,offset+(double)(54*db),(double)(meter_height-20));
-        cairo_move_to(cr,offset+(double)(74*db),(double)meter_height-10);
-        cairo_line_to(cr,offset+(double)(74*db),(double)(meter_height-20));
-        cairo_move_to(cr,offset+(double)(94*db),(double)meter_height-10);
-        cairo_line_to(cr,offset+(double)(94*db),(double)(meter_height-20));
-        cairo_move_to(cr,offset+(double)(114*db),(double)meter_height-10);
-        cairo_line_to(cr,offset+(double)(114*db),(double)(meter_height-20));
+        cairo_move_to(cr,5+ 54,METER_HEIGHT-10);
+        cairo_line_to(cr,5+ 54,METER_HEIGHT-20);
+        cairo_move_to(cr,5+ 74,METER_HEIGHT-10);
+        cairo_line_to(cr,5+ 74,METER_HEIGHT-20);
+        cairo_move_to(cr,5+ 94,METER_HEIGHT-10);
+        cairo_line_to(cr,5+ 94,METER_HEIGHT-20);
+        cairo_move_to(cr,5+114,METER_HEIGHT-10);
+        cairo_line_to(cr,5+114,METER_HEIGHT-20);
         cairo_stroke(cr);
 
-        cairo_move_to(cr, offset+(double)(54*db)-3.0, (double)meter_height-1);
+        cairo_move_to(cr, 56, METER_HEIGHT-1);
         cairo_show_text(cr, "9");
-        cairo_move_to(cr, offset+(double)(74*db)-12.0, (double)meter_height-1);
+        cairo_move_to(cr, 5+74-12, METER_HEIGHT-1);
         cairo_show_text(cr, "+20");
-        cairo_move_to(cr, offset+(double)(94*db)-9.0, (double)meter_height-1);
+        cairo_move_to(cr, 5+94-9, METER_HEIGHT-1);
         cairo_show_text(cr, "+40");
-        cairo_move_to(cr, offset+(double)(114*db)-6.0, (double)meter_height-1);
+        cairo_move_to(cr, 5+114-6, METER_HEIGHT-1);
         cairo_show_text(cr, "+60");
 
         // if frequency > 30MHz then -93 is S9
@@ -562,7 +564,7 @@ if(analog_meter) {
         cairo_pattern_add_color_stop_rgba(pat,1.00,COLOUR_GRAD4);
         cairo_set_source(cr, pat);
 
-        cairo_rectangle(cr, offset+0.0, (double)(meter_height-40), (double)((l+127.0)*db), 20.0);
+        cairo_rectangle(cr, 5, METER_HEIGHT-40, l+127.0, 20.0);
         cairo_fill(cr);
         cairo_pattern_destroy(pat);
 
@@ -571,20 +573,25 @@ if(analog_meter) {
           // Mark right edge of S-meter bar with a line in ATTN colour
           //
           cairo_set_source_rgba(cr, COLOUR_ATTN);
-          cairo_move_to(cr,offset+(double)((max_rxlvl+127.0)*db),(double)meter_height-20);
-          cairo_line_to(cr,offset+(double)((max_rxlvl+127.0)*db),(double)(meter_height-40));
+          cairo_move_to(cr,5+(double)((max_rxlvl+127.0)),(double)METER_HEIGHT-20);
+          cairo_line_to(cr,5+(double)((max_rxlvl+127.0)),(double)(METER_HEIGHT-40));
         }
 
 
         cairo_stroke(cr);
 
-        text_location=offset+(db*114)+10;
+        text_location=124;
       }
 
-      cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-      sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
-      cairo_move_to(cr, text_location, meter_height-12);
-      cairo_show_text(cr, sf);
+      size=(METER_WIDTH - text_location)/5;
+      if (size > METER_HEIGHT/3) size=METER_HEIGHT/3;
+      if (size >= 12) {
+        cairo_set_source_rgba(cr, COLOUR_ATTN);
+        cairo_set_font_size(cr, size);
+        sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
+        cairo_move_to(cr, text_location, METER_HEIGHT-25);
+        cairo_show_text(cr, sf);
+      }
       break;
     case POWER:
       cairo_select_font_face(cr, DISPLAY_FONT,
@@ -597,7 +604,7 @@ if(analog_meter) {
         // Power/Alc/SWR not available for SOAPY.
         //
         sprintf(sf,"FWD: %d%s",(int)(max_pwr+0.5),units);
-        cairo_move_to(cr, 10, 35);
+        cairo_move_to(cr, 10, Y2);
         cairo_show_text(cr, sf);
 
         if (swr > transmitter->swr_alarm) {
@@ -612,14 +619,14 @@ if(analog_meter) {
             CAIRO_FONT_WEIGHT_BOLD);
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         sprintf(sf,"SWR: %1.1f:1",swr);
-        cairo_move_to(cr, 10, 55);
+        cairo_move_to(cr, 10, Y4);
         cairo_show_text(cr, sf);
       }
 
       cairo_set_source_rgba(cr, COLOUR_METER);  // revert to white color
 
       sprintf(sf,"ALC: %2.1f dB",max_alc);
-      cairo_move_to(cr, meter_width/2, 35);
+      cairo_move_to(cr, METER_WIDTH/2, Y2);
       cairo_show_text(cr, sf);
       break;
   }

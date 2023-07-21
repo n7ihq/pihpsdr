@@ -265,6 +265,7 @@ actions.c \
 action_dialog.c \
 agc_menu.c \
 ant_menu.c \
+appearance.c \
 band.c \
 band_menu.c \
 bandstack_menu.c \
@@ -425,6 +426,7 @@ actions.o \
 action_dialog.o \
 agc_menu.o \
 ant_menu.o \
+appearance.o \
 band.o \
 band_menu.o \
 bandstack_menu.o \
