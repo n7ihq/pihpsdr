@@ -676,14 +676,14 @@ void radio_menu(GtkWidget *parent) {
     if(row>temp_row) temp_row=row;
   }
 
-  if(device==NEW_DEVICE_ORION || device==NEW_DEVICE_ORION2 ||
+  if(device==NEW_DEVICE_ORION || device==NEW_DEVICE_ORION2 || device==NEW_DEVICE_SATURN ||
      device==DEVICE_ORION || device==DEVICE_ORION2) {
 
       col++;
       row=1;
 
       GtkWidget *orion_label=gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(orion_label), "<b>ORION Mic jack:</b>");
+      gtk_label_set_markup(GTK_LABEL(orion_label), "<b>ORION/SATURN Mic jack:</b>");
       gtk_grid_attach(GTK_GRID(grid),orion_label,col,row,2,1);
       row++;
 
