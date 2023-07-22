@@ -275,6 +275,18 @@ static void filter_cb(GtkWidget *widget, gpointer data) {
   load_filters();
 }
 
+static void mic_input_cb(GtkWidget *widget, gpointer data) {
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  switch (val) {
+  case 0:
+  default:
+    mic_input_xlr=MIC3P55MM;
+    break;
+  case 1:
+    mic_input_xlr=MICXLR;
+    break;
+  }
+}
 static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
   char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
   int samplerate;
@@ -699,6 +711,27 @@ void radio_menu(GtkWidget *parent) {
       g_signal_connect(ptt_tip_b,"toggled",G_CALLBACK(ptt_tip_cb),NULL);
       row++;
 
+      if(device==NEW_DEVICE_SATURN) {
+        GtkWidget *mic_input_label=gtk_label_new(NULL);
+        gtk_label_set_markup(GTK_LABEL(mic_input_label), "<b>Mic Input:</b>");
+        gtk_grid_attach(GTK_GRID(grid),mic_input_label,col+1,row,2,1);
+
+        GtkWidget *mic_input_combo=gtk_combo_box_text_new();
+        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mic_input_combo),NULL,"3.5mm");
+        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mic_input_combo),NULL,"XLR");
+
+        switch (mic_input_xlr) {
+          case MIC3P55MM:
+            gtk_combo_box_set_active(GTK_COMBO_BOX(mic_input_combo),0);
+            break;
+          case MICXLR:
+            gtk_combo_box_set_active(GTK_COMBO_BOX(mic_input_combo),1);
+            break;
+        }
+        my_combo_attach(GTK_GRID(grid), mic_input_combo, col+1, row+1, 2, 1);
+        g_signal_connect(mic_input_combo,"changed",G_CALLBACK(mic_input_cb),NULL);
+      }
+
       GtkWidget *ptt_b=gtk_check_button_new_with_label("PTT Enabled");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ptt_b), mic_ptt_enabled);
       gtk_grid_attach(GTK_GRID(grid),ptt_b,col,row,2,1);
@@ -819,7 +852,6 @@ void radio_menu(GtkWidget *parent) {
 #ifdef SOAPYSDR
   row++;
   col=0;
-
   if (device==SOAPYSDR_USB_DEVICE) {
     //
     // If there is only a single RX or TX gain element, then we need not display it

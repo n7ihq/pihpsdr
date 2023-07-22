@@ -1253,6 +1253,9 @@ static void new_protocol_transmit_specific() {
     if(mic_bias_enabled) {
       transmit_specific_buffer[50]|=0x10;
     }
+    if(mic_input_xlr) {
+      transmit_specific_buffer[50]|=0x20;
+    }
 
     // 0..31
     transmit_specific_buffer[51]=linein_gain;

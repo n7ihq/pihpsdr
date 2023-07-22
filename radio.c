@@ -218,6 +218,7 @@ int mic_boost=0;
 int mic_bias_enabled=0;
 int mic_ptt_enabled=0;
 int mic_ptt_tip_bias_ring=0;
+int mic_input_xlr=0;
 
 int receivers;
 
@@ -2204,6 +2205,10 @@ t_print("radioRestoreState: %s\n",property_path);
     if(value) mic_bias_enabled=atof(value);
     value=getProperty("mic_ptt_tip_bias_ring");
     if(value) mic_ptt_tip_bias_ring=atof(value);
+    if(device==NEW_DEVICE_SATURN) {
+      value=getProperty("mic_input_xlr");
+      if(value) mic_input_xlr=atoi(value);
+    }
 
     value=getProperty("tx_filter_low");
     if(value) tx_filter_low=atoi(value);
@@ -2590,6 +2595,10 @@ t_print("radioSaveState: %s\n",property_path);
     setProperty("mic_bias_enabled",value);
     sprintf(value,"%d",mic_ptt_tip_bias_ring);
     setProperty("mic_ptt_tip_bias_ring",value);
+    if(device==NEW_DEVICE_SATURN) {
+      sprintf(value,"%d",mic_input_xlr);
+      setProperty("mic_input_xlr",value);
+    }
     sprintf(value,"%d",tx_filter_low);
     setProperty("tx_filter_low",value);
     sprintf(value,"%d",tx_filter_high);
