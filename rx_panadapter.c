@@ -61,16 +61,15 @@ panadapter_configure_event_cb (GtkWidget         *widget,
 
   RECEIVER *rx=(RECEIVER *)data;
 
-  int display_width=gtk_widget_get_allocated_width (widget);
-  int display_height=gtk_widget_get_allocated_height (widget);
+  int mywidth=gtk_widget_get_allocated_width (widget);
+  int myheight=gtk_widget_get_allocated_height (widget);
 
   if (rx->panadapter_surface)
     cairo_surface_destroy (rx->panadapter_surface);
 
   rx->panadapter_surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
                                        CAIRO_CONTENT_COLOR,
-                                       display_width,
-                                       display_height);
+                                       mywidth,myheight);
 
   cairo_t *cr=cairo_create(rx->panadapter_surface);
   cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
@@ -125,16 +124,15 @@ void rx_panadapter_update(RECEIVER *rx) {
 
   gboolean active=active_receiver==rx;
 
-  int display_width=gtk_widget_get_allocated_width (rx->panadapter);
-  int display_height=gtk_widget_get_allocated_height (rx->panadapter);
+  int mywidth=gtk_widget_get_allocated_width (rx->panadapter);
+  int myheight=gtk_widget_get_allocated_height (rx->panadapter);
 
   samples=rx->pixel_samples;
 
   cairo_t *cr;
   cr = cairo_create (rx->panadapter_surface);
-  cairo_set_line_width(cr, PAN_LINE_THIN);
   cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);
-  cairo_rectangle(cr,0,0,display_width,display_height);
+  cairo_rectangle(cr,0,0,mywidth,myheight);
   cairo_fill(cr);
 
   double HzPerPixel = rx->hz_per_pixel;  // need this many times
@@ -200,7 +198,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       x1=(low_freq-min_display)/(long long)HzPerPixel;
       x2=(hi_freq-min_display)/(long long)HzPerPixel;
       cairo_set_source_rgba(cr, COLOUR_PAN_60M);
-      cairo_rectangle(cr, x1, 0.0, x2-x1, (double)display_height);
+      cairo_rectangle(cr, x1, 0.0, x2-x1, myheight);
       cairo_fill(cr);
     }
   }
@@ -209,7 +207,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_set_source_rgba (cr, COLOUR_PAN_FILTER);
   filter_left =((double)rx->pixels*0.5)-(double)rx->pan +(((double)rx->filter_low+offset)/HzPerPixel);
   filter_right=((double)rx->pixels*0.5)-(double)rx->pan +(((double)rx->filter_high+offset)/HzPerPixel);
-  cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);
+  cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, myheight);
   cairo_fill(cr);
 
   //
@@ -224,7 +222,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     }
     cw_frequency=filter_left+((filter_right-filter_left)/2.0);
     cairo_move_to(cr,cw_frequency,10.0);
-    cairo_line_to(cr,cw_frequency,(double)display_height);
+    cairo_line_to(cr,cw_frequency,myheight);
     cairo_set_line_width(cr, PAN_LINE_THICK);
     cairo_stroke(cr);
   }
@@ -236,7 +234,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_set_source_rgba(cr, COLOUR_PAN_LINE_WEAK);
   }
 
-  double dbm_per_line=(double)display_height/((double)rx->panadapter_high-(double)rx->panadapter_low);
+  double dbm_per_line=(double)myheight/((double)rx->panadapter_high-(double)rx->panadapter_low);
   cairo_set_line_width(cr, PAN_LINE_THIN);
   cairo_select_font_face(cr, DISPLAY_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
@@ -247,7 +245,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     if(mod==0) {
       double y = (double)(rx->panadapter_high-i)*dbm_per_line;
       cairo_move_to(cr,0.0,y);
-      cairo_line_to(cr,(double)display_width,y);
+      cairo_line_to(cr,mywidth,y);
 
       sprintf(v,"%d dBm",i);
       cairo_move_to(cr, 1, y);
@@ -282,8 +280,8 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
   while(f<max_display) {
     double x=(double)(f-min_display)/HzPerPixel;
-    cairo_move_to(cr,(double)x,0.0);
-    cairo_line_to(cr,(double)x,(double)display_height);
+    cairo_move_to(cr,x,0);
+    cairo_line_to(cr,x,myheight);
     //
     // For frequency marker lines very close to the left or right
     // edge, do not print a frequency since this probably won't fit
@@ -317,15 +315,15 @@ void rx_panadapter_update(RECEIVER *rx) {
       cairo_set_line_width(cr, PAN_LINE_THICK);
       if((min_display<band->frequencyMin)&&(max_display>band->frequencyMin)) {
         i=(band->frequencyMin-min_display)/(long long)HzPerPixel;
-        cairo_move_to(cr,(double)i,0.0);
-        cairo_line_to(cr,(double)i,(double)display_height);
+        cairo_move_to(cr,i,0);
+        cairo_line_to(cr,i,myheight);
         cairo_set_line_width(cr, PAN_LINE_EXTRA);
         cairo_stroke(cr);
       }
       if((min_display<band->frequencyMax)&&(max_display>band->frequencyMax)) {
         i=(band->frequencyMax-min_display)/(long long)HzPerPixel;
-        cairo_move_to(cr,(double)i,0.0);
-        cairo_line_to(cr,(double)i,(double)display_height);
+        cairo_move_to(cr,i,0);
+        cairo_line_to(cr,i,myheight);
         cairo_set_line_width(cr, PAN_LINE_THICK);
         cairo_stroke(cr);
       }
@@ -341,7 +339,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_set_font_size(cr, DISPLAY_FONT_SIZE4);
     inet_ntop(AF_INET, &(((struct sockaddr_in *)&clients->address)->sin_addr),text,64);
     cairo_text_extents(cr, text, &extents);
-    cairo_move_to(cr, ((double)display_width/2.0)-(extents.width/2.0), (double)display_height/2.0);
+    cairo_move_to(cr, ((double)mywidth/2.0)-(extents.width/2.0), (double)myheight/2.0);
     cairo_show_text(cr, text);
   }
 #endif
@@ -352,12 +350,12 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_set_line_width(cr, PAN_LINE_THICK);
     double knee_y=rx->agc_thresh + soffset;
     knee_y = floor((rx->panadapter_high - knee_y)
-                        * (double) display_height
+                        * (double) myheight
                         / (rx->panadapter_high - rx->panadapter_low));
 
     double hang_y=rx->agc_hang + soffset;
     hang_y = floor((rx->panadapter_high - hang_y)
-                        * (double) display_height
+                        * (double) myheight
                         / (rx->panadapter_high - rx->panadapter_low));
 
     if(rx->agc!=AGC_MEDIUM && rx->agc!=AGC_FAST) {
@@ -370,7 +368,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       cairo_rectangle(cr, 40, hang_y-8.0,8.0,8.0);
       cairo_fill(cr);
       cairo_move_to(cr,40.0,hang_y);
-      cairo_line_to(cr,(double)display_width-40.0,hang_y);
+      cairo_line_to(cr,(double)mywidth-40.0,hang_y);
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_stroke(cr);
       cairo_move_to(cr,48.0,hang_y);
@@ -386,7 +384,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_rectangle(cr, 40, knee_y-8.0,8.0,8.0);
     cairo_fill(cr);
     cairo_move_to(cr,40.0,knee_y);
-    cairo_line_to(cr,(double)display_width-40.0,knee_y);
+    cairo_line_to(cr,(double)mywidth-40.0,knee_y);
     cairo_set_line_width(cr, PAN_LINE_THICK);
     cairo_stroke(cr);
     cairo_move_to(cr,48.0,knee_y);
@@ -401,7 +399,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_set_source_rgba(cr, COLOUR_ALARM_WEAK);
   }
   cairo_move_to(cr,vfofreq+(offset/HzPerPixel),0.0);
-  cairo_line_to(cr,vfofreq+(offset/HzPerPixel),(double)display_height);
+  cairo_line_to(cr,vfofreq+(offset/HzPerPixel),myheight);
   cairo_set_line_width(cr, PAN_LINE_THIN);
   cairo_stroke(cr);
 
@@ -416,37 +414,37 @@ void rx_panadapter_update(RECEIVER *rx) {
 #endif
 
   samples[pan]=-200.0;
-  samples[display_width-1+pan]=-200.0;
+  samples[mywidth-1+pan]=-200.0;
   //
   // most HPSDR only have attenuation (no gain), while HermesLite-II and SOAPY use gain (no attenuation)
   //
   s1=(double)samples[pan] + soffset;
 
   s1 = floor((rx->panadapter_high - s1)
-                        * (double) display_height
+                        * (double) myheight
                         / (rx->panadapter_high - rx->panadapter_low));
   cairo_move_to(cr, 0.0, s1);
-  for(i=1;i<display_width;i++) {
+  for(i=1;i<mywidth;i++) {
     s2=(double)samples[i+pan] + soffset;
     s2 = floor((rx->panadapter_high - s2)
-                            * (double) display_height
+                            * (double) myheight
                             / (rx->panadapter_high - rx->panadapter_low));
-    cairo_line_to(cr, (double)i, s2);
+    cairo_line_to(cr, i, s2);
   }
 
   cairo_pattern_t *gradient;
   gradient=NULL;
   if(display_gradient) {
-    gradient = cairo_pattern_create_linear(0.0, display_height, 0.0, 0.0);
+    gradient = cairo_pattern_create_linear(0.0, myheight, 0.0, 0.0);
     // calculate where S9 is
     double S9=-73;
     if(vfo[rx->id].frequency>30000000LL) {
       S9=-93;
     }
     S9 = floor((rx->panadapter_high - S9)
-                            * (double) display_height
+                            * (double) myheight
                             / (rx->panadapter_high - rx->panadapter_low));
-    S9 = 1.0-(S9/(double)display_height);
+    S9 = 1.0-(S9/(double)myheight);
 
     if(active) {
       cairo_pattern_add_color_stop_rgba(gradient,0.0,         COLOUR_GRAD1);
@@ -498,19 +496,19 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_set_source_rgba(cr,COLOUR_ATTN);
     cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
     if(ENABLE_E2_ENCODER) {
-      cairo_move_to(cr, display_width-200,70);
+      cairo_move_to(cr, mywidth-200,70);
       sprintf(text,"%s (%s)",encoder_string[e2_encoder_action],sw_string[e2_sw_action]);
       cairo_show_text(cr, text);
     }
 
     if(ENABLE_E3_ENCODER) {
-      cairo_move_to(cr, display_width-200,90);
+      cairo_move_to(cr, mywidth-200,90);
       sprintf(text,"%s (%s)",encoder_string[e3_encoder_action],sw_string[e3_sw_action]);
       cairo_show_text(cr, text);
     }
 
     if(ENABLE_E4_ENCODER) {
-      cairo_move_to(cr, display_width-200,110);
+      cairo_move_to(cr, mywidth-200,110);
       sprintf(text,"%s (%s)",encoder_string[e4_encoder_action],sw_string[e4_sw_action]);
       cairo_show_text(cr, text);
     }
@@ -554,6 +552,24 @@ void rx_panadapter_update(RECEIVER *rx) {
 #ifdef CLIENT_SERVER
     }
 #endif
+  }
+
+  //
+  // For horizontal stacking, draw a vertical separator,
+  // at the right edge of RX1, and at the left
+  // edge of RX2.
+  //
+  if (rx_stack_horizontal && receivers > 1) {
+    if (rx->id == 0) {
+      cairo_move_to(cr,mywidth-1,0);
+      cairo_line_to(cr,mywidth-1,myheight);
+    } else {
+      cairo_move_to(cr,0,0);
+      cairo_line_to(cr,0,myheight);
+    }
+    cairo_set_source_rgba(cr, COLOUR_PAN_LINE);
+    cairo_set_line_width(cr, 1);
+    cairo_stroke(cr);
   }
 
   cairo_destroy (cr);

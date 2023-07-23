@@ -621,6 +621,7 @@ void reconfigure_receiver(RECEIVER *rx,int height) {
   int myheight=(rx->display_panadapter && rx->display_waterfall) ? height/2 : height;
 
   rx->height=height;  // total height
+  gtk_widget_set_size_request(rx->panel, rx->width, rx->height);
 
   if(rx->display_panadapter) {
     if(rx->panadapter==NULL) {
@@ -1742,11 +1743,14 @@ void add_div_iq_samples(RECEIVER *rx, double i0, double q0, double i1, double q1
   }
 }
 
-void receiver_change_zoom(RECEIVER *rx,double zoom) {
-  rx->zoom=(int)zoom;
+void receiver_update_zoom(RECEIVER *rx) {
+  //
+  // This is called whenever rx->zoom or rx->width changes,
+  // since in both cases the analyzer must be restarted.
+  //
   rx->pixels=rx->width*rx->zoom;
   rx->hz_per_pixel=(double)rx->sample_rate/(double)rx->pixels;
-  if(zoom==1) {
+  if(rx->zoom==1) {
     rx->pan=0;
   } else {
     if(vfo[rx->id].ctun) {
@@ -1769,12 +1773,6 @@ void receiver_change_zoom(RECEIVER *rx,double zoom) {
 #ifdef CLIENT_SERVER
   }
 #endif
-}
-
-void receiver_change_pan(RECEIVER *rx,double pan) {
-  if(rx->zoom>1) {
-    rx->pan=(int)pan;
-  }
 }
 
 #ifdef CLIENT_SERVER

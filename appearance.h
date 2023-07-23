@@ -15,7 +15,6 @@
  *            and then decide to re-use an existing one.
  */
 
-
 // Define maximum window size.
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
 
@@ -164,6 +163,6 @@ struct _VFO_BAR_LAYOUT {
 };
 
 typedef struct _VFO_BAR_LAYOUT VFO_BAR_LAYOUT;
-
-extern const VFO_BAR_LAYOUT vfo_layout[];
+extern const VFO_BAR_LAYOUT vfo_layout_list[];
+extern const VFO_BAR_LAYOUT *vfo_layout;
 

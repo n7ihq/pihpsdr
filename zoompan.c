@@ -78,7 +78,8 @@ static void zoom_value_changed_cb(GtkWidget *widget, gpointer data) {
     send_zoom(client_socket,active_receiver->id,zoom);
   } else {
 #endif
-    receiver_change_zoom(active_receiver,gtk_range_get_value(GTK_RANGE(zoom_scale)));
+    active_receiver->zoom=(int)(gtk_range_get_value(GTK_RANGE(zoom_scale))+0.5);;
+    receiver_update_zoom(active_receiver);
 #ifdef CLIENT_SERVER
   }
 #endif
@@ -100,7 +101,8 @@ void set_zoom(int rx,double value) {
   //t_print("set_zoom: %f\n",value);
   if (rx >= receivers) return;
   receiver[rx]->zoom=value;
-  if(display_zoompan) {
+  receiver_update_zoom(receiver[rx]);
+  if(display_zoompan && active_receiver->id == rx) {
     gtk_range_set_value (GTK_RANGE(zoom_scale),receiver[rx]->zoom);
   } else {
     if(scale_status!=ZOOM || scale_rx!=rx) {
@@ -110,7 +112,6 @@ void set_zoom(int rx,double value) {
         scale_status=NO_ACTION;
       }
     }
-    receiver_change_zoom(active_receiver,value);
     if(scale_status==NO_ACTION) {
       scale_status=ZOOM;
       scale_rx=rx;
@@ -165,15 +166,21 @@ static void pan_value_changed_cb(GtkWidget *widget, gpointer data) {
     return;
   }
 #endif
-  receiver_change_pan(active_receiver,gtk_range_get_value(GTK_RANGE(pan_scale)));
+  if (active_receiver->zoom > 1) {
+    active_receiver->pan=(int)(gtk_range_get_value(GTK_RANGE(pan_scale))+0.5);
+  }
   g_mutex_unlock(&pan_zoom_mutex);
 }
 
 void set_pan(int rx,double value) {
   //t_print("set_pan: value=%f\n",value);
   if (rx >= receivers) return;
+  if (receiver[rx]->zoom == 1) {
+    receiver[rx]->pan=0;
+    return;
+  }
   receiver[rx]->pan=(int)value;
-  if(display_zoompan) {
+  if(display_zoompan && rx == active_receiver->id) {
     gtk_range_set_value (GTK_RANGE(pan_scale),receiver[rx]->pan);
   } else {
     if(scale_status!=PAN || scale_rx!=rx) {
@@ -183,7 +190,6 @@ void set_pan(int rx,double value) {
         scale_status=NO_ACTION;
       }
     }
-    receiver_change_pan(active_receiver,value);
     if(scale_status==NO_ACTION) {
       scale_status=PAN;
       scale_rx=rx;

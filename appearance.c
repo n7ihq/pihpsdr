@@ -12,10 +12,22 @@
  * switch to a larger font.
  */
 
+#include <stdlib.h>
+
 #include "appearance.h"
 
-const VFO_BAR_LAYOUT vfo_layout[] =
+//
+// Note the first layout that fits into the actual size of
+// the VFO bar is taken, so the largest one come first, and
+// the smallest one last.
+//
+const VFO_BAR_LAYOUT vfo_layout_list[] =
 {
+  //
+  // A layout tailored for a screen 1024 px wide:
+  // a Layout with dial digits of size 40, and a "LED" size 17
+  // which requires a width of 745 and a height of 78
+  //
   {
    .width=745,
    .height=78,
@@ -69,6 +81,11 @@ const VFO_BAR_LAYOUT vfo_layout[] =
    .dup_x=285,
    .dup_y=78
   },
+  //
+  // A layout tailored for a screen 900 px wide:
+  // a Layout with dial digits of size 32, and a "LED" size 14
+  // which requires a width of 620 and a height of 66
+  //
   {
    .width=620,
    .height=66,
@@ -122,6 +139,11 @@ const VFO_BAR_LAYOUT vfo_layout[] =
    .dup_x=240,
    .dup_y=66
   },  
+  //
+  // The standard piHPSDR layout for a 800x480 screen:
+  // a Layout with dial digits of size 26, and a "LED" size 12
+  // which requires a width of 530 and a height of 55
+  //
   {
    .width=530,
    .height=55,
@@ -175,9 +197,13 @@ const VFO_BAR_LAYOUT vfo_layout[] =
    .dup_x=210,
    .dup_y=54
   },
+  //
+  // The last "layout" must have a negative width to
+  // mark the end of the list
+  //
   {
     .width=-1
   }
 };
-   
-  
+
+const VFO_BAR_LAYOUT *vfo_layout=NULL;

@@ -243,8 +243,7 @@ extern void receiver_frequency_changed(RECEIVER *rx);
 extern void receiver_mode_changed(RECEIVER *rx);
 extern void receiver_filter_changed(RECEIVER *rx);
 extern void receiver_vfo_changed(RECEIVER *rx);
-extern void receiver_change_zoom(RECEIVER *rx,double zoom);
-extern void receiver_change_pan(RECEIVER *rx,double pan);
+extern void receiver_update_zoom(RECEIVER *rx);
 
 extern void set_mode(RECEIVER* rx,int m);
 extern void set_filter(RECEIVER *rx);

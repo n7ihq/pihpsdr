@@ -5,9 +5,6 @@ UNAME_S := $(shell uname -s)
 GIT_DATE := $(firstword $(shell git --no-pager show --date=short --format="%ai" --name-only))
 GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 
-# uncomment the following line to force 480x320 screen
-#SMALL_SCREEN_OPTIONS=-D SMALL_SCREEN
-
 # uncomment the line below to include GPIO (needs libgpiod)
 # For support of:
 #    CONTROLLER1 (Original Controller)

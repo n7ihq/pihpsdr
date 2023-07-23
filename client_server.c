@@ -2132,7 +2132,8 @@ t_print("CMD_RESP_RX_ZOOM: zoom=%d rx[%d]->zoom=%d\n",zoom,rx,receiver[rx]->zoom
         if(receiver[rx]->zoom!=zoom) {
           g_idle_add(ext_remote_set_zoom,GINT_TO_POINTER(zoom));
         } else {
-          receiver_change_zoom(receiver[rx],(double)zoom);
+          receiver[rx]->zoom=(int)(zoom+0.5);
+          receiver_update_zoom(receiver[rx]);
         }
         }
         break;

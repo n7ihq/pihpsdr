@@ -1087,27 +1087,11 @@ void vfo_update() {
 
     int id=active_receiver->id;
     int txvfo=get_tx_vfo();
+    const VFO_BAR_LAYOUT *vfl = vfo_layout;
 
-    const VFO_BAR_LAYOUT *layout=vfo_layout;
-
-    //
-    // Determine the largest layout which fits
-    // Assume that the last one fits
-    //
-    for (;;) {
-      if (layout->width < 0) {
-        layout--;
-        break;
-      }
-      if (layout->width <= VFO_WIDTH && layout->height <= VFO_HEIGHT) break;
-      layout++;
-    }
-
-    //t_print("VFO width=%d height=%d fits (%d,%d).\n", VFO_WIDTH, VFO_HEIGHT, layout->width, layout->height);
-   
     FILTER* band_filters=filters[vfo[id].mode];
     const FILTER* band_filter=&band_filters[vfo[id].filter];
-    if(vfo_surface) {
+    if(vfo_surface && vfl) {
         char temp_text[32];
         cairo_t *cr;
         cr = cairo_create (vfo_surface);
@@ -1143,9 +1127,9 @@ void vfo_update() {
             sprintf(temp_text,"%s %s",mode_string[vfo[id].mode],band_filter->title);
             break;
         }
-        cairo_set_font_size(cr, layout->size1);
+        cairo_set_font_size(cr, vfl->size1);
         cairo_set_source_rgba(cr, COLOUR_ATTN);
-        cairo_move_to(cr, layout->mode_x, layout->mode_y);
+        cairo_move_to(cr, vfl->mode_x, vfl->mode_y);
         cairo_show_text(cr, temp_text);
 
         // In what follows, we want to display the VFO frequency
@@ -1197,7 +1181,7 @@ void vfo_update() {
         //
         // VFO A Dial
         //
-        cairo_move_to(cr, layout->vfo_a_x, layout->vfo_a_y);
+        cairo_move_to(cr, vfl->vfo_a_x, vfl->vfo_a_y);
         if (txvfo == 0 && (isTransmitting() || oob))
             cairo_set_source_rgba(cr, COLOUR_ALARM);
         else if (vfo[0].entered_frequency[0])
@@ -1211,9 +1195,9 @@ void vfo_update() {
         f_k = (af - 1000000LL*f_m) / 1000;
         f_h = (af - 1000000LL*f_m - 1000*f_k);
 
-        cairo_set_font_size(cr, layout->size2);
+        cairo_set_font_size(cr, vfl->size2);
         cairo_show_text(cr, "VFO A:");
-        cairo_set_font_size(cr, layout->size3);
+        cairo_set_font_size(cr, vfl->size3);
         if (txvfo == 0 && oob) {
           cairo_show_text(cr, "Out of band");
         } else if (vfo[0].entered_frequency[0]) {
@@ -1238,7 +1222,7 @@ void vfo_update() {
           cairo_restore(cr);
           sprintf(temp_text,"%0d.%03d", f_m,f_k);
           cairo_show_text(cr, temp_text);
-          cairo_set_font_size(cr, layout->size2);
+          cairo_set_font_size(cr, vfl->size2);
           sprintf(temp_text,"%03d", f_h);
           cairo_show_text(cr, temp_text);
         }
@@ -1246,7 +1230,7 @@ void vfo_update() {
         //
         // VFO B Dial
         //
-        cairo_move_to(cr, layout->vfo_b_x, layout->vfo_b_y);
+        cairo_move_to(cr, vfl->vfo_b_x, vfl->vfo_b_y);
         if (txvfo == 1 && (isTransmitting() || oob))
             cairo_set_source_rgba(cr, COLOUR_ALARM);
         else if (vfo[1].entered_frequency[0])
@@ -1260,9 +1244,9 @@ void vfo_update() {
         f_k = (bf - 1000000LL*f_m) / 1000;
         f_h = (bf - 1000000LL*f_m - 1000*f_k);
 
-        cairo_set_font_size(cr, layout->size2);
+        cairo_set_font_size(cr, vfl->size2);
         cairo_show_text(cr, "VFO B:");
-        cairo_set_font_size(cr, layout->size3);
+        cairo_set_font_size(cr, vfl->size3);
         if (txvfo == 0 && oob) {
           cairo_show_text(cr, "Out of band");
         } else if (vfo[1].entered_frequency[0]) {
@@ -1287,29 +1271,29 @@ void vfo_update() {
           cairo_restore(cr);
           sprintf(temp_text,"%0d.%03d", f_m,f_k);
           cairo_show_text(cr, temp_text);
-          cairo_set_font_size(cr, layout->size2);
+          cairo_set_font_size(cr, vfl->size2);
           sprintf(temp_text,"%03d", f_h);
           cairo_show_text(cr, temp_text);
         }
 
-        cairo_move_to(cr, layout->zoom_x, layout->zoom_y);
+        cairo_move_to(cr, vfl->zoom_x, vfl->zoom_y);
         if(active_receiver->zoom>1) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
           cairo_set_source_rgba(cr, COLOUR_SHADE);
         }
-        cairo_set_font_size(cr, layout->size1);
+        cairo_set_font_size(cr, vfl->size1);
         sprintf(temp_text,"Zoom x%d",active_receiver->zoom);
         cairo_show_text(cr, temp_text);
 
         if ((protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) && can_transmit) {
-          cairo_move_to(cr, layout->ps_x, layout->ps_y);
+          cairo_move_to(cr, vfl->ps_x, vfl->ps_y);
           if(transmitter->puresignal) {
             cairo_set_source_rgba(cr, COLOUR_ATTN);
           } else {
             cairo_set_source_rgba(cr, COLOUR_SHADE);
           }
-          cairo_set_font_size(cr, layout->size1);
+          cairo_set_font_size(cr, vfl->size1);
           cairo_show_text(cr, "PS");
         }
 
@@ -1319,8 +1303,8 @@ void vfo_update() {
             cairo_set_source_rgba(cr, COLOUR_ATTN);
         }
         sprintf(temp_text,"RIT: %lldHz",vfo[id].rit);
-        cairo_move_to(cr, layout->rit_x, layout->rit_y);
-        cairo_set_font_size(cr, layout->size1);
+        cairo_move_to(cr, vfl->rit_x, vfl->rit_y);
+        cairo_set_font_size(cr, vfl->size1);
         cairo_show_text(cr, temp_text);
 
 
@@ -1331,12 +1315,12 @@ void vfo_update() {
               cairo_set_source_rgba(cr, COLOUR_ATTN);
           }
           sprintf(temp_text,"XIT: %lldHz",transmitter->xit);
-          cairo_move_to(cr, layout->xit_x, layout->xit_y);
-          cairo_set_font_size(cr, layout->size1);
+          cairo_move_to(cr, vfl->xit_x, vfl->xit_y);
+          cairo_set_font_size(cr, vfl->size1);
           cairo_show_text(cr, temp_text);
         }
 
-        cairo_move_to(cr, layout->nb_x, layout->nb_y);
+        cairo_move_to(cr, vfl->nb_x, vfl->nb_y);
         switch(active_receiver->nb) {
           case 1:
             cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1352,7 +1336,7 @@ void vfo_update() {
             break;
         }
 
-        cairo_move_to(cr, layout->nr_x, layout->nr_y);
+        cairo_move_to(cr, vfl->nr_x, vfl->nr_y);
         switch (active_receiver->nr) {
           case 1:
             cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1378,7 +1362,7 @@ void vfo_update() {
           break;
         }
 
-        cairo_move_to(cr, layout->anf_x, layout->anf_y);
+        cairo_move_to(cr, vfl->anf_x, vfl->anf_y);
         if(active_receiver->anf) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1386,7 +1370,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "ANF");
 
-        cairo_move_to(cr, layout->snb_x, layout->snb_y);
+        cairo_move_to(cr, vfl->snb_x, vfl->snb_y);
         if(active_receiver->snb) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1394,7 +1378,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "SNB");
 
-        cairo_move_to(cr, layout->agc_x, layout->agc_y);
+        cairo_move_to(cr, vfl->agc_x, vfl->agc_y);
         switch(active_receiver->agc) {
           case AGC_OFF:
             cairo_set_source_rgba(cr, COLOUR_SHADE);
@@ -1419,7 +1403,7 @@ void vfo_update() {
         }
 
         if(can_transmit) {
-          cairo_move_to(cr, layout->cmpr_x, layout->cmpr_y);
+          cairo_move_to(cr, vfl->cmpr_x, vfl->cmpr_y);
           if (transmitter->compressor) {
               sprintf(temp_text,"CMPR %d",(int) transmitter->compressor_level);
               cairo_set_source_rgba(cr, COLOUR_ATTN);
@@ -1430,7 +1414,7 @@ void vfo_update() {
           }
         }
 
-        cairo_move_to(cr, layout->eq_x, layout->eq_y);
+        cairo_move_to(cr, vfl->eq_x, vfl->eq_y);
         if (isTransmitting() && enable_tx_equalizer) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
           cairo_show_text(cr, "TxEQ");
@@ -1442,7 +1426,7 @@ void vfo_update() {
           cairo_show_text(cr, "EQ");
         }
 
-        cairo_move_to(cr, layout->div_x, layout->div_y);
+        cairo_move_to(cr, vfl->div_x, vfl->div_y);
         if(diversity_enabled) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1457,11 +1441,11 @@ void vfo_update() {
         if(s>=STEPS) s=0;
 
         sprintf(temp_text,"Step %s",step_labels[s]);
-        cairo_move_to(cr, layout->step_x, layout->step_y);
+        cairo_move_to(cr, vfl->step_x, vfl->step_y);
         cairo_set_source_rgba(cr, COLOUR_ATTN);
         cairo_show_text(cr, temp_text);
 
-        cairo_move_to(cr, layout->ctun_x, layout->ctun_y);
+        cairo_move_to(cr, vfl->ctun_x, vfl->ctun_y);
         if(vfo[id].ctun) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1469,7 +1453,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "CTUN");
 
-        cairo_move_to(cr, layout->cat_x, layout->cat_y);
+        cairo_move_to(cr, vfl->cat_x, vfl->cat_y);
         if(cat_control>0) {
           cairo_set_source_rgba(cr, COLOUR_ATTN);
         } else {
@@ -1478,7 +1462,7 @@ void vfo_update() {
         cairo_show_text(cr, "CAT");
 
         if(can_transmit) {
-          cairo_move_to(cr, layout->vox_x, layout->vox_y);
+          cairo_move_to(cr, vfl->vox_x, vfl->vox_y);
           if(vox_enabled) {
             cairo_set_source_rgba(cr, COLOUR_ALARM);
           } else {
@@ -1487,7 +1471,7 @@ void vfo_update() {
           cairo_show_text(cr, "VOX");
         }
 
-        cairo_move_to(cr, layout->lock_x, layout->lock_y);
+        cairo_move_to(cr, vfl->lock_x, vfl->lock_y);
         if(locked) {
           cairo_set_source_rgba(cr, COLOUR_ALARM);
         } else {
@@ -1495,7 +1479,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "Locked");
 
-        cairo_move_to(cr, layout->split_x, layout->split_y);
+        cairo_move_to(cr, vfl->split_x, vfl->split_y);
         if(split) {
           cairo_set_source_rgba(cr, COLOUR_ALARM);
         } else {
@@ -1503,7 +1487,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "Split");
 
-        cairo_move_to(cr, layout->sat_x, layout->sat_y);
+        cairo_move_to(cr, vfl->sat_x, vfl->sat_y);
         if(sat_mode!=SAT_NONE) {
           cairo_set_source_rgba(cr, COLOUR_ALARM);
         } else {
@@ -1522,14 +1506,12 @@ void vfo_update() {
             cairo_set_source_rgba(cr, COLOUR_SHADE);
         }
         sprintf(temp_text,"DUP");
-        cairo_move_to(cr, layout->dup_x, layout->dup_y);
-        cairo_set_font_size(cr, layout->size1);
+        cairo_move_to(cr, vfl->dup_x, vfl->dup_y);
+        cairo_set_font_size(cr, vfl->size1);
         cairo_show_text(cr, temp_text);
 
         cairo_destroy (cr);
         gtk_widget_queue_draw (vfo_panel);
-    } else {
-t_print("%s: no surface!\n",__FUNCTION__);
     }
 }
 
@@ -1538,9 +1520,12 @@ vfo_press_event_cb (GtkWidget *widget,
                GdkEventButton *event,
                gpointer        data)
 {
+  int vfo;
   switch (event->button) {
     case GDK_BUTTON_PRIMARY:
-      g_idle_add(ext_start_vfo,GINT_TO_POINTER(event->x<300?VFO_A:VFO_B));
+      vfo=VFO_A;
+      if (event->x >= vfo_layout->vfo_b_x) vfo=VFO_B;
+      g_idle_add(ext_start_vfo,GINT_TO_POINTER(vfo));
       break;
     case GDK_BUTTON_SECONDARY:
       // do not discriminate between A and B

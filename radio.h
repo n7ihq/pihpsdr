@@ -90,15 +90,22 @@ extern RECEIVER *active_receiver;
 
 extern TRANSMITTER *transmitter;
 
-#define PA_DISABLED 0
-#define PA_ENABLED 1
+enum {
+  PA_DISABLED=0,
+  PA_ENABLED
+};
 
-#define KEYER_STRAIGHT 0
-#define KEYER_MODE_A 1
-#define KEYER_MODE_B 2
+enum {
+  KEYER_STRAIGHT=0,
+  KEYER_MODE_A,
+  KEYER_MODE_B
+};
 
-#define MIC3P55MM 0
-#define MICXLR 1
+enum {
+  MIC3P55MM=0,
+  MICXLR
+};
+
 enum {
   SAT_NONE,
   SAT_MODE,
@@ -294,6 +301,7 @@ extern int VFO_WIDTH;
 extern int VFO_HEIGHT;
 extern int METER_WIDTH;
 extern int METER_HEIGHT;
+extern int rx_stack_horizontal;
 
 extern void radio_stop(void);
 extern void reconfigure_radio(void);

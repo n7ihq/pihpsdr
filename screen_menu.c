@@ -24,8 +24,23 @@
 
 static GtkWidget *dialog=NULL;
 
-static void cleanup() {
+//
+// Make local copies of METER_WIDTH and rx_stack_horizontal,
+// and copy those back when the menu is closed or the apply()
+// function is called. These values affect the update of the
+// meter and the rx panadapter which are called asynchronously.
+//
+static int my_meter_width;
+static int my_rx_hstack;
+
+static void apply() {
+  METER_WIDTH=my_meter_width;
+  rx_stack_horizontal=my_rx_hstack;
   reconfigure_screen();
+}
+
+static void cleanup() {
+  apply();
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -44,7 +59,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean apply_cb(GtkWidget *widget, gpointer data) {
-  reconfigure_screen();
+  apply();
   return TRUE;
 }
 
@@ -53,7 +68,7 @@ static void vfo_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void meter_cb(GtkWidget *widget, gpointer data) {
-  METER_WIDTH=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  my_meter_width=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
 static void width_cb(GtkWidget *widget, gpointer data) {
@@ -66,10 +81,17 @@ static void height_cb(GtkWidget *widget, gpointer data) {
   gtk_widget_set_size_request(top_window, display_width, display_height);
 }   
 
+static void horizontal_cb(GtkWidget *widget, gpointer data) {
+  my_rx_hstack=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 void screen_menu(GtkWidget *parent) {
 
   GtkWidget *label;
   GtkWidget *button;
+
+  my_rx_hstack=rx_stack_horizontal;
+  my_meter_width=METER_WIDTH;
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
@@ -140,11 +162,19 @@ void screen_menu(GtkWidget *parent) {
   col++;
 
   button=gtk_spin_button_new_with_range(100.0, 250.0, 25.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) METER_WIDTH);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) my_meter_width);
   gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
   g_signal_connect(button,"value-changed", G_CALLBACK(meter_cb), NULL);
   row++;
  
+  col=0;
+  button=gtk_check_button_new_with_label("Stack receivers horizontally");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), my_rx_hstack);
+  gtk_grid_attach(GTK_GRID(grid),button,col,row,2,1);
+  g_signal_connect(button,"toggled",G_CALLBACK(horizontal_cb),NULL);
+  row++;
+
+
   button=gtk_button_new_with_label("Apply");
   g_signal_connect(button, "pressed", G_CALLBACK(apply_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), button, 5, row, 1, 1);

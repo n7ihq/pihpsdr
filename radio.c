@@ -93,8 +93,7 @@ int METER_WIDTH=200;
 int ZOOMPAN_HEIGHT=50;
 int SLIDERS_HEIGHT=100;
 int TOOLBAR_HEIGHT=30;
-int PANADAPTER_HEIGHT=105;
-int WATERFALL_HEIGHT=105;
+int rx_stack_horizontal=0;
 
 gint controller=NO_CONTROLLER;
 
@@ -110,12 +109,6 @@ static GtkWidget *toolbar;
 // RX and TX calibration
 long long frequency_calibration=0LL;
 
-/*
-#ifdef GPIO
-static GtkWidget *encoders;
-static cairo_surface_t *encoders_surface = NULL;
-#endif
-*/
 gint sat_mode;
 
 int region=REGION_OTHER;
@@ -379,8 +372,11 @@ t_print("radio_stop: RX1: CloseChannel: %d\n",receiver[1]->id);
 }
 
 void reconfigure_screen() {
+  const VFO_BAR_LAYOUT *vfl;
   //
   // Re-configure the piHPSDR screen after dimensions have changed
+  // Start with removing the toolbar, the slider area and the zoom/pan area
+  // (these will be re-constructed in due course)
   // 
   if (toolbar) {
     gtk_container_remove(GTK_CONTAINER(fixed), toolbar);
@@ -394,26 +390,56 @@ void reconfigure_screen() {
     gtk_container_remove(GTK_CONTAINER(fixed), zoompan);
     zoompan=NULL;
   }
+  //
+  // Calculate the width of the VFO bar from the meter width,
+  // and the height of the Hide/Menu buttons and the meter height from the vfo height
+  //
   VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
   MENU_HEIGHT=VFO_HEIGHT/2;
   METER_HEIGHT=VFO_HEIGHT;
   t_print("%s: meter width=%d vfo width=%d vfo height=%d\n",
               __FUNCTION__,METER_WIDTH, VFO_WIDTH, VFO_HEIGHT);
+  //
+  // Determine the largest layouts that fit, and choose those
+  //
+  vfl=vfo_layout_list;
+  for (;;) {
+    if (vfl->width < 0) {
+      vfl--;
+      break;
+    }
+    if (vfl->width <= VFO_WIDTH && vfl->height <= VFO_HEIGHT) break;
+    vfl++;
+  }
+  vfo_layout=vfl;
+
+  //
+  // Change sizes of main window, Hide and Menu buttons, meter, and vfo
+  //
+  gtk_widget_set_size_request(top_window, display_width, display_height);
   gtk_widget_set_size_request(hide_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(menu_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(meter,  METER_WIDTH, METER_HEIGHT);
   gtk_widget_set_size_request(vfo_panel, VFO_WIDTH, VFO_HEIGHT);
+
+  //
+  // Move Hide and Menu buttons, meter to new position
+  //
   gtk_fixed_move(GTK_FIXED(fixed),hide_b,VFO_WIDTH+METER_WIDTH,0);
   gtk_fixed_move(GTK_FIXED(fixed),menu_b,VFO_WIDTH+METER_WIDTH,MENU_HEIGHT);
   gtk_fixed_move(GTK_FIXED(fixed),meter,VFO_WIDTH, 0);
-  for (int i=0; i<RECEIVERS; i++) {
-    RECEIVER *rx=receiver[i];
-    double zoom=(double)rx->zoom;
-    rx->width=display_width;
-    receiver_change_zoom(rx, zoom);
-  }
+
+  //
+  // Adjust position of the TX panel.
+  // This must even be done in duplex mode, if we switch back
+  // to non-duplex in the future.
+  //
   transmitter->x=0;
   transmitter->y=VFO_HEIGHT;
+
+  //
+  // This re-creates all the panels and the Toolbar/Slider/Zoom area
+  //
   reconfigure_radio();
 }
 
@@ -433,12 +459,31 @@ void reconfigure_radio() {
   }
 
   y=VFO_HEIGHT;
-  for(i=0;i<receivers;i++) {
-    reconfigure_receiver(receiver[i],rx_height/receivers);
-    gtk_fixed_move(GTK_FIXED(fixed),receiver[i]->panel,0,y);
-    receiver[i]->x=0;
-    receiver[i]->y=y;
-    y+=rx_height/receivers;
+  // if there is only one receiver, both cases here do the same.
+  if (rx_stack_horizontal) {
+    int x=0;
+    for (i=0; i<receivers; i++) {
+      RECEIVER *rx=receiver[i];
+      rx->width=display_width/receivers;
+      receiver_update_zoom(rx);
+      reconfigure_receiver(rx,rx_height);
+      gtk_fixed_move(GTK_FIXED(fixed),rx->panel,x,y);
+      rx->x=x;
+      rx->y=y;
+      x=x+display_width/receivers;
+    }
+    y+=rx_height;
+  } else {
+    for(i=0;i<receivers;i++) {
+      RECEIVER *rx=receiver[i];
+      rx->width=display_width;
+      receiver_update_zoom(rx);
+      reconfigure_receiver(rx,rx_height/receivers);
+      gtk_fixed_move(GTK_FIXED(fixed),rx->panel,0,y);
+      rx->x=0;
+      rx->y=y;
+      y+=rx_height/receivers;
+    }
   }
 
   if(display_zoompan) {
@@ -561,10 +606,6 @@ static void create_visual() {
   g_object_ref(topgrid);  // so it does not get deleted
   gtk_container_remove(GTK_CONTAINER(top_window),topgrid);
   gtk_container_add(GTK_CONTAINER(top_window), fixed);
-
-  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
-  MENU_HEIGHT=VFO_HEIGHT/2;
-  METER_HEIGHT=VFO_HEIGHT;
 
 //t_print("radio: vfo_init\n");
   vfo_panel = vfo_init(VFO_WIDTH,VFO_HEIGHT);
@@ -805,10 +846,22 @@ void start_radio() {
   // The setting can be changed in the RADIO menu and is stored in the
   // props file, so will be restored therefrom as well.
   //
+
   optimize_for_touchscreen=1;
 #ifndef ANDROMEDA
   if (controller == NO_CONTROLLER) optimize_for_touchscreen=0;
 #endif
+
+  //
+  // If the program is compiled for a larger default screen
+  // increase the VFO height to have space for the larger
+  // VFO bar layouts.
+  //
+  if (display_width > 1020) {
+    VFO_HEIGHT=84;
+  } else if (display_width > 890) {
+    VFO_HEIGHT=72;
+  }
 
   protocol=radio->protocol;
   device=radio->device;
@@ -1293,13 +1346,29 @@ void start_radio() {
 //
 // Sanity Check #2: enable diversity only if there are two RX and two ADCs
 //
-   if (RECEIVERS < 2 || n_adc < 2) {
-     diversity_enabled=0;
-   }
+  if (RECEIVERS < 2 || n_adc < 2) {
+    diversity_enabled=0;
+  }
+//
+// Sanity Check #3: check display size
+//
+  if (full_screen) {
+    display_width = screen_width;
+    display_height = screen_height;
+  } else {
+    if (display_width > screen_width) {
+      display_width = screen_width;
+      VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
+    }
+    if (display_height > screen_height) display_height = screen_height;
+  }
+  MENU_HEIGHT=VFO_HEIGHT/2;
+  METER_HEIGHT=VFO_HEIGHT;
 
   radio_change_region(region);
 
   create_visual();
+  reconfigure_screen();
 
   // save every 30 seconds
   // save_timer_id=gdk_threads_add_timeout(30000, save_cb, NULL);
@@ -2123,6 +2192,23 @@ t_print("radioRestoreState: %s\n",property_path);
   value=getProperty("display_toolbar");
   if(value) display_toolbar=atoi(value);
 
+  value=getProperty("display_width");
+  if (value) display_width=atoi(value);
+  value=getProperty("display_height");
+  if (value) display_height=atoi(value);
+  value=getProperty("VFO_HEIGHT");
+  if (value) VFO_HEIGHT=atoi(value);
+  value=getProperty("METER_WIDTH");
+  if (value) METER_WIDTH=atoi(value);
+  value=getProperty("rx_stack_horizontal");
+  if (value) rx_stack_horizontal=atoi(value);
+
+//
+// TODO: I think some further options related to the GUI
+// (such as "optimize for touch screen") should be moved up
+// here, since they affect the local client
+//
+
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
   } else {
@@ -2514,6 +2600,22 @@ t_print("radioSaveState: %s\n",property_path);
   sprintf(value,"%d",hide_status ? old_tool : display_toolbar);
   setProperty("display_toolbar",value);
 
+  sprintf(value, "%d", display_width);
+  setProperty("display_width", value);
+  sprintf(value, "%d", display_height);
+  setProperty("display_height", value);
+  sprintf(value, "%d", VFO_HEIGHT);
+  setProperty("VFO_HEIGHT", value);
+  sprintf(value, "%d", METER_WIDTH);
+  setProperty("METER_WIDTH", value);
+  sprintf(value,"%d", rx_stack_horizontal);
+  setProperty("rx_stack_horizontal", value);
+
+//
+// TODO: I think some further options related to the GUI
+// (such as "optimize for touch screen") should be moved up
+// here, since they affect the local client
+//
 #ifdef CLIENT_SERVER
   if(!radio_is_remote) {
 #endif
@@ -2932,6 +3034,12 @@ int remote_start(void *data) {
   char *server=(char *)data;
   sprintf(property_path,"%s@%s.props",radio->name,server);
   radio_is_remote=TRUE;
+
+  optimize_for_touchscreen=1;
+#ifndef ANDROMEDA
+  if (controller == NO_CONTROLLER) optimize_for_touchscreen=0;
+#endif
+
   switch(controller) {
     case CONTROLLER2_V1:
     case CONTROLLER2_V2:
@@ -2950,7 +3058,23 @@ int remote_start(void *data) {
   PS_RX_FEEDBACK=2;
   PS_TX_FEEDBACK=2;
   radioRestoreState();
+//
+// Sanity Check #3: check display size
+//
+  if (full_screen) {
+    display_width = screen_width;
+    display_height = screen_height;
+  } else {
+    if (display_width > screen_width) {
+      display_width = screen_width;
+      VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
+    }
+    if (display_height > screen_height) display_height = screen_height;
+  }
+  MENU_HEIGHT=VFO_HEIGHT/2;
+  METER_HEIGHT=VFO_HEIGHT;
   create_visual();
+  reconfigure_screen();
   if (can_transmit) {
     if(transmitter->local_microphone) {
       if(audio_open_input()!=0) {
