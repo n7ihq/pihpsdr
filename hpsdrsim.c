@@ -100,8 +100,6 @@ static int              pwmmax = 0;
 static int              adc2bpf = 0;
 static int              anan7kps = 0;
 static int              anan7kxvtr = 0;
-static int              dash = 0;
-static int              dot  = 0;
 static int              rx_att[2] = {-1,-1};
 static int              rx1_attE = -1;
 static int              rx_preamp[4] = {-1,-1,-1,-1};
@@ -198,18 +196,15 @@ static int    do_tone;
 int main(int argc, char *argv[])
 {
         int i, j, size;
-        struct sched_param param;
-        pthread_attr_t attr;
         pthread_t thread;
 
         uint8_t id[4] = { 0xef, 0xfe, 1, 6 };
         uint32_t code;
-        int16_t  sample,l,r;
+        int16_t sample;
 
         struct sockaddr_in addr_udp;
         uint8_t buffer[1032];
         struct timeval tv;
-        struct timespec ts;
         int yes = 1;
         uint8_t *bp;
         unsigned long checksum;
@@ -223,8 +218,6 @@ int main(int argc, char *argv[])
         int udp_retries=0;
         int bytes_read, bytes_left;
         uint32_t *code0 = (uint32_t *) buffer;  // fast access to code of first buffer
-        int fd;
-        long cnt;
         double run,off,inc;
 
 /*
@@ -843,7 +836,6 @@ int main(int argc, char *argv[])
                                 if (bytes_read == 64 && buffer[0] == 0xEF && buffer[1] == 0xFE && buffer[2] == 0x03 && buffer[3] == 0x02) {
                                   printf("OldProtocol Erase packet received:\n");
                                   sleep(1);
-                                  cnt=0;
                                   memset(buffer, 0, 60);
                                   buffer[0]=0xEF;
                                   buffer[1]=0xFE;
@@ -1021,9 +1013,7 @@ int main(int argc, char *argv[])
 void process_ep2(uint8_t *frame)
 {
 
-        uint16_t data;
         int rc;
-        int mod_ptt;
         int mod;
 
         chk_data(frame[0] & 1, ptt, "PTT");
@@ -1229,8 +1219,6 @@ void process_ep2(uint8_t *frame)
 
         case 24:
         case 25:
-           data = frame[1];
-           data |= frame[2] << 8;
            chk_data((frame[2] << 8) | frame[1], c25_ext_board_i2c_data, "C25 EXT BOARD DATA");
            break;
 
@@ -1310,7 +1298,7 @@ void process_ep2(uint8_t *frame)
 void *handler_ep6(void *arg)
 {
         int i, j, k, n, size;
-        int data_offset, header_offset;
+        int header_offset;
         uint32_t counter;
         uint8_t buffer[1032];
         uint8_t *pointer;
@@ -1329,14 +1317,12 @@ void *handler_ep6(void *arg)
         int32_t dacisample,dacqsample;
 
         int32_t myisample,myqsample;
-        int16_t ssample;
 
         struct timespec delay;
         long wait;
         int noiseIQpt,divpt,rxptr;
         double i1,q1,fac1,fac2,fac3,fac4;
         unsigned int seed;
-        unsigned int tx_fifo_count;
         int decimation;
 
         seed=((uintptr_t) &seed) & 0xffffff;
@@ -1365,7 +1351,6 @@ void *handler_ep6(void *arg)
                 wait = (2*n*1000000L) / (48 << rate);
 
                 // plug in sequence numbers
-                data_offset = 0;
                 *(uint32_t *)(buffer + 4) = htonl(counter);
                 ++counter;
 

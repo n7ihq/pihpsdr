@@ -45,8 +45,6 @@ static int hwtim = 0;
 static int pa_enable = 0;
 static int alex0_enable = 0;
 static int alex1_enable = 0;
-static int mm_port = 0;
-static int smm_port = 0;
 static int iqform = 0;
 
 // data from rx specific packet
@@ -784,10 +782,7 @@ void *rx_thread(void *data) {
   unsigned long seqnum;
   unsigned char buffer[1444];
   int yes = 1;
-  int rc;
-  int ddc;
   int i;
-  unsigned long time;
   long wait;
   double i0sample,q0sample;
   double i1sample,q1sample;
@@ -797,7 +792,6 @@ void *rx_thread(void *data) {
   unsigned char *p;
   int noisept;
   int myddc;
-  long myrate;
   int sync,size;
   int myadc, syncadc;
   int rxptr;
@@ -1018,7 +1012,6 @@ void *tx_thread(void * data) {
   int rc;
   int i;
   unsigned char *p;
-  int noisept;
   int sample;
   double di,dq;
   double sum;
@@ -1107,7 +1100,6 @@ void *send_highprio_thread(void *data) {
   unsigned char buffer[60];
   int yes = 1;
   int rc;
-  int i;
   unsigned char *p;
 
 
@@ -1181,9 +1173,6 @@ void *audio_thread(void *data) {
   unsigned char buffer[260];
   int yes = 1;
   int rc;
-  int i;
-  unsigned char *p;
-  int16_t lsample,rsample;
   struct timeval tv;
 
   sock=socket(AF_INET, SOCK_DGRAM, 0);
@@ -1243,8 +1232,6 @@ void *mic_thread(void *data) {
   unsigned char buffer[132];
   unsigned char *p;
   int yes = 1;
-  int rc;
-  int i;
   struct timespec delay;
 
 
