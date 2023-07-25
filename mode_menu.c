@@ -57,7 +57,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-static gboolean mode_select_cb (GtkWidget *widget, gpointer        data) {
+static gboolean mode_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int m=GPOINTER_TO_UINT(data);
   set_button_text_color(last_mode,"default");
   last_mode=widget;
@@ -87,7 +87,7 @@ void mode_menu(GtkWidget *parent) {
   gtk_grid_set_row_spacing (GTK_GRID(grid),5);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   int mode=vfo[active_receiver->id].mode;
@@ -102,7 +102,7 @@ void mode_menu(GtkWidget *parent) {
     }
     gtk_widget_show(b);
     gtk_grid_attach(GTK_GRID(grid),b,i%5,1+(i/5),1,1);
-    g_signal_connect(b,"pressed",G_CALLBACK(mode_select_cb),(gpointer)(long)i);
+    g_signal_connect(b,"button-press-event",G_CALLBACK(mode_select_cb),(gpointer)(long)i);
   }
   gtk_container_add(GTK_CONTAINER(content),grid);
 

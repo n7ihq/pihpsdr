@@ -53,7 +53,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
+static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
    int ind = GPOINTER_TO_INT(data);
    t_print("STORE BUTTON PUSHED=%d\n",ind);
    char workstr[40];
@@ -67,7 +67,7 @@ static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
 }
 
 
-static gboolean recall_select_cb (GtkWidget *widget, gpointer data) {
+static gboolean recall_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
     int ind = GPOINTER_TO_INT(data);
     recall_memory_slot(ind);
     return FALSE;
@@ -94,19 +94,19 @@ void store_menu(GtkWidget *parent) {
   gtk_grid_set_row_spacing (GTK_GRID(grid),5);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   for(i=0;i<NUM_OF_MEMORYS;i++) {
      sprintf(label_str,"Store M%d",i);
      b=gtk_button_new_with_label(label_str);
-     g_signal_connect(b,"pressed",G_CALLBACK(store_select_cb),(gpointer)(long)i);
+     g_signal_connect(b,"button-press-event",G_CALLBACK(store_select_cb),(gpointer)(long)i);
      gtk_grid_attach(GTK_GRID(grid),b,2,i,1,1);
 
      sprintf(label_str,"M%d=%8.6f MHz",i,((double) mem[i].frequency)/1000000.0);
      b=gtk_button_new_with_label(label_str);
      store_button[i]= b;
-     g_signal_connect(b,"pressed",G_CALLBACK(recall_select_cb),(gpointer)(long)i);
+     g_signal_connect(b,"button-press-event",G_CALLBACK(recall_select_cb),(gpointer)(long)i);
      gtk_grid_attach(GTK_GRID(grid),b,3,i,1,1);
   }
 

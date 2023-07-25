@@ -30,6 +30,7 @@
 #include "new_protocol.h"
 #include "vfo.h"
 #include "ext.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 static GtkWidget *feedback_l;
@@ -73,6 +74,7 @@ extern void SetPSPinMode (int channel, int pin);
 
 
 static int running=0;
+static guint info_timer=0;
 
 #define INFO_SIZE 16
 
@@ -80,7 +82,10 @@ static GtkWidget *entry[INFO_SIZE];
 
 static void cleanup() {
   running=0;
-  // wait for one instance of info_thread to complete
+  if (info_timer > 0) {
+    g_source_remove(info_timer);
+    info_timer=0;
+  }
   usleep(200000);
 
   if(transmitter->twotone) {
@@ -91,6 +96,12 @@ static void cleanup() {
     dialog=NULL;
     sub_menu=NULL;
   }
+}
+
+// need this because delete-event callbacks are different from button-press-event callbacks
+static gboolean delete_cb(GtkWidget* self, GdkEvent* event, gpointer user_data) {
+  cleanup();
+  return FALSE;
 }
 
 static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -121,94 +132,93 @@ static void setpk_cb(GtkWidget *widget, gpointer data) {
 // must be a state machine
 //
 static int info_thread(gpointer arg) {
-  static int info[INFO_SIZE];
-  int i;
+  int info[INFO_SIZE];
+  int newcal, newcorr;
   gchar label[20];
-  static int old5=0;
-  static int old14=0;
+  static int old5=0;  // used to detect a new calibration attempt
+  static int old14=0; // used to detect change of "Correcting" status
 
-  if (!running) return FALSE;
+  if (!running) {
+     return FALSE;
+  }
 
     GetPSInfo(transmitter->id,&info[0]);
-    for(i=0;i<INFO_SIZE;i++) {
-      int display=1;
+    //
+    // Set newcal if we have new feedbk info
+    // Set newcorr if "Correcting" status changed
+    //
+    newcal=0;
+    newcorr=0;
+    if (info[5] !=  old5) {
+      old5=info[5];
+      newcal=1;
+    }
+    if (info[14] != old14) {
+      old14=info[14];
+      newcorr=1;
+    }
+    if(newcal) {
+      if(info[4]>181)  {
+        gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='blue'>Feedback Lvl</span>");
+      } else if(info[4]>128)  {
+        gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='green'>Feedback Lvl</span>");
+      } else if(info[4]>90)  {
+        gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='yellow'>Feedback Lvl</span>");
+      } else {
+        gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='red'>Feedback Lvl</span>");
+      }
+    }
+    if(newcorr) {
+      if(info[14]==0) {
+        gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='red'>Correcting</span>");
+      } else {
+        gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='green'>Correcting</span>");
+      }
+    }
+    //
+    // Print PS status into the text boxes (if they exist)
+    //
+    for (int i=0; i<INFO_SIZE; i++) {
+      if (entry[i] == NULL) continue;
       sprintf(label,"%d",info[i]);
-      switch(i) {
-        case 4:
-          break;
-        case 5:
-          if(info[i]!=old5) {
-            old5=info[5];
-            if(info[4]>181)  {
-              gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='blue'>Feedback Lvl</span>");
-            } else if(info[4]>128)  {
-              gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='green'>Feedback Lvl</span>");
-            } else if(info[4]>90)  {
-              gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='yellow'>Feedback Lvl</span>");
-            } else {
-              gtk_label_set_markup(GTK_LABEL(feedback_l),"<span color='red'>Feedback Lvl</span>");
-            }
-          }
-          break;
-        case 6:
-          break;
-        case 13:
-          break;
-        case 14:
-          if(info[14]!=old14) {
-            old14=info[14];
-            if(info[14]==0) {
-              gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='red'>Correcting</span>");
-            } else {
-              gtk_label_set_markup(GTK_LABEL(correcting_l),"<span color='green'>Correcting</span>");
-            }
-          }
-          display=0;
-          break;
-        case 15:
-          switch(info[i]) {
-            case 0:
-              strcpy(label,"RESET");
-              break;
-            case 1:
-              strcpy(label,"WAIT");
-              break;
-            case 2:
-              strcpy(label,"MOXDELAY");
-              break;
-            case 3:
-              strcpy(label,"SETUP");
-              break;
-            case 4:
-              strcpy(label,"COLLECT");
-              break;
-            case 5:
-              strcpy(label,"MOXCHECK");
-              break;
-            case 6:
-              strcpy(label,"CALC");
-              break;
-            case 7:
-              strcpy(label,"DELAY");
-              break;
-            case 8:
-              strcpy(label,"STAYON");
-              break;
-            case 9:
-              strcpy(label,"TURNON");
-              break;
-            default:
-              display=0;
-              break;
-          }
-          break;
-        default:
-          display=0;
-          break;
+      //
+      // Translate PS state variable into human-readable string
+      //
+      if (i == 15) {
+        switch(info[15]) {
+          case 0:
+            strcpy(label,"RESET");
+            break;
+          case 1:
+            strcpy(label,"WAIT");
+            break;
+          case 2:
+            strcpy(label,"MOXDELAY");
+            break;
+          case 3:
+            strcpy(label,"SETUP");
+            break;
+          case 4:
+            strcpy(label,"COLLECT");
+            break;
+          case 5:
+            strcpy(label,"MOXCHECK");
+            break;
+          case 6:
+            strcpy(label,"CALC");
+            break;
+          case 7:
+            strcpy(label,"DELAY");
+            break;
+          case 8:
+            strcpy(label,"STAYON");
+            break;
+          case 9:
+            strcpy(label,"TURNON");
+            break;
+        }
       }
-      if(display && entry[i] != NULL) {
-          gtk_entry_set_text(GTK_ENTRY(entry[i]),label);
-      }
+      gtk_entry_set_text(GTK_ENTRY(entry[i]),label);
     }
 
     sprintf(label,"%d",transmitter->attenuation);
@@ -221,22 +231,20 @@ static int info_thread(gpointer arg) {
     gtk_entry_set_text(GTK_ENTRY(get_pk),label);
 
     if (transmitter->auto_on) {
-      static int old5_2=0;
       static int state=0;
-      int newcal=info[5]!=old5_2;
-      old5_2=info[5];
       switch(state) {
         case 0:
           //
-          // A value of 175 means 1.2 dB too strong
-          // A value of 132 means 1.2 dB too weak
+          // A value of 165 means 0.7 dB too strong
+          // A value of 140 means 0.7 dB too weak
+          // So everything between 140 and 165 is accepted without changing the attenuation
           //
-          if(newcal && ((info[4]>175 && transmitter->attenuation < tx_att_max) || (info[4]<=132 && transmitter->attenuation>tx_att_min))) {
+          if(newcal && ((info[4]>165 && transmitter->attenuation < tx_att_max) || (info[4]<140 && transmitter->attenuation>tx_att_min))) {
             int delta_att;
             int new_att;
-            if (info[4] > 300) {
+            if (info[4] > 275) {
               // If signal is very strong, increase attenuation by 15 dB
-              // Note the value is limited to about 350 due to ADC clipping/IQ overflow,
+              // Note the value is limited to about 300-350 due to ADC clipping/IQ overflow,
               // so the feedback level might be much stronger than indicated here
               delta_att = 15;
             } else if (info[4] < 25) {
@@ -397,7 +405,7 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect (dialog, "destroy", G_CALLBACK(close_cb), NULL);
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - Pure Signal");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_cb), NULL);
   set_backgnd(dialog);
 
   GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -411,7 +419,7 @@ void ps_menu(GtkWidget *parent) {
   int col=0;
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
   set_button_text_color(close_b, "default");
 
@@ -428,7 +436,7 @@ void ps_menu(GtkWidget *parent) {
   GtkWidget *twotone_b=gtk_button_new_with_label("Two Tone");
   gtk_widget_show(twotone_b);
   gtk_grid_attach(GTK_GRID(grid),twotone_b,col,row,1,1);
-  g_signal_connect(twotone_b,"pressed",G_CALLBACK(twotone_cb),NULL);
+  g_signal_connect(twotone_b,"button-press-event",G_CALLBACK(twotone_cb),NULL);
   set_button_text_color(twotone_b,transmitter->twotone ? "red" : "default");
 
   col++;
@@ -443,14 +451,14 @@ void ps_menu(GtkWidget *parent) {
   GtkWidget *reset_b=gtk_button_new_with_label("OFF");
   gtk_widget_show(reset_b);
   gtk_grid_attach(GTK_GRID(grid),reset_b,col,row,1,1);
-  g_signal_connect(reset_b,"pressed",G_CALLBACK(reset_cb),NULL);
+  g_signal_connect(reset_b,"button-press-event",G_CALLBACK(reset_cb),NULL);
   set_button_text_color(reset_b, "default");
 
   col++;
 
   GtkWidget *resume_b=gtk_button_new_with_label("Restart");
   gtk_grid_attach(GTK_GRID(grid),resume_b,col,row,1,1);
-  g_signal_connect(resume_b,"pressed",G_CALLBACK(resume_cb),NULL);
+  g_signal_connect(resume_b,"button-press-event",G_CALLBACK(resume_cb),NULL);
   set_button_text_color(resume_b, "default");
 
   col++;
@@ -458,7 +466,7 @@ void ps_menu(GtkWidget *parent) {
   GtkWidget *feedback_b=gtk_button_new_with_label("MON");
   gtk_widget_show(feedback_b);
   gtk_grid_attach(GTK_GRID(grid),feedback_b,col,row,1,1);
-  g_signal_connect(feedback_b,"pressed",G_CALLBACK(feedback_cb),NULL);
+  g_signal_connect(feedback_b,"button-press-event",G_CALLBACK(feedback_cb),NULL);
   set_button_text_color(feedback_b,transmitter->feedback ? "red" : "default");
 
   row++;
@@ -604,7 +612,7 @@ void ps_menu(GtkWidget *parent) {
   SetPSLoopDelay(transmitter->id, loopdelay);
 
   running=1;
-  g_timeout_add((guint) 100, info_thread, NULL);
+  info_timer=g_timeout_add((guint) 100, info_thread, NULL);
 
   gtk_widget_show_all(dialog);
 

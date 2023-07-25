@@ -1312,10 +1312,8 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
 void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
   int mode=tx->mode;
-  float cwsample;
-  double mic_sample_double, ramp;
-  int i,j,s;
-  int updown;
+  double mic_sample_double;
+  int i,j;
 
   //
   // silence TX audio if tuning, or when doing CW.
@@ -1332,6 +1330,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
   // shape CW pulses when doing CW and transmitting, else nullify them
   //
   if((mode==modeCWL || mode==modeCWU) && isTransmitting()) {
+    int updown;
     //
     //  RigCtl CW sets the variables cw_key_up and cw_key_down
     //  to the number of samples for the next down/up sequence.
@@ -1363,8 +1362,8 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
     //
     // store the ramp value in cw_shape_buffer, but also use it for shaping the "local"
     // side tone
-    ramp=cwramp48[cw_shape];
-    cwsample=0.00197 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local, cw_keyer_sidetone_frequency);
+    double ramp=cwramp48[cw_shape];
+    float cwsample=0.00197 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local, cw_keyer_sidetone_frequency);
     if(active_receiver->local_audio && cw_keyer_sidetone_volume > 0) cw_audio_write(active_receiver,cwsample);
         cw_shape_buffer48[tx->samples]=ramp;
     //
@@ -1379,7 +1378,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
     // and ends with four times 1.0.
     //
     if (protocol == NEW_PROTOCOL) {
-        s=0;
+        int s=0;
         // cwsample is in the range 0.0 - 0.25. For my Anan-7000, the following scaling
         // produces the same volume as "internal CW".
         if (!cw_keyer_internal || CAT_cw_is_active) s=(int) (cwsample * 65535.0);
@@ -1421,7 +1420,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
         if (ratio % 4 == 0) {
           // simple adaptation from the 192 kHz ramp
           ratio = ratio / 4;
-          s=4*cw_shape;
+          int s=4*cw_shape;
           for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+0];
           for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+1];
           for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+2];
@@ -1437,7 +1436,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
         if (ratio % 4 == 0) {
           // simple adaptation from the 192 kHz ramp
           ratio = ratio / 4;
-          s=4*cw_shape;
+          int s=4*cw_shape;
           for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+3];
           for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+2];
           for (j=0; j<ratio; j++) cw_shape_buffer192[i++]=cwramp192[s+1];

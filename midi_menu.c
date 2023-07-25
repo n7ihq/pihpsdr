@@ -546,7 +546,7 @@ static void load_store() {
   }
 }
 
-static void add_cb(GtkButton *widget,gpointer user_data) {
+static void add_cb(GtkButton *widget, GdkEventButton *event, gpointer user_data) {
 
   gchar *str_type=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(newType));
   const gchar *str_action=gtk_button_get_label(GTK_BUTTON(newAction));
@@ -616,7 +616,7 @@ static void add_cb(GtkButton *widget,gpointer user_data) {
 
 }
 
-static void update_cb(GtkButton *widget,gpointer user_data) {
+static void update_cb(GtkButton *widget, GdkEventButton *event, gpointer user_data) {
   char str_event[16];
   char str_channel[16];
   char str_note[16];
@@ -702,7 +702,7 @@ static void update_cb(GtkButton *widget,gpointer user_data) {
       -1);
 }
 
-static void delete_cb(GtkButton *widget,gpointer user_data) {
+static void delete_cb(GtkButton *widget, GdkEventButton *event, gpointer user_data) {
   struct desc *previous_cmd;
   struct desc *next_cmd;
   GtkTreeIter saved_iter;
@@ -769,7 +769,7 @@ void midi_menu(GtkWidget *parent) {
   col=0;
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect(close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect(close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   col++;
 
@@ -902,17 +902,17 @@ void midi_menu(GtkWidget *parent) {
   col=0;
 
   add_b=gtk_button_new_with_label("Add");
-  g_signal_connect(add_b, "pressed", G_CALLBACK(add_cb),NULL);
+  g_signal_connect(add_b, "button-press-event", G_CALLBACK(add_cb),NULL);
   gtk_grid_attach(GTK_GRID(grid),add_b,col++,row,1,1);
   gtk_widget_set_sensitive(add_b,FALSE);
 
   update_b=gtk_button_new_with_label("Update");
-  g_signal_connect(update_b, "pressed", G_CALLBACK(update_cb),NULL);
+  g_signal_connect(update_b, "button-press-event", G_CALLBACK(update_cb),NULL);
   gtk_grid_attach(GTK_GRID(grid),update_b,col++,row,1,1);
   gtk_widget_set_sensitive(update_b,FALSE);
 
   delete_b=gtk_button_new_with_label("Delete");
-  g_signal_connect(delete_b, "pressed", G_CALLBACK(delete_cb),NULL);
+  g_signal_connect(delete_b, "button-press-event", G_CALLBACK(delete_cb),NULL);
   gtk_grid_attach(GTK_GRID(grid),delete_b,col++,row,1,1);
   gtk_widget_set_sensitive(delete_b,FALSE);
 

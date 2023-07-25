@@ -22,7 +22,7 @@
 #include "receiver.h"
 #include "transmitter.h"
 
-extern gint scale_timer;
+extern guint scale_timer;
 extern gint scale_status;
 extern gint scale_rx;
 extern GtkWidget *scale_dialog;

@@ -34,7 +34,7 @@ static int vox_timeout_cb(gpointer data) {
   // First set vox_timeout to zero indicating no "hanging" timeout
   // then, remove VOX and update display
   //
-  vox_timeout=0;
+  vox_cancel();
   g_idle_add(ext_vox_changed,GINT_TO_POINTER(0));
   g_idle_add(ext_vfo_update,NULL);
   return FALSE;
@@ -67,8 +67,9 @@ void update_vox(TRANSMITTER *tx) {
       // since this may be set with a delay, and we MUST NOT miss
       // a "hanging" timeout. Note that if a time-out fires, vox_timeout
       // is set to zero.
-      if(vox_timeout) {
+      if(vox_timeout >0) {
         g_source_remove(vox_timeout);
+        vox_timeout=0;
       } else {
         //
         // no hanging time-out, assume that we just fired VOX
@@ -89,5 +90,6 @@ void update_vox(TRANSMITTER *tx) {
 void vox_cancel() {
   if(vox_timeout) {
     g_source_remove(vox_timeout);
+    vox_timeout=0;
   }
 }

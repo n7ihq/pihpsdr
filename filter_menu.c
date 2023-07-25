@@ -52,7 +52,7 @@ static void cleanup() {
   }
 }
 
-static gboolean default_cb (GtkWidget *widget, gpointer data) {
+static gboolean default_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int mode=vfo[active_receiver->id].mode;
   int f=GPOINTER_TO_INT(data);
   int low, high;
@@ -106,7 +106,7 @@ int filter_select(void *data) {
   return 0;
 }
 
-static gboolean filter_select_cb (GtkWidget *widget, gpointer        data) {
+static gboolean filter_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   filter_select(data);
   set_button_text_color(last_filter,"default");
   last_filter=widget;
@@ -114,7 +114,7 @@ static gboolean filter_select_cb (GtkWidget *widget, gpointer        data) {
   return FALSE;
 }
 
-static gboolean deviation_select_cb (GtkWidget *widget, gpointer data) {
+static gboolean deviation_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   active_receiver->deviation=GPOINTER_TO_UINT(data);
   transmitter->deviation=GPOINTER_TO_UINT(data);
   set_filter(active_receiver);
@@ -183,7 +183,7 @@ void filter_menu(GtkWidget *parent) {
   gtk_grid_set_row_spacing (GTK_GRID(grid),5);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   FILTER* band_filters=filters[vfo[active_receiver->id].mode];
@@ -201,7 +201,7 @@ void filter_menu(GtkWidget *parent) {
       } else {
         set_button_text_color(b,"default");
       }
-      g_signal_connect(b,"pressed",G_CALLBACK(deviation_select_cb),(gpointer)(long)2500);
+      g_signal_connect(b,"button-press-event",G_CALLBACK(deviation_select_cb),(gpointer)(long)2500);
       gtk_grid_attach(GTK_GRID(grid),b,1,1,1,1);
 
       b=gtk_button_new_with_label("5.0K");
@@ -211,7 +211,7 @@ void filter_menu(GtkWidget *parent) {
       } else {
         set_button_text_color(b,"default");
       }
-      g_signal_connect(b,"pressed",G_CALLBACK(deviation_select_cb),(gpointer)(long)5000);
+      g_signal_connect(b,"button-press-event",G_CALLBACK(deviation_select_cb),(gpointer)(long)5000);
       gtk_grid_attach(GTK_GRID(grid),b,2,1,1,1);
       }
       break;
@@ -226,7 +226,7 @@ void filter_menu(GtkWidget *parent) {
           set_button_text_color(b,"default");
         }
         gtk_grid_attach(GTK_GRID(grid),b,i%5,1+(i/5),1,1);
-        g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
+        g_signal_connect(b,"button-press-event",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
       }
 
       // last 2 are var1 and var2
@@ -242,7 +242,7 @@ void filter_menu(GtkWidget *parent) {
         set_button_text_color(b,"default");
       }
       gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
-      g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
+      g_signal_connect(b,"button-press-event",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
 
       col++;
       //
@@ -269,7 +269,7 @@ void filter_menu(GtkWidget *parent) {
       }
 
       GtkWidget *var1_default_b=gtk_button_new_with_label("Default");
-      g_signal_connect (var1_default_b, "pressed", G_CALLBACK(default_cb), GINT_TO_POINTER(i));
+      g_signal_connect (var1_default_b, "button-press-event", G_CALLBACK(default_cb), GINT_TO_POINTER(i));
       gtk_grid_attach(GTK_GRID(grid),var1_default_b,col,row,1,1);
 
 
@@ -285,7 +285,7 @@ void filter_menu(GtkWidget *parent) {
         set_button_text_color(b,"default");
       }
       gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
-      g_signal_connect(b,"pressed",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
+      g_signal_connect(b,"button-press-event",G_CALLBACK(filter_select_cb),(gpointer)(long)i);
       col++;
 
       var2_spin_low=gtk_spin_button_new_with_range(-8000.0,+8000.0,1.0);
@@ -310,7 +310,7 @@ void filter_menu(GtkWidget *parent) {
       }
 
       GtkWidget *var2_default_b=gtk_button_new_with_label("Default");
-      g_signal_connect (var2_default_b, "pressed", G_CALLBACK(default_cb), GINT_TO_POINTER(i));
+      g_signal_connect (var2_default_b, "button-press-event", G_CALLBACK(default_cb), GINT_TO_POINTER(i));
       gtk_grid_attach(GTK_GRID(grid),var2_default_b,col,row,1,1);
 
       break;

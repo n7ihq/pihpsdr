@@ -197,14 +197,14 @@ ACTION_TABLE ActionTable[] = {
   {ACTIONS,             "NONE",                 "NONE",         TYPE_NONE}
 };
 
-static gint timer=0;
+static guint timer=0;
 static gboolean timer_released;
 
 static int timeout_cb(gpointer data) {
   if(timer_released) {
     g_free(data);
     timer=0;
-    return FALSE;
+    return G_SOURCE_REMOVE;
   }
   // process the action;
   process_action(data);

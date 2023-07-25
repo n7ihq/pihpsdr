@@ -140,7 +140,7 @@ void xvtr_menu(GtkWidget *parent) {
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),FALSE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   GtkWidget *label=gtk_label_new(NULL);

@@ -127,13 +127,13 @@ void tune_update(int state) {
   g_idle_add(ext_vfo_update,NULL);
 }
 
-void switch_pressed_cb(GtkWidget *widget, gpointer data) {
+void switch_pressed_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
 //t_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
   schedule_action(toolbar_switches[i].switch_function, PRESSED, 0);
 }
 
-void switch_released_cb(GtkWidget *widget, gpointer data) {
+void switch_released_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
 //t_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
   schedule_action(toolbar_switches[i].switch_function, RELEASED, 0);
@@ -153,43 +153,43 @@ GtkWidget *toolbar_init(int my_width, int my_height) {
     gtk_grid_set_column_homogeneous(GTK_GRID(toolbar),TRUE);
 
     sim_mox=gtk_button_new_with_label(ActionTable[toolbar_switches[0].switch_function].button_str);
-    g_signal_connect(G_OBJECT(sim_mox),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(0));
+    g_signal_connect(G_OBJECT(sim_mox),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(0));
     gtk_grid_attach(GTK_GRID(toolbar),sim_mox,0,0,4,1);
 
     sim_s1=gtk_button_new_with_label(ActionTable[toolbar_switches[1].switch_function].button_str);
     gtk_widget_set_size_request (sim_s1, button_width, 0);
-    g_signal_connect(G_OBJECT(sim_s1),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(1));
-    g_signal_connect(G_OBJECT(sim_s1),"released",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(1));
+    g_signal_connect(G_OBJECT(sim_s1),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(1));
+    g_signal_connect(G_OBJECT(sim_s1),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(1));
     gtk_grid_attach(GTK_GRID(toolbar),sim_s1,4,0,4,1);
 
     sim_s2=gtk_button_new_with_label(ActionTable[toolbar_switches[2].switch_function].button_str);
     gtk_widget_set_size_request (sim_s2, button_width, 0);
-    g_signal_connect(G_OBJECT(sim_s2),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(2));
-    g_signal_connect(G_OBJECT(sim_s2),"released",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(2));
+    g_signal_connect(G_OBJECT(sim_s2),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(2));
+    g_signal_connect(G_OBJECT(sim_s2),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(2));
     gtk_grid_attach(GTK_GRID(toolbar),sim_s2,8,0,4,1);
 
     sim_s3=gtk_button_new_with_label(ActionTable[toolbar_switches[3].switch_function].button_str);
-    g_signal_connect(G_OBJECT(sim_s3),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(3));
-    g_signal_connect(G_OBJECT(sim_s3),"released",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(3));
+    g_signal_connect(G_OBJECT(sim_s3),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(3));
+    g_signal_connect(G_OBJECT(sim_s3),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(3));
     gtk_grid_attach(GTK_GRID(toolbar),sim_s3,12,0,4,1);
 
     sim_s4=gtk_button_new_with_label(ActionTable[toolbar_switches[4].switch_function].button_str);
-    g_signal_connect(G_OBJECT(sim_s4),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(4));
-    g_signal_connect(G_OBJECT(sim_s4),"released",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(4));
+    g_signal_connect(G_OBJECT(sim_s4),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(4));
+    g_signal_connect(G_OBJECT(sim_s4),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(4));
     gtk_grid_attach(GTK_GRID(toolbar),sim_s4,16,0,4,1);
 
     sim_s5=gtk_button_new_with_label(ActionTable[toolbar_switches[5].switch_function].button_str);
-    g_signal_connect(G_OBJECT(sim_s5),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(5));
-    g_signal_connect(G_OBJECT(sim_s5),"released",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(5));
+    g_signal_connect(G_OBJECT(sim_s5),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(5));
+    g_signal_connect(G_OBJECT(sim_s5),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(5));
     gtk_grid_attach(GTK_GRID(toolbar),sim_s5,20,0,4,1);
 
     sim_s6=gtk_button_new_with_label(ActionTable[toolbar_switches[6].switch_function].button_str);
-    g_signal_connect(G_OBJECT(sim_s6),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(6));
-    g_signal_connect(G_OBJECT(sim_s6),"released",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(6));
+    g_signal_connect(G_OBJECT(sim_s6),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(6));
+    g_signal_connect(G_OBJECT(sim_s6),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(6));
     gtk_grid_attach(GTK_GRID(toolbar),sim_s6,24,0,4,1);
 
     sim_function=gtk_button_new_with_label(ActionTable[toolbar_switches[7].switch_function].button_str);
-    g_signal_connect(G_OBJECT(sim_function),"pressed",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(7));
+    g_signal_connect(G_OBJECT(sim_function),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(7));
     gtk_grid_attach(GTK_GRID(toolbar),sim_function,28,0,4,1);
 
     last_dialog=NULL;

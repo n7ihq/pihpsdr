@@ -90,7 +90,7 @@ static void squelch_enable_cb(GtkWidget *widget, gpointer data) {
   setSquelch(active_receiver);
 }
 
-static gboolean num_pad_cb(GtkWidget *widget, gpointer data) {
+static gboolean num_pad_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int val = GPOINTER_TO_INT(data);
   char output[64];
   num_pad(btn_actions[val],v);
@@ -177,7 +177,7 @@ void vfo_menu(GtkWidget *parent,int id) {
   gtk_grid_set_row_spacing (GTK_GRID(grid),4);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,2,1);
 
   GtkWidget *lock_b=gtk_check_button_new_with_label("Lock VFOs");
@@ -195,7 +195,7 @@ void vfo_menu(GtkWidget *parent,int id) {
     set_button_text_color(btn[i],"default");
     gtk_widget_show(btn[i]);
     gtk_grid_attach(GTK_GRID(grid),btn[i],i%3,2+(i/3),1,1);
-    g_signal_connect(btn[i],"pressed",G_CALLBACK(num_pad_cb),GINT_TO_POINTER(i));
+    g_signal_connect(btn[i],"button-press-event",G_CALLBACK(num_pad_cb),GINT_TO_POINTER(i));
   }
   set_btn_state();
 

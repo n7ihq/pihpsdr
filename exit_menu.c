@@ -67,32 +67,6 @@ static void cleanup() {
   }
 }
 
-#if 0
-//
-// This one is not really working:
-// a) GTK complains when trying to destroy "fixed"
-// b) when stopping the radio, not everything is tidied up such that it can be 
-//    restarted
-//
-// so it is preferable to re-start the piHPSDR application if one wants to switch
-// to another radio.
-//
-static gboolean discovery_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  cleanup();
-  stop_program();
-  t_print("%s: program stopped\n",__FUNCTION__);
-  gtk_widget_hide(fixed);
-  gtk_container_remove(GTK_CONTAINER(top_window), fixed);
-  t_print("%s: container removed\n",__FUNCTION__);
-  gtk_widget_destroy(fixed);
-  t_print("%s: destroy complete\n",__FUNCTION__);
-  gtk_container_add(GTK_CONTAINER(top_window), topgrid);
-  t_print("%s: topgrid added\n",__FUNCTION__);
-  g_timeout_add(100,ext_discovery,NULL);
-  return TRUE;
-}
-#endif
-
 static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
   return TRUE;
@@ -141,34 +115,26 @@ void exit_menu(GtkWidget *parent) {
   int col=0;
 
   GtkWidget *close_b=gtk_button_new_with_label("Cancel");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
 
   row++;
   col=0;
 
-#if 0
-  GtkWidget *discovery_b=gtk_button_new_with_label("Discovery");
-  g_signal_connect (discovery_b, "pressed", G_CALLBACK(discovery_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),discovery_b,col,row,1,1);
-
-  col++;
-#endif
-
   GtkWidget *exit_b=gtk_button_new_with_label("Exit");
-  g_signal_connect (exit_b, "pressed", G_CALLBACK(exit_cb), NULL);
+  g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),exit_b,col,row,1,1);
 
   col++;
 
   GtkWidget *reboot_b=gtk_button_new_with_label("Reboot");
-  g_signal_connect (reboot_b, "pressed", G_CALLBACK(reboot_cb), NULL);
+  g_signal_connect (reboot_b, "button-press-event", G_CALLBACK(reboot_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),reboot_b,col,row,1,1);
 
   col++;
 
   GtkWidget *shutdown_b=gtk_button_new_with_label("Shutdown");
-  g_signal_connect (shutdown_b, "pressed", G_CALLBACK(shutdown_cb), NULL);
+  g_signal_connect (shutdown_b, "button-press-event", G_CALLBACK(shutdown_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),shutdown_b,col,row,1,1);
 
   gtk_container_add(GTK_CONTAINER(content),grid);

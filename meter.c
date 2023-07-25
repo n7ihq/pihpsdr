@@ -122,7 +122,6 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   double rxlvl;   // only used for RX input level, clones "value"
   double pwr;     // only used for TX power, clones "value"
   char sf[32];
-  double offset;
   char *units="W";
   double interval=10.0;
   cairo_t *cr = cairo_create (meter_surface);
@@ -240,7 +239,7 @@ if(analog_meter) {
   switch(meter_type) {
     case SMETER:
       {
-      offset=210.0;
+      double offset=210.0;
 
       int i;
       double x;
@@ -334,7 +333,7 @@ if(analog_meter) {
       break;
     case POWER:
       {
-      offset=220.0;
+      double offset=220.0;
 
       int i;
       double x;
@@ -410,7 +409,7 @@ if(analog_meter) {
   }
 
   if((meter_type==POWER) || (vox_enabled)) {
-    offset=((double)METER_WIDTH-100.0)/2.0;
+    double offset=((double)METER_WIDTH-100.0)/2.0;
     double peak=vox_get_peak();
     peak=peak*100.0;
     cairo_set_source_rgba(cr, COLOUR_OK);

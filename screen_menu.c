@@ -58,7 +58,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-static gboolean apply_cb(GtkWidget *widget, gpointer data) {
+static gboolean apply_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   apply();
   return TRUE;
 }
@@ -112,7 +112,7 @@ void screen_menu(GtkWidget *parent) {
   int col=0;
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
   row++;
 
@@ -176,7 +176,7 @@ void screen_menu(GtkWidget *parent) {
 
 
   button=gtk_button_new_with_label("Apply");
-  g_signal_connect(button, "pressed", G_CALLBACK(apply_cb), NULL);
+  g_signal_connect(button, "button-press-event", G_CALLBACK(apply_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), button, 5, row, 1, 1);
 
 

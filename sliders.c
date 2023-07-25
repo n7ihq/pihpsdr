@@ -56,7 +56,7 @@ static int height;
 
 static GtkWidget *sliders;
 
-gint scale_timer;
+guint scale_timer;
 int scale_status=NO_ACTION;
 int scale_rx=0;
 GtkWidget *scale_dialog;

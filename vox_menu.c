@@ -149,14 +149,14 @@ void vox_menu(GtkWidget *parent) {
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   led=create_led(10,10,&led_color);
   gtk_grid_attach(GTK_GRID(grid),led,2,0,1,1);
 
   GtkWidget *enable_b=gtk_button_new_with_label(vox_enabled==0?"VOX Enable":"VOX Disable");
-  g_signal_connect (enable_b, "pressed", G_CALLBACK(enable_cb), NULL);
+  g_signal_connect (enable_b, "button-press-event", G_CALLBACK(enable_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),enable_b,3,0,1,1);
 
   GtkWidget *level_label=gtk_label_new(NULL);

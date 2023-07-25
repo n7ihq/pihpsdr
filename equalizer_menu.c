@@ -75,7 +75,7 @@ void update_eq() {
 #endif
 }
 
-static gboolean enable_cb (GtkWidget *widget, gpointer data) {
+static void enable_cb (GtkWidget *widget, gpointer data) {
   int i=GPOINTER_TO_INT(data);
   int m;
   if(i != 0) {
@@ -89,23 +89,25 @@ static gboolean enable_cb (GtkWidget *widget, gpointer data) {
   }
   update_eq();
   g_idle_add(ext_vfo_update, NULL);
-  return FALSE;
 }
 
-static void value_changed_cb (GtkWidget *widget, gpointer data) {
+static void rx_changed_cb (GtkWidget *widget, gpointer data) {
   int i=GPOINTER_TO_INT(data);
   int m;
  
-  if (i >= 10) {
-    i-=10;
-    tx_equalizer[i]=(int)gtk_range_get_value(GTK_RANGE(widget));
-    m=vfo[get_tx_vfo()].mode;
-    mode_settings[m].txeq[i]=tx_equalizer[i];
-  } else {
-    rx_equalizer[i]=(int)gtk_range_get_value(GTK_RANGE(widget));
-    m=vfo[active_receiver->id].mode;
-    mode_settings[m].rxeq[i]=rx_equalizer[i];
-  }
+  rx_equalizer[i]=(int)gtk_range_get_value(GTK_RANGE(widget));
+  m=vfo[active_receiver->id].mode;
+  mode_settings[m].rxeq[i]=rx_equalizer[i];
+  update_eq();
+}
+
+static void tx_changed_cb (GtkWidget *widget, gpointer data) {
+  int i=GPOINTER_TO_INT(data);
+  int m;
+
+  tx_equalizer[i]=(int)gtk_range_get_value(GTK_RANGE(widget));
+  m=vfo[get_tx_vfo()].mode;
+  mode_settings[m].txeq[i]=tx_equalizer[i];
   update_eq();
 }
 
@@ -128,7 +130,7 @@ void equalizer_menu(GtkWidget *parent) {
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   label=gtk_label_new(NULL);
@@ -177,13 +179,14 @@ void equalizer_menu(GtkWidget *parent) {
       switch(j) {
         case 0:
           gtk_range_set_value(GTK_RANGE(scale),(double)rx_equalizer[i]);
+          g_signal_connect(scale,"value-changed",G_CALLBACK(rx_changed_cb),GINT_TO_POINTER(i));
           break;
         case 1:
           gtk_range_set_value(GTK_RANGE(scale),(double)tx_equalizer[i]);
+          g_signal_connect(scale,"value-changed",G_CALLBACK(tx_changed_cb),GINT_TO_POINTER(i));
           break;
       }
       gtk_grid_attach(GTK_GRID(grid),scale,1+3*j,i+2,2,1);
-      g_signal_connect(scale,"value-changed",G_CALLBACK(value_changed_cb),GINT_TO_POINTER(i+10*j));
       gtk_scale_add_mark(GTK_SCALE(scale),-12.0,GTK_POS_LEFT,"-12dB");
       gtk_scale_add_mark(GTK_SCALE(scale),-9.0,GTK_POS_LEFT,NULL);
       gtk_scale_add_mark(GTK_SCALE(scale),-6.0,GTK_POS_LEFT,NULL);

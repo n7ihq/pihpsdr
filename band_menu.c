@@ -98,7 +98,7 @@ void band_menu(GtkWidget *parent) {
   gtk_grid_set_row_spacing (GTK_GRID(grid),5);
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
+  g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
 
   long long frequency_min=radio->frequency_min;

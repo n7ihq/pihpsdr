@@ -30,7 +30,6 @@ extern int ext_remote_set_pan(void *data);
 //
 // The following calls functions can be called usig g_idle_add
 //
-extern int ext_discovery(void *data);
 extern int ext_start_radio(void *data);
 extern int ext_vfo_update(void *data);
 extern int ext_sliders_update(void *data);  // is this necessary?

@@ -189,7 +189,10 @@ static int init(void *data) {
       status_text(text);
   }
 
-  g_idle_add(ext_discovery,NULL);
+  //
+  // When widsom plans are complete, start discovery process
+  //
+  g_timeout_add(100,delayed_discovery,NULL);
   return 0;
 }
 

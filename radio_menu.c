@@ -388,7 +388,7 @@ void radio_menu(GtkWidget *parent) {
 
   int col=0;
   int row=0;
-  int temp_row;
+  int max_row;
 
   GtkWidget *close_b=gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
@@ -482,7 +482,7 @@ void radio_menu(GtkWidget *parent) {
   }
 
 
-  temp_row=row;
+  max_row=row;
   col++,
   row=1;
 
@@ -529,7 +529,7 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect(sat_combo,"changed",G_CALLBACK(sat_cb),NULL);
   row++;
 
-  if(row>temp_row) temp_row=row;
+  if(row>max_row) max_row=row;
   col++;
   row=1;
 
@@ -601,7 +601,7 @@ void radio_menu(GtkWidget *parent) {
   }
 #endif
 
-  if(row>temp_row) temp_row=row;
+  if(row>max_row) max_row=row;
 
   //
   // The HPSDR machine-specific stuff is now put in the last column(s),
@@ -685,7 +685,7 @@ void radio_menu(GtkWidget *parent) {
       row++;
     }
 
-    if(row>temp_row) temp_row=row;
+    if(row>max_row) max_row=row;
   }
 
   if(device==NEW_DEVICE_ORION || device==NEW_DEVICE_ORION2 || device==NEW_DEVICE_SATURN ||
@@ -744,10 +744,10 @@ void radio_menu(GtkWidget *parent) {
       g_signal_connect(bias_b,"toggled",G_CALLBACK(bias_cb),NULL);
       row++;
 
-      if(row>temp_row) temp_row=row;
+      if(row>max_row) max_row=row;
   }
 
-  row=temp_row;
+  row=max_row;
   col=0;
   //
   // Insert small separation between top columns and bottom rows
@@ -828,8 +828,8 @@ void radio_menu(GtkWidget *parent) {
   GtkWidget *calibration_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(calibration_label), "<b>Frequency\nCalibration(Hz):</b>");
   gtk_grid_attach(GTK_GRID(grid),calibration_label,col,row,1,1);
-  col++;
 
+  col++;
   GtkWidget *calibration_b=gtk_spin_button_new_with_range(-10000.0,10000.0,1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(calibration_b),(double)frequency_calibration);
   gtk_grid_attach(GTK_GRID(grid),calibration_b,col,row,1,1);
@@ -885,7 +885,7 @@ void radio_menu(GtkWidget *parent) {
     }
 
     row++;
-    temp_row=row;
+    max_row=row;
 
     if(display_gains) {
       //
@@ -910,7 +910,7 @@ void radio_menu(GtkWidget *parent) {
       }
     }
 
-    row=temp_row;
+    row=max_row;
 
     if(can_transmit && display_gains) {
       //

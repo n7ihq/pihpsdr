@@ -19,5 +19,6 @@
 
 extern int  discover_only_stemlab;
 
+extern int delayed_discovery(gpointer data);
 extern void discovery(void);
 extern char *ipaddr_radio;
