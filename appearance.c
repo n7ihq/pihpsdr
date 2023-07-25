@@ -31,7 +31,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] =
   {
    .width=745,
    .height=78,
-   .size1=17,
+   .size1=15,
    .size2=26,
    .size3=40,
    .vfo_a_x=5,
