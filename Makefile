@@ -50,7 +50,7 @@ LINK?=   $(CC)
 # *both* for the compile and the link step.
 #
 CFLAGS+=-pthread
-LINKK+=-pthread
+LINK+=-pthread
 
 PKG_CONFIG = pkg-config
 

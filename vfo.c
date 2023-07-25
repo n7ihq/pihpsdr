@@ -1283,7 +1283,7 @@ void vfo_update() {
           cairo_set_source_rgba(cr, COLOUR_SHADE);
         }
         cairo_set_font_size(cr, vfl->size1);
-        sprintf(temp_text,"Zoom x%d",active_receiver->zoom);
+        sprintf(temp_text,"Zoom:%d",active_receiver->zoom);
         cairo_show_text(cr, temp_text);
 
         if ((protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) && can_transmit) {

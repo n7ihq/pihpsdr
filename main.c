@@ -221,7 +221,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
 
   screen_width=gdk_screen_get_width(screen);
   screen_height=gdk_screen_get_height(screen);
-  t_print("Screen: width=%d height=%d\n", display_width, display_height);
+  t_print("Screen: width=%d height=%d\n", screen_width, screen_height);
 
   display_width=gdk_screen_get_width(screen);
   display_height=gdk_screen_get_height(screen);
