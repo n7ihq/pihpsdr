@@ -79,7 +79,8 @@ static gboolean default_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
   }
 
   //
-  // Determine value(s) for spin button(s)
+  // Determine value(s) for spin button(s), this also emits a signal
+  // that calls the spin button callbacks.
   //
   if (mode == modeCWL || mode == modeCWU) {
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinlow),(double)(high-low));
@@ -143,8 +144,13 @@ static void var_spin_low_cb (GtkWidget *widget, gpointer data) {
     filter->low = val;
   }
   t_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
-  if(f==vfo[id].filter) {
-    vfo_filter_changed(f);
+  //
+  // Change all receivers that use *this* variable filter
+  //
+  for (int i=0; i<receivers; i++) {
+    if (vfo[i].filter == f) {
+      receiver_filter_changed(receiver[i]);
+    }
   }
 }
 
@@ -157,8 +163,13 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
 
   filter->high=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   t_print("%s: new values=(%d:%d)\n", __FUNCTION__,filter->low,filter->high);
-  if(f==vfo[id].filter) {
-    vfo_filter_changed(f);
+  //
+  // Change all receivers that use *this* variable filter
+  //
+  for (int i=0; i<receivers; i++) {
+    if (vfo[i].filter == f) {
+      receiver_filter_changed(receiver[i]);
+    }
   }
 }
 

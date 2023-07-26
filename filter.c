@@ -570,17 +570,18 @@ void filter_cut_default(int id) {
     case filterVar1:
       filter->low =var1_default_low [mode];
       filter->high=var1_default_high[mode];
+      vfo_filter_changed(f);
       break;
     case filterVar2:
       filter->low =var2_default_low [mode];
       filter->high=var2_default_high[mode];
+      vfo_filter_changed(f);
       break;
     default:
       // do nothing
       break;
   }
 t_print("%s: mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,mode,f,filter->low,filter->high);
-  vfo_filter_changed(f);
 }
 //
 // This function is a no-op unless the vfo referenced uses a Var1 or Var2 filter
@@ -596,10 +597,12 @@ void filter_cut_changed(int id, int action, int increment) {
     switch(action) {
       case FILTER_CUT_HIGH:
         filter->high += increment*st;
+        // this *only* displays a scale on the screen
         set_filter_cut_high(id,filter->high);
         break;
       case FILTER_CUT_LOW:
         filter->low += increment*st;
+        // this *only* displays a scale on the screen
         set_filter_cut_low(id,filter->low);
         break;
       default:
@@ -640,6 +643,7 @@ void filter_width_changed(int id,int increment) {
         break;
     }
     vfo_filter_changed(f);
+    // this *only* displays a scale on the screen
     set_filter_width(id,filter->high-filter->low);
 t_print("%s: rx=%d mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,id,vfo[id].mode,vfo[id].filter,filter->low,filter->high);
   }
@@ -659,12 +663,14 @@ void filter_shift_changed(int id,int increment) {
       case modeDIGL:
         filter->low=filter->low+(increment*5);
         filter->high=filter->high+(increment*5);
+        // this *only* displays a scale on the screen
         set_filter_shift(id,filter->high);
         break;
       case modeUSB:
       case modeDIGU:
         filter->low=filter->low+(increment*5);
         filter->high=filter->high+(increment*5);
+        // this *only* displays a scale on the screen
         set_filter_shift(id,filter->low);
         break;
 

@@ -548,8 +548,19 @@ void vfo_filter_changed(int f) {
   mode_settings[vfo[id].mode].filter = f;
 
   vfo[id].filter=f;
-  if (id < receivers) {
-    receiver_filter_changed(receiver[id]);
+  //
+  // If f is either Var1 or Var2, then the changed filter edges
+  // should also apply to the other receiver, if it is running.
+  // Otherwise the filter and rx settings do not coincide.
+  //
+  if (f == filterVar1 || f == filterVar2 ) {
+    for (int i=0; i<receivers; i++) {
+      receiver_filter_changed(receiver[i]);
+    }
+  } else {
+    if (id < receivers) {
+      receiver_filter_changed(receiver[id]);
+    }
   }
 
   g_idle_add(ext_vfo_update,NULL);
