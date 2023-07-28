@@ -604,29 +604,14 @@ int process_action(void *data) {
       break;
     case FUNCTION:
       if(a->mode==PRESSED) {
-        switch(controller) {
-          case NO_CONTROLLER:
-          case CONTROLLER1:
-            function++;
-            if(function>=MAX_FUNCTIONS) {
-              function=0;
-            }
-            toolbar_switches=switches_controller1[function];
-            if (controller == CONTROLLER1) {
-              switches=switches_controller1[function];
-            }
-            update_toolbar_labels();
-            break;
-          case CONTROLLER2_V1:
-          case CONTROLLER2_V2:
-          case G2_FRONTPANEL:
-            function++;
-            if(function>=MAX_FUNCTIONS) {
-              function=0;
-            }
-            toolbar_switches=switches_controller1[function];
-            update_toolbar_labels();
-            break;
+        function++;
+        if(function>=MAX_FUNCTIONS) {
+          function=0;
+        }
+        toolbar_switches=switches_controller1[function];
+        update_toolbar_labels();
+        if (controller == CONTROLLER1) {
+          switches=switches_controller1[function];
         }
       }
       break;
@@ -975,7 +960,7 @@ int process_action(void *data) {
         } else {
           sat_mode=RSAT_MODE;
         }
-        t_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
+        t_print("%s: TODO: report sat mode change upstream\n", __FUNCTION__);
         g_idle_add(ext_vfo_update, NULL);
       }
       break;
@@ -986,7 +971,7 @@ int process_action(void *data) {
         } else {
           sat_mode=SAT_MODE;
         }
-        t_print("%s: TODO: report sat mode chante upstream\n", __FUNCTION__);
+        t_print("%s: TODO: report sat mode change upstream\n", __FUNCTION__);
         g_idle_add(ext_vfo_update, NULL);
       }
       break;

@@ -370,10 +370,6 @@ void receiver_save_state(RECEIVER *rx) {
     setProperty(name,value);
 #endif
 
-    sprintf(name,"receiver.%d.low_latency",rx->id);
-    sprintf(value,"%d",rx->low_latency);
-    setProperty(name,value);
-
     sprintf(name,"receiver.%d.deviation",rx->id);
     sprintf(value,"%d",rx->deviation);
     setProperty(name,value);
@@ -581,10 +577,6 @@ void receiver_restore_state(RECEIVER *rx) {
     value=getProperty(name);
     if(value) rx->nr4_post_filter_threshold=atof(value);
 #endif
-
-    sprintf(name,"receiver.%d.low_latency",rx->id);
-    value=getProperty(name);
-    if(value) rx->low_latency=atoi(value);
 
     sprintf(name,"receiver.%d.deviation",rx->id);
     value=getProperty(name);
@@ -964,7 +956,6 @@ RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,in
 
   rx->sample_rate=sample_rate;
   rx->buffer_size=buffer_size;
-  rx->fft_size=fft_size;
   rx->pixels=0;
   rx->fps=0;
 
@@ -1059,8 +1050,6 @@ RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,in
   rx->audio_device=-1;
   rx->mute_radio=0;
 
-  rx->low_latency=0;
-
   rx->pan=0;
   rx->zoom=1;
 
@@ -1085,8 +1074,8 @@ RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,in
   return rx;
 }
 
-RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int fps, int width, int height) {
-  t_print("%s: RXid=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,id,buffer_size, fft_size, pixels, fps);
+RECEIVER *create_receiver(int id, int buffer_size, int pixels, int fps, int width, int height) {
+  t_print("%s: RXid=%d buffer_size=%d dsp_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,id,buffer_size, dsp_size, fft_size, pixels, fps);
   RECEIVER *rx=malloc(sizeof(RECEIVER));
   double amplitude;
   rx->id=id;
@@ -1123,7 +1112,6 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int
   }
   t_print("%s: RXid=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->buffer_size=buffer_size;
-  rx->fft_size=fft_size;
   rx->fps=fps;
   rx->update_timer_id=-1;
 
@@ -1206,8 +1194,6 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int
   rx->audio_channel=STEREO;
   rx->audio_device=-1;
 
-  rx->low_latency=0;
-
   rx->squelch_enable=0;
   rx->squelch=0;
 
@@ -1243,21 +1229,23 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int
 
   t_print("%s: RXid=%d after restore adc=%d\n",__FUNCTION__,rx->id, rx->adc);
 
-  t_print("%s: OpenChannel RXid=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
+  t_print("%s: OpenChannel RXid=%d buffer_size=%d dsp_size=%d sample_rate=%d\n",
         __FUNCTION__,
         rx->id,
         rx->buffer_size,
-        rx->fft_size,
+        dsp_size,
         rx->sample_rate);
-  OpenChannel(rx->id,
-              rx->buffer_size,
-              rx->fft_size,
-              rx->sample_rate,
-              48000, // dsp rate
-              48000, // output rate
-              0, // receive
-              1, // run
-              0.010, 0.025, 0.0, 0.010, 0);
+
+  OpenChannel(rx->id,                     // channel
+              rx->buffer_size,            // in_size
+              dsp_size,                   // dsp_size
+              rx->sample_rate,            // input_samplerate
+              48000,                      // dsp rate
+              48000,                      // output_samplerate
+              0,                          // type (0=receive)
+              1,                          // state (run)
+              0.010, 0.025, 0.0, 0.010,   // DelayUp, SlewUp, DelayDown, SlewDown
+              1);                         // Wait for data in fexchange0
 
   //
   // NB noise blanker
@@ -1325,8 +1313,8 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int
   SetRXASBNRRun(rx->id, (rx->nr == 4));
 #endif
 
-  RXASetNC(rx->id, rx->fft_size);     // length of all RXA filter impulse responses
-  RXASetMP(rx->id, rx->low_latency);  // Linear phase or low latency
+  RXASetNC(rx->id, fft_size);         // length of all RXA filter impulse responses
+  RXASetMP(rx->id, fft_type);         // Linear phase or low latency
 
   SetRXAAMDSBMode(rx->id, 0);         // use both sidebands in SAM
   SetRXAShiftRun(rx->id, 0);          // Frequency shifter OFF

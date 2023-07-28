@@ -23,10 +23,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wdsp.h>
 
 #include "new_menu.h"
 #include "fft_menu.h"
 #include "radio.h"
+#include "message.h"
 
 static GtkWidget *dialog=NULL;
 
@@ -49,18 +51,23 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void filter_type_cb(GtkToggleButton *widget, gpointer data) {
-  if(gtk_toggle_button_get_active(widget)) {
-    set_filter_type(GPOINTER_TO_UINT(data));
+  fft_type = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  for(int i=0;i<RECEIVERS;i++) {
+    RXASetMP(receiver[i]->id, fft_type);
   }
+  TXASetMP(transmitter->id, fft_type);
+  t_print("WDSP filter type changed to %d\n", fft_type);
 }
 
-#ifdef SET_FILTER_SIZE
-static void filter_size_cb(GtkToggleButton *widget, gpointer data) {
-  if(gtk_toggle_button_get_active(widget)) {
-    set_filter_size((int)data);
-  }
+static void filter_size_cb(GtkWidget *widget, gpointer data) {
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  fft_size = 1 << (val+11);
+  for(int i=0;i<RECEIVERS;i++) {
+     RXASetNC(receiver[i]->id, fft_size);
+   } 
+   TXASetNC(transmitter->id, fft_size);
+   t_print("WDSP filter size changed to %d\n", fft_size);
 }
-#endif
 
 void fft_menu(GtkWidget *parent) {
 
@@ -86,22 +93,13 @@ void fft_menu(GtkWidget *parent) {
   gtk_label_set_markup(GTK_LABEL(filter_type_label), "<b>Filter Type</b>");
   gtk_grid_attach(GTK_GRID(grid),filter_type_label,col,row,1,1);
 
-  row++;
-  col=0;
-
-  GtkWidget *linear_phase=gtk_radio_button_new_with_label(NULL,"Linear Phase");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (linear_phase), receiver[0]->low_latency==0);
-  gtk_grid_attach(GTK_GRID(grid),linear_phase,col,row,1,1);
-  g_signal_connect(linear_phase,"toggled",G_CALLBACK(filter_type_cb),(gpointer)0);
-
   col++;
-
-  GtkWidget *low_latency=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(linear_phase),"Low Latency");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (low_latency), receiver[0]->low_latency==1);
-  gtk_grid_attach(GTK_GRID(grid),low_latency,col,row,1,1);
-  g_signal_connect(low_latency,"toggled",G_CALLBACK(filter_type_cb),(gpointer)1);
-
-#ifdef SET_FILTER_SIZE
+  GtkWidget *filter_type_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_combo), NULL, "Linear Phase");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_combo), NULL, "Low Latency");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(filter_type_combo), fft_type);
+  my_combo_attach(GTK_GRID(grid), filter_type_combo, col, row, 1, 1);
+  g_signal_connect(filter_type_combo,"changed",G_CALLBACK(filter_type_cb), NULL);
 
   row++;
   col=0;
@@ -109,43 +107,32 @@ void fft_menu(GtkWidget *parent) {
   GtkWidget *filter_size_label=gtk_label_new("Filter Size: ");
   gtk_grid_attach(GTK_GRID(grid),filter_size_label,col,row,1,1);
 
-  row++;
-  col=0;
-
-  GtkWidget *filter_1024=gtk_radio_button_new_with_label(NULL,"1024");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_1024), receiver[0]->fft_size==1024);
-  gtk_grid_attach(GTK_GRID(grid),filter_1024,col,row,1,1);
-  g_signal_connect(filter_1024,"toggled",G_CALLBACK(filter_size_cb),(gpointer)1024);
-
   col++;
+  //
+  // We use a fixed "dsp_size" of 2048, so the filter size must be 2048, 4096, 8192, 16384
+  //
+  GtkWidget *filter_size_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "2048");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "4096");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "8192");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "16384");
+  switch (fft_size) {
+    case 2048:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 0);
+      break;
+    case 4096:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 1);
+      break;
+    case 8192:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 2);
+      break;
+    case 16384:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 3);
+      break;
+  }
+  my_combo_attach(GTK_GRID(grid), filter_size_combo, col, row, 1, 1);
+  g_signal_connect(filter_size_combo,"changed",G_CALLBACK(filter_size_cb), NULL);
 
-  GtkWidget *filter_2048=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"2048");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_2048), receiver[0]->fft_size==2048);
-  gtk_grid_attach(GTK_GRID(grid),filter_2048,col,row,1,1);
-  g_signal_connect(filter_2048,"toggled",G_CALLBACK(filter_size_cb),(gpointer)2048);
-
-  col++;
-
-  GtkWidget *filter_4096=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"4096");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_4096), receiver[0]->fft_size==4096);
-  gtk_grid_attach(GTK_GRID(grid),filter_4096,col,row,1,1);
-  g_signal_connect(filter_4096,"toggled",G_CALLBACK(filter_size_cb),(gpointer)4096);
-
-  col++;
-
-  GtkWidget *filter_8192=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"8192");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_8192), receiver[0]->fft_size==8192);
-  gtk_grid_attach(GTK_GRID(grid),filter_8192,col,row,1,1);
-  g_signal_connect(filter_8192,"toggled",G_CALLBACK(filter_size_cb),(gpointer)8192);
-
-  col++;
-
-  GtkWidget *filter_16384=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(filter_1024),"16384");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filter_16384), receiver[0]->fft_size==16384);
-  gtk_grid_attach(GTK_GRID(grid),filter_16384,col,row,1,1);
-  g_signal_connect(filter_16384,"toggled",G_CALLBACK(filter_size_cb),(gpointer)16394);
-
-#endif
   gtk_container_add(GTK_CONTAINER(content),grid);
 
   sub_menu=dialog;

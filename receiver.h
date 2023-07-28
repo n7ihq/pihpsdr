@@ -60,7 +60,6 @@ typedef struct _receiver {
   audio_t audio_channel;
   gint sample_rate;
   gint buffer_size;
-  gint fft_size;
   gint pixels;
   gint samples;
   gint output_samples;
@@ -200,8 +199,6 @@ typedef struct _receiver {
   gint local_audio_buffer_offset;
   GMutex local_audio_mutex;
 
-  gint low_latency;
-
   gint squelch_enable;
   gdouble squelch;
 
@@ -235,7 +232,7 @@ typedef struct _receiver {
 } RECEIVER;
 
 extern RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int pixels);
-extern RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int fps, int width, int height);
+extern RECEIVER *create_receiver(int id, int buffer_size, int pixels, int fps, int width, int height);
 extern void receiver_change_sample_rate(RECEIVER *rx,int sample_rate);
 extern void receiver_change_adc(RECEIVER *rx,int adc);
 extern void receiver_set_frequency(RECEIVER *rx, long long frequency);

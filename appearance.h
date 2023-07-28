@@ -130,6 +130,7 @@
 
 
 struct _VFO_BAR_LAYOUT {
+  const char *description; // Text appearing in the screen menu combobox
   int width;               // overall width required
   int height;              // overall height required
   int size1;               // Font size for the "LED markers"
@@ -160,6 +161,7 @@ struct _VFO_BAR_LAYOUT {
   int split_x, split_y;
   int sat_x,   sat_y;
   int dup_x,   dup_y;
+  int filter_x,filter_y;
 };
 
 typedef struct _VFO_BAR_LAYOUT VFO_BAR_LAYOUT;

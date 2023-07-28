@@ -239,6 +239,9 @@ if(analog_meter) {
   switch(meter_type) {
     case SMETER:
       {
+      //
+      // Analog RX display
+      //
       double offset=210.0;
 
       int i;
@@ -333,6 +336,9 @@ if(analog_meter) {
       break;
     case POWER:
       {
+      //
+      // Analog TX display
+      //
       double offset=220.0;
 
       int i;
@@ -408,6 +414,9 @@ if(analog_meter) {
       break;
   }
 
+  //
+  // Both analog and digital, VOX status
+  //
   if((meter_type==POWER) || (vox_enabled)) {
     double offset=((double)METER_WIDTH-100.0)/2.0;
     double peak=vox_get_peak();
@@ -454,11 +463,13 @@ if(analog_meter) {
   int size;
 
 
-  // Section for the digital meter
-  // clear the meter
   cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
   cairo_paint (cr);
 
+  //
+  // Digital meter, both RX and TX:
+  // Mic level display
+  //
   cairo_select_font_face(cr, DISPLAY_FONT,
                 CAIRO_FONT_SLANT_NORMAL,
                 CAIRO_FONT_WEIGHT_BOLD);
@@ -505,6 +516,9 @@ if(analog_meter) {
   cairo_set_source_rgba(cr, COLOUR_METER);
   switch(meter_type) {
     case SMETER:
+      //
+      // Digital meter, RX
+      //
       // value is dBm
       text_location=10;
 
@@ -513,39 +527,39 @@ if(analog_meter) {
         cairo_set_line_width(cr, PAN_LINE_THICK);
         cairo_set_source_rgba(cr, COLOUR_METER);
         for(i=0;i<54;i++) {
-          cairo_move_to(cr,5+i,METER_HEIGHT-10);
+          cairo_move_to(cr,5+i,Y4-10);
           if(i%18==0) {
-            cairo_line_to(cr,5+i,METER_HEIGHT-20);
+            cairo_line_to(cr,5+i,Y4-20);
           } else if(i%6==0) {
-            cairo_line_to(cr,5+i,METER_HEIGHT-15);
+            cairo_line_to(cr,5+i,Y4-15);
           }
         }
         cairo_stroke(cr);
 
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE1);
-        cairo_move_to(cr, 20, METER_HEIGHT-1);
+        cairo_move_to(cr, 20, Y4);
         cairo_show_text(cr, "3");
-        cairo_move_to(cr, 38, METER_HEIGHT-1);
+        cairo_move_to(cr, 38, Y4);
         cairo_show_text(cr, "6");
 
         cairo_set_source_rgba(cr, COLOUR_ALARM);
-        cairo_move_to(cr,5+ 54,METER_HEIGHT-10);
-        cairo_line_to(cr,5+ 54,METER_HEIGHT-20);
-        cairo_move_to(cr,5+ 74,METER_HEIGHT-10);
-        cairo_line_to(cr,5+ 74,METER_HEIGHT-20);
-        cairo_move_to(cr,5+ 94,METER_HEIGHT-10);
-        cairo_line_to(cr,5+ 94,METER_HEIGHT-20);
-        cairo_move_to(cr,5+114,METER_HEIGHT-10);
-        cairo_line_to(cr,5+114,METER_HEIGHT-20);
+        cairo_move_to(cr,5+ 54,Y4-10);
+        cairo_line_to(cr,5+ 54,Y4-20);
+        cairo_move_to(cr,5+ 74,Y4-10);
+        cairo_line_to(cr,5+ 74,Y4-20);
+        cairo_move_to(cr,5+ 94,Y4-10);
+        cairo_line_to(cr,5+ 94,Y4-20);
+        cairo_move_to(cr,5+114,Y4-10);
+        cairo_line_to(cr,5+114,Y4-20);
         cairo_stroke(cr);
 
-        cairo_move_to(cr, 56, METER_HEIGHT-1);
+        cairo_move_to(cr, 56, Y4);
         cairo_show_text(cr, "9");
-        cairo_move_to(cr, 5+74-12, METER_HEIGHT-1);
+        cairo_move_to(cr, 5+74-12, Y4);
         cairo_show_text(cr, "+20");
-        cairo_move_to(cr, 5+94-9, METER_HEIGHT-1);
+        cairo_move_to(cr, 5+94-9, Y4);
         cairo_show_text(cr, "+40");
-        cairo_move_to(cr, 5+114-6, METER_HEIGHT-1);
+        cairo_move_to(cr, 5+114-6, Y4);
         cairo_show_text(cr, "+60");
 
         // if frequency > 30MHz then -93 is S9
@@ -553,6 +567,10 @@ if(analog_meter) {
         if(vfo[active_receiver->id].frequency>30000000LL) {
           l=max_rxlvl+20.0;
         }
+        //
+        // Restrict bar to S9+60
+        //
+        if (l > -13) l=-13;
 
         // use colours from the "gradient" panadapter display,
         // but use no gradient: S0-S9 first colour, <S9 last colour
@@ -563,7 +581,7 @@ if(analog_meter) {
         cairo_pattern_add_color_stop_rgba(pat,1.00,COLOUR_GRAD4);
         cairo_set_source(cr, pat);
 
-        cairo_rectangle(cr, 5, METER_HEIGHT-40, l+127.0, 20.0);
+        cairo_rectangle(cr, 5, Y2-20, l+127.0, 20.0);
         cairo_fill(cr);
         cairo_pattern_destroy(pat);
 
@@ -572,8 +590,8 @@ if(analog_meter) {
           // Mark right edge of S-meter bar with a line in ATTN colour
           //
           cairo_set_source_rgba(cr, COLOUR_ATTN);
-          cairo_move_to(cr,5+(double)((max_rxlvl+127.0)),(double)METER_HEIGHT-20);
-          cairo_line_to(cr,5+(double)((max_rxlvl+127.0)),(double)(METER_HEIGHT-40));
+          cairo_move_to(cr,5+(double)((max_rxlvl+127.0)),(double)Y2);
+          cairo_line_to(cr,5+(double)((max_rxlvl+127.0)),(double)(Y2-20));
         }
 
 
@@ -588,7 +606,7 @@ if(analog_meter) {
         cairo_set_source_rgba(cr, COLOUR_ATTN);
         cairo_set_font_size(cr, size);
         sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
-        cairo_move_to(cr, text_location, METER_HEIGHT-25);
+        cairo_move_to(cr, text_location, Y2);
         cairo_show_text(cr, sf);
       }
       break;

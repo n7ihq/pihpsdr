@@ -34,7 +34,6 @@ typedef struct _transmitter {
   int mic_dsp_rate;
   int iq_output_rate;
   int buffer_size;
-  int fft_size;
   int pixels;
   int samples;
   int output_samples;
@@ -71,8 +70,6 @@ typedef struct _transmitter {
 
   int out_of_band;
   gint out_of_band_timer_id;
-
-  int low_latency;
 
   int twotone;
   int puresignal;
@@ -120,7 +117,7 @@ typedef struct _transmitter {
 
 } TRANSMITTER;
 
-extern TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, int width, int height);
+extern TRANSMITTER *create_transmitter(int id, int buffer_size, int fps, int width, int height);
 
 void create_dialog(TRANSMITTER *tx);
 void reconfigure_transmitter(TRANSMITTER *tx,int width,int height);

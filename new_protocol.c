@@ -677,7 +677,6 @@ static void new_protocol_high_priority() {
     long long HPFfreq;  // frequency determining the HPF filters
     long long LPFfreq;  // frequency determining the LPF filters
     unsigned long phase;
-    int xmit, txvfo, txmode;
 
     if(data_socket==-1) {
       return;
@@ -686,9 +685,10 @@ static void new_protocol_high_priority() {
     pthread_mutex_lock(&hi_prio_mutex);
     memset(high_priority_buffer_to_radio, 0, sizeof(high_priority_buffer_to_radio));
 
-    xmit    = isTransmitting();
-    txvfo   = get_tx_vfo();
-    txmode  = get_tx_mode();
+    int xmit    = isTransmitting();
+    int txvfo   = get_tx_vfo();
+    int rxvfo   = active_receiver->id;
+    int txmode  = get_tx_mode();
 
     high_priority_buffer_to_radio[0]=high_priority_sequence>>24;
     high_priority_buffer_to_radio[1]=high_priority_sequence>>16;
@@ -716,27 +716,28 @@ static void new_protocol_high_priority() {
 
 //
 //  Set DDC frequencies
+//  If there is only one DDC, rx2Frequency is un-used
 //
 
-    rx1Frequency=vfo[0].frequency-vfo[0].lo;
-    rx2Frequency=vfo[1].frequency-vfo[1].lo;
+    rx1Frequency=vfo[VFO_A].frequency-vfo[VFO_A].lo;
+    rx2Frequency=vfo[VFO_B].frequency-vfo[VFO_B].lo;
 
-    if(vfo[0].rit_enabled) {
-      rx1Frequency+=vfo[0].rit;
+    if(vfo[VFO_A].rit_enabled) {
+      rx1Frequency+=vfo[VFO_A].rit;
     }
-    if(vfo[1].rit_enabled) {
-      rx2Frequency+=vfo[1].rit;
+    if(vfo[VFO_B].rit_enabled) {
+      rx2Frequency+=vfo[VFO_B].rit;
     }
 
     if (cw_is_on_vfo_freq) {
-      if(vfo[0].mode==modeCWU) {
+      if(vfo[VFO_A].mode==modeCWU) {
         rx1Frequency-=(long long)cw_keyer_sidetone_frequency;
-      } else if(vfo[0].mode==modeCWL) {
+      } else if(vfo[VFO_A].mode==modeCWL) {
         rx1Frequency+=(long long)cw_keyer_sidetone_frequency;
       }
-      if(vfo[1].mode==modeCWU) {
+      if(vfo[VFO_B].mode==modeCWU) {
         rx2Frequency-=(long long)cw_keyer_sidetone_frequency;
-      } else if(vfo[1].mode==modeCWL) {
+      } else if(vfo[VFO_B].mode==modeCWL) {
         rx2Frequency+=(long long)cw_keyer_sidetone_frequency;
       }
     }
@@ -764,7 +765,7 @@ static void new_protocol_high_priority() {
         // Set frequencies for all receivers
         //
         // note that for HERMES, receiver[i] is associated with DDC(i) but beyond
-        // (that is, ANGELIA, ORION, ORION2) receiver[i] is associated with DDC(i+2)
+        // (that is, ANGELIA, ORION, ORION2, SATURN) receiver[i] is associated with DDC(i+2)
         int ddc=0;
         if (device==NEW_DEVICE_ANGELIA  || device==NEW_DEVICE_ORION || 
             device == NEW_DEVICE_ORION2 || device==NEW_DEVICE_SATURN) ddc=2;
@@ -846,7 +847,7 @@ static void new_protocol_high_priority() {
         }
       }
     } else {
-      band=band_get_band(vfo[VFO_A].band);
+      band=band_get_band(vfo[rxvfo].band);
       high_priority_buffer_to_radio[1401]=band->OCrx<<1;
     }
 
@@ -870,7 +871,7 @@ static void new_protocol_high_priority() {
 
     if (have_alex_att) {
       //
-      // ANAN7000 and 8000 do not have ALEX attenuators.
+      // ANAN7000/8000 and SATURN do not have ALEX attenuators.
       //
       switch (receiver[0]->alex_attenuation) {
         case 0:
@@ -893,7 +894,7 @@ static void new_protocol_high_priority() {
 //    Do not switch TR relay to "TX" if PA is disabled.
 //    This is necessary because the "PA enable flag" in the GeneralPacket
 //    had no effect in the Orion-II firmware up to 2.1.18
-//    (starting with 2.1.15, it works: thanks to Rick N1GP)
+//    (meanwhile it works: thanks to Rick N1GP)
 //    But we have to keep this "safety belt" for some time.
 //
       if (!band->disablePA  && pa_enabled) {
@@ -945,7 +946,7 @@ static void new_protocol_high_priority() {
           rx2Frequency=rx1Frequency;
         }
 //
-//      new ANAN-7000/8000 "Alex1" band-pass RX filters
+//      new ANAN-7000/8000/G2 "Alex1" band-pass RX filters
 //
         if(rx2Frequency<1500000LL) {
           alex1|=ALEX_ANAN7000_RX_BYPASS_BPF;
@@ -1103,7 +1104,7 @@ static void new_protocol_high_priority() {
     }
 
 //
-//  Now we set the bits for Ant1/2/3 (RX and TX may be different)
+//  Now we set the bits for Ant1/2/3 (may be different for RX/TX)
 //
     if(xmit) {
       i=transmitter->alex_antenna;

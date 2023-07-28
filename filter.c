@@ -29,6 +29,7 @@
 #include "actions.h"
 #include "mode.h"
 #include "message.h"
+#include "ext.h"
 
 //
 // mode-specific defaults for the Var1 and Var2 filters
@@ -581,6 +582,7 @@ void filter_cut_default(int id) {
       // do nothing
       break;
   }
+  g_idle_add(ext_vfo_update, NULL);
 t_print("%s: mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,mode,f,filter->low,filter->high);
 }
 //
@@ -609,6 +611,7 @@ void filter_cut_changed(int id, int action, int increment) {
         break;
     }
     vfo_filter_changed(f);
+    g_idle_add(ext_vfo_update, NULL);
 t_print("%s: rx=%d action=%d, mode=%d filter=%d low=%d high=%d\n", __FUNCTION__,id,action,mode,f,filter->low, filter->high);
   }
 }
@@ -643,6 +646,7 @@ void filter_width_changed(int id,int increment) {
         break;
     }
     vfo_filter_changed(f);
+    g_idle_add(ext_vfo_update, NULL);
     // this *only* displays a scale on the screen
     set_filter_width(id,filter->high-filter->low);
 t_print("%s: rx=%d mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,id,vfo[id].mode,vfo[id].filter,filter->low,filter->high);
@@ -679,6 +683,7 @@ void filter_shift_changed(int id,int increment) {
         break;
     }
     vfo_filter_changed(f),
+    g_idle_add(ext_vfo_update, NULL);
 t_print("%s: rx=%d mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,id,vfo[id].mode,vfo[id].filter,filter->low,filter->high);
   }
 

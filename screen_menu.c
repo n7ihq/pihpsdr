@@ -21,26 +21,24 @@
 #include "radio.h"
 #include "new_menu.h"
 #include "main.h"
+#include "appearance.h"
+#include "message.h"
+
 
 static GtkWidget *dialog=NULL;
-
-//
-// Make local copies of METER_WIDTH and rx_stack_horizontal,
-// and copy those back when the menu is closed or the apply()
-// function is called. These values affect the update of the
-// meter and the rx panadapter which are called asynchronously.
-//
-static int my_meter_width;
-static int my_rx_hstack;
+static GtkWidget *wide_b=NULL;
+static GtkWidget *vfo_b=NULL;
 
 static void apply() {
-  METER_WIDTH=my_meter_width;
-  rx_stack_horizontal=my_rx_hstack;
   reconfigure_screen();
+  //
+  // VFO layout may have been re-adjusted so update combo-box
+  //
+  gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), vfo_layout - vfo_layout_list);
+  
 }
 
 static void cleanup() {
-  apply();
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);
     dialog=NULL;
@@ -58,40 +56,45 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
-static gboolean apply_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  apply();
-  return TRUE;
-}
-
 static void vfo_cb(GtkWidget *widget, gpointer data) {
-  VFO_HEIGHT=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));  
+  vfo_layout=&vfo_layout_list[val];
+  VFO_HEIGHT=vfo_layout->height;
+  int needed=vfo_layout->width + METER_WIDTH + MENU_WIDTH;
+  if (needed % 32 != 0) needed = 32*(needed/32 + 1);
+  if (needed > display_width && wide_b && needed < screen_width) {
+    display_width=needed;
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) needed);
+  }
+  apply();
 }
 
 static void meter_cb(GtkWidget *widget, gpointer data) {
-  my_meter_width=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  METER_WIDTH=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  apply();
 }
 
 static void width_cb(GtkWidget *widget, gpointer data) {
   display_width=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
+  apply();
 }   
 
 static void height_cb(GtkWidget *widget, gpointer data) {
   display_height=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
+  apply();
 }   
 
 static void horizontal_cb(GtkWidget *widget, gpointer data) {
-  my_rx_hstack=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  rx_stack_horizontal=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  apply();
 }
 
 void screen_menu(GtkWidget *parent) {
 
   GtkWidget *label;
   GtkWidget *button;
-
-  my_rx_hstack=rx_stack_horizontal;
-  my_meter_width=METER_WIDTH;
 
   dialog=gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
@@ -123,10 +126,10 @@ void screen_menu(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),label,col,row,1,1);
     col++;
 
-    button=gtk_spin_button_new_with_range(800.0, (double) screen_width, 32.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) display_width);
-    gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
-    g_signal_connect(button,"value-changed", G_CALLBACK(width_cb), NULL);
+    wide_b=gtk_spin_button_new_with_range(800.0, (double) screen_width, 32.0);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) display_width);
+    gtk_grid_attach(GTK_GRID(grid), wide_b, col, row, 1, 1);
+    g_signal_connect(wide_b,"value-changed", G_CALLBACK(width_cb), NULL);
     col++;
 
     label=gtk_label_new(NULL);
@@ -144,41 +147,42 @@ void screen_menu(GtkWidget *parent) {
 
   col=0;
   label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>VFO Height: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
-  gtk_grid_attach(GTK_GRID(grid),label,col,row,1,1);
-  col++;
-
-  button=gtk_spin_button_new_with_range(60.0, 96.0, 12.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) VFO_HEIGHT);
-  gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
-  g_signal_connect(button,"value-changed", G_CALLBACK(vfo_cb), NULL);
-  col++;
-
-  label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(label), "<b>Meter Width: </b>");
   gtk_widget_set_halign(label, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(grid),label,col,row,1,1);
   col++;
 
   button=gtk_spin_button_new_with_range(100.0, 250.0, 25.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) my_meter_width);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) METER_WIDTH);
   gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
   g_signal_connect(button,"value-changed", G_CALLBACK(meter_cb), NULL);
-  row++;
+  row++; 
  
-  col=0;
   button=gtk_check_button_new_with_label("Stack receivers horizontally");
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), my_rx_hstack);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
   gtk_grid_attach(GTK_GRID(grid),button,col,row,2,1);
   g_signal_connect(button,"toggled",G_CALLBACK(horizontal_cb),NULL);
   row++;
 
 
-  button=gtk_button_new_with_label("Apply");
-  g_signal_connect(button, "button-press-event", G_CALLBACK(apply_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid), button, 5, row, 1, 1);
+  col=0;
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>Select VFO bar layout: </b>");
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  gtk_grid_attach(GTK_GRID(grid),label,col,row,1,1);
+  col++;
 
+  vfo_b=gtk_combo_box_text_new();
+  const VFO_BAR_LAYOUT *vfl = vfo_layout_list;
+  for (;;) {
+    if (vfl->width < 0) break;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(vfo_b), NULL, vfl->description);
+    if (vfl == vfo_layout) gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), vfo_layout - vfo_layout_list);
+    vfl++;
+  }
+  // This combo-box spans three columns so the text may be really long
+  gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
+  g_signal_connect(vfo_b,"changed", G_CALLBACK(vfo_cb), NULL);
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

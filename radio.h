@@ -123,6 +123,8 @@ extern gboolean iqswap;
 
 extern int buffer_size;
 extern int fft_size;
+extern int fft_type;
+extern const int dsp_size;
 
 extern int atlas_penelope;
 extern int atlas_clock_source_10mhz;
@@ -301,6 +303,7 @@ extern int VFO_WIDTH;
 extern int VFO_HEIGHT;
 extern int METER_WIDTH;
 extern int METER_HEIGHT;
+extern int MENU_WIDTH;
 extern int rx_stack_horizontal;
 
 extern void radio_stop(void);
@@ -335,9 +338,6 @@ extern void radioRestoreState(void);
 extern void radioSaveState(void);
 
 extern void calculate_display_average(RECEIVER *rx);
-
-extern void set_filter_type(int filter_type);
-extern void set_filter_size(int filter_size);
 
 extern void radio_change_region(int region);
 

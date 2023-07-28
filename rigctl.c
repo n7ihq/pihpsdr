@@ -1345,6 +1345,7 @@ gboolean parse_extended_cmd (const char *command,const CLIENT *client) {
             FILTER *filter=&mode_filters[filterVar1];
             filter->high=fh;
             vfo_filter_changed(filterVar1);
+            g_idle_add(ext_vfo_update, NULL);
           }
           break;
         case 'I': //ZZFI
@@ -1385,6 +1386,7 @@ gboolean parse_extended_cmd (const char *command,const CLIENT *client) {
             FILTER *filter=&mode_filters[filterVar1];
             filter->low=fl;
             vfo_filter_changed(filterVar1);
+            g_idle_add(ext_vfo_update, NULL);
           }
           break;
         case 'M': //ZZFM
@@ -3233,6 +3235,7 @@ int parse_cmd(void *data) {
             }
             if(implemented) {
               vfo_filter_changed(filterVar1);
+              g_idle_add(ext_vfo_update, NULL);
             }
           }
           break;
@@ -3862,6 +3865,7 @@ int parse_cmd(void *data) {
               filter->high=fh;
             }
             vfo_filter_changed(filterVar1);
+            g_idle_add(ext_vfo_update, NULL);
           }
           break;
         case 'I': //SI
@@ -3988,6 +3992,7 @@ int parse_cmd(void *data) {
               filter->low=fl;
             }
             vfo_filter_changed(filterVar1);
+            g_idle_add(ext_vfo_update, NULL);
           }
           break;
         case 'M': //SM

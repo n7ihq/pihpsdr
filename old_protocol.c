@@ -622,11 +622,7 @@ static gpointer receive_thread(gpointer arg) {
               // A sequence error with a seqnum of zero usually indicates a METIS restart
               // and is no error condition
               if (sequence != 0 && sequence != last_seq_num+1) {
-                struct timespec ts;
-                double now;
-                clock_gettime(CLOCK_MONOTONIC, &ts);
-                now=ts.tv_sec + 1E-9*ts.tv_nsec;
-                t_print("SEQ ERROR: T=%0.3f last %ld, recvd %ld\n", now, (long) last_seq_num, (long) sequence);
+                t_print("SEQ ERROR: last %ld, recvd %ld\n", (long) last_seq_num, (long) sequence);
                 sequence_errors++;
               }
               last_seq_num=sequence;
@@ -1322,8 +1318,9 @@ void ozy_send_buffer() {
 
   int txmode=get_tx_mode();
   int txvfo=get_tx_vfo();
+  int rxvfo=active_receiver->id;
   int i;
-  const BAND *rxband=band_get_band(vfo[VFO_A].band);
+  const BAND *rxband=band_get_band(vfo[rxvfo].band);
   const BAND *txband=band_get_band(vfo[txvfo].band);
   int power;
   int num_hpsdr_receivers=how_many_receivers();

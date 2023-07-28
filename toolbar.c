@@ -130,7 +130,14 @@ void tune_update(int state) {
 void switch_pressed_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   gint i=GPOINTER_TO_INT(data);
 //t_print("%s: %d action=%d\n",__FUNCTION__,i,toolbar_switches[i].switch_function);
-  schedule_action(toolbar_switches[i].switch_function, PRESSED, 0);
+  //
+  // A "double click" generates three events, namely
+  // two  "button press"  and then a "2button press" event,
+  // which we have to filter out.
+  //
+  if (event->type == GDK_BUTTON_PRESS) {
+    schedule_action(toolbar_switches[i].switch_function, PRESSED, 0);
+  }
 }
 
 void switch_released_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -154,6 +161,7 @@ GtkWidget *toolbar_init(int my_width, int my_height) {
 
     sim_mox=gtk_button_new_with_label(ActionTable[toolbar_switches[0].switch_function].button_str);
     g_signal_connect(G_OBJECT(sim_mox),"button-press-event",G_CALLBACK(switch_pressed_cb),GINT_TO_POINTER(0));
+    g_signal_connect(G_OBJECT(sim_mox),"button-release-event",G_CALLBACK(switch_released_cb),GINT_TO_POINTER(0));
     gtk_grid_attach(GTK_GRID(toolbar),sim_mox,0,0,4,1);
 
     sim_s1=gtk_button_new_with_label(ActionTable[toolbar_switches[1].switch_function].button_str);

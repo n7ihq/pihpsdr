@@ -137,8 +137,10 @@ int PS_RX_FEEDBACK;
 
 
 
-int buffer_size=1024; // 64, 128, 256, 512, 1024, 2048
-int fft_size=2048; // 1024, 2048, 4096, 8192, 16384
+int buffer_size=1024;        // 64, 128, 256, 512, 1024, 2048
+int fft_size=2048;           // 2048, 4096, 8192, 16384
+int fft_type=0;              // 0, 1
+const int dsp_size=2048;     // not changed
 
 int atlas_penelope=0;  // 0: no TX, 1: Penelope TX, 2: PennyLane TX
 int atlas_clock_source_10mhz=0;
@@ -371,8 +373,49 @@ t_print("radio_stop: RX1: CloseChannel: %d\n",receiver[1]->id);
   }
 }
 
-void reconfigure_screen() {
+static void choose_vfo_layout() {
+  //
+  // a) secure that vfo_layout is a valid pointer
+  // b) secure that the VFO layout width fits
+  //
+  int rc;
   const VFO_BAR_LAYOUT *vfl;
+
+  rc=1;
+  vfl=vfo_layout_list;
+
+  // make sure vfo_layout points to a valid entry in vfo_layout_list
+  for (;;) {
+    if (vfl->width < 0) break;
+    if (vfl == vfo_layout) rc=0;
+    vfl++;
+  }
+  if (rc) {
+    t_print("%s: vfo_layout corrected from %p ==> %p\n", __FUNCTION__, vfo_layout, vfo_layout_list);
+    vfo_layout = vfo_layout_list;
+  }
+    
+  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
+  //
+  // If chosen layout does not fit:
+  // Choose the first largest layout that fits
+  //
+  if (vfo_layout->width > VFO_WIDTH) {
+    vfl=vfo_layout_list;
+    for (;;) {
+      if (vfl->width < 0) {
+        vfl--;
+        break;
+      }
+      if (vfl->width <= VFO_WIDTH) break;
+      vfl++;
+    }
+    vfo_layout=vfl;
+    t_print("%s: vfo_layout changed (width=%d)\n", __FUNCTION__,vfl->width);
+  }
+}
+
+void reconfigure_screen() {
   //
   // Re-configure the piHPSDR screen after dimensions have changed
   // Start with removing the toolbar, the slider area and the zoom/pan area
@@ -390,29 +433,13 @@ void reconfigure_screen() {
     gtk_container_remove(GTK_CONTAINER(fixed), zoompan);
     zoompan=NULL;
   }
-  //
-  // Calculate the width of the VFO bar from the meter width,
-  // and the height of the Hide/Menu buttons and the meter height from the vfo height
-  //
-  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
+  choose_vfo_layout();
+  VFO_HEIGHT=vfo_layout->height;
   MENU_HEIGHT=VFO_HEIGHT/2;
   METER_HEIGHT=VFO_HEIGHT;
-  t_print("%s: meter width=%d vfo width=%d vfo height=%d\n",
-              __FUNCTION__,METER_WIDTH, VFO_WIDTH, VFO_HEIGHT);
-  //
-  // Determine the largest layouts that fit, and choose those
-  //
-  vfl=vfo_layout_list;
-  for (;;) {
-    if (vfl->width < 0) {
-      vfl--;
-      break;
-    }
-    if (vfl->width <= VFO_WIDTH && vfl->height <= VFO_HEIGHT) break;
-    vfl++;
-  }
-  vfo_layout=vfl;
-
+  t_print("%s: display = %dx%d, vfo height = %dx%d, meter width = %d\n",
+           __FUNCTION__,
+           display_width, display_height, VFO_WIDTH, VFO_HEIGHT, METER_WIDTH);
   //
   // Change sizes of main window, Hide and Menu buttons, meter, and vfo
   //
@@ -441,6 +468,7 @@ void reconfigure_screen() {
   // This re-creates all the panels and the Toolbar/Slider/Zoom area
   //
   reconfigure_radio();
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 void reconfigure_radio() {
@@ -652,7 +680,7 @@ static void create_visual() {
       receiver_create_remote(receiver[i]);
     } else {
 #endif
-      receiver[i]=create_receiver(CHANNEL_RX0+i, buffer_size, fft_size, display_width, updates_per_second, display_width, rx_height/RECEIVERS);
+      receiver[i]=create_receiver(CHANNEL_RX0+i, buffer_size, display_width, updates_per_second, display_width, rx_height/RECEIVERS);
       setSquelch(receiver[i]);
 #ifdef CLIENT_SERVER
     }
@@ -694,13 +722,13 @@ if(!radio_is_remote) {
   //t_print("Create transmitter\n");
   if(can_transmit) {
     if(duplex) {
-      transmitter=create_transmitter(CHANNEL_TX, buffer_size, fft_size, updates_per_second, display_width/4, display_height/2);
+      transmitter=create_transmitter(CHANNEL_TX, buffer_size, updates_per_second, display_width/4, display_height/2);
     } else {
       int tx_height=display_height-VFO_HEIGHT;
       if(display_zoompan) tx_height-=ZOOMPAN_HEIGHT;
       if(display_sliders) tx_height-=SLIDERS_HEIGHT;
       if(display_toolbar) tx_height-=TOOLBAR_HEIGHT;
-      transmitter=create_transmitter(CHANNEL_TX, buffer_size, fft_size, updates_per_second, display_width, tx_height);
+      transmitter=create_transmitter(CHANNEL_TX, buffer_size, updates_per_second, display_width, tx_height);
     }
     transmitter->x=0;
     transmitter->y=VFO_HEIGHT;
@@ -851,17 +879,6 @@ void start_radio() {
 #ifndef ANDROMEDA
   if (controller == NO_CONTROLLER) optimize_for_touchscreen=0;
 #endif
-
-  //
-  // If the program is compiled for a larger default screen
-  // increase the VFO height to have space for the larger
-  // VFO bar layouts.
-  //
-  if (display_width > 1020) {
-    VFO_HEIGHT=84;
-  } else if (display_width > 890) {
-    VFO_HEIGHT=72;
-  }
 
   protocol=radio->protocol;
   device=radio->device;
@@ -1362,8 +1379,6 @@ void start_radio() {
     }
     if (display_height > screen_height) display_height = screen_height;
   }
-  MENU_HEIGHT=VFO_HEIGHT/2;
-  METER_HEIGHT=VFO_HEIGHT;
 
   radio_change_region(region);
 
@@ -2022,7 +2037,7 @@ void setSquelch(RECEIVER *rx) {
     case modeAM:
     case modeSAM:
     // My personal experience is that "Voice squelch" is of very
-    // little use  when doing CW
+    // little use  when doing CW (this may apply to "AM squelch", too).
     case modeCWU:
     case modeCWL:
       //
@@ -2196,12 +2211,12 @@ t_print("radioRestoreState: %s\n",property_path);
   if (value) display_width=atoi(value);
   value=getProperty("display_height");
   if (value) display_height=atoi(value);
-  value=getProperty("VFO_HEIGHT");
-  if (value) VFO_HEIGHT=atoi(value);
   value=getProperty("METER_WIDTH");
   if (value) METER_WIDTH=atoi(value);
   value=getProperty("rx_stack_horizontal");
   if (value) rx_stack_horizontal=atoi(value);
+  value=getProperty("vfo_layout");
+  if (value) vfo_layout=&vfo_layout_list[atoi(value)];
 
 //
 // TODO: I think some further options related to the GUI
@@ -2234,6 +2249,8 @@ t_print("radioRestoreState: %s\n",property_path);
     if(value) buffer_size=atoi(value);
     value=getProperty("fft_size");
     if(value) fft_size=atoi(value);
+    value=getProperty("fft_type");
+    if(value) fft_type=atoi(value);
     value=getProperty("atlas_penelope");
     if(value) atlas_penelope=atoi(value);
     value=getProperty("atlas_clock_source_10mhz");
@@ -2604,12 +2621,12 @@ t_print("radioSaveState: %s\n",property_path);
   setProperty("display_width", value);
   sprintf(value, "%d", display_height);
   setProperty("display_height", value);
-  sprintf(value, "%d", VFO_HEIGHT);
-  setProperty("VFO_HEIGHT", value);
   sprintf(value, "%d", METER_WIDTH);
   setProperty("METER_WIDTH", value);
   sprintf(value,"%d", rx_stack_horizontal);
   setProperty("rx_stack_horizontal", value);
+  sprintf(value,"%d", (int) (vfo_layout - vfo_layout_list));
+  setProperty("vfo_layout", value);
 
 //
 // TODO: I think some further options related to the GUI
@@ -2649,6 +2666,8 @@ t_print("radioSaveState: %s\n",property_path);
     setProperty("buffer_size",value);
     sprintf(value,"%d",fft_size);
     setProperty("fft_size",value);
+    sprintf(value,"%d",fft_type);
+    setProperty("fft_type",value);
     sprintf(value,"%d",atlas_penelope);
     setProperty("atlas_penelope",value);
     sprintf(value,"%d",atlas_clock_source_10mhz);
@@ -2978,30 +2997,6 @@ void calculate_display_average(RECEIVER *rx) {
   SetDisplayNumAverage(rx->id, 0, display_average);
 }
 
-void set_filter_type(int filter_type) {
-  int i;
-
-  //t_print("set_filter_type: %d\n",filter_type);
-  for(i=0;i<RECEIVERS;i++) {
-    receiver[i]->low_latency=filter_type;
-    RXASetMP(receiver[i]->id, filter_type);
-  }
-  transmitter->low_latency=filter_type;
-  TXASetMP(transmitter->id, filter_type);
-}
-
-void set_filter_size(int filter_size) {
-  int i;
-
-  //t_print("set_filter_size: %d\n",filter_size);
-  for(i=0;i<RECEIVERS;i++) {
-    receiver[i]->fft_size=filter_size;
-    RXASetNC(receiver[i]->id, filter_size);
-  }
-  transmitter->fft_size=filter_size;
-  TXASetNC(transmitter->id, filter_size);
-}
-
 void radio_change_region(int r) {
   region=r;
   switch (region) {
@@ -3071,8 +3066,6 @@ int remote_start(void *data) {
     }
     if (display_height > screen_height) display_height = screen_height;
   }
-  MENU_HEIGHT=VFO_HEIGHT/2;
-  METER_HEIGHT=VFO_HEIGHT;
   create_visual();
   reconfigure_screen();
   if (can_transmit) {

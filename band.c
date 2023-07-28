@@ -391,7 +391,6 @@ void bandSaveState() {
 
         sprintf(value,"%d",bands[b].alexTxAntenna);
         sprintf(name,"band.%d.alexTxAntenna",b);
-        sprintf(name,"band.%d.alexTxAntenna",b);
         setProperty(name,value);
 
         sprintf(value,"%d",bands[b].alexAttenuation);
@@ -499,7 +498,7 @@ void bandRestoreState() {
         if(value) bands[b].alexTxAntenna=atoi(value);
 
 // fix bug so props file does not have to be deleted
-        if(bands[b].alexTxAntenna>2) bands[b].alexTxAntenna=0;
+        if(bands[b].alexTxAntenna>2 || bands[b].alexTxAntenna<0) bands[b].alexTxAntenna=0;
 
         sprintf(name,"band.%d.alexAttenuation",b);
         value=getProperty(name);

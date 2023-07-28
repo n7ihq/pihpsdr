@@ -200,9 +200,6 @@ void transmitter_save_state(const TRANSMITTER *tx) {
     sprintf(value,"%s",tx->microphone_name);
     setProperty(name,value);
   }
-  sprintf(name,"transmitter.%d.low_latency",tx->id);
-  sprintf(value,"%d",tx->low_latency);
-  setProperty(name,value);
   sprintf(name,"transmitter.%d.puresignal",tx->id);
   sprintf(value,"%d",tx->puresignal);
   setProperty(name,value);
@@ -314,9 +311,6 @@ void transmitter_restore_state(TRANSMITTER *tx) {
     tx->microphone_name=g_new(gchar,strlen(value)+1);
     strcpy(tx->microphone_name,value);
   }
-  sprintf(name,"transmitter.%d.low_latency",tx->id);
-  value=getProperty(name);
-  if(value) tx->low_latency=atoi(value);
   sprintf(name,"transmitter.%d.puresignal",tx->id);
   value=getProperty(name);
   if(value) tx->puresignal=atoi(value);
@@ -518,7 +512,7 @@ static gboolean update_display(gpointer data) {
     //
     switch(device) {
       default:
-        // This include SOAPY (where these numbers are not used)
+        // This includes SOAPY (where these numbers are not used)
         constant1=3.3;
         constant2=0.09;
         rev_cal_offset=3;
@@ -785,14 +779,13 @@ static void create_visual(TRANSMITTER *tx) {
 
 }
 
-TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, int width, int height) {
+TRANSMITTER *create_transmitter(int id, int buffer_size, int fps, int width, int height) {
   int rc;
 
   TRANSMITTER *tx=g_new(TRANSMITTER,1);
   tx->id=id;
   tx->dac=0;
   tx->buffer_size=buffer_size;
-  tx->fft_size=fft_size;
   tx->fps=fps;
 
   switch(protocol) {
@@ -836,8 +829,6 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
   tx->use_rx_filter=FALSE;
 
   tx->out_of_band=0;
-
-  tx->low_latency=0;
 
   tx->twotone=0;
   tx->puresignal=0;
@@ -909,26 +900,28 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
       break;
   }
 
-  t_print("create_transmitter: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d dspRate=%d outputRate=%d\n",
+  t_print("create_transmitter: OpenChannel id=%d buffer_size=%d dsp_size=%d fft_size=%d sample_rate=%d dspRate=%d outputRate=%d\n",
           tx->id,
           tx->buffer_size,
-          2048, // tx->fft_size,
+          dsp_size,
+          fft_size,
           tx->mic_sample_rate,
           tx->mic_dsp_rate,
           tx->iq_output_rate);
 
-  OpenChannel(tx->id,
-              tx->buffer_size,
-              2048, // tx->fft_size,
-              tx->mic_sample_rate,
-              tx->mic_dsp_rate,
-              tx->iq_output_rate,
-              1, // transmit
-              0, // run
-              0.010, 0.025, 0.0, 0.010, 0);
+  OpenChannel(tx->id,                    // channel
+              tx->buffer_size,           // in_size
+              dsp_size,                  // dsp_size
+              tx->mic_sample_rate,       // input_samplerate
+              tx->mic_dsp_rate,          // dsp_rate
+              tx->iq_output_rate,        // output_samplerate
+              1,                         // type (1=transmit)
+              0,                         // state (do not run yet)
+              0.010, 0.025, 0.0, 0.010,  // DelayUp, SlewUp, DelayDown, SlewDown
+              1);                        // Wait for data in fexchange0
 
-  TXASetNC(tx->id, tx->fft_size);
-  TXASetMP(tx->id, tx->low_latency);
+  TXASetNC(tx->id, fft_size);
+  TXASetMP(tx->id, fft_type);
 
 
   SetTXABandpassWindow(tx->id, 1);

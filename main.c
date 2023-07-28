@@ -88,40 +88,106 @@ static void* wisdom_thread(void *arg) {
   return NULL;
 }
 
-//
-// handler for key press events.
-// SpaceBar presses toggle MOX, everything else downstream
-// code to switch mox copied from mox_cb() in toolbar.c,
-// but added the correct return values.
-//
 gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
-   if (radio != NULL) {
-      if (event->keyval == GDK_KEY_space) {
-        if(getTune()==1) {
-          setTune(0);
-        }
-        if(getMox()==1) {
-          setMox(0);
-        } else if(canTransmit() || tx_out_of_band) {
-          setMox(1);
-        } else {
-          transmitter_set_out_of_band(transmitter);
-        }
-        g_idle_add(ext_vfo_update,NULL);
-        return TRUE;
-      }
-      if (event->keyval == GDK_KEY_d ) {
-        vfo_step(-1);
-        return TRUE;
-      }
-      if (event->keyval == GDK_KEY_u ) {
-         vfo_step(1);
-         return TRUE;
-      }
-  }
+   gboolean ret=TRUE;
+   
+   // Ignore key-strokes until radio is ready
+   if (radio == NULL) return FALSE;
 
-  return FALSE;
+   //
+   // Intercept key-strokes. The "keypad" stuff 
+   // has been contributed by Ron.
+   // Everything that is not intercepted is handled downstream.
+   //
+   // space             ==>  MOX
+   // u                 ==>  VFO up
+   // d                 ==>  VFO down
+   // Keypad 0..9       ==>  NUMPAD 0 ... 9
+   // Keypad Divide     ==>  NUMPAD CL
+   // Keypad Subtract   ==>  NUMPAD BS
+   // Keypad Multiply   ==>  NUMPAD Hz
+   // Keypad Add        ==>  NUMPAD kHz
+   // Keypad Enter      ==>  NUMPAD MHz
+   //
+   switch (event->keyval) {
+     case GDK_KEY_space:
+       if(getTune()==1) {
+         setTune(0);
+       }
+       if(getMox()==1) {
+         setMox(0);
+       } else if(canTransmit() || tx_out_of_band) {
+         setMox(1);
+       } else {
+         transmitter_set_out_of_band(transmitter);
+       }
+       break;
+     case  GDK_KEY_d:
+       vfo_step(-1);
+       break;
+     case GDK_KEY_u:
+       vfo_step(1);
+       break;
+     //
+     // This is a contribution of Ron, it uses a keypad for
+     // entering a frequency
+     //
+     case GDK_KEY_KP_0:
+       num_pad(0,active_receiver->id);
+       break;
+     case GDK_KEY_KP_1:
+       num_pad(1,active_receiver->id);
+       break;
+     case GDK_KEY_KP_2:
+       num_pad(2,active_receiver->id);
+       break;
+     case GDK_KEY_KP_3:
+       num_pad(3,active_receiver->id);
+       break;
+     case GDK_KEY_KP_4:
+       num_pad(4,active_receiver->id);
+       break;
+     case GDK_KEY_KP_5:
+       num_pad(5,active_receiver->id);
+       break;
+     case GDK_KEY_KP_6:
+       num_pad(6,active_receiver->id);
+       break;
+     case GDK_KEY_KP_7:
+       num_pad(7,active_receiver->id);
+       break;
+     case GDK_KEY_KP_8:
+       num_pad(8,active_receiver->id);
+       break;
+     case GDK_KEY_KP_9:
+       num_pad(9,active_receiver->id);
+       break;
+     case GDK_KEY_KP_Divide:
+       num_pad(-1,active_receiver->id);
+       break;
+     case GDK_KEY_KP_Multiply:
+       num_pad(-2,active_receiver->id);
+       break;
+     case GDK_KEY_KP_Add:
+       num_pad(-3,active_receiver->id);
+       break;
+     case GDK_KEY_KP_Enter:
+       num_pad(-4,active_receiver->id);
+       break;
+     case GDK_KEY_KP_Decimal:
+       num_pad(-5,active_receiver->id);
+       break;
+      case GDK_KEY_KP_Subtract:
+       num_pad(-6,active_receiver->id);
+       break;
+     default:
+       // not intercepted, so handle downstream
+       ret=FALSE;
+       break;
+   }
+   g_idle_add(ext_vfo_update, NULL);
+   return ret;
 }
 
 gboolean main_delete (GtkWidget *widget) {

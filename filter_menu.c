@@ -152,6 +152,7 @@ static void var_spin_low_cb (GtkWidget *widget, gpointer data) {
       receiver_filter_changed(receiver[i]);
     }
   }
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
@@ -171,6 +172,7 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
       receiver_filter_changed(receiver[i]);
     }
   }
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 void filter_menu(GtkWidget *parent) {
