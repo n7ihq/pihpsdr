@@ -163,8 +163,8 @@ void soapy_protocol_create_receiver(RECEIVER *rx) {
 
   max_samples=SoapySDRDevice_getStreamMTU(soapy_device,rx_stream[channel]);
   t_print("%s: max_samples=%d\n",__FUNCTION__,max_samples);
-  if(max_samples>(2*rx->fft_size)) {
-    max_samples=2*rx->fft_size;
+  if(max_samples>(2*fft_size)) {
+    max_samples=2*fft_size;
   }
   rx->buffer=g_new(double,max_samples*2);
 
@@ -231,8 +231,8 @@ void soapy_protocol_create_transmitter(TRANSMITTER *tx) {
 #endif
 
   max_tx_samples=SoapySDRDevice_getStreamMTU(soapy_device,tx_stream);
-  if(max_tx_samples>(2*tx->fft_size)) {
-    max_tx_samples=2*tx->fft_size;
+  if(max_tx_samples>(2*fft_size)) {
+    max_tx_samples=2*fft_size;
   }
   t_print("%s: max_tx_samples=%d\n",__FUNCTION__,max_tx_samples);
   output_buffer=(float *)malloc(max_tx_samples*sizeof(float)*2);
