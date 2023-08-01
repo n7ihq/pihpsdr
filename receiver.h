@@ -21,20 +21,20 @@
 
 #include <gtk/gtk.h>
 #ifdef PORTAUDIO
-#include "portaudio.h"
+  #include "portaudio.h"
 #endif
 #ifdef ALSA
-#include <alsa/asoundlib.h>
+  #include <alsa/asoundlib.h>
 #endif
 #ifdef PULSEAUDIO
-#include <pulse/pulseaudio.h>
-#include <pulse/simple.h>
+  #include <pulse/pulseaudio.h>
+  #include <pulse/simple.h>
 #endif
 
 enum _audio_t {
-    STEREO=0,
-    LEFT,
-    RIGHT
+  STEREO = 0,
+  LEFT,
+  RIGHT
 };
 
 typedef enum _audio_t audio_t;
@@ -49,6 +49,11 @@ typedef struct _receiver {
 
   gdouble volume;  // in dB
 
+  int dsp_size;
+  int buffer_size;
+  int fft_size;
+  int low_latency;
+
   gint agc;
   gdouble agc_gain;
   gdouble agc_slope;
@@ -59,14 +64,12 @@ typedef struct _receiver {
   gint displaying;
   audio_t audio_channel;
   gint sample_rate;
-  gint buffer_size;
   gint pixels;
   gint samples;
   gint output_samples;
   gdouble *iq_input_buffer;
   gdouble *audio_output_buffer;
   gint audio_index;
-  guint32 audio_sequence;
   gfloat *pixel_samples;
   gint display_panadapter;
   gint display_waterfall;
@@ -231,10 +234,10 @@ typedef struct _receiver {
   guint txrxmax;
 } RECEIVER;
 
-extern RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int pixels);
-extern RECEIVER *create_receiver(int id, int buffer_size, int pixels, int fps, int width, int height);
-extern void receiver_change_sample_rate(RECEIVER *rx,int sample_rate);
-extern void receiver_change_adc(RECEIVER *rx,int adc);
+extern RECEIVER *create_pure_signal_receiver(int id, int sample_rate, int pixels);
+extern RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height);
+extern void receiver_change_sample_rate(RECEIVER *rx, int sample_rate);
+extern void receiver_change_adc(RECEIVER *rx, int adc);
 extern void receiver_set_frequency(RECEIVER *rx, long long frequency);
 extern void receiver_frequency_changed(RECEIVER *rx);
 extern void receiver_mode_changed(RECEIVER *rx);
@@ -242,16 +245,16 @@ extern void receiver_filter_changed(RECEIVER *rx);
 extern void receiver_vfo_changed(RECEIVER *rx);
 extern void receiver_update_zoom(RECEIVER *rx);
 
-extern void set_mode(RECEIVER* rx,int m);
+extern void set_mode(RECEIVER* rx, int m);
 extern void set_filter(RECEIVER *rx);
 extern void set_agc(RECEIVER *rx, int agc);
 extern void set_offset(RECEIVER *rx, long long offset);
 extern void set_deviation(RECEIVER *rx);
 
-extern void add_iq_samples(RECEIVER *rx, double i_sample,double q_sample);
-extern void add_div_iq_samples(RECEIVER *rx, double i0,double q0, double i1, double q1);
+extern void add_iq_samples(RECEIVER *rx, double i_sample, double q_sample);
+extern void add_div_iq_samples(RECEIVER *rx, double i0, double q0, double i1, double q1);
 
-extern void reconfigure_receiver(RECEIVER *rx,int height);
+extern void reconfigure_receiver(RECEIVER *rx, int height);
 
 extern void receiver_save_state(RECEIVER *rx);
 
@@ -260,15 +263,15 @@ extern gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton 
 extern gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer data);
 extern gboolean receiver_scroll_event(GtkWidget *widget, const GdkEventScroll *event, gpointer data);
 
-extern void set_displaying(RECEIVER *rx,int state);
+extern void set_displaying(RECEIVER *rx, int state);
 
 extern void receiver_restore_state(RECEIVER *rx);
 
 extern void receiver_set_active(RECEIVER *rx);
 
 #ifdef CLIENT_SERVER
-extern void receiver_create_remote(RECEIVER *rx);
-extern void receiver_remote_update_display(RECEIVER *rx);
+  extern void receiver_create_remote(RECEIVER *rx);
+  extern void receiver_remote_update_display(RECEIVER *rx);
 #endif
 
 #endif

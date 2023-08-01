@@ -30,13 +30,13 @@
 #include "radio.h"
 #include "message.h"
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static void cleanup() {
-  if(dialog!=NULL) {
+  if (dialog != NULL) {
     gtk_widget_destroy(dialog);
-    dialog=NULL;
-    sub_menu=NULL;
+    dialog = NULL;
+    sub_menu = NULL;
   }
 }
 
@@ -51,93 +51,138 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void filter_type_cb(GtkToggleButton *widget, gpointer data) {
-  fft_type = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
-  for(int i=0;i<RECEIVERS;i++) {
-    RXASetMP(receiver[i]->id, fft_type);
+  int type = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  int channel  = GPOINTER_TO_INT(data);
+
+  switch (channel) {
+  case 0:
+  case 1:
+    receiver[channel]->low_latency = type;
+    RXASetMP(channel, type);
+    break;
+
+  case 8:
+    transmitter->low_latency = type;
+    TXASetMP(transmitter->id, type);
+    break;
   }
-  TXASetMP(transmitter->id, fft_type);
-  t_print("WDSP filter type changed to %d\n", fft_type);
+
+  //t_print("WDSP filter type channel=%d changed to %d\n", channel, type);
 }
 
 static void filter_size_cb(GtkWidget *widget, gpointer data) {
-  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
-  fft_size = 1 << (val+11);
-  for(int i=0;i<RECEIVERS;i++) {
-     RXASetNC(receiver[i]->id, fft_size);
-   } 
-   TXASetNC(transmitter->id, fft_size);
-   t_print("WDSP filter size changed to %d\n", fft_size);
+  int channel = GPOINTER_TO_INT(data);
+  char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
+  int size;
+
+  // Get size from string in the combobox
+  if (sscanf(p, "%d", &size) != 1) { return; }
+
+  switch (channel) {
+  case 0:
+  case 1:
+    receiver[channel]->fft_size = size;
+    RXASetNC(channel, size);
+    break;
+
+  case 8:
+    transmitter->fft_size = size;;
+    TXASetNC(transmitter->id, size);
+    break;
+  }
+
+  //t_print("WDSP filter size channel=%d changed to %d\n", channel, size);
 }
 
 void fft_menu(GtkWidget *parent) {
-
-  dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
-  gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - FFT");
+  GtkWidget *wid;
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
+  gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - FFT");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *grid = gtk_grid_new();
+  gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
+  wid = gtk_button_new_with_label("Close");
+  g_signal_connect (wid, "button_press_event", G_CALLBACK(close_cb), NULL);
+  gtk_grid_attach(GTK_GRID(grid), wid, 0, 0, 1, 1);
+  wid = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(wid), "<b>Filter Type</b>");
+  gtk_grid_attach(GTK_GRID(grid), wid, 0, 2, 1, 1);
+  wid = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(wid), "<b>Filter Size</b>");
+  gtk_grid_attach(GTK_GRID(grid), wid, 0, 3, 1, 1);
+  int col = 1;
 
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  for (int i = 0; i <= receivers; i++) {
+    // i == receivers means "TX"
+    int chan;
+    int j, s, dsize, fsize, ftype;
+    char text[32];
 
-  GtkWidget *grid=gtk_grid_new();
-  gtk_grid_set_column_spacing (GTK_GRID(grid),10);
+    if ((i == receivers) && !can_transmit) { break; }
 
-  GtkWidget *close_b=gtk_button_new_with_label("Close");
-  g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
+    wid = gtk_label_new(NULL);
 
-  int row=1;
-  int col=0;
+    if (i == 0) {
+      gtk_label_set_markup(GTK_LABEL(wid), "<b>RX1</b>");
+      chan = 0;
+      fsize = receiver[0]->fft_size;
+      dsize = receiver[0]->dsp_size;
+      ftype = receiver[0]->low_latency;
+    } else if (i == receivers - 1) {
+      gtk_label_set_markup(GTK_LABEL(wid), "<b>RX2</b>");
+      chan = 1;
+      fsize = receiver[1]->fft_size;
+      dsize = receiver[1]->fft_size;
+      ftype = receiver[1]->low_latency;
+    } else {
+      gtk_label_set_markup(GTK_LABEL(wid), "<b>TX</b>");
+      chan = 8;
+      fsize = transmitter->fft_size;
+      dsize = transmitter->dsp_size;
+      ftype = transmitter->low_latency;
+    }
 
-  GtkWidget *filter_type_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(filter_type_label), "<b>Filter Type</b>");
-  gtk_grid_attach(GTK_GRID(grid),filter_type_label,col,row,1,1);
+    // chan: actual channel, fsize: actual size value, dsize: minimum size value
+    gtk_grid_attach(GTK_GRID(grid), wid, col, 1, 1, 1);
+    wid = gtk_combo_box_text_new();
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(wid), NULL, "Linear Phase");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(wid), NULL, "Low Latency");
+    gtk_combo_box_set_active(GTK_COMBO_BOX(wid), ftype);
+    my_combo_attach(GTK_GRID(grid), wid, col, 2, 1, 1);
+    g_signal_connect(wid, "changed", G_CALLBACK(filter_type_cb), GINT_TO_POINTER(chan));
+    //
+    // The filter size must be a power of two and at least equal to the dsp size
+    // Apart from that, we allow values from 1024 ... 16384.
+    //
+    wid = gtk_combo_box_text_new();
+    s = 512;
+    j = 0;
 
-  col++;
-  GtkWidget *filter_type_combo=gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_combo), NULL, "Linear Phase");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_type_combo), NULL, "Low Latency");
-  gtk_combo_box_set_active(GTK_COMBO_BOX(filter_type_combo), fft_type);
-  my_combo_attach(GTK_GRID(grid), filter_type_combo, col, row, 1, 1);
-  g_signal_connect(filter_type_combo,"changed",G_CALLBACK(filter_type_cb), NULL);
+    for (;;) {
+      s = 2 * s;
 
-  row++;
-  col=0;
+      if (s >= dsize) {
+        sprintf(text, "%d", s);
+        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(wid), NULL, text);
 
-  GtkWidget *filter_size_label=gtk_label_new("Filter Size: ");
-  gtk_grid_attach(GTK_GRID(grid),filter_size_label,col,row,1,1);
+        if (s == fsize) { gtk_combo_box_set_active(GTK_COMBO_BOX(wid), j); }
 
-  col++;
-  //
-  // We use a fixed "dsp_size" of 2048, so the filter size must be 2048, 4096, 8192, 16384
-  //
-  GtkWidget *filter_size_combo=gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "2048");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "4096");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "8192");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_size_combo), NULL, "16384");
-  switch (fft_size) {
-    case 2048:
-      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 0);
-      break;
-    case 4096:
-      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 1);
-      break;
-    case 8192:
-      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 2);
-      break;
-    case 16384:
-      gtk_combo_box_set_active(GTK_COMBO_BOX(filter_size_combo), 3);
-      break;
+        j++;
+      }
+
+      if (s >= 16384) { break; }
+    }
+
+    my_combo_attach(GTK_GRID(grid), wid, col, 3, 1, 1);
+    g_signal_connect(wid, "changed", G_CALLBACK(filter_size_cb), GINT_TO_POINTER(chan));
+    col++;
   }
-  my_combo_attach(GTK_GRID(grid), filter_size_combo, col, row, 1, 1);
-  g_signal_connect(filter_size_combo,"changed",G_CALLBACK(filter_size_cb), NULL);
 
-  gtk_container_add(GTK_CONTAINER(content),grid);
-
-  sub_menu=dialog;
-
+  gtk_container_add(GTK_CONTAINER(content), grid);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
-
 }
 

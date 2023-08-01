@@ -47,7 +47,7 @@
 #define OLD_ORION_MIC_BIAS_ENABLED 0x20
 
 enum {
-  PA_1W=0,
+  PA_1W = 0,
   PA_10W,
   PA_30W,
   PA_50W,
@@ -58,7 +58,7 @@ enum {
 
 extern DISCOVERED *radio;
 #ifdef CLIENT_SERVER
-extern gboolean radio_is_remote;
+  extern gboolean radio_is_remote;
 #endif
 
 extern GtkWidget *fixed;
@@ -91,18 +91,18 @@ extern RECEIVER *active_receiver;
 extern TRANSMITTER *transmitter;
 
 enum {
-  PA_DISABLED=0,
+  PA_DISABLED = 0,
   PA_ENABLED
 };
 
 enum {
-  KEYER_STRAIGHT=0,
+  KEYER_STRAIGHT = 0,
   KEYER_MODE_A,
   KEYER_MODE_B
 };
 
 enum {
-  MIC3P55MM=0,
+  MIC3P55MM = 0,
   MICXLR
 };
 
@@ -120,11 +120,6 @@ extern int radio_sample_rate;
 extern gboolean iqswap;
 
 #define MAX_BUFFER_SIZE 2048
-
-extern int buffer_size;
-extern int fft_size;
-extern int fft_type;
-extern const int dsp_size;
 
 extern int atlas_penelope;
 extern int atlas_clock_source_10mhz;
@@ -165,7 +160,6 @@ extern int display_sliders;
 extern int display_toolbar;
 
 extern double mic_gain;
-extern int binaural;
 
 extern int mic_linein;
 extern int linein_gain;
@@ -346,7 +340,7 @@ extern void disable_rigctl(void);
 extern void set_backgnd(GtkWidget *widget);
 
 #ifdef CLIENT_SERVER
-extern int remote_start(void *data);
+  extern int remote_start(void *data);
 #endif
 
 extern int optimize_for_touchscreen;

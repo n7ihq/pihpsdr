@@ -34,6 +34,9 @@ typedef struct _transmitter {
   int mic_dsp_rate;
   int iq_output_rate;
   int buffer_size;
+  int dsp_size;
+  int fft_size;
+  int low_latency;
   int pixels;
   int samples;
   int output_samples;
@@ -43,7 +46,8 @@ typedef struct _transmitter {
   float *pixel_samples;
   int display_panadapter;
   int display_waterfall;
-  gint update_timer_id;
+  guint update_timer_id;
+  GMutex display_mutex;
 
   int mode;
   int filter_low;
@@ -117,10 +121,10 @@ typedef struct _transmitter {
 
 } TRANSMITTER;
 
-extern TRANSMITTER *create_transmitter(int id, int buffer_size, int fps, int width, int height);
+extern TRANSMITTER *create_transmitter(int id, int fps, int width, int height);
 
 void create_dialog(TRANSMITTER *tx);
-void reconfigure_transmitter(TRANSMITTER *tx,int width,int height);
+void reconfigure_transmitter(TRANSMITTER *tx, int width, int height);
 
 //
 // CW pulse shaper variables
@@ -129,28 +133,29 @@ extern int cw_key_up;
 extern int cw_key_down;
 extern int cw_not_ready;
 
-extern void tx_set_mode(TRANSMITTER* tx,int m);
+extern void tx_set_mode(TRANSMITTER* tx, int m);
 extern void tx_set_filter(TRANSMITTER *tx);
 extern void transmitter_set_deviation(TRANSMITTER *tx);
 extern void transmitter_set_am_carrier_level(TRANSMITTER *tx);
-extern void tx_set_pre_emphasize(TRANSMITTER *tx,int state);
-extern void transmitter_set_ctcss(TRANSMITTER *tx,int state,int i);
+extern void tx_set_pre_emphasize(TRANSMITTER *tx, int state);
+extern void transmitter_set_ctcss(TRANSMITTER *tx, int state, int i);
 
-extern void add_mic_sample(TRANSMITTER *tx,float mic_sample);
-extern void add_freedv_mic_sample(TRANSMITTER *tx,float mic_sample);
+extern void add_mic_sample(TRANSMITTER *tx, float mic_sample);
+extern void add_freedv_mic_sample(TRANSMITTER *tx, float mic_sample);
 
 extern void transmitter_save_state(const TRANSMITTER *tx);
 extern void transmitter_set_out_of_band(TRANSMITTER *tx);
-extern void tx_set_displaying(TRANSMITTER *tx,int state);
+extern void tx_set_displaying(TRANSMITTER *tx, int state);
 
-extern void tx_set_ps(TRANSMITTER *tx,int state);
-extern void tx_set_twotone(TRANSMITTER *tx,int state);
+extern void tx_set_ps(TRANSMITTER *tx, int state);
+extern void tx_set_twotone(TRANSMITTER *tx, int state);
 
-extern void transmitter_set_compressor_level(TRANSMITTER *tx,double level);
-extern void transmitter_set_compressor(TRANSMITTER *tx,int state);
+extern void transmitter_set_compressor_level(TRANSMITTER *tx, double level);
+extern void transmitter_set_compressor(TRANSMITTER *tx, int state);
 
-extern void tx_set_ps_sample_rate(TRANSMITTER *tx,int rate);
-extern void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_0,double q_sample_0, double i_sample_1, double q_sample_1);
+extern void tx_set_ps_sample_rate(TRANSMITTER *tx, int rate);
+extern void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_0, double q_sample_0, double i_sample_1,
+                              double q_sample_1);
 
 extern void cw_hold_key(int state);
 
