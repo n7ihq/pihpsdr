@@ -97,7 +97,7 @@ GMutex accumulated_mutex;
 static int accumulated_steps = 0;
 static long long accumulated_hz = 0LL;
 static gboolean accumulated_round = FALSE;
-guint check_vfo_timer_id = -1;
+guint check_vfo_timer_id = 0;
 
 REMOTE_CLIENT *add_client(REMOTE_CLIENT *client) {
   t_print("add_client: %p\n", client);
@@ -220,7 +220,7 @@ static gint send_spectrum(void *arg) {
   result = TRUE;
 
   if (!(client->receiver[0].send_spectrum || client->receiver[1].send_spectrum) || !client->running) {
-    client->spectrum_update_timer_id = -1;
+    client->spectrum_update_timer_id = 0;
     t_print("send_spectrum: no more receivers\n");
     return FALSE;
   }
@@ -486,7 +486,7 @@ static void *server_client_thread(void *arg) {
         client->receiver[rx].spectrum_port = 0;
         client->receiver[rx].send_spectrum = TRUE;
 
-        if (client->spectrum_update_timer_id == -1) {
+        if (client->spectrum_update_timer_id == 0) {
           t_print("start send_spectrum thread: fps=%d\n", client->receiver[rx].spectrum_fps);
           client->spectrum_update_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE,
                                              1000 / client->receiver[rx].spectrum_fps, send_spectrum, client, NULL);
@@ -1929,7 +1929,7 @@ static void *listen_thread(void *arg) {
     }
 
     REMOTE_CLIENT* client = g_new(REMOTE_CLIENT, 1);
-    client->spectrum_update_timer_id = -1;
+    client->spectrum_update_timer_id = 0;
     client->address_length = sizeof(client->address);
     client->running = TRUE;
     t_print("hpsdr_server: accept\n");
