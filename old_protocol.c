@@ -123,7 +123,7 @@ static struct sockaddr_in data_addr;
 
 static unsigned char control_in[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 
-static int running;
+static int running=0;
 
 static uint32_t last_seq_num = -0xffffffff;
 static int tx_fifo_flag = 0;
@@ -347,11 +347,15 @@ static void start_usb_receive_threads() {
 //
 static gpointer ozy_ep6_rx_thread(gpointer arg) {
   t_print( "old_protocol: USB EP6 receive_thread\n");
-  running = 1;
   static unsigned char ep6_inbuffer[EP6_BUFFER_SIZE];
 
-  while (running) {
+  for (;;) {
     int bytes = ozy_read(EP6_IN_ID, ep6_inbuffer, EP6_BUFFER_SIZE); // read a 2K buffer at a time
+
+    //
+    // If the protocol has been stopped, just swallow all incoming packets
+    //
+    if (!running) continue;
 
     //t_print("%s: read %d bytes\n",__FUNCTION__,bytes);
     //dump_buffer(ep6_inbuffer,bytes,__FUNCTION__);
@@ -371,8 +375,7 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
       process_ozy_input_buffer(&ep6_inbuffer[1024 + 512]);
     }
   }
-
-  return NULL;
+  return NULL;  /*NOTREACHED*/
 }
 #endif
 
@@ -599,10 +602,9 @@ static gpointer receive_thread(gpointer arg) {
   int ep;
   uint32_t sequence;
   t_print( "old_protocol: receive_thread\n");
-  running = 1;
   length = sizeof(addr);
 
-  while (running) {
+  for (;;) {
     switch (device) {
     case DEVICE_OZY:
       // should not happen
@@ -637,7 +639,9 @@ static gpointer receive_thread(gpointer arg) {
 
           //t_print("%s: bytes_read=%d\n",__FUNCTION__,bytes_read);
         } else {
-          // This could happen in METIS start/stop sequences
+          //
+          // This could happen in METIS start/stop sequences when using TCP
+          //
           usleep(100000);
           continue;
         }
@@ -645,7 +649,10 @@ static gpointer receive_thread(gpointer arg) {
         if (bytes_read >= 0 || errno != EAGAIN) { break; }
       }
 
-      if (bytes_read <= 0) {
+      //
+      // If the protocol has been stopped, just swallow all incoming packets
+      //
+      if (bytes_read <= 0 || !running) {
         continue;
       }
 
@@ -2295,6 +2302,7 @@ static void metis_start_stop(int command) {
   int i;
   unsigned char buffer[1032];
   t_print("%s: %d\n", __FUNCTION__, command);
+  running=command;
   //
   // Clear TX IQ ring buffer
   //
