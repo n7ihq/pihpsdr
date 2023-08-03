@@ -4,7 +4,6 @@
 --break-blocks
 --pad-oper
 --pad-header
---unpad-brackets
 --delete-empty-lines
 --add-braces
 --max-code-length=120
