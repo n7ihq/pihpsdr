@@ -371,329 +371,90 @@ const int var2_default_high[MODES] = {
 void filterSaveState() {
   char value[128];
   // save the Var1 and Var2 settings
-  sprintf(value, "%d", filterLSB[filterVar1].low);
-  setProperty("filter.lsb.var1.low", value);
-  sprintf(value, "%d", filterLSB[filterVar1].high);
-  setProperty("filter.lsb.var1.high", value);
-  sprintf(value, "%d", filterLSB[filterVar2].low);
-  setProperty("filter.lsb.var2.low", value);
-  sprintf(value, "%d", filterLSB[filterVar2].high);
-  setProperty("filter.lsb.var2.high", value);
-  sprintf(value, "%d", filterDIGL[filterVar1].low);
-  setProperty("filter.digl.var1.low", value);
-  sprintf(value, "%d", filterDIGL[filterVar1].high);
-  setProperty("filter.digl.var1.high", value);
-  sprintf(value, "%d", filterDIGL[filterVar2].low);
-  setProperty("filter.digl.var2.low", value);
-  sprintf(value, "%d", filterDIGL[filterVar2].high);
-  setProperty("filter.digl.var2.high", value);
-  sprintf(value, "%d", filterCWL[filterVar1].low);
-  setProperty("filter.cwl.var1.low", value);
-  sprintf(value, "%d", filterCWL[filterVar1].high);
-  setProperty("filter.cwl.var1.high", value);
-  sprintf(value, "%d", filterCWL[filterVar2].low);
-  setProperty("filter.cwl.var2.low", value);
-  sprintf(value, "%d", filterCWL[filterVar2].high);
-  setProperty("filter.cwl.var2.high", value);
-  sprintf(value, "%d", filterUSB[filterVar1].low);
-  setProperty("filter.usb.var1.low", value);
-  sprintf(value, "%d", filterUSB[filterVar1].high);
-  setProperty("filter.usb.var1.high", value);
-  sprintf(value, "%d", filterUSB[filterVar2].low);
-  setProperty("filter.usb.var2.low", value);
-  sprintf(value, "%d", filterUSB[filterVar2].high);
-  setProperty("filter.usb.var2.high", value);
-  sprintf(value, "%d", filterDIGU[filterVar1].low);
-  setProperty("filter.digu.var1.low", value);
-  sprintf(value, "%d", filterDIGU[filterVar1].high);
-  setProperty("filter.digu.var1.high", value);
-  sprintf(value, "%d", filterDIGU[filterVar2].low);
-  setProperty("filter.digu.var2.low", value);
-  sprintf(value, "%d", filterDIGU[filterVar2].high);
-  setProperty("filter.digu.var2.high", value);
-  sprintf(value, "%d", filterCWU[filterVar1].low);
-  setProperty("filter.cwu.var1.low", value);
-  sprintf(value, "%d", filterCWU[filterVar1].high);
-  setProperty("filter.cwu.var1.high", value);
-  sprintf(value, "%d", filterCWU[filterVar2].low);
-  setProperty("filter.cwu.var2.low", value);
-  sprintf(value, "%d", filterCWU[filterVar2].high);
-  setProperty("filter.cwu.var2.high", value);
-  sprintf(value, "%d", filterAM[filterVar1].low);
-  setProperty("filter.am.var1.low", value);
-  sprintf(value, "%d", filterAM[filterVar1].high);
-  setProperty("filter.am.var1.high", value);
-  sprintf(value, "%d", filterAM[filterVar2].low);
-  setProperty("filter.am.var2.low", value);
-  sprintf(value, "%d", filterAM[filterVar2].high);
-  setProperty("filter.am.var2.high", value);
-  sprintf(value, "%d", filterSAM[filterVar1].low);
-  setProperty("filter.sam.var1.low", value);
-  sprintf(value, "%d", filterSAM[filterVar1].high);
-  setProperty("filter.sam.var1.high", value);
-  sprintf(value, "%d", filterSAM[filterVar2].low);
-  setProperty("filter.sam.var2.low", value);
-  sprintf(value, "%d", filterSAM[filterVar2].high);
-  setProperty("filter.sam.var2.high", value);
-  sprintf(value, "%d", filterFMN[filterVar1].low);
-  setProperty("filter.fmn.var1.low", value);
-  sprintf(value, "%d", filterFMN[filterVar1].high);
-  setProperty("filter.fmn.var1.high", value);
-  sprintf(value, "%d", filterFMN[filterVar2].low);
-  setProperty("filter.fmn.var2.low", value);
-  sprintf(value, "%d", filterFMN[filterVar2].high);
-  setProperty("filter.fmn.var2.high", value);
-  sprintf(value, "%d", filterDSB[filterVar1].low);
-  setProperty("filter.dsb.var1.low", value);
-  sprintf(value, "%d", filterDSB[filterVar1].high);
-  setProperty("filter.dsb.var1.high", value);
-  sprintf(value, "%d", filterDSB[filterVar2].low);
-  setProperty("filter.dsb.var2.low", value);
-  sprintf(value, "%d", filterDSB[filterVar2].high);
-  setProperty("filter.dsb.var2.high", value);
+  SetPropI0("filter.lsb.var1.low",            filterLSB[filterVar1].low);
+  SetPropI0("filter.lsb.var1.high",           filterLSB[filterVar1].high);
+  SetPropI0("filter.lsb.var2.low",            filterLSB[filterVar2].low);
+  SetPropI0("filter.lsb.var2.high",           filterLSB[filterVar2].high);
+  SetPropI0("filter.digl.var1.low",           filterDIGL[filterVar1].low);
+  SetPropI0("filter.digl.var1.high",          filterDIGL[filterVar1].high);
+  SetPropI0("filter.digl.var2.low",           filterDIGL[filterVar2].low);
+  SetPropI0("filter.digl.var2.high",          filterDIGL[filterVar2].high);
+  SetPropI0("filter.cwl.var1.low",            filterCWL[filterVar1].low);
+  SetPropI0("filter.cwl.var1.high",           filterCWL[filterVar1].high);
+  SetPropI0("filter.cwl.var2.low",            filterCWL[filterVar2].low);
+  SetPropI0("filter.cwl.var2.high",           filterCWL[filterVar2].high);
+  SetPropI0("filter.usb.var1.low",            filterUSB[filterVar1].low);
+  SetPropI0("filter.usb.var1.high",           filterUSB[filterVar1].high);
+  SetPropI0("filter.usb.var2.low",            filterUSB[filterVar2].low);
+  SetPropI0("filter.usb.var2.high",           filterUSB[filterVar2].high);
+  SetPropI0("filter.digu.var1.low",           filterDIGU[filterVar1].low);
+  SetPropI0("filter.digu.var1.high",          filterDIGU[filterVar1].high);
+  SetPropI0("filter.digu.var2.low",           filterDIGU[filterVar2].low);
+  SetPropI0("filter.digu.var2.high",          filterDIGU[filterVar2].high);
+  SetPropI0("filter.cwu.var1.low",            filterCWU[filterVar1].low);
+  SetPropI0("filter.cwu.var1.high",           filterCWU[filterVar1].high);
+  SetPropI0("filter.cwu.var2.low",            filterCWU[filterVar2].low);
+  SetPropI0("filter.cwu.var2.high",           filterCWU[filterVar2].high);
+  SetPropI0("filter.am.var1.low",             filterAM[filterVar1].low);
+  SetPropI0("filter.am.var1.high",            filterAM[filterVar1].high);
+  SetPropI0("filter.am.var2.low",             filterAM[filterVar2].low);
+  SetPropI0("filter.am.var2.high",            filterAM[filterVar2].high);
+  SetPropI0("filter.sam.var1.low",            filterSAM[filterVar1].low);
+  SetPropI0("filter.sam.var1.high",           filterSAM[filterVar1].high);
+  SetPropI0("filter.sam.var2.low",            filterSAM[filterVar2].low);
+  SetPropI0("filter.sam.var2.high",           filterSAM[filterVar2].high);
+  SetPropI0("filter.fmn.var1.low",            filterFMN[filterVar1].low);
+  SetPropI0("filter.fmn.var1.high",           filterFMN[filterVar1].high);
+  SetPropI0("filter.fmn.var2.low",            filterFMN[filterVar2].low);
+  SetPropI0("filter.fmn.var2.high",           filterFMN[filterVar2].high);
+  SetPropI0("filter.dsb.var1.low",            filterDSB[filterVar1].low);
+  SetPropI0("filter.dsb.var1.high",           filterDSB[filterVar1].high);
+  SetPropI0("filter.dsb.var2.low",            filterDSB[filterVar2].low);
+  SetPropI0("filter.dsb.var2.high",           filterDSB[filterVar2].high);
 }
 
 void filterRestoreState() {
   char* value;
-  value = getProperty("filter.lsb.var1.low");
-
-  if (value) {
-    filterLSB[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.lsb.var1.high");
-
-  if (value) {
-    filterLSB[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.lsb.var2.low");
-
-  if (value) {
-    filterLSB[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.lsb.var2.high");
-
-  if (value) {
-    filterLSB[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.digl.var1.low");
-
-  if (value) {
-    filterDIGL[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.digl.var1.high");
-
-  if (value) {
-    filterDIGL[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.digl.var2.low");
-
-  if (value) {
-    filterDIGL[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.digl.var2.high");
-
-  if (value) {
-    filterDIGL[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.cwl.var1.low");
-
-  if (value) {
-    filterCWL[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.cwl.var1.high");
-
-  if (value) {
-    filterCWL[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.cwl.var2.low");
-
-  if (value) {
-    filterCWL[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.cwl.var2.high");
-
-  if (value) {
-    filterCWL[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.usb.var1.low");
-
-  if (value) {
-    filterUSB[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.usb.var1.high");
-
-  if (value) {
-    filterUSB[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.usb.var2.low");
-
-  if (value) {
-    filterUSB[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.usb.var2.high");
-
-  if (value) {
-    filterUSB[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.digu.var1.low");
-
-  if (value) {
-    filterDIGU[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.digu.var1.high");
-
-  if (value) {
-    filterDIGU[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.digu.var2.low");
-
-  if (value) {
-    filterDIGU[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.digu.var2.high");
-
-  if (value) {
-    filterDIGU[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.cwu.var1.low");
-
-  if (value) {
-    filterCWU[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.cwu.var1.high");
-
-  if (value) {
-    filterCWU[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.cwu.var2.low");
-
-  if (value) {
-    filterCWU[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.cwu.var2.high");
-
-  if (value) {
-    filterCWU[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.am.var1.low");
-
-  if (value) {
-    filterAM[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.am.var1.high");
-
-  if (value) {
-    filterAM[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.am.var2.low");
-
-  if (value) {
-    filterAM[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.am.var2.high");
-
-  if (value) {
-    filterAM[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.sam.var1.low");
-
-  if (value) {
-    filterSAM[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.sam.var1.high");
-
-  if (value) {
-    filterSAM[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.sam.var2.low");
-
-  if (value) {
-    filterSAM[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.sam.var2.high");
-
-  if (value) {
-    filterSAM[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.fmn.var1.low");
-
-  if (value) {
-    filterFMN[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.fmn.var1.high");
-
-  if (value) {
-    filterFMN[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.fmn.var2.low");
-
-  if (value) {
-    filterFMN[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.fmn.var2.high");
-
-  if (value) {
-    filterFMN[filterVar2].high = atoi(value);
-  }
-
-  value = getProperty("filter.dsb.var1.low");
-
-  if (value) {
-    filterDSB[filterVar1].low = atoi(value);
-  }
-
-  value = getProperty("filter.dsb.var1.high");
-
-  if (value) {
-    filterDSB[filterVar1].high = atoi(value);
-  }
-
-  value = getProperty("filter.dsb.var2.low");
-
-  if (value) {
-    filterDSB[filterVar2].low = atoi(value);
-  }
-
-  value = getProperty("filter.dsb.var2.high");
-
-  if (value) {
-    filterDSB[filterVar2].high = atoi(value);
-  }
+  GetPropI0("filter.lsb.var1.low",            filterLSB[filterVar1].low);
+  GetPropI0("filter.lsb.var1.high",           filterLSB[filterVar1].high);
+  GetPropI0("filter.lsb.var2.low",            filterLSB[filterVar2].low);
+  GetPropI0("filter.lsb.var2.high",           filterLSB[filterVar2].high);
+  GetPropI0("filter.digl.var1.low",           filterDIGL[filterVar1].low);
+  GetPropI0("filter.digl.var1.high",          filterDIGL[filterVar1].high);
+  GetPropI0("filter.digl.var2.low",           filterDIGL[filterVar2].low);
+  GetPropI0("filter.digl.var2.high",          filterDIGL[filterVar2].high);
+  GetPropI0("filter.cwl.var1.low",            filterCWL[filterVar1].low);
+  GetPropI0("filter.cwl.var1.high",           filterCWL[filterVar1].high);
+  GetPropI0("filter.cwl.var2.low",            filterCWL[filterVar2].low);
+  GetPropI0("filter.cwl.var2.high",           filterCWL[filterVar2].high);
+  GetPropI0("filter.usb.var1.low",            filterUSB[filterVar1].low);
+  GetPropI0("filter.usb.var1.high",           filterUSB[filterVar1].high);
+  GetPropI0("filter.usb.var2.low",            filterUSB[filterVar2].low);
+  GetPropI0("filter.usb.var2.high",           filterUSB[filterVar2].high);
+  GetPropI0("filter.digu.var1.low",           filterDIGU[filterVar1].low);
+  GetPropI0("filter.digu.var1.high",          filterDIGU[filterVar1].high);
+  GetPropI0("filter.digu.var2.low",           filterDIGU[filterVar2].low);
+  GetPropI0("filter.digu.var2.high",          filterDIGU[filterVar2].high);
+  GetPropI0("filter.cwu.var1.low",            filterCWU[filterVar1].low);
+  GetPropI0("filter.cwu.var1.high",           filterCWU[filterVar1].high);
+  GetPropI0("filter.cwu.var2.low",            filterCWU[filterVar2].low);
+  GetPropI0("filter.cwu.var2.high",           filterCWU[filterVar2].high);
+  GetPropI0("filter.am.var1.low",             filterAM[filterVar1].low);
+  GetPropI0("filter.am.var1.high",            filterAM[filterVar1].high);
+  GetPropI0("filter.am.var2.low",             filterAM[filterVar2].low);
+  GetPropI0("filter.am.var2.high",            filterAM[filterVar2].high);
+  GetPropI0("filter.sam.var1.low",            filterSAM[filterVar1].low);
+  GetPropI0("filter.sam.var1.high",           filterSAM[filterVar1].high);
+  GetPropI0("filter.sam.var2.low",            filterSAM[filterVar2].low);
+  GetPropI0("filter.sam.var2.high",           filterSAM[filterVar2].high);
+  GetPropI0("filter.fmn.var1.low",            filterFMN[filterVar1].low);
+  GetPropI0("filter.fmn.var1.high",           filterFMN[filterVar1].high);
+  GetPropI0("filter.fmn.var2.low",            filterFMN[filterVar2].low);
+  GetPropI0("filter.fmn.var2.high",           filterFMN[filterVar2].high);
+  GetPropI0("filter.dsb.var1.low",            filterDSB[filterVar1].low);
+  GetPropI0("filter.dsb.var1.high",           filterDSB[filterVar1].high);
+  GetPropI0("filter.dsb.var2.low",            filterDSB[filterVar2].low);
+  GetPropI0("filter.dsb.var2.high",           filterDSB[filterVar2].high);
 }
 
 //

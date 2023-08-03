@@ -22,7 +22,7 @@
 #define _CONFIGURE_H
 
 #ifdef GPIO
-void configure_gpio(GtkWidget *parent);
+  void configure_gpio(GtkWidget *parent);
 #endif
 
 #endif

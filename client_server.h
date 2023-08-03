@@ -21,8 +21,8 @@
 #define HPSDR_SERVER_H
 
 #ifndef __APPLE__
-#define htonll htobe64
-#define ntohll be64toh
+  #define htonll htobe64
+  #define ntohll be64toh
 #endif
 
 //
@@ -34,7 +34,7 @@
 #define ntohd(X) 0.01*ntohs(X)-200.0
 
 typedef enum {
-    RECEIVER_DETACHED, RECEIVER_ATTACHED
+  RECEIVER_DETACHED, RECEIVER_ATTACHED
 } CLIENT_STATE;
 
 enum {
@@ -120,7 +120,7 @@ typedef struct _remote_client {
   GThread *thread_id;
   CLIENT_STATE state;
   gint receivers;
-  gint spectrum_update_timer_id;
+  guint spectrum_update_timer_id;
   REMOTE_RX receiver[8];
   void *next;
 } REMOTE_CLIENT;
@@ -243,7 +243,7 @@ typedef struct __attribute__((__packed__)) _audio_data {
   HEADER header;
   uint8_t rx;
   uint16_t samples;
-  uint16_t sample[AUDIO_DATA_SIZE*2];
+  uint16_t sample[AUDIO_DATA_SIZE * 2];
 } AUDIO_DATA;
 
 typedef struct __attribute__((__packed__)) _spectrum_command {
@@ -483,49 +483,49 @@ extern int destroy_hpsdr_server(void);
 extern int radio_connect_remote(char *host, int port);
 
 extern void send_radio_data(const REMOTE_CLIENT *client);
-extern void send_adc_data(const REMOTE_CLIENT *client,int i);
-extern void send_receiver_data(const REMOTE_CLIENT *client,int rx);
-extern void send_vfo_data(const REMOTE_CLIENT *client,int v);
+extern void send_adc_data(const REMOTE_CLIENT *client, int i);
+extern void send_receiver_data(const REMOTE_CLIENT *client, int rx);
+extern void send_vfo_data(const REMOTE_CLIENT *client, int v);
 
-extern void send_start_spectrum(int s,int rx);
-extern void send_vfo_frequency(int s,int rx,long long hz);
-extern void send_vfo_move_to(int s,int rx,long long hz);
-extern void send_vfo_move(int s,int rx,long long hz,int round);
-extern void update_vfo_move(int rx,long long hz,int round);
-extern void send_vfo_step(int s,int rx,int steps);
-extern void update_vfo_step(int rx,int steps);
-extern void send_zoom(int s,int rx,int zoom);
-extern void send_pan(int s,int rx,int pan);
-extern void send_volume(int s,int rx,double volume);
-extern void send_agc(int s,int rx,int agc);
-extern void send_agc_gain(int s,int rx,double gain,double hang,double thresh,double hang_thresh);
-extern void send_attenuation(int s,int rx,int attenuation);
-extern void send_rfgain(int s,int rx, double gain);
-extern void send_squelch(int s,int rx,int enable,int squelch);
-extern void send_noise(int s,int rx,int nb, int nr, int anf,int snb);
-extern void send_band(int s,int rx,int band);
-extern void send_mode(int s,int rx,int mode);
-extern void send_filter(int s,int rx,int filter);
-extern void send_split(int s,int split);
-extern void send_sat(int s,int sat);
-extern void send_dup(int s,int dup);
-extern void send_ctun(int s,int vfo,int ctun);
-extern void send_fps(int s,int rx,int fps);
-extern void send_rx_select(int s,int rx);
-extern void send_vfo(int s,int action);
-extern void send_lock(int s,int lock);
-extern void send_rit_update(int s,int rx);
-extern void send_rit_clear(int s,int rx);
-extern void send_rit(int s,int rx,int rit);
-extern void send_sample_rate(int s,int rx,int sample_rate);
-extern void send_receivers(int s,int receivers);
-extern void send_rit_increment(int s,int increment);
-extern void send_filter_board(int s,int filter_board);
-extern void send_swap_iq(int s,int swap_iq);
-extern void send_region(int s,int region);
-extern void send_mute_rx(int s,int mute);
+extern void send_start_spectrum(int s, int rx);
+extern void send_vfo_frequency(int s, int rx, long long hz);
+extern void send_vfo_move_to(int s, int rx, long long hz);
+extern void send_vfo_move(int s, int rx, long long hz, int round);
+extern void update_vfo_move(int rx, long long hz, int round);
+extern void send_vfo_step(int s, int rx, int steps);
+extern void update_vfo_step(int rx, int steps);
+extern void send_zoom(int s, int rx, int zoom);
+extern void send_pan(int s, int rx, int pan);
+extern void send_volume(int s, int rx, double volume);
+extern void send_agc(int s, int rx, int agc);
+extern void send_agc_gain(int s, int rx, double gain, double hang, double thresh, double hang_thresh);
+extern void send_attenuation(int s, int rx, int attenuation);
+extern void send_rfgain(int s, int rx, double gain);
+extern void send_squelch(int s, int rx, int enable, int squelch);
+extern void send_noise(int s, int rx, int nb, int nr, int anf, int snb);
+extern void send_band(int s, int rx, int band);
+extern void send_mode(int s, int rx, int mode);
+extern void send_filter(int s, int rx, int filter);
+extern void send_split(int s, int split);
+extern void send_sat(int s, int sat);
+extern void send_dup(int s, int dup);
+extern void send_ctun(int s, int vfo, int ctun);
+extern void send_fps(int s, int rx, int fps);
+extern void send_rx_select(int s, int rx);
+extern void send_vfo(int s, int action);
+extern void send_lock(int s, int lock);
+extern void send_rit_update(int s, int rx);
+extern void send_rit_clear(int s, int rx);
+extern void send_rit(int s, int rx, int rit);
+extern void send_sample_rate(int s, int rx, int sample_rate);
+extern void send_receivers(int s, int receivers);
+extern void send_rit_increment(int s, int increment);
+extern void send_filter_board(int s, int filter_board);
+extern void send_swap_iq(int s, int swap_iq);
+extern void send_region(int s, int region);
+extern void send_mute_rx(int s, int mute);
 
 
-extern void remote_audio(const RECEIVER *rx,short left_sample,short right_sample);
+extern void remote_audio(const RECEIVER *rx, short left_sample, short right_sample);
 
 #endif

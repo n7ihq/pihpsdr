@@ -30,9 +30,9 @@
 * @brief Band definition
 */
 struct _MEM_STORE {
-    long long frequency;
-    int mode;
-    int filter;
+  long long frequency;
+  int mode;
+  int filter;
 };
 
 typedef struct _MEM_STORE MEM;

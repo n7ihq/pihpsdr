@@ -22,7 +22,7 @@
 
 void tx_panadapter_update(TRANSMITTER *tx);
 
-void tx_panadapter_init(TRANSMITTER *tx,int width,int height);
+void tx_panadapter_init(TRANSMITTER *tx, int width, int height);
 
 
 #endif

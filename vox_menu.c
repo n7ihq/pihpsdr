@@ -34,65 +34,69 @@
 #include "ext.h"
 #include "message.h"
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static GtkWidget *level;
 
 static GtkWidget *led;
-static GdkRGBA led_color={COLOUR_OK};
-static GdkRGBA led_red  ={COLOUR_ALARM};
-static GdkRGBA led_green={COLOUR_OK};
+static GdkRGBA led_color = {COLOUR_OK};
+static GdkRGBA led_red  = {COLOUR_ALARM};
+static GdkRGBA led_green = {COLOUR_OK};
 
 static GThread *level_thread_id;
-static int run_level=0;
-static double peak=0.0;
+static int run_level = 0;
+static double peak = 0.0;
 static gint vox_timeout;
-static int hold=0;
+static int hold = 0;
 
 static int vox_timeout_cb(gpointer data) {
-  hold=0;
+  hold = 0;
   return FALSE;
 }
 
 static int level_update(void *data) {
-  if(run_level) {
-    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(level),peak);
+  if (run_level) {
+    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(level), peak);
 
-    if(peak>vox_threshold) {
+    if (peak > vox_threshold) {
       // red indicator
-      led_color=led_red;
+      led_color = led_red;
       led_set_color(led);
-      if(hold==0) {
-        hold=1;
+
+      if (hold == 0) {
+        hold = 1;
       } else {
         g_source_remove(vox_timeout);
       }
-      vox_timeout=g_timeout_add((int)vox_hang,vox_timeout_cb,NULL);
+
+      vox_timeout = g_timeout_add((int)vox_hang, vox_timeout_cb, NULL);
     } else {
       // green indicator
-      if(hold==0) {
-        led_color=led_green;
+      if (hold == 0) {
+        led_color = led_green;
         led_set_color(led);
       }
     }
   }
+
   return 0;
 }
 
 static gpointer level_thread(gpointer arg) {
-  while(run_level) {
-    peak=vox_get_peak();
-    g_idle_add(level_update,NULL);
+  while (run_level) {
+    peak = vox_get_peak();
+    g_idle_add(level_update, NULL);
     usleep(100000); // 100ms
   }
+
   return NULL;
 }
 
 static void cleanup() {
-  if(dialog!=NULL) {
+  if (dialog != NULL) {
     gtk_widget_destroy(dialog);
-    dialog=NULL;
-    sub_menu=NULL;
+    dialog = NULL;
+    sub_menu = NULL;
   }
 }
 
@@ -107,103 +111,89 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean enable_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  vox_enabled=vox_enabled==1?0:1;
-  gtk_button_set_label(GTK_BUTTON(widget),vox_enabled==0?"VOX Enable":"VOX Disable");
+  vox_enabled = vox_enabled == 1 ? 0 : 1;
+  gtk_button_set_label(GTK_BUTTON(widget), vox_enabled == 0 ? "VOX Enable" : "VOX Disable");
   g_idle_add(ext_vfo_update, GINT_TO_POINTER(0));
   return TRUE;
 }
 
 static void start_level_thread() {
-  run_level=1;
+  run_level = 1;
   level_thread_id = g_thread_new( "VOX level", level_thread, NULL);
-  t_print("level_thread: id=%p\n",level_thread_id);
+  t_print("level_thread: id=%p\n", level_thread_id);
 }
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {
-  run_level=0;
-  vox_setting=0;
+  run_level = 0;
+  vox_setting = 0;
 }
 
 static void vox_value_changed_cb(GtkWidget *widget, gpointer data) {
-  vox_threshold=gtk_range_get_value(GTK_RANGE(widget))/1000.0;
+  vox_threshold = gtk_range_get_value(GTK_RANGE(widget)) / 1000.0;
 }
 
 static void vox_hang_value_changed_cb(GtkWidget *widget, gpointer data) {
-  vox_hang=gtk_range_get_value(GTK_RANGE(widget));
+  vox_hang = gtk_range_get_value(GTK_RANGE(widget));
 }
 
 void vox_menu(GtkWidget *parent) {
-
-  dialog=gtk_dialog_new();
+  dialog = gtk_dialog_new();
   g_signal_connect (dialog, "destroy", G_CALLBACK(destroy_cb), NULL);
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
-  gtk_window_set_title(GTK_WINDOW(dialog),"piHPSDR - VOX");
+  gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
+  gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - VOX");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
-
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-  GtkWidget *grid=gtk_grid_new();
-  gtk_grid_set_column_spacing (GTK_GRID(grid),10);
-  gtk_grid_set_row_spacing (GTK_GRID(grid),10);
-  gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-
-  GtkWidget *close_b=gtk_button_new_with_label("Close");
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *grid = gtk_grid_new();
+  gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
+  gtk_grid_set_row_spacing (GTK_GRID(grid), 10);
+  gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+  GtkWidget *close_b = gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
-
-  led=create_led(10,10,&led_color);
-  gtk_grid_attach(GTK_GRID(grid),led,2,0,1,1);
-
-  GtkWidget *enable_b=gtk_button_new_with_label(vox_enabled==0?"VOX Enable":"VOX Disable");
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
+  led = create_led(10, 10, &led_color);
+  gtk_grid_attach(GTK_GRID(grid), led, 2, 0, 1, 1);
+  GtkWidget *enable_b = gtk_button_new_with_label(vox_enabled == 0 ? "VOX Enable" : "VOX Disable");
   g_signal_connect (enable_b, "button-press-event", G_CALLBACK(enable_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),enable_b,3,0,1,1);
-
-  GtkWidget *level_label=gtk_label_new(NULL);
+  gtk_grid_attach(GTK_GRID(grid), enable_b, 3, 0, 1, 1);
+  GtkWidget *level_label = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(level_label), "<b>Mic Level:</b>");
   gtk_misc_set_alignment (GTK_MISC(level_label), 0, 0);
   gtk_widget_show(level_label);
-  gtk_grid_attach(GTK_GRID(grid),level_label,0,1,1,1);
-
-  level=gtk_progress_bar_new();
+  gtk_grid_attach(GTK_GRID(grid), level_label, 0, 1, 1, 1);
+  level = gtk_progress_bar_new();
   gtk_widget_show(level);
-  gtk_grid_attach(GTK_GRID(grid),level,1,1,3,1);
-
-  GtkWidget *threshold_label=gtk_label_new(NULL);
+  gtk_grid_attach(GTK_GRID(grid), level, 1, 1, 3, 1);
+  GtkWidget *threshold_label = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(threshold_label), "<b>VOX Threshold:</b>");
   gtk_misc_set_alignment (GTK_MISC(threshold_label), 0, 0);
   gtk_widget_show(threshold_label);
-  gtk_grid_attach(GTK_GRID(grid),threshold_label,0,2,1,1);
-
-  GtkWidget *vox_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0,1000.0,1.0);
-  gtk_range_set_increments (GTK_RANGE(vox_scale),1.0,1.0);
-  gtk_range_set_value(GTK_RANGE(vox_scale),vox_threshold*1000.0);
+  gtk_grid_attach(GTK_GRID(grid), threshold_label, 0, 2, 1, 1);
+  GtkWidget *vox_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 1000.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(vox_scale), 1.0, 1.0);
+  gtk_range_set_value(GTK_RANGE(vox_scale), vox_threshold * 1000.0);
   gtk_widget_show(vox_scale);
-  gtk_grid_attach(GTK_GRID(grid),vox_scale,1,2,3,1);
-  g_signal_connect(G_OBJECT(vox_scale),"value_changed",G_CALLBACK(vox_value_changed_cb),NULL);
-
-  GtkWidget *hang_label=gtk_label_new(NULL);
+  gtk_grid_attach(GTK_GRID(grid), vox_scale, 1, 2, 3, 1);
+  g_signal_connect(G_OBJECT(vox_scale), "value_changed", G_CALLBACK(vox_value_changed_cb), NULL);
+  GtkWidget *hang_label = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(hang_label), "<b>VOX Hang (ms):</b>");
   gtk_misc_set_alignment (GTK_MISC(hang_label), 0, 0);
   gtk_widget_show(hang_label);
-  gtk_grid_attach(GTK_GRID(grid),hang_label,0,4,1,1);
-
-  GtkWidget *vox_hang_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0,1000.0,1.0);
-  gtk_range_set_increments (GTK_RANGE(vox_hang_scale),1.0,1.0);
-  gtk_range_set_value(GTK_RANGE(vox_hang_scale),vox_hang);
+  gtk_grid_attach(GTK_GRID(grid), hang_label, 0, 4, 1, 1);
+  GtkWidget *vox_hang_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 1000.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(vox_hang_scale), 1.0, 1.0);
+  gtk_range_set_value(GTK_RANGE(vox_hang_scale), vox_hang);
   gtk_widget_show(vox_hang_scale);
-  gtk_grid_attach(GTK_GRID(grid),vox_hang_scale,1,4,3,1);
-  g_signal_connect(G_OBJECT(vox_hang_scale),"value_changed",G_CALLBACK(vox_hang_value_changed_cb),NULL);
-  gtk_container_add(GTK_CONTAINER(content),grid);
-
-  sub_menu=dialog;
-
+  gtk_grid_attach(GTK_GRID(grid), vox_hang_scale, 1, 4, 3, 1);
+  g_signal_connect(G_OBJECT(vox_hang_scale), "value_changed", G_CALLBACK(vox_hang_value_changed_cb), NULL);
+  gtk_container_add(GTK_CONTAINER(content), grid);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
 
-  if(!vox_enabled) {
-    vox_setting=1;
+  if (!vox_enabled) {
+    vox_setting = 1;
   }
-  start_level_thread();
 
+  start_level_thread();
 }
 

@@ -33,19 +33,19 @@
 #include "vfo.h"
 #include "button_text.h"
 #ifdef CLIENT_SERVER
-#include "client_server.h"
+  #include "client_server.h"
 #endif
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static GtkWidget *last_band;
 
 static void cleanup() {
-  if(dialog!=NULL) {
+  if (dialog != NULL) {
     gtk_widget_destroy(dialog);
-    dialog=NULL;
-    sub_menu=NULL;
-    active_menu=NO_MENU;
+    dialog = NULL;
+    sub_menu = NULL;
+    active_menu = NO_MENU;
   }
 }
 
@@ -60,80 +60,77 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 gboolean band_select_cb (GtkWidget *widget, gpointer        data) {
-  int b=GPOINTER_TO_INT(data);
-  set_button_text_color(last_band,"default");
-  last_band=widget;
+  int b = GPOINTER_TO_INT(data);
+  set_button_text_color(last_band, "default");
+  last_band = widget;
   //t_print("%s: %d\n",__FUNCTION__,b);
-  set_button_text_color(last_band,"orange");
+  set_button_text_color(last_band, "orange");
 #ifdef CLIENT_SERVER
-  if(radio_is_remote) {
-    send_band(client_socket,active_receiver->id,b);
+
+  if (radio_is_remote) {
+    send_band(client_socket, active_receiver->id, b);
   } else {
 #endif
-    vfo_band_changed(active_receiver->id,b);
+    vfo_band_changed(active_receiver->id, b);
 #ifdef CLIENT_SERVER
   }
+
 #endif
   return FALSE;
 }
 
 void band_menu(GtkWidget *parent) {
-  int i,j;
-
-  dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
+  int i, j;
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  sprintf(title,"piHPSDR - Band (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
-  gtk_window_set_title(GTK_WINDOW(dialog),title);
+  sprintf(title, "piHPSDR - Band (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
+  gtk_window_set_title(GTK_WINDOW(dialog), title);
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
-
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-  GtkWidget *grid=gtk_grid_new();
-
-  gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_column_spacing (GTK_GRID(grid),5);
-  gtk_grid_set_row_spacing (GTK_GRID(grid),5);
-
-  GtkWidget *close_b=gtk_button_new_with_label("Close");
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *grid = gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
+  gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
+  GtkWidget *close_b = gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
-
-  long long frequency_min=radio->frequency_min;
-  long long frequency_max=radio->frequency_max;
-
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
+  long long frequency_min = radio->frequency_min;
+  long long frequency_max = radio->frequency_max;
   //t_print("band_menu: min=%lld max=%lld\n",frequency_min,frequency_max);
-  j=0;
-  for(i=0;i<BANDS+XVTRS;i++) {
+  j = 0;
+
+  for (i = 0; i < BANDS + XVTRS; i++) {
     BAND *band;
-    band=(BAND*)band_get_band(i);
-    if(strlen(band->title)>0) {
-      if(i<BANDS) {
-        if(!(band->frequencyMin==0.0 && band->frequencyMax==0.0)) {
-          if(band->frequencyMin<frequency_min || band->frequencyMax>frequency_max) {
+    band = (BAND*)band_get_band(i);
+
+    if (strlen(band->title) > 0) {
+      if (i < BANDS) {
+        if (!(band->frequencyMin == 0.0 && band->frequencyMax == 0.0)) {
+          if (band->frequencyMin < frequency_min || band->frequencyMax > frequency_max) {
             continue;
           }
         }
       }
-      GtkWidget *b=gtk_button_new_with_label(band->title);
-      set_button_text_color(b,"default");
-      if(i==vfo[active_receiver->id].band) {
-        set_button_text_color(b,"orange");
-        last_band=b;
+
+      GtkWidget *b = gtk_button_new_with_label(band->title);
+      set_button_text_color(b, "default");
+
+      if (i == vfo[active_receiver->id].band) {
+        set_button_text_color(b, "orange");
+        last_band = b;
       }
+
       gtk_widget_show(b);
-      gtk_grid_attach(GTK_GRID(grid),b,j%5,1+(j/5),1,1);
-      g_signal_connect(b,"clicked",G_CALLBACK(band_select_cb),(gpointer)(long)i);
+      gtk_grid_attach(GTK_GRID(grid), b, j % 5, 1 + (j / 5), 1, 1);
+      g_signal_connect(b, "clicked", G_CALLBACK(band_select_cb), (gpointer)(long)i);
       j++;
     }
   }
 
-  gtk_container_add(GTK_CONTAINER(content),grid);
-
-  sub_menu=dialog;
-
+  gtk_container_add(GTK_CONTAINER(content), grid);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
-
 }

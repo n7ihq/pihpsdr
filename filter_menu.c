@@ -267,7 +267,6 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
 }
 
 void filter_menu(GtkWidget *parent) {
-  int i;
   int id = active_receiver->id;
   int f = vfo[id].filter;
   int m = vfo[id].mode;
@@ -319,7 +318,7 @@ void filter_menu(GtkWidget *parent) {
     int row = 0;
     int col = 5;
 
-    for (i = 0; i < filterVar1; i++) {
+    for (int i = 0; i < filterVar1; i++) {
       if (col >= 5) {
         col = 0;
         row++;
@@ -343,8 +342,8 @@ void filter_menu(GtkWidget *parent) {
     // Var1 and Var2
     //
     row++;
-    FILTER* filter1 = &band_filters[filterVar1];
-    FILTER* filter2 = &band_filters[filterVar2];
+    const FILTER* filter1 = &band_filters[filterVar1];
+    const FILTER* filter2 = &band_filters[filterVar2];
     w = gtk_button_new_with_label(band_filters[filterVar1].title);
     gtk_grid_attach(GTK_GRID(grid), w, 0, row, 1, 1);
 

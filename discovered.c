@@ -20,7 +20,7 @@
 #include <gtk/gtk.h>
 #include "discovered.h"
 
-int selected_device=0;
-int devices=0;
+int selected_device = 0;
+int devices = 0;
 DISCOVERED discovered[MAX_DEVICES];
 

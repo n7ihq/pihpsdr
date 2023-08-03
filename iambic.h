@@ -2,16 +2,16 @@
 #define _IAMBIC_H
 
 enum {
-    CHECK = 0,
-    STRAIGHT,
-    PREDOT,
-    SENDDOT,
-    PREDASH,
-    SENDDASH,
-    DOTDELAY,
-    DASHDELAY,
-    LETTERSPACE,
-    EXITLOOP
+  CHECK = 0,
+  STRAIGHT,
+  PREDOT,
+  SENDDOT,
+  PREDASH,
+  SENDDASH,
+  DOTDELAY,
+  DASHDELAY,
+  LETTERSPACE,
+  EXITLOOP
 };
 
 void keyer_event(int left, int state);

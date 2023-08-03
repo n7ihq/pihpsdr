@@ -72,10 +72,10 @@ extern int *sw_action;
 extern long settle_time;
 
 extern void gpio_set_defaults(int ctrlr);
-extern void gpio_restore_actions(void);
-extern void gpio_restore_state(void);
-extern void gpio_save_state(void);
-extern void gpio_save_actions(void);
+extern void gpioRestoreActions(void);
+extern void gpioRestoreState(void);
+extern void gpioSaveState(void);
+extern void gpioSaveActions(void);
 extern int gpio_init(void);
 extern void gpio_close(void);
 

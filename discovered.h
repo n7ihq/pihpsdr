@@ -22,7 +22,7 @@
 
 #include <netinet/in.h>
 #ifdef SOAPYSDR
-#include <SoapySDR/Device.h>
+  #include <SoapySDR/Device.h>
 #endif
 
 #define MAX_DEVICES 16
@@ -89,58 +89,58 @@
 
 
 struct _DISCOVERED {
-    int protocol;
-    int device;
-    int use_tcp;        // Radio connection is via TCP
-    int use_routing;    // Radio connection is "routed" to some IP address
-    char name[64];
-    int software_version;
-    int status;
-    int supported_receivers;
-    int supported_transmitters;
-    int adcs;
-    int dacs;
-    double frequency_min;
-    double frequency_max;
-    union {
-      struct network {
-        unsigned char mac_address[6];
-        int address_length;
-        struct sockaddr_in address;
-        int interface_length;
-        struct sockaddr_in interface_address;
-        struct sockaddr_in interface_netmask;
-        char interface_name[64];
-      } network;
+  int protocol;
+  int device;
+  int use_tcp;        // Radio connection is via TCP
+  int use_routing;    // Radio connection is "routed" to some IP address
+  char name[64];
+  int software_version;
+  int status;
+  int supported_receivers;
+  int supported_transmitters;
+  int adcs;
+  int dacs;
+  double frequency_min;
+  double frequency_max;
+  union {
+    struct network {
+      unsigned char mac_address[6];
+      int address_length;
+      struct sockaddr_in address;
+      int interface_length;
+      struct sockaddr_in interface_address;
+      struct sockaddr_in interface_netmask;
+      char interface_name[64];
+    } network;
 #ifdef SOAPYSDR
-      struct soapy {
-        char version[128];
-        char hardware_key[64];
-        char driver_key[64];
-        int rtlsdr_count;
-        int sdrplay_count;
-        int sample_rate;
-        size_t rx_channels;
-        size_t rx_gains;
-        char **rx_gain;
-        SoapySDRRange *rx_range;
-        gboolean rx_has_automatic_gain;
-        gboolean rx_has_automatic_dc_offset_correction;
-        size_t rx_antennas;
-        char **rx_antenna;
-        size_t tx_channels;
-        size_t tx_gains;
-        char **tx_gain;
-        SoapySDRRange *tx_range;
-        size_t tx_antennas;
-        char **tx_antenna;
-        size_t sensors;
-        char **sensor;
-        gboolean has_temp;
-        char address[64];
-      } soapy;
+    struct soapy {
+      char version[128];
+      char hardware_key[64];
+      char driver_key[64];
+      int rtlsdr_count;
+      int sdrplay_count;
+      int sample_rate;
+      size_t rx_channels;
+      size_t rx_gains;
+      char **rx_gain;
+      SoapySDRRange *rx_range;
+      gboolean rx_has_automatic_gain;
+      gboolean rx_has_automatic_dc_offset_correction;
+      size_t rx_antennas;
+      char **rx_antenna;
+      size_t tx_channels;
+      size_t tx_gains;
+      char **tx_gain;
+      SoapySDRRange *tx_range;
+      size_t tx_antennas;
+      char **tx_antenna;
+      size_t sensors;
+      char **sensor;
+      gboolean has_temp;
+      char address[64];
+    } soapy;
 #endif
-    } info;
+  } info;
 };
 
 typedef struct _DISCOVERED DISCOVERED;

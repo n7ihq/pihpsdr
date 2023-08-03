@@ -19,11 +19,11 @@
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
 
 #ifdef ANDROMEDA
-#define MAX_DISPLAY_WIDTH  1024
-#define MAX_DISPLAY_HEIGHT 600
+  #define MAX_DISPLAY_WIDTH  1024
+  #define MAX_DISPLAY_HEIGHT 600
 #else
-#define MAX_DISPLAY_WIDTH  800                      // Default: 800
-#define MAX_DISPLAY_HEIGHT 480                      // Default: 480
+  #define MAX_DISPLAY_WIDTH  800                      // Default: 800
+  #define MAX_DISPLAY_HEIGHT 480                      // Default: 480
 #endif
 
 //
@@ -37,9 +37,9 @@
 #define DISPLAY_FONT_SIZE5 26                       // Default: 22
 
 #ifdef __APPLE__
-#define SLIDERS_FONT "FreeSans Bold 12"             // Default: FreeSans Bold 10
+  #define SLIDERS_FONT "FreeSans Bold 12"             // Default: FreeSans Bold 10
 #else
-#define SLIDERS_FONT "FreeSans Bold 10"             // Default: FreeSans Bold 10
+  #define SLIDERS_FONT "FreeSans Bold 10"             // Default: FreeSans Bold 10
 #endif
 
 //
@@ -161,10 +161,10 @@ struct _VFO_BAR_LAYOUT {
   int split_x, split_y;
   int sat_x,   sat_y;
   int dup_x,   dup_y;
-  int filter_x,filter_y;
+  int filter_x, filter_y;
 };
 
 typedef struct _VFO_BAR_LAYOUT VFO_BAR_LAYOUT;
 extern const VFO_BAR_LAYOUT vfo_layout_list[];
-extern const VFO_BAR_LAYOUT *vfo_layout;
+extern int vfo_layout;
 

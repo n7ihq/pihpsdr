@@ -73,7 +73,7 @@ typedef struct _receiver {
   gfloat *pixel_samples;
   gint display_panadapter;
   gint display_waterfall;
-  gint update_timer_id;
+  guint update_timer_id;
   gdouble meter;
 
   gdouble hz_per_pixel;
@@ -256,7 +256,8 @@ extern void add_div_iq_samples(RECEIVER *rx, double i0, double q0, double i1, do
 
 extern void reconfigure_receiver(RECEIVER *rx, int height);
 
-extern void receiver_save_state(RECEIVER *rx);
+extern void receiverSaveState(RECEIVER *rx);
+extern void receiverRestoreState(RECEIVER *rx);
 
 extern gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data);
 extern gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data);
@@ -264,8 +265,6 @@ extern gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *
 extern gboolean receiver_scroll_event(GtkWidget *widget, const GdkEventScroll *event, gpointer data);
 
 extern void set_displaying(RECEIVER *rx, int state);
-
-extern void receiver_restore_state(RECEIVER *rx);
 
 extern void receiver_set_active(RECEIVER *rx);
 

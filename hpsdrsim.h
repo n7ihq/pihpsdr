@@ -95,7 +95,7 @@ EXTERN struct sockaddr_in addr_old;
 //
 // Constants for conversion of TX power
 //
-EXTERN double c1,c2;
+EXTERN double c1, c2;
 
 //
 // Forward declarations for new protocol stuff
@@ -106,8 +106,8 @@ int    new_protocol_running(void);
 #ifndef __APPLE__
 // using clock_nanosleep of librt
 extern int clock_nanosleep(clockid_t __clock_id, int __flags,
-      __const struct timespec *__req,
-      struct timespec *__rem);
+                           __const struct timespec *__req,
+                           struct timespec *__rem);
 #endif
 
 //

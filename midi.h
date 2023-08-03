@@ -55,10 +55,10 @@ extern gchar *midi_events[];
 // MIDI_KNOB or MIDI_WHEEL, depending on the device description.
 //
 enum MIDIevent {
- EVENT_NONE=0,
- MIDI_NOTE,
- MIDI_CTRL,
- MIDI_PITCH
+  EVENT_NONE = 0,
+  MIDI_NOTE,
+  MIDI_CTRL,
+  MIDI_PITCH
 };
 
 //
@@ -82,18 +82,18 @@ enum MIDIevent {
 //
 
 struct desc {
-   int               channel;     // -1 for ANY channel
-   enum MIDIevent    event;       // type of event (NOTE on/off, Controller change, Pitch value)
-   enum ACTIONtype   type;        // Key, Knob, or Wheel
-   int               vfl1,vfl2;   // Wheel only: range of controller values for "very fast left"
-   int               fl1,fl2;     // Wheel only: range of controller values for "fast left"
-   int               lft1,lft2;   // Wheel only: range of controller values for "slow left"
-   int               vfr1,vfr2;   // Wheel only: range of controller values for "very fast right"
-   int               fr1,fr2;     // Wheel only: range of controller values for "fast right"
-   int               rgt1,rgt2;   // Wheel only: range of controller values for "slow right"
-   int               delay;       // Wheel only: delay (msec) before next message is given upstream
-   int               action;      // SDR "action" to generate
-   struct desc       *next;       // Next defined action for a controller/key with that note value (NULL for end of list)
+  int               channel;     // -1 for ANY channel
+  enum MIDIevent    event;       // type of event (NOTE on/off, Controller change, Pitch value)
+  enum ACTIONtype   type;        // Key, Knob, or Wheel
+  int               vfl1, vfl2;  // Wheel only: range of controller values for "very fast left"
+  int               fl1, fl2;    // Wheel only: range of controller values for "fast left"
+  int               lft1, lft2;  // Wheel only: range of controller values for "slow left"
+  int               vfr1, vfr2;  // Wheel only: range of controller values for "very fast right"
+  int               fr1, fr2;    // Wheel only: range of controller values for "fast right"
+  int               rgt1, rgt2;  // Wheel only: range of controller values for "slow right"
+  int               delay;       // Wheel only: delay (msec) before next message is given upstream
+  int               action;      // SDR "action" to generate
+  struct desc       *next;       // Next defined action for a controller/key with that note value (NULL for end of list)
 };
 
 extern struct desc *MidiCommandsTable[129];  // slot #128 is for the pitch-bend

@@ -73,7 +73,7 @@ typedef struct _transmitter {
   gchar *microphone_name;
 
   int out_of_band;
-  gint out_of_band_timer_id;
+  guint out_of_band_timer_id;
 
   int twotone;
   int puresignal;
@@ -143,7 +143,7 @@ extern void transmitter_set_ctcss(TRANSMITTER *tx, int state, int i);
 extern void add_mic_sample(TRANSMITTER *tx, float mic_sample);
 extern void add_freedv_mic_sample(TRANSMITTER *tx, float mic_sample);
 
-extern void transmitter_save_state(const TRANSMITTER *tx);
+extern void transmitterSaveState(const TRANSMITTER *tx);
 extern void transmitter_set_out_of_band(TRANSMITTER *tx);
 extern void tx_set_displaying(TRANSMITTER *tx, int state);
 

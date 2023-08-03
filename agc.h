@@ -21,7 +21,7 @@
 #define _AGC_H
 
 enum {
-  AGC_OFF=0,
+  AGC_OFF = 0,
   AGC_LONG,
   AGC_SLOW,
   AGC_MEDIUM,

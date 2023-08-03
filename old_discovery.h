@@ -22,7 +22,7 @@
 
 void old_discovery(void);
 #ifdef STEMLAB_DISCOVERY
-int  stemlab_get_info(int id);
+  int  stemlab_get_info(int id);
 #endif
 
 #endif

@@ -21,6 +21,6 @@
 #define _WATERFALL_H
 
 extern void waterfall_update(RECEIVER *rx);
-extern void waterfall_init(RECEIVER *rx,int width,int height);
+extern void waterfall_init(RECEIVER *rx, int width, int height);
 
 #endif

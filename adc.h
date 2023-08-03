@@ -23,12 +23,12 @@
 #include <gtk/gtk.h>
 
 enum {
-  AUTOMATIC=0,
+  AUTOMATIC = 0,
   MANUAL
 };
 
 enum {
-  BYPASS=0,
+  BYPASS = 0,
   HPF_1_5,
   HPF_6_5,
   HPF_9_5,
@@ -37,7 +37,7 @@ enum {
 };
 
 enum {
-  LPF_160=0,
+  LPF_160 = 0,
   LPF_80,
   LPF_60_40,
   LPF_30_20,
@@ -47,7 +47,7 @@ enum {
 };
 
 enum {
-  ANTENNA_1=0,
+  ANTENNA_1 = 0,
   ANTENNA_2,
   ANTENNA_3,
   ANTENNA_XVTR,

@@ -61,11 +61,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 struct mybuffer_ {
-   struct mybuffer_ *next;
-   int             free;
-   long            lowfence;
-   unsigned char   buffer[NET_BUFFER_SIZE];
-   long            highfence;
+  struct mybuffer_ *next;
+  int             free;
+  long            lowfence;
+  unsigned char   buffer[NET_BUFFER_SIZE];
+  long            highfence;
 };
 
 typedef struct mybuffer_ mybuffer;
@@ -89,8 +89,8 @@ extern int getMox(void);
 extern void setTune(int state);
 extern int getTune(void);
 
-extern void new_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right_audio_sample);
-extern void new_protocol_iq_samples(int isample,int qsample);
+extern void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short right_audio_sample);
+extern void new_protocol_iq_samples(int isample, int qsample);
 extern void new_protocol_flush_iq_samples(void);
 extern void new_protocol_cw_audio_samples(short l, short r);
 

@@ -37,14 +37,14 @@
 #include "gpio.h"
 #include "i2c.h"
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static void cleanup() {
-  if(dialog!=NULL) {
+  if (dialog != NULL) {
     gtk_widget_destroy(dialog);
-    dialog=NULL;
-    active_menu=NO_MENU;
-    sub_menu=NULL;
+    dialog = NULL;
+    active_menu = NO_MENU;
+    sub_menu = NULL;
   }
 }
 
@@ -59,392 +59,382 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean encoder_bottom_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
-  int en=GPOINTER_TO_INT(data);
-  int action=action_dialog(dialog,CONTROLLER_ENCODER,encoders[en].bottom_encoder_function);
-  gtk_button_set_label(GTK_BUTTON(widget),ActionTable[action].str);
-  encoders[en].bottom_encoder_function=action;
+  int en = GPOINTER_TO_INT(data);
+  int action = action_dialog(dialog, CONTROLLER_ENCODER, encoders[en].bottom_encoder_function);
+  gtk_button_set_label(GTK_BUTTON(widget), ActionTable[action].str);
+  encoders[en].bottom_encoder_function = action;
   return TRUE;
 }
 
 static gboolean encoder_top_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
-  int en=GPOINTER_TO_INT(data);
-  int action=action_dialog(dialog,CONTROLLER_ENCODER,encoders[en].top_encoder_function);
-  gtk_button_set_label(GTK_BUTTON(widget),ActionTable[action].str);
-  encoders[en].top_encoder_function=action;
+  int en = GPOINTER_TO_INT(data);
+  int action = action_dialog(dialog, CONTROLLER_ENCODER, encoders[en].top_encoder_function);
+  gtk_button_set_label(GTK_BUTTON(widget), ActionTable[action].str);
+  encoders[en].top_encoder_function = action;
   return TRUE;
 }
 
 static gboolean encoder_switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
-  int en=GPOINTER_TO_INT(data);
-  int action=action_dialog(dialog,CONTROLLER_SWITCH,encoders[en].switch_function);
-  gtk_button_set_label(GTK_BUTTON(widget),ActionTable[action].str);
-  encoders[en].switch_function=action;
+  int en = GPOINTER_TO_INT(data);
+  int action = action_dialog(dialog, CONTROLLER_SWITCH, encoders[en].switch_function);
+  gtk_button_set_label(GTK_BUTTON(widget), ActionTable[action].str);
+  encoders[en].switch_function = action;
   return TRUE;
 }
 
 void encoder_menu(GtkWidget *parent) {
-  gint row=0;
-  gint col=0;
+  gint row = 0;
+  gint col = 0;
   char label[32];
   GtkWidget *widget;
-
-  dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  switch(controller) {
-    case NO_CONTROLLER:
-      sprintf(title,"piHPSDR - No Encoders");
-      break;
-    case CONTROLLER1:
-      sprintf(title,"piHPSDR - Controller 1 Encoder Actions");
-      break;
-    case CONTROLLER2_V1:
-      sprintf(title,"piHPSDR - Controller 2 V1 Encoder Actions");
-      break;
-    case CONTROLLER2_V2:
-      sprintf(title,"piHPSDR - Controller 2 V2 Encoder Actions");
-      break;
-    case G2_FRONTPANEL:
-      sprintf(title,"piHPSDR - G2 FrontPanel Encoder Actions");
-      break;
+
+  switch (controller) {
+  case NO_CONTROLLER:
+    sprintf(title, "piHPSDR - No Encoders");
+    break;
+
+  case CONTROLLER1:
+    sprintf(title, "piHPSDR - Controller 1 Encoder Actions");
+    break;
+
+  case CONTROLLER2_V1:
+    sprintf(title, "piHPSDR - Controller 2 V1 Encoder Actions");
+    break;
+
+  case CONTROLLER2_V2:
+    sprintf(title, "piHPSDR - Controller 2 V2 Encoder Actions");
+    break;
+
+  case G2_FRONTPANEL:
+    sprintf(title, "piHPSDR - G2 FrontPanel Encoder Actions");
+    break;
   }
-  gtk_window_set_title(GTK_WINDOW(dialog),title);
+
+  gtk_window_set_title(GTK_WINDOW(dialog), title);
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-  GtkWidget *grid=gtk_grid_new();
-
-  gtk_grid_set_column_homogeneous(GTK_GRID(grid),FALSE);
-  gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_column_spacing(GTK_GRID(grid),5);
-
-  GtkWidget *close_b=gtk_button_new_with_label("Close");
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *grid = gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(grid), FALSE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_column_spacing(GTK_GRID(grid), 5);
+  GtkWidget *close_b = gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
-
+  gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   row++;
-  col=0;
+  col = 0;
 
-  switch(controller) {
-    case NO_CONTROLLER:
-      // should never happen
-      break;
-    case CONTROLLER1:
-      // 3 vertical single encoders with switches plus VFO
-      col=4;
-      for(int i=0;i<3;i++) {
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        row++;
-        col=4;
+  switch (controller) {
+  case NO_CONTROLLER:
+    // should never happen
+    break;
 
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        row++;
-        col=4;
-      }
+  case CONTROLLER1:
+    // 3 vertical single encoders with switches plus VFO
+    col = 4;
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
-      // This one is hard-wired to "VFO" and generates no signal
-      encoders[3].bottom_encoder_function=VFO;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      g_sprintf(label,"<b>%s</b>",ActionTable[encoders[3].bottom_encoder_function].str);
-      gtk_label_set_markup (GTK_LABEL(widget), label);
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      break;
-    case CONTROLLER2_V1:
-      // 3 horizontal single encoders with switches
-      row=4;
-      col=0;
-      for(int i=0;i<3;i++) {
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-      }
-      row++;
-      col=0;
-      for(int i=0;i<3;i++) {
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-      }
-
-      // padding
-      row=1;
-      col=6;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-
-      // 1 vertical single encoder with switch plus VFO encoder
-      row=1;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
+    for (int i = 0; i < 3; i++) {
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
       gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
-      widget=gtk_button_new_with_label(ActionTable[encoders[3].switch_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(3));
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       row++;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+      col = 4;
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
+      gtk_label_set_markup (GTK_LABEL(widget), "<b>Encoder</b>");
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
-      widget=gtk_button_new_with_label(ActionTable[encoders[3].bottom_encoder_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(3));
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-
-      row=5;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
-      // This one is hard-wired to "VFO" and generates no signal
-      encoders[4].bottom_encoder_function=VFO;
-      widget=gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-
-      break;
-    case CONTROLLER2_V2:
-      // 3 horizontal double encoders with switches
-      row=5;
-      col=0;
-      for(int i=0;i<3;i++) {
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-      }
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       row++;
-      col=0;
-      for(int i=0;i<3;i++) {
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget),"<b>Top</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_top_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-      }
-      row++;
-      col=0;
-      for(int i=0;i<3;i++) {
-        widget=gtk_label_new(NULL);
-        gtk_widget_set_name(widget,"small_button");
-        gtk_label_set_markup (GTK_LABEL(widget),"<b>Bottom</b>");
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-        col++;
-      }
+      col = 4;
+    }
 
-      // padding
-      row=1;
-      col=6;
-      widget=gtk_label_new("    ");
-      gtk_widget_set_name(widget,"small_button");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Encoder</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    // This one is hard-wired to "VFO" and generates no signal
+    encoders[3].bottom_encoder_function = VFO;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    g_sprintf(label, "<b>%s</b>", ActionTable[encoders[3].bottom_encoder_function].str);
+    gtk_label_set_markup (GTK_LABEL(widget), label);
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    break;
 
-      // 1 vertical single double with switch plus VFO encoder
-      row=1;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
+  case CONTROLLER2_V1:
+    // 3 horizontal single encoders with switches
+    row = 4;
+    col = 0;
+
+    for (int i = 0; i < 3; i++) {
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
       gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
-      widget=gtk_button_new_with_label(ActionTable[encoders[3].switch_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(3));
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      row++;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Top</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
-      widget=gtk_button_new_with_label(ActionTable[encoders[3].top_encoder_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_top_cb),GINT_TO_POINTER(3));
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      row++;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Bottom</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
-      col++;
-      widget=gtk_button_new_with_label(ActionTable[encoders[3].bottom_encoder_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(3));
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    }
 
-      row=7;
-      col=7;
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Encoder</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+    row++;
+    col = 0;
+
+    for (int i = 0; i < 3; i++) {
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
+      gtk_label_set_markup (GTK_LABEL(widget), "<b>Encoder</b>");
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
-      // This one is hard-wired to "VFO" and generates no signal
-      encoders[4].bottom_encoder_function=VFO;
-      widget=gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_grid_attach(GTK_GRID(grid),widget,col,row,1,1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+    }
 
-      break;
-    case G2_FRONTPANEL:
-      // 2 vertical double encoders with switches left side
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget), "<b>Left edge Encoders</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,0,1,3,1);
+    // padding
+    row = 1;
+    col = 6;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    // 1 vertical single encoder with switch plus VFO encoder
+    row = 1;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    widget = gtk_button_new_with_label(ActionTable[encoders[3].switch_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(3));
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    row++;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Encoder</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    widget = gtk_button_new_with_label(ActionTable[encoders[3].bottom_encoder_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(3));
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    row = 5;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Encoder</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    // This one is hard-wired to "VFO" and generates no signal
+    encoders[4].bottom_encoder_function = VFO;
+    widget = gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    break;
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
+  case CONTROLLER2_V2:
+    // 3 horizontal double encoders with switches
+    row = 5;
+    col = 0;
+
+    for (int i = 0; i < 3; i++) {
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
       gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,0,2,1,1);
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+    }
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Top</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,1,2,1,1);
+    row++;
+    col = 0;
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Bottom</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,2,2,1,1);
+    for (int i = 0; i < 3; i++) {
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
+      gtk_label_set_markup (GTK_LABEL(widget), "<b>Top</b>");
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+    }
 
+    row++;
+    col = 0;
 
-      for(int i=0;i<2;i++) {
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,0,3+i,1,1);
+    for (int i = 0; i < 3; i++) {
+      widget = gtk_label_new(NULL);
+      gtk_widget_set_name(widget, "small_button");
+      gtk_label_set_markup (GTK_LABEL(widget), "<b>Bottom</b>");
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+      col++;
+    }
 
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_top_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,1,3+i,1,1);
+    // padding
+    row = 1;
+    col = 6;
+    widget = gtk_label_new("    ");
+    gtk_widget_set_name(widget, "small_button");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    // 1 vertical single double with switch plus VFO encoder
+    row = 1;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    widget = gtk_button_new_with_label(ActionTable[encoders[3].switch_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(3));
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    row++;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Top</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    widget = gtk_button_new_with_label(ActionTable[encoders[3].top_encoder_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(3));
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    row++;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Bottom</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    widget = gtk_button_new_with_label(ActionTable[encoders[3].bottom_encoder_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(3));
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    row = 7;
+    col = 7;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Encoder</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    col++;
+    // This one is hard-wired to "VFO" and generates no signal
+    encoders[4].bottom_encoder_function = VFO;
+    widget = gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
+    break;
 
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,2,3+i,1,1);
-      }
+  case G2_FRONTPANEL:
+    // 2 vertical double encoders with switches left side
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Left edge Encoders</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 0, 1, 3, 1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 0, 2, 1, 1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Top</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 1, 2, 1, 1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Bottom</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 2, 2, 1, 1);
 
-      // 2 vertical double encoders with switches right side
+    for (int i = 0; i < 2; i++) {
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, 0, 3 + i, 1, 1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, 1, 3 + i, 1, 1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, 2, 3 + i, 1, 1);
+    }
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget), "<b>Right edge Encoders</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,4,1,3,1);
+    // 2 vertical double encoders with switches right side
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Right edge Encoders</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 4, 1, 3, 1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 4, 2, 1, 1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Top</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 5, 2, 1, 1);
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Bottom</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 6, 2, 1, 1);
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget), "<b>Switch</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,4,2,1,1);
+    for (int i = 2; i < 4; i++) {
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, 4, 1 + i, 1, 1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, 5, 1 + i, 1, 1);
+      widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
+      gtk_widget_set_name(widget, "small_button");
+      g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
+      gtk_grid_attach(GTK_GRID(grid), widget, 6, 1 + i, 1, 1);
+    }
 
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Top</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,5,2,1,1);
-
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Bottom</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,6,2,1,1);
-
-
-      for(int i=2;i<4;i++) {
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_switch_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,4,1+i,1,1);
-
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_top_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,5,1+i,1,1);
-
-        widget=gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
-        gtk_widget_set_name(widget,"small_button");
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(encoder_bottom_cb),GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid),widget,6,1+i,1,1);
-      }
-
-      widget=gtk_label_new(NULL);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_label_set_markup (GTK_LABEL(widget),"<b>Main Dial</b>");
-      gtk_grid_attach(GTK_GRID(grid),widget,3,5,1,1);
-
-      // This one is hard-wired to "VFO" and generates no signal
-      encoders[4].bottom_encoder_function=VFO;
-      widget=gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
-      gtk_widget_set_name(widget,"small_button");
-      gtk_grid_attach(GTK_GRID(grid),widget,3,6,1,1);
-
-      break;
+    widget = gtk_label_new(NULL);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_label_set_markup (GTK_LABEL(widget), "<b>Main Dial</b>");
+    gtk_grid_attach(GTK_GRID(grid), widget, 3, 5, 1, 1);
+    // This one is hard-wired to "VFO" and generates no signal
+    encoders[4].bottom_encoder_function = VFO;
+    widget = gtk_button_new_with_label(ActionTable[encoders[4].bottom_encoder_function].str);
+    gtk_widget_set_name(widget, "small_button");
+    gtk_grid_attach(GTK_GRID(grid), widget, 3, 6, 1, 1);
+    break;
   }
 
-  gtk_container_add(GTK_CONTAINER(content),grid);
-
-  sub_menu=dialog;
-
+  gtk_container_add(GTK_CONTAINER(content), grid);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }

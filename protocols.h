@@ -20,13 +20,12 @@
 extern gboolean enable_protocol_1;
 extern gboolean enable_protocol_2;
 #ifdef SOAPYSDR
-extern gboolean enable_soapy_protocol;
+  extern gboolean enable_soapy_protocol;
 #endif
 #ifdef STEMLAB_DISCOVERY
-extern gboolean enable_stemlab;
+  extern gboolean enable_stemlab;
 #endif
 extern gboolean autostart;
 
-extern void protocols_save_state(void);
-extern void protocols_restore_state(void);
+extern void protocolsRestoreState(void);
 extern void configure_protocols(GtkWidget *parent);

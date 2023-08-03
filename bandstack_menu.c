@@ -33,16 +33,16 @@
 #include "vfo.h"
 #include "button_text.h"
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static GtkWidget *last_bandstack;
 
 static void cleanup() {
-  if(dialog!=NULL) {
+  if (dialog != NULL) {
     gtk_widget_destroy(dialog);
-    dialog=NULL;
-    sub_menu=NULL;
-    active_menu=NO_MENU;
+    dialog = NULL;
+    sub_menu = NULL;
+    active_menu = NO_MENU;
   }
 }
 
@@ -57,7 +57,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean bandstack_select_cb (GtkWidget *widget, gpointer        data) {
-  int b=GPOINTER_TO_UINT(data);
+  int b = GPOINTER_TO_UINT(data);
 
   if (active_receiver->id == 0) {
     //
@@ -66,78 +66,76 @@ static gboolean bandstack_select_cb (GtkWidget *widget, gpointer        data) {
     // current frequency/mode, which should be reflected by the button text.
     //
     char label[32];
+
     if (vfo[0].ctun) {
-      snprintf(label,32,"%lld %s",vfo[0].ctun_frequency,mode_string[vfo[0].mode]);
+      snprintf(label, 32, "%lld %s", vfo[0].ctun_frequency, mode_string[vfo[0].mode]);
     } else {
-      snprintf(label,32,"%lld %s",vfo[0].frequency,mode_string[vfo[0].mode]);
+      snprintf(label, 32, "%lld %s", vfo[0].frequency, mode_string[vfo[0].mode]);
     }
+
     gtk_button_set_label(GTK_BUTTON(last_bandstack), label);
   }
 
-  set_button_text_color(last_bandstack,"default");
-  last_bandstack=widget;
-  set_button_text_color(last_bandstack,"orange");
+  set_button_text_color(last_bandstack, "default");
+  last_bandstack = widget;
+  set_button_text_color(last_bandstack, "orange");
   vfo_bandstack_changed(b);
   return FALSE;
 }
 
 void bandstack_menu(GtkWidget *parent) {
   int i;
-
-  dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  sprintf(title,"piHPSDR - Band Stack (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
-  gtk_window_set_title(GTK_WINDOW(dialog),title);
+  sprintf(title, "piHPSDR - Band Stack (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
+  gtk_window_set_title(GTK_WINDOW(dialog), title);
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
-
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-  GtkWidget *grid=gtk_grid_new();
-
-  gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_column_spacing (GTK_GRID(grid),5);
-  gtk_grid_set_row_spacing (GTK_GRID(grid),5);
-
-  GtkWidget *close_b=gtk_button_new_with_label("Close");
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *grid = gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
+  gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
+  GtkWidget *close_b = gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
-
-  BAND *band=band_get_band(vfo[active_receiver->id].band);
-  BANDSTACK *bandstack=band->bandstack;
-
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
+  BAND *band = band_get_band(vfo[active_receiver->id].band);
+  BANDSTACK *bandstack = band->bandstack;
   char label[32];
-  int row=1;
-  int col=0;
-  for(i=0;i<bandstack->entries;i++) {
-    const BANDSTACK_ENTRY *entry=&bandstack->entry[i];
+  int row = 1;
+  int col = 0;
+
+  for (i = 0; i < bandstack->entries; i++) {
+    const BANDSTACK_ENTRY *entry = &bandstack->entry[i];
+
     if (entry->ctun) {
-      sprintf(label,"%lld %s",entry->ctun_frequency,mode_string[entry->mode]);
+      sprintf(label, "%lld %s", entry->ctun_frequency, mode_string[entry->mode]);
     } else {
-      sprintf(label,"%lld %s",entry->frequency,mode_string[entry->mode]);
+      sprintf(label, "%lld %s", entry->frequency, mode_string[entry->mode]);
     }
-    GtkWidget *b=gtk_button_new_with_label(label);
-    set_button_text_color(b,"default");
-    if(i==vfo[active_receiver->id].bandstack) {
-      set_button_text_color(b,"orange");
-      last_bandstack=b;
+
+    GtkWidget *b = gtk_button_new_with_label(label);
+    set_button_text_color(b, "default");
+
+    if (i == vfo[active_receiver->id].bandstack) {
+      set_button_text_color(b, "orange");
+      last_bandstack = b;
     }
+
     gtk_widget_show(b);
-    gtk_grid_attach(GTK_GRID(grid),b,col,row,1,1);
-    g_signal_connect(b,"clicked",G_CALLBACK(bandstack_select_cb),(gpointer)(long)i);
+    gtk_grid_attach(GTK_GRID(grid), b, col, row, 1, 1);
+    g_signal_connect(b, "clicked", G_CALLBACK(bandstack_select_cb), (gpointer)(long)i);
     col++;
-    if(col>=5) {
-      col=0;
+
+    if (col >= 5) {
+      col = 0;
       row++;
     }
   }
 
-  gtk_container_add(GTK_CONTAINER(content),grid);
-
-  sub_menu=dialog;
-
+  gtk_container_add(GTK_CONTAINER(content), grid);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
-
 }

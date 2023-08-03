@@ -34,16 +34,16 @@
 #include "vfo.h"
 #include "button_text.h"
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static GtkWidget *last_mode;
 
 static void cleanup() {
-  if(dialog!=NULL) {
+  if (dialog != NULL) {
     gtk_widget_destroy(dialog);
-    dialog=NULL;
-    sub_menu=NULL;
-    active_menu=NO_MENU;
+    dialog = NULL;
+    sub_menu = NULL;
+    active_menu = NO_MENU;
   }
 }
 
@@ -58,56 +58,50 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean mode_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  int m=GPOINTER_TO_UINT(data);
-  set_button_text_color(last_mode,"default");
-  last_mode=widget;
-  set_button_text_color(last_mode,"orange");
+  int m = GPOINTER_TO_UINT(data);
+  set_button_text_color(last_mode, "default");
+  last_mode = widget;
+  set_button_text_color(last_mode, "orange");
   vfo_mode_changed(m);
   return FALSE;
 }
 
 void mode_menu(GtkWidget *parent) {
   int i;
-
-  dialog=gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  sprintf(title,"piHPSDR - Mode (RX %d VFO %s)",active_receiver->id,active_receiver->id==0?"A":"B");
-  gtk_window_set_title(GTK_WINDOW(dialog),title);
+  sprintf(title, "piHPSDR - Mode (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
+  gtk_window_set_title(GTK_WINDOW(dialog), title);
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
   set_backgnd(dialog);
-
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-  GtkWidget *grid=gtk_grid_new();
-
-  gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
-  gtk_grid_set_column_spacing (GTK_GRID(grid),5);
-  gtk_grid_set_row_spacing (GTK_GRID(grid),5);
-
-  GtkWidget *close_b=gtk_button_new_with_label("Close");
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *grid = gtk_grid_new();
+  gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
+  gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
+  GtkWidget *close_b = gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid),close_b,0,0,1,1);
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
+  int mode = vfo[active_receiver->id].mode;
 
-  int mode=vfo[active_receiver->id].mode;
+  for (i = 0; i < MODES; i++) {
+    GtkWidget *b = gtk_button_new_with_label(mode_string[i]);
 
-  for(i=0;i<MODES;i++) {
-    GtkWidget *b=gtk_button_new_with_label(mode_string[i]);
-    if(i==mode) {
-      set_button_text_color(b,"orange");
-      last_mode=b;
+    if (i == mode) {
+      set_button_text_color(b, "orange");
+      last_mode = b;
     } else {
-      set_button_text_color(b,"default");
+      set_button_text_color(b, "default");
     }
+
     gtk_widget_show(b);
-    gtk_grid_attach(GTK_GRID(grid),b,i%5,1+(i/5),1,1);
-    g_signal_connect(b,"button-press-event",G_CALLBACK(mode_select_cb),(gpointer)(long)i);
+    gtk_grid_attach(GTK_GRID(grid), b, i % 5, 1 + (i / 5), 1, 1);
+    g_signal_connect(b, "button-press-event", G_CALLBACK(mode_select_cb), (gpointer)(long)i);
   }
-  gtk_container_add(GTK_CONTAINER(content),grid);
 
-  sub_menu=dialog;
-
+  gtk_container_add(GTK_CONTAINER(content), grid);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
-
 }

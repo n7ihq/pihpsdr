@@ -38,111 +38,81 @@
 MEM mem[NUM_OF_MEMORYS];  // This makes it a compile time option
 
 void memSaveState() {
-    char name[128];
-    char value[128];
-    int b;
+  char name[128];
+  char value[128];
 
-    for(b=0;b<NUM_OF_MEMORYS;b++) {
-      sprintf(value,"%lld",mem[b].frequency);
-      sprintf(name,"mem.%d.freqA",b);
-      setProperty(name,value);
-
-      sprintf(value,"%d",mem[b].mode);
-      sprintf(name,"mem.%d.mode",b);
-      setProperty(name,value);
-
-      sprintf(value,"%d",mem[b].filter);
-      sprintf(name,"mem.%d.filter",b);
-      setProperty(name,value);
-    }
+  for (int b = 0; b < NUM_OF_MEMORYS; b++) {
+    SetPropI1("mem.%d.freqA", b,           mem[b].frequency);
+    SetPropI1("mem.%d.mode", b,            mem[b].mode);
+    SetPropI1("mem.%d.filter", b,           mem[b].filter);
+  }
 }
 
 void memRestoreState() {
-    int b;
-    char name[128];
+  char name[128];
+  char *value;
+  t_print("memRestoreState: restore memory\n");
 
-    // Initialize the array with default values
-    // Allows this to be a compile time option..
-    for(b=0; b<NUM_OF_MEMORYS; b++) {
-       mem[b].frequency = 28010000LL;
-       mem[b].mode = modeCWU;
-       mem[b].filter = filterF0;
-    }
-
-    t_print("memRestoreState: restore memory\n");
-
-    for(b=0;b<NUM_OF_MEMORYS;b++) {
-      char* value;
-      sprintf(name,"mem.%d.freqA",b);
-      value=getProperty(name);
-      if(value) {
-         mem[b].frequency=atoll(value);
-         t_print("RESTORE MEM:Mem %d=FreqA %11lld\n",b,mem[b].frequency);
-      }
-
-      sprintf(name,"mem.%d.mode",b);
-      value=getProperty(name);
-      if(value) {
-        mem[b].mode=atoi(value);
-        t_print("RESTORE: index=%d mode=%d\n",b,mem[b].mode);
-      }
-
-      sprintf(name,"mem.%d.filter",b);
-      value=getProperty(name);
-      if(value) {
-        mem[b].filter=atoi(value);
-        t_print("RESTORE: index=%d filter=%d\n",b,mem[b].filter);
-      }
-    }
+  for (int b = 0; b < NUM_OF_MEMORYS; b++) {
+    //
+    // Set defaults
+    //
+    mem[b].frequency = 28010000LL;
+    mem[b].mode = modeCWU;
+    mem[b].filter = filterF0;
+    //
+    // Read from props
+    //
+    GetPropI1("mem.%d.freqA", b,           mem[b].frequency);
+    GetPropI1("mem.%d.mode", b,            mem[b].mode);
+    GetPropI1("mem.%d.filter", b,           mem[b].filter);
+  }
 }
 
 void recall_memory_slot(int index) {
-    long long new_freq;
-
-    new_freq = mem[index].frequency;
-    t_print("recall_select_cb: Index=%d\n",index);
-    t_print("recall_select_cb: freqA=%11lld\n",new_freq);
-    t_print("recall_select_cb: mode=%d\n",mem[index].mode);
-    t_print("recall_select_cb: filter=%d\n",mem[index].filter);
-
-    //
-    // Recalling a memory slot is equivalent to the following actions
-    //
-    // a) set the new frequency via the "Freq" menu
-    // b) set the new mode via the "Mode" menu
-    // c) set the new filter via the "Filter" menu
-    //
-    // Step b) automatically restores the filter, noise reduction, and
-    // equalizer settings stored with that mode
-    //
-    // Step c) will not only change the filter but also store the new setting
-    // with that mode.
-    //
-    vfo_set_frequency(active_receiver->id, new_freq);
-    vfo_mode_changed(mem[index].mode);
-    vfo_filter_changed(mem[index].filter);
-    g_idle_add(ext_vfo_update,NULL);
+  long long new_freq;
+  new_freq = mem[index].frequency;
+  t_print("recall_select_cb: Index=%d\n", index);
+  t_print("recall_select_cb: freqA=%11lld\n", new_freq);
+  t_print("recall_select_cb: mode=%d\n", mem[index].mode);
+  t_print("recall_select_cb: filter=%d\n", mem[index].filter);
+  //
+  // Recalling a memory slot is equivalent to the following actions
+  //
+  // a) set the new frequency via the "Freq" menu
+  // b) set the new mode via the "Mode" menu
+  // c) set the new filter via the "Filter" menu
+  //
+  // Step b) automatically restores the filter, noise reduction, and
+  // equalizer settings stored with that mode
+  //
+  // Step c) will not only change the filter but also store the new setting
+  // with that mode.
+  //
+  vfo_set_frequency(active_receiver->id, new_freq);
+  vfo_mode_changed(mem[index].mode);
+  vfo_filter_changed(mem[index].filter);
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 void store_memory_slot(int index) {
-   int id=active_receiver->id;
+  int id = active_receiver->id;
 
-   //
-   // Store current frequency, mode, and filter in slot #index
-   //
-   if (vfo[id].ctun) {
-     mem[index].frequency = vfo[id].ctun_frequency;
-   } else {
-     mem[index].frequency = vfo[id].frequency;
-   }
-   mem[index].mode = vfo[id].mode;
-   mem[index].filter=vfo[id].filter;
+  //
+  // Store current frequency, mode, and filter in slot #index
+  //
+  if (vfo[id].ctun) {
+    mem[index].frequency = vfo[id].ctun_frequency;
+  } else {
+    mem[index].frequency = vfo[id].frequency;
+  }
 
-   t_print("store_select_cb: Index=%d\n",index);
-   t_print("store_select_cb: freqA=%11lld\n",mem[index].frequency);
-   t_print("store_select_cb: mode=%d\n",mem[index].mode);
-   t_print("store_select_cb: filter=%d\n",mem[index].filter);
-
-   memSaveState();
+  mem[index].mode = vfo[id].mode;
+  mem[index].filter = vfo[id].filter;
+  t_print("store_select_cb: Index=%d\n", index);
+  t_print("store_select_cb: freqA=%11lld\n", mem[index].frequency);
+  t_print("store_select_cb: mode=%d\n", mem[index].mode);
+  t_print("store_select_cb: filter=%d\n", mem[index].filter);
+  memSaveState();
 }
 

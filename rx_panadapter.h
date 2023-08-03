@@ -22,7 +22,7 @@
 
 void rx_panadapter_update(RECEIVER* rx);
 
-void rx_panadapter_init(RECEIVER *rx,int width,int height);
+void rx_panadapter_init(RECEIVER *rx, int width, int height);
 
 
 #endif

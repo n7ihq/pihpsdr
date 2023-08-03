@@ -21,7 +21,7 @@
 #define _MODE_H
 
 enum {
-  modeLSB=0,
+  modeLSB = 0,
   modeUSB,
   modeDSB,
   modeCWL,

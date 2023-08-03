@@ -26,20 +26,16 @@ typedef int clockid_t;
 #include <mach/mach_time.h>
 
 // here to avoid problem on linking
-static inline int clock_gettime( clockid_t clk_id, struct timespec *ts )
-{
+static inline int clock_gettime( clockid_t clk_id, struct timespec *ts ) {
   int ret = -1;
-  if ( ts )
-  {
-    if      ( CLOCK_REALTIME == clk_id )
-    {
+
+  if ( ts ) {
+    if      ( CLOCK_REALTIME == clk_id ) {
       struct timeval tv;
       ret = gettimeofday(&tv, NULL);
       ts->tv_sec  = tv.tv_sec;
       ts->tv_nsec = tv.tv_usec * 1000;
-    }
-    else if ( CLOCK_MONOTONIC == clk_id  || CLOCK_MONOTONIC_RAW == clk_id )
-    {
+    } else if ( CLOCK_MONOTONIC == clk_id  || CLOCK_MONOTONIC_RAW == clk_id ) {
       //
       // For the time being, accept CLOCK_MONOTONIC_RAW but treat it
       // the same way as CLOCK_MONOTONIC.
@@ -53,6 +49,7 @@ static inline int clock_gettime( clockid_t clk_id, struct timespec *ts )
       ret = 0;
     }
   }
+
   return ret;
 }
 
@@ -69,8 +66,8 @@ static inline int clock_gettime( clockid_t clk_id, struct timespec *ts )
 #define TIMER_ABSTIME 12345
 
 static inline int clock_nanosleep(clockid_t clock_id, int flags,
-                              const struct timespec *request,
-                              struct timespec *remain) {
+                                  const struct timespec *request,
+                                  struct timespec *remain) {
   struct timespec now;
   int rc;
 
@@ -80,18 +77,21 @@ static inline int clock_nanosleep(clockid_t clock_id, int flags,
     //
     clock_gettime(CLOCK_MONOTONIC, &now);
     now.tv_sec = request->tv_sec  - now.tv_sec;
-    now.tv_nsec= request->tv_nsec - now.tv_nsec;
+    now.tv_nsec = request->tv_nsec - now.tv_nsec;
+
     while (now.tv_nsec < 0) {
       now.tv_nsec += 1000000000;
       now.tv_sec--;
     }
-    rc=nanosleep(&now, remain);
+
+    rc = nanosleep(&now, remain);
   } else {
     //
     // sleep for the given period
     //
-    rc=nanosleep(request, remain);
+    rc = nanosleep(request, remain);
   }
+
   return rc;
 }
 #endif  // !defined(TIMER_ABSTIME)

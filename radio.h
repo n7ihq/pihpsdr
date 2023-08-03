@@ -132,11 +132,6 @@ extern int classE;
 
 extern int tx_out_of_band;
 
-extern int tx_cfir;
-extern int tx_leveler;
-
-extern double tone_level;
-
 extern int filter_board;
 extern int pa_enabled;
 extern int pa_power;
@@ -229,10 +224,6 @@ extern unsigned int AIN3;
 extern unsigned int AIN4;
 extern unsigned int AIN6;
 extern int supply_volts;
-
-extern long long frequencyB;
-extern int modeB;
-extern int filterB;
 
 extern int split;
 

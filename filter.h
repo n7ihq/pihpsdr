@@ -23,15 +23,15 @@
 #include "mode.h"
 
 struct _FILTER {
-    int low;
-    int high;
-    char* title;
+  int low;
+  int high;
+  char* title;
 };
 
 typedef struct _FILTER FILTER;
 
 enum {
-  filterF0=0,
+  filterF0 = 0,
   filterF1,
   filterF2,
   filterF3,
@@ -54,8 +54,8 @@ extern const int var2_default_high[MODES];
 
 extern void filterSaveState(void);
 extern void filterRestoreState(void);
-extern void filter_width_changed(int id,int increment);
-extern void filter_shift_changed(int id,int increment);
+extern void filter_width_changed(int id, int increment);
+extern void filter_shift_changed(int id, int increment);
 extern void filter_cut_changed(int id, int action, int increment);
 extern void filter_cut_default(int id);
 #endif

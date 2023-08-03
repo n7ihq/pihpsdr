@@ -16,21 +16,22 @@
 #include "midi.h"
 
 void DoTheMidi(int action, enum ACTIONtype type, int val) {
+  //t_print("%s: action=%d type=%d val=%d\n",__FUNCTION__,action,type,val);
+  switch (type) {
+  case MIDI_KEY:
+    schedule_action(action, val ? PRESSED : RELEASED, 0);
+    break;
 
-    //t_print("%s: action=%d type=%d val=%d\n",__FUNCTION__,action,type,val);
+  case MIDI_KNOB:
+    schedule_action(action, ABSOLUTE, val);
+    break;
 
-    switch(type) {
-      case MIDI_KEY:
-        schedule_action(action, val?PRESSED:RELEASED, 0);
-        break;
-      case MIDI_KNOB:
-        schedule_action(action, ABSOLUTE, val);
-        break;
-      case MIDI_WHEEL:
-        schedule_action(action, RELATIVE, val);
-        break;
-      default:
-        // other types cannot happen for MIDI
-        break;
-    }
+  case MIDI_WHEEL:
+    schedule_action(action, RELATIVE, val);
+    break;
+
+  default:
+    // other types cannot happen for MIDI
+    break;
+  }
 }

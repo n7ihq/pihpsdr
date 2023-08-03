@@ -39,78 +39,73 @@
 #include "gpio.h"
 #include "i2c.h"
 
-static GtkWidget *dialog=NULL;
+static GtkWidget *dialog = NULL;
 
 static SWITCH *temp_switches;
 
 
-static void switch_page_cb(GtkNotebook *notebook,GtkWidget *page,guint page_num,gpointer user_data) {
-  temp_switches=switches_controller1[page_num];
+static void switch_page_cb(GtkNotebook *notebook, GtkWidget *page, guint page_num, gpointer user_data) {
+  temp_switches = switches_controller1[page_num];
 }
 
 static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
-  int sw=GPOINTER_TO_INT(data);
-  int action=action_dialog(dialog,CONTROLLER_SWITCH,temp_switches[sw].switch_function);
-  gtk_button_set_label(GTK_BUTTON(widget),ActionTable[action].str);
-  temp_switches[sw].switch_function=action;
+  int sw = GPOINTER_TO_INT(data);
+  int action = action_dialog(dialog, CONTROLLER_SWITCH, temp_switches[sw].switch_function);
+  gtk_button_set_label(GTK_BUTTON(widget), ActionTable[action].str);
+  temp_switches[sw].switch_function = action;
   update_toolbar_labels();
   return TRUE;
 }
 
-static void response_event(GtkWidget *mydialog,gint id,gpointer user_data) {
+static void response_event(GtkWidget *mydialog, gint id, gpointer user_data) {
   // mydialog is a copy of dialog
   gtk_widget_destroy(mydialog);
-  dialog=NULL;
-  active_menu=NO_MENU;
-  sub_menu=NULL;
+  dialog = NULL;
+  active_menu = NO_MENU;
+  sub_menu = NULL;
 }
 
 void toolbar_menu(GtkWidget *parent) {
   gchar label[64];
   GtkWidget *notebook;
   GtkWidget *widget;
-  gint lfunction=0;
-
-  dialog=gtk_dialog_new_with_buttons("piHPSDR - Toolbar Actions",GTK_WINDOW(parent),GTK_DIALOG_DESTROY_WITH_PARENT,"_OK",GTK_RESPONSE_ACCEPT,NULL);
+  gint lfunction = 0;
+  dialog = gtk_dialog_new_with_buttons("piHPSDR - Toolbar Actions", GTK_WINDOW(parent), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                       "_OK", GTK_RESPONSE_ACCEPT, NULL);
   g_signal_connect (dialog, "response", G_CALLBACK (response_event), NULL);
   set_backgnd(dialog);
-
-  GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-  const int max_switches=8;
-
-  notebook=gtk_notebook_new();
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  const int max_switches = 8;
+  notebook = gtk_notebook_new();
   set_backgnd(notebook);
 
-  for (lfunction=0; lfunction<MAX_FUNCTIONS; lfunction++) {
-    GtkWidget *grid=gtk_grid_new();
-    gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-    gtk_grid_set_row_homogeneous(GTK_GRID(grid),FALSE);
-    gtk_grid_set_column_spacing (GTK_GRID(grid),0);
-    gtk_grid_set_row_spacing (GTK_GRID(grid),0);
+  for (lfunction = 0; lfunction < MAX_FUNCTIONS; lfunction++) {
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+    gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE);
+    gtk_grid_set_column_spacing (GTK_GRID(grid), 0);
+    gtk_grid_set_row_spacing (GTK_GRID(grid), 0);
+    temp_switches = switches_controller1[lfunction];
 
-    temp_switches=switches_controller1[lfunction];
-
-    for(int i=0;i<max_switches;i++) {
-      if (i == max_switches-1) {
+    for (int i = 0; i < max_switches; i++) {
+      if (i == max_switches - 1) {
         // Rightmost switch is hardwired to FUNCTION
-        temp_switches[i].switch_function=FUNCTION;
-        widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
-        gtk_grid_attach(GTK_GRID(grid),widget,i,1,1,1);
+        temp_switches[i].switch_function = FUNCTION;
+        widget = gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
+        gtk_grid_attach(GTK_GRID(grid), widget, i, 1, 1, 1);
       } else {
-        widget=gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
-        gtk_grid_attach(GTK_GRID(grid),widget,i,1,1,1);
-        g_signal_connect(widget,"button-press-event",G_CALLBACK(switch_cb),GINT_TO_POINTER(i));
+        widget = gtk_button_new_with_label(ActionTable[temp_switches[i].switch_function].str);
+        gtk_grid_attach(GTK_GRID(grid), widget, i, 1, 1, 1);
+        g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(i));
       }
     }
 
-    g_sprintf(label,"Function %d",lfunction);
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),grid,gtk_label_new(label));
+    g_sprintf(label, "Function %d", lfunction);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), grid, gtk_label_new(label));
   }
-  gtk_container_add(GTK_CONTAINER(content),notebook);
-  g_signal_connect (notebook, "switch-page",G_CALLBACK(switch_page_cb),NULL);
 
-  sub_menu=dialog;
-
+  gtk_container_add(GTK_CONTAINER(content), notebook);
+  g_signal_connect (notebook, "switch-page", G_CALLBACK(switch_page_cb), NULL);
+  sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }

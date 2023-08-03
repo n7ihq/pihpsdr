@@ -40,7 +40,7 @@
 static GtkWidget *meter;
 static cairo_surface_t *meter_surface = NULL;
 
-static int last_meter_type=SMETER;
+static int last_meter_type = SMETER;
 
 #define min_rxlvl -200.0
 #define min_alc   -100.0
@@ -50,26 +50,24 @@ static double max_rxlvl = min_rxlvl;
 static double max_alc   = min_alc;
 static double max_pwr   = min_pwr;
 
-static int max_count=0;
+static int max_count = 0;
 
 static gboolean
 meter_configure_event_cb (GtkWidget         *widget,
-            GdkEventConfigure *event,
-            gpointer           data)
-{
-  if (meter_surface)
+                          GdkEventConfigure *event,
+                          gpointer           data) {
+  if (meter_surface) {
     cairo_surface_destroy (meter_surface);
+  }
 
   meter_surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-                                       CAIRO_CONTENT_COLOR,METER_WIDTH,METER_HEIGHT);
-
+                  CAIRO_CONTENT_COLOR, METER_WIDTH, METER_HEIGHT);
   /* Initialize the surface to black */
   cairo_t *cr;
   cr = cairo_create (meter_surface);
   cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
   cairo_paint (cr);
   cairo_destroy (cr);
-
   return TRUE;
 }
 
@@ -86,54 +84,47 @@ meter_draw_cb (GtkWidget *widget, cairo_t   *cr, gpointer   data) {
 
 static gboolean
 meter_press_event_cb (GtkWidget *widget,
-               GdkEventButton *event,
-               gpointer        data)
-{
+                      GdkEventButton *event,
+                      gpointer        data) {
   start_meter();
   return TRUE;
 }
 
 
-GtkWidget* meter_init(int width,int height) {
-
-t_print("meter_init: width=%d height=%d\n",width,height);
-
+GtkWidget* meter_init(int width, int height) {
+  t_print("meter_init: width=%d height=%d\n", width, height);
   meter = gtk_drawing_area_new ();
   gtk_widget_set_size_request (meter, width, height);
-
   /* Signals used to handle the backing surface */
   g_signal_connect (meter, "draw",
-            G_CALLBACK (meter_draw_cb), NULL);
-  g_signal_connect (meter,"configure-event",
-            G_CALLBACK (meter_configure_event_cb), NULL);
-
+                    G_CALLBACK (meter_draw_cb), NULL);
+  g_signal_connect (meter, "configure-event",
+                    G_CALLBACK (meter_configure_event_cb), NULL);
   /* Event signals */
   g_signal_connect (meter, "button-press-event",
-            G_CALLBACK (meter_press_event_cb), NULL);
+                    G_CALLBACK (meter_press_event_cb), NULL);
   gtk_widget_set_events (meter, gtk_widget_get_events (meter)
-                     | GDK_BUTTON_PRESS_MASK);
-
+                         | GDK_BUTTON_PRESS_MASK);
   return meter;
 }
 
 
-void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double exciter,double alc,double swr) {
-
+void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, double exciter, double alc, double swr) {
   double rxlvl;   // only used for RX input level, clones "value"
   double pwr;     // only used for TX power, clones "value"
   char sf[32];
-  char *units="W";
-  double interval=10.0;
+  char *units = "W";
+  double interval = 10.0;
   cairo_t *cr = cairo_create (meter_surface);
-  const BAND *band=band_get_current_band();
+  const BAND *band = band_get_current_band();
 
   //
   // First, do all the work that  does not depend on whether the
   // meter is analog or digital.
   //
 
-  if(last_meter_type!=meter_type) {
-    last_meter_type=meter_type;
+  if (last_meter_type != meter_type) {
+    last_meter_type = meter_type;
     //
     // reset max values
     //
@@ -154,159 +145,172 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   //
   // A new max value will therefore be immediately visible, the display stays (if not surpassed) for
   // CNTMAX cycles and then the displayed value will gradually approach the new one(s).
-  #define CNTMAX 5
-  #define EXPAV1 0.75
-  #define EXPAV2 0.25
+#define CNTMAX 5
+#define EXPAV1 0.75
+#define EXPAV2 0.25
 
   switch (meter_type) {
-    case POWER:
-      pwr=value;
-      if(pwr==0.0 || band->disablePA || !pa_enabled) {
-        pwr=exciter;
+  case POWER:
+    pwr = value;
+
+    if (pwr == 0.0 || band->disablePA || !pa_enabled) {
+      pwr = exciter;
+    }
+
+    if (band->disablePA || !pa_enabled) {
+      units = "mW";
+      interval = 100.0;
+      pwr = pwr * 1000.0;
+    } else {
+      switch (pa_power) {
+      case PA_1W:
+        units = "mW";
+        interval = 100.0;
+        pwr = pwr * 1000.0;
+        break;
+
+      case PA_10W:
+        interval = 1.0;
+        break;
+
+      case PA_30W:
+        interval = 3.0;
+        break;
+
+      case PA_50W:
+        interval = 5.0;
+        break;
+
+      case PA_100W:
+        interval = 10.0;
+        break;
+
+      case PA_200W:
+        interval = 20.0;
+        break;
+
+      case PA_500W:
+        interval = 50.0;
+        break;
       }
-      if(band->disablePA || !pa_enabled) {
-        units="mW";
-        interval=100.0;
-        pwr=pwr*1000.0;
-      } else {
-        switch(pa_power) {
-          case PA_1W:
-            units="mW";
-            interval=100.0;
-            pwr=pwr*1000.0;
-            break;
-          case PA_10W:
-            interval=1.0;
-            break;
-          case PA_30W:
-            interval=3.0;
-            break;
-          case PA_50W:
-            interval=5.0;
-            break;
-          case PA_100W:
-            interval=10.0;
-            break;
-          case PA_200W:
-            interval=20.0;
-            break;
-          case PA_500W:
-            interval=50.0;
-            break;
-        }
-      }
-      if (max_count > CNTMAX) {
-        max_pwr = EXPAV1*max_pwr + EXPAV2*pwr;
-        max_alc = EXPAV1*max_alc + EXPAV2*alc;
-        // This is perhaps not necessary ...
-        if (max_pwr < min_pwr) max_pwr=min_pwr;
-        // ... but alc goes to -Infinity during CW
-        if (max_alc < min_alc) max_alc=min_alc;
-      }
-      if (pwr > max_pwr) {
-        max_pwr=pwr;
-        max_count=0;
-      }
-      if (alc > max_alc) {
-        max_alc=alc;
-        max_count=0;
-      }
-      break;
-    case SMETER:
-      rxlvl=value;  // all corrections now in receiver.c
-      if (max_count > CNTMAX) {
-        max_rxlvl=EXPAV1*max_rxlvl + EXPAV2*rxlvl;
-        if (max_rxlvl < min_rxlvl) max_rxlvl=min_rxlvl;
-      }
-      if (rxlvl > max_rxlvl) {
-        max_rxlvl=rxlvl;
-        max_count=0;
-      }
-      break;
+    }
+
+    if (max_count > CNTMAX) {
+      max_pwr = EXPAV1 * max_pwr + EXPAV2 * pwr;
+      max_alc = EXPAV1 * max_alc + EXPAV2 * alc;
+
+      // This is perhaps not necessary ...
+      if (max_pwr < min_pwr) { max_pwr = min_pwr; }
+
+      // ... but alc goes to -Infinity during CW
+      if (max_alc < min_alc) { max_alc = min_alc; }
+    }
+
+    if (pwr > max_pwr) {
+      max_pwr = pwr;
+      max_count = 0;
+    }
+
+    if (alc > max_alc) {
+      max_alc = alc;
+      max_count = 0;
+    }
+
+    break;
+
+  case SMETER:
+    rxlvl = value; // all corrections now in receiver.c
+
+    if (max_count > CNTMAX) {
+      max_rxlvl = EXPAV1 * max_rxlvl + EXPAV2 * rxlvl;
+
+      if (max_rxlvl < min_rxlvl) { max_rxlvl = min_rxlvl; }
+    }
+
+    if (rxlvl > max_rxlvl) {
+      max_rxlvl = rxlvl;
+      max_count = 0;
+    }
+
+    break;
   }
+
   max_count++;
 
   //
   // From now on, DO NOT USE rxlvl,pwr,alc but use max_rxlvl etc.
   //
 
-if(analog_meter) {
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-  cairo_paint (cr);
+  if (analog_meter) {
+    cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+    cairo_paint (cr);
+    cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
-  cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-
-  switch(meter_type) {
-    case SMETER:
-      {
+    switch (meter_type) {
+    case SMETER: {
       //
       // Analog RX display
       //
-      double offset=210.0;
-
+      double offset = 210.0;
       int i;
       double x;
       double y;
       double angle;
       double radians;
-      double cx=(double)METER_WIDTH/2.0;
-      double radius=cx-20.0;
-
+      double cx = (double)METER_WIDTH / 2.0;
+      double radius = cx - 20.0;
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      cairo_arc(cr, cx, cx, radius, 216.0*M_PI/180.0, 324.0*M_PI/180.0);
+      cairo_arc(cr, cx, cx, radius, 216.0 * M_PI / 180.0, 324.0 * M_PI / 180.0);
       cairo_stroke(cr);
-
       cairo_set_line_width(cr, PAN_LINE_EXTRA);
       cairo_set_source_rgba(cr, COLOUR_ALARM);
-      cairo_arc(cr, cx, cx, radius+2, 264.0*M_PI/180.0, 324.0*M_PI/180.0);
+      cairo_arc(cr, cx, cx, radius + 2, 264.0 * M_PI / 180.0, 324.0 * M_PI / 180.0);
       cairo_stroke(cr);
-
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
-      for(i=1;i<10;i++) {
-        angle=((double)i*6.0)+offset;
-        radians=angle*M_PI/180.0;
+      for (i = 1; i < 10; i++) {
+        angle = ((double)i * 6.0) + offset;
+        radians = angle * M_PI / 180.0;
 
-        if((i%2)==1) {
-          cairo_arc(cr, cx, cx, radius+4, radians, radians);
+        if ((i % 2) == 1) {
+          cairo_arc(cr, cx, cx, radius + 4, radians, radians);
           cairo_get_current_point(cr, &x, &y);
           cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
-
-          sprintf(sf,"%d",i);
-          cairo_arc(cr, cx, cx, radius+5, radians, radians);
+          sprintf(sf, "%d", i);
+          cairo_arc(cr, cx, cx, radius + 5, radians, radians);
           cairo_get_current_point(cr, &x, &y);
           cairo_new_path(cr);
-          x-=4.0;
+          x -= 4.0;
           cairo_move_to(cr, x, y);
           cairo_show_text(cr, sf);
         } else {
-          cairo_arc(cr, cx, cx, radius+2, radians, radians);
+          cairo_arc(cr, cx, cx, radius + 2, radians, radians);
           cairo_get_current_point(cr, &x, &y);
           cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
         }
+
         cairo_new_path(cr);
       }
 
-      for(i=20;i<=60;i+=20) {
-        angle=((double)i+54.0)+offset;
-        radians=angle*M_PI/180.0;
-        cairo_arc(cr, cx, cx, radius+4, radians, radians);
+      for (i = 20; i <= 60; i += 20) {
+        angle = ((double)i + 54.0) + offset;
+        radians = angle * M_PI / 180.0;
+        cairo_arc(cr, cx, cx, radius + 4, radians, radians);
         cairo_get_current_point(cr, &x, &y);
         cairo_arc(cr, cx, cx, radius, radians, radians);
         cairo_line_to(cr, x, y);
         cairo_stroke(cr);
-
-        sprintf(sf,"+%d",i);
-        cairo_arc(cr, cx, cx, radius+5, radians, radians);
+        sprintf(sf, "+%d", i);
+        cairo_arc(cr, cx, cx, radius + 5, radians, radians);
         cairo_get_current_point(cr, &x, &y);
         cairo_new_path(cr);
-        x-=4.0;
+        x -= 4.0;
         cairo_move_to(cr, x, y);
         cairo_show_text(cr, sf);
         cairo_new_path(cr);
@@ -314,85 +318,78 @@ if(analog_meter) {
 
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
-
-      angle=fmax(-127.0,max_rxlvl)+127.0+offset;
+      angle = fmax(-127.0, max_rxlvl) + 127.0 + offset;
 
       // if frequency > 30MHz then -93 is S9
-      if(vfo[active_receiver->id].frequency>30000000LL) {
-        angle=angle+20;
+      if (vfo[active_receiver->id].frequency > 30000000LL) {
+        angle = angle + 20;
       }
 
-      radians=angle*M_PI/180.0;
-      cairo_arc(cr, cx, cx, radius+8, radians, radians);
+      radians = angle * M_PI / 180.0;
+      cairo_arc(cr, cx, cx, radius + 8, radians, radians);
       cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
-
       cairo_set_source_rgba(cr, COLOUR_METER);
-      sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
-      cairo_move_to(cr, 80, METER_HEIGHT-2);
+      sprintf(sf, "%d dBm", (int)(max_rxlvl + 0.5));
+      cairo_move_to(cr, 80, METER_HEIGHT - 2);
       cairo_show_text(cr, sf);
+    }
+    break;
 
-      }
-      break;
-    case POWER:
-      {
+    case POWER: {
       //
       // Analog TX display
       //
-      double offset=220.0;
-
+      double offset = 220.0;
       int i;
       double x;
       double y;
       double angle;
       double radians;
-      double cx=(double)METER_WIDTH/2.0;
-      double radius=cx-20.0;
-
+      double cx = (double)METER_WIDTH / 2.0;
+      double radius = cx - 20.0;
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      cairo_arc(cr, cx, cx, radius, 220.0*M_PI/180.0, 320.0*M_PI/180.0);
+      cairo_arc(cr, cx, cx, radius, 220.0 * M_PI / 180.0, 320.0 * M_PI / 180.0);
       cairo_stroke(cr);
-
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
 
-      for(i=0;i<=100;i++) {
-        angle=(double)i+offset;
-        radians=angle*M_PI/180.0;
-        if((i%10)==0) {
-          cairo_arc(cr, cx, cx, radius+4, radians, radians);
+      for (i = 0; i <= 100; i++) {
+        angle = (double)i + offset;
+        radians = angle * M_PI / 180.0;
+
+        if ((i % 10) == 0) {
+          cairo_arc(cr, cx, cx, radius + 4, radians, radians);
           cairo_get_current_point(cr, &x, &y);
           cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
 
-          if((i%20)==0) {
-            sprintf(sf,"%d",(i/10)*(int)interval);
-            cairo_arc(cr, cx, cx, radius+5, radians, radians);
+          if ((i % 20) == 0) {
+            sprintf(sf, "%d", (i / 10) * (int)interval);
+            cairo_arc(cr, cx, cx, radius + 5, radians, radians);
             cairo_get_current_point(cr, &x, &y);
             cairo_new_path(cr);
-            x-=6.0;
+            x -= 6.0;
             cairo_move_to(cr, x, y);
             cairo_show_text(cr, sf);
           }
         }
+
         cairo_new_path(cr);
       }
 
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
-
-      angle=(max_pwr*10.0/(double)interval)+offset;
-      radians=angle*M_PI/180.0;
-      cairo_arc(cr, cx, cx, radius+8, radians, radians);
+      angle = (max_pwr * 10.0 / (double)interval) + offset;
+      radians = angle * M_PI / 180.0;
+      cairo_arc(cr, cx, cx, radius + 8, radians, radians);
       cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
-
-
       cairo_set_source_rgba(cr, COLOUR_METER);
-      sprintf(sf,"%d%s",(int)(max_pwr+0.5),units);
-      cairo_move_to(cr, 80, METER_HEIGHT-22);
+      sprintf(sf, "%d%s", (int)(max_pwr + 0.5), units);
+      cairo_move_to(cr, 80, METER_HEIGHT - 22);
       cairo_show_text(cr, sf);
 
       if (swr > transmitter->swr_alarm) {
@@ -400,227 +397,221 @@ if(analog_meter) {
       } else {
         cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
       }
-      sprintf(sf,"SWR: %1.1f:1",swr);
-      cairo_move_to(cr, 60, METER_HEIGHT-12);
-      cairo_show_text(cr, sf);
 
+      sprintf(sf, "SWR: %1.1f:1", swr);
+      cairo_move_to(cr, 60, METER_HEIGHT - 12);
+      cairo_show_text(cr, sf);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      sprintf(sf,"ALC: %2.1f dB",max_alc);
-      cairo_move_to(cr, 60, METER_HEIGHT-2);
+      sprintf(sf, "ALC: %2.1f dB", max_alc);
+      cairo_move_to(cr, 60, METER_HEIGHT - 2);
       cairo_show_text(cr, sf);
+    }
+    break;
+    }
 
+    //
+    // Both analog and digital, VOX status
+    //
+    if ((meter_type == POWER) || (vox_enabled)) {
+      double offset = ((double)METER_WIDTH - 100.0) / 2.0;
+      double peak = vox_get_peak();
+      peak = peak * 100.0;
+      cairo_set_source_rgba(cr, COLOUR_OK);
+      cairo_rectangle(cr, offset, 0.0, peak, 5.0);
+      cairo_fill(cr);
+      cairo_select_font_face(cr, DISPLAY_FONT,
+                             CAIRO_FONT_SLANT_NORMAL,
+                             CAIRO_FONT_WEIGHT_BOLD);
+      cairo_set_font_size(cr, DISPLAY_FONT_SIZE1);
+      cairo_set_source_rgba(cr, COLOUR_METER);
+      cairo_move_to(cr, 0.0, 8.0);
+      cairo_show_text(cr, "Mic Lvl");
+      cairo_move_to(cr, offset, 0.0);
+      cairo_line_to(cr, offset, 5.0);
+      cairo_stroke(cr);
+      cairo_move_to(cr, offset + 50.0, 0.0);
+      cairo_line_to(cr, offset + 50.0, 5.0);
+      cairo_stroke(cr);
+      cairo_move_to(cr, offset + 100.0, 0.0);
+      cairo_line_to(cr, offset + 100.0, 5.0);
+      cairo_stroke(cr);
+      cairo_move_to(cr, offset, 5.0);
+      cairo_line_to(cr, offset + 100.0, 5.0);
+      cairo_stroke(cr);
 
+      if (vox_enabled) {
+        cairo_set_source_rgba(cr, COLOUR_ALARM);
+        cairo_move_to(cr, offset + (vox_threshold * 100.0), 0.0);
+        cairo_line_to(cr, offset + (vox_threshold * 100.0), 5.0);
+        cairo_stroke(cr);
       }
-      break;
-  }
-
-  //
-  // Both analog and digital, VOX status
-  //
-  if((meter_type==POWER) || (vox_enabled)) {
-    double offset=((double)METER_WIDTH-100.0)/2.0;
-    double peak=vox_get_peak();
-    peak=peak*100.0;
-    cairo_set_source_rgba(cr, COLOUR_OK);
-    cairo_rectangle(cr, offset, 0.0, peak, 5.0);
-    cairo_fill(cr);
-
+    }
+  } else {
+    int text_location;
+    int Y1 = METER_HEIGHT / 4;
+    int Y2 = Y1 + METER_HEIGHT / 3;
+    int Y4 = 4 * Y1 - 6;
+    int size;
+    cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
+    cairo_paint (cr);
+    //
+    // Digital meter, both RX and TX:
+    // Mic level display
+    //
     cairo_select_font_face(cr, DISPLAY_FONT,
-                CAIRO_FONT_SLANT_NORMAL,
-                CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size(cr, DISPLAY_FONT_SIZE1);
-    cairo_set_source_rgba(cr, COLOUR_METER);
-    cairo_move_to(cr, 0.0, 8.0);
-    cairo_show_text(cr, "Mic Lvl");
+                           CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_line_width(cr, PAN_LINE_THICK);
 
-
-    cairo_move_to(cr, offset, 0.0);
-    cairo_line_to(cr, offset, 5.0);
-    cairo_stroke(cr);
-    cairo_move_to(cr, offset+50.0, 0.0);
-    cairo_line_to(cr, offset+50.0, 5.0);
-    cairo_stroke(cr);
-    cairo_move_to(cr, offset+100.0, 0.0);
-    cairo_line_to(cr, offset+100.0, 5.0);
-    cairo_stroke(cr);
-    cairo_move_to(cr, offset, 5.0);
-    cairo_line_to(cr, offset+100.0, 5.0);
-    cairo_stroke(cr);
-
-    if(vox_enabled) {
-      cairo_set_source_rgba(cr, COLOUR_ALARM);
-      cairo_move_to(cr,offset+(vox_threshold*100.0),0.0);
-      cairo_line_to(cr,offset+(vox_threshold*100.0),5.0);
+    if (can_transmit) {
+      cairo_set_source_rgba(cr, COLOUR_METER);
+      cairo_move_to(cr, 5.0, Y1);
+      cairo_line_to(cr, 5.0, Y1 - 10);
+      cairo_move_to(cr, 5.0 + 25.0, Y1);
+      cairo_line_to(cr, 5.0 + 25.0, Y1 - 5);
+      cairo_move_to(cr, 5.0 + 50.0, Y1);
+      cairo_line_to(cr, 5.0 + 50.0, Y1 - 10);
+      cairo_move_to(cr, 5.0 + 75.0, Y1);
+      cairo_line_to(cr, 5.0 + 75.0, Y1 - 5);
+      cairo_move_to(cr, 5.0 + 100.0, Y1);
+      cairo_line_to(cr, 5.0 + 100.0, Y1 - 10);
       cairo_stroke(cr);
+      double peak = vox_get_peak();
+      peak = peak * 100.0;
+      cairo_set_source_rgba(cr, COLOUR_OK);
+      cairo_rectangle(cr, 5.0, Y1 - 10, peak, 5);
+      cairo_fill(cr);
+
+      if (vox_enabled) {
+        cairo_set_source_rgba(cr, COLOUR_ALARM);
+        cairo_move_to(cr, 5.0 + (vox_threshold * 100.0), Y1 - 10);
+        cairo_line_to(cr, 5.0 + (vox_threshold * 100.0), Y1);
+        cairo_stroke(cr);
+      }
+
+      size = (METER_WIDTH - 120) / 6;
+
+      if (size > METER_HEIGHT / 4) { size = METER_HEIGHT / 4; }
+
+      if (size >= 10) {
+        cairo_set_source_rgba(cr, COLOUR_ATTN);
+        cairo_set_font_size(cr, size);
+        cairo_move_to(cr, 120.0, Y1);
+        cairo_show_text(cr, "Mic Level");
+      }
     }
-  }
 
-} else {
-  int text_location;
-  int Y1=METER_HEIGHT/4;
-  int Y2=Y1+METER_HEIGHT/3;
-  int Y4=4*Y1-6;
-  int size;
-
-
-  cairo_set_source_rgba(cr, COLOUR_VFO_BACKGND);
-  cairo_paint (cr);
-
-  //
-  // Digital meter, both RX and TX:
-  // Mic level display
-  //
-  cairo_select_font_face(cr, DISPLAY_FONT,
-                CAIRO_FONT_SLANT_NORMAL,
-                CAIRO_FONT_WEIGHT_BOLD);
-
-  cairo_set_line_width(cr, PAN_LINE_THICK);
-
-  if(can_transmit) {
     cairo_set_source_rgba(cr, COLOUR_METER);
-    cairo_move_to(cr, 5.0, Y1);
-    cairo_line_to(cr, 5.0, Y1-10);
-    cairo_move_to(cr, 5.0+25.0, Y1);
-    cairo_line_to(cr, 5.0+25.0, Y1-5);
-    cairo_move_to(cr, 5.0+50.0, Y1);
-    cairo_line_to(cr, 5.0+50.0, Y1-10);
-    cairo_move_to(cr, 5.0+75.0, Y1);
-    cairo_line_to(cr, 5.0+75.0, Y1-5);
-    cairo_move_to(cr, 5.0+100.0, Y1);
-    cairo_line_to(cr, 5.0+100.0, Y1-10);
-    cairo_stroke(cr);
 
-    double peak=vox_get_peak();
-    peak=peak*100.0;
-    cairo_set_source_rgba(cr, COLOUR_OK);
-    cairo_rectangle(cr, 5.0, Y1-10, peak, 5);
-    cairo_fill(cr);
-
-    if(vox_enabled) {
-      cairo_set_source_rgba(cr, COLOUR_ALARM);
-      cairo_move_to(cr,5.0+(vox_threshold*100.0),Y1-10);
-      cairo_line_to(cr,5.0+(vox_threshold*100.0),Y1);
-      cairo_stroke(cr);
-    }
-
-    size=(METER_WIDTH-120)/6;
-    if (size > METER_HEIGHT/4) size = METER_HEIGHT/4;
-    if (size >= 10) {
-      cairo_set_source_rgba(cr, COLOUR_ATTN);
-      cairo_set_font_size(cr, size);
-      cairo_move_to(cr, 120.0, Y1);
-      cairo_show_text(cr, "Mic Level");
-    }
-  }
-
-  cairo_set_source_rgba(cr, COLOUR_METER);
-  switch(meter_type) {
+    switch (meter_type) {
     case SMETER:
       //
       // Digital meter, RX
       //
       // value is dBm
-      text_location=10;
+      text_location = 10;
 
-      if(METER_WIDTH>=150) {
+      if (METER_WIDTH >= 150) {
         int i;
         cairo_set_line_width(cr, PAN_LINE_THICK);
         cairo_set_source_rgba(cr, COLOUR_METER);
-        for(i=0;i<54;i++) {
-          cairo_move_to(cr,5+i,Y4-10);
-          if(i%18==0) {
-            cairo_line_to(cr,5+i,Y4-20);
-          } else if(i%6==0) {
-            cairo_line_to(cr,5+i,Y4-15);
+
+        for (i = 0; i < 54; i++) {
+          cairo_move_to(cr, 5 + i, Y4 - 10);
+
+          if (i % 18 == 0) {
+            cairo_line_to(cr, 5 + i, Y4 - 20);
+          } else if (i % 6 == 0) {
+            cairo_line_to(cr, 5 + i, Y4 - 15);
           }
         }
-        cairo_stroke(cr);
 
+        cairo_stroke(cr);
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE1);
         cairo_move_to(cr, 20, Y4);
         cairo_show_text(cr, "3");
         cairo_move_to(cr, 38, Y4);
         cairo_show_text(cr, "6");
-
         cairo_set_source_rgba(cr, COLOUR_ALARM);
-        cairo_move_to(cr,5+ 54,Y4-10);
-        cairo_line_to(cr,5+ 54,Y4-20);
-        cairo_move_to(cr,5+ 74,Y4-10);
-        cairo_line_to(cr,5+ 74,Y4-20);
-        cairo_move_to(cr,5+ 94,Y4-10);
-        cairo_line_to(cr,5+ 94,Y4-20);
-        cairo_move_to(cr,5+114,Y4-10);
-        cairo_line_to(cr,5+114,Y4-20);
+        cairo_move_to(cr, 5 + 54, Y4 - 10);
+        cairo_line_to(cr, 5 + 54, Y4 - 20);
+        cairo_move_to(cr, 5 + 74, Y4 - 10);
+        cairo_line_to(cr, 5 + 74, Y4 - 20);
+        cairo_move_to(cr, 5 + 94, Y4 - 10);
+        cairo_line_to(cr, 5 + 94, Y4 - 20);
+        cairo_move_to(cr, 5 + 114, Y4 - 10);
+        cairo_line_to(cr, 5 + 114, Y4 - 20);
         cairo_stroke(cr);
-
         cairo_move_to(cr, 56, Y4);
         cairo_show_text(cr, "9");
-        cairo_move_to(cr, 5+74-12, Y4);
+        cairo_move_to(cr, 5 + 74 - 12, Y4);
         cairo_show_text(cr, "+20");
-        cairo_move_to(cr, 5+94-9, Y4);
+        cairo_move_to(cr, 5 + 94 - 9, Y4);
         cairo_show_text(cr, "+40");
-        cairo_move_to(cr, 5+114-6, Y4);
+        cairo_move_to(cr, 5 + 114 - 6, Y4);
         cairo_show_text(cr, "+60");
-
         // if frequency > 30MHz then -93 is S9
-        double l=fmax(-127.0,max_rxlvl);
-        if(vfo[active_receiver->id].frequency>30000000LL) {
-          l=max_rxlvl+20.0;
+        double l = fmax(-127.0, max_rxlvl);
+
+        if (vfo[active_receiver->id].frequency > 30000000LL) {
+          l = max_rxlvl + 20.0;
         }
+
         //
         // Restrict bar to S9+60
         //
-        if (l > -13) l=-13;
+        if (l > -13) { l = -13; }
 
         // use colours from the "gradient" panadapter display,
         // but use no gradient: S0-S9 first colour, <S9 last colour
-        cairo_pattern_t *pat=cairo_pattern_create_linear(0.0,0.0,114.0,0.0);
-        cairo_pattern_add_color_stop_rgba(pat,0.00,COLOUR_GRAD1);
-        cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD1);
-        cairo_pattern_add_color_stop_rgba(pat,0.50,COLOUR_GRAD4);
-        cairo_pattern_add_color_stop_rgba(pat,1.00,COLOUR_GRAD4);
+        cairo_pattern_t *pat = cairo_pattern_create_linear(0.0, 0.0, 114.0, 0.0);
+        cairo_pattern_add_color_stop_rgba(pat, 0.00, COLOUR_GRAD1);
+        cairo_pattern_add_color_stop_rgba(pat, 0.50, COLOUR_GRAD1);
+        cairo_pattern_add_color_stop_rgba(pat, 0.50, COLOUR_GRAD4);
+        cairo_pattern_add_color_stop_rgba(pat, 1.00, COLOUR_GRAD4);
         cairo_set_source(cr, pat);
-
-        cairo_rectangle(cr, 5, Y2-20, l+127.0, 20.0);
+        cairo_rectangle(cr, 5, Y2 - 20, l + 127.0, 20.0);
         cairo_fill(cr);
         cairo_pattern_destroy(pat);
 
-        if(l!=0) {
+        if (l != 0) {
           //
           // Mark right edge of S-meter bar with a line in ATTN colour
           //
           cairo_set_source_rgba(cr, COLOUR_ATTN);
-          cairo_move_to(cr,5+(double)((max_rxlvl+127.0)),(double)Y2);
-          cairo_line_to(cr,5+(double)((max_rxlvl+127.0)),(double)(Y2-20));
+          cairo_move_to(cr, 5 + (double)((max_rxlvl + 127.0)), (double)Y2);
+          cairo_line_to(cr, 5 + (double)((max_rxlvl + 127.0)), (double)(Y2 - 20));
         }
 
-
         cairo_stroke(cr);
-
-        text_location=124;
+        text_location = 124;
       }
 
-      size=(METER_WIDTH - text_location)/5;
-      if (size > METER_HEIGHT/3) size=METER_HEIGHT/3;
+      size = (METER_WIDTH - text_location) / 5;
+
+      if (size > METER_HEIGHT / 3) { size = METER_HEIGHT / 3; }
+
       if (size >= 12) {
         cairo_set_source_rgba(cr, COLOUR_ATTN);
         cairo_set_font_size(cr, size);
-        sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
+        sprintf(sf, "%d dBm", (int)(max_rxlvl + 0.5));
         cairo_move_to(cr, text_location, Y2);
         cairo_show_text(cr, sf);
       }
+
       break;
+
     case POWER:
       cairo_select_font_face(cr, DISPLAY_FONT,
-            CAIRO_FONT_SLANT_NORMAL,
-            CAIRO_FONT_WEIGHT_BOLD);
+                             CAIRO_FONT_SLANT_NORMAL,
+                             CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
 
       if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
         //
         // Power/Alc/SWR not available for SOAPY.
         //
-        sprintf(sf,"FWD: %d%s",(int)(max_pwr+0.5),units);
+        sprintf(sf, "FWD: %d%s", (int)(max_pwr + 0.5), units);
         cairo_move_to(cr, 10, Y2);
         cairo_show_text(cr, sf);
 
@@ -630,24 +621,22 @@ if(analog_meter) {
           cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
         }
 
-
         cairo_select_font_face(cr, DISPLAY_FONT,
-            CAIRO_FONT_SLANT_NORMAL,
-            CAIRO_FONT_WEIGHT_BOLD);
+                               CAIRO_FONT_SLANT_NORMAL,
+                               CAIRO_FONT_WEIGHT_BOLD);
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-        sprintf(sf,"SWR: %1.1f:1",swr);
+        sprintf(sf, "SWR: %1.1f:1", swr);
         cairo_move_to(cr, 10, Y4);
         cairo_show_text(cr, sf);
       }
 
       cairo_set_source_rgba(cr, COLOUR_METER);  // revert to white color
-
-      sprintf(sf,"ALC: %2.1f dB",max_alc);
-      cairo_move_to(cr, METER_WIDTH/2, Y2);
+      sprintf(sf, "ALC: %2.1f dB", max_alc);
+      cairo_move_to(cr, METER_WIDTH / 2, Y2);
       cairo_show_text(cr, sf);
       break;
+    }
   }
-}
 
   //
   // This is the same for analog and digital metering

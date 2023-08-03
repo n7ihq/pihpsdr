@@ -123,7 +123,7 @@ static struct sockaddr_in data_addr;
 
 static unsigned char control_in[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 
-static int running=0;
+static int running = 0;
 
 static uint32_t last_seq_num = -0xffffffff;
 static int tx_fifo_flag = 0;
@@ -355,7 +355,7 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
     //
     // If the protocol has been stopped, just swallow all incoming packets
     //
-    if (!running) continue;
+    if (!running) { continue; }
 
     //t_print("%s: read %d bytes\n",__FUNCTION__,bytes);
     //dump_buffer(ep6_inbuffer,bytes,__FUNCTION__);
@@ -375,6 +375,7 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
       process_ozy_input_buffer(&ep6_inbuffer[1024 + 512]);
     }
   }
+
   return NULL;  /*NOTREACHED*/
 }
 #endif
@@ -2136,8 +2137,9 @@ void ozy_send_buffer() {
 #ifdef USBOZY
     ozyusb_write(output_buffer, OZY_BUFFER_SIZE);
 #endif
-  } else
+  } else {
     metis_write(0x02, output_buffer, OZY_BUFFER_SIZE);
+  }
 
   //t_print("C0=%02X C1=%02X C2=%02X C3=%02X C4=%02X\n",
   //                output_buffer[C0],output_buffer[C1],output_buffer[C2],output_buffer[C3],output_buffer[C4]);
@@ -2302,7 +2304,7 @@ static void metis_start_stop(int command) {
   int i;
   unsigned char buffer[1032];
   t_print("%s: %d\n", __FUNCTION__, command);
-  running=command;
+  running = command;
   //
   // Clear TX IQ ring buffer
   //

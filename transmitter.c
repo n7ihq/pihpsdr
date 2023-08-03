@@ -114,7 +114,7 @@ static gint update_out_of_band(gpointer data) {
   TRANSMITTER *tx = (TRANSMITTER *)data;
   tx->out_of_band = 0;
   g_idle_add(ext_vfo_update, NULL);
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 void transmitter_set_out_of_band(TRANSMITTER *tx) {
@@ -166,301 +166,85 @@ void reconfigure_transmitter(TRANSMITTER *tx, int width, int height) {
   gtk_widget_set_size_request(tx->panadapter, width, height);
 }
 
-void transmitter_save_state(const TRANSMITTER *tx) {
+void transmitterSaveState(const TRANSMITTER *tx) {
   char name[128];
   char value[128];
   t_print("%s: TX=%d\n", __FUNCTION__, tx->id);
-  sprintf(name, "transmitter.%d.low_latency", tx->id);
-  sprintf(value, "%d", tx->low_latency);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.fft_size", tx->id);
-  sprintf(value, "%d", tx->fft_size);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.fps", tx->id);
-  sprintf(value, "%d", tx->fps);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.filter_low", tx->id);
-  sprintf(value, "%d", tx->filter_low);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.filter_high", tx->id);
-  sprintf(value, "%d", tx->filter_high);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.use_rx_filter", tx->id);
-  sprintf(value, "%d", tx->use_rx_filter);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.alex_antenna", tx->id);
-  sprintf(value, "%d", tx->alex_antenna);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.panadapter_low", tx->id);
-  sprintf(value, "%d", tx->panadapter_low);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.panadapter_high", tx->id);
-  sprintf(value, "%d", tx->panadapter_high);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.local_microphone", tx->id);
-  sprintf(value, "%d", tx->local_microphone);
-  setProperty(name, value);
-
-  if (tx->microphone_name != NULL) {
-    sprintf(name, "transmitter.%d.microphone_name", tx->id);
-    sprintf(value, "%s", tx->microphone_name);
-    setProperty(name, value);
-  }
-
-  sprintf(name, "transmitter.%d.puresignal", tx->id);
-  sprintf(value, "%d", tx->puresignal);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.auto_on", tx->id);
-  sprintf(value, "%d", tx->auto_on);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.single_on", tx->id);
-  sprintf(value, "%d", tx->single_on);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.feedback", tx->id);
-  sprintf(value, "%d", tx->feedback);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.attenuation", tx->id);
-  sprintf(value, "%d", tx->attenuation);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.ctcss_enabled", tx->id);
-  sprintf(value, "%d", tx->ctcss_enabled);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.ctcss", tx->id);
-  sprintf(value, "%d", tx->ctcss);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.deviation", tx->id);
-  sprintf(value, "%d", tx->deviation);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.am_carrier_level", tx->id);
-  sprintf(value, "%f", tx->am_carrier_level);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.drive", tx->id);
-  sprintf(value, "%d", tx->drive);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.tune_drive", tx->id);
-  sprintf(value, "%d", tx->tune_drive);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.tune_use_drive", tx->id);
-  sprintf(value, "%d", tx->tune_use_drive);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.swr_protection", tx->id);
-  sprintf(value, "%d", tx->swr_protection);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.swr_alarm", tx->id);
-  sprintf(value, "%f", tx->swr_alarm);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.drive_level", tx->id);
-  sprintf(value, "%d", tx->drive_level);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.drive_scale", tx->id);
-  sprintf(value, "%f", tx->drive_scale);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.drive_iscal", tx->id);
-  sprintf(value, "%f", tx->drive_iscal);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.do_scale", tx->id);
-  sprintf(value, "%d", tx->do_scale);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.compressor", tx->id);
-  sprintf(value, "%d", tx->compressor);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.compressor_level", tx->id);
-  sprintf(value, "%f", tx->compressor_level);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.xit_enabled", tx->id);
-  sprintf(value, "%d", tx->xit_enabled);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.xit", tx->id);
-  sprintf(value, "%lld", tx->xit);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.dialog_x", tx->id);
-  sprintf(value, "%d", tx->dialog_x);
-  setProperty(name, value);
-  sprintf(name, "transmitter.%d.dialog_y", tx->id);
-  sprintf(value, "%d", tx->dialog_y);
-  setProperty(name, value);
+  SetPropI1("transmitter.%d.low_latency",       tx->id,               tx->low_latency);
+  SetPropI1("transmitter.%d.fft_size",          tx->id,               tx->fft_size);
+  SetPropI1("transmitter.%d.fps",               tx->id,               tx->fps);
+  SetPropI1("transmitter.%d.filter_low",        tx->id,               tx->filter_low);
+  SetPropI1("transmitter.%d.filter_high",       tx->id,               tx->filter_high);
+  SetPropI1("transmitter.%d.use_rx_filter",     tx->id,               tx->use_rx_filter);
+  SetPropI1("transmitter.%d.alex_antenna",      tx->id,               tx->alex_antenna);
+  SetPropI1("transmitter.%d.panadapter_low",    tx->id,               tx->panadapter_low);
+  SetPropI1("transmitter.%d.panadapter_high",   tx->id,               tx->panadapter_high);
+  SetPropI1("transmitter.%d.local_microphone",  tx->id,               tx->local_microphone);
+  SetPropS1("transmitter.%d.microphone_name",   tx->id,               tx->microphone_name);
+  SetPropI1("transmitter.%d.puresignal",        tx->id,               tx->puresignal);
+  SetPropI1("transmitter.%d.auto_on",           tx->id,               tx->auto_on);
+  SetPropI1("transmitter.%d.single_on",         tx->id,               tx->single_on);
+  SetPropI1("transmitter.%d.feedback",          tx->id,               tx->feedback);
+  SetPropI1("transmitter.%d.attenuation",       tx->id,               tx->attenuation);
+  SetPropI1("transmitter.%d.ctcss_enabled",     tx->id,               tx->ctcss_enabled);
+  SetPropI1("transmitter.%d.ctcss",             tx->id,               tx->ctcss);
+  SetPropI1("transmitter.%d.deviation",         tx->id,               tx->deviation);
+  SetPropF1("transmitter.%d.am_carrier_level",  tx->id,               tx->am_carrier_level);
+  SetPropI1("transmitter.%d.drive",             tx->id,               tx->drive);
+  SetPropI1("transmitter.%d.tune_drive",        tx->id,               tx->tune_drive);
+  SetPropI1("transmitter.%d.tune_use_drive",    tx->id,               tx->tune_use_drive);
+  SetPropI1("transmitter.%d.swr_protection",    tx->id,               tx->swr_protection);
+  SetPropF1("transmitter.%d.swr_alarm",         tx->id,               tx->swr_alarm);
+  SetPropI1("transmitter.%d.drive_level",       tx->id,               tx->drive_level);
+  SetPropF1("transmitter.%d.drive_scale",       tx->id,               tx->drive_scale);
+  SetPropF1("transmitter.%d.drive_iscal",       tx->id,               tx->drive_iscal);
+  SetPropI1("transmitter.%d.do_scale",          tx->id,               tx->do_scale);
+  SetPropI1("transmitter.%d.compressor",        tx->id,               tx->compressor);
+  SetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor);
+  SetPropI1("transmitter.%d.xit_enabled",       tx->id,               tx->xit_enabled);
+  SetPropI1("transmitter.%d.xit",               tx->id,               tx->xit);
+  SetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
+  SetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
 }
 
-void transmitter_restore_state(TRANSMITTER *tx) {
+static void transmitterRestoreState(TRANSMITTER *tx) {
   char name[128];
   char *value;
-  sprintf(name, "transmitter.%d.low_latency", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->low_latency = atoi(value); }
-
-  sprintf(name, "transmitter.%d.fft_size", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->fft_size = atoi(value); }
-
-  sprintf(name, "transmitter.%d.fps", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->fps = atoi(value); }
-
-  sprintf(name, "transmitter.%d.filter_low", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->filter_low = atoi(value); }
-
-  sprintf(name, "transmitter.%d.filter_high", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->filter_high = atoi(value); }
-
-  sprintf(name, "transmitter.%d.use_rx_filter", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->use_rx_filter = atoi(value); }
-
-  sprintf(name, "transmitter.%d.alex_antenna", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->alex_antenna = atoi(value); }
-
-  sprintf(name, "transmitter.%d.panadapter_low", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->panadapter_low = atoi(value); }
-
-  sprintf(name, "transmitter.%d.panadapter_high", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->panadapter_high = atoi(value); }
-
-  sprintf(name, "transmitter.%d.local_microphone", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->local_microphone = atoi(value); }
-
-  sprintf(name, "transmitter.%d.microphone_name", tx->id);
-  value = getProperty(name);
-
-  if (value) {
-    tx->microphone_name = g_new(gchar, strlen(value) + 1);
-    strcpy(tx->microphone_name, value);
-  }
-
-  sprintf(name, "transmitter.%d.puresignal", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->puresignal = atoi(value); }
-
-  sprintf(name, "transmitter.%d.auto_on", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->auto_on = atoi(value); }
-
-  sprintf(name, "transmitter.%d.single_on", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->single_on = atoi(value); }
-
-  sprintf(name, "transmitter.%d.feedback", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->feedback = atoi(value); }
-
-  sprintf(name, "transmitter.%d.attenuation", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->attenuation = atoi(value); }
-
-  sprintf(name, "transmitter.%d.ctcss_enabled", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->ctcss_enabled = atoi(value); }
-
-  sprintf(name, "transmitter.%d.ctcss", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->ctcss = atoi(value); }
-
-  sprintf(name, "transmitter.%d.deviation", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->deviation = atoi(value); }
-
-  sprintf(name, "transmitter.%d.am_carrier_level", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->am_carrier_level = atof(value); }
-
-  sprintf(name, "transmitter.%d.drive", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->drive = atoi(value); }
-
-  sprintf(name, "transmitter.%d.tune_drive", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->tune_drive = atoi(value); }
-
-  sprintf(name, "transmitter.%d.tune_use_drive", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->tune_use_drive = atoi(value); }
-
-  sprintf(name, "transmitter.%d.swr_protection", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->swr_protection = atoi(value); }
-
-  sprintf(name, "transmitter.%d.swr_alarm", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->swr_alarm = atof(value); }
-
-  sprintf(name, "transmitter.%d.drive_level", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->drive_level = atoi(value); }
-
-  sprintf(name, "transmitter.%d.drive_scale", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->drive_scale = atof(value); }
-
-  sprintf(name, "transmitter.%d.drive_iscal", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->drive_iscal = atof(value); }
-
-  sprintf(name, "transmitter.%d.do_scale", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->do_scale = atoi(value); }
-
-  sprintf(name, "transmitter.%d.compressor", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->compressor = atoi(value); }
-
-  sprintf(name, "transmitter.%d.compressor_level", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->compressor_level = atof(value); }
-
-  sprintf(name, "transmitter.%d.xit_enabled", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->xit_enabled = atoi(value); }
-
-  sprintf(name, "transmitter.%d.xit", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->xit = atoll(value); }
-
-  sprintf(name, "transmitter.%d.dialog_x", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->dialog_x = atoi(value); }
-
-  sprintf(name, "transmitter.%d.dialog_y", tx->id);
-  value = getProperty(name);
-
-  if (value) { tx->dialog_y = atoi(value); }
+  GetPropI1("transmitter.%d.low_latency",       tx->id,               tx->low_latency);
+  GetPropI1("transmitter.%d.fft_size",          tx->id,               tx->fft_size);
+  GetPropI1("transmitter.%d.fps",               tx->id,               tx->fps);
+  GetPropI1("transmitter.%d.filter_low",        tx->id,               tx->filter_low);
+  GetPropI1("transmitter.%d.filter_high",       tx->id,               tx->filter_high);
+  GetPropI1("transmitter.%d.use_rx_filter",     tx->id,               tx->use_rx_filter);
+  GetPropI1("transmitter.%d.ales_antenna",     tx->id,               tx->alex_antenna);
+  GetPropI1("transmitter.%d.panadapter_low",    tx->id,               tx->panadapter_low);
+  GetPropI1("transmitter.%d.panadapter_high",   tx->id,               tx->panadapter_high);
+  GetPropI1("transmitter.%d.local_microphone",  tx->id,               tx->local_microphone);
+  GetPropS1("transmitter.%d.microphone_name",   tx->id,               tx->microphone_name);
+  GetPropI1("transmitter.%d.puresignal",        tx->id,               tx->puresignal);
+  GetPropI1("transmitter.%d.auto_on",           tx->id,               tx->auto_on);
+  GetPropI1("transmitter.%d.single_on",         tx->id,               tx->single_on);
+  GetPropI1("transmitter.%d.feedback",          tx->id,               tx->feedback);
+  GetPropI1("transmitter.%d.attenuation",       tx->id,               tx->attenuation);
+  GetPropI1("transmitter.%d.ctcss_enabled",     tx->id,               tx->ctcss_enabled);
+  GetPropI1("transmitter.%d.ctcss",             tx->id,               tx->ctcss);
+  GetPropI1("transmitter.%d.deviation",         tx->id,               tx->deviation);
+  GetPropF1("transmitter.%d.am_carrier_level",  tx->id,               tx->am_carrier_level);
+  GetPropI1("transmitter.%d.drive",             tx->id,               tx->drive);
+  GetPropI1("transmitter.%d.tune_drive",        tx->id,               tx->tune_drive);
+  GetPropI1("transmitter.%d.tune_use_drive",    tx->id,               tx->tune_use_drive);
+  GetPropI1("transmitter.%d.swr_protection",    tx->id,               tx->swr_protection);
+  GetPropF1("transmitter.%d.swr_alarm",         tx->id,               tx->swr_alarm);
+  GetPropI1("transmitter.%d.drive_level",       tx->id,               tx->drive_level);
+  GetPropF1("transmitter.%d.drive_scale",       tx->id,               tx->drive_scale);
+  GetPropF1("transmitter.%d.drive_iscal",       tx->id,               tx->drive_iscal);
+  GetPropI1("transmitter.%d.do_scale",          tx->id,               tx->do_scale);
+  GetPropI1("transmitter.%d.compressor",        tx->id,               tx->compressor);
+  GetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor);
+  GetPropI1("transmitter.%d.xit_enabled",       tx->id,               tx->xit_enabled);
+  GetPropI1("transmitter.%d.xit",               tx->id,               tx->xit);
+  GetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
+  GetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
 }
 
 static double compute_power(double p) {
@@ -901,6 +685,8 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   tx->low_latency = 0;
   tx->fft_size = 2048;
   g_mutex_init(&tx->display_mutex);
+  tx->update_timer_id = 0;
+  tx->out_of_band_timer_id = 0;
 
   switch (protocol) {
   case ORIGINAL_PROTOCOL:
@@ -981,7 +767,8 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   tx->compressor = 0;
   tx->compressor_level = 0.0;
   tx->local_microphone = 0;
-  tx->microphone_name = NULL;
+  tx->microphone_name = g_new(gchar, 128);
+  strcpy(tx->microphone_name, "NO LOCAL MIC");
   tx->xit_enabled = FALSE;
   tx->xit = 0LL;
   tx->dialog_x = -1;
@@ -990,7 +777,7 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   tx->swr_protection = FALSE;
   tx->swr_alarm = 3.0;     // default value for SWR protection
   tx->alc = 0.0;
-  transmitter_restore_state(tx);
+  transmitterRestoreState(tx);
   // allocate buffers
   t_print("transmitter: allocate buffers: mic_input_buffer=%d iq_output_buffer=%d pixels=%d\n", tx->buffer_size,
           tx->output_samples, tx->pixels);
@@ -1069,14 +856,14 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   SetTXALevelerAttack(tx->id, 1);
   SetTXALevelerDecay(tx->id, 500);
   SetTXALevelerTop(tx->id, 5.0);
-  SetTXALevelerSt(tx->id, tx_leveler);
+  SetTXALevelerSt(tx->id, 0);
   SetTXAPreGenMode(tx->id, 0);
   SetTXAPreGenToneMag(tx->id, 0.0);
   SetTXAPreGenToneFreq(tx->id, 0.0);
   SetTXAPreGenRun(tx->id, 0);
   SetTXAPostGenMode(tx->id, 0);
-  SetTXAPostGenToneMag(tx->id, tone_level);
-  SetTXAPostGenTTMag(tx->id, tone_level, tone_level);
+  SetTXAPostGenToneMag(tx->id, 0.2);
+  SetTXAPostGenTTMag(tx->id, 0.2, 0.2);
   SetTXAPostGenToneFreq(tx->id, 0.0);
   SetTXAPostGenRun(tx->id, 0);
   SetTXAPanelGain1(tx->id, pow(10.0, mic_gain * 0.05));
@@ -1703,14 +1490,17 @@ void tx_set_displaying(TRANSMITTER *tx, int state) {
   tx->displaying = state;
 
   if (state) {
-    if (tx->update_timer_id > 0) { g_source_remove(tx->update_timer_id); }
+    if (tx->update_timer_id > 0) {
+      g_source_remove(tx->update_timer_id);
+    }
 
     tx->update_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE, 1000 / tx->fps, update_display, (gpointer)tx,
                           NULL);
   } else {
-    if (tx->update_timer_id > 0) { g_source_remove(tx->update_timer_id); }
-
-    tx->update_timer_id = 0;
+    if (tx->update_timer_id > 0) {
+      g_source_remove(tx->update_timer_id);
+      tx->update_timer_id = 0;
+    }
   }
 }
 

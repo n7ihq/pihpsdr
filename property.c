@@ -25,19 +25,21 @@
 #include "property.h"
 #include "message.h"
 
-PROPERTY* properties=NULL;
+PROPERTY* properties = NULL;
 
-static double version=0.0;
+static double version = 0.0;
 
 void clearProperties() {
-t_print("clearProperties\n");
-  if(properties!=NULL) {
+  t_print("clearProperties\n");
+
+  if (properties != NULL) {
     // free all the properties
     PROPERTY *next;
-    while(properties!=NULL) {
-      next=properties->next_property;
+
+    while (properties != NULL) {
+      next = properties->next_property;
       free(properties);
-      properties=next;
+      properties = next;
     }
   }
 }
@@ -49,41 +51,45 @@ t_print("clearProperties\n");
 * @param filename
 */
 void loadProperties(char* filename) {
-    FILE* f=fopen(filename,"r");
-    PROPERTY* property;
+  FILE* f = fopen(filename, "r");
+  PROPERTY* property;
+  t_print("loadProperties: %s\n", filename);
+  clearProperties();
 
-    t_print("loadProperties: %s\n",filename);
-    clearProperties();
-    if(f) {
-        char* value;
-        char* name;
-        char string[256];
-        while(fgets(string,sizeof(string),f)) {
-            if(string[0]!='#') {
-                name=strtok(string,"=");
-                value=strtok(NULL,"\n");
-                // Beware of "illegal" lines in corrupted files
-                if (name != NULL && value != NULL) {
-                  property=malloc(sizeof(PROPERTY));
-                  property->name=malloc(strlen(name)+1);
-                  strcpy(property->name,name);
-                  property->value=malloc(strlen(value)+1);
-                  strcpy(property->value,value);
-                  property->next_property=properties;
-                  properties=property;
-                  if(strcmp(name,"property_version")==0) {
-                    version=atof(value);
-                  }
-               }
-            }
+  if (f) {
+    char* value;
+    char* name;
+    char string[256];
+
+    while (fgets(string, sizeof(string), f)) {
+      if (string[0] != '#') {
+        name = strtok(string, "=");
+        value = strtok(NULL, "\n");
+
+        // Beware of "illegal" lines in corrupted files
+        if (name != NULL && value != NULL) {
+          property = malloc(sizeof(PROPERTY));
+          property->name = malloc(strlen(name) + 1);
+          strcpy(property->name, name);
+          property->value = malloc(strlen(value) + 1);
+          strcpy(property->value, value);
+          property->next_property = properties;
+          properties = property;
+
+          if (strcmp(name, "property_version") == 0) {
+            version = atof(value);
+          }
         }
-        fclose(f);
+      }
     }
 
-    if(version!=PROPERTY_VERSION) {
-      properties=NULL;
-      t_print("loadProperties: version=%f expected version=%f ignoring\n",version,PROPERTY_VERSION);
-    }
+    fclose(f);
+  }
+
+  if (version != PROPERTY_VERSION) {
+    properties = NULL;
+    t_print("loadProperties: version=%f expected version=%f ignoring\n", version, PROPERTY_VERSION);
+  }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -93,26 +99,27 @@ void loadProperties(char* filename) {
 * @param filename
 */
 void saveProperties(char* filename) {
-    PROPERTY* property;
-    FILE* f=fopen(filename,"w+");
-    char line[512];
+  PROPERTY* property;
+  FILE* f = fopen(filename, "w+");
+  char line[512];
+  t_print("saveProperties: %s\n", filename);
 
-    t_print("saveProperties: %s\n",filename);
+  if (!f) {
+    t_print("can't open %s\n", filename);
+    return;
+  }
 
-    if(!f) {
-        t_print("can't open %s\n",filename);
-        return;
-    }
+  sprintf(line, "%0.2f", PROPERTY_VERSION);
+  setProperty("property_version", line);
+  property = properties;
 
-    sprintf(line,"%0.2f",PROPERTY_VERSION);
-    setProperty("property_version",line);
-    property=properties;
-    while(property) {
-        sprintf(line,"%s=%s\n",property->name,property->value);
-        fwrite(line,1,strlen(line),f);
-        property=property->next_property;
-    }
-    fclose(f);
+  while (property) {
+    sprintf(line, "%s=%s\n", property->name, property->value);
+    fwrite(line, 1, strlen(line), f);
+    property = property->next_property;
+  }
+
+  fclose(f);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -124,16 +131,19 @@ void saveProperties(char* filename) {
 * @return
 */
 char* getProperty(char* name) {
-    char* value=NULL;
-    PROPERTY* property=properties;
-    while(property) {
-        if(strcmp(name,property->name)==0) {
-            value=property->value;
-            break;
-        }
-        property=property->next_property;
+  char* value = NULL;
+  PROPERTY* property = properties;
+
+  while (property) {
+    if (strcmp(name, property->name) == 0) {
+      value = property->value;
+      break;
     }
-    return value;
+
+    property = property->next_property;
+  }
+
+  return value;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -143,28 +153,31 @@ char* getProperty(char* name) {
 * @param name
 * @param value
 */
-void setProperty(char* name,char* value) {
-    PROPERTY* property=properties;
-    while(property) {
-        if(strcmp(name,property->name)==0) {
-            break;
-        }
-        property=property->next_property;
+void setProperty(char* name, char* value) {
+  PROPERTY* property = properties;
+
+  while (property) {
+    if (strcmp(name, property->name) == 0) {
+      break;
     }
-    if(property) {
-        // just update
-        free(property->value);
-        property->value=malloc(strlen(value)+1);
-        strcpy(property->value,value);
-    } else {
-        // new property
-        property=malloc(sizeof(PROPERTY));
-        property->name=malloc(strlen(name)+1);
-        strcpy(property->name,name);
-        property->value=malloc(strlen(value)+1);
-        strcpy(property->value,value);
-        property->next_property=properties;
-        properties=property;
-    }
+
+    property = property->next_property;
+  }
+
+  if (property) {
+    // just update
+    free(property->value);
+    property->value = malloc(strlen(value) + 1);
+    strcpy(property->value, value);
+  } else {
+    // new property
+    property = malloc(sizeof(PROPERTY));
+    property->name = malloc(strlen(name) + 1);
+    strcpy(property->name, name);
+    property->value = malloc(strlen(value) + 1);
+    strcpy(property->value, value);
+    property->next_property = properties;
+    properties = property;
+  }
 }
 

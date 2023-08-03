@@ -1,6 +1,6 @@
 
 enum ACTION {
-  NO_ACTION=0,
+  NO_ACTION = 0,
   A_SWAP_B,
   A_TO_B,
   AF_GAIN,
@@ -160,12 +160,12 @@ enum ACTION {
 };
 
 enum ACTIONtype {
-  TYPE_NONE=0,
-  MIDI_KEY=1,           // MIDI Button (press event)
-  MIDI_KNOB=2,          // MIDI Knob   (value between 0 and 100)
-  MIDI_WHEEL=4,         // MIDI Wheel  (direction and speed)
-  CONTROLLER_SWITCH=8,  // Controller Button
-  CONTROLLER_ENCODER=16 // Controller Encoder
+  TYPE_NONE = 0,
+  MIDI_KEY = 1,         // MIDI Button (press event)
+  MIDI_KNOB = 2,        // MIDI Knob   (value between 0 and 100)
+  MIDI_WHEEL = 4,       // MIDI Wheel  (direction and speed)
+  CONTROLLER_SWITCH = 8, // Controller Button
+  CONTROLLER_ENCODER = 16 // Controller Encoder
 };
 
 typedef struct _action_table {
@@ -188,7 +188,7 @@ typedef struct process_action {
   gint val;
 } PROCESS_ACTION;
 
-extern ACTION_TABLE ActionTable[ACTIONS+1];
+extern ACTION_TABLE ActionTable[ACTIONS + 1];
 
 extern int process_action(void *data);
 extern void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val);

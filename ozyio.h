@@ -50,9 +50,9 @@ extern int adc_overflow;
 
 int ozy_open(void);
 int ozy_close(void);
-int ozy_get_firmware_string(unsigned char* buffer,int buffer_size);
-int ozy_write(int ep,unsigned char* buffer,int buffer_size);
-int ozy_read(int ep,unsigned char* buffer,int buffer_size);
+int ozy_get_firmware_string(unsigned char* buffer, int buffer_size);
+int ozy_write(int ep, unsigned char* buffer, int buffer_size);
+int ozy_read(int ep, unsigned char* buffer, int buffer_size);
 
 void ozy_load_fw(void);
 int ozy_load_fpga(char *rbf_fnamep);

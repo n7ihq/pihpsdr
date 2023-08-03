@@ -19,31 +19,32 @@
 #include <stdarg.h>
 #include <errno.h>
 
-void t_print(const gchar *format, ...) { 
+void t_print(const gchar *format, ...) {
   va_list(args);
   va_start(args, format);
   struct timespec ts;
   double now;
-  static double starttime; 
-  static int first=1;
+  static double starttime;
+  static int first = 1;
   char line[1024];
-
   clock_gettime(CLOCK_MONOTONIC, &ts);
-  now=ts.tv_sec + 1E-9*ts.tv_nsec;
+  now = ts.tv_sec + 1E-9 * ts.tv_nsec;
+
   if (first) {
-    first=0;
-    starttime=now;
+    first = 0;
+    starttime = now;
   }
+
   //
   // After 11 days, the time reaches 999999.999 so we simply wrap around
   //
-  if (now - starttime >= 999999.995) starttime += 1000000.0;
+  if (now - starttime >= 999999.995) { starttime += 1000000.0; }
 
   //
   // We have to use vsprintf to handle the varargs stuff
   //
-  g_print("%10.3f ", now-starttime);
-  vsprintf(line,format, args);
+  g_print("%10.3f ", now - starttime);
+  vsprintf(line, format, args);
   g_print("%s", line);
 }
 

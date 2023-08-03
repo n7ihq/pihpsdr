@@ -72,8 +72,8 @@ void receiver_weak_notify(gpointer data, GObject  *obj) {
 
 gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   const RECEIVER *rx = (RECEIVER *)data;
-
 #ifdef __APPLE__
+
   //
   // TEMPORARY FIX:
   //
@@ -93,6 +93,7 @@ gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, g
   // is not present.
   //
   if (sub_menu || main_menu) { return TRUE; }
+
 #endif
 
   if (rx == active_receiver) {

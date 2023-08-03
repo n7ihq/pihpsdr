@@ -78,7 +78,7 @@ char *step_labels[] = {"1Hz", "10Hz", "25Hz", "50Hz", "100Hz", "250Hz", "500Hz",
 struct _vfo vfo[MAX_VFOS];
 struct _mode_settings mode_settings[MODES];
 
-static void vfo_save_bandstack() {
+static void vfoSaveBandstack() {
   BANDSTACK *bandstack = bandstack_get_bandstack(vfo[0].band);
   BANDSTACK_ENTRY *entry = &bandstack->entry[vfo[0].bandstack];
   entry->frequency = vfo[0].frequency;
@@ -88,72 +88,38 @@ static void vfo_save_bandstack() {
   entry->ctun_frequency = vfo[0].ctun_frequency;
 }
 
-void modesettings_save_state() {
+static void modesettingsSaveState() {
+  char name[128];
+  char value[128];
+
   for (int i = 0; i < MODES; i++) {
-    char name[80];
-    char value[80];
-    sprintf(name, "modeset.%d.filter", i);
-    sprintf(value, "%d", mode_settings[i].filter);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.nr", i);
-    sprintf(value, "%d", mode_settings[i].nr);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.nb", i);
-    sprintf(value, "%d", mode_settings[i].nb);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.anf", i);
-    sprintf(value, "%d", mode_settings[i].anf);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.snb", i);
-    sprintf(value, "%d", mode_settings[i].snb);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.en_txeq", i);
-    sprintf(value, "%d", mode_settings[i].en_txeq);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.txeq.0", i);
-    sprintf(value, "%d", mode_settings[i].txeq[0]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.txeq.1", i);
-    sprintf(value, "%d", mode_settings[i].txeq[1]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.txeq.2", i);
-    sprintf(value, "%d", mode_settings[i].txeq[2]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.txeq.3", i);
-    sprintf(value, "%d", mode_settings[i].txeq[3]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.en_rxeq", i);
-    sprintf(value, "%d", mode_settings[i].en_rxeq);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.rxeq.0", i);
-    sprintf(value, "%d", mode_settings[i].rxeq[0]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.rxeq.1", i);
-    sprintf(value, "%d", mode_settings[i].rxeq[1]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.rxeq.2", i);
-    sprintf(value, "%d", mode_settings[i].rxeq[2]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.rxeq.3", i);
-    sprintf(value, "%d", mode_settings[i].rxeq[3]);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.step", i);
-    sprintf(value, "%lld", mode_settings[i].step);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.compressor_level", i);
-    sprintf(value, "%f", mode_settings[i].compressor_level);
-    setProperty(name, value);
-    sprintf(name, "modeset.%d.compressor", i);
-    sprintf(value, "%d", mode_settings[i].compressor);
-    setProperty(name, value);
+    SetPropI1("modeset.%d.filter", i,                mode_settings[i].filter);
+    SetPropI1("modeset.%d.nr", i,                    mode_settings[i].nr);
+    SetPropI1("modeset.%d.nb", i,                    mode_settings[i].nb);
+    SetPropI1("modeset.%d.anf", i,                   mode_settings[i].anf);
+    SetPropI1("modeset.%d.snb", i,                   mode_settings[i].snb);
+    SetPropI1("modeset.%d.en_txeq", i,               mode_settings[i].en_txeq);
+    SetPropI1("modeset.%d.en_rxeq", i,               mode_settings[i].en_rxeq);
+    SetPropI1("modeset.%d.en_rxeq", i,               mode_settings[i].en_rxeq);
+    SetPropI1("modeset.%d.step", i,                  mode_settings[i].step);
+    SetPropF1("modeset.%d.compressor_level", i,      mode_settings[i].compressor_level);
+    SetPropI1("modeset.%d.compressor", i,            mode_settings[i].compressor);
+
+    for (int j = 0; j < 4; j++) {
+      SetPropI2("modeset.%d.txeq.%d", i, j,          mode_settings[i].txeq[j]);
+      SetPropI2("modeset.%d.rxeq.%d", i, j,          mode_settings[i].rxeq[j]);
+    }
   }
 }
 
-void modesettings_restore_state() {
-  // set some reasonable defaults
+static void modesettingsRestoreState() {
+  char name[128];
+  char *value;
+
   for (int i = 0; i < MODES; i++) {
-    char *value;
-    char name[80];
+    //
+    // set defaults
+    //
     mode_settings[i].filter = filterF6;
     mode_settings[i].nr = 0;
     mode_settings[i].nb = 0;
@@ -172,141 +138,53 @@ void modesettings_restore_state() {
     mode_settings[i].step = 100;
     mode_settings[i].compressor = 0;
     mode_settings[i].compressor_level = 0.0;
-    sprintf(name, "modeset.%d.filter", i);
-    value = getProperty(name);
+    GetPropI1("modeset.%d.filter", i,                mode_settings[i].filter);
+    GetPropI1("modeset.%d.nr", i,                    mode_settings[i].nr);
+    GetPropI1("modeset.%d.nb", i,                    mode_settings[i].nb);
+    GetPropI1("modeset.%d.anf", i,                   mode_settings[i].anf);
+    GetPropI1("modeset.%d.snb", i,                   mode_settings[i].snb);
+    GetPropI1("modeset.%d.en_txeq", i,               mode_settings[i].en_txeq);
+    GetPropI1("modeset.%d.en_rxeq", i,               mode_settings[i].en_rxeq);
+    GetPropI1("modeset.%d.step", i,                  mode_settings[i].step);
+    GetPropF1("modeset.%d.compressor_level", i,      mode_settings[i].compressor_level);
+    GetPropI1("modeset.%d.compressor", i,            mode_settings[i].compressor);
 
-    if (value) { mode_settings[i].filter = atoi(value); }
-
-    sprintf(name, "modeset.%d.nr", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].nr = atoi(value); }
-
-    sprintf(name, "modeset.%d.nb", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].nb = atoi(value); }
-
-    sprintf(name, "modeset.%d.anf", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].anf = atoi(value); }
-
-    sprintf(name, "modeset.%d.snb", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].snb = atoi(value); }
-
-    sprintf(name, "modeset.%d.en_txeq", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].en_txeq = atoi(value); }
-
-    sprintf(name, "modeset.%d.txeq.0", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].txeq[0] = atoi(value); }
-
-    sprintf(name, "modeset.%d.txeq.1", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].txeq[1] = atoi(value); }
-
-    sprintf(name, "modeset.%d.txeq.2", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].txeq[2] = atoi(value); }
-
-    sprintf(name, "modeset.%d.txeq.3", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].txeq[3] = atoi(value); }
-
-    sprintf(name, "modeset.%d.en_rxeq", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].en_rxeq = atoi(value); }
-
-    sprintf(name, "modeset.%d.rxeq.0", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].rxeq[0] = atoi(value); }
-
-    sprintf(name, "modeset.%d.rxeq.1", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].rxeq[1] = atoi(value); }
-
-    sprintf(name, "modeset.%d.rxeq.2", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].rxeq[2] = atoi(value); }
-
-    sprintf(name, "modeset.%d.rxeq.3", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].rxeq[3] = atoi(value); }
-
-    sprintf(name, "modeset.%d.step", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].step = atoll(value); }
-
-    sprintf(name, "modeset.%d.compressor_level", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].compressor_level = atof(value); }
-
-    sprintf(name, "modeset.%d.compressor", i);
-    value = getProperty(name);
-
-    if (value) { mode_settings[i].compressor = atoi(value); }
+    for (int j = 0; j < 4; j++) {
+      GetPropI2("modeset.%d.txeq.%d", i, j,          mode_settings[i].txeq[j]);
+      GetPropI2("modeset.%d.rxeq.%d", i, j,          mode_settings[i].rxeq[j]);
+    }
   }
 }
 
-void vfo_save_state() {
-  vfo_save_bandstack();
+void vfoSaveState() {
+  char name[128];
+  char value[128];
+  vfoSaveBandstack();
 
   for (int i = 0; i < MAX_VFOS; i++) {
-    char name[80];
-    char value[80];
-    sprintf(name, "vfo.%d.band", i);
-    sprintf(value, "%d", vfo[i].band);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.frequency", i);
-    sprintf(value, "%lld", vfo[i].frequency);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.ctun", i);
-    sprintf(value, "%d", vfo[i].ctun);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.rit_enabled", i);
-    sprintf(value, "%d", vfo[i].rit_enabled);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.rit", i);
-    sprintf(value, "%lld", vfo[i].rit);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.lo", i);
-    sprintf(value, "%lld", vfo[i].lo);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.ctun_frequency", i);
-    sprintf(value, "%lld", vfo[i].ctun_frequency);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.offset", i);
-    sprintf(value, "%lld", vfo[i].offset);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.mode", i);
-    sprintf(value, "%d", vfo[i].mode);
-    setProperty(name, value);
-    sprintf(name, "vfo.%d.filter", i);
-    sprintf(value, "%d", vfo[i].filter);
-    setProperty(name, value);
+    SetPropI1("vfo.%d.band", i,             vfo[i].band);
+    SetPropI1("vfo.%d.frequency", i,        vfo[i].frequency);
+    SetPropI1("vfo.%d.ctun", i,             vfo[i].ctun);
+    SetPropI1("vfo.%d.ctun_frequency", i,   vfo[i].ctun_frequency);
+    SetPropI1("vfo.%d.rit", i,              vfo[i].rit);
+    SetPropI1("vfo.%d.rit_enabled", i,      vfo[i].rit_enabled);
+    SetPropI1("vfo.%d.lo", i,               vfo[i].lo);
+    SetPropI1("vfo.%d.offset", i,           vfo[i].offset);
+    SetPropI1("vfo.%d.mode", i,             vfo[i].mode);
+    SetPropI1("vfo.%d.filter", i,           vfo[i].filter);
   }
+
+  modesettingsSaveState();
 }
 
-void vfo_restore_state() {
+void vfoRestoreState() {
+  char name[128];
+  char *value;
+
   for (int i = 0; i < MAX_VFOS; i++) {
-    char name[80];
-    char *value;
+    //
+    // Set defaults
+    //
     vfo[i].band = band20;
     vfo[i].bandstack = 0;
     vfo[i].frequency = 14010000;
@@ -324,61 +202,24 @@ void vfo_restore_state() {
     vfo[i].rit_enabled = 0;
     vfo[i].rit = 0;
     vfo[i].ctun = 0;
-    sprintf(name, "vfo.%d.band", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].band = atoi(value); }
-
-    sprintf(name, "vfo.%d.frequency", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].frequency = atoll(value); }
-
-    sprintf(name, "vfo.%d.ctun", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].ctun = atoi(value); }
-
-    sprintf(name, "vfo.%d.ctun_frequency", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].ctun_frequency = atoll(value); }
-
-    sprintf(name, "vfo.%d.rit", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].rit = atoll(value); }
-
-    sprintf(name, "vfo.%d.rit_enabled", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].rit_enabled = atoi(value); }
-
-    sprintf(name, "vfo.%d.lo", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].lo = atoll(value); }
-
-    sprintf(name, "vfo.%d.offset", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].offset = atoll(value); }
-
-    sprintf(name, "vfo.%d.mode", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].mode = atoi(value); }
-
-    sprintf(name, "vfo.%d.filter", i);
-    value = getProperty(name);
-
-    if (value) { vfo[i].filter = atoi(value); }
+    GetPropI1("vfo.%d.band", i,             vfo[i].band);
+    GetPropI1("vfo.%d.frequency", i,        vfo[i].frequency);
+    GetPropI1("vfo.%d.ctun", i,             vfo[i].ctun);
+    GetPropI1("vfo.%d.ctun_frequency", i,   vfo[i].ctun_frequency);
+    GetPropI1("vfo.%d.rit", i,              vfo[i].rit);
+    GetPropI1("vfo.%d.rit_enabled", i,      vfo[i].rit_enabled);
+    GetPropI1("vfo.%d.lo", i,               vfo[i].lo);
+    GetPropI1("vfo.%d.offset", i,           vfo[i].offset);
+    GetPropI1("vfo.%d.mode", i,             vfo[i].mode);
+    GetPropI1("vfo.%d.filter", i,           vfo[i].filter);
 
     // Sanity check: if !ctun, offset must be zero
     if (!vfo[i].ctun) {
       vfo[i].offset = 0;
     }
   }
+
+  modesettingsRestoreState();
 }
 
 void vfo_xvtr_changed() {
@@ -472,7 +313,7 @@ void vfo_band_changed(int id, int b) {
 #endif
 
   if (id == 0) {
-    vfo_save_bandstack();
+    vfoSaveBandstack();
   }
 
   if (b == vfo[id].band) {
@@ -541,7 +382,7 @@ void vfo_bandstack_changed(int b) {
   int id = active_receiver->id;
 
   if (id == 0) {
-    vfo_save_bandstack();
+    vfoSaveBandstack();
   }
 
   vfo[id].bandstack = b;
@@ -1224,7 +1065,7 @@ void vfo_update() {
   int m = vfo[id].mode;
   int f = vfo[id].filter;
   int txvfo = get_tx_vfo();
-  const VFO_BAR_LAYOUT *vfl = vfo_layout;
+  const VFO_BAR_LAYOUT *vfl = &vfo_layout_list[vfo_layout];
   //
   // Filter used in active receiver
   //
@@ -1244,38 +1085,30 @@ void vfo_update() {
   //
   // -----------------------------------------------------------
   if ((f == filterVar1 || f == filterVar2) && m != modeFMN && vfl->filter_x != 0) {
-    int i;
     double range;
     double s, x1, x2;
     int def_low, def_high;
     int low = band_filter->low;
     int high = band_filter->high;
 
-    switch (vfo[id].filter) {
-    case filterVar1:
+    if (vfo[id].filter == filterVar1) {
       def_low = var1_default_low[m];
       def_high = var1_default_high[m];
-      break;
-
-    case filterVar2:
+    } else {
       def_low = var2_default_low[m];
       def_high = var2_default_high[m];
-      break;
     }
 
     // switch high/low for lower-sideband-modes such
     // that the graphic display refers to audio frequencies.
-    switch (m) {
-    case modeLSB:
-    case modeDIGL:
-    case modeCWL:
-      i = def_low;
-      def_low = def_high;
-      def_high = i;
-      i = low;
-      low = high;
-      high = i;
-      break;
+    if (m == modeLSB || m == modeDIGL || m == modeCWL) {
+      int swap;
+      swap     = def_low;
+      def_low  = def_high;
+      def_high = swap;
+      swap     = low;
+      low      = high;
+      high     = swap;
     }
 
     // default range is 50 pix wide in a 100 pix window
@@ -1943,7 +1776,7 @@ vfo_press_event_cb (GtkWidget *widget,
   case GDK_BUTTON_PRIMARY:
     v = VFO_A;
 
-    if (event->x >= abs(vfo_layout->vfo_b_x)) { v = VFO_B; }
+    if (event->x >= abs(vfo_layout_list[vfo_layout].vfo_b_x)) { v = VFO_B; }
 
     g_idle_add(ext_start_vfo, GINT_TO_POINTER(v));
     break;

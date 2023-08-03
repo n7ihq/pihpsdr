@@ -31,19 +31,19 @@
 // b) variable filter frequencies removed because they were nowhere used
 //
 struct _BANDSTACK_ENTRY {
-    long long frequency;
-    int ctun;
-    long long ctun_frequency;
-    int mode;
-    int filter;
+  long long frequency;
+  int ctun;
+  long long ctun_frequency;
+  int mode;
+  int filter;
 };
 
 typedef struct _BANDSTACK_ENTRY BANDSTACK_ENTRY;
 
 struct _BANDSTACK {
-    int entries;
-    int current_entry;
-    BANDSTACK_ENTRY *entry;
+  int entries;
+  int current_entry;
+  BANDSTACK_ENTRY *entry;
 };
 
 typedef struct _BANDSTACK BANDSTACK;

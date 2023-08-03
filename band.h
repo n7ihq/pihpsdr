@@ -24,7 +24,7 @@
 #include "bandstack.h"
 
 enum {
-  band136=0,
+  band136 = 0,
   band472,
   band160,
   band80,
@@ -58,27 +58,27 @@ enum {
 * @brief Band definition
 */
 struct _BAND {
-    char title[16];
-    BANDSTACK *bandstack;
-    unsigned char OCrx;
-    unsigned char OCtx;
-    int preamp;
-    int alexRxAntenna;
-    int alexTxAntenna;
-    int alexAttenuation;
-    double pa_calibration;
-    long long frequencyMin;
-    long long frequencyMax;
-    long long frequencyLO;
-    long long errorLO;
-    int disablePA;
+  char title[16];
+  BANDSTACK *bandstack;
+  unsigned char OCrx;
+  unsigned char OCtx;
+  int preamp;
+  int alexRxAntenna;
+  int alexTxAntenna;
+  int alexAttenuation;
+  double pa_calibration;
+  long long frequencyMin;
+  long long frequencyMax;
+  long long frequencyLO;
+  long long errorLO;
+  int disablePA;
 };
 
 typedef struct _BAND BAND;
 
 struct _CHANNEL {
-    long long frequency;
-    long long width;
+  long long frequency;
+  long long width;
 };
 
 typedef struct _CHANNEL CHANNEL;
@@ -112,7 +112,7 @@ extern BANDSTACK *bandstack_get_bandstack(int band);
 extern void bandSaveState(void);
 extern void bandRestoreState(void);
 
-char* getFrequencyInfo(long long frequency,int filter_low,int filter_high);
+char* getFrequencyInfo(long long frequency, int filter_low, int filter_high);
 int canTransmit(void);
 
 extern void band_minus(int id);

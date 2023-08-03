@@ -23,7 +23,7 @@
 #include "mode.h"
 
 enum {
-  VFO_A=0,
+  VFO_A = 0,
   VFO_B,
   MAX_VFOS
 };
@@ -74,24 +74,22 @@ extern struct _mode_settings mode_settings[];
 #define STEPS 15
 extern char *step_labels[];
 
-extern GtkWidget* vfo_init(int width,int height);
+extern GtkWidget* vfo_init(int width, int height);
 extern int  vfo_get_stepindex(void);
 extern void vfo_set_step_from_index(int index);
 extern void vfo_set_stepsize(int newstep);
 extern int  vfo_get_step_from_index(int index);
 extern void vfo_step(int steps);
 extern void vfo_id_step(int id, int steps);
-extern void vfo_move(long long hz,int round);
-extern void vfo_id_move(int id,long long hz,int round);
+extern void vfo_move(long long hz, int round);
+extern void vfo_id_move(int id, long long hz, int round);
 extern void vfo_move_to(long long hz);
 extern void vfo_update(void);
 
-extern void vfo_save_state(void);
-extern void vfo_restore_state(void);
-extern void modesettings_save_state(void);
-extern void modesettings_restore_state(void);
+extern void vfoSaveState(void);
+extern void vfoRestoreState(void);
 
-extern void vfo_band_changed(int id,int b);
+extern void vfo_band_changed(int id, int b);
 extern void vfo_bandstack_changed(int b);
 extern void vfo_mode_changed(int m);
 extern void vfo_filter_changed(int f);
@@ -107,7 +105,7 @@ extern void vfo_xvtr_changed(void);
 
 extern void vfo_rit_update(int rx);
 extern void vfo_rit_clear(int rx);
-extern void vfo_rit(int rx,int i);
+extern void vfo_rit(int rx, int i);
 extern void vfo_set_frequency(int vfo, long long f);
 
 extern void vfo_ctun_update(int id, int state);
