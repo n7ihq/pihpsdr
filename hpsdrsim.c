@@ -828,14 +828,15 @@ int main(int argc, char *argv[]) {
 
       /*
        * Here we have to handle the following "non standard" cases:
-       * OldProtocol "program"   packet
-       * OldProtocol "erase"     packet
-       * OldProtocol "Set IP"    packet
-       * NewProtocol "Discovery" packet
-       * NewProtocol "program"   packet
-       * NewProtocol "erase"     packet
-       * NewProtocol "Set IP"    packet
-       * NewProtocol "General"   packet  ==> this starts NewProtocol radio
+       * OldProtocol "program"   packet  264 bytes starting with EF FE 03 01
+       * OldProtocol "erase"     packet   64 bytes starting with EF FE 03 02
+       * OldProtocol "Set IP"    packet   63 bytes starting with EF FE 03
+       * NewProtocol "Discovery" packet   60 bytes starting with 00 00 00 00 02
+       * NewProtocol "program"   packet  265 bytes starting with xx xx xx xx 05  (XXXXXXXX = Seq. Number)
+       * NewProtocol "erase"     packet   60 bytes starting with 00 00 00 00 04
+       * NewProtocol "Set IP"    packet   60 bytes starting with 00 00 00 00 03
+       * NewProtocol "General"   packet   60 bytes starting with 00 00 00 00 00
+       *                                  ==> this starts NewProtocol radio
        */
       if (bytes_read == 264 && buffer[0] == 0xEF && buffer[1] == 0xFE && buffer[2] == 0x03 && buffer[3] == 0x01) {
         static long cnt = 0;
