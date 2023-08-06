@@ -1672,6 +1672,9 @@ static void rxtx(int state) {
       gtk_fixed_put(GTK_FIXED(fixed), transmitter->panel, transmitter->x, transmitter->y);
     }
 
+    if (transmitter->puresignal) {
+      SetPSMox(transmitter->id, 1);
+    }
     SetChannelState(transmitter->id, 1, 0);
     tx_set_displaying(transmitter, 1);
 
@@ -1695,6 +1698,9 @@ static void rxtx(int state) {
 #endif
     }
 
+    if (transmitter->puresignal) {
+      SetPSMox(transmitter->id, 0);
+    }
     SetChannelState(transmitter->id, 0, 1);
     tx_set_displaying(transmitter, 0);
 
@@ -1724,10 +1730,7 @@ static void rxtx(int state) {
         // importance in SSB. On the other hand, one wants a very fast turnaround in CW.
         // So there is no "muting" for CW, 31 msec "muting" for TUNE/AM/FM, and 16 msec for other modes.
         //
-        // Note that for doing "TwoTone" we should also use the long silence, but it is difficult
-        // to detect at this point whether this TX/RX transition comes from ending a TwoTone
-        // experiment, since tx_set_twotone() first sets transmitter->twotone and then queues the
-        // mox  update. Therefore, these "tails" are still there in two-tone experiments.
+        // Note that for doing "TwoTone" the silence is built into tx_set_twotone().
         //
         switch (get_tx_mode()) {
         case modeCWU:
@@ -1769,9 +1772,6 @@ static void rxtx(int state) {
     }
   }
 
-  if (transmitter->puresignal) {
-    SetPSMox(transmitter->id, state);
-  }
 }
 
 void setMox(int state) {
