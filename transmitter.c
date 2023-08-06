@@ -334,10 +334,14 @@ static gboolean update_display(gpointer data) {
       // at -6 dBm each. THIS DOES NOT DEPEND ON THE POSITION OF THE DRIVE LEVEL SLIDER.
       // The strength of the feedback signal, however, depends on the drive, on the PA and
       // on the attenuation effective in the feedback path.
-      // We try to normalize the feeback signal such that is looks like a "normal" TX
+      // We try to shift the RX feeback signal such that is looks like a "normal" TX
       // panadapter if the feedback is optimal for PureSignal (that is, if the attenuation
-      // is optimal). The correction (offset) depends on the protocol (different peak levels in the TX
-      // feedback channel.
+      // is optimal). The correction (offset) depends on the FPGA software inside the radio
+      // (diffent peak levels in the TX feedback channel).
+      //
+      // The (empirically) determined offset is 4.2 - 20*Log10(GetPk value), it is the larger
+      // the smaller the amplitude of the RX feedback signal is.
+      //
       switch (protocol) {
       case ORIGINAL_PROTOCOL:
         // TX dac feedback peak = 0.406, on HermesLite2 0.230
@@ -345,8 +349,8 @@ static gboolean update_display(gpointer data) {
         break;
 
       case NEW_PROTOCOL:
-        // TX dac feedback peak = 0.2899
-        offset = 15.0;
+        // TX dac feedback peak = 0.2899, on SATURN 0.6121
+        offset = (device == NEW_DEVICE_SATURN) ? 8.5 : 15.0;
         break;
 
       default:
@@ -1455,6 +1459,7 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx, double q_sample_tx, 
 
   if (rx_feedback->samples >= rx_feedback->buffer_size) {
     if (isTransmitting()) {
+      int cwmode = (tx->mode == modeCWL || tx->mode == modeCWU) && !tune && !tx->twotone;
 #if 0
       //
       // Special code to document the amplitude of the TX IQ samples.
@@ -1472,7 +1477,13 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx, double q_sample_tx, 
 
       t_print("PK MEASURED: %f\n", sqrt(pkmax));
 #endif
-      pscc(tx->id, rx_feedback->buffer_size, tx_feedback->iq_input_buffer, rx_feedback->iq_input_buffer);
+      if (!cwmode) {
+        //
+        // Since we are not using WDSP in CW transmit, it also makes little sense to
+        // deliver feedback samples
+        //
+        pscc(tx->id, rx_feedback->buffer_size, tx_feedback->iq_input_buffer, rx_feedback->iq_input_buffer);
+      }
 
       if (tx->displaying && tx->feedback) {
         g_mutex_lock(&rx_feedback->display_mutex);
@@ -1581,6 +1592,15 @@ void tx_set_twotone(TRANSMITTER *tx, int state) {
     SetTXAPostGenRun(tx->id, 1);
   } else {
     SetTXAPostGenRun(tx->id, 0);
+    //
+    // These radios show "tails" of the TX signal after a TX/RX transition,
+    // so wait a small moment (31 msec) after the TwoTone signal has been removed, before
+    // removing MOX
+    //
+    if (device == DEVICE_HERMES_LITE2 || device == DEVICE_HERMES_LITE ||
+        device == DEVICE_HERMES || device == DEVICE_STEMLAB || device == DEVICE_STEMLAB_Z20) {
+      usleep(31000);
+    }
   }
 
   g_idle_add(ext_mox_update, GINT_TO_POINTER(state));
