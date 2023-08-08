@@ -1,19 +1,18 @@
 /* Copyright (C)
 * 2015 - John Melton, G0ORX/N6LYT
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
 
@@ -80,6 +79,11 @@
   #include "client_server.h"
 #endif
 #include "message.h"
+#ifdef SATURN
+  #include "saturnmain.h"
+  #include "saturnserver.h"
+#endif
+
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
@@ -119,9 +123,7 @@ int radio_sample_rate;   // alias for radio->info.soapy.sample_rate
 gboolean iqswap;
 
 DISCOVERED *radio = NULL;
-#ifdef CLIENT_SERVER
-  gboolean radio_is_remote = FALSE;
-#endif
+gboolean radio_is_remote = FALSE;     // only used with CLIENT_SERVER
 
 char property_path[128];
 GMutex property_mutex;
@@ -270,6 +272,7 @@ int have_rx_gain = 0;
 int have_rx_att = 0;
 int have_alex_att = 0;
 int have_preamp = 0;
+int have_saturn_xdma = 0;
 int rx_gain_calibration = 0;
 
 int split = 0;
@@ -923,6 +926,10 @@ void start_radio() {
   protocol = radio->protocol;
   device = radio->device;
 
+  if (device == NEW_DEVICE_SATURN && (strcmp(radio->info.network.interface_name, "XDMA") == 0)) {
+    have_saturn_xdma = 1;
+  }
+
   if (device == DEVICE_METIS || device == DEVICE_OZY || device == NEW_DEVICE_ATLAS) {
     //
     // by default, assume there is a penelope board (no PennyLane)
@@ -1204,13 +1211,22 @@ void start_radio() {
   switch (protocol) {
   case ORIGINAL_PROTOCOL:
   case NEW_PROTOCOL:
-    sprintf(text, "piHPSDR: %s (%s %s) %s (%s) on %s",
-            radio->name,
-            p,
-            version,
-            ip,
-            mac,
-            iface);
+    if (have_saturn_xdma) {
+      sprintf(text, "piHPSDR: %s (%s v%d) on %s",
+              radio->name,
+              p,
+              radio->software_version,
+              iface);
+    } else {
+      sprintf(text, "piHPSDR: %s (%s %s) %s (%s) on %s",
+              radio->name,
+              p,
+              version,
+              ip,
+              mac,
+              iface);
+    }
+
     break;
 
   case SOAPYSDR_PROTOCOL:
@@ -1510,6 +1526,13 @@ void start_radio() {
   }
 
 #endif
+#ifdef SATURN
+
+  if (saturn_server_en) {
+    start_saturn_server();
+  }
+
+#endif
 #ifdef CLIENT_SERVER
 
   if (hpsdr_server) {
@@ -1675,6 +1698,7 @@ static void rxtx(int state) {
     if (transmitter->puresignal) {
       SetPSMox(transmitter->id, 1);
     }
+
     SetChannelState(transmitter->id, 1, 0);
     tx_set_displaying(transmitter, 1);
 
@@ -1701,6 +1725,7 @@ static void rxtx(int state) {
     if (transmitter->puresignal) {
       SetPSMox(transmitter->id, 0);
     }
+
     SetChannelState(transmitter->id, 0, 1);
     tx_set_displaying(transmitter, 0);
 
@@ -1771,7 +1796,6 @@ static void rxtx(int state) {
       }
     }
   }
-
 }
 
 void setMox(int state) {
@@ -2443,6 +2467,10 @@ void radioRestoreState() {
   GetPropI0("radio.display_sequence_errors",                 display_sequence_errors);
   GetPropI0("rigctl_enable",                                 rigctl_enable);
   GetPropI0("rigctl_port_base",                              rigctl_port_base);
+#ifdef SATURN
+  GetPropI0("client_enable_tx",                              client_enable_tx);
+  GetPropI0("saturn_server_en",                              saturn_server_en);
+#endif
 
   for (int i = 0; i < 4; i++) {
     GetPropI1("tx_equalizer.%d", i,                          tx_equalizer[i]);
@@ -2633,6 +2661,10 @@ void radioSaveState() {
   SetPropI0("radio.display_sequence_errors",                 display_sequence_errors);
   SetPropI0("rigctl_enable",                                 rigctl_enable);
   SetPropI0("rigctl_port_base",                              rigctl_port_base);
+#ifdef SATURN
+  SetPropI0("client_enable_tx",                              client_enable_tx);
+  SetPropI0("saturn_server_en",                              saturn_server_en);
+#endif
 
   for (int i = 0; i < 4; i++) {
     SetPropI1("tx_equalizer.%d", i,                          tx_equalizer[i]);

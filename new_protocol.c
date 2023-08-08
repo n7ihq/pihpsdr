@@ -1,19 +1,18 @@
 /* Copyright (C)
 * 2015 - John Melton, G0ORX/N6LYT
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
 
@@ -60,6 +59,10 @@
 #include "ext.h"
 #include "iambic.h"
 #include "message.h"
+#ifdef SATURN
+  #include "saturnmain.h"
+#endif
+
 
 #define min(x,y) (x<y?x:y)
 
@@ -518,120 +521,131 @@ void new_protocol_init(int pixels) {
     iq_thread_id[i] = g_thread_new( "iq thread", iq_thread, GINT_TO_POINTER(i));
   }
 
-  data_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-  if (data_socket < 0) {
-    t_perror("NewProtocol: create data_socket:");
-    exit(-1);
-  }
-
-  int optval = 1;
-  socklen_t optlen = sizeof(optval);
-  setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
-  setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
-  //
-  // We need a receive buffer with a decent size, to be able to
-  // store several incoming packets if they arrive in a burst.
-  // My personal feeling is to let the kernel decide, but other
-  // program explicitly specify the buffer sizes. What I  do here
-  // is to query the buffer sizes after they have been set.
-  // Note in the UDP case one normally does not need a large
-  // send buffer because data is sent immediately.
-  //
-  // UDP RaspPi default values: RCVBUF: 0x34000, SNDBUF: 0x34000
-  //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
-  // then getsockopt() returns: RCVBUF: 0x68000, SNDBUF: 0x20000
-  //
-  // UDP MacOS  default values: RCVBUF: 0xC01D0, SNDBUF: 0x02400
-  //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
-  // then getsockopt() returns: RCVBUF: 0x40000, SNDBUF: 0x10000
-  //
-  optval = 0x40000;
-
-  if (setsockopt(data_socket, SOL_SOCKET, SO_RCVBUF, &optval, optlen) < 0) {
-    t_perror("data_socket: set SO_RCVBUF");
-  }
-
-  optval = 0x10000;
-
-  if (setsockopt(data_socket, SOL_SOCKET, SO_SNDBUF, &optval, optlen) < 0) {
-    t_perror("data_socket: set SO_SNDBUF");
-  }
-
-  optlen = sizeof(optval);
-
-  if (getsockopt(data_socket, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) < 0) {
-    t_perror("data_socket: get SO_RCVBUF");
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_init();
+    iqindex = 4;
+    audioindex = 4; // leave space for sequence
+    audiosequence = 0L;
+    running = 1;
+#endif
   } else {
-    if (optlen == sizeof(optval)) { t_print("UDP Socket RCV buf size=%d\n", optval); }
-  }
+    data_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-  optlen = sizeof(optval);
+    if (data_socket < 0) {
+      t_perror("NewProtocol: create data_socket:");
+      exit(-1);
+    }
 
-  if (getsockopt(data_socket, SOL_SOCKET, SO_SNDBUF, &optval, &optlen) < 0) {
-    t_perror("data_socket: get SO_SNDBUF");
-  } else {
-    if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
-  }
+    int optval = 1;
+    socklen_t optlen = sizeof(optval);
+    setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
+    setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
+    //
+    // We need a receive buffer with a decent size, to be able to
+    // store several incoming packets if they arrive in a burst.
+    // My personal feeling is to let the kernel decide, but other
+    // program explicitly specify the buffer sizes. What I  do here
+    // is to query the buffer sizes after they have been set.
+    // Note in the UDP case one normally does not need a large
+    // send buffer because data is sent immediately.
+    //
+    // UDP RaspPi default values: RCVBUF: 0x34000, SNDBUF: 0x34000
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x68000, SNDBUF: 0x20000
+    //
+    // UDP MacOS  default values: RCVBUF: 0xC01D0, SNDBUF: 0x02400
+    //            we set them to: RCVBUF: 0x40000, SNDBUF: 0x10000
+    // then getsockopt() returns: RCVBUF: 0x40000, SNDBUF: 0x10000
+    //
+    optval = 0x40000;
+
+    if (setsockopt(data_socket, SOL_SOCKET, SO_RCVBUF, &optval, optlen) < 0) {
+      t_perror("data_socket: set SO_RCVBUF");
+    }
+
+    optval = 0x10000;
+
+    if (setsockopt(data_socket, SOL_SOCKET, SO_SNDBUF, &optval, optlen) < 0) {
+      t_perror("data_socket: set SO_SNDBUF");
+    }
+
+    optlen = sizeof(optval);
+
+    if (getsockopt(data_socket, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) < 0) {
+      t_perror("data_socket: get SO_RCVBUF");
+    } else {
+      if (optlen == sizeof(optval)) { t_print("UDP Socket RCV buf size=%d\n", optval); }
+    }
+
+    optlen = sizeof(optval);
+
+    if (getsockopt(data_socket, SOL_SOCKET, SO_SNDBUF, &optval, &optlen) < 0) {
+      t_perror("data_socket: get SO_SNDBUF");
+    } else {
+      if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
+    }
 
 #ifdef __APPLE__
-  //optval = 0x10;  // IPTOS_LOWDELAY
-  optval = 0xb8;  // DSCP EF
+    //optval = 0x10;  // IPTOS_LOWDELAY
+    optval = 0xb8;  // DSCP EF
 
-  if (setsockopt(data_socket, IPPROTO_IP, IP_TOS, &optval, sizeof(optval)) < 0) {
-    t_perror("data_socket: IP_TOS");
-  }
+    if (setsockopt(data_socket, IPPROTO_IP, IP_TOS, &optval, sizeof(optval)) < 0) {
+      t_perror("data_socket: IP_TOS");
+    }
 
 #endif
 
-  // bind to the interface
-  if (bind(data_socket, (struct sockaddr*)&radio->info.network.interface_address,
-           radio->info.network.interface_length) < 0) {
-    t_perror("bind socket failed for data_socket:");
-    exit(-1);
+    // bind to the interface
+    if (bind(data_socket, (struct sockaddr*)&radio->info.network.interface_address,
+             radio->info.network.interface_length) < 0) {
+      t_perror("bind socket failed for data_socket:");
+      exit(-1);
+    }
+
+    t_print("new_protocol_init: data_socket %d bound to interface %s:%d\n", data_socket,
+            inet_ntoa(radio->info.network.interface_address.sin_addr), ntohs(radio->info.network.interface_address.sin_port));
+    memcpy(&base_addr, &radio->info.network.address, radio->info.network.address_length);
+    base_addr_length = radio->info.network.address_length;
+    base_addr.sin_port = htons(GENERAL_REGISTERS_FROM_HOST_PORT);
+    //t_print("base_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
+    memcpy(&receiver_addr, &radio->info.network.address, radio->info.network.address_length);
+    receiver_addr_length = radio->info.network.address_length;
+    receiver_addr.sin_port = htons(RECEIVER_SPECIFIC_REGISTERS_FROM_HOST_PORT);
+    //t_print("receive_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
+    memcpy(&transmitter_addr, &radio->info.network.address, radio->info.network.address_length);
+    transmitter_addr_length = radio->info.network.address_length;
+    transmitter_addr.sin_port = htons(TRANSMITTER_SPECIFIC_REGISTERS_FROM_HOST_PORT);
+    //t_print("transmit_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
+    memcpy(&high_priority_addr, &radio->info.network.address, radio->info.network.address_length);
+    high_priority_addr_length = radio->info.network.address_length;
+    high_priority_addr.sin_port = htons(HIGH_PRIORITY_FROM_HOST_PORT);
+    //t_print("high_priority_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
+    //t_print("new_protocol_thread: high_priority_addr setup for port %d\n",HIGH_PRIORITY_FROM_HOST_PORT);
+    memcpy(&audio_addr, &radio->info.network.address, radio->info.network.address_length);
+    audio_addr_length = radio->info.network.address_length;
+    audio_addr.sin_port = htons(AUDIO_FROM_HOST_PORT);
+    //t_print("audio_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
+    memcpy(&iq_addr, &radio->info.network.address, radio->info.network.address_length);
+    iq_addr_length = radio->info.network.address_length;
+    iq_addr.sin_port = htons(TX_IQ_FROM_HOST_PORT);
+    //t_print("iq_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
+
+    for (i = 0; i < MAX_DDC; i++) {
+      memcpy(&data_addr[i], &radio->info.network.address, radio->info.network.address_length);
+      data_addr_length[i] = radio->info.network.address_length;
+      data_addr[i].sin_port = htons(RX_IQ_TO_HOST_PORT_0 + i);
+    }
+
+    // running is set to 1 at the top of new_protocol_thread,
+    // but this may lead to race conditions. So out of paranoia,
+    // set it to 1 here as well such that we are *absolutely* sure
+    // is is set before starting the timer thread sending the HP packet.
+    running = 1;
+    new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
+    t_print( "new_protocol_thread: id=%p\n", new_protocol_thread_id);
   }
 
-  t_print("new_protocol_init: data_socket %d bound to interface %s:%d\n", data_socket,
-          inet_ntoa(radio->info.network.interface_address.sin_addr), ntohs(radio->info.network.interface_address.sin_port));
-  memcpy(&base_addr, &radio->info.network.address, radio->info.network.address_length);
-  base_addr_length = radio->info.network.address_length;
-  base_addr.sin_port = htons(GENERAL_REGISTERS_FROM_HOST_PORT);
-  //t_print("base_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
-  memcpy(&receiver_addr, &radio->info.network.address, radio->info.network.address_length);
-  receiver_addr_length = radio->info.network.address_length;
-  receiver_addr.sin_port = htons(RECEIVER_SPECIFIC_REGISTERS_FROM_HOST_PORT);
-  //t_print("receive_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
-  memcpy(&transmitter_addr, &radio->info.network.address, radio->info.network.address_length);
-  transmitter_addr_length = radio->info.network.address_length;
-  transmitter_addr.sin_port = htons(TRANSMITTER_SPECIFIC_REGISTERS_FROM_HOST_PORT);
-  //t_print("transmit_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
-  memcpy(&high_priority_addr, &radio->info.network.address, radio->info.network.address_length);
-  high_priority_addr_length = radio->info.network.address_length;
-  high_priority_addr.sin_port = htons(HIGH_PRIORITY_FROM_HOST_PORT);
-  //t_print("high_priority_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
-  //t_print("new_protocol_thread: high_priority_addr setup for port %d\n",HIGH_PRIORITY_FROM_HOST_PORT);
-  memcpy(&audio_addr, &radio->info.network.address, radio->info.network.address_length);
-  audio_addr_length = radio->info.network.address_length;
-  audio_addr.sin_port = htons(AUDIO_FROM_HOST_PORT);
-  //t_print("audio_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
-  memcpy(&iq_addr, &radio->info.network.address, radio->info.network.address_length);
-  iq_addr_length = radio->info.network.address_length;
-  iq_addr.sin_port = htons(TX_IQ_FROM_HOST_PORT);
-  //t_print("iq_addr=%s\n",inet_ntoa(radio->info.network.address.sin_addr));
-
-  for (i = 0; i < MAX_DDC; i++) {
-    memcpy(&data_addr[i], &radio->info.network.address, radio->info.network.address_length);
-    data_addr_length[i] = radio->info.network.address_length;
-    data_addr[i].sin_port = htons(RX_IQ_TO_HOST_PORT_0 + i);
-  }
-
-  // running is set to 1 at the top of new_protocol_thread,
-  // but this may lead to race conditions. So out of paranoia,
-  // set it to 1 here as well such that we are *absolutely* sure
-  // is is set before starting the timer thread sending the HP packet.
-  running = 1;
-  new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
-  t_print( "new_protocol_thread: id=%p\n", new_protocol_thread_id);
   new_protocol_general();
   new_protocol_start();
   new_protocol_high_priority();
@@ -675,14 +689,20 @@ static void new_protocol_general() {
   //t_print("Alex Enable=%02X\n",general_buffer[59]);
   //t_print("new_protocol_general: %s:%d\n",inet_ntoa(base_addr.sin_addr),ntohs(base_addr.sin_port));
 
-  if ((rc = sendto(data_socket, general_buffer, sizeof(general_buffer), 0, (struct sockaddr*)&base_addr,
-                   base_addr_length)) < 0) {
-    t_perror("sendto socket failed for general:");
-    exit(1);
-  }
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_handle_general_packet(false, general_buffer);
+#endif
+  } else {
+    if ((rc = sendto(data_socket, general_buffer, sizeof(general_buffer), 0, (struct sockaddr*)&base_addr,
+                     base_addr_length)) < 0) {
+      t_perror("sendto socket failed for general:");
+      exit(1);
+    }
 
-  if (rc != sizeof(general_buffer)) {
-    t_print("sendto socket for general: %d rather than %ld", rc, (long)sizeof(general_buffer));
+    if (rc != sizeof(general_buffer)) {
+      t_print("sendto socket for general: %d rather than %ld", rc, (long)sizeof(general_buffer));
+    }
   }
 
   general_sequence++;
@@ -699,7 +719,7 @@ static void new_protocol_high_priority() {
   long long LPFfreq;  // frequency determining the LPF filters
   unsigned long phase;
 
-  if (data_socket == -1) {
+  if (data_socket == -1 && !have_saturn_xdma) {
     return;
   }
 
@@ -1227,16 +1247,23 @@ static void new_protocol_high_priority() {
   //  Voila mes amis. Envoyons les 1444 octets "high priority" au radio
   //
   //t_print("new_protocol_high_priority: %s:%d\n",inet_ntoa(high_priority_addr.sin_addr),ntohs(high_priority_addr.sin_port));
-  int rc;
 
-  if ((rc = sendto(data_socket, high_priority_buffer_to_radio, sizeof(high_priority_buffer_to_radio), 0,
-                   (struct sockaddr*)&high_priority_addr, high_priority_addr_length)) < 0) {
-    t_perror("sendto socket failed for high priority:");
-    exit(-1);
-  }
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_handle_high_priority(false, high_priority_buffer_to_radio);
+#endif
+  } else {
+    int rc;
 
-  if (rc != sizeof(high_priority_buffer_to_radio)) {
-    t_print("sendto socket for high_priority: %d rather than %ld", rc, (long)sizeof(high_priority_buffer_to_radio));
+    if ((rc = sendto(data_socket, high_priority_buffer_to_radio, sizeof(high_priority_buffer_to_radio), 0,
+                     (struct sockaddr*)&high_priority_addr, high_priority_addr_length)) < 0) {
+      t_perror("sendto socket failed for high priority:");
+      exit(-1);
+    }
+
+    if (rc != sizeof(high_priority_buffer_to_radio)) {
+      t_print("sendto socket for high_priority: %d rather than %ld", rc, (long)sizeof(high_priority_buffer_to_radio));
+    }
   }
 
   high_priority_sequence++;
@@ -1247,7 +1274,6 @@ static void new_protocol_high_priority() {
 
 static void new_protocol_transmit_specific() {
   int txmode = get_tx_mode();
-  int rc;
   pthread_mutex_lock(&tx_spec_mutex);
   memset(transmit_specific_buffer, 0, sizeof(transmit_specific_buffer));
   transmit_specific_buffer[0] = tx_specific_sequence >> 24;
@@ -1329,14 +1355,22 @@ static void new_protocol_transmit_specific() {
 
   //t_print("new_protocol_transmit_specific: %s:%d\n",inet_ntoa(transmitter_addr.sin_addr),ntohs(transmitter_addr.sin_port));
 
-  if ((rc = sendto(data_socket, transmit_specific_buffer, sizeof(transmit_specific_buffer), 0,
-                   (struct sockaddr*)&transmitter_addr, transmitter_addr_length)) < 0) {
-    t_perror("sendto socket failed for tx specific:");
-    exit(1);
-  }
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_handle_duc_specific(false, transmit_specific_buffer);
+#endif
+  } else {
+    int rc;
 
-  if (rc != sizeof(transmit_specific_buffer)) {
-    t_print("sendto socket for transmit_specific: %d rather than %ld", rc, (long)sizeof(transmit_specific_buffer));
+    if ((rc = sendto(data_socket, transmit_specific_buffer, sizeof(transmit_specific_buffer), 0,
+                     (struct sockaddr*)&transmitter_addr, transmitter_addr_length)) < 0) {
+      t_perror("sendto socket failed for tx specific:");
+      exit(1);
+    }
+
+    if (rc != sizeof(transmit_specific_buffer)) {
+      t_print("sendto socket for transmit_specific: %d rather than %ld", rc, (long)sizeof(transmit_specific_buffer));
+    }
   }
 
   tx_specific_sequence++;
@@ -1345,7 +1379,6 @@ static void new_protocol_transmit_specific() {
 
 static void new_protocol_receive_specific() {
   int i;
-  int rc;
   int xmit;
   pthread_mutex_lock(&rx_spec_mutex);
   memset(receive_specific_buffer, 0, sizeof(receive_specific_buffer));
@@ -1433,14 +1466,22 @@ static void new_protocol_receive_specific() {
 
   //t_print("new_protocol_receive_specific: %s:%d enable=%02X\n",inet_ntoa(receiver_addr.sin_addr),ntohs(receiver_addr.sin_port),receive_specific_buffer[7]);
 
-  if ((rc = sendto(data_socket, receive_specific_buffer, sizeof(receive_specific_buffer), 0,
-                   (struct sockaddr*)&receiver_addr, receiver_addr_length)) < 0) {
-    t_perror("sendto socket failed for receive_specific:");
-    exit(1);
-  }
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_handle_ddc_specific(false, receive_specific_buffer);
+#endif
+  } else {
+    int rc;
 
-  if (rc != sizeof(receive_specific_buffer)) {
-    t_print("sendto socket for receive_specific: %d rather than %ld", rc, (long)sizeof(receive_specific_buffer));
+    if ((rc = sendto(data_socket, receive_specific_buffer, sizeof(receive_specific_buffer), 0,
+                     (struct sockaddr*)&receiver_addr, receiver_addr_length)) < 0) {
+      t_perror("sendto socket failed for receive_specific:");
+      exit(1);
+    }
+
+    if (rc != sizeof(receive_specific_buffer)) {
+      t_print("sendto socket for receive_specific: %d rather than %ld", rc, (long)sizeof(receive_specific_buffer));
+    }
   }
 
   rx_specific_sequence++;
@@ -1459,7 +1500,15 @@ void new_protocol_stop() {
   running = 0;
   new_protocol_high_priority();
   usleep(100000); // 100 ms
-  close (data_socket);
+
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_exit();
+#endif
+  } else {
+    close (data_socket);
+    data_socket = -1;
+  }
 }
 
 //
@@ -1474,6 +1523,14 @@ void new_protocol_menu_stop() {
   // the data socket is drained but kept open
   //
   running = 0;
+
+  if (have_saturn_xdma) {
+    g_thread_join(new_protocol_timer_thread_id);
+    new_protocol_high_priority();
+    usleep(200000); // 200 ms
+    return;
+  }
+
   // wait until the thread that receives from the radio has terminated
   g_thread_join(new_protocol_thread_id);
   g_thread_join(new_protocol_timer_thread_id);
@@ -1522,7 +1579,11 @@ void new_protocol_menu_start() {
   // set it to 1 here as well such that we are *absolutely* sure
   // is is set before starting the timer thread sending the HP packet.
   running = 1;
-  new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
+
+  if (!have_saturn_xdma) {
+    new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
+  }
+
   // start the protocol
   new_protocol_general();
   new_protocol_start();
@@ -1706,6 +1767,52 @@ static gpointer mic_line_thread(gpointer data) {
 
   return NULL;
 }
+
+#ifdef SATURN
+void saturn_post_high_priority(mybuffer *buffer) {
+#ifdef __APPLE__
+  sem_wait(high_priority_sem_ready);
+#else
+  sem_wait(&high_priority_sem_ready);
+#endif
+  high_priority_buffer = buffer;
+#ifdef __APPLE__
+  sem_post(high_priority_sem_buffer);
+#else
+  sem_post(&high_priority_sem_buffer);
+#endif
+}
+
+
+void saturn_post_micaudio(int bytesread, mybuffer *buffer) {
+#ifdef __APPLE__
+  sem_wait(mic_line_sem_ready);
+#else
+  sem_wait(&mic_line_sem_ready);
+#endif
+  mic_line_buffer = buffer;
+  mic_bytes_read = bytesread;
+#ifdef __APPLE__
+  sem_post(mic_line_sem_buffer);
+#else
+  sem_post(&mic_line_sem_buffer);
+#endif
+}
+
+void saturn_post_iq_data(int ddc, mybuffer *buffer) {
+#ifdef __APPLE__
+  sem_wait(iq_sem_ready[ddc]);
+#else
+  sem_wait(&iq_sem_ready[ddc]);
+#endif
+  iq_buffer[ddc] = buffer;
+#ifdef __APPLE__
+  sem_post(iq_sem_buffer[ddc]);
+#else
+  sem_post(&iq_sem_buffer[ddc]);
+#endif
+}
+#endif
 
 static gpointer iq_thread(gpointer data) {
   int ddc = GPOINTER_TO_INT(data);
@@ -2046,10 +2153,17 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
       audiobuffer[2] = audiosequence >> 8;
       audiobuffer[3] = audiosequence;
       // send the buffer
-      int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
 
-      if (rc != sizeof(audiobuffer)) {
-        t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
+      if (have_saturn_xdma) {
+#ifdef SATURN
+        saturn_handle_speaker_audio(audiobuffer);
+#endif
+      } else {
+        int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
+
+        if (rc != sizeof(audiobuffer)) {
+          t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
+        }
       }
 
       audioindex = 4;
@@ -2083,10 +2197,17 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
     audiobuffer[2] = audiosequence >> 8;
     audiobuffer[3] = audiosequence;
     // send the buffer
-    int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
 
-    if (rc != sizeof(audiobuffer)) {
-      t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
+    if (have_saturn_xdma) {
+#ifdef SATURN
+      saturn_handle_speaker_audio(audiobuffer);
+#endif
+    } else {
+      int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
+
+      if (rc != sizeof(audiobuffer)) {
+        t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
+      }
     }
 
     audioindex = 4;
@@ -2111,9 +2232,15 @@ void new_protocol_flush_iq_samples() {
   iqbuffer[3] = tx_iq_sequence;
 
   // send the buffer
-  if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
-    t_perror("sendto socket failed for iq:");
-    exit(1);
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_handle_duc_iq(false, iqbuffer);
+#endif
+  } else {
+    if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
+      t_perror("sendto socket failed for iq:");
+      exit(1);
+    }
   }
 
   iqindex = 4;
@@ -2135,9 +2262,15 @@ void new_protocol_iq_samples(int isample, int qsample) {
     iqbuffer[3] = tx_iq_sequence;
 
     // send the buffer
-    if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
-      t_perror("sendto socket failed for iq:");
-      exit(1);
+    if (have_saturn_xdma) {
+#ifdef SATURN
+      saturn_handle_duc_iq(false, iqbuffer);
+#endif
+    } else {
+      if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
+        t_perror("sendto socket failed for iq:");
+        exit(1);
+      }
     }
 
     iqindex = 4;

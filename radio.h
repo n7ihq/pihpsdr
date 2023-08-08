@@ -1,19 +1,18 @@
 /* Copyright (C)
 * 2015 - John Melton, G0ORX/N6LYT
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
 
@@ -57,9 +56,7 @@ enum {
 };
 
 extern DISCOVERED *radio;
-#ifdef CLIENT_SERVER
-  extern gboolean radio_is_remote;
-#endif
+extern gboolean radio_is_remote;
 
 extern GtkWidget *fixed;
 
@@ -271,6 +268,7 @@ extern int have_rx_gain;         // programmable RX gain available
 extern int have_rx_att;          // step attenuator available -31 ... 0 dB
 extern int have_preamp;          // switchable preamp
 extern int have_alex_att;        // ALEX board does have 0/10/20/30 dB attenuator
+extern int have_saturn_xdma;     // Saturn can use Network or XDMA interface
 extern int rx_gain_calibration;  // used to calibrate the input signal
 
 extern double drive_max;         // maximum value of the drive slider

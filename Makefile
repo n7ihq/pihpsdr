@@ -17,8 +17,11 @@ GPIO_INCLUDE=GPIO
 # uncomment the line below to include MIDI support (needs MIDI support)
 MIDI_INCLUDE=MIDI
 
+# uncomment the line below to include SATURN native xdma support
+#SATURN_INCLUDE=SATURN
+
 # uncomment the line below to include ANDROMEDA support
-# ANDROMEDA_OPTIONS=-D ANDROMEDA
+#ANDROMEDA_OPTIONS=-D ANDROMEDA
 
 # uncomment the line below to include USB Ozy support (needs libusb)
 #USBOZY_INCLUDE=USBOZY
@@ -76,6 +79,31 @@ MIDI_SOURCES= alsa_midi.c midi2.c midi3.c midi_menu.c
 MIDI_OBJS= alsa_midi.o midi2.o midi3.o midi_menu.o
 MIDI_LIBS= -lasound
 endif
+endif
+
+ #
+# Add libraries for Saturn support, if requested
+#
+ifeq ($(SATURN_INCLUDE),SATURN)
+SATURN_OPTIONS=-D SATURN
+SATURN_SOURCES= \
+saturndrivers.c \
+saturnregisters.c \
+saturnserver.c \
+saturnmain.c \
+saturn_menu.c
+SATURN_HEADERS= \
+saturndrivers.h \
+saturnregisters.h \
+saturnserver.h \
+saturnmain.h \
+saturn_menu.h
+SATURN_OBJS= \
+saturndrivers.o \
+saturnregisters.o \
+saturnserver.o \
+saturnmain.o \
+saturn_menu.o
 endif
 
 #
@@ -236,6 +264,7 @@ endif
 OPTIONS=$(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) \
 	$(ANDROMEDA_OPTIONS) \
+	$(SATURN_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
 	$(AUDIO_OPTIONS) $(EXTENDED_NOISE_REDUCTION_OPTIONS)\
@@ -501,14 +530,14 @@ zoompan.o
 # How to link the program
 #
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
-		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
+		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(SATURN_OBJS)
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
-		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
+		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(SATURN_OBJS) $(LIBS)
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
 	$(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) $(AUDIO_SOURCES) $(SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
+	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(SATURN_HEADERS) $(SATURN_SOURCES) \
 	$(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
@@ -542,7 +571,7 @@ endif
 .PHONY:	cppcheck
 cppcheck:
 	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(USBOZY_SOURCES) \
-	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
+	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES) $(SATURN_SOURCES)
 
 .PHONY:	clean
 clean:

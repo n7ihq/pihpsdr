@@ -1,19 +1,18 @@
 /* Copyright (C)
 * 2017 - John Melton, G0ORX/N6LYT
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
 
@@ -1477,6 +1476,7 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx, double q_sample_tx, 
 
       t_print("PK MEASURED: %f\n", sqrt(pkmax));
 #endif
+
       if (!cwmode) {
         //
         // Since we are not using WDSP in CW transmit, it also makes little sense to
@@ -1592,14 +1592,19 @@ void tx_set_twotone(TRANSMITTER *tx, int state) {
     SetTXAPostGenRun(tx->id, 1);
   } else {
     SetTXAPostGenRun(tx->id, 0);
+
     //
     // These radios show "tails" of the TX signal after a TX/RX transition,
-    // so wait a small moment (31 msec) after the TwoTone signal has been removed, before
-    // removing MOX
+    // so wait after the TwoTone signal has been removed, before
+    // removing MOX.
+    // The wait time required is rather long, since we must fill the TX IQ
+    // FIFO completely with zeroes. 100 msec was measured on a HermesLite-2
+    // to be OK.
+    //
     //
     if (device == DEVICE_HERMES_LITE2 || device == DEVICE_HERMES_LITE ||
         device == DEVICE_HERMES || device == DEVICE_STEMLAB || device == DEVICE_STEMLAB_Z20) {
-      usleep(31000);
+      usleep(100000);
     }
   }
 

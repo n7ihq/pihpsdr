@@ -1,19 +1,18 @@
 /* Copyright (C)
 * 2015 - John Melton, G0ORX/N6LYT
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
 
@@ -67,6 +66,10 @@
   #include "midi_menu.h"
 #endif
 #include "screen_menu.h"
+#ifdef SATURN
+  #include "saturn_menu.h"
+#endif
+
 
 
 GtkWidget *main_menu = NULL;
@@ -127,6 +130,14 @@ static gboolean minimize_cb(GtkWidget *widget, GdkEventButton *event, gpointer d
   gtk_window_iconify(GTK_WINDOW(top_window));
   return TRUE;
 }
+
+#ifdef SATURN
+static gboolean saturn_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  cleanup();
+  saturn_menu(top_window);
+  return TRUE;
+}
+#endif
 
 static gboolean about_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
@@ -575,6 +586,16 @@ void new_menu() {
     g_signal_connect (server_b, "button-press-event", G_CALLBACK(server_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), server_b, (i % 5), i / 5, 1, 1);
     i++;
+#endif
+#ifdef SATURN
+
+    if (have_saturn_xdma) { // only display on the xdma client
+      GtkWidget *saturn_b = gtk_button_new_with_label("Saturn");
+      g_signal_connect (saturn_b, "button-press-event", G_CALLBACK(saturn_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), saturn_b, (i % 5), i / 5, 1, 1);
+      i++;
+    }
+
 #endif
     GtkWidget *screen_b = gtk_button_new_with_label("Screen");
     g_signal_connect (screen_b, "button-press-event", G_CALLBACK(screen_cb), NULL);

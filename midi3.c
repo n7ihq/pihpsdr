@@ -1,8 +1,23 @@
+/* Copyright (C)
+* 2019 - Christoph van Wüllen, DL1YCF
+*
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*
+*/
+
 /*
  * Layer-3 of MIDI support
- *
- * (C) Christoph van Wullen, DL1YCF
- *
  *
  * In most cases, a certain action only makes sense for a specific
  * type. For example, changing the VFO frequency will only be implemeted

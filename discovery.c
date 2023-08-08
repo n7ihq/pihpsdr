@@ -1,19 +1,18 @@
 /* Copyright (C)
 * 2015 - John Melton, G0ORX/N6LYT
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
 
@@ -273,6 +272,11 @@ void discovery() {
   }
 
 #endif
+#ifdef SATURN
+#include "saturnmain.h"
+  t_print("looking for /dev/xdma* based saturn devices\n");
+  saturn_discovery();
+#endif
 #ifdef STEMLAB_DISCOVERY
 
   if (enable_stemlab && !discover_only_stemlab) {
@@ -329,6 +333,7 @@ void discovery() {
   } else {
     char version[16];
     char text[512];
+    char macStr[18];
 
     for (row = 0; row < devices; row++) {
       d = &discovered[row];
@@ -336,6 +341,13 @@ void discovery() {
       snprintf(version, sizeof(version), "v%d.%d",
                d->software_version / 10,
                d->software_version % 10);
+      snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+               d->info.network.mac_address[0],
+               d->info.network.mac_address[1],
+               d->info.network.mac_address[2],
+               d->info.network.mac_address[3],
+               d->info.network.mac_address[4],
+               d->info.network.mac_address[5]);
 
       switch (d->protocol) {
       case ORIGINAL_PROTOCOL:
@@ -343,18 +355,17 @@ void discovery() {
         if (d->device == DEVICE_OZY) {
           snprintf(text, sizeof(text), "%s (%s) on USB /dev/ozy", d->name,
                    d->protocol == ORIGINAL_PROTOCOL ? "Protocol 1" : "Protocol 2");
+        } else if (d->device == NEW_DEVICE_SATURN && strcmp(d->info.network.interface_name, "XDMA") == 0) {
+          snprintf(text, sizeof(text), "%s (%s v%d) fpga:%x (%s) on /dev/xdma*", d->name,
+                   d->protocol == ORIGINAL_PROTOCOL ? "Protocol 1" : "Protocol 2", d->software_version,
+                   d->fpga_version, macStr);
         } else {
-          snprintf(text, sizeof(text), "%s (%s %s) %s (%02X:%02X:%02X:%02X:%02X:%02X) on %s: ",
+          snprintf(text, sizeof(text), "%s (%s %s) %s (%s) on %s: ",
                    d->name,
                    d->protocol == ORIGINAL_PROTOCOL ? "Protocol 1" : "Protocol 2",
                    version,
                    inet_ntoa(d->info.network.address.sin_addr),
-                   d->info.network.mac_address[0],
-                   d->info.network.mac_address[1],
-                   d->info.network.mac_address[2],
-                   d->info.network.mac_address[3],
-                   d->info.network.mac_address[4],
-                   d->info.network.mac_address[5],
+                   macStr,
                    d->info.network.interface_name);
         }
 

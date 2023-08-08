@@ -1,3 +1,21 @@
+/* Copyright (C)
+* 2023 - Christoph van Wüllen, DL1YCF
+*
+*   This program is free software: you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation, either version 3 of the License, or
+*   (at your option) any later version.
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*
+*/
+
 /*
  * Hook for logging messages to the output file
  *
@@ -42,12 +60,12 @@ void t_print(const gchar *format, ...) {
 
   //
   // We have to use vsprintf to handle the varargs stuff
+  // g_print() seems to be thread-safe but call it only ONCE.
   //
-  g_print("%10.3f ", now - starttime);
   vsprintf(line, format, args);
-  g_print("%s", line);
+  g_print("%10.3f %s", now - starttime, line);
 }
 
 void t_perror(const gchar *string) {
-  t_print("%s %s\n", string, strerror(errno));
+  t_print("%s: %s\n", string, strerror(errno));
 }

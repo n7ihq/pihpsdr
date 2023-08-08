@@ -1,0 +1,23 @@
+This procedure was tested on a Pi4B and CM4.
+
+Before creating a new release (pihpsdr.tar), make sure
+wdsp is up to date.
+
+The below steps may be different depending on where your
+wdsp and pihpsdr repos are copied to and named.
+
+cd wdsp
+git pull
+make clean
+make -j9
+
+cd ../pihpsdr
+git pull
+make clean
+make -j9
+cp pihpsdr release/pihpsdr/
+cp ../wdsp/libwdsp.so release/pihpsdr/
+
+cd release
+rm -f pihpsdr.tar
+tar cvf pihpsdr.tar pihpsdr
