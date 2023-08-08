@@ -433,7 +433,7 @@ void new_menu() {
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
     gtk_grid_set_row_spacing (GTK_GRID(grid), 10);
-    gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+    gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
 
     //
@@ -451,7 +451,14 @@ void new_menu() {
     g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), exit_b, 3, 0, 2, 1);
 
-    row=maxrow=1;
+    //
+    // Insert small separation between top column the the "many buttons"
+    //
+    GtkWidget *TopSeparator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_widget_set_size_request(TopSeparator, -1, 3);
+    gtk_grid_attach(GTK_GRID(grid), TopSeparator, 0, 1, 5, 1);
+
+    row=maxrow=2;
     //
     // First Column: Radio/Screen/Display/XVTR/Saturn/Server
     //
@@ -492,7 +499,7 @@ void new_menu() {
 #endif 
 
     if (row > maxrow) { maxrow=row; }
-    row=1;
+    row=2;
 
     //
     // Second column: RX/Noise/AGC/Diversity
@@ -503,7 +510,7 @@ void new_menu() {
     row++;
 
     GtkWidget *noise_b = gtk_button_new_with_label("Noise");
-    g_signal_connect (rx_b, "button-press-event", G_CALLBACK(noise_cb), NULL);
+    g_signal_connect (noise_b, "button-press-event", G_CALLBACK(noise_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), noise_b, 1, row, 1, 1);
     row++;
 
@@ -520,7 +527,7 @@ void new_menu() {
     }
 
     if (row > maxrow) { maxrow=row; }
-    row=1;
+    row=2;
 
     //
     // Third column:  TX, PA, VOX, PS, CW
@@ -555,7 +562,7 @@ void new_menu() {
     row++;
 
     if (row > maxrow) { maxrow=row; }
-    row=1;
+    row=2;
 
     //
     // Fourth column: FFT, Equalizer, Meter, Ant, OC
@@ -588,7 +595,7 @@ void new_menu() {
     }
 
     if (row > maxrow) { maxrow=row; }
-    row=1;
+    row=2;
 
     //
     // Fifth column: Toolbar, RigCtl, MIDI, Encoders, Switches
@@ -626,17 +633,26 @@ void new_menu() {
     }
 #endif
 
+    row=maxrow;
+    //
+    // Insert small separation between the "many buttons" and the bottom row
+    //
+    GtkWidget *BotSeparator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_widget_set_size_request(BotSeparator, -1, 3);
+    gtk_grid_attach(GTK_GRID(grid), BotSeparator, 0, row, 5, 1);
+    row++; 
+
     //
     // Last row: About and Iconify Button
     //
 
     GtkWidget *about_b = gtk_button_new_with_label("About");
     g_signal_connect (about_b, "button-press-event", G_CALLBACK(about_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), about_b, 0, maxrow, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), about_b, 0, row, 2, 1);
 
     GtkWidget *minimize_b = gtk_button_new_with_label("Iconify");
     g_signal_connect (minimize_b, "button-press-event", G_CALLBACK(minimize_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), minimize_b, 3, maxrow, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), minimize_b, 3, row, 2, 1);
 
     gtk_container_add(GTK_CONTAINER(content), grid);
     gtk_widget_show_all(main_menu);

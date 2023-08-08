@@ -753,6 +753,7 @@ void radio_menu(GtkWidget *parent) {
   // Insert small separation between top columns and bottom rows
   //
   GtkWidget *Separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_widget_set_size_request(Separator, -1, 3);
   gtk_grid_attach(GTK_GRID(grid), Separator, col, row, 5, 1);
   row++;
   GtkWidget *split_b = gtk_check_button_new_with_label("Split");

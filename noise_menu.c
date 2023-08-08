@@ -278,7 +278,7 @@ void noise_menu(GtkWidget *parent) {
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
-  gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE);
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
@@ -328,26 +328,29 @@ void noise_menu(GtkWidget *parent) {
   gtk_combo_box_set_active(GTK_COMBO_BOX(nb_combo), active_receiver->nb);
   my_combo_attach(GTK_GRID(grid), nb_combo, 3, 2, 1, 1);
   g_signal_connect(nb_combo, "changed", G_CALLBACK(nb_cb), NULL);
+
   GtkWidget *line = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_widget_set_size_request(line, -1, 3);
   gtk_grid_attach(GTK_GRID(grid), line, 0, 3, 4, 1);
+
   //
   // Third row: select settings: NR, NB, NR4 settings
   //
   GtkWidget *nr_sel = gtk_radio_button_new_with_label_from_widget(NULL, "NR Settings");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(nr_sel), 1);
   gtk_widget_show(nr_sel);
-  gtk_grid_attach(GTK_GRID(grid), nr_sel, 0, 3, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), nr_sel, 0, 4, 1, 1);
   g_signal_connect(nr_sel, "toggled", G_CALLBACK(nr_sel_changed), NULL);
   GtkWidget *nb_sel = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(nr_sel), "NB Settings");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(nb_sel), 0);
   gtk_widget_show(nb_sel);
-  gtk_grid_attach(GTK_GRID(grid), nb_sel, 1, 3, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), nb_sel, 1, 4, 1, 1);
   g_signal_connect(nb_sel, "toggled", G_CALLBACK(nb_sel_changed), NULL);
 #ifdef EXTNR
   GtkWidget *nr4_sel = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(nr_sel), "NR4 Settings");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(nr4_sel), 0);
   gtk_widget_show(nr4_sel);
-  gtk_grid_attach(GTK_GRID(grid), nr4_sel, 2, 3, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), nr4_sel, 2, 4, 1, 1);
   g_signal_connect(nr4_sel, "toggled", G_CALLBACK(nr4_sel_changed), NULL);
 #endif
   //
@@ -359,7 +362,7 @@ void noise_menu(GtkWidget *parent) {
   // NR controls
   //
   nr_container = gtk_fixed_new();
-  gtk_grid_attach(GTK_GRID(grid), nr_container, 0, 4, 4, 3);
+  gtk_grid_attach(GTK_GRID(grid), nr_container, 0, 5, 4, 3);
   GtkWidget *nr_grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(nr_grid), TRUE);
   gtk_grid_set_row_homogeneous(GTK_GRID(nr_grid), TRUE);
@@ -409,7 +412,7 @@ void noise_menu(GtkWidget *parent) {
   // NB controls starting on row 4
   //
   nb_container = gtk_fixed_new();
-  gtk_grid_attach(GTK_GRID(grid), nb_container, 0, 4, 4, 3);
+  gtk_grid_attach(GTK_GRID(grid), nb_container, 0, 5, 4, 3);
   GtkWidget *nb_grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(nb_grid), TRUE);
   gtk_grid_set_row_homogeneous(GTK_GRID(nb_grid), TRUE);
@@ -466,7 +469,7 @@ void noise_menu(GtkWidget *parent) {
   // NR4 controls starting at row 4
   //
   nr4_container = gtk_fixed_new();
-  gtk_grid_attach(GTK_GRID(grid), nr4_container, 0, 4, 4, 3);
+  gtk_grid_attach(GTK_GRID(grid), nr4_container, 0, 5, 4, 3);
   GtkWidget *nr4_grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(nr4_grid), TRUE);
   gtk_grid_set_row_homogeneous(GTK_GRID(nr4_grid), TRUE);
