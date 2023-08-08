@@ -285,6 +285,11 @@ void start_filter() {
   }
 }
 
+static gboolean noise_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  start_noise();
+  return TRUE;
+}
+
 void start_noise() {
   int old_menu = active_menu;
   cleanup();
@@ -293,6 +298,11 @@ void start_noise() {
     noise_menu(top_window);
     active_menu = NOISE_MENU;
   }
+}
+
+static gboolean agc_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  start_agc();
+  return TRUE;
 }
 
 void start_agc() {
@@ -406,7 +416,7 @@ static gboolean midi_cb (GtkWidget *widget, GdkEventButton *event, gpointer data
 #endif
 
 void new_menu() {
-  int i;
+  int row, maxrow;
 
   if (main_menu == NULL) {
     if (sub_menu != NULL) {
@@ -425,189 +435,209 @@ void new_menu() {
     gtk_grid_set_row_spacing (GTK_GRID(grid), 10);
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+
+    //
+    // First row is reserved for Close/Restart/Exit
+    //
     GtkWidget *close_b = gtk_button_new_with_label("Close");
     g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 2, 1);
-    //
-    // The "Restart" button restarts the protocol
-    // This may help to recover from certain error conditions
-    //
+ 
     GtkWidget *restart_b = gtk_button_new_with_label("Restart");
     g_signal_connect (restart_b, "button-press-event", G_CALLBACK(restart_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), restart_b, 2, 0, 1, 1);
+
     GtkWidget *exit_b = gtk_button_new_with_label("Exit piHPSDR");
     g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), exit_b, 3, 0, 2, 1);
-    i = 5;
+
+    row=maxrow=1;
+    //
+    // First Column: Radio/Screen/Display/XVTR/Saturn/Server
+    //
     GtkWidget *radio_b = gtk_button_new_with_label("Radio");
     g_signal_connect (radio_b, "button-press-event", G_CALLBACK(radio_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), radio_b, (i % 5), i / 5, 1, 1);
-    i++;
-    GtkWidget *rx_b = gtk_button_new_with_label("RX");
-    g_signal_connect (rx_b, "button-press-event", G_CALLBACK(rx_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), rx_b, (i % 5), i / 5, 1, 1);
-    i++;
+    gtk_grid_attach(GTK_GRID(grid), radio_b, 0, row, 1, 1);
+    row++;
 
-    if (can_transmit) {
-      GtkWidget *tx_b = gtk_button_new_with_label("TX");
-      g_signal_connect (tx_b, "button-press-event", G_CALLBACK(tx_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), tx_b, (i % 5), i / 5, 1, 1);
-      i++;
-
-      if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
-        GtkWidget *ps_b = gtk_button_new_with_label("PS");
-        g_signal_connect (ps_b, "button-press-event", G_CALLBACK(ps_cb), NULL);
-        gtk_grid_attach(GTK_GRID(grid), ps_b, (i % 5), i / 5, 1, 1);
-        i++;
-      }
-
-      GtkWidget *pa_b = gtk_button_new_with_label("PA");
-      g_signal_connect (pa_b, "button-press-event", G_CALLBACK(pa_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), pa_b, (i % 5), i / 5, 1, 1);
-      i++;
-      GtkWidget *cw_b = gtk_button_new_with_label("CW");
-      g_signal_connect (cw_b, "button-press-event", G_CALLBACK(cw_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), cw_b, (i % 5), i / 5, 1, 1);
-      i++;
-    }
-
-    GtkWidget *ant_b = gtk_button_new_with_label("Ant");
-    g_signal_connect (ant_b, "button-press-event", G_CALLBACK(ant_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), ant_b, (i % 5), i / 5, 1, 1);
-    i++;
-
-    if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
-      GtkWidget *oc_b = gtk_button_new_with_label("OC");
-      g_signal_connect (oc_b, "button-press-event", G_CALLBACK(oc_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), oc_b, (i % 5), i / 5, 1, 1);
-      i++;
-    }
+    GtkWidget *screen_b = gtk_button_new_with_label("Screen");
+    g_signal_connect (screen_b, "button-press-event", G_CALLBACK(screen_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), screen_b, 0, row, 1, 1);
+    row++; 
 
     GtkWidget *display_b = gtk_button_new_with_label("Display");
     g_signal_connect (display_b, "button-press-event", G_CALLBACK(display_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), display_b, (i % 5), i / 5, 1, 1);
-    i++;
+    gtk_grid_attach(GTK_GRID(grid), display_b, 0, row, 1, 1);
+    row++;
+
     GtkWidget *xvtr_b = gtk_button_new_with_label("XVTR");
     g_signal_connect (xvtr_b, "button-press-event", G_CALLBACK(xvtr_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), xvtr_b, (i % 5), i / 5, 1, 1);
-    i++;
-    GtkWidget *equalizer_b = gtk_button_new_with_label("Equalizer");
-    g_signal_connect (equalizer_b, "button-press-event", G_CALLBACK(equalizer_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), equalizer_b, (i % 5), i / 5, 1, 1);
-    i++;
-    //GtkWidget *step_b=gtk_button_new_with_label("Step");
-    //g_signal_connect (step_b, "button-press-event", G_CALLBACK(step_cb), NULL);
-    //gtk_grid_attach(GTK_GRID(grid),step_b,(i%5),i/5,1,1);
-    //i++;
-    GtkWidget *meter_b = gtk_button_new_with_label("Meter");
-    g_signal_connect (meter_b, "button-press-event", G_CALLBACK(meter_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), meter_b, (i % 5), i / 5, 1, 1);
-    i++;
+    gtk_grid_attach(GTK_GRID(grid), xvtr_b, 0, row, 1, 1);
+    row++;
 
-    if (can_transmit) {
-      GtkWidget *vox_b = gtk_button_new_with_label("VOX");
-      g_signal_connect (vox_b, "button-press-event", G_CALLBACK(vox_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), vox_b, (i % 5), i / 5, 1, 1);
-      i++;
+#ifdef SATURN
+    if (have_saturn_xdma) { // only display on the xdma client
+      GtkWidget *saturn_b = gtk_button_new_with_label("Saturn");
+      g_signal_connect (saturn_b, "button-press-event", G_CALLBACK(saturn_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), saturn_b, 0, row, 1, 1);
+      row++;
     }
-
-    GtkWidget *fft_b = gtk_button_new_with_label("FFT");
-    g_signal_connect (fft_b, "button-press-event", G_CALLBACK(fft_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), fft_b, (i % 5), i / 5, 1, 1);
-    i++;
-    GtkWidget *rigctl_b = gtk_button_new_with_label("RIGCTL");
-    g_signal_connect (rigctl_b, "button-press-event", G_CALLBACK(rigctl_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), rigctl_b, (i % 5), i / 5, 1, 1);
-    i++;
-
-    switch (controller) {
-    case NO_CONTROLLER: {
-      GtkWidget *toolbar_b = gtk_button_new_with_label("Toolbar");
-      g_signal_connect (toolbar_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), toolbar_b, (i % 5), i / 5, 1, 1);
-      i++;
-    }
-    break;
-
-    case CONTROLLER1: {
-#ifdef GPIO
-      GtkWidget *encoders_b = gtk_button_new_with_label("Encoders");
-      g_signal_connect (encoders_b, "button-press-event", G_CALLBACK(encoder_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), encoders_b, (i % 5), i / 5, 1, 1);
-      i++;
-      GtkWidget *switches_b = gtk_button_new_with_label("Switches");
-      g_signal_connect (switches_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), switches_b, (i % 5), i / 5, 1, 1);
-      i++;
 #endif
-    }
-    break;
-
-    case CONTROLLER2_V1:
-    case CONTROLLER2_V2:
-    case G2_FRONTPANEL: {
-#ifdef GPIO
-      GtkWidget *encoders_b = gtk_button_new_with_label("Encoders");
-      g_signal_connect (encoders_b, "button-press-event", G_CALLBACK(encoder_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), encoders_b, (i % 5), i / 5, 1, 1);
-      i++;
-      GtkWidget *switches_b = gtk_button_new_with_label("Switches");
-      g_signal_connect (switches_b, "button-press-event", G_CALLBACK(switch_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), switches_b, (i % 5), i / 5, 1, 1);
-      i++;
-#endif
-      GtkWidget *toolbar_b = gtk_button_new_with_label("Toolbar");
-      g_signal_connect (toolbar_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), toolbar_b, (i % 5), i / 5, 1, 1);
-      i++;
-    }
-    break;
-    }
-
-#ifdef MIDI
-    GtkWidget *midi_b = gtk_button_new_with_label("MIDI");
-    g_signal_connect (midi_b, "button-press-event", G_CALLBACK(midi_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), midi_b, (i % 5), i / 5, 1, 1);
-    i++;
-#endif
-
-    //
-    //  We need at least two receivers and two ADCs to do DIVERSITY
-    //
-    if (RECEIVERS == 2 && n_adc > 1) {
-      GtkWidget *diversity_b = gtk_button_new_with_label("Diversity");
-      g_signal_connect (diversity_b, "button-press-event", G_CALLBACK(diversity_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), diversity_b, (i % 5), i / 5, 1, 1);
-      i++;
-    }
 
 #ifdef CLIENT_SERVER
     GtkWidget *server_b = gtk_button_new_with_label("Server");
     g_signal_connect (server_b, "button-press-event", G_CALLBACK(server_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), server_b, (i % 5), i / 5, 1, 1);
-    i++;
-#endif
-#ifdef SATURN
+    gtk_grid_attach(GTK_GRID(grid), server_b, 0, row, 1, 1);
+    row++;
+#endif 
 
-    if (have_saturn_xdma) { // only display on the xdma client
-      GtkWidget *saturn_b = gtk_button_new_with_label("Saturn");
-      g_signal_connect (saturn_b, "button-press-event", G_CALLBACK(saturn_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), saturn_b, (i % 5), i / 5, 1, 1);
-      i++;
+    if (row > maxrow) { maxrow=row; }
+    row=1;
+
+    //
+    // Second column: RX/Noise/AGC/Diversity
+    //
+    GtkWidget *rx_b = gtk_button_new_with_label("RX");
+    g_signal_connect (rx_b, "button-press-event", G_CALLBACK(rx_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), rx_b, 1, row, 1, 1);
+    row++;
+
+    GtkWidget *noise_b = gtk_button_new_with_label("Noise");
+    g_signal_connect (rx_b, "button-press-event", G_CALLBACK(noise_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), noise_b, 1, row, 1, 1);
+    row++;
+
+    GtkWidget *agc_b = gtk_button_new_with_label("AGC");
+    g_signal_connect (agc_b, "button-press-event", G_CALLBACK(agc_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), agc_b, 1, row, 1, 1);
+    row++;
+
+    if (RECEIVERS == 2 && n_adc > 1) {
+      GtkWidget *diversity_b = gtk_button_new_with_label("Diversity");
+      g_signal_connect (diversity_b, "button-press-event", G_CALLBACK(diversity_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), diversity_b, 1, row, 1, 1);
+      row++;
     }
 
+    if (row > maxrow) { maxrow=row; }
+    row=1;
+
+    //
+    // Third column:  TX, PA, VOX, PS, CW
+    //
+    if (can_transmit) {
+      GtkWidget *tx_b = gtk_button_new_with_label("TX");
+      g_signal_connect (tx_b, "button-press-event", G_CALLBACK(tx_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), tx_b, 2, row, 1, 1);
+      row++;
+
+      GtkWidget *pa_b = gtk_button_new_with_label("PA");
+      g_signal_connect (pa_b, "button-press-event", G_CALLBACK(pa_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), pa_b, 2, row, 1, 1);
+      row++;
+
+      GtkWidget *vox_b = gtk_button_new_with_label("VOX");
+      g_signal_connect (vox_b, "button-press-event", G_CALLBACK(vox_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), vox_b, 2, row, 1, 1);
+      row++;
+
+      if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
+        GtkWidget *ps_b = gtk_button_new_with_label("PS");
+        g_signal_connect (ps_b, "button-press-event", G_CALLBACK(ps_cb), NULL);
+        gtk_grid_attach(GTK_GRID(grid), ps_b, 2, row, 1, 1);
+        row++;
+      }
+    }
+
+    GtkWidget *cw_b = gtk_button_new_with_label("CW");
+    g_signal_connect (cw_b, "button-press-event", G_CALLBACK(cw_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), cw_b, 2, row, 1, 1);
+    row++;
+
+    if (row > maxrow) { maxrow=row; }
+    row=1;
+
+    //
+    // Fourth column: FFT, Equalizer, Meter, Ant, OC
+    //
+    GtkWidget *fft_b = gtk_button_new_with_label("FFT");
+    g_signal_connect (fft_b, "button-press-event", G_CALLBACK(fft_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), fft_b, 3, row, 1, 1);
+    row++;
+
+    GtkWidget *equalizer_b = gtk_button_new_with_label("Equalizer");
+    g_signal_connect (equalizer_b, "button-press-event", G_CALLBACK(equalizer_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), equalizer_b, 3, row, 1, 1);
+    row++;
+
+    GtkWidget *meter_b = gtk_button_new_with_label("Meter");
+    g_signal_connect (meter_b, "button-press-event", G_CALLBACK(meter_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), meter_b, 3, row, 1, 1);
+    row++;
+
+    GtkWidget *ant_b = gtk_button_new_with_label("Ant");
+    g_signal_connect (ant_b, "button-press-event", G_CALLBACK(ant_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), ant_b, 3, row, 1, 1);
+    row++;
+
+    if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
+      GtkWidget *oc_b = gtk_button_new_with_label("OC");
+      g_signal_connect (oc_b, "button-press-event", G_CALLBACK(oc_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), oc_b, 3, row, 1, 1);
+      row++;
+    }
+
+    if (row > maxrow) { maxrow=row; }
+    row=1;
+
+    //
+    // Fifth column: Toolbar, RigCtl, MIDI, Encoders, Switches
+    //
+    if (controller != CONTROLLER1) {
+      GtkWidget *toolbar_b = gtk_button_new_with_label("Toolbar");
+      g_signal_connect (toolbar_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), toolbar_b, 4, row, 1, 1);
+      row++;
+    }
+
+    GtkWidget *rigctl_b = gtk_button_new_with_label("RIGCTL");
+    g_signal_connect (rigctl_b, "button-press-event", G_CALLBACK(rigctl_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), rigctl_b, 4, row, 1, 1);
+    row++;
+
+#ifdef MIDI
+    GtkWidget *midi_b = gtk_button_new_with_label("MIDI");
+    g_signal_connect (midi_b, "button-press-event", G_CALLBACK(midi_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), midi_b, 4, row, 1, 1);
+    row++;
 #endif
-    GtkWidget *screen_b = gtk_button_new_with_label("Screen");
-    g_signal_connect (screen_b, "button-press-event", G_CALLBACK(screen_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), screen_b, (i % 5), i / 5, 1, 1);
-    i++;
-    GtkWidget *minimize_b = gtk_button_new_with_label("Minimize");
-    g_signal_connect (minimize_b, "button-press-event", G_CALLBACK(minimize_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), minimize_b, (i % 5), i / 5, 1, 1);
-    i++;
+
+#ifdef GPIO
+    if (controller != NO_CONTROLLER) {
+      GtkWidget *encoders_b = gtk_button_new_with_label("Encoders");
+      g_signal_connect (encoders_b, "button-press-event", G_CALLBACK(encoder_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), encoders_b, 4, row, 1, 1);
+      row++;
+
+      GtkWidget *switches_b = gtk_button_new_with_label("Switches");
+      g_signal_connect (switches_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid), switches_b, 4, row, 1, 1);
+      row++;
+    }
+#endif
+
+    //
+    // Last row: About and Iconify Button
+    //
+
     GtkWidget *about_b = gtk_button_new_with_label("About");
     g_signal_connect (about_b, "button-press-event", G_CALLBACK(about_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), about_b, (i % 5), i / 5, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), about_b, 0, maxrow, 2, 1);
+
+    GtkWidget *minimize_b = gtk_button_new_with_label("Iconify");
+    g_signal_connect (minimize_b, "button-press-event", G_CALLBACK(minimize_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), minimize_b, 3, maxrow, 2, 1);
+
     gtk_container_add(GTK_CONTAINER(content), grid);
     gtk_widget_show_all(main_menu);
   } else {
