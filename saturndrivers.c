@@ -322,12 +322,12 @@ const uint32_t DDCSampleCounts[] = {
 //
 uint32_t AnalyseDDCHeader(uint32_t Header, uint32_t* DDCCounts) {
   uint32_t DDC;               // DDC counter
-  uint32_t Rate;                // 3 bit value for this DDC
   uint32_t Count;
   uint32_t Total = 0;
 
   for (DDC = 0; DDC < VNUMDDC; DDC++) {
-    Rate = Header & 7;            // get settings for this DDC
+    // 3 bit value for this DDC
+    uint32_t Rate = Header & 7;            // get settings for this DDC
 
     if (Rate != 7) {
       Count = DDCSampleCounts[Rate];

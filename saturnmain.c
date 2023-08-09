@@ -188,20 +188,6 @@ static mybuffer *get_my_buffer(int numlist) {
 bool CreateDynamicMemory(void) {                            // return true if error
   uint32_t DDC;
   bool Result = false;
-  //
-  // first create the buffer for DMA, and initialise its pointers
-  //
-  posix_memalign((void**)&DMAReadBuffer, VALIGNMENT, DMABufferSize);
-  DMAReadPtr = DMAReadBuffer + VBASE;                             // offset 4096 bytes into buffer
-  DMAHeadPtr = DMAReadBuffer + VBASE;
-  DMABasePtr = DMAReadBuffer + VBASE;
-
-  if (!DMAReadBuffer) {
-    t_print("I/Q read buffer allocation failed\n");
-    Result = true;
-  }
-
-  memset(DMAReadBuffer, 0, DMABufferSize);
 
   //
   // set up per-DDC data structures
@@ -212,6 +198,22 @@ bool CreateDynamicMemory(void) {                            // return true if er
     IQHeadPtr[DDC] = DDCSampleBuffer[DDC] + VBASE;
     IQBasePtr[DDC] = DDCSampleBuffer[DDC] + VBASE;
   }
+
+  //
+  // then create the buffer for DMA, and initialise its pointers
+  //
+  posix_memalign((void**)&DMAReadBuffer, VALIGNMENT, DMABufferSize);
+
+  if (!DMAReadBuffer) {
+    t_print("I/Q read buffer allocation failed\n");
+    Result = true;
+    return Result;
+  }
+
+  DMAReadPtr = DMAReadBuffer + VBASE;                             // offset 4096 bytes into buffer
+  DMAHeadPtr = DMAReadBuffer + VBASE;
+  DMABasePtr = DMAReadBuffer + VBASE;
+  memset(DMAReadBuffer, 0, DMABufferSize);
 
   return Result;
 }
@@ -276,12 +278,10 @@ int is_already_running() {
 void saturn_discovery() {
   if (devices < MAX_DEVICES) {
     struct stat sb;
-    int i;
-    char buf[256];
-    FILE *fp;
     uint8_t *mac = discovered[devices].info.network.mac_address;
 
     if (stat("/dev/xdma/card0", &sb) == 0 && S_ISDIR(sb.st_mode)) {
+      char buf[256];
       discovered[devices].status = (is_already_running()) ? STATE_SENDING : STATE_AVAILABLE;
       saturn_register_init();
       discovered[devices].protocol = NEW_PROTOCOL;
@@ -292,7 +292,7 @@ void saturn_discovery() {
       discovered[devices].frequency_min = 0.0;
       discovered[devices].frequency_max = 61440000.0;
       memset(buf, 0, 256);
-      fp = fopen("/sys/class/net/eth0/address", "rt");
+      FILE *fp = fopen("/sys/class/net/eth0/address", "rt");
 
       if (fp) {
         if (fgets(buf, sizeof buf, fp) > 0) {
@@ -302,7 +302,7 @@ void saturn_discovery() {
 
         fclose(fp);
       } else
-        for (i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
           discovered[devices].info.network.mac_address[i] = 0;
         }
 
@@ -450,10 +450,10 @@ void saturn_init_speaker_audio() {
 }
 
 void saturn_handle_speaker_audio(uint8_t *UDPInBuffer) {
-  uint32_t RegVal = 0;    //debug
+  //uint32_t RegVal = 0;    //debug
   bool FIFOSpkOverflow;
   uint32_t DepthSpk = 0;
-  RegVal += 1;            //debug
+  //RegVal += 1;            //debug
   DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow);        // read the FIFO free locations
 
   //t_print("speaker data received; depth = %d\n", DepthSpk);
@@ -501,8 +501,6 @@ void start_saturn_high_priority_thread() {
 }
 
 static gpointer saturn_high_priority_thread(gpointer arg) {
-  uint32_t SequenceCounter;                       // sequence count
-  uint32_t SequenceCounter2;
   uint8_t Byte;                                   // data being encoded
   uint16_t Word;                                  // data being encoded
   int Error;
@@ -515,12 +513,12 @@ static gpointer saturn_high_priority_thread(gpointer arg) {
   struct msghdr datagram;
 
   while (!Exiting) {
+    uint32_t SequenceCounter = 0;                       // sequence count
+    uint32_t SequenceCounter2 = 0;
     while (!SDRActive) {
       usleep(10000);
     }
 
-    SequenceCounter = 0;
-    SequenceCounter2 = 0;
     memcpy(&DestAddr, &reply_addr, sizeof(struct
                                           sockaddr_in));           // local copy of PC destination address (reply_addr is global)
     memset(&iovecinst, 0, sizeof(struct iovec));
@@ -631,12 +629,10 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   uint8_t* MicReadBuffer = NULL;              // data for DMA read from DDC
   uint32_t MicBufferSize = VDMAMICBUFFERSIZE;
   unsigned char* MicBasePtr;                // ptr to DMA location in mic memory
-  uint32_t Depth = 0;
+  uint32_t Depth;
   int DMAReadfile_fd = -1;                  // DMA read file device
   uint32_t RegisterValue;
   bool FIFOOverflow;
-  uint32_t SequenceCounter;
-  uint32_t SequenceCounter2;
   uint8_t UDPBuffer[VMICPACKETSIZE];
   int Error;
   //
@@ -676,7 +672,6 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   ResetDMAStreamFIFO(eMicCodecDMA);
   RegisterValue = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow);        // read the FIFO Depth register
   t_print("%s: mic FIFO Depth register = %08x (should be ~0)\n", __FUNCTION__, RegisterValue);
-  Depth = 0;
 
   //
   // planned strategy: just DMA mic data when available; don't copy and DMA a larger amount.
@@ -684,12 +679,12 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   // if it turns out to be too inefficient, we'll have to try larger DMA.
   //
   while (!Exiting) {
+    uint32_t SequenceCounter = 0;
+    uint32_t SequenceCounter2 = 0;
     while (!SDRActive) {
       usleep(10000);
     }
 
-    SequenceCounter = 0;
-    SequenceCounter2 = 0;
     memcpy(&DestAddr, &reply_addr, sizeof(struct
                                           sockaddr_in));           // local copy of PC destination address (reply_addr is global)
     memset(&iovecinst, 0, sizeof(struct iovec));
@@ -835,7 +830,6 @@ static gpointer saturn_rx_thread(gpointer arg) {
   ResetDMAStreamFIFO(eRXDDCDMA);
   RegisterValue = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow);       // read the FIFO Depth register
   t_print("%s: DDC FIFO Depth register = %08x (should be 0)\n", __FUNCTION__, RegisterValue);
-  Depth = 0;
   SetByteSwapping(true);                                            // h/w to generate network byte order
   //
   // thread loop. runs continuously until commanded by main loop to exit
@@ -1098,7 +1092,7 @@ void saturn_handle_high_priority(bool FromNetwork, unsigned char *UDPInBuffer) {
     } else {
       ServerActive = false;                                       // set state of whole app
 
-      for (int i = 4; i < VNUMDDC; i++) {        // disable upper bank of DDCs
+      for (i = 4; i < VNUMDDC; i++) {        // disable upper bank of DDCs
         SetP2SampleRate(i, false, 48, false);
       }
 
@@ -1213,16 +1207,14 @@ void saturn_handle_general_packet(bool FromNetwork, uint8_t *PacketBuffer) {
 
 void saturn_handle_ddc_specific(bool FromNetwork, unsigned char *UDPInBuffer) {
   uint8_t Byte1, Byte2;                                 // received data
-  bool Dither, Random;                                  // ADC bits
-  bool Enabled, Interleaved;                            // DDC settings
-  uint16_t Word, Word2;                                 // 16 bit read value
-  int i;                                                // counter
+  uint16_t Word;                                        // 16 bit read value
   EADCSelect ADC = eADC1;                               // ADC to use for a DDC
   int DDCLoop = (FromNetwork) ? 6 : 4;
   int DDCOffset = (FromNetwork) ? 0 : 6;
 
   //t_print("DDC specific %sbuffer received\n", (FromNetwork)?"network ":"");
-  if (!FromNetwork) { //RRK
+  if (!FromNetwork) {
+    bool Dither, Random;                                  // ADC bits
     // get ADC details:
     Byte1 = *(uint8_t*)(UDPInBuffer + 4);                 // get ADC count
     SetADCCount(Byte1);
@@ -1246,8 +1238,10 @@ void saturn_handle_ddc_specific(bool FromNetwork, unsigned char *UDPInBuffer) {
   //
   Word = *(uint16_t*)(UDPInBuffer + 7);                 // get DDC enables 15:0 (note it is already low byte 1st!)
 
-  for (i = 0; i < DDCLoop; i++) {
-    Enabled = (bool)(Word & 1);                        // get enable state
+  for (int i = 0; i < DDCLoop; i++) {
+    uint16_t Word2;                                   // 16 bit read value
+    bool Enabled, Interleaved;                        // DDC settings
+    Enabled = (bool)(Word & 1);                       // get enable state
     Byte1 = *(uint8_t*)(UDPInBuffer + i * 6 + 17);    // get ADC for this DDC
     Word2 = *(uint16_t*)(UDPInBuffer + i * 6 + 18);   // get sample rate for this DDC
     Word2 = ntohs(Word2);                             // swap byte order

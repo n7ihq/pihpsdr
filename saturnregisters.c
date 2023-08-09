@@ -261,7 +261,7 @@ uint32_t DDCRegisters[VNUMDDC] = {
 //
 // Keyer setup register defines
 //
-#define VCWKEYERENABLE 31                               // enable bit
+#define VCWKEYERENABLE 0x80000000                       // enable bit
 #define VCWKEYERDELAY 0                                 // delay bits 7:0
 #define VCWKEYERHANG 8                                  // hang time is 17:8
 #define VCWKEYERRAMP 18                                 // ramp time
@@ -303,28 +303,26 @@ uint32_t DDCRegisters[VNUMDDC] = {
 // for "attenuation intent" values from 0 to 255
 //
 void InitialiseDACAttenROMs(void) {
-  unsigned int Level;                         // input demand value
-  double DesiredAtten;                        // desired attenuation in dB
-  unsigned int StepValue;                     // integer step atten drive value
-  double ResidualAtten;                       // atten to go in the current setting DAC
-  unsigned int DACDrive;                      // int value to go to DAC ROM
   //
   // do the max atten values separately; then calculate point by point
   //
   DACCurrentROM[0] = 0;                       // min level
   DACStepAttenROM[0] = 63;                    // max atten
 
-  for (Level = 1; Level < 256; Level++) {
-    DesiredAtten = 20.0 * log10(255.0 / (double)Level); // this is the atten value we want after the high speed DAC
-    StepValue = (int)(2.0 * DesiredAtten);              // 6 bit step atten should be set to
+  for (unsigned int Level = 1; Level < 256; Level++) { // input demand value
+    double DesiredAtten = 20.0 * log10(255.0 / (double)Level); // this is the atten value we want after the high speed DAC
+    // integer step atten drive value
+    unsigned int StepValue = (int)(2.0 * DesiredAtten);              // 6 bit step atten should be set to
 
     if (StepValue > 63) {                               // clip to 6 bits
       StepValue = 63;
     }
 
-    ResidualAtten = DesiredAtten - ((double)StepValue *
+    // atten to go in the current setting DAC
+    double ResidualAtten = DesiredAtten - ((double)StepValue *
                                     0.5);        // this needs to be achieved through the current setting drive
-    DACDrive = (unsigned int)(255.0 / pow(10.0, (ResidualAtten / 20.0)));
+    // int value to go to DAC ROM
+    unsigned int DACDrive = (unsigned int)(255.0 / pow(10.0, (ResidualAtten / 20.0)));
     DACCurrentROM[Level] = DACDrive;
     DACStepAttenROM[Level] = StepValue;
   }
@@ -357,13 +355,12 @@ void SetByteSwapping(bool IsSwapped) {
 // needed because keyer setting can change by message, of by TX operation
 //
 void ActivateCWKeyer(bool Keyer) {
-  uint32_t Register;
-  Register = GCWKeyerSetup;                           // get current settings
+  uint32_t Register = GCWKeyerSetup;                           // get current settings
 
   if (Keyer) {
-    Register |= (1 << VCWKEYERENABLE);
+    Register |= VCWKEYERENABLE;
   } else {
-    Register &= ~(1 << VCWKEYERENABLE);
+    Register &= ~VCWKEYERENABLE;
   }
 
   if (Register != GCWKeyerSetup) {                    // write back if different
@@ -657,15 +654,13 @@ void SetADCOptions(EADCSelect ADC, bool PGA, bool Dither, bool Random) {
 //
 void SetDDCFrequency(uint32_t DDC, uint32_t Value, bool IsDeltaPhase) {
   uint32_t DeltaPhase;                    // calculated deltaphase value
-  uint32_t RegAddress;
-  double fDeltaPhase;
 
   if (DDC >= VNUMDDC) {                   // limit the DDC count to actual regs!
     DDC = VNUMDDC - 1;
   }
 
   if (!IsDeltaPhase) {                    // ieif protocol 1
-    fDeltaPhase = VTWOEXP32 * (double)Value / (double) VSAMPLERATE;
+    double fDeltaPhase = VTWOEXP32 * (double)Value / (double) VSAMPLERATE;
     DeltaPhase = (uint32_t)fDeltaPhase;
   } else {
     DeltaPhase = (uint32_t)Value;
@@ -673,7 +668,7 @@ void SetDDCFrequency(uint32_t DDC, uint32_t Value, bool IsDeltaPhase) {
 
   if (DDCDeltaPhase[DDC] != DeltaPhase) { // write back if changed
     DDCDeltaPhase[DDC] = DeltaPhase;        // store this delta phase
-    RegAddress = DDCRegisters[DDC];         // get DDC reg address,
+    uint32_t RegAddress = DDCRegisters[DDC];         // get DDC reg address,
     RegisterWrite(RegAddress, DeltaPhase);  // and write to it
   }
 }
@@ -689,10 +684,9 @@ void SetDDCFrequency(uint32_t DDC, uint32_t Value, bool IsDeltaPhase) {
 //
 void SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase) {
   uint32_t DeltaPhase;                    // calculated deltaphase value
-  double fDeltaPhase;
 
   if (!IsDeltaPhase) {                    // ie if protocol 1
-    fDeltaPhase = VTWOEXP32 * (double)Value / (double) VSAMPLERATE;
+    double fDeltaPhase = VTWOEXP32 * (double)Value / (double) VSAMPLERATE;
     DeltaPhase = (uint32_t)fDeltaPhase;
   } else {
     DeltaPhase = (uint32_t)Value;
@@ -713,11 +707,9 @@ void SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase) {
 //
 void SetDUCFrequency(unsigned int Value, bool IsDeltaPhase) { // only accepts DUC=0
   uint32_t DeltaPhase;                    // calculated deltaphase value
-  double fDeltaPhase;
 
   if (!IsDeltaPhase) {                    // ieif protocol 1
-    // 4294967296 is 2^32
-    fDeltaPhase = 4294967296.0 * (double)Value / (double) VSAMPLERATE;
+    double fDeltaPhase = VTWOEXP32 * (double)Value / (double) VSAMPLERATE;
     DeltaPhase = (uint32_t)fDeltaPhase;
   } else {
     DeltaPhase = (uint32_t)Value;
@@ -889,10 +881,9 @@ void SetAlexCoarseAttenuator(unsigned int Bits) {
 // RX2: C0-0x12, byte X1 has RX2
 //
 void SetAlexRXFilters(bool IsRX1, unsigned int Bits) {
-  uint32_t Register;                                          // modified register
-
   if (GAlexManualFilterSelect) {
-    Register = GAlexRXRegister;                             // copy original register
+    // modified register
+    uint32_t Register = GAlexRXRegister;                             // copy original register
 
     if (IsRX1) {
       Register &= 0xFFFFEF81;                             // turn off all affected bits
@@ -930,10 +921,8 @@ void SetRX2GroundDuringTX(bool IsGrounded) {
 // Bits follows the P1 protocol format. C0=0x12, byte C4 has TX
 //
 void SetAlexTXFilters(unsigned int Bits) {
-  uint32_t Register;                                          // modified register
-
   if (GAlexManualFilterSelect) {
-    Register = GAlexTXRegister;                         // copy original register
+    uint32_t Register = GAlexTXRegister;                // copy original register
     Register &= 0x1F0F;                                 // turn off all affected bits
     Register |= (Bits & 0x0F) << 4;                     // bits 3-0, moved up
     Register |= (Bits & 0x1C) << 9;                    // bits 6-4, moved up
@@ -964,10 +953,8 @@ void EnableAlexManualFilterSelect(bool IsManual) {
 // must be enabled by calling EnableAlexManualFilterSelect(true) first!
 //
 void AlexManualRXFilters(unsigned int Bits, int RX) {
-  uint32_t Register;                                          // modified register
-
   if (GAlexManualFilterSelect) {
-    Register = GAlexRXRegister;                             // copy original register
+    uint32_t Register = GAlexRXRegister;                             // copy original register
 
     if (RX != 2) {
       Register &= 0xFFFF0000;                             // turn off all affected bits
@@ -1001,10 +988,8 @@ void DisableAlexTRRelay(bool IsDisabled) {
 // must be enabled by calling EnableAlexManualFilterSelect(true) first!
 //
 void AlexManualTXFilters(unsigned int Bits) {
-  uint32_t Register;                                  // modified register
-
   if (GAlexManualFilterSelect) {
-    Register = Bits;                         // new setting
+    uint32_t Register = Bits;                         // new setting
 
     if (Register != GAlexTXRegister) {                  // write back if changed
       GAlexTXRegister = Register;
@@ -1394,12 +1379,10 @@ void InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us) {
   const double a2 = 0.14128;
   const double a3 = -0.01168;
   double LargestSample;
-  double Fraction;                         // fractional position in ramp
   double SamplePeriod;                     // sample period in us
   uint32_t RampLength;                    // integer length in WORDS not bytes!
   double RampSample[VRAMPSIZE];            // array samples
   uint32_t Cntr;
-  uint32_t Sample;                        // ramp sample value
   uint32_t Register;
 
   // work out required length
@@ -1417,7 +1400,7 @@ void InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us) {
   RampSample[0] = 0.0;
 
   for (Cntr = 1; Cntr < RampLength; Cntr++) {
-    Fraction = (double)Cntr / (double)RampLength;
+    double Fraction = (double)Cntr / (double)RampLength; // fractional position in ramp
     RampSample[Cntr] = RampSample[Cntr - 1] + a0 + a1 * cos(2.0 * M_PI * Fraction)
                        + a2 * cos(4.0 * M_PI * Fraction) + a3 * cos(6.0 * M_PI * Fraction);
   }
@@ -1429,7 +1412,7 @@ void InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us) {
   // that's the peak amplitude for I/Q in Saturn, either protocol
   //
   for (Cntr = 0; Cntr < RampLength; Cntr++) {
-    Sample = (uint32_t)((RampSample[Cntr] / LargestSample) * 8388607.0);
+    uint32_t Sample = (uint32_t)((RampSample[Cntr] / LargestSample) * 8388607.0); // ramp sample value
     RegisterWrite(VADDRCWKEYERRAM + 4 * Cntr, Sample);
     //        t_print("sample: %d = %d\n", Cntr, Sample);
   }
@@ -1480,11 +1463,9 @@ void EnableCW (bool Enabled, bool Breakin) {
 // only do something if the bit changes; note the volume setting function is relevant too
 //
 void SetCWSidetoneEnabled(bool Enabled) {
-  uint32_t Register;
-
   if (GSidetoneEnabled != Enabled) {                  // only act if bit changed
     GSidetoneEnabled = Enabled;
-    Register = GCodecConfigReg;                     // get current settings
+    uint32_t Register = GCodecConfigReg;                     // get current settings
     Register &= 0x0000FFFF;                         // remove old volume bits
 
     if (Enabled) {
@@ -1502,11 +1483,9 @@ void SetCWSidetoneEnabled(bool Enabled) {
 // sets the sidetone volume level (7 bits, unsigned)
 //
 void SetCWSidetoneVol(uint8_t Volume) {
-  uint32_t Register;
-
   if (GSidetoneVolume != Volume) {                    // only act if value changed
     GSidetoneVolume = Volume;                       // set new value
-    Register = GCodecConfigReg;                     // get current settings
+    uint32_t Register = GCodecConfigReg;                     // get current settings
     Register &= 0x0000FFFF;                         // remove old volume bits
 
     if (GSidetoneEnabled) {
@@ -2081,7 +2060,7 @@ void EnableDUCMux(bool Enabled) {
   uint32_t Register;
   uint32_t BitMask;
   GTXDUCMuxActive = Enabled;
-  BitMask = (1 << 31);
+  BitMask = 0x80000000;
   Register = TXConfigRegValue;                        // get current settings
 
   if (Enabled) {

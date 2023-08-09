@@ -199,11 +199,9 @@ int MakeSocket(struct ThreadSocketData* Ptr, int DDCid) {
 // if nomessages in a second, goes back to "inactive" state.
 //
 void* CheckForActivity(void *arg) {
-  bool PreviouslyActiveState;
-
   while (1) {
     sleep(1000);                               // wait for 1 second
-    PreviouslyActiveState = ServerActive;      // see if active on entry
+    bool PreviouslyActiveState = ServerActive;      // see if active on entry
 
     if (!NewMessageReceived) {              // if no messages received,
       ServerActive = false;                    // set back to inactive
@@ -518,7 +516,6 @@ void *IncomingHighPriority(void *arg) {                 // listener thread
   uint8_t UDPInBuffer[VHIGHPRIOTIYTOSDRSIZE];           // incoming buffer
   struct iovec iovecinst;                               // iovcnt buffer - 1 for each outgoing buffer
   struct msghdr datagram;                               // multiple incoming message header
-  int size;                                             // UDP datagram length
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
   t_print("spinning up high priority incoming thread with port %d\n", ThreadData->Portid);
@@ -535,7 +532,7 @@ void *IncomingHighPriority(void *arg) {                 // listener thread
     datagram.msg_iovlen = 1;
     datagram.msg_name = &addr_from;
     datagram.msg_namelen = sizeof(addr_from);
-    size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
+    int size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
 
     if (size < 0 && errno != EAGAIN) {
       t_perror("recvfrom, high priority");
@@ -571,7 +568,6 @@ void *IncomingDDCSpecific(void *arg) {                  // listener thread
   uint8_t UDPInBuffer[VDDCSPECIFICSIZE];                // incoming buffer
   struct iovec iovecinst;                               // iovcnt buffer - 1 for each outgoing buffer
   struct msghdr datagram;                               // multiple incoming message header
-  int size;                                             // UDP datagram length
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
   t_print("spinning up DDC specific thread with port %d\n", ThreadData->Portid);
@@ -588,7 +584,7 @@ void *IncomingDDCSpecific(void *arg) {                  // listener thread
     datagram.msg_iovlen = 1;
     datagram.msg_name = &addr_from;
     datagram.msg_namelen = sizeof(addr_from);
-    size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
+    int size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
 
     if (size < 0 && errno != EAGAIN) {
       t_perror("recvfrom, DDC Specific");
@@ -620,7 +616,6 @@ void *IncomingDUCSpecific(void *arg) {                  // listener thread
   uint8_t UDPInBuffer[VDUCSPECIFICSIZE];                // incoming buffer
   struct iovec iovecinst;                               // iovcnt buffer - 1 for each outgoing buffer
   struct msghdr datagram;                               // multiple incoming message header
-  int size;                                             // UDP datagram length
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
   t_print("spinning up DUC specific thread with port %d\n", ThreadData->Portid);
@@ -637,7 +632,7 @@ void *IncomingDUCSpecific(void *arg) {                  // listener thread
     datagram.msg_iovlen = 1;
     datagram.msg_name = &addr_from;
     datagram.msg_namelen = sizeof(addr_from);
-    size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
+    int size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
 
     if (size < 0 && errno != EAGAIN) {
       t_perror("recvfrom, DUC specific");
@@ -681,17 +676,15 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
   uint8_t UDPInBuffer[VSPEAKERAUDIOSIZE];               // incoming buffer
   struct iovec iovecinst;                               // iovcnt buffer - 1 for each outgoing buffer
   struct msghdr datagram;                               // multiple incoming message header
-  int size;                                             // UDP datagram length
   //
   // variables for DMA buffer
   //
   uint8_t* SpkWriteBuffer = NULL;             // data for DMA to write to spkr
   uint32_t SpkBufferSize = VDMABUFFERSIZE;
   unsigned char* SpkBasePtr;                // ptr to DMA location in spk memory
-  uint32_t Depth = 0;
   int DMAWritefile_fd = -1;               // DMA read file device
   bool FIFOOverflow;
-  uint32_t RegVal = 0;                    // debug
+  //uint32_t RegVal = 0;                    // debug
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
   t_print("spinning up speaker audio thread with port %d\n", ThreadData->Portid);
@@ -700,8 +693,9 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
   //
   posix_memalign((void**)&SpkWriteBuffer, VALIGNMENT, SpkBufferSize);
 
-  if (!SpkWriteBuffer) {
+  if (SpkWriteBuffer == NULL) {
     t_print("spkr write buffer allocation failed\n");
+    return NULL;
   }
 
   SpkBasePtr = SpkWriteBuffer + VBASE;
@@ -713,6 +707,7 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
 
   if (DMAWritefile_fd < 0) {
     t_print("XDMA write device open failed for spk data\n");
+    return NULL;
   }
 
   ResetDMAStreamFIFO(eSpkCodecDMA);
@@ -729,7 +724,7 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
     datagram.msg_iovlen = 1;
     datagram.msg_name = &addr_from;
     datagram.msg_namelen = sizeof(addr_from);
-    size = recvmsg(ThreadData->Socketid, &datagram, 0);     // get one message. If it times out, sets size=-1
+    int size = recvmsg(ThreadData->Socketid, &datagram, 0);     // get one message. If it times out, sets size=-1
 
     if (size < 0 && errno != EAGAIN) {
       t_perror("recvfrom fail, Speaker data");
@@ -738,8 +733,8 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
 
     if (size == VSPEAKERAUDIOSIZE) {                        // we have received a packet!
       NewMessageReceived = true;
-      RegVal += 1;            //debug
-      Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow);        // read the FIFO free locations
+      //RegVal += 1;            //debug
+      int Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow);        // read the FIFO free locations
       t_print("speaker packet received; depth = %d\n", Depth);
 
       while (Depth < VMEMWORDSPERFRAME) {     // loop till space available
@@ -782,7 +777,6 @@ void *IncomingDUCIQ(void *arg) {                        // listener thread
   uint8_t UDPInBuffer[VDUCIQSIZE];                      // incoming buffer
   struct iovec iovecinst;                               // iovcnt buffer - 1 for each outgoing buffer
   struct msghdr datagram;                               // multiple incoming message header
-  int size;                                             // UDP datagram length
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
   t_print("spinning up incoming DUC I/Q thread with port %d\n", ThreadData->Portid);
@@ -800,7 +794,7 @@ void *IncomingDUCIQ(void *arg) {                        // listener thread
     datagram.msg_iovlen = 1;
     datagram.msg_name = &addr_from;
     datagram.msg_namelen = sizeof(addr_from);
-    size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
+    int size = recvmsg(ThreadData->Socketid, &datagram, 0);         // get one message. If it times out, ges size=-1
 
     if (size < 0 && errno != EAGAIN) {
       t_perror("recvfrom fail, TX I/Q data");
