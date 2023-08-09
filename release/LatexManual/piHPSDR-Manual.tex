@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage{mathtools}
 \usepackage{xcolor}
+\usepackage{enumitem}
 \parindent 0pt
 \parskip 6pt
 \begin{document}
@@ -96,10 +97,142 @@ the network connection, you then see a screen with a ,,discovery menu''
 \includegraphics[width=12cm]{Start.png}
 \end{center}
 
-At this point, you can start the radio by clicking the "Start" button, but let us first explain the
-purpose of the other buttons! Easiest to explain is the "Exit" button, this will simply terminate
-the program. Most likely, you may want to go into the "Protocols" menu. By default, piHPSDR tries to
-,,discover'' a radio using all protocols known to piHPSDR. However, if you know that your radio, for
+At this point, you can start the radio by clicking the \texttt{Start} button, but let us first explain the
+purpose of the other buttons! Easiest to explain is the \texttt{Exit} button, this will simply terminate
+the program. Most likely, you may want to go into the \texttt{Protocols} menu sooner or later.
+ By default, piHPSDR tries to
+discover the presence of a radio using all protocols known to piHPSDR. However, if you know that your radio, for
 example, uses Protocol 2, then trying to discover a Protocol-1 radio is just a waste of time. So if you
-know which types of radio you want to connect to, check these protocols. The available protocols are 
+know which types of radio you want to connect to, check these protocols. The available protocols are
+\begin{itemize}[font=\texttt, left=80pt]
+\item[Protocol 1]{This is the "original" HPSDR protocol.}
+\item[Protocol 2]{This is the "new" HPSDR protocol.}
+\item[Saturn XDMA]{This is used to talk to a Saturn FPGA through the internal XDMA interface. Only available
+if piHPSDR is compiled with the \texttt{SATURN}  option.}
+\item[USB OZY]{This is used to talk to a radio using the legacy USB OZY interface. Only available if piHPSDR
+is compiled with the \texttt{USBOZY} option.}
+\item[SoapySDR]{This is used to talk to a radio through the SoapySDR library, for example to an AdalmPLUTO. 
+Only available if piHPSDR is compiled with the \texttt{SOAPYSDR} option.}
+\item[STEMlab]{This is used to connect to RedPitaya based SDRs through the WEB interface. Only available if piHPSDR is
+compiled with the \texttt{STEMLAB\_DISCOVERY} option. Starting the radio using this protocol is a two-step process:
+first, the RedPitaya's WEB interface is located, and the \texttt{Start} button then starts the SDR app
+on the RedPitaya. Then, piHPSDR tries to connect to this SDR app and upon success offers a new \texttt{Start} button
+to start the radio. If the RedPitaya is exclusively used as a radio, it is recommended to auto-start the SDR app
+when the RedPitaya is powered up. In this case, the STEMlab protocol is not used, because the SDR app can be started
+through Protocol-2.}
+\item[Autostart]{This is a very useful option. It indicates that if exactly one radio has been found, it is automatically
+started. So in normal operation, when starting piHPSDR subsequently, and all settings are still valid, the radio is
+started without user intervention. If this option is activated and one radio is present, you will not see this menu, so in order
+to make further changes here, you have to disconnect the radio from the ethernet cable, start piHPSDR until you see this
+menu, and reconnect the radio.}
+\end{itemize}
+
+Sometimes piHPSDR needs to know the IP address of the radio. This is, for example, the case for the \texttt{STEMlab} discovery
+described above. In such a case the IP address in numerical form (xxx.xxx.xxx.xxx) can be entered in the box
+with the label \texttt{Radio IP Addr:}. If a legal IP address is contained in this box, protocol-1 and protocol-2 discoveries
+will also send, in addition to a broadcast discovery packet, such a packet to the IP address specified. This way one can
+connect to radios which are not on the same subnet as the computer, in principle you can connect to any radio on the world
+provided it is on the internet. However, the original HPSDR standard states that a broadcast packet must be used, so several
+radios won't reply. On the other hand, there are some radios such as a RedPitaya or a HermesLite-II which allow being discovered
+by such a routed packet. 
+
+The \texttt{Discover} button re-starts the discovery process. This is useful if the radio has been powered up too late and
+was not yet ready when piHPSDR was started. Simply press \texttt{Discover} to give another try.
+
+The \texttt{Configure GPIO} button opens a menu that currently has no function, so it is not described here.
+
+The combo-box (pop-down menu) to the left of the \texttt{Discover} button lets you choose which type of GPIO controller you
+have attached to the computer. This menu is only available if piHPSDR has been compiled with the \texttt{GPIO} option, which
+is not the case on desktop/laptop computers. The menu lets you choose between
+
+\begin{itemize}[font=\texttt, left=80pt]
+\item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi.}
+\item[Contoller1]{Choose this if you have a "version 1" piHPSDR controller.}
+\item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller.}
+\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller.}
+\item[G2 Front Panel]{Choose this if you have an ANAN G2 radio with a built-in controller.}
+\end{itemize}
+
+\textbf{Attention.} Be sure to choose a controller only if such a controller is actually connected to your Raspberry Pi. If
+you choose, for example, a controller which uses an I2C expander for the switches, but no I2C interface is present on
+your Raspberry Pi, the program my hang when trying to open the I2C connection.
+
+All settings (protocols, controller, IP address) made in this menu are stored in the global (radio-indepentend) settings
+and are restored when piHPSDR is started the next time. 
+
+If all went well, a radio could be discovered and you hit the \texttt{Start} button, you should see the following
+
+\begin{center}
+\includegraphics[width=12cm]{FirstDisplay.png}
+\end{center}
+
+The bottom of the window looks different (more controls) if you have chosen \texttt{No Controller} in the preceeding menu.
+You see two receiver panels stacked vertically, both of them having a spectrum display and a waterfall area. At the top,
+just below the window title, you have the VFO bar which contains information on the frequencies of the two VFOs A and B,
+as well as lots of further information, to be explained later. At the top right, there are two buttons \texttt{Hide}
+and \texttt{Menu} which will be explained in the next chapter. To the left of these two buttons, there is the meter
+bar which by default is a digital S-meter. At this point, you have started piHPSDR successfully for the first time.
+
+\chapter{Main window and toolbar}
+
+\begin{center}
+\includegraphics[width=12cm]{SingleReceiver.png}
+\end{center}
+
+
+\begin{center}
+\includegraphics[width=12cm]{Hidden.png}
+\end{center}
+
+\section{The VFO menu}
+\begin{center}
+\includegraphics[width=12cm]{VFOmenu.png}
+\end{center}
+
+\section{The Meter menu}
+\begin{center}
+\includegraphics[width=12cm]{MeterMenu.png}
+\end{center}
+
+\section{The Band menu}
+\begin{center}
+\includegraphics[width=12cm]{BandMenu.png}
+\end{center}
+
+\section{The Bandstack menu}
+\begin{center}
+\includegraphics[width=12cm]{BandstackMenu.png}
+\end{center}
+
+\section{The Mode menu}
+\begin{center}
+\includegraphics[width=12cm]{ModeMenu.png}
+\end{center}
+
+\section{The Filter menu}
+\begin{center}
+\includegraphics[width=12cm]{FilterMenu.png}
+\end{center}
+
+\section{The AGC menu}
+\begin{center}
+\includegraphics[width=12cm]{AGCmenu.png}
+\end{center}
+
+\chapter{The Main Menu}
+
+\begin{center}
+\includegraphics[width=12cm]{MainMenu.png}
+\end{center}
+
+\section{The Exit Menu}
+\begin{center}
+\includegraphics[width=12cm]{ExitMenu.png}
+\end{center}
+
+\section{The About Menu}
+\begin{center}
+\includegraphics[width=12cm]{AboutMenu.png}
+\end{center}
+
 \end{document}

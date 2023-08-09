@@ -1,2 +1,13 @@
 \contentsline {chapter}{\numberline {1}Introduction}{5}{}%
 \contentsline {chapter}{\numberline {2}Starting piHPSDR for the first time}{7}{}%
+\contentsline {chapter}{\numberline {3}Main window and toolbar}{13}{}%
+\contentsline {section}{\numberline {3.1}The VFO menu}{14}{}%
+\contentsline {section}{\numberline {3.2}The Meter menu}{15}{}%
+\contentsline {section}{\numberline {3.3}The Band menu}{15}{}%
+\contentsline {section}{\numberline {3.4}The Bandstack menu}{16}{}%
+\contentsline {section}{\numberline {3.5}The Mode menu}{16}{}%
+\contentsline {section}{\numberline {3.6}The Filter menu}{17}{}%
+\contentsline {section}{\numberline {3.7}The AGC menu}{17}{}%
+\contentsline {chapter}{\numberline {4}The Main Menu}{19}{}%
+\contentsline {section}{\numberline {4.1}The Exit Menu}{20}{}%
+\contentsline {section}{\numberline {4.2}The About Menu}{20}{}%

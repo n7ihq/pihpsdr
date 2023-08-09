@@ -169,7 +169,7 @@ void configure_protocols(GtkWidget *parent) {
   row++;
 #endif
 #ifdef STEMLAB_DISCOVERY
-  GtkWidget *b_enable_stemlab = gtk_check_button_new_with_label("Enable Stemlab");
+  GtkWidget *b_enable_stemlab = gtk_check_button_new_with_label("Enable STEMlab");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_enable_stemlab), enable_stemlab);
   gtk_widget_show(b_enable_stemlab);
   g_signal_connect(b_enable_stemlab, "toggled", G_CALLBACK(stemlab_cb), NULL);
