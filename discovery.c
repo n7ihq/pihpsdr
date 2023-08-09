@@ -241,7 +241,7 @@ void discovery() {
   }
 
 #ifdef USBOZY
-  if (enabled_usbozy && !discover_only_stemlab) {
+  if (enable_usbozy && !discover_only_stemlab) {
     //
     // first: look on USB for an Ozy
     //
