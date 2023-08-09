@@ -31,6 +31,7 @@
 #include "radio.h"
 
 static GtkWidget *dialog = NULL;
+static GtkWidget *client_enable_tx_b;
 
 static void cleanup() {
   if (dialog != NULL) {
@@ -56,8 +57,12 @@ static void server_enable_cb(GtkWidget *widget, gpointer data) {
   if (saturn_server_en) {
     start_saturn_server();
   } else {
+    client_enable_tx = 0;
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (client_enable_tx_b), 0);
     shutdown_saturn_server();
   }
+
+  gtk_widget_set_sensitive(client_enable_tx_b, saturn_server_en);
 }
 
 static void client_enable_tx_cb(GtkWidget *widget, gpointer data) {
@@ -66,8 +71,13 @@ static void client_enable_tx_cb(GtkWidget *widget, gpointer data) {
 }
 
 void saturn_menu(GtkWidget *parent) {
-  GtkWidget *widget;
   dialog = gtk_dialog_new();
+
+  // paranoia is always good when programming
+  if (!saturn_server_en) {
+    client_enable_tx = FALSE;
+  }
+
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Saturn");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
@@ -75,24 +85,27 @@ void saturn_menu(GtkWidget *parent) {
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
+  gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
   g_signal_connect (close_b, "pressed", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-  widget = gtk_label_new(NULL);
-  gtk_widget_set_name(widget, "small_button");
-  gtk_grid_attach(GTK_GRID(grid), widget, 0, 1, 1, 1);
   GtkWidget *server_enable_b = gtk_check_button_new_with_label("Saturn Server Enable");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (server_enable_b), saturn_server_en);
   gtk_widget_show(server_enable_b);
-  gtk_grid_attach(GTK_GRID(grid), server_enable_b, 0, 2, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), server_enable_b, 0, 1, 1, 1);
   g_signal_connect(server_enable_b, "toggled", G_CALLBACK(server_enable_cb), NULL);
-  GtkWidget *client_enable_tx_b = gtk_check_button_new_with_label("Client Transmit Enable");
+  client_enable_tx_b = gtk_check_button_new_with_label("Client Transmit Enable");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (client_enable_tx_b), client_enable_tx);
   gtk_widget_show(client_enable_tx_b);
-  gtk_grid_attach(GTK_GRID(grid), client_enable_tx_b, 0, 3, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), client_enable_tx_b, 1, 1, 1, 1);
   g_signal_connect(client_enable_tx_b, "toggled", G_CALLBACK(client_enable_tx_cb), NULL);
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
+  //
+  // The client enable tx button will only be "sensitive" is the
+  // saturn server is enabled
+  //
+  gtk_widget_set_sensitive(client_enable_tx_b, saturn_server_en);
   gtk_widget_show_all(dialog);
 }
 
