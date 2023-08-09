@@ -600,12 +600,10 @@ void new_menu() {
     //
     // Fifth column: Toolbar, RigCtl, MIDI, Encoders, Switches
     //
-    if (controller != CONTROLLER1) {
-      GtkWidget *toolbar_b = gtk_button_new_with_label("Toolbar");
-      g_signal_connect (toolbar_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
-      gtk_grid_attach(GTK_GRID(grid), toolbar_b, 4, row, 1, 1);
-      row++;
-    }
+    GtkWidget *toolbar_b = gtk_button_new_with_label("Toolbar");
+    g_signal_connect (toolbar_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), toolbar_b, 4, row, 1, 1);
+    row++;
 
     GtkWidget *rigctl_b = gtk_button_new_with_label("RIGCTL");
     g_signal_connect (rigctl_b, "button-press-event", G_CALLBACK(rigctl_cb), NULL);
@@ -625,9 +623,13 @@ void new_menu() {
       g_signal_connect (encoders_b, "button-press-event", G_CALLBACK(encoder_cb), NULL);
       gtk_grid_attach(GTK_GRID(grid), encoders_b, 4, row, 1, 1);
       row++;
-
+    }
+    //
+    // Note the switches of CONTROLLER1 are assigned via the Toolbar menu
+    //
+    if (controller != NO_CONTROLLER && controller != CONTROLLER1) {
       GtkWidget *switches_b = gtk_button_new_with_label("Switches");
-      g_signal_connect (switches_b, "button-press-event", G_CALLBACK(toolbar_cb), NULL);
+      g_signal_connect (switches_b, "button-press-event", G_CALLBACK(switch_cb), NULL);
       gtk_grid_attach(GTK_GRID(grid), switches_b, 4, row, 1, 1);
       row++;
     }

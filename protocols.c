@@ -36,6 +36,8 @@ gboolean enable_protocol_1;
 gboolean enable_protocol_2;
 gboolean enable_soapy_protocol;
 gboolean enable_stemlab;
+gboolean enable_usbozy;
+gboolean enable_saturn_xdma;
 gboolean autostart;
 
 static void protocolsSaveState() {
@@ -45,6 +47,8 @@ static void protocolsSaveState() {
   SetPropI0("enable_protocol_2",     enable_protocol_2);
   SetPropI0("enable_soapy_protocol", enable_soapy_protocol);
   SetPropI0("enable_stemlab",        enable_stemlab);
+  SetPropI0("enable_usbozy",         enable_usbozy);
+  SetPropI0("enable_saturn_xdma",    enable_saturn_xdma);
   SetPropI0("autostart",             autostart);
   saveProperties("protocols.props");
 }
@@ -58,12 +62,16 @@ void protocolsRestoreState() {
   enable_protocol_1 = TRUE;
   enable_protocol_2 = TRUE;
   enable_stemlab = TRUE;
+  enable_usbozy = TRUE;
   enable_soapy_protocol = TRUE;
+  enable_saturn_xdma = TRUE;
   autostart = FALSE;
   GetPropI0("enable_protocol_1",     enable_protocol_1);
   GetPropI0("enable_protocol_2",     enable_protocol_2);
   GetPropI0("enable_soapy_protocol", enable_soapy_protocol);
   GetPropI0("enable_stemlab",        enable_stemlab);
+  GetPropI0("enable_usbozy",         enable_usbozy);
+  GetPropI0("enable_saturn_xdma",    enable_saturn_xdma);
   GetPropI0("autostart",             autostart);
   clearProperties();
 }
@@ -97,6 +105,18 @@ static void stemlab_cb(GtkToggleButton *widget, gpointer data) {
 }
 #endif
 
+#ifdef SATURN
+static void saturn_xdma_cb(GtkToggleButton *widget, gpointer data) {
+  enable_saturn_xdma = gtk_toggle_button_get_active(widget);
+}
+#endif
+
+#ifdef USBOZY
+static void usbozy_cb(GtkToggleButton *widget, gpointer data) {
+  enable_usbozy = gtk_toggle_button_get_active(widget);
+}
+#endif
+
 static void autostart_cb(GtkToggleButton *widget, gpointer data) {
   autostart = gtk_toggle_button_get_active(widget);
 }
@@ -124,6 +144,22 @@ void configure_protocols(GtkWidget *parent) {
   g_signal_connect(b_enable_protocol_2, "toggled", G_CALLBACK(protocol_2_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), b_enable_protocol_2, 0, row, 1, 1);
   row++;
+#ifdef SATURN
+  GtkWidget *b_saturn_xdma = gtk_check_button_new_with_label("Enable Saturn XDMA");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_saturn_xdma), enable_saturn_xdma);
+  gtk_widget_show(b_saturn_xdma);
+  g_signal_connect(b_saturn_xdma, "toggled", G_CALLBACK(saturn_xdma_cb), NULL);
+  gtk_grid_attach(GTK_GRID(grid), b_saturn_xdma, 0, row, 1, 1);
+  row++;
+#endif
+#ifdef USBOZY
+  GtkWidget *b_usbozy = gtk_check_button_new_with_label("Enable USB OZY");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_usbozy), enable_usbozy);
+  gtk_widget_show(b_usbozy);
+  g_signal_connect(b_usbozy, "toggled", G_CALLBACK(usbozy_cb), NULL);
+  gtk_grid_attach(GTK_GRID(grid), b_usbozy, 0, row, 1, 1);
+  row++;
+#endif
 #ifdef SOAPYSDR
   GtkWidget *b_enable_soapy_protocol = gtk_check_button_new_with_label("Enable SoapySDR Protocol");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_enable_soapy_protocol), enable_soapy_protocol);

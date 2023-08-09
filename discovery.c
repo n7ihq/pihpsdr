@@ -241,41 +241,44 @@ void discovery() {
   }
 
 #ifdef USBOZY
-  //
-  // first: look on USB for an Ozy
-  //
-  t_print("looking for USB based OZY devices\n");
+  if (enabled_usbozy && !discover_only_stemlab) {
+    //
+    // first: look on USB for an Ozy
+    //
+    status_text("Looking for USB based OZY devices");
 
-  if (ozy_discover() != 0) {
-    discovered[devices].protocol = ORIGINAL_PROTOCOL;
-    discovered[devices].device = DEVICE_OZY;
-    discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
-    strcpy(discovered[devices].name, "Ozy on USB");
-    discovered[devices].frequency_min = 0.0;
-    discovered[devices].frequency_max = 61440000.0;
+    if (ozy_discover() != 0) {
+      discovered[devices].protocol = ORIGINAL_PROTOCOL;
+      discovered[devices].device = DEVICE_OZY;
+      discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
+      strcpy(discovered[devices].name, "Ozy on USB");
+      discovered[devices].frequency_min = 0.0;
+      discovered[devices].frequency_max = 61440000.0;
 
-    for (int i = 0; i < 6; i++) {
-      discovered[devices].info.network.mac_address[i] = 0;
+      for (int i = 0; i < 6; i++) {
+        discovered[devices].info.network.mac_address[i] = 0;
+      }
+
+      discovered[devices].status = STATE_AVAILABLE;
+      discovered[devices].info.network.address_length = 0;
+      discovered[devices].info.network.interface_length = 0;
+      strcpy(discovered[devices].info.network.interface_name, "USB");
+      discovered[devices].use_tcp = 0;
+      discovered[devices].use_routing = 0;
+      discovered[devices].supported_receivers = 2;
+      t_print("discovery: found USB OZY device min=%f max=%f\n",
+              discovered[devices].frequency_min,
+              discovered[devices].frequency_max);
+      devices++;
     }
-
-    discovered[devices].status = STATE_AVAILABLE;
-    discovered[devices].info.network.address_length = 0;
-    discovered[devices].info.network.interface_length = 0;
-    strcpy(discovered[devices].info.network.interface_name, "USB");
-    discovered[devices].use_tcp = 0;
-    discovered[devices].use_routing = 0;
-    discovered[devices].supported_receivers = 2;
-    t_print("discovery: found USB OZY device min=%f max=%f\n",
-            discovered[devices].frequency_min,
-            discovered[devices].frequency_max);
-    devices++;
   }
-
 #endif
 #ifdef SATURN
 #include "saturnmain.h"
-  t_print("looking for /dev/xdma* based saturn devices\n");
-  saturn_discovery();
+  if (enable_saturn_xdma && !discover_only_stemlab) {
+    status_text("Looking for /dev/xdma* based saturn devices");
+    saturn_discovery();
+  }
 #endif
 #ifdef STEMLAB_DISCOVERY
 

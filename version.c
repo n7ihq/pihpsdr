@@ -21,18 +21,24 @@ char build_version[] = GIT_VERSION;
 
 char version[] =
 #ifdef STEMLAB_DISCOVERY
-  "STEMlab, "
+  "STEMlab "
 #endif
 #ifdef USBOZY
-  "OZY(USB), "
+  "OZY(USB) "
 #endif
 #ifdef GPIO
-  "GPIO, "
+  "GPIO "
 #endif
 #ifdef SOAPYSDR
-  "SOAPYSDR, "
+  "SOAPYSDR "
 #endif
 #ifdef MIDI
-  "MIDI, "
+  "MIDI "
+#endif
+#ifdef SATURN
+  "SATURN "
+#endif
+#ifdef ANDROMEDA
+  "ANDROMEDA "
 #endif
   "" ;
