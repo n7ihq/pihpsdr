@@ -69,6 +69,11 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
     if ((desc->channel == channel || desc->channel == -1) && (desc->event == event)) {
       // Found matching entry
       switch (desc->event) {
+      case EVENT_NONE:
+        // this cannot happen
+        t_print("%s: Unknown Event\n", __FUNCTION__);
+        break;
+
       case MIDI_NOTE:
         DoTheMidi(desc->action, desc->type, val);
         break;
@@ -124,8 +129,6 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
 
         break;
 
-      case EVENT_NONE:
-        break;
       }
 
       break;
@@ -196,6 +199,7 @@ void MidiAddCommand(int note, struct desc *desc) {
   }
 }
 
+#if 0
 //
 // maintained so old midi configurations can be loaded
 // the sole purpose of this table is to map names in
@@ -511,3 +515,4 @@ int ReadLegacyMidiFile(char *filename) {
 
   return 0;
 }
+#endif
