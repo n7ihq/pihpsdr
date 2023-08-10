@@ -144,9 +144,6 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
   }
 }
 
-gchar *midi_types[] = {"NONE", "KEY", "KNOB/SLIDER", "*INVALID*", "WHEEL"};
-gchar *midi_events[] = {"NONE", "NOTE", "CTRL", "PITCH"};
-
 /*
  * Release data from MidiCommandsTable
  */

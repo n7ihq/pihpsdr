@@ -110,7 +110,7 @@ static void rx_gain_calibration_value_changed_cb(GtkWidget *widget, gpointer dat
   rx_gain_calibration = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
-#ifdef GPIO
+#if defined(GPIO) || defined(ANDROMEDA)
 static void vfo_divisor_value_changed_cb(GtkWidget *widget, gpointer data) {
   vfo_encoder_divisor = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
@@ -602,20 +602,16 @@ void radio_menu(GtkWidget *parent) {
     row++;
   }
 
-#ifdef GPIO
-
-  if (controller != NO_CONTROLLER) {
-    GtkWidget *vfo_divisor_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(vfo_divisor_label), "<b>VFO Encoder Divisor:</b>");
-    gtk_grid_attach(GTK_GRID(grid), vfo_divisor_label, col, row, 1, 1);
-    row++;
-    GtkWidget *vfo_divisor = gtk_spin_button_new_with_range(1.0, 60.0, 1.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(vfo_divisor), (double)vfo_encoder_divisor);
-    gtk_grid_attach(GTK_GRID(grid), vfo_divisor, col, row, 1, 1);
-    g_signal_connect(vfo_divisor, "value_changed", G_CALLBACK(vfo_divisor_value_changed_cb), NULL);
-    row++;
-  }
-
+#if defined(GPIO) || defined(ANDROMEDA)
+  GtkWidget *vfo_divisor_label = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(vfo_divisor_label), "<b>VFO Encoder Divisor:</b>");
+  gtk_grid_attach(GTK_GRID(grid), vfo_divisor_label, col, row, 1, 1);
+  row++;
+  GtkWidget *vfo_divisor = gtk_spin_button_new_with_range(1.0, 60.0, 1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(vfo_divisor), (double)vfo_encoder_divisor);
+  gtk_grid_attach(GTK_GRID(grid), vfo_divisor, col, row, 1, 1);
+  g_signal_connect(vfo_divisor, "value_changed", G_CALLBACK(vfo_divisor_value_changed_cb), NULL);
+  row++;
 #endif
 
   if (row > max_row) { max_row = row; }

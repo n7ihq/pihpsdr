@@ -61,9 +61,6 @@
 #ifndef _MIDI_H
 #define _MIDI_H
 
-extern gchar *midi_types[];
-extern gchar *midi_events[];
-
 //
 // MIDIevent encodes the actual MIDI event "seen" in Layer-1 and
 // passed to Layer-2. MIDI_NOTE events end up as MIDI_KEY and
