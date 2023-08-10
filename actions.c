@@ -54,6 +54,8 @@
 // for each case. button_str is used to identify the action in the props files and therefore
 // it should not contain white space. Apart from the props files, the button_str determines
 // what is written on the buttons in the toolbar (but that's it).
+// For finding an action in the "action_dialog", it is most convenient if these actions are
+// (roughly) sorted by the first string, but keep "NONE" at the beginning
 //
 ACTION_TABLE ActionTable[] = {
   {NO_ACTION,           "NONE",                 "NONE",         TYPE_NONE},
@@ -66,6 +68,7 @@ ACTION_TABLE ActionTable[] = {
   {AGC_GAIN,            "AGC GAIN",             "AGCGain",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {AGC_GAIN_RX1,        "AGC GAIN\nRX1",        "AGCGain1",     MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {AGC_GAIN_RX2,        "AGC GAIN\nRX2",        "AGCGain2",     MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {MENU_AGC,            "AGC\nMENU",            "AGC",          MIDI_KEY   | CONTROLLER_SWITCH},
   {ANF,                 "ANF",                  "ANF",          MIDI_KEY   | CONTROLLER_SWITCH},
   {ATTENUATION,         "ATTEN",                "ATTEN",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {B_TO_A,              "A<B",                  "A<B",          MIDI_KEY   | CONTROLLER_SWITCH},
@@ -95,6 +98,8 @@ ACTION_TABLE ActionTable[] = {
   {BAND_WWV,            "BAND WWV",             "WWV",          MIDI_KEY   | CONTROLLER_SWITCH},
   {BANDSTACK_MINUS,     "BANDSTACK -",          "BSTK-",        MIDI_KEY   | CONTROLLER_SWITCH},
   {BANDSTACK_PLUS,      "BANDSTACK +",          "BSTK+",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_BAND,           "BAND\nMENU",           "BAND",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_BANDSTACK,      "BANDSTACK\nMENU",      "BSTK",         MIDI_KEY   | CONTROLLER_SWITCH},
   {COMP_ENABLE,         "COMP ON/OFF",          "COMP",         MIDI_KEY   | CONTROLLER_SWITCH},
   {COMPRESSION,         "COMPRESSION",          "COMPVAL",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {CTUN,                "CTUN",                 "CTUN",         MIDI_KEY   | CONTROLLER_SWITCH},
@@ -113,13 +118,15 @@ ACTION_TABLE ActionTable[] = {
   {DIV_PHASE,           "DIV PHASE",            "DIVP",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_PHASE_COARSE,    "DIV PHASE\nCOARSE",    "DIVPC",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_PHASE_FINE,      "DIV PHASE\nFINE",      "DIVPF",        MIDI_WHEEL | CONTROLLER_ENCODER},
-  {DRIVE,               "TX DRIVE",             "TXDRV",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {MENU_DIVERSITY,      "DIV\nMENU",            "DIV",          MIDI_KEY   | CONTROLLER_SWITCH},
   {DUPLEX,              "DUPLEX",               "DUP",          MIDI_KEY   | CONTROLLER_SWITCH},
   {FILTER_MINUS,        "FILTER -",             "FL-",          MIDI_KEY   | CONTROLLER_SWITCH},
   {FILTER_PLUS,         "FILTER +",             "FL+",          MIDI_KEY   | CONTROLLER_SWITCH},
   {FILTER_CUT_LOW,      "FILTER CUT\nLOW",      "FCUTL",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {FILTER_CUT_HIGH,     "FILTER CUT\nHIGH",     "FCUTH",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {FILTER_CUT_DEFAULT,  "FILTER CUT\nDEFAULT",  "FCUTDEF",      MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_FILTER,         "FILT\nMENU",           "FILT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_FREQUENCY,      "FREQ\nMENU",           "FREQ",         MIDI_KEY   | CONTROLLER_SWITCH},
   {FUNCTION,            "FUNC",                 "FUNC",         MIDI_KEY   | CONTROLLER_SWITCH},
   {IF_SHIFT,            "IF SHIFT",             "IFSHFT",       MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_SHIFT_RX1,        "IF SHIFT\nRX1",        "IFSHFT1",      MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -129,23 +136,16 @@ ACTION_TABLE ActionTable[] = {
   {IF_WIDTH_RX2,        "IF WIDTH\nRX2",        "IFWIDTH2",     MIDI_WHEEL | CONTROLLER_ENCODER},
   {LINEIN_GAIN,         "LINEIN\nGAIN",         "LIGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {LOCK,                "LOCK",                 "LOCKM",        MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_AGC,            "AGC\nMENU",            "AGC",          MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_BAND,           "BAND\nMENU",           "BAND",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_BANDSTACK,      "BSTK\nMENU",           "BSTK",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_DIVERSITY,      "DIV\nMENU",            "DIV",          MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_FILTER,         "FILT\nMENU",           "FILT",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_FREQUENCY,      "FREQ\nMENU",           "FREQ",         MIDI_KEY   | CONTROLLER_SWITCH},
   {MENU_MEMORY,         "MEM\nMENU",            "MEM",          MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_MODE,           "MODE\nMENU",           "MODE",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_NOISE,          "NOISE\nMENU",          "NOISE",        MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_PS,             "PS MENU",              "PS",           MIDI_KEY   | CONTROLLER_SWITCH},
   {MIC_GAIN,            "MIC GAIN",             "MICGAIN",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {MODE_MINUS,          "MODE -",               "MD-",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MODE_PLUS,           "MODE +",               "MD+",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_MODE,           "MODE\nMENU",           "MODE",         MIDI_KEY   | CONTROLLER_SWITCH},
   {MOX,                 "MOX",                  "MOX",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MUTE,                "MUTE",                 "MUTE",         MIDI_KEY   | CONTROLLER_SWITCH},
   {NB,                  "NB",                   "NB",           MIDI_KEY   | CONTROLLER_SWITCH},
   {NR,                  "NR",                   "NR",           MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_NOISE,          "NOISE\nMENU",          "NOISE",        MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_0,            "NUMPAD 0",             "0",            MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_1,            "NUMPAD 1",             "1",            MIDI_KEY   | CONTROLLER_SWITCH},
   {NUMPAD_2,            "NUMPAD 2",             "2",            MIDI_KEY   | CONTROLLER_SWITCH},
@@ -170,6 +170,7 @@ ACTION_TABLE ActionTable[] = {
   {PANADAPTER_STEP,     "PAN STEP",             "PANS",         MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {PREAMP,              "PREAMP\nON/OFF",       "PRE",          MIDI_KEY   | CONTROLLER_SWITCH},
   {PS,                  "PS ON/OFF",            "PST",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_PS,             "PS MENU",              "PS",           MIDI_KEY   | CONTROLLER_SWITCH},
   {PTT,                 "PTT",                  "PTT",          MIDI_KEY   | CONTROLLER_SWITCH},
   {RF_GAIN,             "RF GAIN",              "RFGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {RF_GAIN_RX1,         "RF GAIN\nRX1",         "RFGAIN1",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -194,6 +195,7 @@ ACTION_TABLE ActionTable[] = {
   {TUNE_DRIVE,          "TUNE\nDRV",            "TUNDRV",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {TUNE_FULL,           "TUNE\nFUL",            "TUNF",         MIDI_KEY   | CONTROLLER_SWITCH},
   {TUNE_MEMORY,         "TUNE\nMEM",            "TUNM",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {DRIVE,               "TX DRIVE",             "TXDRV",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {TWO_TONE,            "TWO TONE",             "2TONE",        MIDI_KEY   | CONTROLLER_SWITCH},
   {VFO,                 "VFO",                  "VFO",          MIDI_WHEEL | CONTROLLER_ENCODER},
   {VFO_STEP_MINUS,      "VFO STEP -",           "STEP-",        MIDI_KEY   | CONTROLLER_SWITCH},
@@ -1612,6 +1614,10 @@ int process_action(void *data) {
       g_idle_add(ext_vfo_update, NULL);
     }
 
+    break;
+
+  case NO_ACTION:
+    // do nothing
     break;
 
   default:
