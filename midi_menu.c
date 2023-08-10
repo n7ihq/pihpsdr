@@ -689,8 +689,8 @@ void midi_menu(GtkWidget *parent) {
   } else {
     GtkWidget *devices_label = gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(devices_label), "<b>No MIDI devices found!</b>");
-    gtk_label_set_xalign(GTK_LABEL(devices_label), 0.0);
-    gtk_grid_attach(GTK_GRID(grid), devices_label, col, row, 3, 1);
+    gtk_label_set_xalign(GTK_LABEL(devices_label), 0.5);
+    gtk_grid_attach(GTK_GRID(grid), devices_label, col, row, 4, 1);
     row++;
     col = 0;
   }
