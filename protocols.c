@@ -161,7 +161,7 @@ void configure_protocols(GtkWidget *parent) {
   row++;
 #endif
 #ifdef SOAPYSDR
-  GtkWidget *b_enable_soapy_protocol = gtk_check_button_new_with_label("Enable SoapySDR Protocol");
+  GtkWidget *b_enable_soapy_protocol = gtk_check_button_new_with_label("Enable SoapySDR");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_enable_soapy_protocol), enable_soapy_protocol);
   gtk_widget_show(b_enable_soapy_protocol);
   g_signal_connect(b_enable_soapy_protocol, "toggled", G_CALLBACK(soapy_protocol_cb), NULL);
