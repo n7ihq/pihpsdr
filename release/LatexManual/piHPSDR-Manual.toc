@@ -1,13 +1,43 @@
-\contentsline {chapter}{\numberline {1}Introduction}{5}{}%
-\contentsline {chapter}{\numberline {2}Starting piHPSDR for the first time}{7}{}%
-\contentsline {chapter}{\numberline {3}Main window and toolbar}{13}{}%
-\contentsline {section}{\numberline {3.1}The VFO menu}{14}{}%
-\contentsline {section}{\numberline {3.2}The Meter menu}{15}{}%
-\contentsline {section}{\numberline {3.3}The Band menu}{15}{}%
-\contentsline {section}{\numberline {3.4}The Bandstack menu}{16}{}%
-\contentsline {section}{\numberline {3.5}The Mode menu}{16}{}%
-\contentsline {section}{\numberline {3.6}The Filter menu}{17}{}%
-\contentsline {section}{\numberline {3.7}The AGC menu}{17}{}%
-\contentsline {chapter}{\numberline {4}The Main Menu}{19}{}%
-\contentsline {section}{\numberline {4.1}The Exit Menu}{20}{}%
-\contentsline {section}{\numberline {4.2}The About Menu}{20}{}%
+\contentsline {chapter}{\numberline {1}Introduction}{7}{}%
+\contentsline {chapter}{\numberline {2}Starting piHPSDR for the first time}{9}{}%
+\contentsline {chapter}{\numberline {3}Main window and toolbar}{15}{}%
+\contentsline {section}{\numberline {3.1}The VFO menu}{16}{}%
+\contentsline {section}{\numberline {3.2}The Meter menu}{17}{}%
+\contentsline {section}{\numberline {3.3}The Band menu}{17}{}%
+\contentsline {section}{\numberline {3.4}The Bandstack menu}{18}{}%
+\contentsline {section}{\numberline {3.5}The Mode menu}{18}{}%
+\contentsline {section}{\numberline {3.6}The Filter menu}{19}{}%
+\contentsline {section}{\numberline {3.7}The AGC menu}{19}{}%
+\contentsline {chapter}{\numberline {4}The Main Menu: introduction}{21}{}%
+\contentsline {section}{\numberline {4.1}The Exit Menu}{22}{}%
+\contentsline {section}{\numberline {4.2}The About Menu}{22}{}%
+\contentsline {chapter}{\numberline {5}The Main Menu: Radio-related menus}{23}{}%
+\contentsline {section}{\numberline {5.1}The Radio Menu}{23}{}%
+\contentsline {section}{\numberline {5.2}The Screen Menu}{24}{}%
+\contentsline {section}{\numberline {5.3}The Display Menu}{24}{}%
+\contentsline {section}{\numberline {5.4}The XVTR Menu}{25}{}%
+\contentsline {chapter}{\numberline {6}The Main Menu: RX-related menus}{27}{}%
+\contentsline {section}{\numberline {6.1}The RX Menu}{27}{}%
+\contentsline {section}{\numberline {6.2}The Noise Menu}{28}{}%
+\contentsline {section}{\numberline {6.3}The AGC Menu}{28}{}%
+\contentsline {section}{\numberline {6.4}The Diversity Menu}{29}{}%
+\contentsline {chapter}{\numberline {7}The Main Menu: TX-related menus}{31}{}%
+\contentsline {section}{\numberline {7.1}The TX Menu}{31}{}%
+\contentsline {section}{\numberline {7.2}The PA Menu}{32}{}%
+\contentsline {section}{\numberline {7.3}The VOX Menu}{33}{}%
+\contentsline {section}{\numberline {7.4}The PS (PureSignal) Menu}{33}{}%
+\contentsline {section}{\numberline {7.5}The CW Menu}{34}{}%
+\contentsline {chapter}{\numberline {8}The Main Menu: menus for RX and TX}{35}{}%
+\contentsline {section}{\numberline {8.1}The FFT Menu}{35}{}%
+\contentsline {section}{\numberline {8.2}The FFT Menu}{36}{}%
+\contentsline {section}{\numberline {8.3}The Equalizer Menu}{36}{}%
+\contentsline {section}{\numberline {8.4}The Meter Menu}{37}{}%
+\contentsline {section}{\numberline {8.5}The Ant (Antenna) Menu}{37}{}%
+\contentsline {section}{\numberline {8.6}The OC (OpenCollector) Menu}{38}{}%
+\contentsline {chapter}{\numberline {9}The Main Menu: controlling piHPSDR}{39}{}%
+\contentsline {section}{\numberline {9.1}The Toolbar Menu}{39}{}%
+\contentsline {section}{\numberline {9.2}The RIGCTL Menu}{40}{}%
+\contentsline {section}{\numberline {9.3}The MIDI Menu}{40}{}%
+\contentsline {section}{\numberline {9.4}The Encoders Menu}{42}{}%
+\contentsline {section}{\numberline {9.5}The Switches Menu}{42}{}%
+\contentsline {chapter}{\numberline {10}List of piHPSDR ,,Actions''}{43}{}%
