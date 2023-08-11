@@ -319,11 +319,6 @@ bar which by default is a digital S-meter. At this point, you have started piHPS
 \includegraphics[width=12cm]{FFTMenu.png}
 \end{center}
 
-\section{The FFT Menu}
-\begin{center}
-\includegraphics[width=12cm]{FFTMenu.png}
-\end{center}
-
 \section{The Equalizer Menu}
 \begin{center}
 \includegraphics[width=12cm]{EqualizerMenu.png}
@@ -346,10 +341,65 @@ bar which by default is a digital S-meter. At this point, you have started piHPS
 
 \chapter{The Main Menu: controlling piHPSDR}
 
+In this chapter, the customization of the toolbar (at the bottom of the piHPSDR window),
+as well as how to configure GPIO and MIDI controllers, is described. Furthermore, in this
+chapter we discuss the RIGCTL menu which allows controlling piHPSDR by some external program
+such as a logbook or contest program, via standardized CAT commands that can be sent to
+piHPSDR either over a serial line or via TCP.
+
+\textbf{Note for Controller1 owners:} The eight switches (push-buttons) of the controller,
+that a positioned below the screen, are bound to the eight toolbar buttons on the screen.
+Therefore, there is no "Switches" menu for this controller, and the switches are implicitly
+configured via the Toolbar menu.
+
 \section{The Toolbar Menu}
+We start with the "Toolbar" menu, that can be found at the top of the rightmost
+column in the main menu. The toolbar consists of eight buttons that can be assigned
+to a set of eight functions. There are six such sets, and pressing the FUNC button
+cycles through these six sets. If you click the Toolbar button, a menu pops up and
+you see the following:
+
 \begin{center}
-\includegraphics[width=12cm]{OCMenu.png}
+\includegraphics[width=12cm]{ToolbarMenu1.png}
 \end{center}
+
+The six lines denoted \texttt{F0} through \texttt{F5} indicate the six different sets. If you
+look closely, you will discover that the set \texttt{F1} is the one that is currently active,
+since the labels in this line exactly match the labels in the toolbar. In this menu, the
+possible actions (that can be bound to a button) are written with the short text (see Chapter \ref{ch:actions}),
+since this is the text that is printed on the toolbar buttons. If one now clicks (just an example)
+the \texttt{CTUN} button in the line \texttt{F1}, an ,,action dialog'' pops up that looks as follows:
+
+\begin{center}
+\includegraphics[width=12cm]{ToolbarMenu2.png}
+\end{center}
+
+The current action selected (\texttt{CTUN}) is high-lighted. Lists of possible actions can be rather long,
+so it might be necessary that you have to scroll up or down in such an action dialog until you have
+found what you were looking for. Now (again just an example) the button \texttt{Band 20} has been clicked
+in the action dialog, such that it gets high-lighted:
+
+\begin{center}
+\includegraphics[width=12cm]{ToolbarMenu3.png}
+\end{center}
+
+If one now closes the action dialog by clicking the \texttt{OK} button, the third button in the \texttt{F1}
+line of the toolbar menu has changed, it now gives the short text (\texttt{20}) of the action, which will
+switch the active receiver to the 20m band (see the explanation of all the actions in chapter \ref{ch:actions}).
+
+\begin{center}
+\includegraphics[width=12cm]{ToolbarMenu4.png}
+\end{center}
+You also see that the toolbar has changed, now reading \texttt{20} on the third button from the left. Note that
+you can likewise change the functions of the toolbar sets that are currently not active, for example, we can
+change the behaviour of a toolbar button in set \texttt{F5}, no matter whether this set is currently active
+or not. Note futher that nothing happens if you press the \texttt{FUNC} buttons in the toolbar menu, since the
+rightmost button is hard-wired to that function. This is so because if in one set, you do not have the 
+\texttt{FUNC} functions at hand, you are trapped and can no longer cycle through the sets.
+
+Assigning actions to buttons, as done here in the ,,action dialog'' also works, exactly as described here,
+in the MIDI, the Encoders, and the Switches menus.
+
 
 \section{The RIGCTL Menu}
 \begin{center}
@@ -380,6 +430,7 @@ bar which by default is a digital S-meter. At this point, you have started piHPS
 \end{center}
 
 \chapter{List of piHPSDR ,,Actions''}
+\label{ch:actions}
 
 In this chapter, we give a list of ,,actions'' implemented in the piHPSDR program. These actions can be assigned to
 toolbar buttons on the screen, or pushbuttons/encoders of a GPIO-connected or MIDI controller. Not all actions can
@@ -388,19 +439,21 @@ you can turn, while switching RIT on/off can only be assigned to a button that y
 in the following table, there is a long and a short string assigned. The long string will be used when there is
 enough space, while the short string is used for small buttons and to store actions in preference files (therefore
 the short strings never contain a blank character or a line break). Then, for each action we give the type of control
-element allowed for this action as a combination of the letters B, S, E, which stand for
+element allowed for this action as a combination of the letters B, P, E, which stand for
 
 \begin{itemize}[font=\texttt, left=0pt]
 \item[B] {"Button": A button in the toolbar, or a push-button or switch on a GPIO or MIDI connected console}
-\item[S] {"Slider": A potentiometer or a slider on a MIDI connected console}
+\item[P] {"Potentiometer": A potentiometer or a slider on a MIDI connected console}
 \item[E] {"Encoder": A rotary encoder on a GPIO or MIDI connected console}
 \end{itemize}
 
-The main difference between a "slider" and an "encoder" is, that the former has a min and max position, while
-an encoder can be turned in either direction without stopping. This means that a slider (best to be viewed
-as a potentiometer) reports a value between min and max, while an encoder just reports an incremental value,
-that is, whether it has been turned clock-wise or CCW. The existing GPIO consoles do not have  sliders, but
-many MIDI consoles do have sliders (or knobs) with a min and max position.
+The main difference between a "potentiometer" and an "encoder" is, that the former has a min and max position, while
+an encoder can be turned in either direction without stopping. This means that a potentiometer
+reports a value between min and max, while an encoder reports an increment,
+that is, whether it has been turned clock wise or counter clock wise.
+The existing GPIO consoles do not have potentiometers (most likely because of the lack of analog inputs), but
+many MIDI consoles do have, and Arduino-based MIDI controllers might have it because there analog inputs
+to read out potentiometers are available.
 
 To give an example, controlling the TX drive can be down both with a slider and with an encoder. While for
 a slider/potentiometer, the values from min to max are simple mapped to the TX drive values from 0 to 100,
@@ -409,17 +462,6 @@ the signals from an encoder will just increase or decrease the value until one o
 In the following, the actions are alphabetically sorted by their long name, with the "empty" action listed
 first.
 
-%\def\action#1#2#3#4{
-%\begin{center}
-%\begin{tabular}{|l|l|}
-%\hline
-%\multirow{1}{3cm}{#1} & \multirow[|t|]{3}{10cm}{#4} \\
-%\multirow{1}{3cm}{#2} & \\
-%\multirow{1}{3cm}{#3} & \\
-%\hline
-%\end{tabular}
-%\end{center}
-%}
 \renewcommand{\belowrulesep}{0pt}
 \renewcommand{\aboverulesep}{0pt}
 \def\action#1#2#3#4{
@@ -434,7 +476,7 @@ $\phantom{\Big|}$\texttt{\large #1} & \texttt{\large #2} & \texttt{\large #3} \\
 }
 
 
-\action{NONE}{NONE}{BPE}{This is an action which does nothing. It can be assigned to buttons or encoders that
+\action{NONE}{NONE}{BPE}{This is an action which does nothing. It can be assigned to buttons or enco\-ders that
 are often accidentally operated. Some MIDI consoles, for example, report a button press event if the VFO
 knob is touched, and this we want to ignore.}
 
