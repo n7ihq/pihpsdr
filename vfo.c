@@ -311,6 +311,19 @@ void vfo_band_changed(int id, int b) {
 
 #endif
 
+  //
+  // If the band is not equal to the current band, look at the frequency of the
+  // new bandstack entry.
+  // Return quickly if the frequency is not compatible with the radio.
+  //
+  if (b != vfo[id].band) {
+    bandstack = bandstack_get_bandstack(b);
+    double f = bandstack->entry[bandstack->current_entry].frequency;
+    if (f < radio->frequency_min || f > radio->frequency_max) {
+      return;
+    }
+  }
+
   if (id == 0) {
     vfoSaveBandstack();
   }
