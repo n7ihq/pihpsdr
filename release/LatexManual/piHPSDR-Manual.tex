@@ -483,8 +483,228 @@ knob is touched, and this we want to ignore.}
 \action{A<>B}{A<>B}{B}{Swap VFOs A and B. This will not only swap the frequencies, but also all other settings
 associated with that VFO, such as mode, filter, CTUN, and RIT settings.}
 
+\action{A<B}{A<B}{B}{Copy VFO B to VFO A.}
+
 \action{A>B}{A>B}{B}{Copy VFO A to VFO B.}
 
-\action{AF GAIN}{AFGAIN}{PE}{Change the AF gain (headphone volume).}
+\action{AF GAIN}{AFGAIN}{PE}{Change the AF gain (headphone volume) of the active receiver.}
 
+\action{AF GAIN RX1}{AFGAIN1}{PE}{Change the AF gain (headphone volume) of the RX1 receiver.}
+
+\action{AF GAIN RX2}{AFGAIN2}{PE}{Change the AF gain (headphone volume) of the RX2 receiver.}
+
+\action{AGC MENU}{AGC}{B}{Opens the \texttt{AGC} menu.}
+
+\action{ANF}{ANF}{B}{Toggels the state (on/off) of the automatic notch filter for the active receiver.}
+
+\action{ATTEN}{ATTEN}{PE}{Changes the value (0-31 dB) of the step attenuator of the active receiver.
+This funciton is only available for radios that have such an attenuator.}
+
+\action{BAND 10}{10}{B}
+{Change band of the active receiver to the 10m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.} 
+
+\action{BAND 12}{12}{B}
+{Change band of the active receiver to the 12m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 1240}{1240}{B}
+{Change band of the active receiver to the 1240 MHz (23 cm) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 144}{144}{B}
+{Change band of the active receiver to the 144 MHz (2m) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 15}{15}{B}
+{Change band of the active receiver to the 15m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 160}{160}{B}
+{Change band of the active receiver to the 160m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 17}{17}{B}
+{Change band of the active receiver to the 15m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 20}{20}{B}
+{Change band of the active receiver to the 15m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 220}{220}{B}
+{Change band of the active receiver to the 220 MHz (1.25 m) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 2300}{2300}{B}
+{Change band of the active receiver to the 2300MHz (13 cm) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 30}{30}{B}
+{Change band of the active receiver to the 30m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 3400}{3400}{B}
+{Change band of the active receiver to the 3400 Mhz (9 cm) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 40}{40}{B}
+{Change band of the active receiver to the 40m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 430}{430}{B}
+{Change band of the active receiver to the 430 MHz (70 cm) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 6}{6}{B}
+{Change band of the active receiver to the 6m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 60}{60}{B}
+{Change band of the active receiver to the 60m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 70}{70}{B}
+{Change band of the active receiver to the 70 MHz (4m)  band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 80}{80}{B}
+{Change band of the active receiver to the 80m band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND 902}{902}{B}
+{Change band of the active receiver to the 902 MHz (33 cm) band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND AIR}{AIR}{B}
+{Change band of the active receiver to the 108 MHz band, used for aircraft communication. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.} 
+
+\action{BAND GEN}{GEN}{B}
+{Change band of the active receiver to the current bandstack entry of the "general" band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BAND -}{BND-}{B}
+{Change band of the active receiver to the next lower band in the list of bands. If already at the lowest band, switch to
+the highest band (including transverter bands which have been defined) whose frequency is with the radio's frequency range.}
+
+\action{BAND +}{BND+}{B}
+{Change band of the active receiver to the next higher band in the list of bands (including transverter bands that have been
+defined). If already at the highest band, switch to
+the lowest band whose frequency is with the radio's frequency range.}
+
+\action{BAND WWV}{WWV}{B}
+{Change band of the active receiver to the current bandstack entry of the WWV band. If already on that band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
+of the radio.}
+
+\action{BANDSTACK -}{BSTK-}{B}
+{Cylcle backward through the bandstack entries of the active receiver.}
+
+\action{BANDSTACK +}{BSTK+}{B}
+{Cylcle forward through the bandstack entries of the active receiver.}
+
+\action{BAND MENU}{BAND}{B}
+{Open the \texttt{BAND} menu.}
+
+\action{BANDSTACK MENU}{BSTK}{B}
+{Open the \texttt{BANDSTACK} menu.}
+
+\action{COMP ON/OFF}{COMP}{B}
+{Toggle the state (on/off) of the compressor used in the TX audio input.}
+
+\action{COMPRESSION}{COMPVAL}{PE}
+{Change the value of the compressor (0-20 dB) used in the TX audio input. The compressor is automaticall switched on (off) if
+the "new" value of the compressor is larger then  (equal to) zero.}
+
+\action{CTUN}{CTUN}{B}
+{Toggle the state (on/off) of the CTUN state of the active receiver. CTUN stands for "click to tune". In CTUN mode, you can move
+the RX frequency over the whole spectrum scope, whose center then remains at a fixed frequency.}
+
+\action{CW FREQUENCY}{CWFREQ}{PE}
+{Change the CW side tone frequency in the range 300-1000 Hz. This also changes the BFO frequency upon receive.}
+
+\action{CW LEFT}{CWL}{B}
+{This action indicates the closure/opening of the left paddle of a CW key. It is usually assigned to a GPIO line or a MIDI
+controller to which a Morse paddle is attached, and works with the iambic keyer that is built into piHPSDR. This keyer
+is only active if CW is \textit{not} handled in the radio (see CW menu).}
+
+\action{CW RIGHT}{CWR}{B}
+{This action indicates the closure/opening of the right paddle of a CW key. It is usually assigned to a GPIO line or a MIDI
+controller to which a Morse paddle is attached, and works with the iambic keyer that is built into piHPSDR. This keyer
+is only active if CW is \textit{not} handled in the radio (see CW menu).}
+
+\action{CW SPEED}{CWSPD}{PE}
+{Change the CW side tone frequency in the range 1-60 wpm. This affect the built-in iambic keyer or the keyer inside the radio,
+depending on whether CW is handled in the radio or not (see CW menu).}
+
+\action{CW Key (keyer)}{CWKy}{B}{Straith key key-down or key-up event. Usually assigned to a GPIO line of  MIDI controller to
+which a straight key or an external keyer is attached. Note that this action does not automatically switch to TX, so it must
+be used together with either manual RX/TX switching, or with the "\texttt{PTT (CW Keyer)}" action.}
+
+\action{PTT (keyer)}{CWKyPTT}{B}{This is the PTT button. Unlike MOX, which toggles the PTT status, a button press means "PTT on" and
+a button release means "PTT off". This action is usually connected to a GPIO line or a MIDI controller, which then either connect
+to the PTT button of a microphone or the PTT output of an external CW keyer.}
+
+\action{DIV ON/OFF}{DIVT}{B}{Toggles (enabled/disabled) DIVERSITY reception.}
+
+\action{DIV GAIN}{DIVG}{E}{Adjust DIVERSITY gain. One tick of the encoder increments of decrements the gain by an amount of 0.5}
+
+\action{DIV GAIN COARSE}{DIVGC}{E}{Adjust DIVERSITY gain (coarse adjustment).  One tick of the encoder increments of decrements the gain by an amount of 2.5}
+
+\action{DIV GAIN FINE}{DIVGF}{E}{Adjust DIVERSITY gain (fine adjustment).  One tick of the encoder increments of decrements the gain by an amount of 0.1.
+Since adjusting the DIVERSITY gain (or phase) is sometimes difficult, assigning one encoder to a coarse and another encoder to a fine adjustment may
+help in locating the ,,sweet spot''.}
+
+\action{DIV PHASE}{DIVP}{E}{Adjust DIVERSITY phase (fine adjustment). One tick of the encoder increments of decrements the gain by an amount of 0.5}
+
+\action{DIV PHASE COARSE}{DIVPC}{E}{Adjust DIVERSITY gain (coarse adjustment). One tick of the encoder increments of decrements the gain by an amount of 2.5}
+
+\action{DIV PHASE FINE}{DIVPF}{E}{Adjust DIVERSITY gain (coarse adjustment). One tick of the encoder increments of decrements the gain by an amount of 20.1}
+
+\action{DIV MENU}{DIV}{B}{Open the DIVERSITY menu.}
+
+\action{DUPLEX}{DUP}{B}{Toggle (on/off) DUPLEX status. IN the DUPLEX mode, the receivers continue to work during TX, and the RX panels are not
+removed during TX. Instead, a separate TX window opens during transmitting. Generally, DUPLEX only make sense when using different and well
+decoupled RX and TX antennas.}
+
+\action{FILTER -}{FL-}{B}{Cycle forward (!) through the list of filters for the current mode of the active receiver. Normally, this means switching
+to a narrower filter (hence the name \texttt{FILTER -}). When reaching the last filter in the list, further cycling switches to the first
+(widest) filter.}
+
+ \action{FILTER +}{FL+}{B}{Cycle backward (!) through the list of filters for the current mode of the active receiver. Normally, this means switching
+to a wider filter (hence the name \texttt{FILTER +}). When reaching the first filter in the list, further cycling switches to the last
+filter which is the variable \texttt{Var2} filter.}
+
+\action{FILTER CUT LOW}{FCUTL}{E}{Adjust the low-cut of the current filter. Note that the notion of ,,low'' edge of the filter refers to
+audio frequencies for the single side band modes LSB, CWL, DIGL. This action is a no-op unless the current filter is one of the two variable filters
+ \texttt{Var1} or \texttt{Var2}.}
+
+\action{FILTER CUT HIGH}{FCUTL}{E}{Adjust the high-cut of the current filter. Note that the notion of ,,high'' edge of the filter refers to
+audio frequencies for the single side band modes LSB, CWL, DIGL. This action is a no-op unless the current filter is one of the two variable filters
+ \texttt{Var1} or \texttt{Var2}.}
+ 
+ \action{FILTER CUT DEFAULT}{FCUTDEF}{B}{Reset the low and high cut of the current filter to the default values. This action is a no-op unless the current filter is one of the two variable filters
+ \texttt{Var1} or \texttt{Var2}.}
 \end{document}
