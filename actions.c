@@ -60,6 +60,7 @@
 ACTION_TABLE ActionTable[] = {
   {NO_ACTION,           "NONE",                 "NONE",         TYPE_NONE},
   {A_SWAP_B,            "A<>B",                 "A<>B",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {B_TO_A,              "A<B",                  "A<B",          MIDI_KEY   | CONTROLLER_SWITCH},
   {A_TO_B,              "A>B",                  "A>B",          MIDI_KEY   | CONTROLLER_SWITCH},
   {AF_GAIN,             "AF GAIN",              "AFGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {AF_GAIN_RX1,         "AF GAIN\nRX1",         "AFGAIN1",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -71,7 +72,6 @@ ACTION_TABLE ActionTable[] = {
   {MENU_AGC,            "AGC\nMENU",            "AGC",          MIDI_KEY   | CONTROLLER_SWITCH},
   {ANF,                 "ANF",                  "ANF",          MIDI_KEY   | CONTROLLER_SWITCH},
   {ATTENUATION,         "ATTEN",                "ATTEN",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {B_TO_A,              "A<B",                  "A<B",          MIDI_KEY   | CONTROLLER_SWITCH},
   {BAND_10,             "BAND 10",              "10",           MIDI_KEY   | CONTROLLER_SWITCH},
   {BAND_12,             "BAND 12",              "12",           MIDI_KEY   | CONTROLLER_SWITCH},
   {BAND_1240,           "BAND 1240",            "1240",         MIDI_KEY   | CONTROLLER_SWITCH},
@@ -108,8 +108,6 @@ ACTION_TABLE ActionTable[] = {
   {CW_RIGHT,            "CW RIGHT",             "CWR",          MIDI_KEY   | CONTROLLER_SWITCH},
   {CW_SPEED,            "CW SPEED",             "CWSPD",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {CW_KEYER_KEYDOWN,    "CW Key\n(keyer)",      "CWKy",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {CW_KEYER_SPEED,      "CW Speed\n(keyer)",    "CWKySpd",      MIDI_KNOB                     },
-  {CW_KEYER_SIDETONE,   "CW pitch\n(keyer)",    "CWKyPtch",     MIDI_KNOB                     },
   {CW_KEYER_PTT,        "PTT\n(CW keyer)",      "CWKyPTT",      MIDI_KEY   | CONTROLLER_SWITCH},
   {DIV,                 "DIV ON/OFF",           "DIVT",         MIDI_KEY   | CONTROLLER_SWITCH},
   {DIV_GAIN,            "DIV GAIN",             "DIVG",         MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -122,8 +120,8 @@ ACTION_TABLE ActionTable[] = {
   {DUPLEX,              "DUPLEX",               "DUP",          MIDI_KEY   | CONTROLLER_SWITCH},
   {FILTER_MINUS,        "FILTER -",             "FL-",          MIDI_KEY   | CONTROLLER_SWITCH},
   {FILTER_PLUS,         "FILTER +",             "FL+",          MIDI_KEY   | CONTROLLER_SWITCH},
-  {FILTER_CUT_LOW,      "FILTER CUT\nLOW",      "FCUTL",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {FILTER_CUT_HIGH,     "FILTER CUT\nHIGH",     "FCUTH",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
+  {FILTER_CUT_LOW,      "FILTER CUT\nLOW",      "FCUTL",        MIDI_WHEEL | CONTROLLER_ENCODER},
+  {FILTER_CUT_HIGH,     "FILTER CUT\nHIGH",     "FCUTH",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {FILTER_CUT_DEFAULT,  "FILTER CUT\nDEFAULT",  "FCUTDEF",      MIDI_KEY   | CONTROLLER_SWITCH},
   {MENU_FILTER,         "FILT\nMENU",           "FILT",         MIDI_KEY   | CONTROLLER_SWITCH},
   {MENU_FREQUENCY,      "FREQ\nMENU",           "FREQ",         MIDI_KEY   | CONTROLLER_SWITCH},
@@ -1545,24 +1543,6 @@ int process_action(void *data) {
 
     break;
 
-  case CW_KEYER_SPEED:
-    if (a->mode == ABSOLUTE) {
-      //
-      // The MIDI message contains the speed as a value between 1 and 127,
-      // however the range 0-127 is internally converted to 0-100 upstream
-      //
-      cw_keyer_speed = (127 * a->val + 50) / 100;
-
-      if (cw_keyer_speed <  1) { cw_keyer_speed = 1; }
-
-      if (cw_keyer_speed > 99) { cw_keyer_speed = 99; }
-
-      keyer_update();
-      g_idle_add(ext_vfo_update, NULL);
-    }
-
-    break;
-
   case CW_KEYER_PTT:
 
     //
@@ -1597,21 +1577,6 @@ int process_action(void *data) {
     default:
       // should not happen
       break;
-    }
-
-    break;
-
-  case CW_KEYER_SIDETONE:
-    if (a->mode == ABSOLUTE) {
-      //
-      // The MIDI keyer messages contains the frequency (in multiples of 10 Hz)
-      // as a value between 0 and 127 (thus encoding frequencies from 0 to 1270 Hz).
-      // however the range 0-127 is internally converted to 0-100 upstream
-      //
-      cw_keyer_sidetone_frequency = 10 * ((127 * a->val + 50) / 100);
-      receiver_filter_changed(active_receiver);
-      // we may omit the P2 high-prio packet since this is sent out at regular intervals
-      g_idle_add(ext_vfo_update, NULL);
     }
 
     break;
