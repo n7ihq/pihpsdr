@@ -154,7 +154,17 @@ void reconfigure_transmitter(TRANSMITTER *tx, int width, int height) {
     t_print("reconfigure_transmitter: width=%d height=%d\n", width, height);
     tx->width = width;
     tx->height = height;
+    gtk_widget_set_size_request(tx->panel, width, height);
     int ratio = tx->iq_output_rate / tx->mic_sample_rate;
+    //
+    // Upon calling, width either equals display_width (non-duplex) and
+    // the *shown* TX spectrum is 24 kHz wide, or width equals 1/4 display_width (duplex)
+    // and the *shown* TX spectrum is 6 kHz wide. In both cases, display_width pixels
+    // correspond to 24 kHz, while the width of the whole spectrum is TXIQ. 
+    // The mic sample rate is fixed to 48k , so ratio is TXIQ/24k.
+    // The value of tx->pixels corresponds to the *full* TX spectrum in the
+    // target resolution.
+    //
     tx->pixels = display_width * ratio * 2;
     g_free(tx->pixel_samples);
     tx->pixel_samples = g_new(float, tx->pixels);
