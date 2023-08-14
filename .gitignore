@@ -1,5 +1,9 @@
 GNUmakefile
+*.aux
+*.log
+*.toc
 *.o
+pihpsdr
 pihpsdr.app
 hpsdrsim
 wdspWisdom00
