@@ -938,7 +938,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   // with that of the first  receiver.
   //
   if (protocol == ORIGINAL_PROTOCOL && id == 1) {
-    rx->sample_rate = receiver[0].sample_rate;
+    rx->sample_rate = receiver[0]->sample_rate;
   }
   // allocate buffers
   rx->iq_input_buffer = g_new(double, 2 * rx->buffer_size);
