@@ -487,7 +487,7 @@ void new_menu() {
     col=0;
     //
     // First Column: Menus related to the Radio in general.
-    //               Radio/Screen/Display/XVTR/Saturn/Server
+    //               Radio/Screen/Display/Meter/XVTR
     //
     GtkWidget *radio_b = gtk_button_new_with_label("Radio");
     g_signal_connect (radio_b, "button-press-event", G_CALLBACK(radio_cb), NULL);
@@ -502,6 +502,11 @@ void new_menu() {
     GtkWidget *display_b = gtk_button_new_with_label("Display");
     g_signal_connect (display_b, "button-press-event", G_CALLBACK(display_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), display_b, col, row, 1, 1);
+    row++;
+
+    GtkWidget *meter_b = gtk_button_new_with_label("Meter");
+    g_signal_connect (meter_b, "button-press-event", G_CALLBACK(meter_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), meter_b, col, row, 1, 1);
     row++;
 
     GtkWidget *xvtr_b = gtk_button_new_with_label("XVTR");
@@ -640,11 +645,6 @@ void new_menu() {
     GtkWidget *equalizer_b = gtk_button_new_with_label("Equalizer");
     g_signal_connect (equalizer_b, "button-press-event", G_CALLBACK(equalizer_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), equalizer_b, col, row, 1, 1);
-    row++;
-
-    GtkWidget *meter_b = gtk_button_new_with_label("Meter");
-    g_signal_connect (meter_b, "button-press-event", G_CALLBACK(meter_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), meter_b, col, row, 1, 1);
     row++;
 
     GtkWidget *ant_b = gtk_button_new_with_label("Ant");
