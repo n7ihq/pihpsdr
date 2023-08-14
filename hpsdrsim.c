@@ -366,14 +366,14 @@ int main(int argc, char *argv[]) {
   case   NDEV_ORION2:
     printf("DEVICE is ORION MkII\n");
     c1 = 5.0;
-    c2 = 0.108;
+    c2 = 0.12;
     TXDAC = 4;
     break;
 
   case   NDEV_SATURN:
     printf("DEVICE is SATURN/G2\n");
     c1 = 5.0;
-    c2 = 0.108;
+    c2 = 0.12;
     TXDAC = 4;
     break;
 
@@ -1464,7 +1464,7 @@ void *handler_ep6(void *arg) {
         }
 
         // AIN1: Forward Power
-        j = (int) ((4095.0 / c1) * sqrt(100.0 * txlevel * c2));
+        j = (int) ((4095.0 / c1) * sqrt(500.0 * txlevel * c2));
         *(pointer + 6) = (j >> 8) & 0xFF;
         *(pointer + 7) = (j     ) & 0xFF;
         header_offset = 16;

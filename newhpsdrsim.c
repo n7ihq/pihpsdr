@@ -1290,8 +1290,8 @@ void *tx_thread(void * data) {
       //      but somehow I must multiply the samples to get the correct
       //      strength
       //
-      di *= 1.118;
-      dq *= 1.118;
+      di *= 1.117;
+      dq *= 1.117;
       //
       //      put TX samples into ring buffer
       //
@@ -1306,6 +1306,10 @@ void *tx_thread(void * data) {
       sum += (di * di + dq * dq);
     }
 
+    //
+    // For a full-amplitude signal (e.g. TUNE), sum is 240
+    // and thus txlevel = txdrv_dbl^2
+    //
     txlevel = sum * txdrv_dbl * txdrv_dbl * 0.0041667;
   }
 
@@ -1362,7 +1366,7 @@ void *send_highprio_thread(void *data) {
     *p++ = 0;
     *p++ = txdrive;
     p += 6;
-    rc = (int) ((4095.0 / c1) * sqrt(100.0 * txlevel * c2));
+    rc = (int) ((4095.0 / c1) * sqrt(500.0 * txlevel * c2));
     *p++ = (rc >> 8) & 0xFF;
     *p++ = (rc     ) & 0xFF;
     buffer[49] = 63; // about 13 volts supply
