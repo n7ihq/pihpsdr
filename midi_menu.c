@@ -607,16 +607,6 @@ void midi_menu(GtkWidget *parent) {
   GtkCellRenderer *renderer;
   GtkWidget *lbl;
   //
-  // Debug code. This will produce no output if the ActionTable is sorted correctly.
-  //             If the warning appears, correct the order of actions in actions.h
-  //
-  for (int i=0; i<ACTIONS; i++) {
-    if (i != ActionTable[i].action) {
-      t_print("WARNING: action table messed up\n");
-      t_print("WARNING: Position %d Action=%d str=%s\n", i, ActionTable[i].action, ActionTable[i].button_str);
-    }
-  }
-  //
   // MIDI stays in "configure" mode until this menu is closed
   //
   configure_midi_device(TRUE);

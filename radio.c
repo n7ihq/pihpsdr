@@ -889,6 +889,22 @@ static void create_visual() {
 
 void start_radio() {
   int i;
+
+  //
+  // Debug code. Placed here at the start of the program. piHPSDR  implicitly assumes
+  //             that the entires in the action table (actions.c) are sorted by their
+  //             action enum values (actions.h).
+  //             This will produce no output if the ActionTable is sorted correctly.
+  //             If the warning appears, correct the order of actions in actions.h
+  //             and re-compile.
+  //
+  for (i=0; i<ACTIONS; i++) {
+    if (i != ActionTable[i].action) {
+      t_print("WARNING: action table messed up\n");
+      t_print("WARNING: Position %d Action=%d str=%s\n", i, ActionTable[i].action, ActionTable[i].button_str);
+    }
+  }
+
   //t_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_WATCH));
   //
