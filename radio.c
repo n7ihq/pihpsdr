@@ -2547,12 +2547,6 @@ void radioRestoreState() {
   if (filter_board == N2ADR) {
     n2adr_oc_settings(); // Apply default OC settings for N2ADR board
   }
-  //
-  // 3.) in the old protocol, both receivers must have the same sample rate
-  //
-  if ((protocol == ORIGINAL_PROTOCOL) && (RECEIVERS == 2) && (receiver[0]->sample_rate != receiver[1]->sample_rate)) {
-    receiver[1]->sample_rate = receiver[0]->sample_rate;
-  }
 
   g_mutex_unlock(&property_mutex);
 }

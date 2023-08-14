@@ -933,6 +933,13 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->zoom = 1;
   rx->pan = 0;
   receiverRestoreState(rx);
+  //
+  // If this is the second receiver in P1, over-write sample rate
+  // with that of the first  receiver.
+  //
+  if (protocol == ORIGINAL_PROTOCOL && id == 1) {
+    rx->sample_rate = receiver[0].sample_rate;
+  }
   // allocate buffers
   rx->iq_input_buffer = g_new(double, 2 * rx->buffer_size);
   rx->pixels = pixels * rx->zoom;
