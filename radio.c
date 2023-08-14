@@ -708,13 +708,6 @@ static void create_visual() {
     y += rx_height / RECEIVERS;
   }
 
-  //
-  // Sanity check: in old protocol, all receivers must have the same sample rate
-  //
-  if ((protocol == ORIGINAL_PROTOCOL) && (RECEIVERS == 2) && (receiver[0]->sample_rate != receiver[1]->sample_rate)) {
-    receiver[1]->sample_rate = receiver[0]->sample_rate;
-  }
-
   active_receiver = receiver[0];
   //
   // This is to detect illegal accesses to the PS receivers
@@ -1452,13 +1445,6 @@ void start_radio() {
 
   receivers = RECEIVERS;
   radioRestoreState();
-
-  //
-  // Sanity Check: enable diversity only if there are two RX and two ADCs
-  //
-  if (RECEIVERS < 2 || n_adc < 2) {
-    diversity_enabled = 0;
-  }
 
   radio_change_region(region);
   create_visual();
@@ -2385,6 +2371,10 @@ void radioRestoreState() {
   // TODO: I think some further options related to the GUI
   // have to be moved up here for Client-Server operation
   //
+  // We want to do some internal consistency checking, most of which is done at
+  // the very end of this function. However, if the radio is remote we will return
+  // from this function in due course so have to check some things here.
+  //
   // Sanity check part 1:
   //
   if (full_screen || display_width  > screen_width  ) { display_width  = screen_width; }
@@ -2542,6 +2532,28 @@ void radioRestoreState() {
 #ifdef MIDI
   midiRestoreState();
 #endif
+
+  //
+  // Sanity check part 2:
+  //
+  // 1.) If the radio does not have 2 ADCs, there is no DIVERSITY
+  //
+  if (RECEIVERS < 2 || n_adc < 2) {
+    diversity_enabled = 0;
+  }
+  //
+  // 2.) Selecting the N2ADR filter board overrides most OC settings
+  //
+  if (filter_board == N2ADR) {
+    n2adr_oc_settings(); // Apply default OC settings for N2ADR board
+  }
+  //
+  // 3.) in the old protocol, both receivers must have the same sample rate
+  //
+  if ((protocol == ORIGINAL_PROTOCOL) && (RECEIVERS == 2) && (receiver[0]->sample_rate != receiver[1]->sample_rate)) {
+    receiver[1]->sample_rate = receiver[0]->sample_rate;
+  }
+
   g_mutex_unlock(&property_mutex);
 }
 
