@@ -1,4 +1,5 @@
 \documentclass[12pt]{book}
+\usepackage{appendix}
 \usepackage{graphicx}
 \usepackage{mathtools}
 \usepackage{xcolor}
@@ -8,6 +9,7 @@
 \parindent 0pt
 \parskip 6pt
 \begin{document}
+\frontmatter
 \title{
 piHPSDR User's Manual
 }
@@ -16,7 +18,20 @@ Christoph van W\"ullen, DL1YCF
 }
 %
 \maketitle
+\textbf{Copyright Notice:}
+
+Copyright (C) 2023 Christoph van W\"ullen, DL1YCF.
+
+This work is licensed under
+the Creative Commons licence CC BY-SA, version 4 or later, so it can be freely distributed.
+ This license also allows reusers to distribute, modify and build upon the material in any medium or format,
+as long as attribution is given to the creator. The license allows for commercial use.
+If you modify or build upon the material, you must license the modified material under identical terms.
+
+
+
 \tableofcontents
+\mainmatter
 \chapter{Introduction}
 piHPSDR is a program that can operate with software defined radios (SDRs). As a graphical user interface,
 it uses the GTK-3 toolkit, while the actual signal processing is done by Warren Pratt's WDSP library. Thus,
@@ -177,23 +192,152 @@ bar which by default is a digital S-meter. At this point, you have started piHPS
 
 \chapter{Main window layout}
 
+\section{One or two receivers}
+At the end of the previous chapter, there were two receiver panels in the
+piHPSDR window, stacked vertically, and both including a spectrum scope
+(the green-coloured noise floor) and a waterfall. The waterfall area
+is completely black in the above picture since there was no RF signal.
+piHPSDR can be switched between having one or two receivers in the
+\texttt{Radio} menu. If there are two receivers (called RX1 and RX2),
+ one of the two is the \textit{active receiver}. If you look closely
+ at the above picture, you will note that the spectrum scope of
+ the lower (RX2) panel is shaded, while it is in bright colour for RX1.
+ This indicates that RX1 is currently the active receiver. By simply
+ clicking into the panel of the other (inactive) receiver, either with
+ a mouse or on a touch screen, the formely inactive receiver becomes
+ active.
+ 
+ Many conventional rigs with two independent receivers discriminate
+ between the "main" and the "sub" receiver. It is important that
+ this is \textit{not} the case for piHPSDR. Both  receivers are
+ largely equivalent. For example, if you start transmitting in
+ normal (non-split) mode, the TX frequency matches the frequency
+ of the active receiver, no matter whether this is RX1 or RX2.
+ Likewise, in split mode, the TX frequency matches the frequency
+ of the non-active receiver. Most of the receiver-specific controls,
+ for example adjusting the AF volume or the AGC gain, refer to the
+ current active receiver. If piHPSDR runs with two receivers,
+ RX1 is always controlled by VFO-A while RX2 is controlled by VFO-B.
+ The VFO settings not only include the frequency but also the
+ current mode (e.g. LSB or CWU), the filter setting, the band and
+ bandstack setting, whether RIT is enabled or not, and the RIT
+ offset. So changing the RIT value only changes it for the active
+ receiver. If you want  to change the RIT value for RX2 while RX1 is
+ the active receiver, you have to make RX2 active, change the RIT
+ value and then make RX1 active again.
+ 
+ RX1 and RX2 are largely independent. They can receive on different
+ bands. They can receive from different antennas provided the radio
+ has two RF frontend with two analog-to-digital converter4s (ADC,
+ as most modern radios do. In this case, one usually
+ assigns the first ADC (ADC0) to RX1 and the second ADC (ADC1) to
+ RX2. This can be done in the \texttt{RX} menu.
+ 
+ By default, if there are two receivers, they are vertically stacked,
+ with RX1 in the upper part and RX2 in the lower part of the display.
+ This can be changed in the \texttt{Screen} menu to horizontal stacking,
+ where RX1 is  in the left half and RX2 in the right half of  the 
+ display. Changing the stacking trades vertical against horizontal
+ resolution, of course.
+ 
+ The following picture shows, for demonstration purposed, a piHPSDR
+ window with a single receiver. 
+ 
 \begin{center}
 \includegraphics[width=12cm]{SingleReceiver.png}
 \end{center}
-
+ 
+ The RX panel only contains a
+ spectrum scope with a white line and no waterfall (this can be changed in the
+ \texttt{Display} menu. In addition, you see the toolbar
+ with eight buttons at the lower edge of the window, and above
+ it an area with sliders. Showing the sliders is the default
+ (and necessary) if there is no GPIO or MIDI controller attached,
+ since then these sliders are the only way to change, for example,
+ the AF volume. If there is only one receiver, it is controlled
+ by VFO-A. VFO-B then actually controls nothing (except the TX
+ frequency in split mode), but the data stored in VFO-B can
+ be quickly used, for example by copying VFO-B to VFO-A (the
+ \texttt{A<B} command), or by swapping the two VFOs (the
+ \texttt{A<>B} command).
+  
 \section{Spectrum scope options}
+
+You have already seen two different spectrum scopes: in the first
+picture, the  spectrum was a filled green area, while in the last
+picture, there only was a white line (this is similar to what you
+would see on a spectrum analyzer). This can be adjusted to your
+personal preference in the \texttt{Display} menu (see below). There
+are two options which you can enable or disable, such that there
+are four different outcomes. The first option is the ,,Filled'' option
+which discriminates between a line spectrum and a spectrum which is
+filled below the line. In the picture below, the first and third
+example have no filling, while the second and fourth spectrum
+are filled:
 \begin{center}
 \includegraphics[width=12cm]{ScopeFilling.png}
 \end{center}
+Then there is the ,,Gradient'' option. Without this option, the
+spectrum is displayed in white colour. With the gradient option,
+the colour changes from green over yellow towards red depending
+on the signal strength (red colour is reached for S9). The above
+picture demonstrates the four possible combinations, and in
+the \texttt{Display} menu, you can make your choice. This setting
+refers to both receivers when there are two. Note that the TX
+spectrum can be a filled one or a line spectrum, but that the
+gradient option does not apply.
+
+\section{Zoom and Pan}
+
+The width of the RX spectrum equals the sample rate
+of the receiver. This means that if you use, say,
+a sample rate of 96 kHz for a receiver, its spectrum
+will be 96 kHz wide, which may encompass a larger part
+of the spectrum than you are interested in. As a drawback,
+the part which is relevant to you may look a little bit
+compressed. This is where the \texttt{Zoom} function
+comes in. The Zoom value can adopt integral values between
+1 (no zoom) and 8. In the latter case, only 1/8 of the
+overall spectrum is displayed on the screen. In the
+picture below, you see that the RX scope is only 12 kHz
+wide (which is 1/8 of the RX sample rate, 96 kHz in our
+example). Note that what is displayed is in full resolution.
+Internally, a spectrum with 8 times the number of pixels
+of the screen width is created and only a part of it is
+displayed. The Zoom value can be changed using the Zoom
+slider (at the left edge below the RX panel).
 
 \begin{center}
 \includegraphics[width=12cm]{ZoomPan.png}
 \end{center}
+
+When using a Zoom value larger than one, this means that
+a spectrum with more pixels than the actual screen width
+is produced. One can select which part of that area
+is displayed on the screen with the \texttt{Pan} slider
+(below the RX panel at the right side). Normally (Zoom=1),
+the VFO dial frequency is exactly in the middle of the
+RX scope, and marked with a thin red line. On the picture
+above, the dial frequency (14.100 MHz) is found in the RX
+panel close to the left edge, and this has been done
+by moving the \texttt{Pan} slider.
+
 \section{The \texttt{Hide} button}
+
+On small screens, space is scarce. This in in particular true
+for the vertical space if one used two RX panels and both
+with a spectrum scope and a waterfall. I this case, it may be
+hard to actually watch the signals if the screen is small.
+This is where the \texttt{Hide} button comes in. Clicking on
+this button ,,hides'' the toolbar and slider area:
 
 \begin{center}
 \includegraphics[width=12cm]{Hidden.png}
 \end{center}
+
+The text on the button then changes to \texttt{Show}, and
+clicking this button again will then return to the
+previous display.
 
 \section{Window areas}
 
@@ -389,7 +533,7 @@ you see the following:
 The six lines denoted \texttt{F0} through \texttt{F5} indicate the six different sets. If you
 look closely, you will discover that the set \texttt{F1} is the one that is currently active,
 since the labels in this line exactly match the labels in the toolbar. In this menu, the
-possible actions (that can be bound to a button) are written with the short text (see Chapter \ref{ch:actions}),
+possible actions (that can be bound to a button) are written with the short text (see Appendix A),
 since this is the text that is printed on the toolbar buttons. If one now clicks (just an example)
 the \texttt{CTUN} button in the line \texttt{F1}, an ,,action dialog'' pops up that looks as follows:
 
@@ -408,7 +552,7 @@ in the action dialog, such that it gets high-lighted:
 
 If one now closes the action dialog by clicking the \texttt{OK} button, the third button in the \texttt{F1}
 line of the toolbar menu has changed, it now gives the short text (\texttt{20}) of the action, which will
-switch the active receiver to the 20m band (see the explanation of all the actions in chapter \ref{ch:actions}).
+switch the active receiver to the 20m band (see the explanation of all the actions in Appendix A).
 
 \begin{center}
 \includegraphics[width=12cm]{ToolbarMenu4.png}
@@ -452,8 +596,8 @@ in the MIDI, the Encoders, and the Switches menus.
 \includegraphics[width=12cm]{SwitchesMenu.png}
 \end{center}
 
+\appendix
 \chapter{List of piHPSDR ,,Actions''}
-\label{ch:actions}
 
 In this chapter, we give a list of ,,actions'' implemented in the piHPSDR program. These actions can be assigned to
 toolbar buttons on the screen, or pushbuttons/encoders of a GPIO-connected or MIDI controller. Not all actions can
