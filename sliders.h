@@ -22,12 +22,7 @@
 // include these since we are using RECEIVER and TRANSMITTER
 #include "receiver.h"
 #include "transmitter.h"
-
-extern guint scale_timer;
-extern gint scale_status;
-extern gint scale_rx;
-extern GtkWidget *scale_dialog;
-int scale_timeout_cb(gpointer data);
+#include "actions.h"
 
 extern void att_type_changed(void);
 extern void update_c25_att(void);
@@ -42,6 +37,7 @@ extern void set_agc_gain(int rx, double value);
 extern void set_af_gain(int rx, double value);
 extern void set_rf_gain(int rx, double value);
 extern void set_mic_gain(double value);
+extern void set_linein_gain(double value);
 extern void set_drive(double drive);
 extern void set_filter_cut_low(int rx, int value);
 extern void set_filter_cut_high(int rx, int value);
@@ -57,5 +53,7 @@ extern void set_compression(const TRANSMITTER *tx);
 
 extern void show_diversity_gain(void);
 extern void show_diversity_phase(void);
+
+void show_popup_slider(enum ACTION action, int rx, double min, double max, double delta, double value, char *title);
 
 #endif
