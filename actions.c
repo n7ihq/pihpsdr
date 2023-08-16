@@ -209,7 +209,7 @@ ACTION_TABLE ActionTable[] = {
   {XIT_ENABLE,          "XIT\nON/OFF",          "XITT",         MIDI_KEY   | CONTROLLER_SWITCH},
   {XIT_MINUS,           "XIT -",                "XIT-",         MIDI_KEY   | CONTROLLER_SWITCH},
   {XIT_PLUS,            "XIT +",                "XIT+",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {ZOOM,                "ZOOM",                 "ZOOM",         MIDI_WHEEL | CONTROLLER_ENCODER},
+  {ZOOM,                "ZOOM",                 "ZOOM",         MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {ZOOM_MINUS,          "ZOOM -",               "ZOOM-",        MIDI_KEY   | CONTROLLER_SWITCH},
   {ZOOM_PLUS,           "ZOOM +",               "ZOOM+",        MIDI_KEY   | CONTROLLER_SWITCH},
   {ACTIONS,             "NONE",                 "NONE",         TYPE_NONE}
@@ -783,7 +783,11 @@ int process_action(void *data) {
     filter_width_changed(1, a->val);
     break;
 
-  //case LINEIN_GAIN:
+  case LINEIN_GAIN:
+    value = KnobOrWheel(a, linein_gain, 0.0, 31.0, 1.0);
+    set_linein_gain(value);
+    break;
+
   case LOCK:
     if (a->mode == PRESSED) {
 #ifdef CLIENT_SERVER
@@ -1059,19 +1063,19 @@ int process_action(void *data) {
     break;
 
   case PAN:
-    update_pan((double)a->val * 100);
+    set_pan(active_receiver->id,  active_receiver->pan + 100*a->val);
     break;
 
   case PAN_MINUS:
     if (a->mode == PRESSED) {
-      update_pan(-100.0);
+      set_pan(active_receiver->id,  active_receiver->pan - 100);
     }
 
     break;
 
   case PAN_PLUS:
     if (a->mode == PRESSED) {
-      update_pan(+100.0);
+      set_pan(active_receiver->id,  active_receiver->pan + 100);
     }
 
     break;
@@ -1198,29 +1202,11 @@ int process_action(void *data) {
     break;
 
   case RIT_STEP:
-    switch (a->mode) {
-    case PRESSED:
-      a->val = 1;
-
-    // fall through
-    case RELATIVE:
-      if (a->val > 0) {
-        rit_increment = 10 * rit_increment;
-      } else {
-        rit_increment = rit_increment / 10;
-      }
-
-      if (rit_increment < 1) { rit_increment = 100; }
-
+    if (a->mode == PRESSED) {
+      rit_increment = 10 * rit_increment;
       if (rit_increment > 100) { rit_increment = 1; }
-
-      break;
-
-    default:
-      // ignore other types
-      break;
     }
-
+    break;
     g_idle_add(ext_vfo_update, NULL);
     break;
 
@@ -1319,7 +1305,10 @@ int process_action(void *data) {
     if (can_transmit) {
       value = KnobOrWheel(a, (double) transmitter->tune_drive, 0.0, 100.0, 1.0);
       transmitter->tune_drive = (int) value;
+      transmitter->tune_use_drive = 1;
+      show_popup_slider(TUNE_DRIVE, 0, 0.0, 100.0, 1.0, value, "TUNE DRIVE");
     }
+    
 
     break;
 
@@ -1526,19 +1515,20 @@ int process_action(void *data) {
     break;
 
   case ZOOM:
-    update_zoom((double)a->val);
+    value = KnobOrWheel(a, active_receiver->zoom, 1.0, 8.0, 1.0);
+    set_zoom(active_receiver->id, (int)  value);
     break;
 
   case ZOOM_MINUS:
     if (a->mode == PRESSED) {
-      update_zoom(-1);
+      set_zoom(active_receiver->id, active_receiver->zoom - 1);
     }
 
     break;
 
   case ZOOM_PLUS:
     if (a->mode == PRESSED) {
-      update_zoom(+1);
+      set_zoom(active_receiver->id, active_receiver->zoom + 1);
     }
 
     break;

@@ -16,6 +16,9 @@
 *
 */
 
+#ifndef _ACTION_H_
+#define _ACTION_H_
+
 enum ACTION {
   NO_ACTION = 0,
   A_SWAP_B,
@@ -210,3 +213,4 @@ extern void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val)
 extern void Action2String(const int id, char *str);
 extern int  String2Action(const char *str);
 
+#endif
