@@ -30,7 +30,7 @@
 //
 char *css =
   "  @define-color TOGGLE_ON  rgb(100%,0%,0%);\n"
-  "  @define-color COLOR_ON   rgb(100%,100%,100%);\n"
+  "  @define-color POPUP      rgb(100%,33%,33%);\n"
   "  #small_button {\n"
   "    padding: 1px;\n"
   "    font-family: Sans;\n"
@@ -50,7 +50,15 @@ char *css =
   "    background-color: @TOGGLE_ON;\n"
   "    color: @COLOR_ON;\n"
   "    }\n"
-
+  "  #popup_scale slider {\n"
+  "     background: @POPUP;\n"
+  "    }\n"
+  "  #popup_scale trough {\n"
+  "     background: @POPUP;\n"
+  "    }\n"
+  "  #popup_scale value {\n"
+  "     color: @POPUP;\n"
+  "    }\n"
   ;
 
 void load_css() {

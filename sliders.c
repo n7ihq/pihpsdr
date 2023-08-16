@@ -119,6 +119,7 @@ void show_popup_slider(enum ACTION action, int rx, double min, double max, doubl
     scale_dialog = gtk_dialog_new_with_buttons(title, GTK_WINDOW(top_window), GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
     GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
     popup_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, min, max, delta);
+    gtk_widget_set_name(popup_scale, "popup_scale");
     gtk_widget_set_size_request (popup_scale, 400, 30);
     gtk_range_set_value (GTK_RANGE(popup_scale), value),
     gtk_widget_show(popup_scale);
