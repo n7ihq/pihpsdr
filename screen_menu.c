@@ -71,11 +71,6 @@ static void vfo_cb(GtkWidget *widget, gpointer data) {
   apply();
 }
 
-static void meter_cb(GtkWidget *widget, gpointer data) {
-  METER_WIDTH = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  apply();
-}
-
 static void width_cb(GtkWidget *widget, gpointer data) {
   display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
@@ -139,22 +134,6 @@ void screen_menu(GtkWidget *parent) {
 
   col = 0;
   label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Meter Width: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
-  gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
-  col++;
-  button = gtk_spin_button_new_with_range(100.0, 250.0, 25.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) METER_WIDTH);
-  gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
-  g_signal_connect(button, "value-changed", G_CALLBACK(meter_cb), NULL);
-  row++;
-  button = gtk_check_button_new_with_label("Stack receivers horizontally");
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
-  gtk_grid_attach(GTK_GRID(grid), button, col, row, 2, 1);
-  g_signal_connect(button, "toggled", G_CALLBACK(horizontal_cb), NULL);
-  row++;
-  col = 0;
-  label = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(label), "<b>Select VFO bar layout: </b>");
   gtk_widget_set_halign(label, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
@@ -175,6 +154,14 @@ void screen_menu(GtkWidget *parent) {
   // This combo-box spans three columns so the text may be really long
   gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
   g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
+
+  row++;
+  col = 0;
+  button = gtk_check_button_new_with_label("Stack receivers horizontally");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
+  gtk_grid_attach(GTK_GRID(grid), button, col, row, 2, 1);
+  g_signal_connect(button, "toggled", G_CALLBACK(horizontal_cb), NULL);
+
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

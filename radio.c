@@ -88,15 +88,16 @@
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
-int MENU_HEIGHT = 30;
-int MENU_WIDTH = 65;
-int VFO_HEIGHT = 60;
-int VFO_WIDTH = 530;
-int METER_HEIGHT = 60;
-int METER_WIDTH = 200;
-int ZOOMPAN_HEIGHT = 50;
-int SLIDERS_HEIGHT = 100;
-int TOOLBAR_HEIGHT = 30;
+int MENU_HEIGHT = 30;        // always set to VFO_HEIGHT/2
+int MENU_WIDTH = 65;         // nowhere changed
+int VFO_HEIGHT = 60;         // taken from the current VFO bar layout
+int VFO_WIDTH = 530;         // taken from the current VFO bar layout
+int METER_HEIGHT = 60;       // always set to  VFO_HEIGHT
+int METER_WIDTH = 200;       // nowhere changed
+int ZOOMPAN_HEIGHT = 50;     // nowhere changed
+int SLIDERS_HEIGHT = 100;    // nowhere changed
+int TOOLBAR_HEIGHT = 30;     // nowhere changed
+
 int rx_stack_horizontal = 0;
 
 gint controller = NO_CONTROLLER;
@@ -437,9 +438,9 @@ void reconfigure_screen() {
   VFO_HEIGHT = vfo_layout_list[vfo_layout].height;
   MENU_HEIGHT = VFO_HEIGHT / 2;
   METER_HEIGHT = VFO_HEIGHT;
-  t_print("%s: display = %dx%d, vfo height = %dx%d, meter width = %d\n",
-          __FUNCTION__,
-          display_width, display_height, VFO_WIDTH, VFO_HEIGHT, METER_WIDTH);
+  //t_print("%s: display = %dx%d, vfo height = %dx%d, meter width = %d\n",
+  //        __FUNCTION__,
+  //        display_width, display_height, VFO_WIDTH, VFO_HEIGHT, METER_WIDTH);
   //
   // Change sizes of main window, Hide and Menu buttons, meter, and vfo
   //
@@ -585,7 +586,8 @@ static gboolean save_cb(gpointer data) {
 #endif
 
 //
-// These variables are defined outside hideall_cb.
+// These variables are set in hideall_cb and read
+// in radioSaveState.
 // If the props file is written while "Hide"-ing,
 // these values are written instead of the current
 // hide/show status of the Zoom/Sliders/Toolbar area.
@@ -2362,7 +2364,6 @@ void radioRestoreState() {
   GetPropI0("display_toolbar",                               display_toolbar);
   GetPropI0("display_width",                                 display_width);
   GetPropI0("display_height",                                display_height);
-  GetPropI0("METER_WIDTH",                                   METER_WIDTH);
   GetPropI0("rx_stack_horizontal",                           rx_stack_horizontal);
   GetPropI0("vfo_layout",                                    vfo_layout);
   GetPropI0("optimize_touchscreen",                          optimize_for_touchscreen);
@@ -2591,7 +2592,6 @@ void radioSaveState() {
   SetPropI0("display_toolbar",                               hide_status ? old_tool : display_toolbar);
   SetPropI0("display_width",                                 display_width);
   SetPropI0("display_height",                                display_height);
-  SetPropI0("METER_WIDTH",                                   METER_WIDTH);
   SetPropI0("rx_stack_horizontal",                           rx_stack_horizontal);
   SetPropI0("vfo_layout",                                    vfo_layout);
   SetPropI0("optimize_touchscreen",                          optimize_for_touchscreen);
