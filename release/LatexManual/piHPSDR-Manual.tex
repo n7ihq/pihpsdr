@@ -16,8 +16,10 @@
 piHPSDR User's Manual
 }
 \author{
-Christoph van W\"ullen, DL1YCF
+Christoph van W\"ullen, DL1YCF \\
+email: \texttt{dl1ycf@darc.de}
 }
+
 %
 \maketitle
 \textbf{Copyright Notice:}
@@ -30,7 +32,22 @@ the Creative Commons licence CC BY-SA, version 4 or later, so it can be freely d
 as long as attribution is given to the creator. The license allows for commercial use.
 If you modify or build upon the material, you must license the modified material under identical terms.
 
+\bigskip
+\textbf{The author:}
 
+Christoph van W\"ullen (DL1YCF) has contributed a lot to piHPSDR in the last few years, this manual refers
+to the code in his github account
+
+\texttt{https://github.com/dl1ycf/pihpsdr}
+
+where the \LaTeX\   ,,source code'' of this manual, together with all figures in .png format, can be found
+in the \texttt{release/LatexManual} directory. At this moment this code has significant developed compared
+to the piHPSDR code in John Melton's master repository, but there is still hope that both versions can
+be merged in  the  future, although this  will  be hard  work.
+
+If you think you can improve the manual, you are welcome.
+Simply fork the above repository and make a pull request, or (this is the recommended way) write an
+email to the author: \texttt{dl1ycf@darc.de}
 
 \tableofcontents
 \mainmatter
@@ -448,6 +465,9 @@ hand, a mouse click in the panel of the active receiver changes
 the VFO frequency of that receiver to the value clicked on.
 This means, if you see a signal in the spectrum scope, click
 on that signal and your VFO will move (,,jump'') to that signal.
+Note the VFO frequency will be  rounded to the next multiple of
+the VFO step size when ,,jumping'' by a mouse  click or
+touch screen press.
 
 The second option to change the VFO frequency of the active receiver
 is to click (and hold) into its panel, then drag the mouse to the left
@@ -457,7 +477,11 @@ where the first click actually occured, only the difference
 in horizontal position between click and release is used. You must
 drag at least three pixels so there is clear discrimination between
 a ,,VFO jump'' (click then release) and a ,,VFO drag'' (click, drag,
-and release) operation.
+and release) operation. Finally, the VFO frequency of the active
+receiver can be changed by the scroll wheel of the mouse, if there
+is any. Using the scroll wheel lets the VFO frequency move in multiples
+of the VFO step size, while mouse dragging can also be used for
+finer tuning.
 
 Clicking into the VFO bar opens the \texttt{FREQ} (VFO) menu,
 for the VFO-A if clicked into the left half of the bar, and for
@@ -1351,11 +1375,137 @@ one of the few actions where a button release event is significant. When attachi
 a GPIO line for this purpose, take care of proper debouncine, since piHPSDR is not good at debouncing switches where both
 the press and release events are significant.}
 
+\action{RF GAIN}{RFGAIN}{PE}{Set the gain of the RF front end of the active receiver. Only effective for radios that have such a
+gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end instead. Small SDR radios
+using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have an RF gain control.}
 
+\action{RF GAIN RX1}{RFGAIN1}{PE}{Set the gain of the RF front end of RX1. Only effective for radios that have such a
+gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end instead. Small SDR radios
+using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have an RF gain control.}
 
+\action{RF GAIN RX2}{RFGAIN2}{PE}{Set the gain of the RF front end of RX2. Only effective for radios that have such a
+gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end instead. Small SDR radios
+using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have an RF gain control.}
 
+\action{RIT}{RIT}{E}{Change the RIT value of the active receiver in the range -9999 to 9999 Hz. If a zero value is set, RIT is
+automatically disabled, if a non-zero value ist set, RIT is enabled.}
 
+\action{RIT CLEAR}{RITCL}{B}{Set the RIT value of the active receiver to zero. As a side effect, RIT is disabled for the
+active receiver}
 
+\action{RIT ENABLE}{RITT}{B}{Toggle RIT (enabled/disabled) for the active receiver. Note the RIT value is not changed, so you can
+temporarily disable RIT, and then enable it with the same offset (RIT value) used before.}
+
+\action{RIT -}{RIT-}{B}{Decrement the RIT value of the active receiver by the RIT step size, in the range
+-9999 to 9999 Hz. If a value of zero
+is reached, RIT is automatically disabled, and if a nonzero value is reached, RIT is automatically enabled. 
+Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold RIT- (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+the RIT- button is released.}
+
+\action{RIT +}{RIT+}{B}{Increment the RIT value of the active receiver by the RIT step size, in the range
+-9999 to 9999 Hz. If a value of zero
+is reached, RIT is automatically disabled, and if a nonzero value is reached, RIT is automatically enabled. 
+Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold RIT+ (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+the RIT+ button is released.}
+
+\action{RIT RX1}{RIT1}{E}{Change the RIT value of RX1 in the range -9999 to 9999 Hz. If a zero value is set, RIT is
+automatically disabled, if a non-zero value ist set, RIT is enabled.}
+
+\action{RIT RX2}{RIT2}{E}{Change the RIT value of RX2 in the range -9999 to 9999 Hz. If a zero value is set, RIT is
+automatically disabled, if a non-zero value ist set, RIT is enabled.}
+
+\action{RIT STEP}{RITST}{B}{Cycle through the possible values (1 Hz, 10 Hz, 100 Hz) of the RIT step.}
+
+\action{RSAT}{RSAT}{B}{If the SAT mode is either Off or SAT, change it to RSAT. If the SAT mode  is RSAT, change it to Off. In RSAT mode
+all VFO frequency \textit{changes} applied to one of the two VFOs will be applied to the other VFO with the sign reversed.}
+
+\action{RSAT}{RSAT}{B}{If the SAT mode is either Off or RSAT, change it to SAT. If the SAT mode  is SAT, change it to Off. In SAT mode
+all VFO frequency \textit{changes} applied to one of the two VFOs will be applied to the other VFO as well.}
+
+\action{SNB}{SNB}{B}{Toggle (enable/diable) the spectral noise blanker for the active  receiver.}
+
+\action{SPLIT}{SPLIT}{B}{Toggle (on/off) the  split status of the radio.}
+
+\action{SQUELCH}{SQUELCH}{PE}{Change the squelch threshold value of the active receiver. Squelch is automatically enabled (disbled) if
+the resulting value  is non-zero (zero).} 
+
+\action{SQUELCH RX1}{SQUELCH1}{PE}{Change the squelch threshold value of RX1. Squelch is automatically enabled (disbled) if
+the resulting value  is non-zero (zero).} 
+
+\action{SQUELCH RX2}{SQUELCH2}{PE}{Change the squelch threshold value of RX2. Squelch is automatically enabled (disbled) if
+the resulting value  is non-zero (zero).} 
+
+\action{SWAP RX}{SWAPRX}{B}{Make the inactive receiver the active one. This action is only effective if piHPDSR is running two receivers.}
+
+\action{TUNE}{TUNE}{B}{Toggle (on/off) TUNE. If selected in the OC menu, an OC output will become active (low). This can then be used
+to start an external automatic tuner.}
+
+\action{TUNE DRV}{TUNDRV}{E}{Change the drive  level (0-100) used for TUNEing. This is equivalent to changing the "Tune drive level"
+spin button in the \texttt{TX} menu \textbf{and} to check the "Tune use drive" box.}
+
+\action{TUNE FULL}{TUNF}{B}{Set the "full tune" flag and clear the "memory tune" flag. If an OC output is assigned to the TUNE state,
+it will be cleared (go  high again)  2800 msec after starting TUNE (this  time can also be adjusted  in the OC menu).} 
+
+\action{TUNE FULL}{TUNF}{B}{Set the "memory tune" flag and clear the "full tune" flag. If an OC output is assigned to the TUNE state,
+it will be cleared (go  high again)  550 msec after starting TUNE (this  time can also be adjusted  in the OC menu).} 
+
+\action{TX DRIVE}{TXDRV}{PE}{Set the TX drive level (0-100).}
+
+\action{TWO TONE}{2TONE}{B}{Toggle (on/off) the two-tone state of the transmitter. If the two-tone state is engaged, the radio will go
+TX and emit a two-tone signal.}
+
+\action{VFO}{VFO}{E}{This is  the VFO frequency control of the active receiver.}
+
+\action{VFO A}{VFOA}{E}{This is  the VFO frequency control of VFO-A.}
+
+\action{VFO B}{VFOB}{E}{This is  the VFO frequency control of VFO-B.}
+
+\action{VOX ON/OFF}{VOX}{B}{Toggle (on/off) vox status. If vox is enabled, you can automatically key the transmitter
+by talking into the microphone, without the need to press a PTT button. See the \texttt{VOX} menu.}
+
+\action{VOX LEVEL}{VOX LEV}{E}{Change the VOX level threshold. If  you operate vox, and the radio does not go TX
+while talking into the  microphone, decrease the VOX threshold. If the radio goes TX simply because the neighbour's
+hound starts barking, increase the VOX threshold.}
+
+\action{WFALL HIGH}{WFALLH}{E}{Change the "high" level (-100 dBm ... 0 dBm) of the waterfalls. Signal levels between low and high are colour
+coded from black to yellow, while signals above "high" are yellow and signals below "low" are black. This value has
+no effect if the automatic waterfall coloring is chosen ("waterfall automatic"), which is usually preferable.}
+
+\action{WFALL LOW}{WFALLL}{E}{Change the "low" level (-150 dBm ... -50 dBm) of the waterfalls. Signal levels between low and high are colour
+coded from black to yellow, while signals above "high" are yellow and signals below "low" are black. This value has
+no effect if the automatic waterfall coloring is chosen ("waterfall automatic"), which is usually preferable.}
+
+\action{XIT}{XIT}{E}{Change the XIT value of the transceiver in the range -9999 to 9999 Hz. If a zero value is set, XIT is
+automatically disabled, if a non-zero value ist set, XIT is enabled.}
+
+\action{XIT CLEAR}{XITCL}{B}{Set the XIT value of the transmitter to zero. As a side effect, XIT is disabled.}
+
+\action{XIT ENABLE}{XITT}{B}{Toggle XIT (enabled/disabled) for the transceiver. Note the XIT value is not changed, so you can
+temporarily disable XIT, and then enable it with the same offset (XIT value) used before.}
+
+\action{XIT -}{XIT-}{B}{Decrement the XIT value of the transmitter by the  RIT (!) step size, in the range
+-9999 to 9999 Hz. If a value of zero
+is reached, XIT is automatically disabled, and if a nonzero value is reached, XIT is automatically enabled. 
+Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold XIT- (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+the XIT- button is released.}
+
+\action{XIT +}{XIT+}{B}{Increment the XIT value of the transmitter  by the  RIT (!) step size, in the range
+-9999 to 9999 Hz. If a value of zero
+is reached, XIT is automatically disabled, and if a nonzero value is reached, XIT is automatically enabled. 
+Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold XIT+ (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+the XIT+ button is released.}
+
+\action{ZOOM}{ZOOM}{PE}{Change the ZOOM value (1...8) of the active receiver.}
+
+\action{ZOOM -}{ZOOM-}{B}{Decrease the ZOOM value of the active receiver by one. If the ZOOM value was already 1, this is a no-op.}
+
+\action{ZOOM -}{ZOOM-}{B}{Increase the ZOOM value of the active receiver by one. If the ZOOM value was already 8, this is a no-op.}
+
+\chapter{piHPSDR keyboard bindings}
 
 
 
