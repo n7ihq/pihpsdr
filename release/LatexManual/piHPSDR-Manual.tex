@@ -432,7 +432,63 @@ bar contained therein moves when turning the knob,
 and the numerical value is displayed as well (Fig. \ref{fig:SliderOnScreen}).
 
 
-DESCRIBE THE SHORT CUT  OPENING OF VFO, BAND, METER RX, TX menu.
+\section{Mouse clicks in the main window}
+The main window ,,accepts'' mouse or touchscreen click events.
+Some of them come from the standard handlers of the GUI. It is
+clear, for example, that clicking the \texttt{Hide} or
+\texttt{Menu} buttons, as well as clicking one of the
+toolbar buttons, will activate the function associated with
+these buttons. Furthermore, the sliders (and the squelch enable/disable
+checkbox) in the sliders and Zoom/Pan are are operated as usual.
+But there are additional functions coded into piHPSDR:
+
+If there are two receivers, a mouse click (press and release) into
+the panel of the non-active receiver makes it active. On the other
+hand, a mouse click in the panel of the active receiver changes
+the VFO frequency of that receiver to the value clicked on.
+This means, if you see a signal in the spectrum scope, click
+on that signal and your VFO will move (,,jump'') to that signal.
+
+The second option to change the VFO frequency of the active receiver
+is to click (and hold) into its panel, then drag the mouse to the left
+or to the right, and then release the button. This will shift the
+VFO frequency by the amount dragged, it makes no difference 
+where the first click actually occured, only the difference
+in horizontal position between click and release is used. You must
+drag at least three pixels so there is clear discrimination between
+a ,,VFO jump'' (click then release) and a ,,VFO drag'' (click, drag,
+and release) operation.
+
+Clicking into the VFO bar opens the \texttt{FREQ} (VFO) menu,
+for the VFO-A if clicked into the left half of the bar, and for
+VFO-B if clicked into the right half. This menu not only offers
+the possibility for direct frequency entry, but also lets you 
+alter the RIT/XIT or VFO step size, or alter the Lock, Duplex,
+CTUN, or Split states. So a simple click in the VFO bar 
+gets you quick access to often-used functions.
+
+Clicking in the meter section (between the VFO bar and the
+Hide/Menu buttons) opens the \texttt{METER} menu, where
+you can change the meter properties (see below).
+
+When operating with a mouse, there are usually two mouse buttons,
+the primary button (for right-handed mouses, this is usually
+the left button) and a secondary one. Secondary mouse clicks
+are difficult to apply with a touch-screen. Although there are
+touch-screen drivers which convert long presses to secondary clicks,
+they generate, for a long press, a primary click first and a
+secondary one later, so it is not possible to generate a
+single ,,secondary press'' event. But for the benefit of
+mouse users, secondary mouse clicks are handled in a special way:
+
+A secondary click into the VFO bar will open the \texttt{BAND} menu,
+so a band change can be made with really few mouse clicks. Likewise,
+a secondary click into the panel of a receiver (no matter if it
+the active or the non-active one) will open the \texttt{RX} menu
+for that receiver. This can be used to change the settings of a
+non-active receiver without making it temporarily active. In the
+same way, a secondary click in the TX panel will open the
+\texttt{TX} menu.
 
 \section{VFO bar and status  indicators}
 \begin{figure}[h]
@@ -443,9 +499,12 @@ DESCRIBE THE SHORT CUT  OPENING OF VFO, BAND, METER RX, TX menu.
 \end{figure}
 
 Fig. \ref{fig:VFObar} shows the VFO bar layout in more  detail.
-Note there are several VFO bar layouts coded into the program
-between which the user can choose (see the \texttt{Screen} menu),
-but the information content is the same for all those layouts.
+The example shown is a VFO bar whose width is 745 pixels and
+thus suitable for screens that are 1024 pixels wide (or more),
+since the meter area has a fixed width of 200 pixels, and
+the \texttt{Hide/Menu} buttons are 65 pixels wide. This layout is
+denoted \texttt{Large dials for 1024px windows}, as to the choice
+of VFO bar layouts, see the description of the \texttt{Screen} menu.
 
 The large dials indicating the frequencies of VFO-A and VFO-B
 are easily recognized. The number to the left of the decimal
@@ -535,39 +594,133 @@ is enabled, PS settings can be made in the \texttt{PS} menu.
  LOCK status and which can be assigned to a toolbar button or a push-button
  on a GPIO or MIDI console, but the Lock status can also be set/unset
  via the \texttt{VFO menu}.
+ 
+The next indicator in the bottom  line indicates the Zoom factor. If the
+Zoom factor is 1, the indicator is grey, otherwise it is yellow and
+also indicates the factor. Then there is a string \texttt{CTUN} which
+indicates whether the CTUN (,,click to tune'') mode is off or on (the string 
+is yellow in the latter case). The step size of the VFO controlling the
+active receiver is displayed next, this string is always yellow.
+
+The split status is displayed by the next indicator, which is red in
+split mode. If split mode is off, transmitting is done on the frequency
+and the mode of the active receiver (if there are two receivers), or
+on the frequency/mode of VFO-A (if there is only one receiver). If
+split mode is on, transmitting occurs on the frequency/mode of the
+non-active receiver (if there are 2) or on VFO-B (if there is only  one
+receiver).
+
+The next indicator shows the SAT (satellite) mode, which can be off
+(then the indicator reads SAT in grey), or which can be SAT or RSAT
+(then the indicator displays this  string). Once SAT mode is engaged,
+the two VFOs are tied together such that any frequency change of one
+of the two VFOs also applies to the other VFO. This is the best way
+to do cross-band operation with, e.g. the QO-100 satellite which is at
+a fixed position. In RSAT mode, a frequency change of one of the VFOs
+is applied to the other VFO with an opposite sign (so if you move up
+VFO-A by 2 kHZ, then VFO-B moves down by the same amount). This is
+what one needs for low-flying satellites which have inverting
+transponders which offer some sort of Doppler correction.
+
+Finally there are the RIT (receiver incremental tuning) and XIT
+(transmitter incremental tuning) indicators. If RIT is off,
+receiving occurs on the VFO dial frequency. If RIT is on, the 
+indicator becomes yellow and also indicates the RIT offset, that is,
+the frequency offset used while receiving. RIT is used, for example,
+if during your CW QSO the frequency of the transmitter of your
+QSO partner drifts and you want to follow without altering the
+frequency of your own transmitted signal. The RIT indicator
+corresponds to the active receiver. If XIT is active, the
+indicator becomes yellow and shows the offset of the ,,true''
+TX frequency from the VFO dial frequency. 
+
+Finally, in the top right corner you see a symbol with a green and a red line
+that only occurs if
+one of the variable filters (\texttt{Var1} or \texttt{Var2}) have been
+selected. The green caret indicates the default filter edges,  while the
+red one above denotes the current filter edges. 
 
 \section{Meter section}
-\begin{center}
+
+Fig. \ref{fig:MeterDesigns} shows the different designs that exist for
+the meter. To the left (right) there are the digital (analog) meters,
+while the top panels show the meter during RX and the lower panels
+during TX.
+
+\begin{figure}[h]
+\center
 \includegraphics[width=8cm]{MeterDesigns.png}
-\end{center}
+\caption{Different designs for the meter.}
+\label{fig:MeterDesigns}
+\end{figure}
+
+The design can be switched between digital and analog in the \texttt{Meter}
+menu, which can be accessed quickly just by clicking into the meter area.
+During RX, an S-meter is shown together with the signal level in dBm. Note
+that -73 dBm corresponds to S9 for frequencies up to 30 MHz, while above
+30 MHz, S9 corresponds to -93 dBm. Since the S meter is in steps of
+6 dB, a signal level of S1 (below 30 MHz) corresponds to -121 dBm.
+
+During TX, the output power is displayed, provided that the radio actually
+reports this power. The output power meter can be calibrated (see the \texttt{PA}
+menu). If the SWR exceeds a threshold for SWR warnings (the default is 1:3, but
+this can be changed in the \texttt{TX} menu), the SWR indicator turns red. If, 
+in addition, SWR protection is enabled in the \texttt{TX} menu, the output
+drived  will be reduced to zero if the SWR exceed that threshold.
+Furthermore, the ALC (automatic level control) value of the transmitter is 
+shown. Negative ALC values (at least in peak mode) indicate that the volume of the TX input audio
+could be increased to get full output  power.
+
+Further info on the meters (e.g. switching between ,,peak'' and ,,average'' reporting)
+is described in the \texttt{Meter} menu.
 
 \chapter{The Main Menu: introduction}
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{MainMenu.png}
-\end{center}
+\caption{The Main men, opened by the \texttt{Menu} button.}
+\end{figure}
 
 \section{The \texttt{Exit} Menu}
-\begin{center}
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{ExitMenu.png}
-\end{center}
+\caption{The \texttt{Exit} menu.}
+\end{figure}
 
 \section{The \texttt{About} Menu}
-\begin{center}
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{AboutMenu.png}
-\end{center}
+\caption{The \texttt{About} menu.}
+\end{figure}
 
 \chapter{The Main Menu: Radio-related menus}
 
 \section{The \texttt{Radio} Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{RadioMenu.png}
-\end{center}
+\caption{The \texttt{Radio} menu.}
+\end{figure}
 
 \section{The \texttt{Screen} Menu}
-\begin{center}
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{ScreenMenu.png}
-\end{center}
+\caption{The \texttt{Screen} menu.}
+\end{figure}
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{VFObarChoice.png}
+\caption{Four choices for the VFO bar built into piHPSDR.}
+\label{fig:VFObarChoice}
+\end{figure}
 
 \section{The \texttt{Display} Menu}
 \begin{center}
@@ -1019,9 +1172,9 @@ depending on whether CW is handled in the radio or not (see CW menu).}
 which a straight key or an external keyer is attached. Note that this action does not automatically switch to TX, so it must
 be used together with either manual RX/TX switching, or with the "\texttt{PTT (CW Keyer)}" action.}
 
-\action{PTT (keyer)}{CWKyPTT}{B}{This is the PTT button. Unlike MOX, which toggles the PTT status, a button press means "PTT on" and
-a button release means "PTT off". This action is usually connected to a GPIO line or a MIDI controller, which then either connect
-to the PTT button of a microphone or the PTT output of an external CW keyer.}
+\action{PTT (keyer)}{CWKyPTT}{B}{This very similar to the \texttt{PTT} action (see below) with the exception that CW handling
+in the radio is temporarily disabled (thus, CW handling in piHPSDR is enabled). This allows to have, e.g. a paddle attached
+to the radio while a contest logging program ,,talks'' to piHPSDR.}
 
 \action{DIV ON/OFF}{DIVT}{B}{Toggles (enabled/disabled) DIVERSITY reception.}
 
@@ -1086,19 +1239,153 @@ audio frequencies for the single side band modes LSB, CWL, DIGL. This action is 
  \action{IF WIDTH RX1}{IFWIDTH1}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-A, and changes the  filter width, that is,
  it affects  the low and high cut in an opposite way.}
  
-  \action{IF WIDTH RX2}{IFWIDTH2}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-B, and changes the  filter width, that is,
+ action{IF WIDTH RX2}{IFWIDTH2}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-B, and changes the  filter width, that is,
  it affects  the low and high cut in an opposite way.}
  
-  \action{LINEIN GAIN}{LIGAIN}{PE}{Change the line-in gain of the radio. If the
+\action{LINEIN GAIN}{LIGAIN}{PE}{Change the line-in gain of the radio. If the
      radio does not have a line-in input, this control has no effect.}
      
-  \action{LOCK}{LOCK}{B}{Lock the VFOs. A locked VFO will not accept VFO frequency steps in either direction, and cannot be moved by dragging with the  mouse. Band changes etc.
-  are still possible, though. The command is intended to guard against accidentally moving the VFO dial.}
+\action{LOCK}{LOCK}{B}{Lock the VFOs. A locked VFO will not accept VFO frequency steps in either direction, and cannot be moved by dragging with the  mouse. Band changes etc.
+are still possible, though. The command is intended to guard against accidentally moving the VFO dial.}
   
-  \action{MEM MENU}{MEM}{B}{Open the \texttt{MEM} (Memory) menu.}
+\action{MEM MENU}{MEM}{B}{Open the \texttt{MEM} (Memory) menu.}
   
-  \action{MIC GAIN}{MICGAIN}{PE}{Change the mic gain (from -12 to 50 dB). The amplification of the microphone audio data is done in software, and applies both to microphone samples
-  from the radio and to any audio  source connected to the  computer. (See the discussion of local microphones in the \texttt{TX} menu.}
- 
- \chapter{piHPSDR CAT commands}
+\action{MIC GAIN}{MICGAIN}{PE}{Change the mic gain (from -12 to 50 dB). The amplification of the microphone audio data is done in software, and applies to the TX audio
+input samples whereever they come from. (See the discussion of local microphones in the \texttt{TX} menu.}
+
+\action{MODE -}{MD-}{B}{Cycle backwards through the list of modes for the active receiver. When the first mode (LSB) has been reached, jump to the last one (DRM). Note that when
+changing the mode, the current filter, noise reduction, equalizer, VFO step size, and TX compressor settings are stored for the old mode, and the settings last used with the
+new mode are restored. This allows to quickly switch between SSB and CW, or between SSB and digi modes, without re-adjusting these settings.}
+
+\action{MODE +}{MD+}{B}{Cycle forward through the list of modes for the active receiver. When the last mode (DRM) has been reached, jump to the first one (LSB). Note that when
+changing the mode, the current filter, noise reduction, equalizer, VFO step size, and TX compressor settings are stored for the old mode, and the settings last used with the
+new mode are restored. This allows to quickly switch between SSB and CW, or between SSB and digi modes, without re-adjusting these settings.}
+
+\action{MOX}{MOX}{B}{Toggle between TX and RX. Unlike the PTT action, which puts the radio into TX when pressed and into RX when released, this button toggles the PTT state
+when pressed.}
+
+\action{MUTE}{MUTE}{B}{Toggles the ,,mute'' state of the active receiver. If a receiver is muted, it produces zero-amplitude audio output.}
+
+\action{NB}{NB}{B}{Cycles through the noise blanker states (NB off/NB1/NB2).}
+
+\action{NR}{NR}{B}{Cycles through the noise reduction states (NR off/NR1/NR2).}
+
+\action{NOISE MENU}{NOISE}{B}{Opens the \texttt{NOISE} menu.}
+
+\action{NUMPAD 0}{0}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,0''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 1}{1}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,1''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 2}{2}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,2''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 3}{3}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,3''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 4}{4}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,4''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 5}{5}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,5''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 6}{6}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,6''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 7}{7}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,7''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 8}{8}{B}{(Used for direct frequency entry. This is the same as hitting the corresponding button ,,8''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD 9}{9}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,9''
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD BS}{BS}{B}{Used for direct frequency entry (BS = backstep). This is the same as hitting the corresponding button 
+in the \texttt{FREQ} (VFO) menu. It cancels the last-entered digit.}
+
+\action{NUMPAD CL}{CL}{B}{Used for direct frequency entry (CL = clear). This is the same as hitting the corresponding button 
+in the \texttt{FREQ} (VFO) menu. It cancels all entered digits so far.}
+
+\action{NUMPAD DEC}{DEC}{B}{Used for direct frequency entry (DEC = decimal point). This is the same as hitting the corresponding button 
+in the \texttt{FREQ} (VFO) menu.}
+
+\action{NUMPAD KHZ}{KHZ}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button 
+in the \texttt{FREQ} (VFO) menu. The VFO frequency is changed to the value entered so far, multiplied with 1,000. For example, to
+go to 7.040 MHz, one can enter the sequence ,,7'', ,,0'', ,,4'', ,,0'', ,,KHZ''.}
+
+\action{NUMPAD MHZ}{MHZ}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button 
+in the \texttt{FREQ} (VFO) menu. The VFO frequency is changed to the value entered so far, multiplied with 1,000,000.
+For example, to go to 7.040 MHz, one can enter the sequence ,,7'', ,,DEC'', ,,0'', ,,4'', ,,MHZ''.}
+
+\action{NUMPAD ENTER}{EN}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button 
+in the \texttt{FREQ} (VFO) menu. The VFO frequency is changed to the value entered so far.
+For example, to go to 7.040 MHz, one can enter the sequence ,,7'',  ,,0'', ,,4'', ,,0'', ,,0'', ,,0'', ,,0''. This
+is rarely used but offers Hz-resolution for the direct frequency entry.}
+
+\action{PAN}{PAN}{E}{Change the PAN value. This control is only effective when the Zoom value is larger than 1.}
+
+\action{PAN -}{PAN-}{B}{Decrease the PAN value by 100. This control is only effective when the Zoom value is larger than 1.}
+
+\action{PAN +}{PAN+}{B}{Increase the PAN value by 100. This control is only effective when the Zoom value is larger than 1.}
+
+\action{PAH HIGH}{PANH}{PE}{Change the dBm value (from -60 to +20) at the top of the spectrum scope of the active receiver. Values outside
+this range can be set in the \texttt{DISPLAY} menu.}
+
+\action{PAH LOW}{PANL}{PE}{Change the dBm value (from -160 to -60) at the bottom of the spectrum scope of the active receiver.
+Values outside this range can be set in the \texttt{DISPLAY} menu.}
+
+\action{PAN STEP}{PANS}{PE}{Change the step size (from 5 to 30) of the panadapter of the active receiver. This is the spacing
+of the thin horizontal  lines in the spectrum scope.}
+
+\action{PREAMP ON/OFF}{PRE}{B}{Toggle the preamp of the active receiver. Although the preamp switching is part of the HPSDR protocol,
+this has no effect in current radio models since the preamp is hard-wired ,,on''.}
+
+\action{PS ON/OFF}{PST}{B}{Toggle (on/off) adaptive predistortion (PureSignal).}
+
+\action{PS MENU}{PS}{B}{Open the \texttt{PS} (PureSignal) menu.}
+
+\action{PTT}{PTT}{B}{Put the radio  into TX mode when the button is pressed, and go back to RX when the button is released. This is
+one of the few actions where a button release event is significant. When attaching, say, the PTT contact of a microphone to
+a GPIO line for this purpose, take care of proper debouncine, since piHPSDR is not good at debouncing switches where both
+the press and release events are significant.}
+
+
+
+
+
+
+
+
+
+
+
+\chapter{piHPSDR CAT commands}
+The CAT model of piHPSDR largely follows that for other SDR programs. It is based upon the Kenwood TS-2000 CAT command
+set, which can easily be found on the internet (see the Appendix of the Kenwood TS-2000 instruction manual) and will not be reproduced here
+for copyright reasons. So if you want to connect a logbook
+or contest logging program to piHPSDR, you will normally tell this program that it has to control a Kenwood TS-2000.
+
+In the SDR community, there exist a heavily extended TS-2000 CAT command set known as the ,,PowerSDR CAT command set'', the original
+source is probably
+
+\texttt{https://www.flexradio.com/documentation/}\\
+\texttt{powersdr-cat-command-reference-guide/}
+
+Many (but probably not all) of the commands listed there are implemented in piHPSDR, because it seems that there exist SDR controllers
+which communicate over the serial line. In recent years, such an open-source controller, the ANDROMEDA controller, has been
+developed by Laurence Barker G8NJJ, see
+
+\texttt{https://github.com/laurencebarker/Andromeda\_front\_panel}
+
+This controller uses some additional CAT commands to communicate with the radio, and these commands have also been implemented into 
+the RIGCTL module of piHPSDR by Rick Koch N1GP (thanks Rick). These are the ZZZD and ZZZU commands for moving the VFO frequency
+down/up, and the ZZZP and ZZZE commands for sending information about push-buttons and encoders, and a ZZZS command which
+contains information on the ANDROMEDA version. Furthermore, if "Andromeda" is selected in the RIGCTL menu, piHPSDR will constantly
+\textit{send} status information to the ANDROMEDA controller using a ZZZI command. Status information is sent if something
+changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, CTUN mode, RIT and XIT status, and LOCK status),
+such that the ANDROMEDA controller can update the corresponding LEDs.
+
+
 \end{document}
