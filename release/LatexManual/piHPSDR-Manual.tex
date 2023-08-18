@@ -188,8 +188,8 @@ is not the case on desktop/laptop computers. The menu lets you choose between
 \begin{itemize}[font=\texttt, left=80pt]
 \item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi.}
 \item[Contoller1]{Choose this if you have a "version 1" piHPSDR controller.}
-\item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller.}
-\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller.}
+\item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller with single encoders.}
+\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encocders.}
 \item[G2 Front Panel]{Choose this if you have an ANAN G2 radio with a built-in controller.}
 \end{itemize}
 
@@ -797,9 +797,11 @@ is described in the \texttt{Meter} menu.
 
 \section{The \texttt{Filter} menu}
 \begin{center}
-\includegraphics[width=12cm]{FilterMenu.png}
+\includegraphics[width=12cm]{FilterMenuUSB.png}
 \end{center}
-
+\begin{center}
+\includegraphics[width=12cm]{FilterMenuCW.png}
+\end{center}
 \section{The \texttt{Noise} Menu}
 \begin{center}
 \includegraphics[width=12cm]{NoiseMenu1.png}
@@ -843,6 +845,15 @@ is described in the \texttt{Meter} menu.
 \section{The \texttt{PS} (PureSignal) Menu}
 \begin{center}
 \includegraphics[width=12cm]{PSMenu.png}
+\end{center}
+\begin{center}
+\includegraphics[width=12cm]{PSnomon.png}
+\end{center}
+\begin{center}
+\includegraphics[width=12cm]{PSmon.png}
+\end{center}
+\begin{center}
+\includegraphics[width=12cm]{PSoff.png}
 \end{center}
 
 \section{The \texttt{CW} Menu}
@@ -897,7 +908,7 @@ you see the following:
 \end{center}
 
 The six lines denoted \texttt{F0} through \texttt{F5} indicate the six different sets. If you
-look closely, you will discover that the set \texttt{F1} is the one that is currently active,
+look closely, you will discover that the set \texttt{F0} is the one that is currently active,
 since the labels in this line exactly match the labels in the toolbar. In this menu, the
 possible actions (that can be bound to a button) are written with the short text (see Appendix A),
 since this is the text that is printed on the toolbar buttons. If one now clicks (just an example)
@@ -923,15 +934,18 @@ switch the active receiver to the 20m band (see the explanation of all the actio
 \begin{center}
 \includegraphics[width=12cm]{ToolbarMenu4.png}
 \end{center}
-You also see that the toolbar has changed, now reading \texttt{20} on the third button from the left. Note that
-you can likewise change the functions of the toolbar sets that are currently not active, for example, we can
-change the behaviour of a toolbar button in set \texttt{F5}, no matter whether this set is currently active
-or not. Note futher that nothing happens if you press the \texttt{FUNC} buttons in the toolbar menu, since the
-rightmost button is hard-wired to that function. This is so because if in one set, you do not have the 
-\texttt{FUNC} functions at hand, you are trapped and can no longer cycle through the sets.
+You also see that the toolbar has not changed, because we have just changed the \texttt{F1} set,
+while currently the \texttt{F0} set is active. If one now, however, clicks the \texttt{FUNC}
+button at the bottom right one advances to the \texttt{F1} set and the toolbar labels
+are updated: 
 
-Assigning actions to buttons, as done here in the ,,action dialog'' also works, exactly as described here,
-in the MIDI, the Encoders, and the Switches menus.
+\begin{center}
+\includegraphics[width=12cm]{ToolbarMenu5.png}
+\end{center}
+
+Note that it is not possible to change the assignment of the  rightmost button of the toolbar,
+it will always be assigned to \texttt{FUNC}, since if one has no access to this
+function, one no longer cycle through the sets.
 
 
 \section{The \texttt{RIGCTL} (CAT control) Menu}
@@ -954,12 +968,25 @@ in the MIDI, the Encoders, and the Switches menus.
  
 \section{The \texttt{Encoders} Menu}
 \begin{center}
-\includegraphics[width=12cm]{EncodersMenu.png}
+\includegraphics[width=12cm]{EncoderMenuG2.png}
 \end{center}
+
+\begin{center}
+\includegraphics[width=12cm]{EncoderMenuV2.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=12cm]{EncoderMenuV1.png}
+\end{center}
+
 
 \section{The \texttt{Switches} Menu}
 \begin{center}
-\includegraphics[width=12cm]{SwitchesMenu.png}
+\includegraphics[width=12cm]{SwitchMenuG2.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=12cm]{SwitchMenuV2.png}
 \end{center}
 
 \appendix
