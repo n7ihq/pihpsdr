@@ -44,20 +44,17 @@ static GtkWidget *xvtr_container = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void rx_ant_cb(GtkToggleButton *widget, gpointer data) {
@@ -109,26 +106,25 @@ static void show_hf() {
   gtk_grid_set_column_homogeneous(GTK_GRID(mygrid), FALSE);
   gtk_grid_set_row_homogeneous(GTK_GRID(mygrid), TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(mygrid), 5);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Band</b>");
+  label = gtk_label_new("Band");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 0, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>RX Ant</b>");
+  label = gtk_label_new("RX Ant");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 1, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Ant</b>");
+  label = gtk_label_new("TX Ant");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 2, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "    ");
+  label = gtk_label_new("   ");
   gtk_grid_attach(GTK_GRID(mygrid), label, 3, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Band</b>");
+  label = gtk_label_new("Band");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 4, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>RX Ant</b>");
+  label = gtk_label_new("RX Ant");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 5, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Ant</b>");
+  label = gtk_label_new("TX Ant");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 6, 0, 1, 1);
   int col = 0;
   int row = 1;
@@ -142,8 +138,8 @@ static void show_hf() {
         col = 0;
       }
 
-      label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(label), band->title);
+      label = gtk_label_new(band->title);
+      gtk_widget_set_name(label, "boldlabel");
       gtk_grid_attach(GTK_GRID(mygrid), label, col, row, 1, 1);
       col++;
       GtkWidget *rxcombo = gtk_combo_box_text_new();
@@ -194,30 +190,29 @@ static void show_xvtr() {
   gtk_grid_set_column_homogeneous(GTK_GRID(mygrid), FALSE);
   gtk_grid_set_row_homogeneous(GTK_GRID(mygrid), TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(mygrid), 5);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Band</b>");
+  label = gtk_label_new("Band");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 0, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>RX Ant</b>");
+  label = gtk_label_new("RX Ant");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 1, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Ant</b>");
+  label = gtk_label_new("TX Ant");
+  gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(mygrid), label, 2, 0, 1, 1);
 
   if (num > 1) {
     // Only if there is more than one xvtr band, the
     // second column is used
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), "    ");
+    label = gtk_label_new("   ");
     gtk_grid_attach(GTK_GRID(mygrid), label, 3, 0, 1, 1);
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), "<b>Band</b>");
+    label = gtk_label_new("Band");
+    gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(mygrid), label, 4, 0, 1, 1);
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), "<b>RX Ant</b>");
+    label = gtk_label_new("RX Ant");
+    gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(mygrid), label, 5, 0, 1, 1);
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), "<b>TX Ant</b>");
+    label = gtk_label_new("TX Ant");
+    gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(mygrid), label, 6, 0, 1, 1);
   }
 
@@ -233,8 +228,8 @@ static void show_xvtr() {
         col = 0;
       }
 
-      label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(label), band->title);
+      label = gtk_label_new(band->title);
+      gtk_widget_set_name(label, "boldlabel");
       gtk_grid_attach(GTK_GRID(mygrid), label, col, row, 1, 1);
       col++;
       GtkWidget *rxcombo = gtk_combo_box_text_new();
@@ -287,21 +282,24 @@ void ant_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - ANT");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
 
   if (device != SOAPYSDR_USB_DEVICE) {
     GtkWidget *hf_rb = gtk_radio_button_new_with_label(NULL, "HF");
+    gtk_widget_set_name(hf_rb, "boldlabel");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hf_rb), TRUE);
     g_signal_connect(hf_rb, "toggled", G_CALLBACK(hf_rb_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), hf_rb, 1, 0, 1, 1);
     GtkWidget *xvtr_rb = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(hf_rb), "XVTR");
+    gtk_widget_set_name(xvtr_rb, "boldlabel");
     g_signal_connect(xvtr_rb, "toggled", G_CALLBACK(xvtr_rb_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), xvtr_rb, 2, 0, 1, 1);
   }
@@ -314,6 +312,7 @@ void ant_menu(GtkWidget *parent) {
     //               differs in how to do PS feedback.
     //
     GtkWidget *new_pa_b = gtk_check_button_new_with_label("ANAN 100/200 new PA board");
+    gtk_widget_set_name(new_pa_b, "boldlabel");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(new_pa_b), new_pa_board);
     gtk_grid_attach(GTK_GRID(grid), new_pa_b, 3, 0, 5, 1);
     g_signal_connect(new_pa_b, "toggled", G_CALLBACK(newpa_cb), NULL);
@@ -331,8 +330,8 @@ void ant_menu(GtkWidget *parent) {
     t_print("rx_antennas=%ld\n", radio->info.soapy.rx_antennas);
 
     if (radio->info.soapy.rx_antennas > 0) {
-      GtkWidget *antenna_label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(antenna_label), "<b>RX Antenna:</b>");
+      GtkWidget *antenna_label = gtk_label_new("RX Antenna:");
+      gtk_widget_set_name(antenna_label, "boldlabel");
       gtk_grid_attach(GTK_GRID(grid), antenna_label, 0, 1, 1, 1);
       adc0_antenna_combo_box = gtk_combo_box_text_new();
 
@@ -349,8 +348,8 @@ void ant_menu(GtkWidget *parent) {
       t_print("tx_antennas=%ld\n", radio->info.soapy.tx_antennas);
 
       if (radio->info.soapy.tx_antennas > 0) {
-        GtkWidget *antenna_label = gtk_label_new(NULL);
-        gtk_label_set_markup(GTK_LABEL(antenna_label), "<b>TX Antenna:</b>");
+        GtkWidget *antenna_label = gtk_label_new("TX Antenna:");
+        gtk_widget_set_name(antenna_label, "boldlabel");
         gtk_grid_attach(GTK_GRID(grid), antenna_label, 0, 2, 1, 1);
         dac0_antenna_combo_box = gtk_combo_box_text_new();
 

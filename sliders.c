@@ -90,7 +90,7 @@ int scale_timeout_cb(gpointer data) {
   return FALSE;
 }
 
-void show_popup_slider(enum ACTION action, int rx, double min, double max, double delta, double value, char *title) {
+void show_popup_slider(enum ACTION action, int rx, double min, double max, double delta, double value, const char *title) {
   //
   // general function for displaying a pop-up slider. This can also be used for a value for which there
   // is no GTK slider. Make the slider "insensitive" so one cannot operate on it.
@@ -644,24 +644,21 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_widget_set_size_request (sliders, width, height);
   gtk_grid_set_row_homogeneous(GTK_GRID(sliders), FALSE);
   gtk_grid_set_column_homogeneous(GTK_GRID(sliders), TRUE);
-  set_backgnd(sliders);
   af_gain_label = gtk_label_new("AF:");
-  gtk_widget_override_font(af_gain_label, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(af_gain_label, "boldlabel");
   gtk_widget_show(af_gain_label);
   gtk_grid_attach(GTK_GRID(sliders), af_gain_label, 0, 0, 1, 1);
   af_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -40.0, 0.0, 1.00);
-  gtk_widget_override_font(af_gain_scale, pango_font_description_from_string(SLIDERS_FONT));
   gtk_range_set_increments (GTK_RANGE(af_gain_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(af_gain_scale), active_receiver->volume);
   gtk_widget_show(af_gain_scale);
   gtk_grid_attach(GTK_GRID(sliders), af_gain_scale, 1, 0, 2, 1);
   g_signal_connect(G_OBJECT(af_gain_scale), "value_changed", G_CALLBACK(afgain_value_changed_cb), NULL);
   agc_gain_label = gtk_label_new("AGC:");
-  gtk_widget_override_font(agc_gain_label, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(agc_gain_label, "boldlabel");
   gtk_widget_show(agc_gain_label);
   gtk_grid_attach(GTK_GRID(sliders), agc_gain_label, 3, 0, 1, 1);
   agc_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -20.0, 120.0, 1.0);
-  gtk_widget_override_font(agc_scale, pango_font_description_from_string(SLIDERS_FONT));
   gtk_range_set_increments (GTK_RANGE(agc_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(agc_scale), active_receiver->agc_gain);
   gtk_widget_show(agc_scale);
@@ -670,12 +667,11 @@ GtkWidget *sliders_init(int my_width, int my_height) {
 
   if (have_rx_gain) {
     rf_gain_label = gtk_label_new("RX-GAIN:");
-    gtk_widget_override_font(rf_gain_label, pango_font_description_from_string(SLIDERS_FONT));
+    gtk_widget_set_name(rf_gain_label, "boldlabel");
     gtk_widget_show(rf_gain_label);
     gtk_grid_attach(GTK_GRID(sliders), rf_gain_label, 6, 0, 1, 1);
     rf_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, adc[0].min_gain, adc[0].max_gain, 1.0);
     gtk_range_set_value (GTK_RANGE(rf_gain_scale), adc[0].gain);
-    gtk_widget_override_font(rf_gain_scale, pango_font_description_from_string(SLIDERS_FONT));
     gtk_range_set_increments (GTK_RANGE(rf_gain_scale), 1.0, 1.0);
     gtk_widget_show(rf_gain_scale);
     gtk_grid_attach(GTK_GRID(sliders), rf_gain_scale, 7, 0, 2, 1);
@@ -687,11 +683,10 @@ GtkWidget *sliders_init(int my_width, int my_height) {
 
   if (have_rx_att) {
     attenuation_label = gtk_label_new("ATT (dB):");
-    gtk_widget_override_font(attenuation_label, pango_font_description_from_string(SLIDERS_FONT));
+    gtk_widget_set_name(attenuation_label, "boldlabel");
     gtk_widget_show(attenuation_label);
     gtk_grid_attach(GTK_GRID(sliders), attenuation_label, 6, 0, 1, 1);
     attenuation_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 31.0, 1.0);
-    gtk_widget_override_font(attenuation_scale, pango_font_description_from_string(SLIDERS_FONT));
     gtk_range_set_value (GTK_RANGE(attenuation_scale), adc[active_receiver->adc].attenuation);
     gtk_range_set_increments (GTK_RANGE(attenuation_scale), 1.0, 1.0);
     gtk_widget_show(attenuation_scale);
@@ -713,14 +708,14 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   GtkWidget *c25_grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(c25_grid), TRUE);
   GtkWidget *c25_att_label = gtk_label_new("C25 Att/PreAmp:");
-  gtk_widget_override_font(c25_att_label, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(c25_att_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(c25_grid), c25_att_label, 0, 0, 2, 1);
   //
   // One could achieve a finer granulation by combining attenuators and preamps,
   // but it seems sufficient to either engage attenuators or preamps
   //
   c25_att_combobox = gtk_combo_box_text_new();
-  gtk_widget_override_font(c25_att_combobox, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(c25_att_combobox, "boldlabel");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "-36", "-36 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "-24", "-24 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "-12", "-12 dB");
@@ -733,20 +728,18 @@ GtkWidget *sliders_init(int my_width, int my_height) {
 
   if (can_transmit) {
     mic_gain_label = gtk_label_new(mic_linein ? "Linein:" : "Mic:");
-    gtk_widget_override_font(mic_gain_label, pango_font_description_from_string(SLIDERS_FONT));
+    gtk_widget_set_name(mic_gain_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(sliders), mic_gain_label, 0, 1, 1, 1);
     mic_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, mic_linein ? 0.0 : -12.0,
                      mic_linein ? 31.0 : 50.0, 1.0);
     gtk_range_set_increments (GTK_RANGE(mic_gain_scale), 1.0, 1.0);
-    gtk_widget_override_font(mic_gain_scale, pango_font_description_from_string(SLIDERS_FONT));
     gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_linein ? linein_gain : mic_gain);
     gtk_grid_attach(GTK_GRID(sliders), mic_gain_scale, 1, 1, 2, 1);
     g_signal_connect(G_OBJECT(mic_gain_scale), "value_changed", G_CALLBACK(micgain_value_changed_cb), NULL);
     drive_label = gtk_label_new("Drive:");
-    gtk_widget_override_font(drive_label, pango_font_description_from_string(SLIDERS_FONT));
+    gtk_widget_set_name(drive_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(sliders), drive_label, 3, 1, 1, 1);
     drive_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, drive_max, 1.00);
-    gtk_widget_override_font(drive_scale, pango_font_description_from_string(SLIDERS_FONT));
     gtk_range_set_increments (GTK_RANGE(drive_scale), 1.0, 1.0);
     gtk_range_set_value (GTK_RANGE(drive_scale), getDrive());
     gtk_widget_show(drive_scale);
@@ -760,11 +753,10 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   }
 
   squelch_label = gtk_label_new("Squelch:");
-  gtk_widget_override_font(squelch_label, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(squelch_label, "boldlabel");
   gtk_widget_show(squelch_label);
   gtk_grid_attach(GTK_GRID(sliders), squelch_label, 6, 1, 1, 1);
   squelch_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
-  gtk_widget_override_font(squelch_scale, pango_font_description_from_string(SLIDERS_FONT));
   gtk_range_set_increments (GTK_RANGE(squelch_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(squelch_scale), active_receiver->squelch);
   gtk_widget_show(squelch_scale);

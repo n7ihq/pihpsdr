@@ -54,6 +54,6 @@ extern void set_compression(const TRANSMITTER *tx);
 extern void show_diversity_gain(void);
 extern void show_diversity_phase(void);
 
-void show_popup_slider(enum ACTION action, int rx, double min, double max, double delta, double value, char *title);
+void show_popup_slider(enum ACTION action, int rx, double min, double max, double delta, double value, const char *title);
 
 #endif

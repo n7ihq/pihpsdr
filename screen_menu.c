@@ -40,20 +40,17 @@ static void apply() {
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void vfo_cb(GtkWidget *widget, gpointer data) {
@@ -94,8 +91,8 @@ void screen_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Screen Layout");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
@@ -105,14 +102,15 @@ void screen_menu(GtkWidget *parent) {
   int row = 0;
   int col = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b,"close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   row++;
 
   if (!full_screen) {
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), "<b>Window Width: </b>");
-    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    label = gtk_label_new("Window Width:");
+    gtk_widget_set_name(label, "boldlabel");
+    gtk_widget_set_halign(label, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
     col++;
     wide_b = gtk_spin_button_new_with_range(800.0, (double) screen_width, 32.0);
@@ -120,9 +118,9 @@ void screen_menu(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid), wide_b, col, row, 1, 1);
     g_signal_connect(wide_b, "value-changed", G_CALLBACK(width_cb), NULL);
     col++;
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), "<b>Window Height: </b>");
-    gtk_widget_set_halign(label, GTK_ALIGN_START);
+    label = gtk_label_new("Window Height:");
+    gtk_widget_set_halign(label, GTK_ALIGN_END);
+    gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
     col++;
     button = gtk_spin_button_new_with_range(480.0, (double) screen_height, 16.0);
@@ -133,9 +131,9 @@ void screen_menu(GtkWidget *parent) {
   }
 
   col = 0;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Select VFO bar layout: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("Select VFO bar layout:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
   vfo_b = gtk_combo_box_text_new();
@@ -158,6 +156,7 @@ void screen_menu(GtkWidget *parent) {
   row++;
   col = 0;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
+  gtk_widget_set_name(button, "boldlabel");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
   gtk_grid_attach(GTK_GRID(grid), button, col, row, 2, 1);
   g_signal_connect(button, "toggled", G_CALLBACK(horizontal_cb), NULL);

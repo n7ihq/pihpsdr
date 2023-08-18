@@ -333,17 +333,6 @@ gint sequence_errors = 0;
 
 gint rx_height;
 
-//
-// This is used to over-ride the background of a widget.
-// TRANSFORMED TO A NO-OP, since a fixed background color
-// implicitly makes an illegal assumption about the GTK
-// theme in use.
-//
-void set_backgnd(GtkWidget *widget) {
-  //static GdkRGBA BackGroundColour = {COLOUR_MENU_BACKGND};
-  //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL,&BackGroundColor);
-}
-
 void radio_stop() {
   if (can_transmit) {
     t_print("radio_stop: TX: stop display update\n");
@@ -650,13 +639,13 @@ static void create_visual() {
   meter = meter_init(METER_WIDTH, METER_HEIGHT);
   gtk_fixed_put(GTK_FIXED(fixed), meter, VFO_WIDTH, y);
   hide_b = gtk_button_new_with_label("Hide");
-  gtk_widget_override_font(hide_b, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(hide_b, "boldlabel");
   gtk_widget_set_size_request (hide_b, MENU_WIDTH, MENU_HEIGHT);
   g_signal_connect(hide_b, "button-press-event", G_CALLBACK(hideall_cb), NULL);
   gtk_fixed_put(GTK_FIXED(fixed), hide_b, VFO_WIDTH + METER_WIDTH, y);
   y += MENU_HEIGHT;
   menu_b = gtk_button_new_with_label("Menu");
-  gtk_widget_override_font(menu_b, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_name(menu_b, "boldlabel");
   gtk_widget_set_size_request (menu_b, MENU_WIDTH, MENU_HEIGHT);
   g_signal_connect (menu_b, "button-press-event", G_CALLBACK(menu_cb), NULL) ;
   gtk_fixed_put(GTK_FIXED(fixed), menu_b, VFO_WIDTH + METER_WIDTH, y);

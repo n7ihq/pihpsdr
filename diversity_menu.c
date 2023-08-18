@@ -44,24 +44,23 @@ static double phase_coarse, phase_fine;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
-    sub_menu = NULL;
+
     gain_coarse_scale = NULL;
     gain_fine_scale = NULL;
     phase_coarse_scale = NULL;
     phase_fine_scale = NULL;
+
+    gtk_widget_destroy(tmp);
+    sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void diversity_cb(GtkWidget *widget, gpointer data) {
@@ -185,8 +184,8 @@ void diversity_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Diversity");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
 
   //
   // set coarse/fine values from "sanitized" actual values
@@ -213,14 +212,18 @@ void diversity_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 10);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
   GtkWidget *diversity_b = gtk_check_button_new_with_label("Diversity Enable");
+  gtk_widget_set_name(diversity_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (diversity_b), diversity_enabled);
   gtk_widget_show(diversity_b);
   gtk_grid_attach(GTK_GRID(grid), diversity_b, 1, 0, 1, 1);
   g_signal_connect(diversity_b, "toggled", G_CALLBACK(diversity_cb), NULL);
   GtkWidget *gain_coarse_label = gtk_label_new("Gain (dB, coarse):");
+  gtk_widget_set_name(gain_coarse_label, "boldlabel");
+  gtk_widget_set_halign(gain_coarse_label, GTK_ALIGN_END);
   gtk_misc_set_alignment (GTK_MISC(gain_coarse_label), 0, 0);
   gtk_widget_show(gain_coarse_label);
   gtk_grid_attach(GTK_GRID(grid), gain_coarse_label, 0, 1, 1, 1);
@@ -231,6 +234,8 @@ void diversity_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), gain_coarse_scale, 1, 1, 1, 1);
   g_signal_connect(G_OBJECT(gain_coarse_scale), "value_changed", G_CALLBACK(gain_coarse_changed_cb), NULL);
   GtkWidget *gain_fine_label = gtk_label_new("Gain (dB, fine):");
+  gtk_widget_set_name(gain_fine_label, "boldlabel");
+  gtk_widget_set_halign(gain_fine_label, GTK_ALIGN_END);
   gtk_misc_set_alignment (GTK_MISC(gain_fine_label), 0, 0);
   gtk_widget_show(gain_fine_label);
   gtk_grid_attach(GTK_GRID(grid), gain_fine_label, 0, 2, 1, 1);
@@ -241,6 +246,8 @@ void diversity_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), gain_fine_scale, 1, 2, 1, 1);
   g_signal_connect(G_OBJECT(gain_fine_scale), "value_changed", G_CALLBACK(gain_fine_changed_cb), NULL);
   GtkWidget *phase_coarse_label = gtk_label_new("Phase (coarse):");
+  gtk_widget_set_name(phase_coarse_label, "boldlabel");
+  gtk_widget_set_halign(phase_coarse_label, GTK_ALIGN_END);
   gtk_misc_set_alignment (GTK_MISC(phase_coarse_label), 0, 0);
   gtk_widget_show(phase_coarse_label);
   gtk_grid_attach(GTK_GRID(grid), phase_coarse_label, 0, 3, 1, 1);
@@ -251,6 +258,8 @@ void diversity_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), phase_coarse_scale, 1, 3, 1, 1);
   g_signal_connect(G_OBJECT(phase_coarse_scale), "value_changed", G_CALLBACK(phase_coarse_changed_cb), NULL);
   GtkWidget *phase_fine_label = gtk_label_new("Phase (fine):");
+  gtk_widget_set_name(phase_fine_label, "boldlabel");
+  gtk_widget_set_halign(phase_fine_label, GTK_ALIGN_END);
   gtk_misc_set_alignment (GTK_MISC(phase_fine_label), 0, 0);
   gtk_widget_show(phase_fine_label);
   gtk_grid_attach(GTK_GRID(grid), phase_fine_label, 0, 4, 1, 1);

@@ -104,8 +104,8 @@ static int p1local = 0, p2local = 0; // sine tone to local audio
 
 static void init_analyzer(TRANSMITTER *tx);
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  // ignore delete event
+static gboolean close_cb() {
+  // there is nothing to clean up
   return TRUE;
 }
 
@@ -660,7 +660,8 @@ void create_dialog(TRANSMITTER *tx) {
   tx->dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(tx->dialog), GTK_WINDOW(top_window));
   gtk_window_set_title(GTK_WINDOW(tx->dialog), "TX");
-  g_signal_connect (tx->dialog, "delete_event", G_CALLBACK (delete_event), NULL);
+  g_signal_connect (tx->dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (tx->dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(tx->dialog));
   //t_print("create_dialog: add tx->panel\n");
   gtk_widget_set_size_request (tx->panel, display_width / 4, display_height / 2);

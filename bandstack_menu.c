@@ -34,51 +34,75 @@
 
 static GtkWidget *dialog = NULL;
 
-static GtkWidget *last_bandstack;
+struct _CHOICE {
+  int info;
+  GtkWidget      *button;
+  gulong          signal;
+  struct _CHOICE *next;
+};
+
+typedef struct _CHOICE CHOICE;
+
+
+static struct _CHOICE *first = NULL;
+static struct _CHOICE *current = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+
+    while (first != NULL) {
+      CHOICE *choice = first;
+      first=first->next;
+      g_free(choice);
+    }
+    current = NULL;
+
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
-    active_menu = NO_MENU;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
 }
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
+static gboolean bandstack_select_cb (GtkWidget *widget, gpointer data) {
+  CHOICE *choice = (CHOICE *) data;
 
-static gboolean bandstack_select_cb (GtkWidget *widget, gpointer        data) {
-  int b = GPOINTER_TO_UINT(data);
-
-  if (active_receiver->id == 0) {
-    //
-    // vfo_bandstack_changed() calls vfo_save_bandstack(), so the frequency/mode
-    // of the previous "current" bandstack will be overwritten with the
-    // current frequency/mode, which should be reflected by the button text.
-    //
-    char label[32];
-
-    if (vfo[0].ctun) {
-      snprintf(label, 32, "%lld %s", vfo[0].ctun_frequency, mode_string[vfo[0].mode]);
-    } else {
-      snprintf(label, 32, "%lld %s", vfo[0].frequency, mode_string[vfo[0].mode]);
-    }
-
-    gtk_button_set_label(GTK_BUTTON(last_bandstack), label);
+  if (current) {
+    g_signal_handler_block(G_OBJECT(current->button), current->signal);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), current == choice);
+    g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
   }
 
-  set_button_text_color(last_bandstack, "default");
-  last_bandstack = widget;
-  set_button_text_color(last_bandstack, "orange");
-  vfo_bandstack_changed(b);
+  if (current != choice) {
+
+    if (active_receiver->id == 0 && current) {
+      //
+      // vfo_bandstack_changed() calls vfo_save_bandstack(), so the frequency/mode
+      // of the previous "current" bandstack will be overwritten with the
+      // current frequency/mode, which should be reflected by the button text.
+      //
+      char label[32];
+      double f;
+
+      if (vfo[0].ctun) {
+        f = (double) vfo[0].ctun_frequency * 1E-6;
+      } else {
+        f = (double) vfo[0].frequency * 1E-6;
+      }
+      snprintf(label, 32, "%8.3f %s", f, mode_string[vfo[0].mode]);
+  
+      gtk_button_set_label(GTK_BUTTON(current->button), label);
+    }
+    current = choice;
+    vfo_bandstack_changed(choice->info);
+  }
+
   return FALSE;
 }
 
@@ -89,8 +113,8 @@ void bandstack_menu(GtkWidget *parent) {
   char title[64];
   sprintf(title, "piHPSDR - Band Stack (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
@@ -98,6 +122,7 @@ void bandstack_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b,"close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
   BAND *band = band_get_band(vfo[active_receiver->id].band);
@@ -108,24 +133,32 @@ void bandstack_menu(GtkWidget *parent) {
 
   for (i = 0; i < bandstack->entries; i++) {
     const BANDSTACK_ENTRY *entry = &bandstack->entry[i];
+    double f;
 
     if (entry->ctun) {
-      sprintf(label, "%lld %s", entry->ctun_frequency, mode_string[entry->mode]);
+      f = (double) entry->ctun_frequency * 1E-6;
     } else {
-      sprintf(label, "%lld %s", entry->frequency, mode_string[entry->mode]);
+      f = (double) entry->frequency * 1E-6;
     }
+    sprintf(label, "%8.3f MHz %s", f, mode_string[entry->mode]);
 
-    GtkWidget *b = gtk_button_new_with_label(label);
-    set_button_text_color(b, "default");
+    GtkWidget *w = gtk_toggle_button_new_with_label(label);
+    gtk_widget_set_name(w, "small_toggle_button");
+    gtk_widget_show(w);
+    gtk_grid_attach(GTK_GRID(grid), w, col, row, 1, 1);
+
+    CHOICE *choice = g_new(CHOICE, 1);
+    choice->next = first;
+    first = choice;
+    choice->info=i;
+    choice->button=w;
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(bandstack_select_cb), choice);
 
     if (i == vfo[active_receiver->id].bandstack) {
-      set_button_text_color(b, "orange");
-      last_bandstack = b;
+      current=choice;
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
 
-    gtk_widget_show(b);
-    gtk_grid_attach(GTK_GRID(grid), b, col, row, 1, 1);
-    g_signal_connect(b, "clicked", G_CALLBACK(bandstack_select_cb), (gpointer)(long)i);
     col++;
 
     if (col >= 5) {

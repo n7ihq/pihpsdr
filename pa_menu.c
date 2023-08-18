@@ -41,20 +41,17 @@ static GtkWidget *spin[11];
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void pa_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -116,9 +113,9 @@ static void show_1W(gboolean reset) {
   }
 
   for (i = 1; i < 11; i++) {
-    sprintf(text, "<b>%dmW</b>", pa_trim[i]);
-    GtkWidget *label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), text);
+    sprintf(text, "%dmW", pa_trim[i]);
+    GtkWidget *label = gtk_label_new(text);
+    gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(calibgrid), label, 0, i, 1, 1);
     //
     // We *need* a maximum value for the spinner, but a quite large
@@ -144,9 +141,9 @@ static void show_W(int watts, gboolean reset) {
   }
 
   for (i = 1; i < 11; i++) {
-    sprintf(text, "<b>%dW</b>", i * increment);
-    GtkWidget *label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), text);
+    sprintf(text, "%dW", i * increment);
+    GtkWidget *label = gtk_label_new(text);
+    gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(calibgrid), label, 0, i, 1, 1);
     //
     // We *need* a maximum value for the spinner, but a quite large
@@ -211,18 +208,18 @@ void pa_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - PA Calibration");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *notebook = gtk_notebook_new();
-  set_backgnd(notebook);
   GtkWidget *grid0 = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid0), 10);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid0), close_b, 0, 0, 1, 1);
-  GtkWidget *max_power_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(max_power_label), "<b>MAX Power</b>");
+  GtkWidget *max_power_label = gtk_label_new("MAX Power");
+  gtk_widget_set_name(max_power_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid0), max_power_label, 1, 0, 1, 1);
   GtkWidget *max_power_b = gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "1W");
@@ -236,6 +233,7 @@ void pa_menu(GtkWidget *parent) {
   my_combo_attach(GTK_GRID(grid0), max_power_b, 2, 0, 1, 1);
   g_signal_connect(max_power_b, "changed", G_CALLBACK(max_power_changed_cb), NULL);
   GtkWidget *tx_out_of_band_b = gtk_check_button_new_with_label("Transmit out of band");
+  gtk_widget_set_name(tx_out_of_band_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx_out_of_band_b), tx_out_of_band);
   gtk_widget_show(tx_out_of_band_b);
   gtk_grid_attach(GTK_GRID(grid0), tx_out_of_band_b, 3, 0, 1, 1);
@@ -249,10 +247,8 @@ void pa_menu(GtkWidget *parent) {
 
     for (int i = 0; i <= bands; i++) {
       BAND *band = band_get_band(i);
-      GtkWidget *band_label = gtk_label_new(NULL);
-      char band_text[32];
-      sprintf(band_text, "<b>%s</b>", band->title);
-      gtk_label_set_markup(GTK_LABEL(band_label), band_text);
+      GtkWidget *band_label = gtk_label_new(band->title);
+      gtk_widget_set_name(band_label, "boldlabel");
       gtk_widget_show(band_label);
       gtk_grid_attach(GTK_GRID(grid), band_label, (b / 6) * 2, (b % 6) + 1, 1, 1);
       GtkWidget *pa_r = gtk_spin_button_new_with_range(38.8, 100.0, 0.1);
@@ -267,10 +263,8 @@ void pa_menu(GtkWidget *parent) {
       BAND *band = band_get_band(i);
 
       if (strlen(band->title) > 0) {
-        GtkWidget *band_label = gtk_label_new(NULL);
-        char band_text[32];
-        sprintf(band_text, "<b>%s</b>", band->title);
-        gtk_label_set_markup(GTK_LABEL(band_label), band_text);
+        GtkWidget *band_label = gtk_label_new(band->title);
+        gtk_widget_set_name(band_label, "boldlabel");
         gtk_widget_show(band_label);
         gtk_grid_attach(GTK_GRID(grid), band_label, (b / 6) * 2, (b % 6) + 1, 1, 1);
         GtkWidget *pa_r = gtk_spin_button_new_with_range(38.8, 100.0, 0.1);

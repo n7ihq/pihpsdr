@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "main.h"
 #include "new_menu.h"
 #include "oc_menu.h"
 #include "band.h"
@@ -36,20 +37,17 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void oc_rx_cb(GtkWidget *widget, gpointer data) {
@@ -111,47 +109,52 @@ static void oc_memory_tune_time_cb(GtkWidget *widget, gpointer data) {
 
 void oc_menu(GtkWidget *parent) {
   int i, j;
+  GtkRequisition min; 
+  GtkRequisition nat; 
+  int width, height;
+
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Open Collector Output");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
   gtk_widget_set_size_request(sw, 600, 400);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   GtkWidget *viewport = gtk_viewport_new(NULL, NULL);
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-  GtkWidget *band_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(band_title), "<b>Band</b>");
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 4, 1);
+  GtkWidget *band_title = gtk_label_new("Band");
+  gtk_widget_set_name(band_title, "boldlabel");
   gtk_widget_show(band_title);
   gtk_grid_attach(GTK_GRID(grid), band_title, 0, 1, 1, 1);
-  GtkWidget *rx_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(rx_title), "<b>Rx</b>");
+  GtkWidget *rx_title = gtk_label_new("Rx");
+  gtk_widget_set_name(rx_title, "boldlabel");
   gtk_widget_show(rx_title);
   gtk_grid_attach(GTK_GRID(grid), rx_title, 4, 1, 1, 1);
-  GtkWidget *tx_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(tx_title), "<b>Tx</b>");
+  GtkWidget *tx_title = gtk_label_new("Tx");
+  gtk_widget_set_name(tx_title, "boldlabel");
   gtk_widget_show(tx_title);
   gtk_grid_attach(GTK_GRID(grid), tx_title, 11, 1, 1, 1);
-  GtkWidget *tune_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(tune_title), "<b>Tune (ORed with TX)</b>");
+  GtkWidget *tune_title = gtk_label_new("Tune (ORed with TX) ");
+  gtk_widget_set_name(tune_title, "boldlabel");
   gtk_widget_show(tune_title);
   gtk_grid_attach(GTK_GRID(grid), tune_title, 18, 1, 2, 1);
 
   for (i = 1; i < 8; i++) {
     char oc_id[16];
-    sprintf(oc_id, "<b>%d</b>", i);
-    GtkWidget *oc_rx_title = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(oc_rx_title), oc_id);
+    sprintf(oc_id, "%d", i);
+    GtkWidget *oc_rx_title = gtk_label_new(oc_id);
+    gtk_widget_set_name(oc_rx_title, "boldlabel");
     gtk_widget_show(oc_rx_title);
     gtk_grid_attach(GTK_GRID(grid), oc_rx_title, i, 2, 1, 1);
-    GtkWidget *oc_tx_title = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(oc_tx_title), oc_id);
+    GtkWidget *oc_tx_title = gtk_label_new(oc_id);
+    gtk_widget_set_name(oc_tx_title, "boldlabel");
     gtk_widget_show(oc_tx_title);
     gtk_grid_attach(GTK_GRID(grid), oc_tx_title, i + 7, 2, 1, 1);
   }
@@ -170,10 +173,8 @@ void oc_menu(GtkWidget *parent) {
     const BAND *band = band_get_band(i);
 
     if (strlen(band->title) > 0) {
-      GtkWidget *band_label = gtk_label_new(NULL);
-      char band_text[32];
-      sprintf(band_text, "<b>%s</b>", band->title);
-      gtk_label_set_markup(GTK_LABEL(band_label), band_text);
+      GtkWidget *band_label = gtk_label_new(band->title);
+      gtk_widget_set_name(band_label, "boldlabel");
       gtk_widget_show(band_label);
       gtk_grid_attach(GTK_GRID(grid), band_label, 0, row, 1, 1);
       int mask;
@@ -213,41 +214,62 @@ void oc_menu(GtkWidget *parent) {
     char oc_id[8];
     sprintf(oc_id, "%d", j);
     GtkWidget *oc_tune_title = gtk_label_new(oc_id);
+    gtk_widget_set_name(oc_tune_title, "boldlabel");
     gtk_widget_show(oc_tune_title);
-    gtk_grid_attach(GTK_GRID(grid), oc_tune_title, 18, j + 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), oc_tune_title, 18, j + 2, 1, 1);
     mask = 0x01 << (j - 1);
     GtkWidget *oc_tune_b = gtk_check_button_new();
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (oc_tune_b), (OCtune & mask) == mask);
     gtk_widget_show(oc_tune_b);
-    gtk_grid_attach(GTK_GRID(grid), oc_tune_b, 19, j + 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), oc_tune_b, 19, j + 2, 1, 1);
     g_signal_connect(oc_tune_b, "toggled", G_CALLBACK(oc_tune_cb), (gpointer)(long)j);
   }
 
-  GtkWidget *oc_full_tune_time_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(oc_full_tune_time_title), "Full Tune(ms):");
+  j=10;
+  GtkWidget *oc_full_tune_time_title = gtk_label_new("Full Tune(ms):");
+  gtk_widget_set_name(oc_full_tune_time_title, "boldlabel");
   gtk_widget_show(oc_full_tune_time_title);
-  gtk_grid_attach(GTK_GRID(grid), oc_full_tune_time_title, 18, j + 1, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), oc_full_tune_time_title, 18, j, 2, 1);
   j++;
   GtkWidget *oc_full_tune_time_b = gtk_spin_button_new_with_range(0.0, 9999.0, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(oc_full_tune_time_b), (double)OCfull_tune_time);
   gtk_widget_show(oc_full_tune_time_b);
-  gtk_grid_attach(GTK_GRID(grid), oc_full_tune_time_b, 18, j + 1, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), oc_full_tune_time_b, 18, j, 2, 2);
   g_signal_connect(oc_full_tune_time_b, "value_changed", G_CALLBACK(oc_full_tune_time_cb), NULL);
   j++;
-  GtkWidget *oc_memory_tune_time_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(oc_memory_tune_time_title), "Memory Tune(ms):");
+  j++;
+  GtkWidget *oc_memory_tune_time_title = gtk_label_new("Memory Tune(ms):");
+  gtk_widget_set_name(oc_memory_tune_time_title, "boldlabel");
   gtk_widget_show(oc_memory_tune_time_title);
-  gtk_grid_attach(GTK_GRID(grid), oc_memory_tune_time_title, 18, j + 1, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), oc_memory_tune_time_title, 18, j, 2, 1);
   j++;
   GtkWidget *oc_memory_tune_time_b = gtk_spin_button_new_with_range(0.0, 9999.0, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(oc_memory_tune_time_b), (double)OCmemory_tune_time);
   gtk_widget_show(oc_memory_tune_time_b);
-  gtk_grid_attach(GTK_GRID(grid), oc_memory_tune_time_b, 18, j + 1, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), oc_memory_tune_time_b, 18, j, 2, 2);
   g_signal_connect(oc_memory_tune_time_b, "value_changed", G_CALLBACK(oc_memory_tune_time_cb), NULL);
+
   gtk_container_add(GTK_CONTAINER(viewport), grid);
   gtk_container_add(GTK_CONTAINER(sw), viewport);
+
   gtk_container_add(GTK_CONTAINER(content), sw);
-  sub_menu = dialog;
   gtk_widget_show_all(dialog);
+  sub_menu = dialog;
+
+  //
+  // Look how large the scrolled window is! If it is too large for the
+  // screen, shrink it. But for large screens we can avoid scrolling by
+  // making the dialog just large enough
+  //
+  gtk_widget_get_preferred_size(viewport, &min, &nat);
+
+  width  = nat.width;
+  height = nat.height;
+  if (nat.width  > display_width - 150) width  = display_width - 150;
+  if (nat.height > display_height - 80) height = display_height - 80;
+
+  gtk_widget_set_size_request(viewport, width, height);
+  gtk_widget_set_size_request(sw, width, height);
+
 }
 

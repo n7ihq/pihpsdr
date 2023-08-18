@@ -35,33 +35,57 @@
 
 static GtkWidget *dialog = NULL;
 
-static GtkWidget *last_mode;
+struct _CHOICE {
+  int info;
+  GtkWidget      *button;
+  gulong          signal;
+  struct _CHOICE *next;
+};
+
+typedef struct _CHOICE CHOICE;
+
+
+static struct _CHOICE *first = NULL;
+static struct _CHOICE *current = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+
+    while (first != NULL) {
+      CHOICE *choice = first;
+      first=first->next;
+      g_free(choice);
+    }
+    current = NULL;
+
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
-    active_menu = NO_MENU;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
 }
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
 
-static gboolean mode_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  int m = GPOINTER_TO_UINT(data);
-  set_button_text_color(last_mode, "default");
-  last_mode = widget;
-  set_button_text_color(last_mode, "orange");
-  vfo_mode_changed(m);
+static gboolean mode_select_cb (GtkWidget *widget, gpointer data) {
+  CHOICE *choice = (CHOICE *) data;
+
+  if (current) {
+    g_signal_handler_block(G_OBJECT(current->button), current->signal);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), current == choice);
+    g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
+  }
+
+  if (current != choice) {
+    current = choice;
+    vfo_mode_changed(choice->info);
+  }
+
   return FALSE;
 }
 
@@ -72,8 +96,8 @@ void mode_menu(GtkWidget *parent) {
   char title[64];
   sprintf(title, "piHPSDR - Mode (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
@@ -81,23 +105,30 @@ void mode_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_size_request(close_b, 150, 0);
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 2, 1);
   int mode = vfo[active_receiver->id].mode;
 
   for (i = 0; i < MODES; i++) {
-    GtkWidget *b = gtk_button_new_with_label(mode_string[i]);
+    GtkWidget *w = gtk_toggle_button_new_with_label(mode_string[i]);
+    gtk_widget_set_name(w, "small_toggle_button");
+    gtk_grid_attach(GTK_GRID(grid), w, i % 5, 1 + (i / 5), 1, 1);
+    gtk_widget_show(w);
+
+    CHOICE *choice = g_new(CHOICE, 1);
+    choice->next = first;
+    first = choice;
+    choice->info=i;
+    choice->button=w;
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(mode_select_cb), choice);
 
     if (i == mode) {
-      set_button_text_color(b, "orange");
-      last_mode = b;
-    } else {
-      set_button_text_color(b, "default");
+      current = choice;
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
 
-    gtk_widget_show(b);
-    gtk_grid_attach(GTK_GRID(grid), b, i % 5, 1 + (i / 5), 1, 1);
-    g_signal_connect(b, "button-press-event", G_CALLBACK(mode_select_cb), (gpointer)(long)i);
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

@@ -37,22 +37,19 @@ static GtkWidget *serial_enable_b[MAX_SERIAL];
 static GtkWidget *dialog = NULL;
 static GtkWidget *serial_port_entry;
 
-static void cleanup(void) {
+static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void rigctl_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -90,7 +87,7 @@ static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
 static void serial_port_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
   const char *cp = gtk_entry_get_text(GTK_ENTRY(widget));
-  t_print("%s: ID=%d port=%s\n", __FUNCTION__, id, cp);
+  //t_print("%s: ID=%d port=%s\n", __FUNCTION__, id, cp);
   strcpy(SerialPorts[id].port, cp);
 }
 
@@ -162,42 +159,50 @@ void rigctl_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - RIGCTL");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-  GtkWidget *rigctl_debug_b = gtk_check_button_new_with_label("Debug");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rigctl_debug_b), rigctl_debug);
-  gtk_widget_show(rigctl_debug_b);
-  gtk_grid_attach(GTK_GRID(grid), rigctl_debug_b, 3, 0, 1, 1);
-  g_signal_connect(rigctl_debug_b, "toggled", G_CALLBACK(rigctl_debug_cb), NULL);
-  GtkWidget *rigctl_enable_b = gtk_check_button_new_with_label("Rigctl Enable");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rigctl_enable_b), rigctl_enable);
-  gtk_widget_show(rigctl_enable_b);
-  gtk_grid_attach(GTK_GRID(grid), rigctl_enable_b, 0, 1, 1, 1);
-  g_signal_connect(rigctl_enable_b, "toggled", G_CALLBACK(rigctl_enable_cb), NULL);
-  GtkWidget *rigctl_port_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(rigctl_port_label), "<b>RigCtl TCP Port</b>");
+
+  GtkWidget *rigctl_port_label = gtk_label_new("RigCtl TCP Port");
+  gtk_widget_set_name(rigctl_port_label, "boldlabel");
+  gtk_widget_set_halign(rigctl_port_label, GTK_ALIGN_END);
   gtk_widget_show(rigctl_port_label);
-  gtk_grid_attach(GTK_GRID(grid), rigctl_port_label, 1, 1, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), rigctl_port_label, 0, 1, 1, 1);
   GtkWidget *rigctl_port_spinner = gtk_spin_button_new_with_range(18000, 21000, 1);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(rigctl_port_spinner), (double)19090);
   gtk_widget_show(rigctl_port_spinner);
-  gtk_grid_attach(GTK_GRID(grid), rigctl_port_spinner, 2, 1, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), rigctl_port_spinner, 1, 1, 1, 1);
   g_signal_connect(rigctl_port_spinner, "value_changed", G_CALLBACK(rigctl_value_changed_cb), NULL);
+
+  GtkWidget *rigctl_enable_b = gtk_check_button_new_with_label("Rigctl Enable");
+  gtk_widget_set_name(rigctl_enable_b, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rigctl_enable_b), rigctl_enable);
+  gtk_widget_show(rigctl_enable_b);
+  gtk_grid_attach(GTK_GRID(grid), rigctl_enable_b, 2, 1, 1, 1);
+  g_signal_connect(rigctl_enable_b, "toggled", G_CALLBACK(rigctl_enable_cb), NULL);
+
+  GtkWidget *rigctl_debug_b = gtk_check_button_new_with_label("Debug");
+  gtk_widget_set_name(rigctl_debug_b, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rigctl_debug_b), rigctl_debug);
+  gtk_widget_show(rigctl_debug_b);
+  gtk_grid_attach(GTK_GRID(grid), rigctl_debug_b, 3, 1, 1, 1);
+  g_signal_connect(rigctl_debug_b, "toggled", G_CALLBACK(rigctl_debug_cb), NULL);
 
   /* Put the Serial Port stuff here, one port per line */
 
   for (int i = 0; i < MAX_SERIAL; i++) {
     char str[64];
     int row = i + 2;
-    sprintf (str, "<b>Serial Port%d: </b>", i);
-    GtkWidget *serial_text_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(serial_text_label), str);
+    sprintf (str, "Serial Port%d:", i);
+    GtkWidget *serial_text_label = gtk_label_new(str);
+    gtk_widget_set_name(serial_text_label, "boldlabel");
+    gtk_widget_set_halign(serial_text_label, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), serial_text_label, 0, row, 1, 1);
     serial_port_entry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(serial_port_entry), SerialPorts[i].port);
@@ -231,11 +236,13 @@ void rigctl_menu(GtkWidget *parent) {
     my_combo_attach(GTK_GRID(grid), baud_combo, 3, row, 1, 1);
     g_signal_connect(baud_combo, "changed", G_CALLBACK(baud_cb), GINT_TO_POINTER(i));
     serial_enable_b[i] = gtk_check_button_new_with_label("Enable");
+    gtk_widget_set_name(serial_enable_b[i], "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (serial_enable_b[i]), SerialPorts[i].enable);
     gtk_grid_attach(GTK_GRID(grid), serial_enable_b[i], 4, row, 1, 1);
     g_signal_connect(serial_enable_b[i], "toggled", G_CALLBACK(serial_enable_cb), GINT_TO_POINTER(i));
 #ifdef ANDROMEDA
     GtkWidget *andromeda_b = gtk_check_button_new_with_label("Andromeda");
+    gtk_widget_set_name(andromeda_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (andromeda_b), SerialPorts[i].andromeda);
     gtk_grid_attach(GTK_GRID(grid), andromeda_b, 5, row, 1, 1);
     g_signal_connect(andromeda_b, "toggled", G_CALLBACK(andromeda_cb), GINT_TO_POINTER(i));

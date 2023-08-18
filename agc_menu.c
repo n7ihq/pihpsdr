@@ -36,21 +36,17 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
-    active_menu = NO_MENU;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void agc_hang_threshold_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -92,8 +88,8 @@ void agc_menu(GtkWidget *parent) {
   char title[64];
   sprintf(title, "piHPSDR - AGC (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
@@ -101,10 +97,12 @@ void agc_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-  GtkWidget *agc_title = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(agc_title), "<b>AGC</b>");
+  GtkWidget *agc_title = gtk_label_new("AGC");
+  gtk_widget_set_name(agc_title, "boldlabel");
+  gtk_widget_set_halign(agc_title, GTK_ALIGN_END);
   gtk_widget_show(agc_title);
   gtk_grid_attach(GTK_GRID(grid), agc_title, 0, 1, 1, 1);
   GtkWidget *agc_combo = gtk_combo_box_text_new();
@@ -116,8 +114,9 @@ void agc_menu(GtkWidget *parent) {
   gtk_combo_box_set_active(GTK_COMBO_BOX(agc_combo), active_receiver->agc);
   my_combo_attach(GTK_GRID(grid), agc_combo, 1, 1, 1, 1);
   g_signal_connect(agc_combo, "changed", G_CALLBACK(agc_cb), NULL);
-  GtkWidget *agc_hang_threshold_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(agc_hang_threshold_label), "<b>Hang Threshold</b>");
+  GtkWidget *agc_hang_threshold_label = gtk_label_new("Hang Threshold");
+  gtk_widget_set_name(agc_hang_threshold_label, "boldlabel");
+  gtk_widget_set_halign(agc_hang_threshold_label, GTK_ALIGN_END);
   gtk_widget_show(agc_hang_threshold_label);
   gtk_grid_attach(GTK_GRID(grid), agc_hang_threshold_label, 0, 2, 1, 1);
   GtkWidget *agc_hang_threshold_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);

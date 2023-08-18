@@ -78,8 +78,9 @@ int delayed_discovery(gpointer data);
   gint host_port = 50000; // default listening port
 #endif
 
-static gboolean delete_event_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
-  _exit(0);
+static gboolean close_cb() {
+  // There is nothing to clean up
+  return TRUE;
 }
 
 static gboolean start_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -129,10 +130,12 @@ static gboolean protocols_cb (GtkWidget *widget, GdkEventButton *event, gpointer
 }
 
 #ifdef GPIO
+#if 0
 static gboolean gpio_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   configure_gpio(discovery_dialog);
   return TRUE;
 }
+#endif
 
 static void gpio_changed_cb(GtkWidget *widget, gpointer data) {
   controller = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
@@ -320,8 +323,8 @@ void discovery() {
   discovery_dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(discovery_dialog), GTK_WINDOW(top_window));
   gtk_window_set_title(GTK_WINDOW(discovery_dialog), "piHPSDR - Discovery");
-  g_signal_connect(discovery_dialog, "delete_event", G_CALLBACK(delete_event_cb), NULL);
-  set_backgnd(discovery_dialog);
+  g_signal_connect(discovery_dialog, "delete_event", G_CALLBACK(close_cb), NULL);
+  g_signal_connect(discovery_dialog, "destroy", G_CALLBACK(close_cb), NULL);
   GtkWidget *content;
   content = gtk_dialog_get_content_area(GTK_DIALOG(discovery_dialog));
   GtkWidget *grid = gtk_grid_new();
@@ -381,17 +384,17 @@ void discovery() {
         break;
 
       case STEMLAB_PROTOCOL:
-        snprintf(text, sizeof(text), "Choose RedPitaya App from %s and re-discover: ",
+        snprintf(text, sizeof(text), "Choose SDR App from %s: ",
                  inet_ntoa(d->info.network.address.sin_addr));
       }
 
       GtkWidget *label = gtk_label_new(text);
-      gtk_widget_override_font(label, pango_font_description_from_string("Sans 11"));
+      gtk_widget_set_name(label,"boldlabel");
       gtk_widget_set_halign (label, GTK_ALIGN_START);
       gtk_widget_show(label);
       gtk_grid_attach(GTK_GRID(grid), label, 0, row, 3, 1);
       GtkWidget *start_button = gtk_button_new_with_label("Start");
-      gtk_widget_override_font(start_button, pango_font_description_from_string("Sans 16"));
+      gtk_widget_set_name(start_button,"big_txt");
       gtk_widget_show(start_button);
       gtk_grid_attach(GTK_GRID(grid), start_button, 3, row, 1, 1);
       g_signal_connect(start_button, "button-press-event", G_CALLBACK(start_cb), (gpointer)d);
@@ -428,11 +431,10 @@ void discovery() {
 
       if (d->protocol == STEMLAB_PROTOCOL) {
         if (d->software_version == 0) {
-          gtk_button_set_label(GTK_BUTTON(start_button), "Not installed");
+          gtk_button_set_label(GTK_BUTTON(start_button), "No SDR app found!");
           gtk_widget_set_sensitive(start_button, FALSE);
         } else {
           apps_combobox[row] = gtk_combo_box_text_new();
-          gtk_widget_override_font(apps_combobox[row], pango_font_description_from_string("Sans 11"));
 
           // We want the default selection priority for the STEMlab app to be
           // RP-Trx > HAMlab-Trx > Pavel-Trx > Pavel-Rx, so we add in decreasing order and
@@ -484,8 +486,8 @@ void discovery() {
   gtk_entry_set_max_length(GTK_ENTRY(host_addr_entry), 30);
   gtk_grid_attach(GTK_GRID(grid), host_addr_entry, 1, row, 1, 1);
   gtk_entry_set_text(GTK_ENTRY(host_addr_entry), host_addr);
-  GtkWidget *host_port_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(host_port_label), "<b>Server Port</b>");
+  GtkWidget *host_port_label = gtk_label_new("Server Port");
+  gtk_widget_set_name(host_port_label, "boldlabel");
   gtk_widget_show(host_port_label);
   gtk_grid_attach(GTK_GRID(grid), host_port_label, 2, row, 1, 1);
   host_port_spinner = gtk_spin_button_new_with_range(45000, 55000, 1);
@@ -516,11 +518,14 @@ void discovery() {
   gtk_grid_attach(GTK_GRID(grid), protocols_b, 2, row, 1, 1);
   row++;
 #ifdef GPIO
+#if 0
   GtkWidget *gpio_b = gtk_button_new_with_label("Configure GPIO");
   g_signal_connect (gpio_b, "button-press-event", G_CALLBACK(gpio_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), gpio_b, 0, row, 1, 1);
 #endif
+#endif
   GtkWidget *tcp_b = gtk_label_new("Radio IP Addr:");
+  gtk_widget_set_name(tcp_b, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), tcp_b, 1, row, 1, 1);
   tcpaddr = gtk_entry_new();
   gtk_entry_set_max_length(GTK_ENTRY(tcpaddr), 20);
@@ -528,6 +533,7 @@ void discovery() {
   gtk_entry_set_text(GTK_ENTRY(tcpaddr), ipaddr_radio);
   g_signal_connect (tcpaddr, "changed", G_CALLBACK(radio_ip_cb), NULL);
   GtkWidget *exit_b = gtk_button_new_with_label("Exit");
+  gtk_widget_set_name(exit_b,"close_button");
   g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), exit_b, 3, row, 1, 1);
   gtk_container_add (GTK_CONTAINER (content), grid);

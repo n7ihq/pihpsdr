@@ -21,23 +21,77 @@
 #include "message.h"
 
 //
-// Unless we want a special effect, do not specify colors so
-// we inherit them from the GTK them.
+// Normally one wants to inherit everything from the GTK theme.
+// In some cases, however, this does not work too well. But the
+// principle here is to change as little as possible.
 //
-// Here, only the color for the "selected" state
-// (white text on a red button) is specified
+// Here is a list of CSS definitions we make here:
 //
+// boldlabel           This is used to write texts in menus and the slider area,
+//                     therefore it contains 3px border
+//
+// big_tet             This is a large bold text. Used for the "pi label" on the
+//                     discovery screen, and the "Start" button there
+//
+// med_txt             This is a large text. Used for the status bar, etc.
+//
+// small_txt           This is a small text, used where space is scarce.
+//
+// close_button        Style for the "Close" button in the menus, so it can be
+//                     easily recognized
+//
+// small_button        15px text with minimal paddding. Used in menus where one wants
+//                     to make the buttons narrow.
+//
+// small_toggle_button Used for the buttons in action dialogs, and the filter etc.
+//                     menus where the current choice needs proper high-lighting
+//
+// popup_scale         Used to define the slider that "pops up" when e.g. AF volume
+//                     is changed via GPIO/MIDI but no sliders are on display
+//
+// checkbutton         Very difficult to see on RaspPi with a light GTK theme. So we
+//                     draw a grey border which should be OK for both the light and
+//                     dark theme.
+//
+// radiobutton         see checkbutton.
 //
 char *css =
-  "  @define-color TOGGLE_ON  rgb(100%,0%,0%);\n"
-  "  @define-color POPUP      rgb(100%,33%,33%);\n"
+  "  #boldlabel {\n"
+  "    padding: 3px;\n"
+  "    font-family: Sans;\n"
+  "    font-weight: bold;\n"
+#ifdef __APPLE__
+  "    font-size: 14px;\n"
+#endif
+  "  }\n"
+  "  #big_txt {\n"
+  "    font-family: Sans;\n"
+  "    font-size: 22px;\n"
+  "    font-weight: bold;\n"
+  "    }\n"
+  "  #med_txt {\n"
+  "    font-family: Sans;\n"
+  "    font-size: 18px;\n"
+  "    }\n"
+  "  #small_txt {\n"
+  "    font-family: Sans;\n"
+  "    font-weight: bold;\n"
+  "    font-size: 12px;\n"
+  "    }\n"
+  "  #close_button {\n"
+  "    padding: 5px;\n"
+  "    font-family: Sans;\n"
+  "    font-size: 15px;\n"
+  "    font-weight: bold;\n"
+  "    border: 1px solid rgb(50%, 50%, 50%);\n"
+  "    }\n"
   "  #small_button {\n"
   "    padding: 1px;\n"
   "    font-family: Sans;\n"
   "    font-size: 15px;\n"
   "    }\n"
   "  #small_toggle_button {\n"
-  "    padding: 1px;\n"
+  "    padding: 1px;\n"               
   "    font-family: Sans;\n"
   "    font-size: 15px;\n"
   "    background-image: none;\n"
@@ -46,18 +100,30 @@ char *css =
   "    padding: 1px;\n"
   "    font-family: Sans;\n"
   "    font-size: 15px;\n"
-  "    background-image: none;\n"           // if checked, white text on red background
-  "    background-color: @TOGGLE_ON;\n"
-  "    color: @COLOR_ON;\n"
+  "    background-image: none;\n"
+  "    background-color: rgb(100%, 20%, 20%);\n"    // background if selected
+  "    color: rgb( 60%,100%,100%);\n"               // text if selected
   "    }\n"
   "  #popup_scale slider {\n"
-  "     background: @POPUP;\n"
+  "    background: rgb(  0%,  0%, 100%);\n"         // Slider handle
   "    }\n"
   "  #popup_scale trough {\n"
-  "     background: @POPUP;\n"
+  "    background: rgb( 50%,50%, 100%);\n"         // Slider bar
   "    }\n"
   "  #popup_scale value {\n"
-  "     color: @POPUP;\n"
+  "    color: rgb(100%, 10%, 10%);\n"              // digits
+  "    }\n"
+  "  checkbutton check {\n"
+  //"    background-image: none;\n"
+  //"    background-color: rgb(75%, 75%, 75%);\n"    // good for light and dark theme
+  //"    color: rgb(00%, 00%, 100%);\n"
+  "    border: 1px solid rgb(50%, 50%, 50%);\n"
+  "    }\n"
+  "  radiobutton radio {\n"
+  //"    background-image: none;\n"
+  //"    background-color: rgb(75%, 75%, 75%);\n"    // good for light and dark theme
+  //"    color: rgb(00%, 00%, 100%);\n"
+  "    border: 1px solid rgb(50%, 50%, 50%);\n"
   "    }\n"
   ;
 

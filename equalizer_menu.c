@@ -36,20 +36,17 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 void set_eq() {
@@ -117,8 +114,8 @@ void equalizer_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Equalizer");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
@@ -126,36 +123,38 @@ void equalizer_menu(GtkWidget *parent) {
   gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE);
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>RX Equalizer:</b>");
-  gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
-  GtkWidget *enable_rx_b = gtk_check_button_new_with_label("Enable");
+
+  GtkWidget *enable_rx_b = gtk_check_button_new_with_label("Enable RX Equalizer");
+  gtk_widget_set_name(enable_rx_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_rx_b), enable_rx_equalizer);
   g_signal_connect(enable_rx_b, "toggled", G_CALLBACK(enable_cb), GINT_TO_POINTER(0));
-  gtk_grid_attach(GTK_GRID(grid), enable_rx_b, 2, 1, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), enable_rx_b, 1, 1, 2, 1);
   // This makes column #3 "empty" so it acts as a separator
   label = gtk_label_new(NULL);
   gtk_grid_attach(GTK_GRID(grid), label, 3, 1, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Equalizer:</b>");
-  gtk_grid_attach(GTK_GRID(grid), label, 4, 1, 1, 1);
-  GtkWidget *enable_tx_b = gtk_check_button_new_with_label("Enable");
+  GtkWidget *enable_tx_b = gtk_check_button_new_with_label("Enable TX Equalizer");
+  gtk_widget_set_name(enable_tx_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_tx_b), enable_tx_equalizer);
   g_signal_connect(enable_tx_b, "toggled", G_CALLBACK(enable_cb), GINT_TO_POINTER(1));
-  gtk_grid_attach(GTK_GRID(grid), enable_tx_b, 5, 1, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Preamp</b>");
+  gtk_grid_attach(GTK_GRID(grid), enable_tx_b, 4, 1, 2, 1);
+  label = gtk_label_new("Preamp");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Low</b>");
+  label = gtk_label_new("Low");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, 0, 3, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Mid</b>");
+  label = gtk_label_new("Mid");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, 0, 4, 1, 1);
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>High</b>");
+  label = gtk_label_new("High");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, 0, 5, 1, 1);
 
   for (int i = 0; i < 4; i++) {

@@ -31,21 +31,17 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
-    active_menu = NO_MENU;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
@@ -61,8 +57,8 @@ void toolbar_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Toolbar configuration");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
@@ -70,32 +66,32 @@ void toolbar_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b,"close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-
-  gchar text[64];
-  GtkWidget *widget;
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 2, 1);
 
   gint lfunction = 0;
   const int max_switches = 8;
 
   for (lfunction = 0; lfunction < MAX_FUNCTIONS; lfunction++) {
-    widget=gtk_label_new(NULL);
-    sprintf(text,"<b>F%d</b>", lfunction);
-    gtk_label_set_markup(GTK_LABEL(widget),text);
+    gchar text[64];
+    sprintf(text,"F%d", lfunction);
+    GtkWidget *widget=gtk_label_new(text);
+    gtk_widget_set_name(widget, "boldlabel");
+
     gtk_grid_attach(GTK_GRID(grid), widget, 0, lfunction+1, 1, 1);
-    SWITCH *switches = switches_controller1[lfunction];
+    SWITCH *sw = switches_controller1[lfunction];
 
     for (int i = 0; i < max_switches; i++) {
       if (i == max_switches - 1) {
         // Rightmost switch is hardwired to FUNCTION
-        switches[i].switch_function = FUNCTION;
-        widget = gtk_button_new_with_label(ActionTable[switches[i].switch_function].button_str);
+        sw[i].switch_function = FUNCTION;
+        widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
         gtk_grid_attach(GTK_GRID(grid), widget, i+1, lfunction+1, 1, 1);
       } else {
-        widget = gtk_button_new_with_label(ActionTable[switches[i].switch_function].button_str);
+        widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
         gtk_grid_attach(GTK_GRID(grid), widget, i+1, lfunction+1, 1, 1);
-        g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), (gpointer) &switches[i]);
+        g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), (gpointer) &sw[i]);
       }
     }
   }

@@ -326,7 +326,6 @@ extern void radio_change_region(int region);
 
 extern void disable_rigctl(void);
 
-extern void set_backgnd(GtkWidget *widget);
 
 #ifdef CLIENT_SERVER
   extern int remote_start(void *data);

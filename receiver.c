@@ -72,13 +72,12 @@ void receiver_weak_notify(gpointer data, GObject  *obj) {
 
 gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   const RECEIVER *rx = (RECEIVER *)data;
-#ifdef __APPLE__
 
   //
   // TEMPORARY FIX:
   //
   // There seems to be a bug in GTK on MacOS (June 2023).
-  // If clicking into a sub-menu window that does not have the focus
+  // If clicking into a menu window that does not have the focus
   // (especially when clicking on the title bar), it does not get focus
   // immediatedly and we end up HERE with a button-press event, without
   // receiving the following button-release event (especially if we drag
@@ -86,15 +85,15 @@ gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, g
   // As a consequence, the VFO starts to move with motions of the non-pressed mouse
   // whenever it hovers over the main window.
   // Therefore, as long as this behaviour is observed, we must ingnore
-  // button-press-events if there is a submenu window open.
+  // button-press-events if there is a menu window open.
   //
   // This means that with an open menu, you cannot "drag" the receiver. So check
-  // from time to time if this is still necessary. On my RaspPi this problem
-  // is not present.
+  // from time to time if this is still necessary.
+  //
+  // This problem has been observed on MacOS and RaspPi.
   //
   if (sub_menu || main_menu) { return TRUE; }
 
-#endif
 
   if (rx == active_receiver) {
     if (event->button == GDK_BUTTON_PRIMARY) {

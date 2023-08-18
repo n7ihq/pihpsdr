@@ -33,20 +33,17 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void server_enable_cb(GtkWidget *widget, gpointer data) {
@@ -67,8 +64,7 @@ void server_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Server");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
@@ -80,8 +76,8 @@ void server_menu(GtkWidget *parent) {
   gtk_widget_show(server_enable_b);
   gtk_grid_attach(GTK_GRID(grid), server_enable_b, 0, 1, 1, 1);
   g_signal_connect(server_enable_b, "toggled", G_CALLBACK(server_enable_cb), NULL);
-  GtkWidget *server_port_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(server_port_label), "<b>Server Port</b>");
+  GtkWidget *server_port_label = gtk_label_new("Server Port");
+  gtk_widget_set_name(server_port_label, "boldlabel");
   gtk_widget_show(server_port_label);
   gtk_grid_attach(GTK_GRID(grid), server_port_label, 0, 2, 1, 1);
   GtkWidget *server_port_spinner = gtk_spin_button_new_with_range(45000, 55000, 1);

@@ -48,17 +48,10 @@
 // Fonts and sizes for VFO, meter, panadapter etc.
 //
 #define DISPLAY_FONT "FreeSans"                     // Default: FreeSans
-#define DISPLAY_FONT_SIZE1 10                       // Default: 10
-#define DISPLAY_FONT_SIZE2 12                       // Default: 12
-#define DISPLAY_FONT_SIZE3 16                       // Default: 16
-#define DISPLAY_FONT_SIZE4 20                       // Default: 22
-#define DISPLAY_FONT_SIZE5 26                       // Default: 22
-
-#ifdef __APPLE__
-  #define SLIDERS_FONT "FreeSans Bold 12"             // Default: FreeSans Bold 10
-#else
-  #define SLIDERS_FONT "FreeSans Bold 10"             // Default: FreeSans Bold 10
-#endif
+#define DISPLAY_FONT_SIZE1 10                       // Default: 10, used for small ticks in meter
+#define DISPLAY_FONT_SIZE2 12                       // Default: 12, used for SWR, FWD in Tx meter, and panadapter labels
+#define DISPLAY_FONT_SIZE3 16                       // Default: 16, used for warning/info in panadapters
+#define DISPLAY_FONT_SIZE4 20                       // Default: 22, only used for server IP addr in client mode
 
 //
 // Colours. They are given as a 4-tuple (RGB and opacity).

@@ -37,20 +37,17 @@ static GtkWidget *label;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 void about_menu(GtkWidget *parent) {
@@ -61,14 +58,15 @@ void about_menu(GtkWidget *parent) {
   char title[64];
   sprintf(title, "piHPSDR - About");
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(grid), 4);
   int row = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, row, 1, 1);
   row++;
@@ -117,7 +115,8 @@ void about_menu(GtkWidget *parent) {
   }
 
   label = gtk_label_new(text);
-  gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+  gtk_widget_set_name(label, "small_button");
+  gtk_widget_set_halign(label, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(grid), label, 1, row, 4, 1);
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;

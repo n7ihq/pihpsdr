@@ -5565,7 +5565,7 @@ gboolean andromeda_handler(gpointer data) {
   // This function is repeatedly called until it returns FALSE
   //
   //
-  CLIENT *client = (CLIENT *)data;
+  const CLIENT *client = (CLIENT *)data;
   char reply[64];
 
   if (!client->running) { return FALSE; }
@@ -5632,7 +5632,7 @@ gboolean andromeda_init(gpointer data) {
   // This function is put into the GTK idle queue
   // when an "andromeda" serial line is opened
   //
-  CLIENT *client = (CLIENT *)data;
+  const CLIENT *client = (CLIENT *)data;
 
   if (!client->running) { return FALSE; }
 

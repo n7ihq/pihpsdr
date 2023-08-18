@@ -82,33 +82,32 @@ static guint info_timer = 0;
 static GtkWidget *entry[INFO_SIZE];
 
 static void cleanup() {
-  running = 0;
-
-  if (info_timer > 0) {
-    g_source_remove(info_timer);
-    info_timer = 0;
-  }
-
-  usleep(200000);
-
-  if (transmitter->twotone) {
-    tx_set_twotone(transmitter, 0);
-  }
-
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    //
+    // Let PS thread terminate before destroying dialog
+    //
+    running = 0;
+
+    if (info_timer > 0) {
+      g_source_remove(info_timer);
+      info_timer = 0;
+    }
+
+    usleep(200000);
+
+    if (transmitter->twotone) {
+      tx_set_twotone(transmitter, 0);
+    }
+
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-// need this because delete-event callbacks are different from button-press-event callbacks
-static gboolean delete_cb(GtkWidget* self, GdkEvent* event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
-
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
 }
@@ -447,8 +446,8 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect (dialog, "destroy", G_CALLBACK(close_cb), NULL);
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Pure Signal");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_cb), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
@@ -456,12 +455,14 @@ void ps_menu(GtkWidget *parent) {
   int row = 0;
   int col = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b,"close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   set_button_text_color(close_b, "default");
   row++;
   col = 0;
   GtkWidget *enable_b = gtk_check_button_new_with_label("Enable PS");
+  gtk_widget_set_name(enable_b,"boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_b), transmitter->puresignal);
   gtk_grid_attach(GTK_GRID(grid), enable_b, col, row, 1, 1);
   g_signal_connect(enable_b, "toggled", G_CALLBACK(enable_cb), NULL);
@@ -473,6 +474,7 @@ void ps_menu(GtkWidget *parent) {
   set_button_text_color(twotone_b, transmitter->twotone ? "red" : "default");
   col++;
   GtkWidget *auto_b = gtk_check_button_new_with_label("Auto Attenuate");
+  gtk_widget_set_name(auto_b,"boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_b), transmitter->auto_on);
   gtk_grid_attach(GTK_GRID(grid), auto_b, col, row, 1, 1);
   g_signal_connect(auto_b, "toggled", G_CALLBACK(auto_cb), NULL);
@@ -506,6 +508,7 @@ void ps_menu(GtkWidget *parent) {
   // (before February, 2015) ANAN-100/200 devices.
   //
   GtkWidget *ps_ant_label = gtk_label_new("PS FeedBk ANT:");
+  gtk_widget_set_name(ps_ant_label,"boldlabel");
   gtk_widget_show(ps_ant_label);
   gtk_grid_attach(GTK_GRID(grid), ps_ant_label, col, row, 1, 1);
   col++;
@@ -533,10 +536,12 @@ void ps_menu(GtkWidget *parent) {
   row++;
   col = 0;
   feedback_l = gtk_label_new("Feedback Lvl");
+  gtk_widget_set_name(feedback_l,"boldlabel");
   gtk_widget_show(feedback_l);
   gtk_grid_attach(GTK_GRID(grid), feedback_l, col, row, 1, 1);
   col++;
   correcting_l = gtk_label_new("Correcting");
+  gtk_widget_set_name(correcting_l,"boldlabel");
   gtk_widget_show(correcting_l);
   gtk_grid_attach(GTK_GRID(grid), correcting_l, col, row, 1, 1);
   row++;
@@ -574,6 +579,7 @@ void ps_menu(GtkWidget *parent) {
 
     if (display) {
       GtkWidget *lbl = gtk_label_new(label);
+      gtk_widget_set_name(lbl,"boldlabel");
       entry[i] = gtk_entry_new();
       gtk_entry_set_max_length(GTK_ENTRY(entry[i]), 10);
       gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
@@ -594,6 +600,7 @@ void ps_menu(GtkWidget *parent) {
   row++;
   col = 0;
   GtkWidget *lbl = gtk_label_new("GetPk");
+  gtk_widget_set_name(lbl,"boldlabel");
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   get_pk = gtk_entry_new();
@@ -601,6 +608,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_entry_set_width_chars(GTK_ENTRY(get_pk), 10);
   col++;
   lbl = gtk_label_new("SetPk");
+  gtk_widget_set_name(lbl,"boldlabel");
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   GetPSHWPeak(transmitter->id, &pk_val);
@@ -612,6 +620,7 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect(set_pk, "activate", G_CALLBACK(setpk_cb), NULL);
   col++;
   lbl = gtk_label_new("TX ATT");
+  gtk_widget_set_name(lbl,"boldlabel");
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   tx_att = gtk_entry_new();

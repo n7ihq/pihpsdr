@@ -339,7 +339,6 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   t_print("display_width=%d display_height=%d\n", display_width, display_height);
   t_print("create top level window\n");
   top_window = gtk_application_window_new (app);
-  set_backgnd(top_window);
 
   if (full_screen) {
     t_print("full screen\n");
@@ -385,28 +384,22 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   t_print("add image to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), image, 0, 0, 1, 2);
   t_print("create pi label\n");
-  sprintf(text, "%s %s %d\n", DISPLAY_FONT, "Bold", DISPLAY_FONT_SIZE3);
   GtkWidget *pi_label = gtk_label_new("piHPSDR by John Melton G0ORX/N6LYT");
-  gtk_widget_override_font(pi_label, pango_font_description_from_string(text));
-  gtk_label_set_xalign(GTK_LABEL(pi_label), 0.0);
-  gtk_widget_show(pi_label);
+  gtk_widget_set_name(pi_label,"big_txt");
+  gtk_widget_set_halign(pi_label, GTK_ALIGN_START);
   t_print("add pi label to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), pi_label, 1, 0, 3, 1);
   t_print("create build label\n");
   sprintf(text, "Built %s, Version %s\nIncludes %s", build_date, build_version, version);
   GtkWidget *build_date_label = gtk_label_new(text);
-  sprintf(text, "%s %d\n", DISPLAY_FONT, DISPLAY_FONT_SIZE3);
-  gtk_widget_override_font(build_date_label, pango_font_description_from_string(text));
-  gtk_label_set_xalign(GTK_LABEL(build_date_label), 0.0);
-  gtk_widget_show(build_date_label);
+  gtk_widget_set_name(build_date_label, "med_txt");
+  gtk_widget_set_halign(build_date_label, GTK_ALIGN_START);
   t_print("add build label to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), build_date_label, 1, 1, 3, 1);
   t_print("create status\n");
   status_label = gtk_label_new(NULL);
-  gtk_label_set_xalign(GTK_LABEL(status_label), 0.0);
-  sprintf(text, "%s %d\n", DISPLAY_FONT, DISPLAY_FONT_SIZE3);
-  gtk_widget_override_font(status_label, pango_font_description_from_string(text));
-  gtk_widget_show(status_label);
+  gtk_widget_set_name(status_label,"med_txt");
+  gtk_widget_set_halign(status_label, GTK_ALIGN_START);
   t_print("add status to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), status_label, 1, 2, 3, 1);
   gtk_widget_show_all(top_window);

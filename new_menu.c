@@ -100,12 +100,7 @@ static void cleanup() {
   active_menu = NO_MENU;
 }
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
-
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
 }
@@ -285,6 +280,11 @@ void start_filter() {
   }
 }
 
+static gboolean mode_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  start_mode();
+  return TRUE;
+}
+
 static gboolean filter_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   start_filter();
   return TRUE;
@@ -443,17 +443,18 @@ static gboolean midi_cb (GtkWidget *widget, GdkEventButton *event, gpointer data
 void new_menu() {
   int col, row, maxrow;
 
+  if (sub_menu != NULL) {
+    gtk_widget_destroy(sub_menu);
+    sub_menu = NULL;
+  }
+
   if (main_menu == NULL) {
-    if (sub_menu != NULL) {
-      gtk_widget_destroy(sub_menu);
-      sub_menu = NULL;
-    }
 
     main_menu = gtk_dialog_new();
     gtk_window_set_transient_for(GTK_WINDOW(main_menu), GTK_WINDOW(top_window));
     gtk_window_set_title(GTK_WINDOW(main_menu), "piHPSDR - Menu");
-    g_signal_connect (main_menu, "delete_event", G_CALLBACK (delete_event), NULL);
-    set_backgnd(main_menu);
+    g_signal_connect (main_menu, "delete_event", G_CALLBACK (close_cb), NULL);
+    g_signal_connect (main_menu, "destroy", G_CALLBACK (close_cb), NULL);
     GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(main_menu));
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
@@ -465,6 +466,7 @@ void new_menu() {
     // First row is reserved for Close/Restart/Exit
     //
     GtkWidget *close_b = gtk_button_new_with_label("Close");
+    gtk_widget_set_name(close_b, "close_button");
     g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 2, 1);
  
@@ -536,27 +538,27 @@ void new_menu() {
 
     //
     // Second column: VFO-related menus
-    //                FREQ, BAND, BStack, MEM
+    //                FREQ, BAND, BStack, MODE, MEM
     //
     GtkWidget *vfo_b = gtk_button_new_with_label("FREQ");
     g_signal_connect (vfo_b, "button-press-event", G_CALLBACK(vfo_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 1, 1);
-    row++;
+    gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row++, 1, 1);
     
     GtkWidget *band_b = gtk_button_new_with_label("BAND");
     g_signal_connect (band_b, "button-press-event", G_CALLBACK(band_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), band_b, col, row, 1, 1);
-    row++;
+    gtk_grid_attach(GTK_GRID(grid), band_b, col, row++, 1, 1);
     
     GtkWidget *bstk_b = gtk_button_new_with_label("BndStack");
     g_signal_connect (bstk_b, "button-press-event", G_CALLBACK(bstk_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), bstk_b, col, row, 1, 1);
-    row++;
+    gtk_grid_attach(GTK_GRID(grid), bstk_b, col, row++, 1, 1);
     
+    GtkWidget *mode_b = gtk_button_new_with_label("MODE");
+    g_signal_connect (mode_b, "button-press-event", G_CALLBACK(mode_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), mode_b, col, row++, 1, 1);
+
     GtkWidget *store_b = gtk_button_new_with_label("MEM");
     g_signal_connect (store_b, "button-press-event", G_CALLBACK(store_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), store_b, col, row, 1, 1);
-    row++;
+    gtk_grid_attach(GTK_GRID(grid), store_b, col, row++, 1, 1);
     
     if (row > maxrow) { maxrow=row; }
     row=2;

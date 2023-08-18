@@ -40,20 +40,17 @@ static GtkWidget *output = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void dither_cb(GtkWidget *widget, gpointer data) {
@@ -198,12 +195,13 @@ void rx_menu(GtkWidget *parent) {
   char title[64];
   sprintf(title, "piHPSDR - Receive (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 10);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
   int col = 0;
@@ -216,8 +214,9 @@ void rx_menu(GtkWidget *parent) {
 
     switch (protocol) {
     case NEW_PROTOCOL: { // Sample rate in RX menu only for P2
-      GtkWidget *sample_rate_label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate</b>");
+      GtkWidget *sample_rate_label = gtk_label_new("Sample Rate");
+      gtk_widget_set_name(sample_rate_label, "boldlabel");
+      gtk_widget_set_halign(sample_rate_label, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), sample_rate_label, 0, row, 1, 1);
       GtkWidget *sample_rate_combo_box = gtk_combo_box_text_new();
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box), NULL, "48000");
@@ -265,8 +264,9 @@ void rx_menu(GtkWidget *parent) {
       //
       // The "Alex ATT" value is stored in receiver[0] no matter how the ADCs are selected
       //
-      GtkWidget *alex_att_label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(alex_att_label), "<b>Alex Attenuator</b>");
+      GtkWidget *alex_att_label = gtk_label_new("Alex Attenuator");
+      gtk_widget_set_name(alex_att_label, "boldlabel");
+      gtk_widget_set_halign(alex_att_label, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), alex_att_label, 0, row, 1, 1);
       GtkWidget *alex_att_combo_box = gtk_combo_box_text_new();
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(alex_att_combo_box), NULL, " 0 dB");
@@ -284,8 +284,9 @@ void rx_menu(GtkWidget *parent) {
     // with the current receiver.
     //
     if (n_adc > 1) {
-      GtkWidget *adc_label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(adc_label), "<b>Select ADC</b>");
+      GtkWidget *adc_label = gtk_label_new("Select ADC");
+      gtk_widget_set_name(adc_label, "boldlabel");
+      gtk_widget_set_halign(adc_label, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), adc_label, 0, row, 1, 1);
       GtkWidget *adc_combo_box = gtk_combo_box_text_new();
 
@@ -313,10 +314,12 @@ void rx_menu(GtkWidget *parent) {
     //
     if (filter_board != CHARLY25) {
       GtkWidget *dither_b = gtk_check_button_new_with_label("Dither");
+      gtk_widget_set_name(dither_b, "boldlabel");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dither_b), active_receiver->dither);
       gtk_grid_attach(GTK_GRID(grid), dither_b, 0, row, 1, 1);
       g_signal_connect(dither_b, "toggled", G_CALLBACK(dither_cb), NULL);
       GtkWidget *random_b = gtk_check_button_new_with_label("Random");
+      gtk_widget_set_name(random_b, "boldlabel");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (random_b), active_receiver->random);
       gtk_grid_attach(GTK_GRID(grid), random_b, 1, row, 1, 1);
       g_signal_connect(random_b, "toggled", G_CALLBACK(random_cb), NULL);
@@ -324,6 +327,7 @@ void rx_menu(GtkWidget *parent) {
 
       if (have_preamp) {
         GtkWidget *preamp_b = gtk_check_button_new_with_label("Preamp");
+        gtk_widget_set_name(preamp_b, "boldlabel");
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (preamp_b), active_receiver->preamp);
         gtk_grid_attach(GTK_GRID(grid), preamp_b, 0, row, 1, 1);
         g_signal_connect(preamp_b, "toggled", G_CALLBACK(preamp_cb), NULL);
@@ -334,11 +338,13 @@ void rx_menu(GtkWidget *parent) {
   }
 
   GtkWidget *mute_audio_b = gtk_check_button_new_with_label("Mute when not active");
+  gtk_widget_set_name(mute_audio_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_audio_b), active_receiver->mute_when_not_active);
   gtk_widget_show(mute_audio_b);
   gtk_grid_attach(GTK_GRID(grid), mute_audio_b, col, 1, 1, 1);
   g_signal_connect(mute_audio_b, "toggled", G_CALLBACK(mute_audio_cb), NULL);
   GtkWidget *mute_radio_b = gtk_check_button_new_with_label("Mute audio to radio");
+  gtk_widget_set_name(mute_radio_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_radio_b), active_receiver->mute_radio);
   gtk_widget_show(mute_radio_b);
   gtk_grid_attach(GTK_GRID(grid), mute_radio_b, col, 2, 1, 1);
@@ -347,6 +353,7 @@ void rx_menu(GtkWidget *parent) {
 
   if (n_output_devices > 0) {
     local_audio_b = gtk_check_button_new_with_label("Local Audio Output:");
+    gtk_widget_set_name(local_audio_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (local_audio_b), active_receiver->local_audio);
     gtk_widget_show(local_audio_b);
     gtk_grid_attach(GTK_GRID(grid), local_audio_b, col, 1, 1, 1);

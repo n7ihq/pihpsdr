@@ -55,20 +55,17 @@ static GtkWidget *mute_rx_b;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 #ifdef SOAPYSDR
@@ -395,8 +392,8 @@ void radio_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Radio");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
@@ -407,13 +404,14 @@ void radio_menu(GtkWidget *parent) {
   int row = 0;
   int max_row;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   col = 0;
   row = 1;
-  GtkWidget *receivers_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(receivers_label), "<b>Receivers:</b>");
-  gtk_label_set_xalign(GTK_LABEL(receivers_label), 0.0);
+  GtkWidget *receivers_label = gtk_label_new("Receivers:");
+  gtk_widget_set_name(receivers_label, "boldlabel");
+  gtk_widget_set_halign(receivers_label, GTK_ALIGN_START);
   gtk_grid_attach(GTK_GRID(grid), receivers_label, col, row, 1, 1);
   row++;
   GtkWidget *receivers_combo = gtk_combo_box_text_new();
@@ -434,8 +432,8 @@ void radio_menu(GtkWidget *parent) {
     break;
 
   case ORIGINAL_PROTOCOL: {
-    GtkWidget *sample_rate_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate:</b>");
+    GtkWidget *sample_rate_label = gtk_label_new("Sample Rate:");
+    gtk_widget_set_name(sample_rate_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), sample_rate_label, col, row, 1, 1);
     row++;
     GtkWidget *sample_rate_combo_box = gtk_combo_box_text_new();
@@ -470,8 +468,8 @@ void radio_menu(GtkWidget *parent) {
 #ifdef SOAPYSDR
 
   case SOAPYSDR_PROTOCOL: {
-    GtkWidget *sample_rate_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate:</b>");
+    GtkWidget *sample_rate_label = gtk_label_new("Sample Rate:");
+    gtk_widget_set_name(sample_rate_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), sample_rate_label, col, row, 1, 1);
     row++;
     char rate_string[16];
@@ -503,8 +501,8 @@ void radio_menu(GtkWidget *parent) {
   max_row = row;
   col++,
       row = 1;
-  GtkWidget *rit_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(rit_label), "<b>RIT/XIT step (Hz):</b>");
+  GtkWidget *rit_label = gtk_label_new("RIT/XIT step (Hz):");
+  gtk_widget_set_name(rit_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), rit_label, col, row, 1, 1);
   row++;
   GtkWidget *rit_combo = gtk_combo_box_text_new();
@@ -533,8 +531,8 @@ void radio_menu(GtkWidget *parent) {
   my_combo_attach(GTK_GRID(grid), rit_combo, col, row, 1, 1);
   g_signal_connect(rit_combo, "changed", G_CALLBACK(rit_cb), NULL);
   row++;
-  GtkWidget *sat_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(sat_label), "<b>SAT mode:</b>");
+  GtkWidget *sat_label = gtk_label_new("SAT mode:");
+  gtk_widget_set_name(sat_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), sat_label, col, row, 1, 1);
   row++;
   GtkWidget *sat_combo = gtk_combo_box_text_new();
@@ -550,8 +548,8 @@ void radio_menu(GtkWidget *parent) {
 
   col++;
   row = 1;
-  GtkWidget *region_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(region_label), "<b>Region:</b>");
+  GtkWidget *region_label = gtk_label_new("Region:");
+  gtk_widget_set_name(region_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), region_label, col, row, 1, 1);
   row++;
   GtkWidget *region_combo = gtk_combo_box_text_new();
@@ -564,8 +562,8 @@ void radio_menu(GtkWidget *parent) {
   row++;
 
   if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
-    GtkWidget *filter_board_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(filter_board_label), "<b>Filter Board:</b>");
+    GtkWidget *filter_board_label = gtk_label_new("Filter Board:");
+    gtk_widget_set_name(filter_board_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), filter_board_label, col, row, 1, 1);
     row++;
     GtkWidget *filter_combo = gtk_combo_box_text_new();
@@ -603,8 +601,8 @@ void radio_menu(GtkWidget *parent) {
   }
 
 #if defined(GPIO) || defined(ANDROMEDA)
-  GtkWidget *vfo_divisor_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(vfo_divisor_label), "<b>VFO Encoder Divisor:</b>");
+  GtkWidget *vfo_divisor_label = gtk_label_new("VFO Encoder Divisor");
+  gtk_widget_set_name(vfo_divisor_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), vfo_divisor_label, col, row, 1, 1);
   row++;
   GtkWidget *vfo_divisor = gtk_spin_button_new_with_range(1.0, 60.0, 1.0);
@@ -623,12 +621,12 @@ void radio_menu(GtkWidget *parent) {
   if (device == DEVICE_OZY || device == DEVICE_METIS) {
     col++;
     row = 1;
-    GtkWidget *atlas_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(atlas_label), "<b>ATLAS bus settings:</b>");
+    GtkWidget *atlas_label = gtk_label_new("ATLAS bus settings:");
+    gtk_widget_set_name(atlas_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), atlas_label, col, row, 2, 1);
     row++;
-    GtkWidget *clock10_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(clock10_label), "<b>10 MHz source:</b>");
+    GtkWidget *clock10_label = gtk_label_new("10 MHz source:");
+    gtk_widget_set_name(clock10_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), clock10_label, col, row, 1, 1);
     GtkWidget *ck10mhz_combo = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck10mhz_combo), NULL, "Atlas");
@@ -638,8 +636,8 @@ void radio_menu(GtkWidget *parent) {
     my_combo_attach(GTK_GRID(grid), ck10mhz_combo, col + 1, row, 1, 1);
     g_signal_connect(ck10mhz_combo, "changed", G_CALLBACK(ck10mhz_cb), NULL);
     row++;
-    GtkWidget *clock128_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(clock128_label), "<b>122.88 MHz source:</b>");
+    GtkWidget *clock128_label = gtk_label_new("122.88 MHz source:");
+    gtk_widget_set_name(clock128_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), clock128_label, col, row, 1, 1);
     GtkWidget *ck128mhz_combo = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck128mhz_combo), NULL, "Penelope");
@@ -648,8 +646,8 @@ void radio_menu(GtkWidget *parent) {
     my_combo_attach(GTK_GRID(grid), ck128mhz_combo, col + 1, row, 1, 1);
     g_signal_connect(ck128mhz_combo, "changed", G_CALLBACK(ck128mhz_cb), NULL);
     row++;
-    GtkWidget *micsource_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(micsource_label), "<b>Mic source:</b>");
+    GtkWidget *micsource_label = gtk_label_new("Mic source:");
+    gtk_widget_set_name(micsource_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), micsource_label, col, row, 1, 1);
     GtkWidget *micsource_combo = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(micsource_combo), NULL, "Janus");
@@ -658,8 +656,8 @@ void radio_menu(GtkWidget *parent) {
     my_combo_attach(GTK_GRID(grid), micsource_combo, col + 1, row, 1, 1);
     g_signal_connect(micsource_combo, "changed", G_CALLBACK(micsource_cb), NULL);
     row++;
-    GtkWidget *tx_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(tx_label), "<b>TX config:</b>");
+    GtkWidget *tx_label = gtk_label_new("TX config:");
+    gtk_widget_set_name(tx_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), tx_label, col, row, 1, 1);
     GtkWidget *tx_combo = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(tx_combo), NULL, "No TX");
@@ -678,6 +676,7 @@ void radio_menu(GtkWidget *parent) {
     //
     if (device == DEVICE_OZY) {
       GtkWidget *janus_b = gtk_check_button_new_with_label("Janus Only");
+      gtk_widget_set_name(janus_b, "boldlabel");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (janus_b), atlas_janus);
       gtk_grid_attach(GTK_GRID(grid), janus_b, col + 1, row, 1, 1);
       g_signal_connect(janus_b, "toggled", G_CALLBACK(janus_cb), NULL);
@@ -691,8 +690,8 @@ void radio_menu(GtkWidget *parent) {
       device == DEVICE_ORION || device == DEVICE_ORION2) {
     col++;
     row = 1;
-    GtkWidget *orion_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(orion_label), "<b>ORION/SATURN Mic jack:</b>");
+    GtkWidget *orion_label = gtk_label_new("ORION/SATURN Mic jack:");
+    gtk_widget_set_name(orion_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), orion_label, col, row, 2, 1);
     row++;
     GtkWidget *ptt_ring_b = gtk_radio_button_new_with_label(NULL, "PTT On Ring, Mic and Bias on Tip");
@@ -708,8 +707,8 @@ void radio_menu(GtkWidget *parent) {
     row++;
 
     if (device == NEW_DEVICE_SATURN) {
-      GtkWidget *mic_input_label = gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(mic_input_label), "<b>Mic Input:</b>");
+      GtkWidget *mic_input_label = gtk_label_new("Mic Input:");
+      gtk_widget_set_name(mic_input_label, "boldlabel");
       gtk_grid_attach(GTK_GRID(grid), mic_input_label, col + 1, row, 2, 1);
       GtkWidget *mic_input_combo = gtk_combo_box_text_new();
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mic_input_combo), NULL, "3.5mm");
@@ -753,27 +752,32 @@ void radio_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), Separator, col, row, 5, 1);
   row++;
   GtkWidget *split_b = gtk_check_button_new_with_label("Split");
+  gtk_widget_set_name(split_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (split_b), split);
   gtk_grid_attach(GTK_GRID(grid), split_b, col, row, 1, 1);
   g_signal_connect(split_b, "toggled", G_CALLBACK(split_cb), NULL);
   col++;
   duplex_b = gtk_check_button_new_with_label("Duplex");
+  gtk_widget_set_name(duplex_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplex_b), duplex);
   gtk_grid_attach(GTK_GRID(grid), duplex_b, col, row, 1, 1);
   g_signal_connect(duplex_b, "toggled", G_CALLBACK(duplex_cb), NULL);
   col++;
   mute_rx_b = gtk_check_button_new_with_label("Mute RX when TX");
+  gtk_widget_set_name(mute_rx_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_rx_b), mute_rx_while_transmitting);
   gtk_grid_attach(GTK_GRID(grid), mute_rx_b, col, row, 1, 1);
   g_signal_connect(mute_rx_b, "toggled", G_CALLBACK(mute_rx_cb), NULL);
   col++;
   GtkWidget *PA_enable_b = gtk_check_button_new_with_label("PA enable");
+  gtk_widget_set_name(PA_enable_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (PA_enable_b), pa_enabled);
   gtk_grid_attach(GTK_GRID(grid), PA_enable_b, col, row, 1, 1);
   g_signal_connect(PA_enable_b, "toggled", G_CALLBACK(PA_enable_cb), NULL);
   row++;
   col = 0;
-  GtkWidget *touchscreen_b = gtk_check_button_new_with_label("Optimize pop-up menus for TouchScreen");
+  GtkWidget *touchscreen_b = gtk_check_button_new_with_label("Optimize for TouchScreen");
+  gtk_widget_set_name(touchscreen_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (touchscreen_b), optimize_for_touchscreen);
   gtk_grid_attach(GTK_GRID(grid), touchscreen_b, col, row, 2, 1);
   g_signal_connect(touchscreen_b, "toggled", G_CALLBACK(touchscreen_cb), NULL);
@@ -781,6 +785,7 @@ void radio_menu(GtkWidget *parent) {
 
   if (device == DEVICE_HERMES_LITE2) {
     GtkWidget *hl2audio_b = gtk_check_button_new_with_label("HL2 audio codec");
+    gtk_widget_set_name(hl2audio_b, "boldlabel");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hl2audio_b), hl2_audio_codec);
     gtk_grid_attach(GTK_GRID(grid), hl2audio_b, col, row, 1, 1);
     g_signal_connect(hl2audio_b, "toggled", G_CALLBACK(hl2audio_cb), NULL);
@@ -789,6 +794,7 @@ void radio_menu(GtkWidget *parent) {
 
   if (device == DEVICE_HERMES || device == NEW_DEVICE_HERMES) {
     GtkWidget *anan10e_b = gtk_check_button_new_with_label("Anan-10E/100B");
+    gtk_widget_set_name(anan10e_b, "boldlabel");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(anan10e_b), anan10E);
     gtk_grid_attach(GTK_GRID(grid), anan10e_b, col, row, 1, 1);
     g_signal_connect(anan10e_b, "toggled", G_CALLBACK(anan10e_cb), NULL);
@@ -799,6 +805,7 @@ void radio_menu(GtkWidget *parent) {
 
   if (device == SOAPYSDR_USB_DEVICE) {
     GtkWidget *iqswap_b = gtk_check_button_new_with_label("Swap IQ");
+    gtk_widget_set_name(iqswap_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (iqswap_b), iqswap);
     gtk_grid_attach(GTK_GRID(grid), iqswap_b, col, row, 1, 1);
     g_signal_connect(iqswap_b, "toggled", G_CALLBACK(iqswap_cb), NULL);
@@ -806,6 +813,7 @@ void radio_menu(GtkWidget *parent) {
 
     if (radio->info.soapy.rx_has_automatic_gain) {
       GtkWidget *agc = gtk_check_button_new_with_label("Hardware AGC");
+      gtk_widget_set_name(agc, "boldlabel");
       gtk_grid_attach(GTK_GRID(grid), agc, col, row, 1, 1);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(agc), adc[0].agc);
       g_signal_connect(agc, "toggled", G_CALLBACK(agc_changed_cb), &adc[0]);
@@ -816,8 +824,8 @@ void radio_menu(GtkWidget *parent) {
 #endif
   row++;
   col = 0;
-  GtkWidget *calibration_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(calibration_label), "<b>Frequency\nCalibration(Hz):</b>");
+  GtkWidget *calibration_label = gtk_label_new("Frequency\nCalibration(Hz):");
+  gtk_widget_set_name(calibration_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), calibration_label, col, row, 1, 1);
   col++;
   GtkWidget *calibration_b = gtk_spin_button_new_with_range(-10000.0, 10000.0, 1.0);
@@ -828,8 +836,8 @@ void radio_menu(GtkWidget *parent) {
   // Calibration of the RF front end
   //
   col++;
-  GtkWidget *rx_gain_calib_label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(rx_gain_calib_label), "<b>RX Gain Calibration:</b>");
+  GtkWidget *rx_gain_calib_label = gtk_label_new("RX Gain Calibration:");
+  gtk_widget_set_name(rx_gain_calib_label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), rx_gain_calib_label, col, row, 1, 1);
   col++;
   GtkWidget *rx_gain_calibration_b = gtk_spin_button_new_with_range(-50.0, 50.0, 1.0);
@@ -860,17 +868,17 @@ void radio_menu(GtkWidget *parent) {
       // Select RX gain from one out of a list of ranges (represented by spin buttons)
       //
       if (radio->info.soapy.rx_gains > 1) {
-        GtkWidget *rx_gain = gtk_label_new(NULL);
-        gtk_label_set_markup(GTK_LABEL(rx_gain), "<b>RX Gains:</b>");
-        gtk_label_set_xalign(GTK_LABEL(rx_gain), 0.0);
+        GtkWidget *rx_gain = gtk_label_new("RX Gains:");
+        gtk_widget_set_name(rx_gain, "boldlabel");
+        gtk_widget_set_halign(rx_gain, GTK_ALIGN_START);
         gtk_grid_attach(GTK_GRID(grid), rx_gain, 0, row, 1, 1);
       }
 
       if (can_transmit) {
         if (radio->info.soapy.rx_gains > 1) {
-          GtkWidget *tx_gain = gtk_label_new(NULL);
-          gtk_label_set_markup(GTK_LABEL(tx_gain), "<b>TX Gains:</b>");
-          gtk_label_set_xalign(GTK_LABEL(tx_gain), 0.0);
+          GtkWidget *tx_gain = gtk_label_new("TX Gains:");
+          gtk_widget_set_name(tx_gain, "boldlabel");
+          gtk_widget_set_halign(tx_gain, GTK_ALIGN_START);
           gtk_grid_attach(GTK_GRID(grid), tx_gain, 2, row, 1, 1);
         }
       }

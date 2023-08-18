@@ -82,11 +82,6 @@ enum MIDIevent {
 // There is linked list of all specified MIDI events for a given "Note" value,
 // which contains the defined actions for all MIDI_NOTE and MIDI_CTRL events
 // with that given note and for all channels
-// Note on wheel delay:
-// If using a wheel for cycling through a menu, it is difficult to "hit" the correct
-// menu item if wheel events are generated at a very high rate. Therefore we can define
-// a delay: once a wheel event is reported upstream, any such events are suppressed during
-// the delay.
 //
 // Note that with a MIDI KEY, normally only "Note on" messages
 // are processed, except for the actions
@@ -104,7 +99,6 @@ struct desc {
   int               vfr1, vfr2;  // Wheel only: range of controller values for "very fast right"
   int               fr1, fr2;    // Wheel only: range of controller values for "fast right"
   int               rgt1, rgt2;  // Wheel only: range of controller values for "slow right"
-  int               delay;       // Wheel only: delay (msec) before next message is given upstream
   int               action;      // SDR "action" to generate
   struct desc       *next;       // Next defined action for a controller/key with that note value (NULL for end of list)
 };

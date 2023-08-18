@@ -34,91 +34,124 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
 }
 
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
-
 static void smeter_select_cb (GtkToggleButton *widget, gpointer        data) {
-  if (gtk_toggle_button_get_active(widget)) {
-    smeter = GPOINTER_TO_UINT(data);
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+
+  switch (val) {
+    case 0:
+      smeter = RXA_S_PK;
+      break;
+    case 1:
+      smeter = RXA_S_AV;
+      break;
   }
 }
 
-static void alc_meter_select_cb (GtkToggleButton *widget, gpointer        data) {
+static void alc_select_cb (GtkToggleButton *widget, gpointer        data) {
   alc = GPOINTER_TO_UINT(data);
 }
 
 static void analog_cb(GtkToggleButton *widget, gpointer data) {
-  analog_meter = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+
+  switch (val) {
+    case 0:
+      alc = TXA_ALC_PK;
+      break;
+    case 1:
+      alc = TXA_ALC_AV;
+      break;
+    case 2:
+      alc = TXA_ALC_GAIN;
+      break;
+  }
 }
 
 void meter_menu (GtkWidget *parent) {
+  GtkWidget *w;
+
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Meter");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
-  int row = 0;
-  int col = 0;
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
   gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
-  col++;
-  GtkWidget *analog_b = gtk_check_button_new_with_label("Analog Meter");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (analog_b), analog_meter);
-  gtk_grid_attach(GTK_GRID(grid), analog_b, col, row, 1, 1);
-  g_signal_connect(analog_b, "toggled", G_CALLBACK(analog_cb), NULL);
-  row++;
-  col = 0;
-  GtkWidget *smeter_peak = gtk_radio_button_new_with_label(NULL, "S Meter Peak");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (smeter_peak), smeter == RXA_S_PK);
-  gtk_widget_show(smeter_peak);
-  gtk_grid_attach(GTK_GRID(grid), smeter_peak, col, row, 1, 1);
-  g_signal_connect(smeter_peak, "toggled", G_CALLBACK(smeter_select_cb), GINT_TO_POINTER(RXA_S_PK));
-  col++;
-  GtkWidget *alc_peak = gtk_radio_button_new_with_label(NULL, "ALC Peak");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (alc_peak), alc == TXA_ALC_PK);
-  gtk_widget_show(alc_peak);
-  gtk_grid_attach(GTK_GRID(grid), alc_peak, col, row, 1, 1);
-  g_signal_connect(alc_peak, "toggled", G_CALLBACK(alc_meter_select_cb), GINT_TO_POINTER(TXA_ALC_PK));
-  row++;
-  col = 0;
-  GtkWidget *smeter_average = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(smeter_peak),
-                              "S Meter Average");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (smeter_average), smeter == RXA_S_AV);
-  gtk_widget_show(smeter_average);
-  gtk_grid_attach(GTK_GRID(grid), smeter_average, col, row, 1, 1);
-  g_signal_connect(smeter_average, "toggled", G_CALLBACK(smeter_select_cb), GINT_TO_POINTER(RXA_S_AV));
-  col++;
-  GtkWidget *alc_average = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(alc_peak), "ALC Average");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (alc_average), alc == TXA_ALC_AV);
-  gtk_widget_show(alc_average);
-  gtk_grid_attach(GTK_GRID(grid), alc_average, col, row, 1, 1);
-  g_signal_connect(alc_average, "toggled", G_CALLBACK(alc_meter_select_cb), GINT_TO_POINTER(TXA_ALC_AV));
-  row++;
-  col = 0;
-  col++;
-  GtkWidget *alc_gain = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(alc_peak), "ALC Gain");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (alc_gain), alc == TXA_ALC_GAIN);
-  gtk_widget_show(alc_gain);
-  gtk_grid_attach(GTK_GRID(grid), alc_gain, col, row, 1, 1);
-  g_signal_connect(alc_gain, "toggled", G_CALLBACK(alc_meter_select_cb), GINT_TO_POINTER(TXA_ALC_GAIN));
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
+
+  w=gtk_label_new("Meter Type:");
+  gtk_widget_set_name(w, "boldlabel");
+  gtk_widget_set_halign(w, GTK_ALIGN_END);
+  gtk_grid_attach(GTK_GRID(grid), w, 0, 1, 1, 1);
+
+  w = gtk_combo_box_text_new();
+  gtk_grid_attach(GTK_GRID(grid), w, 1, 1, 1, 1);
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Digital");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Analog");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(w), analog_meter ? 1 : 0);
+  g_signal_connect(w, "changed", G_CALLBACK(analog_cb), NULL);
+
+  w=gtk_label_new("S-Meter Reading:");
+  gtk_widget_set_name(w, "boldlabel");
+  gtk_widget_set_halign(w, GTK_ALIGN_END);
+  gtk_grid_attach(GTK_GRID(grid), w, 0, 2, 1, 1);
+
+  w = gtk_combo_box_text_new();
+  gtk_grid_attach(GTK_GRID(grid), w, 1, 2, 1, 1);
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Peak");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Average");
+  switch (smeter) {
+    case RXA_S_PK:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 0);
+      break;
+    case RXA_S_AV:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 0);
+      break;
+  }
+  g_signal_connect(w, "changed", G_CALLBACK(smeter_select_cb), NULL);
+
+  w=gtk_label_new("TX ALC Reading:");
+  gtk_widget_set_name(w, "boldlabel");
+  gtk_widget_set_halign(w, GTK_ALIGN_END);
+  gtk_grid_attach(GTK_GRID(grid), w, 0, 3, 1, 1);
+
+  w = gtk_combo_box_text_new();
+  gtk_grid_attach(GTK_GRID(grid), w, 1, 3, 1, 1);
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Peak");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Average");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Gain");
+  switch (alc) {
+    case TXA_ALC_PK:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 0);
+      break;
+    case TXA_ALC_AV:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 1);
+      break;
+    case TXA_ALC_GAIN:
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 1);
+      break;
+  }
+  g_signal_connect(w, "changed", G_CALLBACK(alc_select_cb), NULL);
+
+
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

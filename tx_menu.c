@@ -39,20 +39,17 @@ static GtkWidget *tx_spin_high;
 
 static void cleanup() {
   if (dialog != NULL) {
-    gtk_widget_destroy(dialog);
+    GtkWidget *tmp=dialog;
     dialog = NULL;
+    gtk_widget_destroy(tmp);
     sub_menu = NULL;
+    active_menu  = NO_MENU;
   }
 }
 
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+static gboolean close_cb () {
   cleanup();
   return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
 }
 
 static void comp_enable_cb(GtkWidget *widget, gpointer data) {
@@ -225,8 +222,8 @@ void tx_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Transmit");
-  g_signal_connect (dialog, "delete_event", G_CALLBACK (delete_event), NULL);
-  set_backgnd(dialog);
+  g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
+  g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
@@ -234,6 +231,7 @@ void tx_menu(GtkWidget *parent) {
   int row = 0;
   int col = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   row++;
@@ -241,6 +239,7 @@ void tx_menu(GtkWidget *parent) {
 
   if (n_input_devices > 0) {
     GtkWidget *local_microphone_b = gtk_check_button_new_with_label("Local Microphone");
+    gtk_widget_set_name(local_microphone_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (local_microphone_b), transmitter->local_microphone);
     gtk_widget_show(local_microphone_b);
     gtk_grid_attach(GTK_GRID(grid), local_microphone_b, col, row, 1, 1);
@@ -281,6 +280,7 @@ void tx_menu(GtkWidget *parent) {
   row++;
   col = 0;
   GtkWidget *comp_enable = gtk_check_button_new_with_label("Compression (dB):");
+  gtk_widget_set_name(comp_enable, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (comp_enable), transmitter->compressor);
   gtk_grid_attach(GTK_GRID(grid), comp_enable, col, row, 1, 1);
   g_signal_connect(comp_enable, "toggled", G_CALLBACK(comp_enable_cb), NULL);
@@ -340,14 +340,15 @@ void tx_menu(GtkWidget *parent) {
   }
 
   GtkWidget *emp_b = gtk_check_button_new_with_label("FM TX Pre-emphasize before limiting");
+  gtk_widget_set_name(emp_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
   gtk_grid_attach(GTK_GRID(grid), emp_b, col, row, 2, 1);
   g_signal_connect(emp_b, "toggled", G_CALLBACK(emp_cb), NULL);
   row++;
   col = 0;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Filter Low: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("TX Filter Low:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
   tx_spin_low = gtk_spin_button_new_with_range(0.0, 8000.0, 1.0);
@@ -360,9 +361,9 @@ void tx_menu(GtkWidget *parent) {
   }
 
   col++;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>TX Filter High: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("TX Filter High:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
   tx_spin_high = gtk_spin_button_new_with_range(0.0, 8000.0, 1.0);
@@ -371,6 +372,7 @@ void tx_menu(GtkWidget *parent) {
   g_signal_connect(tx_spin_high, "value-changed", G_CALLBACK(tx_spin_high_cb), NULL);
   col++;
   GtkWidget *use_rx_filter_b = gtk_check_button_new_with_label("Use RX Filter");
+  gtk_widget_set_name(use_rx_filter_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (use_rx_filter_b), transmitter->use_rx_filter);
   gtk_widget_show(use_rx_filter_b);
   gtk_grid_attach(GTK_GRID(grid), use_rx_filter_b, col, row, 1, 1);
@@ -382,9 +384,9 @@ void tx_menu(GtkWidget *parent) {
 
   row++;
   col = 0;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Panadapter High: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("Panadapter High:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
@@ -395,14 +397,15 @@ void tx_menu(GtkWidget *parent) {
   g_signal_connect(panadapter_high_r, "value_changed", G_CALLBACK(panadapter_high_value_changed_cb), NULL);
   col++;
   GtkWidget *tune_use_drive_b = gtk_check_button_new_with_label("Tune use drive");
+  gtk_widget_set_name(tune_use_drive_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tune_use_drive_b), transmitter->tune_use_drive);
   gtk_widget_show(tune_use_drive_b);
   gtk_grid_attach(GTK_GRID(grid), tune_use_drive_b, col, row, 1, 1);
   g_signal_connect(tune_use_drive_b, "toggled", G_CALLBACK(tune_use_drive_cb), NULL);
   col++;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Drive level for Tune:</b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("Drive level for Tune:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
@@ -412,9 +415,9 @@ void tx_menu(GtkWidget *parent) {
   g_signal_connect(tune_drive, "value-changed", G_CALLBACK(tune_drive_cb), NULL);
   row++;
   col = 0;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Panadapter Low: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("Panadapter Low:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
@@ -427,14 +430,15 @@ void tx_menu(GtkWidget *parent) {
 
   if (protocol != SOAPYSDR_PROTOCOL) {
     GtkWidget *swr_protection_b = gtk_check_button_new_with_label("SWR Protection");
+    gtk_widget_set_name(swr_protection_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (swr_protection_b), transmitter->swr_protection);
     gtk_widget_show(swr_protection_b);
     gtk_grid_attach(GTK_GRID(grid), swr_protection_b, col, row, 1, 1);
     g_signal_connect(swr_protection_b, "toggled", G_CALLBACK(swr_protection_cb), NULL);
     col++;
-    GtkWidget *swr_alarm_label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(swr_alarm_label), "<b>SWR alarm at:</b>");
-    gtk_widget_set_halign(swr_alarm_label, GTK_ALIGN_START);
+    GtkWidget *swr_alarm_label = gtk_label_new("SWR alarm at:");
+    gtk_widget_set_name(swr_alarm_label, "boldlabel");
+    gtk_widget_set_halign(swr_alarm_label, GTK_ALIGN_END);
     gtk_widget_show(swr_alarm_label);
     gtk_grid_attach(GTK_GRID(grid), swr_alarm_label, col, row, 1, 1);
     col++;
@@ -446,9 +450,9 @@ void tx_menu(GtkWidget *parent) {
 
   row++;
   col = 0;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Panadapter Step: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("Panadapter Step:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
@@ -459,14 +463,15 @@ void tx_menu(GtkWidget *parent) {
   g_signal_connect(panadapter_step_r, "value_changed", G_CALLBACK(panadapter_step_value_changed_cb), NULL);
   col++;
   GtkWidget *ctcss_b = gtk_check_button_new_with_label("CTCSS Enable");
+  gtk_widget_set_name(ctcss_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctcss_b), transmitter->ctcss_enabled);
   gtk_widget_show(ctcss_b);
   gtk_grid_attach(GTK_GRID(grid), ctcss_b, col, row, 1, 1);
   g_signal_connect(ctcss_b, "toggled", G_CALLBACK(ctcss_cb), NULL);
   col++;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>CTCSS Frequency: </b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("CTCSS Frequency:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
@@ -482,9 +487,9 @@ void tx_menu(GtkWidget *parent) {
   g_signal_connect(ctcss_frequency_b, "changed", G_CALLBACK(ctcss_frequency_cb), NULL);
   row++;
   col = 0;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>AM Carrier Level:</b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("AM Carrier Level:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
@@ -494,9 +499,9 @@ void tx_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), am_carrier_level, col, row, 1, 1);
   g_signal_connect(am_carrier_level, "value_changed", G_CALLBACK(am_carrier_level_value_changed_cb), NULL);
   col++;
-  label = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>Max Drive level for DIGU/DIGL modes:</b>");
-  gtk_widget_set_halign(label, GTK_ALIGN_START);
+  label = gtk_label_new("Max Drive level for DIGU/DIGL:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 2, 1);
   col++;
