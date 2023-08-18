@@ -55,8 +55,6 @@ static int height;
 
 static GtkWidget *toolbar;
 
-static GtkWidget *last_dialog;
-
 static GtkWidget *sim_mox = NULL;
 static GtkWidget *sim_s1;
 static GtkWidget *sim_s2;
@@ -195,7 +193,6 @@ GtkWidget *toolbar_init(int my_width, int my_height) {
   sim_function = gtk_button_new_with_label(ActionTable[toolbar_switches[7].switch_function].button_str);
   g_signal_connect(G_OBJECT(sim_function), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(7));
   gtk_grid_attach(GTK_GRID(toolbar), sim_function, 28, 0, 4, 1);
-  last_dialog = NULL;
   gtk_widget_show_all(toolbar);
   return toolbar;
 }
