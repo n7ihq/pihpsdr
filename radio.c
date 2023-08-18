@@ -95,7 +95,7 @@ int VFO_WIDTH = 530;         // taken from the current VFO bar layout
 int METER_HEIGHT = 60;       // always set to  VFO_HEIGHT
 int METER_WIDTH = 200;       // nowhere changed
 int ZOOMPAN_HEIGHT = 50;     // nowhere changed
-int SLIDERS_HEIGHT = 100;    // nowhere changed
+int SLIDERS_HEIGHT = 105;    // nowhere changed
 int TOOLBAR_HEIGHT = 30;     // nowhere changed
 
 int rx_stack_horizontal = 0;
