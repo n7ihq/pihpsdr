@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
 
     if (!strncmp(argv[i], "-orion",       6))  {OLDDEVICE = ODEV_ORION;        NEWDEVICE = NDEV_ORION;         MAC5 = 0x55; continue;}
 
-    if (!strncmp(argv[i], "-c25",      4))  {OLDDEVICE = ODEV_C25;          NEWDEVICE = NDEV_C25;           MAC5 = 0x99; continue;}
+    if (!strncmp(argv[i], "-c25",      4))  {OLDDEVICE = ODEV_C25;          NEWDEVICE = NDEV_C25;           MAC5 = 0x99; oldnew = 1; continue;}
 
     if (!strncmp(argv[i], "-diversity",   10))  {diversity = 1; continue;}
 
