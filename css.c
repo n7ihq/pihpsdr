@@ -102,7 +102,7 @@ char *css =
   "    font-size: 15px;\n"
   "    background-image: none;\n"
   "    background-color: rgb(100%, 20%, 20%);\n"    // background if selected
-  "    color: rgb( 60%,100%,100%);\n"               // text if selected
+  "    color: rgb(100%,100%,100%);\n"               // text if selected
   "    }\n"
   "  #popup_scale slider {\n"
   "    background: rgb(  0%,  0%, 100%);\n"         // Slider handle

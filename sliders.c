@@ -69,6 +69,7 @@ static GtkWidget *attenuation_label = NULL;
 static GtkWidget *attenuation_scale = NULL;
 static GtkWidget *c25_container = NULL;
 static GtkWidget *c25_att_combobox = NULL;
+static GtkWidget *c25_att_label = NULL;
 static GtkWidget *mic_gain_label;
 static GtkWidget *mic_gain_scale;
 static GtkWidget *drive_label;
@@ -233,6 +234,8 @@ void att_type_changed() {
 
     if (c25_container != NULL) { gtk_widget_show(c25_container); }
 
+    if (c25_att_label != NULL) { gtk_widget_show(c25_att_label); }
+
     //
     // There is no step attenuator visible any more. Set to zero
     //
@@ -246,6 +249,8 @@ void att_type_changed() {
     if (attenuation_scale != NULL) { gtk_widget_show(attenuation_scale); }
 
     if (c25_container != NULL) { gtk_widget_hide(c25_container); }
+
+    if (c25_att_label != NULL) { gtk_widget_hide(c25_att_label); }
   }
 
   sliders_active_receiver_changed(NULL);
@@ -682,7 +687,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   }
 
   if (have_rx_att) {
-    attenuation_label = gtk_label_new("ATT (dB):");
+    attenuation_label = gtk_label_new("Att (dB):");
     gtk_widget_set_name(attenuation_label, "boldlabel");
     gtk_widget_show(attenuation_label);
     gtk_grid_attach(GTK_GRID(sliders), attenuation_label, 6, 0, 1, 1);
@@ -703,13 +708,13 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   // Because "touch-screen friendly" comboboxes cannot be shown/hidden properly,
   // we put this into a container
   //
+  c25_att_label = gtk_label_new("Att/Pre:");
+  gtk_widget_set_name(c25_att_label, "boldlabel");
+  gtk_grid_attach(GTK_GRID(sliders), c25_att_label, 6, 0, 1, 1);
   c25_container = gtk_fixed_new();
-  gtk_grid_attach(GTK_GRID(sliders), c25_container, 6, 0, 3, 1);
+  gtk_grid_attach(GTK_GRID(sliders), c25_container, 7, 0, 2, 1);
   GtkWidget *c25_grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(c25_grid), TRUE);
-  GtkWidget *c25_att_label = gtk_label_new("C25 Att/PreAmp:");
-  gtk_widget_set_name(c25_att_label, "boldlabel");
-  gtk_grid_attach(GTK_GRID(c25_grid), c25_att_label, 0, 0, 2, 1);
   //
   // One could achieve a finer granulation by combining attenuators and preamps,
   // but it seems sufficient to either engage attenuators or preamps
@@ -722,7 +727,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "0",   "  0 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "18",  "+18 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "36",  "+36 dB");
-  my_combo_attach(GTK_GRID(c25_grid), c25_att_combobox, 2, 0, 1, 1);
+  my_combo_attach(GTK_GRID(c25_grid), c25_att_combobox, 0, 0, 2, 1);
   g_signal_connect(G_OBJECT(c25_att_combobox), "changed", G_CALLBACK(c25_att_combobox_changed), NULL);
   gtk_container_add(GTK_CONTAINER(c25_container), c25_grid);
 
@@ -736,7 +741,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
     gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_linein ? linein_gain : mic_gain);
     gtk_grid_attach(GTK_GRID(sliders), mic_gain_scale, 1, 1, 2, 1);
     g_signal_connect(G_OBJECT(mic_gain_scale), "value_changed", G_CALLBACK(micgain_value_changed_cb), NULL);
-    drive_label = gtk_label_new("Drive:");
+    drive_label = gtk_label_new("TX Drv:");
     gtk_widget_set_name(drive_label, "boldlabel");
     gtk_grid_attach(GTK_GRID(sliders), drive_label, 3, 1, 1, 1);
     drive_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, drive_max, 1.00);
