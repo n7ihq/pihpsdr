@@ -59,7 +59,6 @@
 
 EXTERN int OLDDEVICE;
 EXTERN int NEWDEVICE;
-EXTERN int MAC5;
 
 //
 // A table of (random) noise with about -90 dBm on the whole spectrum

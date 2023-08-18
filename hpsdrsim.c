@@ -249,32 +249,39 @@ int main(int argc, char *argv[]) {
   noiseblank = 0;
   nb_pulse = 0;
   nb_width = 0;
-  MAC5 = 0x66;
+  const int MAC1 = 0x00;
+  const int MAC2 = 0x1C;
+  const int MAC3 = 0xC0;
+  const int MAC4 = 0xA2;
+  int MAC5 = 0x10;
+  const int MAC6 = 0xDD;  // P1
+  const int MAC6N= 0xDD;  // P2
+
   OLDDEVICE = ODEV_ORION2;
   NEWDEVICE = NDEV_ORION2;
 
   for (i = 1; i < argc; i++) {
-    if (!strncmp(argv[i], "-atlas",      6))  {OLDDEVICE = ODEV_METIS;        NEWDEVICE = NDEV_ATLAS;         MAC5 = 0x11; continue;}
+    if (!strncmp(argv[i], "-atlas",        6))  {OLDDEVICE = ODEV_METIS;        NEWDEVICE = NDEV_ATLAS;         MAC5 = 0x11;             continue;}
 
-    if (!strncmp(argv[i], "-metis",      6))  {OLDDEVICE = ODEV_METIS;        NEWDEVICE = NDEV_ATLAS;         MAC5 = 0x11; continue;}
+    if (!strncmp(argv[i], "-metis",        6))  {OLDDEVICE = ODEV_METIS;        NEWDEVICE = NDEV_ATLAS;         MAC5 = 0x12;             continue;}
 
-    if (!strncmp(argv[i], "-hermeslite2", 12))  {OLDDEVICE = ODEV_HERMES_LITE2; NEWDEVICE = NDEV_HERMES_LITE2;  MAC5 = 0x88; continue;}
+    if (!strncmp(argv[i], "-hermeslite2", 12))  {OLDDEVICE = ODEV_HERMES_LITE2; NEWDEVICE = NDEV_HERMES_LITE2;  MAC5 = 0x13;             continue;}
 
-    if (!strncmp(argv[i], "-hermeslite", 11))  {OLDDEVICE = ODEV_HERMES_LITE;  NEWDEVICE = NDEV_HERMES_LITE;   MAC5 = 0x77; continue;}
+    if (!strncmp(argv[i], "-hermeslite",  11))  {OLDDEVICE = ODEV_HERMES_LITE;  NEWDEVICE = NDEV_HERMES_LITE;   MAC5 = 0x14;             continue;}
 
-    if (!strncmp(argv[i], "-hermes",      7))  {OLDDEVICE = ODEV_HERMES;       NEWDEVICE = NDEV_HERMES;        MAC5 = 0x22; continue;}
+    if (!strncmp(argv[i], "-hermes",       7))  {OLDDEVICE = ODEV_HERMES;       NEWDEVICE = NDEV_HERMES;        MAC5 = 0x15;             continue;}
 
-    if (!strncmp(argv[i], "-griffin",     8))  {OLDDEVICE = ODEV_GRIFFIN;      NEWDEVICE = NDEV_HERMES2;       MAC5 = 0x33; continue;}
+    if (!strncmp(argv[i], "-griffin",      8))  {OLDDEVICE = ODEV_GRIFFIN;      NEWDEVICE = NDEV_HERMES2;       MAC5 = 0x16;             continue;}
 
-    if (!strncmp(argv[i], "-angelia",     8))  {OLDDEVICE = ODEV_ANGELIA;      NEWDEVICE = NDEV_ANGELIA;       MAC5 = 0x44; continue;}
+    if (!strncmp(argv[i], "-angelia",      8))  {OLDDEVICE = ODEV_ANGELIA;      NEWDEVICE = NDEV_ANGELIA;       MAC5 = 0x17;             continue;}
 
-    if (!strncmp(argv[i], "-orion2",      7))  {OLDDEVICE = ODEV_ORION2;       NEWDEVICE = NDEV_ORION2;        MAC5 = 0x66; continue;}
+    if (!strncmp(argv[i], "-orion2",       7))  {OLDDEVICE = ODEV_ORION2;       NEWDEVICE = NDEV_ORION2;        MAC5 = 0x18;             continue;}
 
-    if (!strncmp(argv[i], "-g2",           3))  {OLDDEVICE = ODEV_NONE;         NEWDEVICE = NDEV_SATURN;        MAC5 = 0xAA; oldnew = 2; continue;}
+    if (!strncmp(argv[i], "-g2",           3))  {OLDDEVICE = ODEV_NONE;         NEWDEVICE = NDEV_SATURN;        MAC5 = 0x19; oldnew = 2; continue;}
 
-    if (!strncmp(argv[i], "-orion",       6))  {OLDDEVICE = ODEV_ORION;        NEWDEVICE = NDEV_ORION;         MAC5 = 0x55; continue;}
+    if (!strncmp(argv[i], "-orion",        6))  {OLDDEVICE = ODEV_ORION;        NEWDEVICE = NDEV_ORION;         MAC5 = 0x1A;             continue;}
 
-    if (!strncmp(argv[i], "-c25",      4))  {OLDDEVICE = ODEV_C25;          NEWDEVICE = NDEV_C25;           MAC5 = 0x99; oldnew = 1; continue;}
+    if (!strncmp(argv[i], "-c25",          4))  {OLDDEVICE = ODEV_C25;          NEWDEVICE = NDEV_C25;           MAC5 = 0x1B; oldnew = 1; continue;}
 
     if (!strncmp(argv[i], "-diversity",   10))  {diversity = 1; continue;}
 
@@ -737,12 +744,12 @@ int main(int argc, char *argv[]) {
       buffer[0] = 0xEF;
       buffer[1] = 0xFE;
       buffer[2] = 0x02;
-      buffer[3] = 0xAA; // buffer[3:8] is MAC address
-      buffer[4] = 0xBB;
-      buffer[5] = 0xCC;
-      buffer[6] = 0xDD;
+      buffer[3] = MAC1; // buffer[3:8] is MAC address
+      buffer[4] = MAC2;
+      buffer[5] = MAC3;
+      buffer[6] = MAC4;
       buffer[7] = MAC5; // specifies type of radio
-      buffer[8] = 0xFF; // encodes old protocol
+      buffer[8] = MAC6; // encodes old protocol
       buffer[ 2] = 2;
 
       if (active_thread || new_protocol_running()) {
@@ -864,12 +871,12 @@ int main(int argc, char *argv[]) {
         buffer[0] = 0xEF;
         buffer[1] = 0xFE;
         buffer[2] = 0x04;
-        buffer[3] = 0xAA;
-        buffer[4] = 0xBB;
-        buffer[5] = 0xCC;
-        buffer[6] = 0xDD;
+        buffer[3] = MAC1;
+        buffer[4] = MAC2;
+        buffer[5] = MAC3;
+        buffer[6] = MAC4;
         buffer[7] = MAC5; // specifies type of radio
-        buffer[8] = 0xFF; // encodes old protocol
+        buffer[8] = MAC6; // encodes old protocol
         sendto(sock_udp, buffer, 60, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
 
         if (blks == cnt) { printf("\n\n Programming Done!\n"); }
@@ -884,12 +891,12 @@ int main(int argc, char *argv[]) {
         buffer[0] = 0xEF;
         buffer[1] = 0xFE;
         buffer[2] = 0x03;
-        buffer[3] = 0xAA;
-        buffer[4] = 0xBB;
-        buffer[5] = 0xCC;
-        buffer[6] = 0xDD;
+        buffer[3] = MAC1;
+        buffer[4] = MAC2;
+        buffer[5] = MAC3;
+        buffer[6] = MAC4;
         buffer[7] = MAC5; // specifies type of radio
-        buffer[8] = 0xFF; // encodes old protocol
+        buffer[8] = MAC6; // encodes old protocol
         sendto(sock_udp, buffer, 60, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
         break;
       }
@@ -915,12 +922,12 @@ int main(int argc, char *argv[]) {
         // prepeare response
         memset(buffer, 0, 60);
         buffer [4] = 0x02 + new_protocol_running();
-        buffer [5] = 0xAA;
-        buffer[ 6] = 0xBB;
-        buffer[ 7] = 0xCC;
-        buffer[ 8] = 0xDD;
+        buffer [5] = MAC1;
+        buffer[ 6] = MAC2;
+        buffer[ 7] = MAC3;
+        buffer[ 8] = MAC4;
         buffer[ 9] = MAC5; // specifies type of radio
-        buffer[10] = 0xFE; // encodes new protocol
+        buffer[10] = MAC6N; // encodes new protocol
         buffer[11] = NEWDEVICE;
         buffer[12] = 38;
         buffer[13] = 19;
@@ -946,12 +953,12 @@ int main(int argc, char *argv[]) {
         printf("NewProtocol erase packet received\n");
         memset(buffer, 0, 60);
         buffer [4] = 0x02 + active_thread;
-        buffer [5] = 0xAA;
-        buffer[ 6] = 0xBB;
-        buffer[ 7] = 0xCC;
-        buffer[ 8] = 0xDD;
+        buffer [5] = MAC1;
+        buffer[ 6] = MAC2;
+        buffer[ 7] = MAC3;
+        buffer[ 8] = MAC4;
         buffer[ 9] = MAC5; // specifies type of radio
-        buffer[10] = 0xFE; // encodes new protocol
+        buffer[10] = MAC6N; // encodes new protocol
         buffer[11] = NEWDEVICE;
         buffer[12] = 38;
         buffer[13] = 103;
@@ -981,12 +988,12 @@ int main(int argc, char *argv[]) {
 
         memset(buffer + 4, 0, 56); // keep seq. no
         buffer[ 4] = 0x04;
-        buffer [5] = 0xAA;
-        buffer[ 6] = 0xBB;
-        buffer[ 7] = 0xCC;
-        buffer[ 8] = 0xDD;
+        buffer [5] = MAC1;
+        buffer[ 6] = MAC2;
+        buffer[ 7] = MAC3;
+        buffer[ 8] = MAC4;
         buffer[ 9] = MAC5; // specifies type of radio
-        buffer[10] = 0xFE; // encodes new protocol
+        buffer[10] = MAC6N; // encodes new protocol
         buffer[11] = 103;
         buffer[12] = NEWDEVICE;
         buffer[13] = (checksum >> 8) & 0xFF;
@@ -1009,26 +1016,26 @@ int main(int argc, char *argv[]) {
                buffer[11], buffer[12], buffer[13], buffer[14]);
 
         // only respond if this is for OUR device
-        if (buffer[ 5] != 0xAA) { break; }
+        if (buffer[ 5] != MAC1) { break; }
 
-        if (buffer[ 6] != 0xBB) { break; }
+        if (buffer[ 6] != MAC2) { break; }
 
-        if (buffer[ 7] != 0xCC) { break; }
+        if (buffer[ 7] != MAC3) { break; }
 
-        if (buffer[ 8] != 0xDD) { break; }
+        if (buffer[ 8] != MAC4) { break; }
 
         if (buffer[ 9] != MAC5) { break; } // specifies type of radio
 
-        if (buffer[10] != 0xFE) { break; } // encodes new protocol
+        if (buffer[10] != MAC6N) { break; } // encodes new protocol
 
         memset(buffer, 0, 60);
         buffer [4] = 0x02 + active_thread;
-        buffer [5] = 0xAA;
-        buffer[ 6] = 0xBB;
-        buffer[ 7] = 0xCC;
-        buffer[ 8] = 0xDD;
+        buffer [5] = MAC1;
+        buffer[ 6] = MAC2;
+        buffer[ 7] = MAC3;
+        buffer[ 8] = MAC4;
         buffer[ 9] = MAC5; // specifies type of radio
-        buffer[10] = 0xFE; // encodes new protocol
+        buffer[10] = MAC6N; // encodes new protocol
         buffer[11] = NEWDEVICE;
         buffer[12] = 38;
         buffer[13] = 103;
