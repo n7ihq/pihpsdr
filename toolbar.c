@@ -41,7 +41,6 @@
 #include "transmitter.h"
 #include "property.h"
 #include "new_menu.h"
-#include "button_text.h"
 #include "ext.h"
 #ifdef CLIENT_SERVER
   #include "client_server.h"

@@ -301,7 +301,6 @@ appearance.c \
 band.c \
 band_menu.c \
 bandstack_menu.c \
-button_text.c \
 css.c \
 configure.c \
 cw_menu.c \
@@ -383,7 +382,6 @@ band.h \
 band_menu.h \
 bandstack_menu.h \
 bandstack.h \
-button_text.h \
 channel.h \
 configure.h \
 css.h \
@@ -462,7 +460,6 @@ appearance.o \
 band.o \
 band_menu.o \
 bandstack_menu.o \
-button_text.o \
 configure.o \
 css.o \
 cw_menu.o \

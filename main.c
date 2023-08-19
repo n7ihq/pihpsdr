@@ -42,7 +42,6 @@
 #include "new_menu.h"
 #include "radio.h"
 #include "version.h"
-#include "button_text.h"
 #include "discovery.h"
 #include "new_protocol.h"
 #include "old_protocol.h"

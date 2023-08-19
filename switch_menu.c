@@ -30,7 +30,6 @@
 #include "radio.h"
 #include "receiver.h"
 #include "vfo.h"
-#include "button_text.h"
 #include "toolbar.h"
 #include "actions.h"
 #include "action_dialog.h"

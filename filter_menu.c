@@ -31,7 +31,6 @@
 #include "radio.h"
 #include "receiver.h"
 #include "vfo.h"
-#include "button_text.h"
 #include "ext.h"
 #include "message.h"
 

@@ -53,7 +53,6 @@
   #include "client_server.h"
 #endif
 #include "property.h"
-#include "button_text.h"
 #include "message.h"
 
 static GtkWidget *discovery_dialog;
@@ -539,12 +538,6 @@ void discovery() {
   gtk_container_add (GTK_CONTAINER (content), grid);
   gtk_widget_show_all(discovery_dialog);
   t_print("showing device dialog\n");
-  //
-  // This call records the colour of the label and stores it.
-  // Subsequent calls to set_button_text_color() with color == "default"
-  // will then use that color.
-  //
-  set_button_default_color(discover_b);
   //
   // Autostart and RedPitaya radios:
   //

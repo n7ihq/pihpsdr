@@ -31,7 +31,6 @@
 #include "mode.h"
 #include "radio.h"
 #include "vfo.h"
-#include "button_text.h"
 #include "ext.h"
 
 static GtkWidget *dialog = NULL;

@@ -23,7 +23,6 @@
 #include <string.h>
 #include <wdsp.h>
 
-#include "button_text.h"
 #include "new_menu.h"
 #include "radio.h"
 #include "toolbar.h"
@@ -411,7 +410,6 @@ static void resume_cb(GtkWidget *widget, gpointer data) {
 
 static void feedback_cb(GtkWidget *widget, gpointer data) {
   transmitter->feedback = transmitter->feedback ? 0 : 1;
-  set_button_text_color(widget, transmitter->feedback ? "red" : "default");
 }
 
 static void reset_cb(GtkWidget *widget, gpointer data) {
@@ -423,7 +421,6 @@ static void reset_cb(GtkWidget *widget, gpointer data) {
 static void twotone_cb(GtkWidget *widget, gpointer data) {
   int state = transmitter->twotone ? 0 : 1;
   tx_set_twotone(transmitter, state);
-  set_button_text_color(widget, state ? "red" : "default");
 }
 
 void ps_menu(GtkWidget *parent) {
@@ -458,7 +455,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_widget_set_name(close_b,"close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
-  set_button_text_color(close_b, "default");
+  gtk_widget_set_name(close_b, "close_button");
   row++;
   col = 0;
   GtkWidget *enable_b = gtk_check_button_new_with_label("Enable PS");
@@ -467,11 +464,12 @@ void ps_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), enable_b, col, row, 1, 1);
   g_signal_connect(enable_b, "toggled", G_CALLBACK(enable_cb), NULL);
   col++;
-  GtkWidget *twotone_b = gtk_button_new_with_label("Two Tone");
+  GtkWidget *twotone_b = gtk_toggle_button_new_with_label("Two Tone");
+  gtk_widget_set_name(twotone_b, "small_toggle_button");
   gtk_widget_show(twotone_b);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(twotone_b), transmitter->twotone);
   gtk_grid_attach(GTK_GRID(grid), twotone_b, col, row, 1, 1);
-  g_signal_connect(twotone_b, "button-press-event", G_CALLBACK(twotone_cb), NULL);
-  set_button_text_color(twotone_b, transmitter->twotone ? "red" : "default");
+  g_signal_connect(twotone_b, "toggled", G_CALLBACK(twotone_cb), NULL);
   col++;
   GtkWidget *auto_b = gtk_check_button_new_with_label("Auto Attenuate");
   gtk_widget_set_name(auto_b,"boldlabel");
@@ -483,18 +481,17 @@ void ps_menu(GtkWidget *parent) {
   gtk_widget_show(reset_b);
   gtk_grid_attach(GTK_GRID(grid), reset_b, col, row, 1, 1);
   g_signal_connect(reset_b, "button-press-event", G_CALLBACK(reset_cb), NULL);
-  set_button_text_color(reset_b, "default");
   col++;
   GtkWidget *resume_b = gtk_button_new_with_label("Restart");
   gtk_grid_attach(GTK_GRID(grid), resume_b, col, row, 1, 1);
   g_signal_connect(resume_b, "button-press-event", G_CALLBACK(resume_cb), NULL);
-  set_button_text_color(resume_b, "default");
   col++;
-  GtkWidget *feedback_b = gtk_button_new_with_label("MON");
+  GtkWidget *feedback_b = gtk_toggle_button_new_with_label("MON");
+  gtk_widget_set_name(feedback_b, "small_toggle_button");
   gtk_widget_show(feedback_b);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(feedback_b), transmitter->feedback);
   gtk_grid_attach(GTK_GRID(grid), feedback_b, col, row, 1, 1);
-  g_signal_connect(feedback_b, "button-press-event", G_CALLBACK(feedback_cb), NULL);
-  set_button_text_color(feedback_b, transmitter->feedback ? "red" : "default");
+  g_signal_connect(feedback_b, "toggled", G_CALLBACK(feedback_cb), NULL);
   row++;
   col = 0;
   //

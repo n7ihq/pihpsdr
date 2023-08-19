@@ -25,7 +25,6 @@
 #include "radio.h"
 #include "new_menu.h"
 #include "store_menu.h"
-#include "button_text.h"
 #include "store.h"
 #include "mode.h"
 #include "filter.h"

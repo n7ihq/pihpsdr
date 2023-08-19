@@ -30,7 +30,6 @@
 #include "radio.h"
 #include "receiver.h"
 #include "vfo.h"
-#include "button_text.h"
 
 static GtkWidget *dialog = NULL;
 
