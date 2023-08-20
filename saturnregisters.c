@@ -249,7 +249,7 @@ uint32_t DDCRegisters[VNUMDDC] = {
 #define VKEYINB 3                       // dash key
 #define VUSERIO4 4
 #define VUSERIO5 5
-#define VUSERIO6 8
+#define VUSERIO6 6
 #define VUSERIO8 7
 #define V13_8VDETECTBIT 8
 #define VATUTUNECOMPLETEBIT 9
@@ -1861,7 +1861,7 @@ unsigned int GetP2PTTKeyInputs(void) {
     Result |= 4;  // set dash output bit
   }
 
-  if ((GStatusRegister >> VUSERIO8) & 1) {
+  if (!((GStatusRegister >> VUSERIO8) & 1)) {
     Result |= 4;  // set dash output bit if IO8 active
   }
 

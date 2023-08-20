@@ -78,29 +78,27 @@ static gboolean bandstack_select_cb (GtkWidget *widget, gpointer data) {
     g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
   }
 
-  if (current != choice) {
 
-    if (active_receiver->id == 0 && current) {
-      //
-      // vfo_bandstack_changed() calls vfo_save_bandstack(), so the frequency/mode
-      // of the previous "current" bandstack will be overwritten with the
-      // current frequency/mode, which should be reflected by the button text.
-      //
-      char label[32];
-      double f;
+  if (active_receiver->id == 0 && current) {
+    //
+    // vfo_bandstack_changed() calls vfo_save_bandstack(), so the frequency/mode
+    // of the previous "current" bandstack will be overwritten with the
+    // current frequency/mode, which should be reflected by the button text.
+    //
+    char label[32];
+    double f;
 
-      if (vfo[0].ctun) {
-        f = (double) vfo[0].ctun_frequency * 1E-6;
-      } else {
-        f = (double) vfo[0].frequency * 1E-6;
-      }
-      snprintf(label, 32, "%8.3f %s", f, mode_string[vfo[0].mode]);
-  
-      gtk_button_set_label(GTK_BUTTON(current->button), label);
+    if (vfo[0].ctun) {
+      f = (double) vfo[0].ctun_frequency * 1E-6;
+    } else {
+      f = (double) vfo[0].frequency * 1E-6;
     }
-    current = choice;
-    vfo_bandstack_changed(choice->info);
+    snprintf(label, 32, "%8.3f %s", f, mode_string[vfo[0].mode]);
+
+    gtk_button_set_label(GTK_BUTTON(current->button), label);
   }
+  current = choice;
+  vfo_bandstack_changed(choice->info);
 
   return FALSE;
 }
@@ -151,12 +149,12 @@ void bandstack_menu(GtkWidget *parent) {
     first = choice;
     choice->info=i;
     choice->button=w;
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(bandstack_select_cb), choice);
 
     if (i == vfo[active_receiver->id].bandstack) {
       current=choice;
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), TRUE);
     }
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(bandstack_select_cb), choice);
 
     col++;
 

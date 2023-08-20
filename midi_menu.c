@@ -521,9 +521,7 @@ static void load_store() {
 static void updateDescription() {
   char str_channel[64];
   char str_note[64];
-  char str_action[64];
   int  addFlag = 0;
-  char *cp;
 
   //
   // Add or update a command, both in the MIDI data base and in the
@@ -566,6 +564,8 @@ static void updateDescription() {
     MidiAddCommand(thisNote, current_cmd);
     add_store(thisNote, current_cmd);
   } else {
+    char str_action[64];
+    char *cp;
     // convert line breaks to spaces for window
     cp=strcpy(str_action, ActionTable[thisAction].str);
     while (*cp) {

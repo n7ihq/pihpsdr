@@ -429,7 +429,8 @@ void ps_menu(GtkWidget *parent) {
   //
   // Standard HPSDR gear has a step-attenuator that goes from 0-31 dB.
   // The HermesLite has a "preamp" that goes from -12 to +48 dB,
-  // and this is mapped onto an "attenuation" that goes from +31 downto -29 dB
+  // and this is mapped onto an "attenuation" for PS calibration
+  // that goes from +31 downto -29 dB
   //
   if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2) {
     tx_att_min = -29;

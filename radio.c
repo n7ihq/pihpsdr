@@ -1521,7 +1521,7 @@ void start_radio() {
 #endif
 #ifdef SATURN
 
-  if (saturn_server_en) {
+  if (have_saturn_xdma && saturn_server_en) {
     start_saturn_server();
   }
 

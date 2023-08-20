@@ -332,12 +332,12 @@ void filter_menu(GtkWidget *parent) {
     first = choice;
     choice->info=active_receiver->deviation;
     choice->button=w;
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(deviation_select_cb), choice);
 
     if (active_receiver->deviation == 2500) {
       current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(deviation_select_cb), choice);
 
     gtk_grid_attach(GTK_GRID(grid), w, 1, 1, 1, 1);
     w = gtk_toggle_button_new_with_label("5.0K");
@@ -348,12 +348,12 @@ void filter_menu(GtkWidget *parent) {
     first = choice;
     choice->info=active_receiver->deviation;
     choice->button=w;
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(deviation_select_cb), choice);
 
     if (active_receiver->deviation == 5000) {
       current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(deviation_select_cb), choice);
 
     gtk_grid_attach(GTK_GRID(grid), w, 2, 1, 1, 1);
   } else {
@@ -375,12 +375,12 @@ void filter_menu(GtkWidget *parent) {
       first = choice;
       choice->info=i;
       choice->button=w;
-      choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(filter_select_cb), choice);
 
       if (i == f) {
         current = choice;
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
       }
+      choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(filter_select_cb), choice);
 
       gtk_grid_attach(GTK_GRID(grid), w, col, row, 1, 1);
       col++;
@@ -401,12 +401,12 @@ void filter_menu(GtkWidget *parent) {
     first = choice;
     choice->info=filterVar1;
     choice->button=w;
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(filter_select_cb), choice);
 
     if (f == filterVar1) {
       current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(filter_select_cb), choice);
 
     w = gtk_toggle_button_new_with_label(band_filters[filterVar2].title);
     gtk_widget_set_name(w, "small_toggle_button");
@@ -417,12 +417,12 @@ void filter_menu(GtkWidget *parent) {
     first = choice;
     choice->info=filterVar2;
     choice->button=w;
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(filter_select_cb), choice);
 
     if (f == filterVar2) {
       current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(filter_select_cb), choice);
 
     //
     // The spin buttons either control low/high or width/shift

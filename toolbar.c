@@ -54,31 +54,31 @@ static int height;
 
 static GtkWidget *toolbar;
 
-static GtkWidget *sim_mox = NULL;
+static GtkWidget *sim_s0 = NULL;
 static GtkWidget *sim_s1;
 static GtkWidget *sim_s2;
 static GtkWidget *sim_s3;
 static GtkWidget *sim_s4;
 static GtkWidget *sim_s5;
 static GtkWidget *sim_s6;
-static GtkWidget *sim_function;
+static GtkWidget *sim_s7;
 
 SWITCH *toolbar_switches = switches_controller1[0];
 
 void update_toolbar_labels() {
-  if (sim_mox) {
+  if (sim_s0) {
     //
     // If the toolbar has not yet been on display,
-    // sim_mox and friends are NULL
+    // sim_s0 and friends are NULL
     //
-    gtk_button_set_label(GTK_BUTTON(sim_mox), ActionTable[toolbar_switches[0].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s0), ActionTable[toolbar_switches[0].switch_function].button_str);
     gtk_button_set_label(GTK_BUTTON(sim_s1), ActionTable[toolbar_switches[1].switch_function].button_str);
     gtk_button_set_label(GTK_BUTTON(sim_s2), ActionTable[toolbar_switches[2].switch_function].button_str);
     gtk_button_set_label(GTK_BUTTON(sim_s3), ActionTable[toolbar_switches[3].switch_function].button_str);
     gtk_button_set_label(GTK_BUTTON(sim_s4), ActionTable[toolbar_switches[4].switch_function].button_str);
     gtk_button_set_label(GTK_BUTTON(sim_s5), ActionTable[toolbar_switches[5].switch_function].button_str);
     gtk_button_set_label(GTK_BUTTON(sim_s6), ActionTable[toolbar_switches[6].switch_function].button_str);
-    gtk_button_set_label(GTK_BUTTON(sim_function), ActionTable[toolbar_switches[7].switch_function].button_str);
+    gtk_button_set_label(GTK_BUTTON(sim_s7), ActionTable[toolbar_switches[7].switch_function].button_str);
   }
 }
 
@@ -159,10 +159,10 @@ GtkWidget *toolbar_init(int my_width, int my_height) {
   toolbar = gtk_grid_new();
   gtk_widget_set_size_request (toolbar, width, height);
   gtk_grid_set_column_homogeneous(GTK_GRID(toolbar), TRUE);
-  sim_mox = gtk_button_new_with_label(ActionTable[toolbar_switches[0].switch_function].button_str);
-  g_signal_connect(G_OBJECT(sim_mox), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(0));
-  g_signal_connect(G_OBJECT(sim_mox), "button-release-event", G_CALLBACK(switch_released_cb), GINT_TO_POINTER(0));
-  gtk_grid_attach(GTK_GRID(toolbar), sim_mox, 0, 0, 4, 1);
+  sim_s0 = gtk_button_new_with_label(ActionTable[toolbar_switches[0].switch_function].button_str);
+  g_signal_connect(G_OBJECT(sim_s0), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(0));
+  g_signal_connect(G_OBJECT(sim_s0), "button-release-event", G_CALLBACK(switch_released_cb), GINT_TO_POINTER(0));
+  gtk_grid_attach(GTK_GRID(toolbar), sim_s0, 0, 0, 4, 1);
   sim_s1 = gtk_button_new_with_label(ActionTable[toolbar_switches[1].switch_function].button_str);
   gtk_widget_set_size_request (sim_s1, button_width, 0);
   g_signal_connect(G_OBJECT(sim_s1), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(1));
@@ -189,9 +189,9 @@ GtkWidget *toolbar_init(int my_width, int my_height) {
   g_signal_connect(G_OBJECT(sim_s6), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(6));
   g_signal_connect(G_OBJECT(sim_s6), "button-release-event", G_CALLBACK(switch_released_cb), GINT_TO_POINTER(6));
   gtk_grid_attach(GTK_GRID(toolbar), sim_s6, 24, 0, 4, 1);
-  sim_function = gtk_button_new_with_label(ActionTable[toolbar_switches[7].switch_function].button_str);
-  g_signal_connect(G_OBJECT(sim_function), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(7));
-  gtk_grid_attach(GTK_GRID(toolbar), sim_function, 28, 0, 4, 1);
+  sim_s7 = gtk_button_new_with_label(ActionTable[toolbar_switches[7].switch_function].button_str);
+  g_signal_connect(G_OBJECT(sim_s7), "button-press-event", G_CALLBACK(switch_pressed_cb), GINT_TO_POINTER(7));
+  gtk_grid_attach(GTK_GRID(toolbar), sim_s7, 28, 0, 4, 1);
   gtk_widget_show_all(toolbar);
   return toolbar;
 }

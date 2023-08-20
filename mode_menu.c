@@ -121,12 +121,12 @@ void mode_menu(GtkWidget *parent) {
     first = choice;
     choice->info=i;
     choice->button=w;
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(mode_select_cb), choice);
 
     if (i == mode) {
       current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
+    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(mode_select_cb), choice);
 
   }
 
