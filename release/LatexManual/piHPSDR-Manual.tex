@@ -10,6 +10,7 @@
 \captionsetup[figure]{name=Fig.}
 \parindent 0pt
 \parskip 6pt
+\def\rett#1{\texttt{\color{red}#1}}
 \begin{document}
 \frontmatter
 \title{
@@ -125,10 +126,13 @@ that is has support for MIDI devices, that it can run natively on the compute mo
 G2 (generation two) SDRs from Apache labs, and that is has support for Laurence Barker's ANDROMEDA controller.
 What is important here that you have to wait. This only applies to the very first time you start piHPSDR.
 On CPUs with a rather simple instruction set (like the ARM processor in the Raspberry Pi, or the Apple
-Silicon processor in recent Macintosh computers), this "planning" step is quite fast, on CPUs with very
-complex instruction sets like the Intel x86 processors, this step can last up to 15 minutes. When the
-"wisdom plans" are completed, piHPSDR tries to detect a radio on the network. If everything went well with
-the network connection, you then see a screen with a ,,discovery menu'' (Fig. \ref{fig:Start}).
+Silicon processor in recent Macintosh computers), this "planning" step is quite fast. For example, on my
+Apple M2 Mac mini, this step takes six seconds. On the contrary, on CPUs with very
+complex instruction sets like the Intel x86 processors, this step can last up to 15 minutes. But note
+this has only to be done once, in subsequent starts of piHPSDR, the ,,wisdom'' will simply be read from
+the file created during the ,,wisdom plans''.
+When the ,,wisdom'' is secured, piHPSDR tries to detect a radio on the network. If everything went well with
+the network connection, you then see a screen with a discovery menu (Fig. \ref{fig:Start}).
 
 \begin{figure}
 \center
@@ -137,13 +141,14 @@ the network connection, you then see a screen with a ,,discovery menu'' (Fig. \r
 \label{fig:Start}
 \end{figure}
 
-At this point, you can start the radio by clicking the \texttt{Start} button, but let us first explain the
-purpose of the other buttons! Easiest to explain is the \texttt{Exit} button, this will simply terminate
-the program. Most likely, you may want to go into the \texttt{Protocols} menu sooner or later.
+At this point, you can start the radio by clicking the \rett{Start} button, but let us first explain the
+purpose of the other buttons! Easiest to explain is the \rett{Exit} button, this will simply terminate
+the program. Most likely, you may want to go into the \rett{Protocols} menu sooner or later.
  By default, piHPSDR tries to
 discover the presence of a radio using all protocols known to piHPSDR. However, if you know that your radio, for
-example, uses Protocol 2, then trying to discover a Protocol-1 radio is just a waste of time. So if you
-know which types of radio you want to connect to, check these protocols. The available protocols are
+example, uses P2 (Protocol 2), then trying to discover a P1 (Protocol 1) radio is just a waste of time. So if you
+know which types of radio you want to connect to, you can enable (only) these in the \rett{Protocols} menu.
+The available protocols are
 \begin{itemize}[font=\texttt, left=80pt]
 \item[Protocol 1]{This is the "original" HPSDR protocol.}
 \item[Protocol 2]{This is the "new" HPSDR protocol.}
@@ -169,19 +174,17 @@ menu, and reconnect the radio.}
 
 Sometimes piHPSDR needs to know the IP address of the radio. This is, for example, the case for the \texttt{STEMlab} discovery
 described above. In such a case the IP address in numerical form (xxx.xxx.xxx.xxx) can be entered in the box
-with the label \texttt{Radio IP Addr:}. If a legal IP address is contained in this box, protocol-1 and protocol-2 discoveries
+with the label \rett{Radio IP Addr:}. If a legal IP address is contained in this box, protocol-1 and protocol-2 discoveries
 will also send, in addition to a broadcast discovery packet, such a packet to the IP address specified. This way one can
 connect to radios which are not on the same subnet as the computer, in principle you can connect to any radio on the world
 provided it is on the internet. However, the original HPSDR standard states that a broadcast packet must be used, so several
 radios won't reply. On the other hand, there are some radios such as a RedPitaya or a HermesLite-II which allow being discovered
 by such a routed packet. 
 
-The \texttt{Discover} button re-starts the discovery process. This is useful if the radio has been powered up too late and
-was not yet ready when piHPSDR was started. Simply press \texttt{Discover} to give another try.
+The \rett{Discover} button re-starts the discovery process. This is useful if the radio has been powered up too late and
+was not yet ready when piHPSDR was started. Simply press \rett{Discover} to give another try.
 
-The \texttt{Configure GPIO} button opens a menu that currently has no function, so it is not described here.
-
-The combo-box (pop-down menu) to the left of the \texttt{Discover} button lets you choose which type of GPIO controller you
+The combo-box (pop-down menu) to the left of the \rett{Discover} button lets you choose which type of GPIO controller you
 have attached to the computer. This menu is only available if piHPSDR has been compiled with the \texttt{GPIO} option, which
 is not the case on desktop/laptop computers. The menu lets you choose between
 
@@ -200,7 +203,7 @@ your Raspberry Pi, the program my hang when trying to open the I2C connection.
 All settings (protocols, controller, IP address) made in this menu are stored in the global (radio-indepentend) settings
 and are restored when piHPSDR is started the next time. 
 
-If all went well, a radio could be discovered and you hit the \texttt{Start} button, the radio is started, and
+If all went well, a radio could be discovered and you hit the \rett{Start} button, the radio is started, and
 if this succeeds, you see something like shown in Fig. \ref{fig:FirstDisplay}.
 
 \begin{figure}
@@ -211,11 +214,11 @@ by default when using a controller.}
 \label{fig:FirstDisplay}
 \end{figure}
 
-The bottom of the window looks different (more controls) if you have chosen \texttt{No Controller} in the preceeding menu.
+The bottom of the window looks different (more controls) if you have chosen \rett{No Controller} in the preceeding menu.
 You see two receiver panels stacked vertically, both of them having a spectrum display and a waterfall area. At the top,
 just below the window title, you have the VFO bar which contains information on the frequencies of the two VFOs A and B,
-as well as lots of further information, to be explained later. At the top right, there are two buttons \texttt{Hide}
-and \texttt{Menu} which will be explained in the next chapter. To the left of these two buttons, there is the meter
+as well as lots of further information, to be explained later. At the top right, there are two buttons \rett{Hide}
+and \rett{Menu} which will be explained in the next chapter. To the left of these two buttons, there is the meter
 bar which by default is a digital S-meter. At this point, you have started piHPSDR successfully for the first time.
 
 \chapter{Main window layout}
@@ -339,8 +342,8 @@ a sample rate of 96 kHz for a receiver, its spectrum
 will be 96 kHz wide, which may encompass a larger part
 of the spectrum than you are interested in. As a drawback,
 the part which is relevant to you may look a little bit
-compressed. This is where the \texttt{Zoom} function
-comes in. The Zoom value can adopt integral values between
+compressed. This is where the \rett{Zoom} function
+comes in. The zoom value can adopt integral values between
 1 (no zoom) and 8. In the latter case, only 1/8 of the
 overall spectrum is displayed on the screen. In the
 picture below, you see that the RX scope is only 12 kHz
@@ -348,20 +351,20 @@ wide (which is 1/8 of the RX sample rate, 96 kHz in our
 example). Note that what is displayed is in full resolution.
 Internally, a spectrum with 8 times the number of pixels
 of the screen width is created and only a part of it is
-displayed. The Zoom value can be changed using the Zoom
+displayed. The zoom value can be changed using the \rett{Zoom}
 slider (at the left edge below the RX panel).
 
 
-When using a Zoom value larger than one, this means that
+When using a zoom value larger than one, this means that
 a spectrum with more pixels than the actual screen width
 is produced. One can select which part of that area
-is displayed on the screen with the \texttt{Pan} slider
+is displayed on the screen with the \rett{Pan} slider
 (below the RX panel at the right side). Normally (Zoom=1),
 the VFO dial frequency is exactly in the middle of the
 RX scope, and marked with a thin red line. On the picture
 above, the dial frequency (14.100 MHz) is found in the RX
 panel close to the left edge, and this has been done
-by moving the \texttt{Pan} slider.
+by moving the \rett{Pan} slider.
 
 \section{The \texttt{Hide} button}
 \begin{figure}[h]
@@ -375,11 +378,11 @@ On small screens, space is scarce. This in in particular true
 for the vertical space if one used two RX panels and both
 with a spectrum scope and a waterfall. I this case, it may be
 hard to actually watch the signals if the screen is small.
-This is where the \texttt{Hide} button comes in. Clicking on
+This is where the \rett{Hide} button comes in. Clicking on
 this button ,,hides'' the toolbar and slider area:
 
 
-The text on the button then changes to \texttt{Show}, and
+The text on the button then changes to \rett{Show}, and
 clicking this button again will then return to the
 previous display.
 
@@ -397,12 +400,12 @@ in this information, it is recommended to open the
 Between the title bar and the RX spectrum scope, you see
 a small vertical area, most of  which is taken by the VFO bar
 (containing the large frequency dials). At the rightmost
-end of this area, you see two buttons \texttt{Hide} (already
-discussed) and \texttt{Menu}. Clicking on the latter button opens
+end of this area, you see two buttons \rett{Hide} (already
+discussed) and \rett{Menu}. Clicking on the latter button opens
 the main menu, which will be discussed in detail in the following
-chapters. The \texttt{Menu} button is really important, since it
+chapters. The \rett{Menu} button is really important, since it
 enables access to one of the menus used for configuring piHPSDR.
-Between the VFO bar and the \texttt{Hide}/\texttt{Menu} buttons,
+Between the VFO bar and the \rett{Hide}/\rett{Menu} buttons,
 you see the meter area where you find the S-meter (during RX)
 and information about output power, SWR, etc. during TX.
 
@@ -418,7 +421,7 @@ unless you have a GPIO or MIDI controller which knobs that
 you can asssign to the slider functions. This is so since
 for  normal operation, having access to the sliders is vital.
 Remember that for temporarily enlarging the space for
-the RX  panel, there is the \texttt{Hide} button!
+the RX  panel, there is the \rett{Hide} button!
 
 \begin{figure}
 \center
@@ -437,23 +440,25 @@ because this function does not have a slider in that area,
 then a graphical slider will temporarily pop up in the
 middle of the window to inform you about the changes 
 you have  made. To give one example, a knob at a
-MIDI console has been assigned to the \texttt{ATTEN}
-function (see Appendix A), which controls the step 
+MIDI console has been assigned to the RF attenuator (\texttt{ATTEN}
+function, see Appendix A), which controls the step 
 attenuator in the RF front-end (if there is one). As long
-as the  sliders  are  on display, the \texttt{ATT} slider
+as the  sliders  are  on display, the \texttt{Att} slider
 in the left part of the slider area moves when turning
-the knob. But when the sliders are hidden, e.g. via
-the \texttt{Display} menu, then a slider image
+the knob. But when the sliders are not displayed, then a slider image
 pops up  on the middle of the screen, and the
 bar contained therein moves when turning the knob,
 and the numerical value is displayed as well (Fig. \ref{fig:SliderOnScreen}).
+Such a pop-up slider always occurs if a knob on the GPIO or MIDI
+console is turned and no slider associated with the value changing is
+on display.
 
 
 \section{Mouse clicks in the main window}
 The main window ,,accepts'' mouse or touchscreen click events.
 Some of them come from the standard handlers of the GUI. It is
-clear, for example, that clicking the \texttt{Hide} or
-\texttt{Menu} buttons, as well as clicking one of the
+clear, for example, that clicking the \rett{Hide} or
+\rett{Menu} buttons, as well as clicking one of the
 toolbar buttons, will activate the function associated with
 these buttons. Furthermore, the sliders (and the squelch enable/disable
 checkbox) in the sliders and Zoom/Pan are are operated as usual.
@@ -549,11 +554,10 @@ yellow and sometimes in red.
 
 At the top left  corner of the VFO bar, the mode and
 filter of the currently active receiver is displayed. 
-In Fig. \ref{fig:VFObar}, you can see that the  mode
-is  CWU (upper side band CW) and the RX filter with
-designation  "250" (it is easy to guess that this
-filter is 250 Hz wide, see the \texttt{Filter} menu).
-For CWU and CWL, the CW speed (in wpm) and the side tone
+In Fig. \ref{fig:VFObar}, the text is \texttt{USB Var1}
+which indicates that the  mode
+is USB using the Var1 filter with variable width (see the \texttt{Filter} menu).
+For the CW (CWU and CWL) modes, the CW speed (in wpm) and the side tone
 frequency (in Hz) is stated as well.
 
 Now we continue line by line, from left to right and find
@@ -704,7 +708,65 @@ is described in the \texttt{Meter} menu.
 \center
 \includegraphics[width=12cm]{MainMenu.png}
 \caption{The Main men, opened by the \texttt{Menu} button.}
+\label{fig:MainMenu}
 \end{figure}
+
+Now we have a series of chapters that discuss all the piHPDSR menus. Many menus can be
+opened by a "button" action, e.g. hitting the "MODE", "FILT", or "NOISE" button on the
+toolbar you have seen in the last picture. You already know that the VFO and Meter
+menus can be opened by clicking into the VFO or meter section at the top of the window.
+When operating with a mouse, a secondary click in the RX or TX panadapter opens the
+RX or TX menu. But there is one place from which \textit{all} piHPSDR menus are at hand,
+and this is the "Main Menu". It can be opened by clicking into the "Menu" button at the
+top right corne of the piHPSDR window, the outcome is shown in Fig. \ref{fig:MainMenu}.
+
+Some remarks have to be made about menus in general. Since piHPSDR is optimized for
+working with small screens, only one menu can be open at a time. If a menu is open
+and one tries to open another one, the first menu will be destroyed (closed) and the
+new one will be opened. For example, if you hit the \texttt{FILT} button in the toolbar
+when starting from Fig. \ref{fig:MainMenu}, the main menu closes and the Filter menu
+opens. If you try to open a menu that is already open, then the menu will be closed.
+So, starting from Fig. \ref{fig:MainMenu} hitting the "Menu" button again will close
+the menu. Likewise, when the Filter menu has been opened, either via the Main Menu
+or with the \texttt{FILT} button, then hitting this button again will close the menu.
+
+While the menus are looking quite diverse, some effort has been invested to keep
+some things consistent throughout. For example, at the top left corner of the menu
+you usually find the "Close" button which closes the menu. The close button is somewht
+emphasised (slightly larger letters, and a thin border) so you will always quickly find it.
+Of course, it it possible to close a menu by deleting the menu window (on RaspberryPi,
+this is the small cross at the left of the title bar) but this is neither necessary nor
+recommended.
+
+There are some commands available here that do not directly affect the radio operation,
+so these commands are found in the top and bottom line of the Main Menu. We first 
+mention the \texttt{Restart} button in the middle of the top line. This restarts the
+radio protocol. While not needed under normal circumstances, it my happen (especially
+with beta releases of radio FPGA firmware) that the data exchange between piHPSDR and
+the radio gets out-of-sync. I observed such problems with early versions of the P2
+firmware for Orion2 boards and that is the reason the \texttt{Restart} button is
+there, since this made a quick recovery possible without loosing the QSO.
+At the bottom right, there is the \texttt{Iconify} button which ,,minimizes'' the
+piHPSDR window. Normally, if needed, one can do so by standard methods of the
+operating system in the title bar of the piHPSDR window. If piHPSDR, however,
+runs in full-screen mode (this is the case on very small touch screens), then the
+\texttt{Iconify} button to make the piHPSDR window temporarily disappear without
+breaking the connetion to the radio, do some work with the operating system, and
+get the piHPSDR window back. Note in earlier versions of piHPSDR this function was
+associated with the "Hide" button in the top right corner of the main window.
+Then, there are two menus ("Exit" and "About") which are described in due course and which
+one can open by clicking either "Exit piHPDSR" or "About" in the main menu.
+
+The other buttons, between the two horizontal separator lines, give access to piHPSDR
+control and fine tuning. They are organized in six columns, namely radio related
+menus (first column), VFO related menus (second column), RX and TX related menus (third
+and fourth column), menus affecting both RX and TX (fifth column) and, finally,
+menus for adjusting how you can control piHPSDR (sixth column), either via Toolbar,
+MIDI, or GPIO encoders or switches. \textbf{,,Encoders''} are knobs which you can turn, and which
+can be used to change AF volume or TX output power. \textbf{,,Switches''} are push-buttons which
+can be used to trigger a function such as transmitting a carrier for tuning, toggle
+between RX and TX, open a menu, and so forth.
+
 
 \section{The \texttt{Exit} Menu}
 
@@ -714,7 +776,24 @@ is described in the \texttt{Meter} menu.
 \caption{The \texttt{Exit} menu.}
 \end{figure}
 
+Via the \texttt{Exit} menu, you can leave the piHPSDR program. When leaving the program,
+the radio protocol is stopped and all the settings are written to a preferences file. This
+file is located in the piHPSDR directory and takes the name xx-xx-xx-xx-xx-xx.progs, where
+the xx encode the MAC address for the radio. So the preferences for different radios (if you
+have more than one) are stored in different files. To leave the program, just click the
+"Exit" button in this menu. If you decide you want to continue, you can leave the \texttt{Exit}
+menu by clicking the "Cancel" button. This is the button which closes the menu and has
+the same position and look as the "Close" buttons in all the other menus.
+
+If piHPSDR runs with administrator privileges, you can even leave the program and either re-boot
+or switch off the computer via the "Reboot" and "Shutdown" buttons. This makes sense for setups 
+where a Raspberry Pi running piHPSDR, a small SDR radio, a touch-screen and several encoders
+and switches are built into a single common enclosure. On the other hand, when running
+piHPSDR on desktop or laptop computers, clicking "Reboot" or "Shutdown" both leave the piHPSDR
+program but no re-boot or shutdown takes place, due to missing administrator privileges.
+
 \section{The \texttt{About} Menu}
+
 
 \begin{figure}[h]
 \center
@@ -722,14 +801,55 @@ is described in the \texttt{Meter} menu.
 \caption{The \texttt{About} menu.}
 \end{figure}
 
-\chapter{The Main Menu: Radio-related menus}
+The about menu gives you some information about piHPSDR, first the original author
+and an (incomplete) list
+of persons who contributed to the code, and then a statement which version of piHPSDR
+is working here, and when it has been compiled. Here you also find the version number of the WDSP
+ library which is the ,,engine''
+running under the hood, and which does nearly all of the signal processing. Finally, there is
+some data on the radio, namely the device type and version numbers, and which protocol is running.
+For diagnostic purposes, you also see the MAC address of the radio, its IP address and the
+IP address of the computer running piHPSDR. The MAC address is of interest since the radio-specific
+preferences are stored in a file whose name is derived from the radio's MAC address.
 
+\chapter{The Main Menu: Radio-related menus}
 \section{The \texttt{Radio} Menu}
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{RadioMenu.png}
 \caption{The \texttt{Radio} menu.}
+\label{fig:RadioMenu}
 \end{figure}
+
+
+The Radio menu lets you make settings which affect the general setting, and the hardware of the radio.
+The following figure (Fig. \ref{fig:RadioMenu}) shows the menu as it opens on an Anan G2 radio.
+Note this menu looks slightly different for different radios and protocols, this will be discussed
+at the end of the section. First, we go through all the elements we see in Fig. \ref{fig:RadioMenu},
+they will be colored red in the following list.
+
+\rett{Receivers.} In the pop-down menu (GTK combo-box) below this string, you can select the number
+of receivers that are running (well, you can choose between 1 and 2). When the number of receivers change,
+the radio communication will shortly be stopped and then resumed, so do not be surprised if the spectrum
+scope freezes for a second or so.
+
+\rett{RIT/XIT step.} In the pop-down menu you can choose among three (1 Hz, 10 Hz, 100 Hz) step sizes
+for RIT and XIT. For example, if the RIT step is 10 Hz, then you can change the RIT offset in steps of
+10 Hz with the RIT+ or RIT- buttons in the toolbar or on the GPIO/MIDI controller.
+
+\rett{Region.} Although not obvious, this selects settings for the 60m band. Possible choices are "Other",
+"US", "UK" and "WRC15". The US and UK choices implement the channel structure of the 60m band according
+to the regulations valid in these countries. "WRC15" gives you a small (15 kHz wide) 60m band according to the WRC15
+(World Radio Conference 2015) document, which is now implemented in many countries. With "Other" you
+have a large 60m band from 5250 o 5450 kHz, but it is most likely not legal for you to operate in this
+entire range.
+
+\rett{Orion/Saturn Mic jack.} Modern radios can switch the connections of the TRS microphone jack in software.
+While the ring of the TRS plug is always connected to ground, the microphone and PTT connections are on the
+ring an tip and you can choose which one is on the ring and which one on the tip. You can then separately
+enable the PTT function of the jack, and select whether a bias (DC offset) is applied to the mic connetion
+(this is necessary for condensor microphones and detrimental if a dynamic mirophone is connected without
+a blocking capacitor).
 
 \section{The \texttt{Screen} Menu}
 
