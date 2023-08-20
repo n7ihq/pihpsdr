@@ -11,6 +11,7 @@
 \parindent 0pt
 \parskip 6pt
 \def\rett#1{\texttt{\color{red}#1}}
+\def\bltt#1{\texttt{\color{blue}#1}}
 \begin{document}
 \frontmatter
 \title{
@@ -32,6 +33,14 @@ the Creative Commons licence CC BY-SA, version 4 or later, so it can be freely d
  This license also allows reusers to distribute, modify and build upon the material in any medium or format,
 as long as attribution is given to the creator. The license allows for commercial use.
 If you modify or build upon the material, you must license the modified material under identical terms.
+
+\textbf{Disclaimer.} The manual has been written with the intention that it is useful. It is quite clear that it
+still contains errors, therefore it is stressed here that it comes without any warranty. The reader is hereby
+explicitly warned that through wrong use of an SDR program such as piHPSDR, it is possible to damage the
+radio hardware.
+
+\textbf{Trade marks.} Registered trade marks are not marked with a sign in this manual. From the absence of a
+trademark sign, it cannot be concluded that a mark you find in this manual is not registered or not protected.
 
 \bigskip
 \textbf{The author:}
@@ -95,17 +104,25 @@ operating system. A manual of how to compile piHPSDR from the sources is availab
 see \texttt{https://github.com/dl1ycf/pihpsdr-compile-from-sources}, so this will not be covered in 
 the present manual. This manual starts with the first invocation of a freshly compiled piHPSDR.
 
+Within this manual, we shall use a typewriter font in red color if we refer to a text or a button within
+a menu of within the VFO bar. piHPSDR menus and commands are indicated through a typewriter font
+printed in blue. The author hopes that this improves readability. In some cases, if the name of a command
+or  menu is written on the screen, you may find the same string both typed in red and blue in the description,
+depending on whether the text refers to the command in an abstract sense or to the string as it can be found
+on the screen. This may be confusing upon first reading, but I shall try to follow the coloring convention
+as laid out here.
+
 \chapter{Starting piHPSDR for the first time}
 Let us assume you have an SDR (say, an ANAN-7000 or a HermesLite-II) powered up and connected to an antenna,
 and you have piHPSDR installed on a computer (say, a Raspberry Pi or an Apple Macintosh), the first thing to
 do is to establish a proper connection between the computer and the radio. Although advocated at many places,
-I do highly recommend against a WiFi connection. WiFi routers often use ,,optimizations'' where they hold
+I do highly recommend against a WiFi connection. WiFi routers often use optimizations where they hold
 back data packets for a given client for a while, to be able to send a collection of them in a burst. While
-this certainly optimizes the through-put because it minimizes clear-channel arbritration events, such jitters
+this certainly optimizes the through-put because it minimizes clear-channel arbitration events, such jitters
 are desastrous in SDR operation. The safest way of connecting the radio and the computer is to have a
 managed switch with a built-in DHCP server, and to connect both the computer and the radio with a suitable
 cable to the switch. If the computer has both a RJ45 jack for an ethernet cable, and a WiFi interface, my
-personal recommendation is to use WiFi to connect to the internet, and use a single ,,direct cable'' plugged
+personal recommendation is to use WiFi to connect the computer to the internet, and use a single direct cable plugged
 into the RJ45 jacks of the computer and of the radio. This is a little bit tricky since both the computer
 and the radio have to be set to a fixed IP address (e.g. computer: 192.168.1.50, radio: 192.168.1.51) with
 the same netmask. However, once this has been done, this is the safest connection with no perturbations from
@@ -114,7 +131,7 @@ elsewhere.
 \begin{figure}
 \center
 \includegraphics[width=12cm]{Planning.png}
-\caption{piHPSDR screen while completing the ,,wisdom plans''.}
+\caption{piHPSDR screen while completing the \textit{wisdom plans}.}
 \label{fig:Planning}
 \end{figure}
 
@@ -126,12 +143,13 @@ that is has support for MIDI devices, that it can run natively on the compute mo
 G2 (generation two) SDRs from Apache labs, and that is has support for Laurence Barker's ANDROMEDA controller.
 What is important here that you have to wait. This only applies to the very first time you start piHPSDR.
 On CPUs with a rather simple instruction set (like the ARM processor in the Raspberry Pi, or the Apple
-Silicon processor in recent Macintosh computers), this "planning" step is quite fast. For example, on my
+Silicon processor in recent Macintosh computers), this so-called  \textit{planning} step is quite fast. For example, on my
 Apple M2 Mac mini, this step takes six seconds. On the contrary, on CPUs with very
 complex instruction sets like the Intel x86 processors, this step can last up to 15 minutes. But note
-this has only to be done once, in subsequent starts of piHPSDR, the ,,wisdom'' will simply be read from
-the file created during the ,,wisdom plans''.
-When the ,,wisdom'' is secured, piHPSDR tries to detect a radio on the network. If everything went well with
+this has only to be done once, in subsequent starts of piHPSDR, the wisdom will simply be read from
+the file created during the \textit{wisdom plans}. These plans contain, for a large number of dimensions, the
+fasted way how to perform FFTs (fast Fourier transformations) on the given CPU.
+When the wisdom is secured, piHPSDR tries to detect a radio on the network. If everything went well with
 the network connection, you then see a screen with a discovery menu (Fig. \ref{fig:Start}).
 
 \begin{figure}
@@ -175,7 +193,8 @@ menu, and reconnect the radio.}
 Sometimes piHPSDR needs to know the IP address of the radio. This is, for example, the case for the \texttt{STEMlab} discovery
 described above. In such a case the IP address in numerical form (xxx.xxx.xxx.xxx) can be entered in the box
 with the label \rett{Radio IP Addr:}. If a legal IP address is contained in this box, protocol-1 and protocol-2 discoveries
-will also send, in addition to a broadcast discovery packet, such a packet to the IP address specified. This way one can
+will also send to the IP address specified, in addition to the standard broadcast discovery packets which can only reach
+radios on the same network segment. With a known IP address,  one can
 connect to radios which are not on the same subnet as the computer, in principle you can connect to any radio on the world
 provided it is on the internet. However, the original HPSDR standard states that a broadcast packet must be used, so several
 radios won't reply. On the other hand, there are some radios such as a RedPitaya or a HermesLite-II which allow being discovered
@@ -189,7 +208,7 @@ have attached to the computer. This menu is only available if piHPSDR has been c
 is not the case on desktop/laptop computers. The menu lets you choose between
 
 \begin{itemize}[font=\texttt, left=80pt]
-\item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi.}
+\item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi. This is the default when you first start piHPSDR.}
 \item[Contoller1]{Choose this if you have a "version 1" piHPSDR controller.}
 \item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller with single encoders.}
 \item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encocders.}
@@ -240,8 +259,8 @@ piHPSDR can be switched between having one or two receivers in the
  active.
  
  Many conventional rigs with two independent receivers discriminate
- between the "main" and the "sub" receiver. It is important that
- this is \textit{not} the case for piHPSDR. Both  receivers are
+ between the \textit{main} and the \textit{sub} receiver. It is important that
+ this is \textbf{not} the case for piHPSDR. In piHPDSR, both  receivers are
  largely equivalent. For example, if you start transmitting in
  normal (non-split) mode, the TX frequency matches the frequency
  of the active receiver, no matter whether this is RX1 or RX2.
@@ -263,11 +282,11 @@ piHPSDR can be switched between having one or two receivers in the
  has two RF frontend with two analog-to-digital converter4s (ADC,
  as most modern radios do. In this case, one usually
  assigns the first ADC (ADC0) to RX1 and the second ADC (ADC1) to
- RX2. This can be done in the \texttt{RX} menu.
+ RX2. This can be done in the \bltt{RX} menu.
  
  By default, if there are two receivers, they are vertically stacked,
  with RX1 in the upper part and RX2 in the lower part of the display.
- This can be changed in the \texttt{Screen} menu to horizontal stacking,
+ This can be changed in the \bltt{Screen} menu to horizontal stacking,
  where RX1 is  in the left half and RX2 in the right half of  the 
  display. Changing the stacking trades vertical against horizontal
  resolution, of course.
@@ -285,7 +304,7 @@ Sliders, Toolbar) at the  bottom.}
  window with a single receiver. 
  The RX panel only contains a
  spectrum scope with a white line and no waterfall (this can be changed in the
- \texttt{Display} menu. In addition, you see the toolbar
+ \bltt{Display} menu. In addition, you see the toolbar
  with eight buttons at the lower edge of the window, and above
  it an area with sliders. Showing the sliders is the default
  (and necessary) if there is no GPIO or MIDI controller attached,
@@ -294,8 +313,8 @@ Sliders, Toolbar) at the  bottom.}
  by VFO-A. VFO-B then actually controls nothing (except the TX
  frequency in split mode), but the data stored in VFO-B can
  be quickly used, for example by copying VFO-B to VFO-A (the
- \texttt{A<B} command), or by swapping the two VFOs (the
- \texttt{A<>B} command).
+ \bltt{A<B} command), or by swapping the two VFOs (the
+ \bltt{A<>B} command).
 
 \section{Spectrum scope options}
 
@@ -303,7 +322,7 @@ You have already seen two different spectrum scopes: in the first
 picture, the  spectrum was a filled green area, while in the last
 picture, there only was a white line (this is similar to what you
 would see on a spectrum analyzer). This can be adjusted to your
-personal preference in the \texttt{Display} menu (see below). There
+personal preference in the \bltt{Display} menu (see below). There
 are two options which you can enable or disable, such that there
 are four different outcomes. The first option is the ,,Filled'' option
 which discriminates between a line spectrum and a spectrum which is
@@ -322,7 +341,7 @@ spectrum is displayed in white colour. With the gradient option,
 the colour changes from green over yellow towards red depending
 on the signal strength (red colour is reached for S9). The above
 picture demonstrates the four possible combinations, and in
-the \texttt{Display} menu, you can make your choice. This setting
+the \bltt{Display} menu, you can make your choice. This setting
 refers to both receivers when there are two. Note that the TX
 spectrum can be a filled one or a line spectrum, but that the
 gradient option does not apply.
@@ -342,7 +361,7 @@ a sample rate of 96 kHz for a receiver, its spectrum
 will be 96 kHz wide, which may encompass a larger part
 of the spectrum than you are interested in. As a drawback,
 the part which is relevant to you may look a little bit
-compressed. This is where the \rett{Zoom} function
+compressed. This is where the \bltt{Zoom} command
 comes in. The zoom value can adopt integral values between
 1 (no zoom) and 8. In the latter case, only 1/8 of the
 overall spectrum is displayed on the screen. In the
@@ -395,7 +414,7 @@ the display size. The title bar contains some basis information
 about the radio, e.g.  its type, the protocol used, the  IP
 and the hardware address of the radio. If you are really interested
 in this information, it is recommended to open the
-\texttt{About} menu.
+\bltt{About} menu.
 
 Between the title bar and the RX spectrum scope, you see
 a small vertical area, most of  which is taken by the VFO bar
@@ -411,12 +430,12 @@ and information about output power, SWR, etc. during TX.
 
 Below the RX  spectrum scope, you see the Zoom/Pan area with
 the  Zoom and Pan sliders, as already discussed. This area
-can be ,,hidden'' with the \texttt{Display} menu to save some
+can be ,,hidden'' with the \bltt{Display} menu to save some
 vertical space. Below the
 Zoom/Pan sliders you see a larger  Sliders area containing
 several sliders for adjusting AF volume, TX  drive leve, 
 RX  AGC threshold, etc. Although the Sliders area can also
-be hidden via the \texttt{Display} menu, you should not do so
+be hidden via the \bltt{Display} menu, you should not do so
 unless you have a GPIO or MIDI controller which knobs that
 you can asssign to the slider functions. This is so since
 for  normal operation, having access to the sliders is vital.
@@ -440,11 +459,11 @@ because this function does not have a slider in that area,
 then a graphical slider will temporarily pop up in the
 middle of the window to inform you about the changes 
 you have  made. To give one example, a knob at a
-MIDI console has been assigned to the RF attenuator (\texttt{ATTEN}
+MIDI console has been assigned to the RF attenuator (\bltt{Atten}
 function, see Appendix A), which controls the step 
 attenuator in the RF front-end (if there is one). As long
-as the  sliders  are  on display, the \texttt{Att} slider
-in the left part of the slider area moves when turning
+as the  sliders  are  on display, the \rett{Att} slider
+in the right part of the slider area moves when turning
 the knob. But when the sliders are not displayed, then a slider image
 pops up  on the middle of the screen, and the
 bar contained therein moves when turning the knob,
@@ -469,9 +488,9 @@ the panel of the non-active receiver makes it active. On the other
 hand, a mouse click in the panel of the active receiver changes
 the VFO frequency of that receiver to the value clicked on.
 This means, if you see a signal in the spectrum scope, click
-on that signal and your VFO will move (,,jump'') to that signal.
+on that signal and your VFO will move (\textit{jump}) to that signal.
 Note the VFO frequency will be  rounded to the next multiple of
-the VFO step size when ,,jumping'' by a mouse  click or
+the VFO step size when jumping by a mouse  click or
 touch screen press.
 
 The second option to change the VFO frequency of the active receiver
@@ -481,14 +500,14 @@ VFO frequency by the amount dragged, it makes no difference
 where the first click actually occured, only the difference
 in horizontal position between click and release is used. You must
 drag at least three pixels so there is clear discrimination between
-a ,,VFO jump'' (click then release) and a ,,VFO drag'' (click, drag,
+a ,\textit{VFO jump} (click then release) and a \textit{VFO drag} (click, drag,
 and release) operation. Finally, the VFO frequency of the active
 receiver can be changed by the scroll wheel of the mouse, if there
 is any. Using the scroll wheel lets the VFO frequency move in multiples
 of the VFO step size, while mouse dragging can also be used for
 finer tuning.
 
-Clicking into the VFO bar opens the \texttt{FREQ} (VFO) menu,
+Clicking into the VFO bar opens the \bltt{FREQ} (VFO) menu,
 for the VFO-A if clicked into the left half of the bar, and for
 VFO-B if clicked into the right half. This menu not only offers
 the possibility for direct frequency entry, but also lets you 
@@ -497,7 +516,7 @@ CTUN, or Split states. So a simple click in the VFO bar
 gets you quick access to often-used functions.
 
 Clicking in the meter section (between the VFO bar and the
-Hide/Menu buttons) opens the \texttt{METER} menu, where
+Hide/Menu buttons) opens the \bltt{METER} menu, where
 you can change the meter properties (see below).
 
 When operating with a mouse, there are usually two mouse buttons,
@@ -510,14 +529,14 @@ secondary one later, so it is not possible to generate a
 single ,,secondary press'' event. But for the benefit of
 mouse users, secondary mouse clicks are handled in a special way:
 
-A secondary click into the VFO bar will open the \texttt{BAND} menu,
+A secondary click into the VFO bar will open the \bltt{BAND} menu,
 so a band change can be made with really few mouse clicks. Likewise,
 a secondary click into the panel of a receiver (no matter if it
-the active or the non-active one) will open the \texttt{RX} menu
+the active or the non-active one) will open the \bltt{RX} menu
 for that receiver. This can be used to change the settings of a
 non-active receiver without making it temporarily active. In the
 same way, a secondary click in the TX panel will open the
-\texttt{TX} menu.
+\bltt{TX} menu.
 
 \section{VFO bar and status  indicators}
 \begin{figure}[h]
@@ -531,9 +550,9 @@ Fig. \ref{fig:VFObar} shows the VFO bar layout in more  detail.
 The example shown is a VFO bar whose width is 745 pixels and
 thus suitable for screens that are 1024 pixels wide (or more),
 since the meter area has a fixed width of 200 pixels, and
-the \texttt{Hide/Menu} buttons are 65 pixels wide. This layout is
+the \rett{Hide}/\rett{Menu} buttons are 65 pixels wide. This layout is
 denoted \texttt{Large dials for 1024px windows}, as to the choice
-of VFO bar layouts, see the description of the \texttt{Screen} menu.
+of VFO bar layouts, see the description of the \bltt{Screen} menu.
 
 The large dials indicating the frequencies of VFO-A and VFO-B
 are easily recognized. The number to the left of the decimal
@@ -554,59 +573,59 @@ yellow and sometimes in red.
 
 At the top left  corner of the VFO bar, the mode and
 filter of the currently active receiver is displayed. 
-In Fig. \ref{fig:VFObar}, the text is \texttt{USB Var1}
+In Fig. \ref{fig:VFObar}, the text is \rett{USB Var1}
 which indicates that the  mode
-is USB using the Var1 filter with variable width (see the \texttt{Filter} menu).
+is USB using the Var1 filter with variable width (see the \bltt{Filter} menu).
 For the CW (CWU and CWL) modes, the CW speed (in wpm) and the side tone
 frequency (in Hz) is stated as well.
 
 Now we continue line by line, from left to right and find
-the string \texttt{AGC med} printed in yellow. This means
+the string \rett{AGC med} printed in yellow. This means
 that automatic gain control (AGC)  is effective  in the
 active receiver, and that the AGC time constant is
 intermediate. Possible values for the time constant 
 are Long, Slow, Medium and Fast which can be selected
-in the \texttt{AGC} menu. Here one can  also disable AGC,
-in this case the VFO bar shows \texttt{AGC off} in grey
+in the \bltt{AGC} menu. Here one can  also disable AGC,
+in this case the VFO bar shows \rett{AGC off} in grey
 colour.
 
 Continuing to the left, we see the noise reduction settings,
 all printed in grey (that is, they are not effective). This
-can be changed in the \texttt{Noise} menu. We have two different
-noise reduction capabilities \texttt{NR1} and \texttt{NR2}, these
-strings are printed in yellow instead of the grey \texttt{NR} if
+can be changed in the \bltt{Noise} menu. We have two different
+noise reduction capabilities \rett{NR1} and \rett{NR2}, these
+strings are printed in yellow instead of the grey \rett{NR} if
 they are effective. There are also two different noise blankers
-\texttt{NB1} and \texttt{NB2}, the automatic notch  filter
-\texttt{ANF} and the spectral  noise blanker \texttt{SNB}.
+\rett{NB1} and \rett{NB2}, the automatic notch  filter
+\rett{ANF} and the spectral  noise blanker \rett{SNB}.
 Besides enabling/disabling these functions, there are  further parameters
-you can tweak in the \texttt{Noise} menu.
+you can tweak in the \bltt{Noise} menu.
 
 The next strings whether Diversity reception is enabled or disabled
-(\texttt{DIV}), or whether an equalizer is effective \texttt{EQ}.
+(\rett{DIV}), or whether an equalizer is effective \rett{EQ}.
 Since there is a separate equalizer for the RX and TX audio chain,
 the equalizer indicator, if it is effective, not only turns yellow
-but reads \texttt{RXEQ} while receiving and \texttt{TXEQ} while
+but reads \rett{RXEQ} while receiving and \rett{TXEQ} while
 transmitting. This means, if only the TX equalizer is enabled,
-the indicator will show a  grey \texttt{EQ} while receiving
-and a yellow \texttt{TXEQ}  while  transmitting.
+the indicator will show a  grey \rett{EQ} while receiving
+and a yellow \rett{TXEQ}  while  transmitting.
 
-The last indicator in the top row  is \texttt{CAT} which indicates
-if the CAT module  (see the \texttt{RIGCTL}  menu) has accepted at least
+The last indicator in the top row  is \rett{CAT} which indicates
+if the CAT module  (see the \bltt{RIGCTL}  menu) has accepted at least
 one connection. In total, piHPSDR can be CAT-controlled simultaneously
 by five different sources, two of them using a serial line and
 three of them a TCP connection. 
 
 The indicators in the middle, between the VFO dials, are related to
-transmitting. \texttt{CMPR} indicates if a speech processor
+transmitting. \rett{CMPR} indicates if a speech processor
 (compressor) is enabled, if so, it prints in yellow, followed
 by a number between 1 and 20 indicating the compression value in dB.
-\texttt{PS} indicates whether adaptive pre-distortion (,,PureSignal'')
-is enabled, PS settings can be made in the \texttt{PS} menu.
- \texttt{VOX} indicates whether VOX (voice control) is enabled. VOX means
+\rett{PS} indicates whether adaptive pre-distortion (,,PureSignal'')
+is enabled, PS settings can be made in the \bltt{PS} menu.
+ \rett{VOX} indicates whether VOX (voice control) is enabled. VOX means
  that if  the microphone delivers an amplitude above a certain threshold,
  the radio is automatically put into TX mode. Enabling/Disabling VOX
- and setting the correct threshold can be done in the \texttt{VOX} menu.
- Finally, \texttt{DUP} indicates whether duplex mode is active.
+ and setting the correct threshold can be done in the \bltt{VOX} menu.
+ Finally, \rett{DUP} indicates whether duplex mode is active.
  In duplex mode, the receiver(s) continue to work during transmit. Duplex
  mode when using the same antenna for RX and TX is  no fun: you not only hear
  your own signal with a delay (from the cross-talk at the TRX relay), but
@@ -617,15 +636,16 @@ is enabled, PS settings can be made in the \texttt{PS} menu.
  antennas for RX and TX.
  
  The bottom line of the VFO bar  indicators are related to the VFO status.
- If the \texttt{Locked} string is red, it indicates that the VFO is locked
+ If the \rett{Locked} string is red, it indicates that the VFO is locked
  and will not accept changes. There is a LOCK action which toggles the
  LOCK status and which can be assigned to a toolbar button or a push-button
  on a GPIO or MIDI console, but the Lock status can also be set/unset
- via the \texttt{VFO menu}.
+ via the \bltt{FREQ} menu, accessibly by the main menu window, or just by
+ clicking into the VFO bar.
  
 The next indicator in the bottom  line indicates the Zoom factor. If the
 Zoom factor is 1, the indicator is grey, otherwise it is yellow and
-also indicates the factor. Then there is a string \texttt{CTUN} which
+also indicates the factor. Then there is a string \rett{CTUN} which
 indicates whether the CTUN (,,click to tune'') mode is off or on (the string 
 is yellow in the latter case). The step size of the VFO controlling the
 active receiver is displayed next, this string is always yellow.
@@ -639,8 +659,8 @@ non-active receiver (if there are 2) or on VFO-B (if there is only  one
 receiver).
 
 The next indicator shows the SAT (satellite) mode, which can be off
-(then the indicator reads SAT in grey), or which can be SAT or RSAT
-(then the indicator displays this  string). Once SAT mode is engaged,
+(then the indicator reads \rett{SAT} in grey), or which can be SAT or RSAT
+(then the indicator displays this string). Once SAT mode is engaged,
 the two VFOs are tied together such that any frequency change of one
 of the two VFOs also applies to the other VFO. This is the best way
 to do cross-band operation with, e.g. the QO-100 satellite which is at
@@ -650,7 +670,7 @@ VFO-A by 2 kHZ, then VFO-B moves down by the same amount). This is
 what one needs for low-flying satellites which have inverting
 transponders which offer some sort of Doppler correction.
 
-Finally there are the RIT (receiver incremental tuning) and XIT
+Finally there are the \rett{RIT} (receiver incremental tuning) and \rett{XIT}
 (transmitter incremental tuning) indicators. If RIT is off,
 receiving occurs on the VFO dial frequency. If RIT is on, the 
 indicator becomes yellow and also indicates the RIT offset, that is,
@@ -659,7 +679,7 @@ if during your CW QSO the frequency of the transmitter of your
 QSO partner drifts and you want to follow without altering the
 frequency of your own transmitted signal. The RIT indicator
 corresponds to the active receiver. If XIT is active, the
-indicator becomes yellow and shows the offset of the ,,true''
+indicator becomes yellow and shows the offset of the true
 TX frequency from the VFO dial frequency. 
 
 Finally, in the top right corner you see a symbol with a green and a red line
@@ -682,7 +702,7 @@ during TX.
 \label{fig:MeterDesigns}
 \end{figure}
 
-The design can be switched between digital and analog in the \texttt{Meter}
+The design can be switched between digital and analog in the \bltt{Meter}
 menu, which can be accessed quickly just by clicking into the meter area.
 During RX, an S-meter is shown together with the signal level in dBm. Note
 that -73 dBm corresponds to S9 for frequencies up to 30 MHz, while above
@@ -690,45 +710,47 @@ that -73 dBm corresponds to S9 for frequencies up to 30 MHz, while above
 6 dB, a signal level of S1 (below 30 MHz) corresponds to -121 dBm.
 
 During TX, the output power is displayed, provided that the radio actually
-reports this power. The output power meter can be calibrated (see the \texttt{PA}
+reports this power. The output power meter can be calibrated (see the \bltt{PA}
 menu). If the SWR exceeds a threshold for SWR warnings (the default is 1:3, but
-this can be changed in the \texttt{TX} menu), the SWR indicator turns red. If, 
-in addition, SWR protection is enabled in the \texttt{TX} menu, the output
+this can be changed in the \bltt{TX} menu), the SWR indicator turns red. If, 
+in addition, SWR protection is enabled in the \bltt{TX} menu, the output
 drived  will be reduced to zero if the SWR exceed that threshold.
 Furthermore, the ALC (automatic level control) value of the transmitter is 
 shown. Negative ALC values (at least in peak mode) indicate that the volume of the TX input audio
 could be increased to get full output  power.
 
 Further info on the meters (e.g. switching between ,,peak'' and ,,average'' reporting)
-is described in the \texttt{Meter} menu.
+is described in the \bltt{Meter} menu.
 
 \chapter{The Main Menu: introduction}
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MainMenu.png}
-\caption{The Main men, opened by the \texttt{Menu} button.}
+\caption{The Main men, opened by the \rett{Menu} button.}
 \label{fig:MainMenu}
 \end{figure}
 
 Now we have a series of chapters that discuss all the piHPDSR menus. Many menus can be
-opened by a "button" action, e.g. hitting the "MODE", "FILT", or "NOISE" button on the
+opened by a button click (or a push-botton on an external controller), e.g. hitting the
+ \rett{MODE}, \rett{FILT}, or \rett{NOISE} button on the
 toolbar you have seen in the last picture. You already know that the VFO and Meter
 menus can be opened by clicking into the VFO or meter section at the top of the window.
 When operating with a mouse, a secondary click in the RX or TX panadapter opens the
 RX or TX menu. But there is one place from which \textit{all} piHPSDR menus are at hand,
-and this is the "Main Menu". It can be opened by clicking into the "Menu" button at the
+and this is the "Main Menu". It can be opened by clicking into the \rett{Menu} button at the
 top right corne of the piHPSDR window, the outcome is shown in Fig. \ref{fig:MainMenu}.
 
 Some remarks have to be made about menus in general. Since piHPSDR is optimized for
 working with small screens, only one menu can be open at a time. If a menu is open
 and one tries to open another one, the first menu will be destroyed (closed) and the
-new one will be opened. For example, if you hit the \texttt{FILT} button in the toolbar
-when starting from Fig. \ref{fig:MainMenu}, the main menu closes and the Filter menu
+new one will be opened. For example, if you hit the \rett{FILT} button in the toolbar
+when starting from Fig. \ref{fig:MainMenu}, the main menu closes and the \bltt{Filter} menu
 opens. If you try to open a menu that is already open, then the menu will be closed.
-So, starting from Fig. \ref{fig:MainMenu} hitting the "Menu" button again will close
+So, starting from Fig. \ref{fig:MainMenu} hitting the \rett{Menu} button again will close
 the menu. Likewise, when the Filter menu has been opened, either via the Main Menu
-or with the \texttt{FILT} button, then hitting this button again will close the menu.
+or with the \rett{FILT} button, then hitting this button again will close the 
+\bltt{Filter} menu.
 
 While the menus are looking quite diverse, some effort has been invested to keep
 some things consistent throughout. For example, at the top left corner of the menu
@@ -740,22 +762,22 @@ recommended.
 
 There are some commands available here that do not directly affect the radio operation,
 so these commands are found in the top and bottom line of the Main Menu. We first 
-mention the \texttt{Restart} button in the middle of the top line. This restarts the
+mention the \rett{Restart} button in the middle of the top line. This restarts the
 radio protocol. While not needed under normal circumstances, it my happen (especially
 with beta releases of radio FPGA firmware) that the data exchange between piHPSDR and
 the radio gets out-of-sync. I observed such problems with early versions of the P2
-firmware for Orion2 boards and that is the reason the \texttt{Restart} button is
+firmware for Orion2 boards and that is the reason the \rett{Restart} button is
 there, since this made a quick recovery possible without loosing the QSO.
-At the bottom right, there is the \texttt{Iconify} button which ,,minimizes'' the
+At the bottom right, there is the \rett{Iconify} button which ,,minimizes'' the
 piHPSDR window. Normally, if needed, one can do so by standard methods of the
 operating system in the title bar of the piHPSDR window. If piHPSDR, however,
 runs in full-screen mode (this is the case on very small touch screens), then the
-\texttt{Iconify} button to make the piHPSDR window temporarily disappear without
+\rett{Iconify} button to make the piHPSDR window temporarily disappear without
 breaking the connetion to the radio, do some work with the operating system, and
 get the piHPSDR window back. Note in earlier versions of piHPSDR this function was
 associated with the "Hide" button in the top right corner of the main window.
-Then, there are two menus ("Exit" and "About") which are described in due course and which
-one can open by clicking either "Exit piHPDSR" or "About" in the main menu.
+Then, there are two menus (\bltt{Exit} and \bltt{About}) which are described in due course and which
+one can open by clicking either \rett{Exit piHPDSR} or \rett{About} in the main menu.
 
 The other buttons, between the two horizontal separator lines, give access to piHPSDR
 control and fine tuning. They are organized in six columns, namely radio related
@@ -773,15 +795,15 @@ between RX and TX, open a menu, and so forth.
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{ExitMenu.png}
-\caption{The \texttt{Exit} menu.}
+\caption{The \bltt{Exit} menu.}
 \end{figure}
 
-Via the \texttt{Exit} menu, you can leave the piHPSDR program. When leaving the program,
+Via the \bltt{Exit} menu, you can leave the piHPSDR program. When leaving the program,
 the radio protocol is stopped and all the settings are written to a preferences file. This
 file is located in the piHPSDR directory and takes the name xx-xx-xx-xx-xx-xx.progs, where
 the xx encode the MAC address for the radio. So the preferences for different radios (if you
 have more than one) are stored in different files. To leave the program, just click the
-"Exit" button in this menu. If you decide you want to continue, you can leave the \texttt{Exit}
+"Exit" button in this menu. If you decide you want to continue, you can leave the \bltt{Exit}
 menu by clicking the "Cancel" button. This is the button which closes the menu and has
 the same position and look as the "Close" buttons in all the other menus.
 
@@ -798,7 +820,7 @@ program but no re-boot or shutdown takes place, due to missing administrator pri
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{AboutMenu.png}
-\caption{The \texttt{About} menu.}
+\caption{The \bltt{About} menu.}
 \end{figure}
 
 The about menu gives you some information about piHPSDR, first the original author
@@ -817,39 +839,45 @@ preferences are stored in a file whose name is derived from the radio's MAC addr
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{RadioMenu.png}
-\caption{The \texttt{Radio} menu.}
+\caption{The \bltt{Radio} menu.}
 \label{fig:RadioMenu}
 \end{figure}
 
 
-The Radio menu lets you make settings which affect the general setting, and the hardware of the radio.
+The \bltt{Radio} menu lets you make settings which affect the general setting, and the hardware of the radio.
 The following figure (Fig. \ref{fig:RadioMenu}) shows the menu as it opens on an Anan G2 radio.
 Note this menu looks slightly different for different radios and protocols, this will be discussed
 at the end of the section. First, we go through all the elements we see in Fig. \ref{fig:RadioMenu},
 they will be colored red in the following list.
 
-\rett{Receivers.} In the pop-down menu (GTK combo-box) below this string, you can select the number
+\rett{Receivers:} In the pop-down menu (GTK combo-box) below this string, you can select the number
 of receivers that are running (well, you can choose between 1 and 2). When the number of receivers change,
 the radio communication will shortly be stopped and then resumed, so do not be surprised if the spectrum
 scope freezes for a second or so.
 
-\rett{RIT/XIT step.} In the pop-down menu you can choose among three (1 Hz, 10 Hz, 100 Hz) step sizes
+\rett{RIT/XIT step:} In the pop-down menu you can choose among three (1 Hz, 10 Hz, 100 Hz) step sizes
 for RIT and XIT. For example, if the RIT step is 10 Hz, then you can change the RIT offset in steps of
 10 Hz with the RIT+ or RIT- buttons in the toolbar or on the GPIO/MIDI controller.
 
-\rett{Region.} Although not obvious, this selects settings for the 60m band. Possible choices are "Other",
+\rett{Region:} Although not obvious, this selects settings for the 60m band. Possible choices are "Other",
 "US", "UK" and "WRC15". The US and UK choices implement the channel structure of the 60m band according
 to the regulations valid in these countries. "WRC15" gives you a small (15 kHz wide) 60m band according to the WRC15
 (World Radio Conference 2015) document, which is now implemented in many countries. With "Other" you
 have a large 60m band from 5250 o 5450 kHz, but it is most likely not legal for you to operate in this
 entire range.
 
-\rett{Orion/Saturn Mic jack.} Modern radios can switch the connections of the TRS microphone jack in software.
+\rett{Orion/Saturn Mic jack:} This part of the menu is not shown for pre-Orion boards. 
+The Orion, Orion2, and Saturn boards can switch the connections
+ of the TRS microphone jack in software (hardware jumpers had to be used previously).
 While the ring of the TRS plug is always connected to ground, the microphone and PTT connections are on the
 ring an tip and you can choose which one is on the ring and which one on the tip. You can then separately
 enable the PTT function of the jack, and select whether a bias (DC offset) is applied to the mic connetion
 (this is necessary for condensor microphones and detrimental if a dynamic mirophone is connected without
 a blocking capacitor).
+
+\rett{Mic Input:} This is only shown for Saturn boards. These radios have two jacks for connecting a microphone,
+either a 3.5mm TRS jack in the front panel, or an XLR connection in the back panel. The pop-down menu lets you
+choose between these two options.
 
 \section{The \texttt{Screen} Menu}
 
