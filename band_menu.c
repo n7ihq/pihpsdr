@@ -82,16 +82,17 @@ gboolean band_select_cb (GtkWidget *widget, gpointer data) {
     g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
   }
 
-
-  if (current != choice) {
-    current = choice;
-    if (radio_is_remote) {
+  //
+  // If the current band has been clicked, this will cycle through the
+  // band stack
+  //
+  current = choice;
+  if (radio_is_remote) {
 #ifdef CLIENT_SERVER
-      send_band(client_socket, active_receiver->id, choice->info);
+    send_band(client_socket, active_receiver->id, choice->info);
 #endif
-    } else {
-      vfo_band_changed(active_receiver->id, choice->info);
-    }
+  } else {
+    vfo_band_changed(active_receiver->id, choice->info);
   }
 
   return FALSE;
