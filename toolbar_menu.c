@@ -68,7 +68,7 @@ void toolbar_menu(GtkWidget *parent) {
   GtkWidget *close_b = gtk_button_new_with_label("Close");
   gtk_widget_set_name(close_b,"close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
-  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 3, 1);
 
   gint lfunction = 0;
   const int max_switches = 8;
@@ -87,10 +87,10 @@ void toolbar_menu(GtkWidget *parent) {
         // Rightmost switch is hardwired to FUNCTION
         sw[i].switch_function = FUNCTION;
         widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
-        gtk_grid_attach(GTK_GRID(grid), widget, i+1, lfunction+1, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, lfunction+1, 2, 1);
       } else {
         widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
-        gtk_grid_attach(GTK_GRID(grid), widget, i+1, lfunction+1, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, lfunction+1, 2, 1);
         g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), (gpointer) &sw[i]);
       }
     }
