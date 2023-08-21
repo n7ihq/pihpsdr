@@ -494,7 +494,7 @@ void noise_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(nr4_grid), nr4_smoothing_b, 3, 0, 1, 1);
   g_signal_connect(G_OBJECT(nr4_smoothing_b), "changed", G_CALLBACK(nr4_smoothing_cb), NULL);
   GtkWidget *nr4_whitening_title = gtk_label_new("NR4 Whitening (%)");
-  gtk_widget_set_name(nr4_whitening, "boldlabel");
+  gtk_widget_set_name(nr4_whitening_title, "boldlabel");
   gtk_widget_set_halign(nr4_whitening_title, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(nr4_grid), nr4_whitening_title, 0, 1, 1, 1);
   GtkWidget *nr4_whitening_b = gtk_spin_button_new_with_range(0.0, 100.0, 1.0);

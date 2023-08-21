@@ -60,11 +60,11 @@ static void smeter_select_cb (GtkToggleButton *widget, gpointer        data) {
   }
 }
 
-static void alc_select_cb (GtkToggleButton *widget, gpointer        data) {
-  alc = GPOINTER_TO_UINT(data);
+static void analog_cb (GtkToggleButton *widget, gpointer        data) {
+  analog_meter = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
 }
 
-static void analog_cb(GtkToggleButton *widget, gpointer data) {
+static void alc_select_cb(GtkToggleButton *widget, gpointer data) {
   int val = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
 
   switch (val) {
