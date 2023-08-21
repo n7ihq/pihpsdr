@@ -323,7 +323,7 @@ void filter_menu(GtkWidget *parent) {
   if (m == modeFMN) {
     CHOICE *choice;
     w = gtk_label_new("Deviation:");
-    gtk_grid_attach(GTK_GRID(grid), w, 0, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), w, 0, 1, 4, 1);
     w = gtk_toggle_button_new_with_label("2.5K");
     gtk_widget_set_name(w, "small_toggle_button");
 
@@ -339,7 +339,7 @@ void filter_menu(GtkWidget *parent) {
     }
     choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(deviation_select_cb), choice);
 
-    gtk_grid_attach(GTK_GRID(grid), w, 3, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), w, 4, 1, 3, 1);
     w = gtk_toggle_button_new_with_label("5.0K");
     gtk_widget_set_name(w, "small_toggle_button");
 
@@ -355,7 +355,7 @@ void filter_menu(GtkWidget *parent) {
     }
     choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(deviation_select_cb), choice);
 
-    gtk_grid_attach(GTK_GRID(grid), w, 5, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), w, 7, 1, 3, 1);
   } else {
     int row = 0;
     int col = 10;
