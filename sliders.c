@@ -530,7 +530,7 @@ void set_mic_gain(double value) {
     if (display_sliders && !mic_linein) {
       gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_gain);
     } else {
-      show_popup_slider(MIC_GAIN, 0, -12.0, 50.0, 1.0, mic_gain, "MIC GAIN");
+      show_popup_slider(MIC_GAIN, 0, -12.0, 50.0, 1.0, mic_gain, "Mic Gain");
     }
   }
 }
@@ -548,7 +548,7 @@ void set_drive(double value) {
   if (display_sliders) {
     gtk_range_set_value (GTK_RANGE(drive_scale), value);
   } else {
-    show_popup_slider(DRIVE, 0, 0.0, drive_max, 1.0, value, "TX DRIVE");
+    show_popup_slider(DRIVE, 0, 0.0, drive_max, 1.0, value, "TX Drive");
   }
 }
 
@@ -671,7 +671,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   g_signal_connect(G_OBJECT(agc_scale), "value_changed", G_CALLBACK(agcgain_value_changed_cb), NULL);
 
   if (have_rx_gain) {
-    rf_gain_label = gtk_label_new("RX-GAIN:");
+    rf_gain_label = gtk_label_new("RF Gain:");
     gtk_widget_set_name(rf_gain_label, "boldlabel");
     gtk_widget_show(rf_gain_label);
     gtk_grid_attach(GTK_GRID(sliders), rf_gain_label, 6, 0, 1, 1);
