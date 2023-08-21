@@ -144,8 +144,10 @@ G2 (generation two) SDRs from Apache labs, and that is has support for Laurence 
 What is important here that you have to wait. This only applies to the very first time you start piHPSDR.
 On CPUs with a rather simple instruction set (like the ARM processor in the Raspberry Pi, or the Apple
 Silicon processor in recent Macintosh computers), this so-called  \textit{planning} step is quite fast. For example, on my
-Apple M2 Mac mini, this step takes six seconds. On the contrary, on CPUs with very
-complex instruction sets like the Intel x86 processors, this step can last up to 15 minutes. But note
+Apple M2 Mac mini, this step only takes 6 seconds, and you have to wait for 34 seconds on a RaspberryPi 4.
+On the contrary, on CPUs with 
+complex instruction sets, more planning is necessary: on my other Mac mini with a 3 GHz x86 processor, it
+takes 16 minutes! But note
 this has only to be done once, in subsequent starts of piHPSDR, the wisdom will simply be read from
 the file created during the \textit{wisdom plans}. These plans contain, for a large number of dimensions, the
 fasted way how to perform FFTs (fast Fourier transformations) on the given CPU.
@@ -836,6 +838,7 @@ preferences are stored in a file whose name is derived from the radio's MAC addr
 
 \chapter{The Main Menu: Radio-related menus}
 \section{The \texttt{Radio} Menu}
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{RadioMenu.png}
@@ -878,6 +881,13 @@ a blocking capacitor).
 \rett{Mic Input:} This is only shown for Saturn boards. These radios have two jacks for connecting a microphone,
 either a 3.5mm TRS jack in the front panel, or an XLR connection in the back panel. The pop-down menu lets you
 choose between these two options.
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{RadioMenuMetis.png}
+\caption{The \bltt{Radio} menu for a legacy HPSDR board.}
+\label{fig:RadioMenuMetis}
+\end{figure}
 
 \section{The \texttt{Screen} Menu}
 
