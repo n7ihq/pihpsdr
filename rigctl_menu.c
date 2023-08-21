@@ -158,7 +158,7 @@ static void baud_cb(GtkWidget *widget, gpointer data) {
 void rigctl_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-  gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - RIGCTL");
+  gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - RigCtl");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));

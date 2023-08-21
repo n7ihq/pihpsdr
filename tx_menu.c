@@ -339,7 +339,7 @@ void tx_menu(GtkWidget *parent) {
     col++;
   }
 
-  GtkWidget *emp_b = gtk_check_button_new_with_label("FM TX Pre-emphasize before limiting");
+  GtkWidget *emp_b = gtk_check_button_new_with_label("FM TX Pre-emphasize before ALC");
   gtk_widget_set_name(emp_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
   gtk_grid_attach(GTK_GRID(grid), emp_b, col, row, 2, 1);
@@ -403,7 +403,7 @@ void tx_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), tune_use_drive_b, col, row, 1, 1);
   g_signal_connect(tune_use_drive_b, "toggled", G_CALLBACK(tune_use_drive_cb), NULL);
   col++;
-  label = gtk_label_new("Drive level for Tune:");
+  label = gtk_label_new("Tune Drive level:");
   gtk_widget_set_name(label, "boldlabel");
   gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);

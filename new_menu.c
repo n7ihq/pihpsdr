@@ -540,11 +540,11 @@ void new_menu() {
     // Second column: VFO-related menus
     //                FREQ, BAND, BStack, MODE, MEM
     //
-    GtkWidget *vfo_b = gtk_button_new_with_label("FREQ");
+    GtkWidget *vfo_b = gtk_button_new_with_label("VFO");
     g_signal_connect (vfo_b, "button-press-event", G_CALLBACK(vfo_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row++, 1, 1);
     
-    GtkWidget *band_b = gtk_button_new_with_label("BAND");
+    GtkWidget *band_b = gtk_button_new_with_label("Band");
     g_signal_connect (band_b, "button-press-event", G_CALLBACK(band_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), band_b, col, row++, 1, 1);
     
@@ -552,11 +552,11 @@ void new_menu() {
     g_signal_connect (bstk_b, "button-press-event", G_CALLBACK(bstk_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), bstk_b, col, row++, 1, 1);
     
-    GtkWidget *mode_b = gtk_button_new_with_label("MODE");
+    GtkWidget *mode_b = gtk_button_new_with_label("Mode");
     g_signal_connect (mode_b, "button-press-event", G_CALLBACK(mode_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), mode_b, col, row++, 1, 1);
 
-    GtkWidget *store_b = gtk_button_new_with_label("MEM");
+    GtkWidget *store_b = gtk_button_new_with_label("Memory");
     g_signal_connect (store_b, "button-press-event", G_CALLBACK(store_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), store_b, col, row++, 1, 1);
     
@@ -674,7 +674,7 @@ void new_menu() {
     gtk_grid_attach(GTK_GRID(grid), toolbar_b, col, row, 1, 1);
     row++;
 
-    GtkWidget *rigctl_b = gtk_button_new_with_label("RIGCTL");
+    GtkWidget *rigctl_b = gtk_button_new_with_label("RigCtl");
     g_signal_connect (rigctl_b, "button-press-event", G_CALLBACK(rigctl_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), rigctl_b, col, row, 1, 1);
     row++;
