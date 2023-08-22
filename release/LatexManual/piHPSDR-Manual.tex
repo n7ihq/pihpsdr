@@ -882,12 +882,168 @@ a blocking capacitor).
 either a 3.5mm TRS jack in the front panel, or an XLR connection in the back panel. The pop-down menu lets you
 choose between these two options.
 
+\rett{SAT mode:} Here you can choose between \texttt{SAT off}, \texttt{SAT}, and \texttt{RSAT}. In SAT mode,
+frequency moves applied to one of the two VFOs are applied to the other VFO as well. This is convenient
+for cross-band operation over satellites with (normal) linear transponders. In RSAT mode, frequency
+moves applied to one of the two VFOs are applied to the other with the sign inversed, that is, if
+for example you move the frequency of VFO A up by 3 kHz, the frequency of VFO B moves down by the same
+amount. This is convenient for cross-band operation over satellites with inverted transponders. Inverted
+transponders are sometimes find in low and fast moving satellites because this leads to some 
+Doppler correction.
+
+\rett{Filter board:} Normally SDRs have some sort of built-in PA with a filter board. Filters in the TX path
+between the PA and the antenna are always required, and filters in the RX path provide some protection
+against ADC overloads from strong out-of-band signals. Here you can choose between \texttt{NONE}, \texttt{ALEX},
+\texttt{APOLLO}, \texttt{CHARLY25}, and \texttt{N2ADR}. Choose \texttt{NONE} if none of the other cases
+apply, and hope your radio does things right automatically. \texttt{ALEX} is the most frequent choice
+and applies to the largest part of current HPSDR radios. \texttt{APOLLO} is an early design of a
+PA/filter combination for Hermes boards, choose this if you have one. \texttt{CHARLY25} is a filter board
+used in some RedPitaya based radios (STEMlab and HAMlab). If you choose this, the Attenuator slider will
+disappear from the Slider area (because this design does not have a step attenuator), instead, you get
+a combined Attenuator/Preamp check-box which lets you choose between zero, preamp values of 18 and 36 dB,
+and attenuation values of 12, 24, and 36 dB. \texttt{N2ADR}, finally, is the filter board usually used
+in combination with a HermesLite-II radio. It is controlled by the OC (open collector) bits in the HPSDR
+protocoll. This means if you use \texttt{N2ADR}, this will override your OC settings upon program startup.
+It is possible to change the OC settings in the \bltt{OC} menu, and these settings are saved with the
+preferences. Upon next program start, however, these preferences will again be overwritten as long
+as the \texttt{N2ADR} filter board is chosen.
+
+\rett{VFO Encoder Divisor:} This option is normally only used for GPIO controllers. Often, the 
+encoders of the main VFO dial generate too many ticks per revolution, such that it is difficult
+to fine tune on a signal. If the VFO Encoder Divisor, as shown in the example, has a value of
+15, only every 15$^\textrm{th}$ tick will we processed. The Divisor is also effective if you
+control piHPSDR with an ANDROMEDA console. So, if the frequency moves too fast if you turn
+the VFO knob, you have to increase the Divisor, and if it moves too slowly, decrease it.
+
+\rett{Split} Use this checkbox to enable/disable Split mode. In Split mode, the frequency of
+the non-active receiver (when using two receivers) or the frequency of VFO-B (when using one
+receiver) controls the TX frequency. In normal (non-Split) mode, it is the frequency of
+the active receiver (2 RX) or the frequency of VFO-A (1 RX) that matters.
+
+\rett{Duplex} Use this checkbox to enable/disable Duplex mode. In Duplex mode, the receiver(s)
+continue working during TX. In normal setup, this is detrimental since the very strong
+signal that originates from the crosstalk at the T/R relay will lead to AGC pumping,
+making your receiver(s) essentially deaf for a short period after TX/RX switching.
+However, when using different and well-decoupled antennas for RX and TX (this is typical
+for some satellite operations), Duplex mode gives you important information, as you can
+see your own downlink signal. In contrast to what is often stated, Duplex mode does not
+affect the data stream between the computer and the radio, it \textit{only} determines
+whether the receivers (within the WDSP library) are shut down during transmit or not.
+
+\rett{Mute RX when TX} This option mutes the RX audio while transmitting. It is important
+to note that the RX continue to work, so you can see the signals on the RX panel, the
+S-meter works, etc. This option is largely equivalent to moving the AF slider to the
+minimum position while transmitting.
+
+\rett{PA enable} This enables/disables the PA in the radio. In addition to this global
+flag, there is a per-band PA enable option for the transverter bands (see the \bltt{XVTR}
+menu).
+
+\rett{Optimize for TouchScreen} The normal procedure to make a selection from a
+pop-down menu (such as the \rett{Receivers:} button on this screen) is to click
+(and hold) it with a mouse, then drag the mouse to your choice, and then the selection
+is made by releasing the mouse button. This is very difficult to achieve on a touch
+screen. Therefore, if \rett{Optimize for TouchScreen} checkbox is checked, the pop-down
+menus are modified as follows: You click and release on the menu button, then it pops
+down and stays open. Then you make your selection by a second click/release sequence
+on your choice. While this is (only a little bit) more involved than the normal procedure
+when using a mouse, it is a great helper when using a touch screen. Therefore this
+option is set by default, but you can uncheck it here if you prefer normal
+mouse operation. Note that this option becomes effective when the next menu is opened.
+
+\rett{Frequency Calibration} Here you can set a frequency offset (in Hz). This offset
+will be added to all frequencies sent to the radio. This means that if you discover that
+a reference signal occurs in your RX panel at 10001 kHz where it should occur at 10000
+kHz, you have to set the calibration value to -1000. Note it is an absolute value,
+which will we applied to all frequences.
+
+\rett{RX Gain Calibration} Here you can calibrate your RF front end. To this end, you
+need a highly accurate signal source of, say, -73 dBm. Connect this source to your
+radio and tune on the signal. If the signal appears at, say, -70 dBm, decrease the
+calibration value. At -3 dBm, your S-meter should then state the correct signal
+strength. The value is the  amplification/attenuation of  a virtual device you
+would need in your RF front end. Therefore, you need a negative value (attenuation)
+if the signal shown is too strong. For normal HPSDR radios, the default value is
+ zero. For the HermesLite-II and other radios using the AD9866 chip, the default
+ value is 14.
+ 
+ There are some further check boxes in the \bltt{Radio} menu that you cannot see
+ in Fig. \ref{fig:RadioMenu}, since they only appear for specific radio hardware.
+ They appear to the right of the touch screen optimization check box
+ and will be listed here.
+ 
+ \rett{HL2 audio codec} This box only appears if the radio is a HermesLite-II (HL2). Some
+ of these radios are equipped with an audio codec and a modified firmware. The
+ audio codec must be enabled by setting a specific bit in the HL2 protocol,
+ and this check box enables/disables this bit. Furthermore, if this check box
+ is enabled, RX audio data is sent to the HL2.
+ 
+ \rett{Anan-10E/100B} This box only appears for Hermes boards. While the Anan-10E and
+ the Anan-100B identify themselves as Hermes boards, they have a FPGA with limited
+ resources and this affects the allocation of PureSignal feedback channels. To make
+ PureSignal work on these machines, you have to check this box in the \bltt{Radio} menu.
+ 
+ \rett{Swap IQ} This box only appears for radios connected via the SoapySDR library. If checked
+ the I and Q samples are exchanged, both in the receivers and in the transmitter. An indication
+ that this is necessary is if you see signals with a frequency above your dial frequency in
+ the left half of the RX panel, or if you have to go to LSB to receive USB signals. If you
+ observe this behaviour, check this box.
+ 
+ \rett{Hardware AGC} This box only appears for radios connected via the SoapySDR library.
+ If checked, automatic gain control (AGC) that is implemented in hardware in the radio is enabled.
+ 
+ \textbf{ATLAS bus options.} For legacy ATLAS bus radios, a number of additional settings have to be
+ made. Therefore, the area where we have seen the Orion microphone options now contains ATLAS bus
+ settings, as shown in Fig. \ref{fig:RadioMenuMetis}. You will see this only if the radio identifies
+ itself as a METIS board.
+  
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{RadioMenuMetis.png}
 \caption{The \bltt{Radio} menu for a legacy HPSDR board.}
 \label{fig:RadioMenuMetis}
 \end{figure}
+
+The first difference you notice is that at the left edge of the menu, in the middle,
+there is a new \rett{Sample Rate:} pop-down menu. This has nothing to do with the
+ATLAS bus, this occurs if the radio is connected via P1, as it is often the case for
+legacy radios. In P1, all receivers share the sample rate, therefore it is set in the
+\bltt{Radio} menu. The same applies for SoapySDR radios. In P2 on the other hand, each
+of the two receivers can have its own sample rate, therefore the sample rate is specified
+in the \bltt{RX} menu. The ATLAS bus settings are at the right edge of the menu (see Fig.
+\ref{fig:RadioMenuMetis}. The ATLAS bus has separate receiver and transmitter plug-in boards.
+To build a radio, they must be synchronized somehow, and therefore their clocks cannot run
+independently, but there must be a master clock.
+
+\rett{10 Mhz source:} This selects the 10 Mhz master clock, which can be either \texttt{ATLAS}
+(the bus itself is the source), \texttt{Penelope} (the transmitter board is the source),
+or \texttt{Mercury} (the receiver board is the source).
+
+\rett{122.88 MHz source:} This selects the 122.88 Mhz master clock, which can be either
+\texttt{Penelope} or \texttt{Mercury}.
+
+\rett{Mic source:} This selects where the microphone samples that are sent to the computer
+originate, that is, where your microphone has to be connected. The default is
+\texttt{Penelope}, this means the microphone is connected to the transmitter board. The
+other choice is \texttt{Janus}. The \texttt{Janus} board is simply an ADC/DAC board (not
+a radio) and used in some very early setups.
+
+\rett{TX config:} This indicates which transmitter board is present on the bus. It can
+be \texttt{No TX}, if this is a receive-only radio, \texttt{Penelope} or \texttt{Pennylane}.
+The \texttt{Pennylane} is a later version of the Penelope transmitter board, the essential
+difference is that it can control the output signal level. In the Penelope case,
+piHPSDR will scale the IQ samples to provide TX drive control.
+
+\rett{Janus Only} This box is for ATLAS systems that only have an OZY and a Janus board,
+and will only appear for OZY (USB-connected) boards. While this hardware is not a radio,
+external hardware such as the SDR-1000 can be connected to the Janus interface. If this
+option is checked, piHPSDR assumes that the radio is controlled outside piHPSDR, and
+will thus only process the data stream but not try to send any commands to the radio.
+
+Note that I have no access to such legacy radios, so the piHPSDR code to handle these radios
+is partly built on speculation (that is, studying the specs) and exchanging e-mails with
+people who still run such hardware. If you meet any inconsistencies, please contact
+the author.
 
 \section{The \texttt{Screen} Menu}
 
