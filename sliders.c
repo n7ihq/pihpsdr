@@ -71,7 +71,9 @@ static GtkWidget *c25_container = NULL;
 static GtkWidget *c25_att_combobox = NULL;
 static GtkWidget *c25_att_label = NULL;
 static GtkWidget *mic_gain_label;
+static GtkWidget *linein_label;
 static GtkWidget *mic_gain_scale;
+static GtkWidget *linein_scale;
 static GtkWidget *drive_label;
 static GtkWidget *drive_scale;
 static GtkWidget *squelch_label;
@@ -142,13 +144,15 @@ void sliders_update() {
   if (display_sliders) {
     if (can_transmit) {
       if (mic_linein) {
-        gtk_label_set_text(GTK_LABEL(mic_gain_label), "Linein:");
-        gtk_range_set_range(GTK_RANGE(mic_gain_scale), 0.0, 31.0);
-        gtk_range_set_value (GTK_RANGE(mic_gain_scale), linein_gain);
+        gtk_widget_hide(mic_gain_label);
+        gtk_widget_hide(mic_gain_scale);
+        gtk_widget_show(linein_label);
+        gtk_widget_show(linein_scale);
       } else {
-        gtk_label_set_text(GTK_LABEL(mic_gain_label), "Mic:");
-        gtk_range_set_range(GTK_RANGE(mic_gain_scale), -12.0, 50.0);
-        gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_gain);
+        gtk_widget_show(mic_gain_label);
+        gtk_widget_show(mic_gain_scale);
+        gtk_widget_hide(linein_label);
+        gtk_widget_hide(linein_scale);
       }
     }
   }
@@ -178,8 +182,6 @@ int sliders_active_receiver_changed(void *data) {
 
       if (rf_gain_scale != NULL) { gtk_range_set_value (GTK_RANGE(rf_gain_scale), adc[active_receiver->adc].gain); }
     }
-
-    sliders_update();
   }
 
   return FALSE;
@@ -501,22 +503,22 @@ void set_filter_shift(int rx, int shift) {
   show_popup_slider(IF_SHIFT, rx,  (double)(shift - 1000), (double) (shift + 1000), 1.0, (double) shift, title);
 }
 
+static void linein_value_changed_cb(GtkWidget *widget, gpointer data) {
+  linein_gain = gtk_range_get_value(GTK_RANGE(widget));
+}
+
 static void micgain_value_changed_cb(GtkWidget *widget, gpointer data) {
-  if (mic_linein) {
-    linein_gain = (int)gtk_range_get_value(GTK_RANGE(widget));
-  } else {
-    mic_gain = gtk_range_get_value(GTK_RANGE(widget));
-    SetTXAPanelGain1(transmitter->id, pow(10.0, mic_gain / 20.0));
-  }
+  mic_gain = gtk_range_get_value(GTK_RANGE(widget));
+  SetTXAPanelGain1(transmitter->id, pow(10.0, mic_gain / 20.0));
 }
 
 void set_linein_gain(double value) {
   //t_print("%s value=%f\n",__FUNCTION__, value);
   linein_gain = value;
   if (display_sliders && mic_linein) {
-    gtk_range_set_value (GTK_RANGE(mic_gain_scale), linein_gain);
+    gtk_range_set_value (GTK_RANGE(linein_scale), linein_gain);
   } else {
-    show_popup_slider(LINEIN_GAIN, 0, 0.0, 31.0, 1.0, linein_gain, "LineIn Gain");
+    show_popup_slider(LINEIN_GAIN, 0, -34.0, 12.0, 1.0, linein_gain, "LineIn Gain");
   }
 }
   
@@ -651,35 +653,38 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_grid_set_column_homogeneous(GTK_GRID(sliders), TRUE);
   af_gain_label = gtk_label_new("AF:");
   gtk_widget_set_name(af_gain_label, "boldlabel");
+  gtk_widget_set_halign(af_gain_label, GTK_ALIGN_END);
   gtk_widget_show(af_gain_label);
-  gtk_grid_attach(GTK_GRID(sliders), af_gain_label, 0, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(sliders), af_gain_label, 0, 0, 3, 1);
   af_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -40.0, 0.0, 1.00);
   gtk_range_set_increments (GTK_RANGE(af_gain_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(af_gain_scale), active_receiver->volume);
   gtk_widget_show(af_gain_scale);
-  gtk_grid_attach(GTK_GRID(sliders), af_gain_scale, 1, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(sliders), af_gain_scale, 3, 0, 6, 1);
   g_signal_connect(G_OBJECT(af_gain_scale), "value_changed", G_CALLBACK(afgain_value_changed_cb), NULL);
   agc_gain_label = gtk_label_new("AGC:");
   gtk_widget_set_name(agc_gain_label, "boldlabel");
+  gtk_widget_set_halign(agc_gain_label, GTK_ALIGN_END);
   gtk_widget_show(agc_gain_label);
-  gtk_grid_attach(GTK_GRID(sliders), agc_gain_label, 3, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(sliders), agc_gain_label, 9, 0, 3, 1);
   agc_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -20.0, 120.0, 1.0);
   gtk_range_set_increments (GTK_RANGE(agc_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(agc_scale), active_receiver->agc_gain);
   gtk_widget_show(agc_scale);
-  gtk_grid_attach(GTK_GRID(sliders), agc_scale, 4, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(sliders), agc_scale, 12, 0, 6, 1);
   g_signal_connect(G_OBJECT(agc_scale), "value_changed", G_CALLBACK(agcgain_value_changed_cb), NULL);
 
   if (have_rx_gain) {
     rf_gain_label = gtk_label_new("RF Gain:");
     gtk_widget_set_name(rf_gain_label, "boldlabel");
+    gtk_widget_set_halign(rf_gain_label, GTK_ALIGN_END);
     gtk_widget_show(rf_gain_label);
-    gtk_grid_attach(GTK_GRID(sliders), rf_gain_label, 6, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(sliders), rf_gain_label, 18, 0, 3, 1);
     rf_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, adc[0].min_gain, adc[0].max_gain, 1.0);
     gtk_range_set_value (GTK_RANGE(rf_gain_scale), adc[0].gain);
     gtk_range_set_increments (GTK_RANGE(rf_gain_scale), 1.0, 1.0);
     gtk_widget_show(rf_gain_scale);
-    gtk_grid_attach(GTK_GRID(sliders), rf_gain_scale, 7, 0, 2, 1);
+    gtk_grid_attach(GTK_GRID(sliders), rf_gain_scale, 21, 0, 6, 1);
     g_signal_connect(G_OBJECT(rf_gain_scale), "value_changed", G_CALLBACK(rf_gain_value_changed_cb), NULL);
   } else {
     rf_gain_label = NULL;
@@ -689,13 +694,14 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   if (have_rx_att) {
     attenuation_label = gtk_label_new("Att (dB):");
     gtk_widget_set_name(attenuation_label, "boldlabel");
+    gtk_widget_set_halign(attenuation_label, GTK_ALIGN_END);
     gtk_widget_show(attenuation_label);
-    gtk_grid_attach(GTK_GRID(sliders), attenuation_label, 6, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(sliders), attenuation_label, 18, 0, 3, 1);
     attenuation_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 31.0, 1.0);
     gtk_range_set_value (GTK_RANGE(attenuation_scale), adc[active_receiver->adc].attenuation);
     gtk_range_set_increments (GTK_RANGE(attenuation_scale), 1.0, 1.0);
     gtk_widget_show(attenuation_scale);
-    gtk_grid_attach(GTK_GRID(sliders), attenuation_scale, 7, 0, 2, 1);
+    gtk_grid_attach(GTK_GRID(sliders), attenuation_scale, 21, 0, 6, 1);
     g_signal_connect(G_OBJECT(attenuation_scale), "value_changed", G_CALLBACK(attenuation_value_changed_cb), NULL);
   } else {
     attenuation_label = NULL;
@@ -710,9 +716,10 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   //
   c25_att_label = gtk_label_new("Att/Pre:");
   gtk_widget_set_name(c25_att_label, "boldlabel");
-  gtk_grid_attach(GTK_GRID(sliders), c25_att_label, 6, 0, 1, 1);
+  gtk_widget_set_halign(c25_att_label, GTK_ALIGN_END);
+  gtk_grid_attach(GTK_GRID(sliders), c25_att_label, 18, 0, 3, 1);
   c25_container = gtk_fixed_new();
-  gtk_grid_attach(GTK_GRID(sliders), c25_container, 7, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(sliders), c25_container, 21, 0, 6, 1);
   GtkWidget *c25_grid = gtk_grid_new();
   gtk_grid_set_column_homogeneous(GTK_GRID(c25_grid), TRUE);
   //
@@ -732,23 +739,36 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_container_add(GTK_CONTAINER(c25_container), c25_grid);
 
   if (can_transmit) {
-    mic_gain_label = gtk_label_new(mic_linein ? "Linein:" : "Mic:");
+    mic_gain_label = gtk_label_new("Mic:");
     gtk_widget_set_name(mic_gain_label, "boldlabel");
-    gtk_grid_attach(GTK_GRID(sliders), mic_gain_label, 0, 1, 1, 1);
-    mic_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, mic_linein ? 0.0 : -12.0,
-                     mic_linein ? 31.0 : 50.0, 1.0);
+    gtk_widget_set_halign(mic_gain_label, GTK_ALIGN_END);
+    gtk_grid_attach(GTK_GRID(sliders), mic_gain_label, 0, 1, 3, 1);
+    linein_label = gtk_label_new("Linein:");
+    gtk_widget_set_name(linein_label, "boldlabel");
+    gtk_widget_set_halign(linein_label, GTK_ALIGN_END);
+    gtk_grid_attach(GTK_GRID(sliders), linein_label, 0, 1, 3, 1);
+
+    mic_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -12.0, 50.0, 1.0);
     gtk_range_set_increments (GTK_RANGE(mic_gain_scale), 1.0, 1.0);
-    gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_linein ? linein_gain : mic_gain);
-    gtk_grid_attach(GTK_GRID(sliders), mic_gain_scale, 1, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(sliders), mic_gain_scale, 3, 1, 6, 1);
+    gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_gain);
     g_signal_connect(G_OBJECT(mic_gain_scale), "value_changed", G_CALLBACK(micgain_value_changed_cb), NULL);
+
+    linein_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -34.0, 12.0, 1.0);
+    gtk_range_set_increments (GTK_RANGE(linein_scale), 1.0, 1.0);
+    gtk_grid_attach(GTK_GRID(sliders), linein_scale, 3, 1, 6, 1);
+    gtk_range_set_value (GTK_RANGE(linein_scale), linein_gain);
+    g_signal_connect(G_OBJECT(linein_scale), "value_changed", G_CALLBACK(linein_value_changed_cb), NULL);
+
     drive_label = gtk_label_new("TX Drv:");
     gtk_widget_set_name(drive_label, "boldlabel");
-    gtk_grid_attach(GTK_GRID(sliders), drive_label, 3, 1, 1, 1);
+    gtk_widget_set_halign(drive_label, GTK_ALIGN_END);
+    gtk_grid_attach(GTK_GRID(sliders), drive_label, 9, 1, 3, 1);
     drive_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, drive_max, 1.00);
     gtk_range_set_increments (GTK_RANGE(drive_scale), 1.0, 1.0);
     gtk_range_set_value (GTK_RANGE(drive_scale), getDrive());
     gtk_widget_show(drive_scale);
-    gtk_grid_attach(GTK_GRID(sliders), drive_scale, 4, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(sliders), drive_scale, 12, 1, 6, 1);
     g_signal_connect(G_OBJECT(drive_scale), "value_changed", G_CALLBACK(drive_value_changed_cb), NULL);
   } else {
     mic_gain_label = NULL;
@@ -759,19 +779,22 @@ GtkWidget *sliders_init(int my_width, int my_height) {
 
   squelch_label = gtk_label_new("Squelch:");
   gtk_widget_set_name(squelch_label, "boldlabel");
+  gtk_widget_set_halign(squelch_label, GTK_ALIGN_END);
   gtk_widget_show(squelch_label);
-  gtk_grid_attach(GTK_GRID(sliders), squelch_label, 6, 1, 1, 1);
+  gtk_grid_attach(GTK_GRID(sliders), squelch_label, 18, 1, 3, 1);
   squelch_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
   gtk_range_set_increments (GTK_RANGE(squelch_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(squelch_scale), active_receiver->squelch);
   gtk_widget_show(squelch_scale);
-  gtk_grid_attach(GTK_GRID(sliders), squelch_scale, 7, 1, 2, 1);
+  gtk_grid_attach(GTK_GRID(sliders), squelch_scale, 22, 1, 5, 1);
   squelch_signal_id = g_signal_connect(G_OBJECT(squelch_scale), "value_changed", G_CALLBACK(squelch_value_changed_cb),
                                        NULL);
   squelch_enable = gtk_check_button_new();
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(squelch_enable), active_receiver->squelch_enable);
   gtk_widget_show(squelch_enable);
-  gtk_grid_attach(GTK_GRID(sliders), squelch_enable, 9, 1, 1, 1);
+  gtk_grid_attach(GTK_GRID(sliders), squelch_enable, 21, 1, 1, 1);
+  gtk_widget_set_halign(squelch_enable, GTK_ALIGN_CENTER);
   g_signal_connect(squelch_enable, "toggled", G_CALLBACK(squelch_enable_cb), NULL);
+
   return sliders;
 }

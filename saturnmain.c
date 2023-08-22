@@ -312,9 +312,9 @@ void saturn_discovery() {
       discovered[devices].use_tcp = 0;
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;
-      t_print("discovery: found saturn device min=%f max=%f\n",
-              discovered[devices].frequency_min,
-              discovered[devices].frequency_max);
+      t_print("discovery: found saturn device min=%0.3f MHz max=%0.3f MHz\n",
+              discovered[devices].frequency_min * 1E-6,
+              discovered[devices].frequency_max* 1E-6);
       devices++;
     }
   }

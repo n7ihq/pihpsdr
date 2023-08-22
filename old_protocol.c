@@ -1916,7 +1916,8 @@ void ozy_send_buffer() {
         output_buffer[C1] |= 0x10;
       }
 
-      output_buffer[C2] |= linein_gain;
+      // map input value -34 ... +12 onto 0 ... 31
+      output_buffer[C2] |=  (int)((linein_gain + 34.0)*0.6739 + 0.5);
 
       if (transmitter->puresignal) {
         output_buffer[C2] |= 0x40;

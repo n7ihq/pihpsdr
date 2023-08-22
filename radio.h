@@ -154,7 +154,7 @@ extern int display_toolbar;
 extern double mic_gain;
 
 extern int mic_linein;
-extern int linein_gain;
+extern double linein_gain;
 extern int mic_boost;
 extern int mic_bias_enabled;
 extern int mic_ptt_enabled;

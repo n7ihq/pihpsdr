@@ -209,17 +209,17 @@ BANDSTACK_ENTRY bandstack_entriesAIR[] = {
 };
 
 BANDSTACK_ENTRY bandstack_entriesGEN[] = {
-  {909000LL, 0, 0LL, modeAM, filterF3},
-  {5975000LL, 0, 0LL, modeAM, filterF3},
-  {13845000LL, 0, 0LL, modeAM, filterF3}
+  {909000LL,    0, 0LL, modeAM, filterF3},
+  {5975000LL,   0, 0LL, modeAM, filterF3},
+  {13845000LL,  0, 0LL, modeAM, filterF3}
 };
 
 BANDSTACK_ENTRY bandstack_entriesWWV[] = {
-  {2500000LL, 0, 0LL, modeSAM, filterF3},
-  {5000000LL, 0, 0LL, modeSAM, filterF3},
-  {10000000LL, 0, 0LL, modeSAM, filterF3},
-  {15000000LL, 0, 0LL, modeSAM, filterF3},
-  {20000000LL, 0, 0LL, modeSAM, filterF3}
+  {2500000LL,   0, 0LL, modeSAM, filterF3},
+  {5000000LL,   0, 0LL, modeSAM, filterF3},
+  {10000000LL,  0, 0LL, modeSAM, filterF3},
+  {15000000LL,  0, 0LL, modeSAM, filterF3},
+  {20000000LL,  0, 0LL, modeSAM, filterF3}
 };
 
 BANDSTACK bandstack160 = {3, 1, bandstack_entries160};
@@ -327,7 +327,7 @@ BAND bands[BANDS + XVTRS] = {
   {"1240",&bandstack1240, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 1240000000LL, 1300000000LL, 0LL, 0LL, 0},
   {"2300",&bandstack2300, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 2300000000LL, 2450000000LL, 0LL, 0LL, 0},
   {"3400",&bandstack3400, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 3400000000LL, 3410000000LL, 0LL, 0LL, 0},
-  {"AIR",&bandstack3400, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 108000000LL, 137000000LL, 0LL, 0LL, 0},
+  {"AIR",&bandstackAIR, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 108000000LL, 137000000LL, 0LL, 0LL, 0},
   {"WWV",&bandstackWWV, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 0},
   {"GEN",&bandstackGEN, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 0},
   // XVTRS
@@ -440,7 +440,19 @@ void bandRestoreState() {
   GetPropI0("band",                 current_band);
 
   for (int b = 0; b < BANDS + XVTRS; b++) {
-    GetPropS1("band.%d.title", b,              bands[b].title);
+    //
+    // For the "normal" (non-XVTR) bands, do not overwrite
+    // the compile-time constants title,fmin,fmax,LO,errorLO,disablePA
+    // (This is to guard against starting from an out-dated props file)
+    //
+    if (b >= BANDS) {
+      GetPropS1("band.%d.title", b,              bands[b].title);
+      GetPropI1("band.%d.frequencyMin", b,       bands[b].frequencyMin);
+      GetPropI1("band.%d.frequencyMax", b,       bands[b].frequencyMax);
+      GetPropI1("band.%d.frequencyLO", b,        bands[b].frequencyLO);
+      GetPropI1("band.%d.errorLO", b,            bands[b].errorLO);
+      GetPropI1("band.%d.disablePA", b,          bands[b].disablePA);
+    }
     GetPropI1("band.%d.current", b,            bands[b].bandstack->current_entry);
     GetPropI1("band.%d.preamp", b,             bands[b].preamp);
     GetPropI1("band.%d.alexRxAntenna", b,      bands[b].alexRxAntenna);
@@ -449,11 +461,6 @@ void bandRestoreState() {
     GetPropF1("band.%d.pa_calibration", b,     bands[b].pa_calibration);
     GetPropI1("band.%d.OCrx", b,               bands[b].OCrx);
     GetPropI1("band.%d.OCtx", b,               bands[b].OCtx);
-    GetPropI1("band.%d.frequencyMin", b,       bands[b].frequencyMin);
-    GetPropI1("band.%d.frequencyMax", b,       bands[b].frequencyMax);
-    GetPropI1("band.%d.frequencyLO", b,        bands[b].frequencyLO);
-    GetPropI1("band.%d.errorLO", b,            bands[b].errorLO);
-    GetPropI1("band.%d.disablePA", b,          bands[b].disablePA);
 
     for (int stack = 0; stack < bands[b].bandstack->entries; stack++) {
       BANDSTACK_ENTRY *entry = bands[b].bandstack->entry;

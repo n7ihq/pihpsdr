@@ -196,6 +196,7 @@ void xvtr_menu(GtkWidget *parent) {
     disable_pa[i] = gtk_check_button_new();
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disable_pa[i]), xvtr->disablePA);
     gtk_grid_attach(GTK_GRID(grid), disable_pa[i], 7, i + 2, 1, 1);
+    gtk_widget_set_halign(disable_pa[i], GTK_ALIGN_CENTER);
     g_signal_connect(disable_pa[i], "toggled", G_CALLBACK(pa_disable_cb), GINT_TO_POINTER(i));
   }
 

@@ -17,8 +17,6 @@
 */
 
 
-//#define ECHO_MIC
-
 #include <gtk/gtk.h>
 
 #include <errno.h>
@@ -1349,7 +1347,7 @@ static void new_protocol_transmit_specific() {
   }
 
   // 0..31
-  transmit_specific_buffer[51] = linein_gain;
+  transmit_specific_buffer[51] = (int)((linein_gain + 34.0)*0.6739 + 0.5);
   // Attenuator for ADC0 upon TX
   transmit_specific_buffer[59] = transmitter->attenuation;
 

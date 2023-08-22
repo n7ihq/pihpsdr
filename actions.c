@@ -784,7 +784,7 @@ int process_action(void *data) {
     break;
 
   case LINEIN_GAIN:
-    value = KnobOrWheel(a, linein_gain, 0.0, 31.0, 1.0);
+    value = KnobOrWheel(a, linein_gain, -34.0, 12.5, 1.5);
     set_linein_gain(value);
     break;
 

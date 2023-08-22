@@ -196,12 +196,8 @@ int display_toolbar = 0;
 
 double mic_gain = 0.0;
 
-int mic_linein = 0;
-//
-// linein_gain = 0...31 maps onto -34.5dB ... +12 dB
-// (in 1.5 dB steps), and 0 dB corresponds to linein_gain=23
-//
-int linein_gain = 23;
+int mic_linein = 0;        // Use microphone rather than linein in radio's audio codec
+double linein_gain = 0.0;  // -34.0 ... +12.5 in steps of 1.5 dB
 int mic_boost = 0;
 int mic_bias_enabled = 0;
 int mic_ptt_enabled = 0;
@@ -532,7 +528,8 @@ void reconfigure_radio() {
       gtk_fixed_move(GTK_FIXED(fixed), sliders, 0, y);
     }
 
-    gtk_widget_show_all(sliders);  // ... this shows both C25 and Alex ATT/Preamp sliders
+    gtk_widget_show_all(sliders);  // ... this shows both C25 and Alex ATT/Preamp, and both Mic/Linein sliders
+    sliders_update();
     att_type_changed();            // ... and this hides the „wrong“ ones.
     y += SLIDERS_HEIGHT;
   } else {
@@ -2408,7 +2405,7 @@ void radioRestoreState() {
   GetPropF0("mic_gain",                                      mic_gain);
   GetPropI0("mic_boost",                                     mic_boost);
   GetPropI0("mic_linein",                                    mic_linein);
-  GetPropI0("linein_gain",                                   linein_gain);
+  GetPropF0("linein_gain",                                   linein_gain);
   GetPropI0("mic_ptt_enabled",                               mic_ptt_enabled);
   GetPropI0("mic_bias_enabled",                              mic_bias_enabled);
   GetPropI0("mic_ptt_tip_bias_ring",                         mic_ptt_tip_bias_ring);
@@ -2625,7 +2622,7 @@ void radioSaveState() {
   SetPropF0("mic_gain",                                      mic_gain);
   SetPropI0("mic_boost",                                     mic_boost);
   SetPropI0("mic_linein",                                    mic_linein);
-  SetPropI0("linein_gain",                                   linein_gain);
+  SetPropF0("linein_gain",                                   linein_gain);
   SetPropI0("mic_ptt_enabled",                               mic_ptt_enabled);
   SetPropI0("mic_bias_enabled",                              mic_bias_enabled);
   SetPropI0("mic_ptt_tip_bias_ring",                         mic_ptt_tip_bias_ring);

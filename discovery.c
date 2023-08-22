@@ -268,9 +268,9 @@ void discovery() {
       discovered[devices].use_tcp = 0;
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;
-      t_print("discovery: found USB OZY device min=%f max=%f\n",
-              discovered[devices].frequency_min,
-              discovered[devices].frequency_max);
+      t_print("discovery: found USB OZY device min=%0.3f MHz max=%0.3f MHz\n",
+              discovered[devices].frequency_min*1E-6,
+              discovered[devices].frequency_max*1E-6);
       devices++;
     }
   }
@@ -342,7 +342,7 @@ void discovery() {
 
     for (row = 0; row < devices; row++) {
       d = &discovered[row];
-      t_print("%p Protocol=%d name=%s\n", d, d->protocol, d->name);
+      t_print("Device Protocol=%d name=%s\n", d->protocol, d->name);
       snprintf(version, sizeof(version), "v%d.%d",
                d->software_version / 10,
                d->software_version % 10);
