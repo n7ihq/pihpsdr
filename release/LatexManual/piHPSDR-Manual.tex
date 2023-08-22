@@ -319,6 +319,7 @@ Sliders, Toolbar) at the  bottom.}
  \bltt{A<>B} command).
 
 \section{Spectrum scope options}
+\label{sec:FillingGradient}
 
 You have already seen two different spectrum scopes: in the first
 picture, the  spectrum was a filled green area, while in the last
@@ -541,6 +542,7 @@ same way, a secondary click in the TX panel will open the
 \bltt{TX} menu.
 
 \section{VFO bar and status  indicators}
+\label{sec:VFObar}
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{VFObar.png}
@@ -863,11 +865,9 @@ for RIT and XIT. For example, if the RIT step is 10 Hz, then you can change the 
 10 Hz with the RIT+ or RIT- buttons in the toolbar or on the GPIO/MIDI controller.
 
 \rett{Region:} Although not obvious, this selects settings for the 60m band. Possible choices are "Other",
-"US", "UK" and "WRC15". The US and UK choices implement the channel structure of the 60m band according
-to the regulations valid in these countries. "WRC15" gives you a small (15 kHz wide) 60m band according to the WRC15
-(World Radio Conference 2015) document, which is now implemented in many countries. With "Other" you
-have a large 60m band from 5250 o 5450 kHz, but it is most likely not legal for you to operate in this
-entire range.
+ "UK" and "WRC15". The \texttt{Other} and \texttt{UK} choices implement the channel structure of the 60m band according
+to the regulations valid in the USA and Great Britain. "WRC15" gives you a small (15 kHz wide) 60m band according to the WRC15
+(World Radio Conference 2015) document, which is now implemented in many countries. 
 
 \rett{Orion/Saturn Mic jack:} This part of the menu is not shown for pre-Orion boards. 
 The Orion, Orion2, and Saturn boards can switch the connections
@@ -1047,20 +1047,53 @@ the author.
 
 \section{The \texttt{Screen} Menu}
 
+The \bltt{Screen} menu lets you dynamically change the size of the piHPSDR main
+window, and choose between different VFO bar layouts. The possibility to adjust
+the screen size has been the most frequent feature request in the last years,
+so I finally decided to implement it. The menu is opened
+via the main menu and the \bltt{Screen} button and is shown in Fig. \ref{fig:ScreenMenu}.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{ScreenMenu.png}
 \caption{The \bltt{Screen} menu.}
+\label{fig:ScreenMenu}
 \end{figure}
 
-\begin{figure}[h]
+The window width and height can be chosen with the spin buttons shown. The minimum
+values for width and height are 800 and 480, the maximum values are determined by
+the resolution of the monitor. Changes made in the spin buttons become effective
+immediately.
+The pop-down menu \rett{Select VFO bar layout} lets you choose the layout of the VFO
+bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown:
+
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{VFObarChoice.png}
 \caption{Four choices for the VFO bar built into piHPSDR.}
 \label{fig:VFObarChoice}
 \end{figure}
 
+The two largest ones require a window width of about 1000 and 900 pixels, while the
+two small ones can be used with a screen only 800 pixels wide. The VFO bar shown
+at the bottom of Fig. \ref{fig:VFObarChoice} represents the original piHPSDR layout,
+the second one from the bottom has larger characters for the VFO dials and therefore
+a few more pixels height. The VFO bar has been described in detail in chapter
+\ref{sec:VFObar}.
+
+The check box \rett{Stack receivers horizontally}, if checked, puts the panels
+of the two receivers (if two receivers are used) side-by-side instead of on top
+of each other.
+
+If the window width is decreased such that the VFO bar chosen does no longer fit,
+the first one in the list that does fit is automatically selected. 
+
 \section{The \texttt{Display} Menu}
+
+The \bltt{Display} menu is used to customize the overall layout of the piHPSDR
+window and the RX panadapters. Adjustments
+for the TX panadapter must be done in the \bltt{TX} menu. The menu is shown
+in Fig. \ref{fig:DisplayMenu}.
 
 \begin{figure}[h]
 \center
@@ -1068,6 +1101,78 @@ the author.
 \caption{The \bltt{Display} menu.}
 \label{fig:DisplayMenu}
 \end{figure}
+
+\rett{Frames Per Second:} This adjust how often the RX and TX (!) displays are re-drawn.
+10 frames per second (the default) is a good value.
+
+\rett{Panadapter High:} This value is the dBm value of the RX signal strength at the
+top of the RX spectrum scope. A value of -40 dBm corresponds to S9 + 33 dB for HF
+signals.
+
+\rett{Panadapter Low:} This value is the dBm value of the RX signal strength at the
+bottom of the RX spectrum scope. A value of -140 dBm is usually low enough such that
+the noise floor is still on display.
+
+\rett{Panadapter Step:} This value is the spacing of the horizontal lines on 
+the spectrum scope. Lines are drawn at dBm values that are multiples of the step
+size.
+
+\rett{Waterfall High:} This is the RX dBm value that will lead to the brightest
+color (yellow) in the waterfall.
+
+\rett{Waterfall Low:} This is the RX dBm value below which the waterfall will be black.
+
+\rett{Waterfall Automatic:} If this box is checked, the \rett{Waterfall High:} and
+\rett{Waterfall Low:} controls are inactive and the values are not used. Instead, 
+the lowest and highest signal strength in the RX spectrum are automaticall determined
+and are then used instead of the waterfall High/Low control values.
+
+\rett{Detector:} Here one can choose between Peak, Rosenfell, Average and Sample. The
+Rosenfell detector is probably closest to what one knows from a spectrum analyzer.
+the Average detector is usually preferred since it is less ,,nervous''.
+
+\rett{Averaging:} Here the possible choices are None, Recursive, Time Window and
+Log Recursive. For the details, see the WDSP manual.
+
+\rett{Av. Time (ms):} If averaging is used for the spectrum scope, the time 
+constant involved in averaging can be set here.
+
+\rett{Fill Panadapter} This is used to enable/disable the ,,Filling'' option
+for the RX and TX spectrum scopes (see chapter \ref{sec:FillingGradient}).
+
+\rett{Gradient} This is used to enable/disable the ,,Gradient'' option
+(color coding) for the RX spectrum scope (see chapter \ref{sec:FillingGradient}).
+ Note color coding is not available for the TX panel.
+ 
+ \rett{Display Waterfall} This option enables/disables the waterfall display
+ of the RX panels. Note the spectrum scope is always shown.
+ 
+ \rett{Display Zoom/Pan} This option can be used to show/hide the Zoom and
+ Pan slider below the RX or TX panel. If you do not use Zoom, or control
+ Zoom via an external GPIO or MIDI controller, this can be used to save
+ some vertical space.
+ 
+ \rett{Display Sliders} This option can be used to show/hide the slider area
+ (AF through Squelch sliders). Hiding them makes little sense unless you
+ have a GPIO or MIDI controller. For temporarily gaining vertical space,
+ use the \rett{Hide} button at the top right of the main window.
+ 
+ \rett{Display Toolbar} This option can be used to show/hide the toolbar.
+
+\rett{Display Seq Errs} All data packets from the radio to the PC contain
+a sequence number that is increased  for each packet sent. piHPSDR
+checks for each incoming data packet whether the sequence number is 
+exactly larger by 1 than the number of the previous packet. If this is not
+the case, this is a \textit{sequence error}. Sequence errors may be caused
+by loosing packets on the way from the radio to the computer, or
+(this is what is usually the reason) packets lost within the computer due
+to the computer being busy with something else (e.g. writing to disk).
+ If the \rett{Display Seq Errs} is checked, a red
+,,Sequence error'' message appears in the RX panel for two seconds.
+Sequence errors during RX often cause cracks in the RX audio. Unless this
+happens regularly, it is no reason to worry.
+
+
 
 \section{The \texttt{Meter} menu}
 
