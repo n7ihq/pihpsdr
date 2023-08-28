@@ -123,7 +123,7 @@ void meter_menu (GtkWidget *parent) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(w), 0);
       break;
     case RXA_S_AV:
-      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 0);
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 1);
       break;
   }
   g_signal_connect(w, "changed", G_CALLBACK(smeter_select_cb), NULL);
@@ -146,7 +146,7 @@ void meter_menu (GtkWidget *parent) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(w), 1);
       break;
     case TXA_ALC_GAIN:
-      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 1);
+      gtk_combo_box_set_active(GTK_COMBO_BOX(w), 2);
       break;
   }
   g_signal_connect(w, "changed", G_CALLBACK(alc_select_cb), NULL);
