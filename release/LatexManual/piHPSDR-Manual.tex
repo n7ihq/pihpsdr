@@ -693,7 +693,7 @@ selected. The green caret indicates the default filter edges,  while the
 red one above denotes the current filter edges. 
 
 \section{Meter section}
-
+\label{sec:MeterSection}
 Fig. \ref{fig:MeterDesigns} shows the different designs that exist for
 the meter. To the left (right) there are the digital (analog) meters,
 while the top panels show the meter during RX and the lower panels
@@ -1176,6 +1176,25 @@ happens regularly, it is no reason to worry.
 
 \section{The \texttt{Meter} menu}
 
+The \bltt{Meter} can either be opened simply by clicking in the meter
+area, or through the main menu. Only few choices can be made here.
+
+\rett{Meter Type:} Here you can select between a digital and an analog
+meter. The four different designs (either analog or digital, and during
+RX or TX) have already been shown in Sec. \ref{sec:MeterSection}.
+
+\rett{S-Meter Reading:} Here you can choose whether the S-meter reports
+a Peak or an Average value (default is Average).
+ Averaging is done over very short times. For
+example, if you receive two signals at S9 (-73 dBm) which are both in the
+RX passband, then an "Average" S-meter will report -70 dBm, while a "Peak"
+S-meter reports -67 dBm, which is the peak envelope power of the received
+signal.
+Note, however, that in order to make the
+display less ,,nervous'' a moving average with a rather long time constant
+(about 0.5 sec) has been implemented on top of both the Peak and Average
+S-meter readings.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MeterMenu.png}
@@ -1183,13 +1202,63 @@ happens regularly, it is no reason to worry.
 \label{fig:Meter}
 \end{figure}
 
+\rett{TX ALC reading:} Here, the possible values are Peak, Average, and
+ALC gain. For a two-tone signal with maximum audio amplitude the Average
+ALC value is -3.0 dB, while the Peak value is 0.0 dB. Therefore I personally
+prefer the Peak value here and made it the default in piHPSDR:
+ if the value is less than zero, one can and should
+increase either the amplitude of the incoming audio signal (e.g. boost the
+microphone preamp) or move the Mic gain slider to the right. The reason is,
+that PureSignal only works if the TX audio input has maximum amplitude,
+so you can put the drive slider to zero, then put the radio into TX mode,
+whistle into the microphone and slowly increase the Mic gain until the
+ALC value shown is only slightly less than zero.
+
+
 \section{The \texttt{XVTR} (Transverter) Menu}
+
+The \bltt{XVTR} menu lets you define additional bands 
+that you can work on using transverters. The bands
+should normally be beyond the standard frequency range of
+the radio, otherwise the the calculation of a band from
+a given frequency will sometimes not work. To give an example,
+suppose you have a transverter which you can drive with frequencies
+between 28 and 30 MHz and which will convert them to the frequency
+range 144 to 146 MHz, and which will receive frequencies in that
+range and mix them down to the 10m band. The data you have to enter
+in the \bltt{XVTR} menu (use the first free entry) are as follows:
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{XVTRMenu.png}
 \caption{The \bltt{XVTR} (transverter) menu.}
 \label{fig:XVTRMenu}
 \end{figure}
+
+
+
+\rett{Title} In this column, enter a name for your band. You can choose
+whatever name you want, this is the one that will be displayed in the
+\bltt{Band} menu. In the present example, use "144" or "144 MHz" or "2m".
+
+\rett{Min Freq} Enter the lowest frequeny of the transverter band in MHz,
+in the present case, 144.
+
+\rett{Max Freq} Enter the highest frequeny of the transverter band in MHz,
+in the present case, 146.
+
+\rett{LO Freq} This is the frequency offset (in MHz) between the radio frequency and
+the operating frequency. In this case, use 116. From this offset, radio frequencies
+between 28 and 30 MHz will be used for operating frequencies between 144 and 146 MHz.
+
+\rett{LO Err} This entry can be used for a fine calibration of the frequency. The value
+(in Hz) is added to the local oscillator (LO) freq in Mhz.
+
+\rett{Disable PA} This checkbox indicates that the PA of the radio should be disabled
+when using the transverter band. This implies that the radio has some sort of 
+low-power output that is used to drive the transverter.
+
+
+
 
 \chapter{The Main Menu: VFO-related menus}
 
