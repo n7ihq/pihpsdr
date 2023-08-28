@@ -206,8 +206,8 @@ static int  anan10e = 0; // HERMES with anan10e set behaves like METIS
 
 static double txlevel;
 
-static double tonearg;
-static double tonedelta;
+static double tonearg,tonearg2;
+static double tonedelta,tonedelta2;
 static int    do_tone;
 
 int main(int argc, char *argv[]) {
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
   int udp_retries = 0;
   int bytes_read, bytes_left;
   uint32_t *code0 = (uint32_t *) buffer;  // fast access to code of first buffer
-  double run, off, inc;
+  double run, off, off2, inc;
   /*
    *      Examples for METIS:     ATLAS bus with Mercury/Penelope boards
    *      Examples for HERMES:    ANAN10, ANAN100 (Note ANAN-10E/100B behave like METIS)
@@ -244,6 +244,8 @@ int main(int argc, char *argv[]) {
   seed = ((uintptr_t) &seed) & 0xffffff;
   tonearg = 0.0;
   tonedelta = 0.0;
+  tonearg2 = 0.0;
+  tonedelta2 = 0.0;
   do_tone = 0;
   diversity = 0;
   noiseblank = 0;
@@ -633,6 +635,12 @@ int main(int argc, char *argv[]) {
         off = (double)(14100000 - rx_freq[0]);
         tonedelta = -6.283185307179586476925286766559 * off / ((double) (48000 << rate));
         do_tone = 1;
+      } else if (labs(21100000L - rx_freq[0]) < (24000 << rate)) {
+        off = (double)(21100000 - rx_freq[0]);
+        tonedelta = -6.283185307179586476925286766559 * off / ((double) (48000 << rate));
+        off2 = (double)(21100900 - rx_freq[0]);
+        tonedelta2 = -6.283185307179586476925286766559 * off2 / ((double) (48000 << rate));
+        do_tone = 2;
       } else {
         do_tone = 0;
       }
@@ -1498,7 +1506,7 @@ void *handler_ep6(void *arg) {
 
       pointer += 8;
       memset(pointer, 0, 504);
-      fac1 = do_tone ?  rxatt_dbl[0] * 0.0002239 : 0.0;
+      fac1 = rxatt_dbl[0] * 0.0002239;
 
       if (diversity && !noiseblank) {
         fac2 = 0.0001 * rxatt_dbl[0];   // Amplitude of broad "man-made" noise to ADC1
@@ -1519,13 +1527,19 @@ void *handler_ep6(void *arg) {
           fac3 = IM3a + IM3b * (i1 * i1 + q1 * q1);
           adc1isample = (txatt_dbl * i1 * fac3 + noiseItab[noiseIQpt]) * 8388607.0;
           adc1qsample = (txatt_dbl * q1 * fac3 + noiseItab[noiseIQpt]) * 8388607.0;
-        } else if (diversity) {
+        } else if (diversity && do_tone == 1) {
           // man made noise to ADC1 samples
           adc1isample = (noiseItab[noiseIQpt] + cos(tonearg) * fac1 + divtab[divpt] * fac2) * 8388607.0;
           adc1qsample = (noiseQtab[noiseIQpt] + sin(tonearg) * fac1                   ) * 8388607.0;
-        } else {
+        } else if (do_tone == 1) {
           adc1isample = (noiseItab[noiseIQpt] + cos(tonearg) * fac1) * 8388607.0;
           adc1qsample = (noiseQtab[noiseIQpt] + sin(tonearg) * fac1) * 8388607.0;
+        } else if (do_tone == 2) {
+          adc1isample = (noiseItab[noiseIQpt] + (cos(tonearg) + cos(tonearg2)) * fac1) * 8388607.0;
+          adc1qsample = (noiseQtab[noiseIQpt] + (sin(tonearg) + sin(tonearg2)) * fac1) * 8388607.0;
+        } else {
+          adc1isample = (noiseItab[noiseIQpt] ) * 8388607.0;
+          adc1qsample = (noiseQtab[noiseIQpt] ) * 8388607.0;
         }
 
         // ADC2: noise RX, feedback sig. on TX (only STEMlab)
@@ -1599,11 +1613,14 @@ void *handler_ep6(void *arg) {
 
         if (noiseIQpt >= LENNOISE) { noiseIQpt = rand_r(&seed) / NOISEDIV; }
 
-        tonearg += tonedelta;
+        tonearg  += tonedelta;
+        tonearg2 += tonedelta2;
 
         if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
+        if (tonearg2 > 6.3) { tonearg2 -= 6.283185307179586476925286766559; }
 
         if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
+        if (tonearg2 < -6.3) { tonearg2  += 6.283185307179586476925286766559; }
 
         divpt += decimation;
 
