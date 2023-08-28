@@ -168,7 +168,7 @@ int classE = 0;
 
 int tx_out_of_band = 0;
 
-int alc = TXA_ALC_AV;
+int alc = TXA_ALC_PK;
 
 int filter_board = ALEX;
 int pa_enabled = PA_ENABLED;
