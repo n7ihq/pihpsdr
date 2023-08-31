@@ -117,9 +117,31 @@ static void modesettingsRestoreState() {
 
   for (int i = 0; i < MODES; i++) {
     //
-    // set defaults
+    // set defaults: everything off, and the default
+    //               filter depends on the mode
     //
-    mode_settings[i].filter = filterF6;
+    switch (i) {
+      case modeLSB:
+      case modeUSB:
+      case modeDSB:
+        mode_settings[i].filter = filterF5; //  2700 Hz
+        break;
+      case modeDIGL:
+      case modeDIGU:
+        mode_settings[i].filter = filterF6; //  1000 Hz
+        break;
+      case modeCWL:
+      case modeCWU:
+        mode_settings[i].filter = filterF4; //   500 Hz
+        break;
+      case modeAM:
+      case modeSAM:
+      case modeSPEC:
+      case modeDRM:
+      case modeFMN:  // nowhere used for FM
+        mode_settings[i].filter = filterF3; //  8000 Hz
+        break;
+    }
     mode_settings[i].nr = 0;
     mode_settings[i].nb = 0;
     mode_settings[i].anf = 0;
