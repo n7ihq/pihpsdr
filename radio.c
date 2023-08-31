@@ -226,7 +226,7 @@ int cw_keyer_ptt_delay = 30;           // 0-255ms
 int cw_keyer_hang_time = 500;          // ms
 int cw_keyer_sidetone_frequency = 800; // Hz
 int cw_breakin = 1;                    // 0=disabled 1=enabled
-int cw_audio_peak_filter = 1;          // 0=disables 1=enabled, only in CW mode
+int cw_audio_peak_filter = 0;          // 0=disables 1=enabled, only in CW mode
 int cw_audio_peak_width = 75;          // Width of CW audio peak filter
 
 int cw_is_on_vfo_freq = 1;             // 1= signal on VFO freq, 0= signal offset by side tone

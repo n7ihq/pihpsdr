@@ -63,17 +63,18 @@ static gboolean close_cb () {
 }
 
 static void cw_keyer_internal_cb(GtkWidget *widget, gpointer data) {
-  cw_keyer_internal = cw_keyer_internal == 1 ? 0 : 1;
+  cw_keyer_internal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   cw_changed();
 }
 
 static void cw_peak_cb(GtkWidget *widget, gpointer data) {
-  cw_audio_peak_filter = cw_audio_peak_filter == 1 ? 0 : 1;
+  cw_audio_peak_filter = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   receiver_filter_changed(active_receiver);
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 static void cw_keyer_spacing_cb(GtkWidget *widget, gpointer data) {
-  cw_keyer_spacing = cw_keyer_spacing == 1 ? 0 : 1;
+  cw_keyer_spacing = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   cw_changed();
 }
 
@@ -88,7 +89,7 @@ static void cw_audio_peak_width_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void cw_breakin_cb(GtkWidget *widget, gpointer data) {
-  cw_breakin = cw_breakin == 1 ? 0 : 1;
+  cw_breakin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   cw_changed();
 }
 
@@ -103,7 +104,7 @@ static void cw_keyer_weight_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void cw_keys_reversed_cb(GtkWidget *widget, gpointer data) {
-  cw_keys_reversed = cw_keys_reversed == 1 ? 0 : 1;
+  cw_keys_reversed = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   cw_changed();
 }
 

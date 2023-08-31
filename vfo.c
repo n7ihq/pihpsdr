@@ -195,7 +195,7 @@ void vfoRestoreState() {
     }
 
     vfo[i].mode = modeCWU;
-    vfo[i].filter = filterF6;
+    vfo[i].filter = filterF4;
     vfo[i].lo = 0;
     vfo[i].offset = 0;
     vfo[i].rit_enabled = 0;
@@ -1167,8 +1167,17 @@ void vfo_update() {
 
     case modeCWL:
     case modeCWU:
-      sprintf(temp_text, "%s %s %d wpm %d Hz", mode_string[vfo[id].mode], band_filter->title,
-              cw_keyer_speed, cw_keyer_sidetone_frequency);
+      if (cw_audio_peak_filter) {
+        sprintf(temp_text, "%s %sP %dwpm %dHz", mode_string[vfo[id].mode],
+                band_filter->title,
+                cw_keyer_speed,
+                cw_keyer_sidetone_frequency);
+      } else {
+        sprintf(temp_text, "%s %s %d wpm %d Hz", mode_string[vfo[id].mode],
+                band_filter->title,
+                cw_keyer_speed,
+                cw_keyer_sidetone_frequency);
+      }
       break;
 
     case modeLSB:
