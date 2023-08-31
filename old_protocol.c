@@ -1050,6 +1050,7 @@ static void process_control_bytes() {
       if (!isTransmitting()) {
         // during RX: set flag to zero
         tx_fifo_flag = 0;
+        tx_fifo_underrun = 0;
       } else {
         // after RX/TX transition: ignore underflow condition
         // until it first vanishes. tx_fifo_flag becomes "true"

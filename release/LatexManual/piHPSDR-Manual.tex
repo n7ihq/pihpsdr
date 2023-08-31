@@ -1183,13 +1183,13 @@ area, or through the main menu. Only few choices can be made here.
 meter. The four different designs (either analog or digital, and during
 RX or TX) have already been shown in Sec. \ref{sec:MeterSection}.
 
+In both cases, there is a choice between Peak and Average reading, which
+refers to peak envelope power and average power. Here averaging is done
+over relatively short times. For a two-tone signal for example, the peak
+reading is 3 dB above the average reading.
+
 \rett{S-Meter Reading:} Here you can choose whether the S-meter reports
 a Peak or an Average value (default is Average).
- Averaging is done over very short times. For
-example, if you receive two signals at S9 (-73 dBm) which are both in the
-RX passband, then an "Average" S-meter will report -70 dBm, while a "Peak"
-S-meter reports -67 dBm, which is the peak envelope power of the received
-signal.
 Note, however, that in order to make the
 display less ,,nervous'' a moving average with a rather long time constant
 (about 0.5 sec) has been implemented on top of both the Peak and Average
@@ -1262,14 +1262,83 @@ low-power output that is used to drive the transverter.
 
 \chapter{The Main Menu: VFO-related menus}
 
+In this chapter we discuss the menus from the second column
+of the main menu. These are all VFO-related menus.
+
+
 \section{The \texttt{VFO}  menu}
+
+The \bltt{VFO} menu can be used for direct frequency entry and to
+enable/disable some frequently used options. If the menu is opened,
+it refers either to VFO-A or VFO-B. If opened via the main menu,
+it automatically refers to the VFO controlling the active receiver.
+The easiest (and therefore recommended) way to open the \bltt{VFO}
+menu is just to make a mouse click (or a touch screen press) into the
+VFO bar. If clicked in the left half of the VFO bar, the menu is opened
+for VFO-A and if clicked in the right half, it is opened for VFO-B.
+The \bltt{VFO} menu is shown in Fig. \ref{fig:VFOmenu}.
+
+
+The ,,keypad'' is used for direct frequency entry. You can enter
+digits and a decimal point. While entering a number the string
+entered so far is not only shown in the upper part of the
+\bltt{VFO} menu, but also (in yellow digits) in the VFO bar.
+The other buttons of the ,,keypad'' have a special meaning:
+
 \begin{figure}[h]
 \includegraphics[width=12cm]{VFOmenu.png}
 \caption{The \bltt{VFO} menu.}
 \label{fig:VFOmenu}
 \end{figure}
 
+
+\rett{BS} Backspace. This cancels the last entered character
+(digit or decimal point).
+
+\rett{Hz} This enters the frequency ,,as is''.
+
+\rett{kHz} This multiplies the frequency just entered with 1000 and
+enters it. This means, the number entered is interpreted as a
+frequency in kHz.
+
+\rett{MHz} The string typed in so far is interpreted as a frequency in MHz
+and this frequency is transferred to the VFO.
+
+\rett{Clear} The string typed in so far is deleted, the VFO frequency is not
+updated.
+
+The commands entered by clicking the buttons of the keypad in the VFO menu
+can also be entered by push-buttons from a GPIO or MIDI controller, see
+the NumPad commands in Appendix A.
+
+In addition to frequency entry, the VFO menu offers a convenient way of changing
+some piHPDSR settings, simply because the VFO menu can be opened by a simple
+mouse click into the VFO bar.
+
+\rett{Rit Step:} In this pop-down menu, the RIT/XIT step size can be chosen
+ (1/10/100 Hz).
+
+\rett{VFO Step:} In this pop-down menu, the VFO step size can be chosen. The VFO step
+sizes range from 1 Hz to 1 MHz.
+
+\rett{Lock VFOs} With this check box enabled, VFO frequencies cannot be changed by
+turning a VFO dial (GPIO or MIDI controller), or by clicking/dragging in the RX panel.
+Band changes (via the \bltt{Band} menu) and other VFO related functions still work.
+
+\rett{Duplex} and \rett{Split}. With these check boxes, you can put the radio
+in Duplex or Split mode, see the \bltt{Radio} menu.
+
+\rett{CTUN}. With this check-box, you can put the VFO this menu is referring to into
+CTUN mode. In CTUN mode, the spectrum scope does not move when changing the frequency, 
+rather, the RX ,,window'' moves. CTUN mode does not affect TX operation.
+
+
 \section{The \texttt{Band} menu}
+
+The \bltt{Band} menu lets you change the band of the active receiver. It is shown
+in Fig. \ref{fig:BandMenu}. When the menu opens, the button of the current band
+is highlighted.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{BandMenu.png}
@@ -1277,21 +1346,72 @@ low-power output that is used to drive the transverter.
 \label{fig:BandMenu}
 \end{figure}
 
-\section{The  \texttt{BndStack} (Bandstack) menu}
+Pressing a button corresponding to another band, two things happen: first, if the 
+active receiver is controlled by VFO-A, the current frequency is stored in the current
+bandstack (which is thus updated). Then, the new band is chosen, the frequency and mode
+are from the active bandstack entry of the new band. This means that if you switch
+to another band and shortly thereafter switch back to the original band, the
+frequency and mode is restored to what you had before.
+
+If you hit the highlighted button, you will not change the band (since you hit the
+button of the current band) but instead will cycle through the band stack of that band
+(see the \bltt{BndStack} menu).
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{BandstackMenu.png}
 \caption{The \bltt{BndStack} (Bandstack) menu.}
 \label{fig:BandstackMenu}
 \end{figure}
+
+Note that the band menu may look different from the one shown here: there are many bands
+(24 bands plus up to 8 transverter bands) defined in piHPSDR. However, the bands that
+are outside of the radio's frequency limits are not shown. For example, a radio
+whose maximum frequency is 30 Mhz will not show the 6m band. The \rett{GEN} (General)
+band encompasses the whole frequency range of the radio. If you set the frequency
+(e.g. via the \bltt{VFO} menu) to a frequency outside of any of the other bands, you
+will end up in the General band. If you have defined transverter bands (see the
+\bltt{XVTR} menu) they will be shown, with the title you have chosen, in the
+\bltt{Band} menu.
+
+\section{The  \texttt{BndStack} (Bandstack) menu}
+
  
-\section{The \texttt{Mode} menu}
+For each band, the band stack is collection of frequency/mode pairs. The idea is that
+you can have preferred or recently visited frequencies to which you can easily come back.
+If you open the \bltt{BndStack} menu (Fig. \ref{fig:BandstackMenu}), you see all these
+frequency/mode pairs, the band stack entry currently selected is highlighted.
+
+If you press the highlighted button, the current frequency/mode is stored in that band stack
+entry. If you press another (non highlighted) bandstack entry, the current frequency/mode
+is stored in the highlighted band stack entry, and then the frequency/mode of the new 
+entry becomes effective. Note that bandstack entries are only changed if the active
+receiver is controlled by VFO-A. 
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{ModeMenu.png}
 \caption{The \bltt{Mode} menu.}
 \label{fig:ModeMenu}
 \end{figure}
+
+\section{The \texttt{Mode} menu}
+The \bltt{Mode} menu lets you change the mode of the active receiver, so you can switch,
+say, from LSB to CWU or DIGU. The mode menu simply lists the available modes, the current
+one is highlighted (Fig. \ref{fig:ModeMenu}).
+
+\textbf{Settings stored with the mode.} Many settings such as filter choices, noise reduction
+and equalizer settings, and TX compressor settings
+ are only reasonable with a specific mode in mind. Therefore, these settings are stored with
+ the mode. If you later switch back to this mode, the settings that were effective the last
+ time you used that mode are restored. This is the main reason why the USB and DIGU modes
+ are separate (although technically they are the same), the same applies for LSB and DIGL. 
+ For digital operation, you will normally choose DIGU and have no noise reduction, no TX
+ compressore, and no equalizer. For voice operation (USB/LSB) you may then have the
+ noise reduction, equalizer and TX compressor settings as you like it. Then you can easily
+ switch between DIGU and USB/LSB and have the correct settings automatically. The same applies
+ to CWL/CWU where you will normally use different settings compared to both USB/LSB and DIGU.
+
 
 \section{The \texttt{Memory}  menu}
 \begin{figure}[h]
@@ -2106,5 +2226,99 @@ contains information on the ANDROMEDA version. Furthermore, if "Andromeda" is se
 changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, CTUN mode, RIT and XIT status, and LOCK status),
 such that the ANDROMEDA controller can update the corresponding LEDs.
 
+\chapter[RaspPi: configure GPIO]{RaspPi: Preparations for using GPIO controllers}
+\label{sec:GPIOconfig}
+If you do not run piHPSDR on a Raspberry Pi, or if you do not use a GPIO controller connected
+to the Raspberry Pi GPIO I/O lines, there is no reason to read this chapter.
+There are only two aspects that need be covered here.
+
+\textbf{Setting the direction of the GPIO I/O lines}. The first one is the switching of the
+direction (input or output) of the I/O lines, which has changed when the RaspPi3 was 
+replaced by the RaspPi4. So for some time, it was necessary to put all the GPIO lines
+used by piHPSDR ,,manually'' into an INPUT state (with pull-ups) when booting the RaspPi.
+The necessity to do so should fade out very quickly now, but just in case, the procedure
+is decribed here. Setting the GPIO lines used by piHPSDR ($4-27$) to input state with
+pull-up can simply be done by adding a line
+
+\texttt{gpio=4-27=ip,pu}
+
+at the end of the file \texttt{/boot/config.txt} (this requires administrator privileges).
+For the ease of the user, a shell script with name \texttt{release/gpio.sh} has been provided
+which exactly does this.
+So it should be enough (this manual assumes that the pihpsdr directory is at top level
+within the users's home directory) to open a terminal window and issue the commmands
+
+\texttt{cd \$HOME/pihpsdr} \\
+\texttt{release/gpio.sh}
+
+and this will update your \texttt{/boot/config.txt} file. Note that the command \texttt{sudo}
+is used to actually perform the tasks that need administrator privileges, so make sure that
+you can use this command from your user account. Depending on the installation, you might
+be asked an administrator password when executing the shell script.
+
+\textbf{Activating the I2C interface.} This is only necessary if you use a ,,version 2''
+or a G2 front-panel controller. These controllers extend the number of available input
+lines (and thus, the number of switches piHPSDR can control) by an i2c device, so 
+i2c must be enabled. This can be done via the ,,Raspberry'' $\to$ ,,Preferences'' $\to$ ,,RaspberryPi Configuration'' menu. In the ,,Interfaces'' tab, make sure that I2C is enabled.
+
+\chapter[RaspPi: binary piHPDSR installation]{Binary installation of piHPSDR (RaspPi only)}
+
+\textbf{Note: binary installation is not recommended, you should rather try to
+compile from the sources.} A binary installation can only work if the operating system used
+to produce the binaries is more or less the same as the one where the binaries will be run.
+OS upgrades, a switch from a 32-bit to a 64-bit OS, and other changes can have the consequence
+that the binaries will not run on your system. This problem can be completely avoided if
+you compile and link piHPSDR from the sources on your system, and it is then also recommended
+to repeat this each time you do a major OS upgrade. For the same reason, \textbf{only binaries
+for the RaspberryPi} are provided, they have been produces on a RaspberryPi using the latest
+RaspberryPi OS. Note there exists a very detailed document on setting up a RaspPi and
+compiling piHPSDR from the sources, and several absolute Linux beginners have successfully
+followed these instructions. Another advantage when compiling from the sources is, that
+you always get the most recent version of piHPSDR. The binaries are only occasionally updated.
+
+So, if you continue reading here despite the long list of caveats,
+ you are sure you have a RaspPi and want a binary installation.
+Such an installation is provided for the RaspPi only. To make this manageable and minimize
+the dependence on third-party libraries, the binary
+version does not contain support for SoapySDR devices or USB OZY devices, and also
+cannot start RedPitaya SDR apps through the web interface. If you need any of these features,
+you have to compile from the sources with the SOAPSDR and/or the USBOZY and/or the STEMLAB
+options activated.
+
+The easiest way to obtain the ,,tar-file'' which contains the installation. Probably the
+easiest way to download the file is using a brower (you can open the browser on your
+RaspPi or on any other computer) and go to the following URI (this is one single string without
+blanks which is broken over two lines here)
+
+\texttt{https://github.com/dl1ycf/pihpsdr/blob/master/\\
+release/pihpsdr.tar}
+
+and then click the ,,Raw'' button. This should make your browser download a file with name
+"pihpsdr.tar". Put this file into your home directory. If you have down loaded the file
+on a different computer, you have to transfer it to your RaspPi. Then, in a terminal
+window issue the three commands
+
+\texttt{cd \$HOME}\\
+\texttt{tar xvf pihpsdr.tar} \\
+\texttt{pihpsdr/install.sh}
+
+
+These commands will ,,extract'' the tar file. At the end you have created a folder names
+pihpsdr in your top level home directory which contains lots of files, and the third command
+as put these files in the right location and should also create a piHPSDR desktop icon.
+Please read Appendix \ref{sec:GPIOconfig} and possibly configure GPIO and/or I2C if
+you want to use GPIO controllers.
+
+The preferred way of starting piHPSDR is then double-clicking the piHPSDR desktop icon.
+As an alternative, you can open a terminal window and issue the two commands
+
+\texttt{cd \$HOME/pihpsdr} \\
+\texttt{pihpsdr}
+
+
+
+\chapter[Linux: piHPDSR install from sources]{Installation of piHPSDR from the sources (Linux, RaspPi)}
+
+\chapter[MacOS: piHPDSR install from sources]{Installation of piHPSDR from the sources (MacOS)}
 
 \end{document}
