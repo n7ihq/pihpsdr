@@ -103,6 +103,7 @@ ACTION_TABLE ActionTable[] = {
   {COMP_ENABLE,         "Cmpr On/Off",          "COMP",         MIDI_KEY   | CONTROLLER_SWITCH},
   {COMPRESSION,         "Cmpr Level",           "COMPVAL",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {CTUN,                "CTUN",                 "CTUN",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_AUDIOPEAKFILTER,  "CW Audio\nPeak Fltr",  "CW-APF",       MIDI_KEY   | CONTROLLER_SWITCH},
   {CW_FREQUENCY,        "CW Frequency",         "CWFREQ",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {CW_LEFT,             "CW Left",              "CWL",          MIDI_KEY   | CONTROLLER_SWITCH},
   {CW_RIGHT,            "CW Right",             "CWR",          MIDI_KEY   | CONTROLLER_SWITCH},
@@ -631,6 +632,15 @@ int process_action(void *data) {
     if (a->mode == PRESSED) {
       int state = vfo[active_receiver->id].ctun ? 0 : 1;
       vfo_ctun_update(active_receiver->id, state);
+      g_idle_add(ext_vfo_update, NULL);
+    }
+
+    break;
+
+  case CW_AUDIOPEAKFILTER:
+    if (a->mode == PRESSED) {
+      active_receiver->cwAudioPeakFilter = active_receiver->cwAudioPeakFilter ? 0 : 1;
+      receiver_filter_changed(active_receiver);
       g_idle_add(ext_vfo_update, NULL);
     }
 

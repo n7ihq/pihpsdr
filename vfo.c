@@ -1192,7 +1192,7 @@ void vfo_update() {
 
     case modeCWL:
     case modeCWU:
-      if (cw_audio_peak_filter) {
+      if (active_receiver->cwAudioPeakFilter) {
         sprintf(temp_text, "%s %sP %dwpm %dHz", mode_string[vfo[id].mode],
                 band_filter->title,
                 cw_keyer_speed,

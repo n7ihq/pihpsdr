@@ -226,8 +226,6 @@ int cw_keyer_ptt_delay = 30;           // 0-255ms
 int cw_keyer_hang_time = 500;          // ms
 int cw_keyer_sidetone_frequency = 800; // Hz
 int cw_breakin = 1;                    // 0=disabled 1=enabled
-int cw_audio_peak_filter = 0;          // 0=disables 1=enabled, only in CW mode
-int cw_audio_peak_width = 75;          // Width of CW audio peak filter
 
 int cw_is_on_vfo_freq = 1;             // 1= signal on VFO freq, 0= signal offset by side tone
 // shall hard-wire this to "1"
@@ -2413,8 +2411,6 @@ void radioRestoreState() {
   GetPropI0("tx_filter_low",                                 tx_filter_low);
   GetPropI0("tx_filter_high",                                tx_filter_high);
   GetPropI0("step",                                          step);
-  GetPropI0("cw_audio_peak_filter",                          cw_audio_peak_filter);
-  GetPropI0("cw_audio_peak_width",                           cw_audio_peak_width);
   GetPropI0("cw_keys_reversed",                              cw_keys_reversed);
   GetPropI0("cw_keyer_speed",                                cw_keyer_speed);
   GetPropI0("cw_keyer_mode",                                 cw_keyer_mode);
@@ -2630,8 +2626,6 @@ void radioSaveState() {
   SetPropI0("tx_filter_low",                                 tx_filter_low);
   SetPropI0("tx_filter_high",                                tx_filter_high);
   SetPropI0("step",                                          step);
-  SetPropI0("cw_audio_peak_filter",                          cw_audio_peak_filter);
-  SetPropI0("cw_audio_peak_width",                           cw_audio_peak_width);
   SetPropI0("cw_keys_reversed",                              cw_keys_reversed);
   SetPropI0("cw_keyer_speed",                                cw_keyer_speed);
   SetPropI0("cw_keyer_mode",                                 cw_keyer_mode);
