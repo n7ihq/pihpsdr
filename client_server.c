@@ -64,16 +64,6 @@ GMutex client_mutex;
 
 #define MAX_COMMAND 256
 
-enum {
-  NO_ACTION,
-  SET,
-  MOVE,
-  MOVETO,
-  GET,
-  START,
-  STOP,
-};
-
 static char title[128];
 
 gboolean hpsdr_server = FALSE;
