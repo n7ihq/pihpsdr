@@ -436,7 +436,7 @@ the  Zoom and Pan sliders, as already discussed. This area
 can be ,,hidden'' with the \bltt{Display} menu to save some
 vertical space. Below the
 Zoom/Pan sliders you see a larger  Sliders area containing
-several sliders for adjusting AF volume, TX  drive leve, 
+several sliders for adjusting AF volume, TX  drive level, 
 RX  AGC threshold, etc. Although the Sliders area can also
 be hidden via the \bltt{Display} menu, you should not do so
 unless you have a GPIO or MIDI controller which knobs that
@@ -474,6 +474,28 @@ and the numerical value is displayed as well (Fig. \ref{fig:SliderOnScreen}).
 Such a pop-up slider always occurs if a knob on the GPIO or MIDI
 console is turned and no slider associated with the value changing is
 on display.
+
+At the very bottom of the window, there it the toolbar. This can also be
+individually hidden/shown via the \bltt{Display} menu. The toolbar consists
+of eight ,,buttons'' which you can click with a mouse or on a touchscreen.
+If you are using the original (V1) piHPSDR GPIO controller, is has eight
+push buttons below the screen and pressing those is equivalent to clicking
+the buttons on the screen. You might still want to keep the toolbar on display
+even if you are using the V1 controller since it shows you to which functions
+the buttons are actually assigned. This assignments consists of six ,,layers''
+(0 through 5). The rightmost button is hard-wired to the \bltt{Function}
+action which cycles through the layers. The button text includes the 
+number of the currently active layer, and the button text of the other buttons
+reflect the functions assigned to the buttons in the current layer. 
+
+\textbf{Bonus for mouse users only.} For the first seven toolbar buttons,
+there is no difference if you do a primary or secondary mouse click on that
+button (that is, it does not matter whether you use the left or right mouse
+button). But for the rightmost toolbar button, a normally mouse click cycles
+forward through the layers, while a secondary mouse click cycles backwards.
+If you use a V2 or G2-frontpanel GPIO controller or a MIDI console, then you
+can also map this function (\bltt{FuncRev}) to a spare button.
+
 
 
 \section{Mouse clicks in the main window}
@@ -581,7 +603,9 @@ In Fig. \ref{fig:VFObar}, the text is \rett{USB Var1}
 which indicates that the  mode
 is USB using the Var1 filter with variable width (see the \bltt{Filter} menu).
 For the CW (CWU and CWL) modes, the CW speed (in wpm) and the side tone
-frequency (in Hz) is stated as well.
+frequency (in Hz) is stated as well. For CW, the filter size may be appended
+by a ,,P'', which indicates whether the CW audio peak filter (see the
+\bltt{Filter} menu) is effective on top of the normal filter.
 
 Now we continue line by line, from left to right and find
 the string \rett{AGC med} printed in yellow. This means
@@ -1412,18 +1436,29 @@ and equalizer settings, and TX compressor settings
  switch between DIGU and USB/LSB and have the correct settings automatically. The same applies
  to CWL/CWU where you will normally use different settings compared to both USB/LSB and DIGU.
 
-
+\newpage
 \section{The \texttt{Memory}  menu}
-\begin{figure}[h]
+
+The \bltt{Memory} menu gives you access to five memory slots. The menu is shown in Fig. \ref{fig:MemMenu}.
+You can store the current
+frequency and mode of the active receiver in any of the five slots by clicking a
+button in the leftmost columns (e.g. "Store M2"), or you can restore
+data from any slot. The current memory contents are shown in the right column (frequency,
+mode, and filter width) and clicking on of the five buttons there will restore
+the data. So if you have some often used frequencies (e.g. for a net), the
+\bltt{Memory} menu allows you to become QRV there with only few mouse clicks.
+
+ \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MemMenu.png}
 \caption{The \bltt{Memory} menu.}
 \label{fig:MemMenu}
 \end{figure}
- 
+
 \chapter{The Main Menu: RX-related menus}
 
-\section{The \texttt{RX} Menu}
+The second column of tghe main menu contains menus which allow you to change 
+receiver settings.
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{RXMenu.png}
@@ -1431,13 +1466,54 @@ and equalizer settings, and TX compressor settings
 \label{fig:RXMenu}
 \end{figure}
 
+\section{The \texttt{RX} Menu}
+
+Invoking the \bltt{RX} menu through the main menu always implies that the settings
+of the active receiver are to be modified. Using a mouse, you can also open the menu
+by a secondary click (using the right mouse button) into the receiver panel. This way,
+if piHPSDR is running two receivers, you can open the \bltt{RX} menu for both receivers
+(the active receiver as well as the other one), depending on in which panel you have
+right-clicked. Note secondary clicks are usually not possible with a touch screen.
+The menu is shown in Fig. \ref{fig:RXMenu}.
+
+\rett{Sample Rate} This box is only shown for radios running P2, since only there the
+receivers can have an individual sample rate. For radios running P1 or radios accessed
+through the SoapySDR library, the sample rate is a global quantity that is modified
+throught the \bltt{Radio} menu (see above).
+
+\rett{Select ADC} This box is only shown if the radio has more than one analog-to-digital
+converter (ADC), such as Orion, Orion-II and Saturn boards. These radios have two ADCs so
+you can choose whether the receiver gets data from ADC0 or ADC1. For these radios, nearly
+all antenna jacks go to ADC0, while there is a jack denoted "RX2" (or similar) that 
+is connected with ADC1. In most cases, ADC0 is used for normal operation, while ADC1
+can be used for connecting a dedicated RX antenna. 
+
+\textbf{Note: Diversity}. When using \bltt{Diversity} reception, the ADC setting is
+overridden, since there data streams from ADC0 and ADC1 are combined (mixed).
+
 \section{The \texttt{Filter} menu}
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{FilterMenuUSB.png}
 \caption{The \bltt{Filter} menu (single side band modes).}
 \label{fig:FilterMenuUSB}
 \end{figure}
+
+With the \bltt{Filter} menu, you can change the filter of the active receiver. There
+are ten fixed filters and two variable filters, see Fig. \ref{fig:FilterMenuUSB}. It
+depends on the current mode which filters are at your disposal, and Fig. \ref{fig:FilterMenuUSB}
+is what you see for USB and LSB modes. The filter currently active is highlighted, and
+you can choose another filter simply clicking the button. For USB and LSB, the filters
+are such the low-frequency cut (in the audio domain) is at 150 Hz, so a 2.7k filter
+actually encompasses audio frequencies from 150 to 2850 Hz. With the variable filters
+(Var1 and Var2) you can be more flexible in the low audio frequency range. Here you
+can individually select the low- and high frequency cut (both frequencies refer to
+the audio domain, and are thus both positive value for USB and LSB).
+
+The pre-defined filters for the digital modes DIGU and DIGL are a little bit different.
+For filter widths up to 3 kHz, the filter is centered around 1500 Hz. For example,
+a 1.0k filter for DIGU/DIGL passes audio frequencies between 1000 and 2000 Hz.
 
 \begin{figure}[h]
 \center
@@ -1446,14 +1522,93 @@ and equalizer settings, and TX compressor settings
 \label{fig:FilterMenuCW}
 \end{figure}
 
+For modes such as CW and AM, low/high cutoff frequencies have little meaning, so the
+\bltt{Filter} menu looks slightly different (Fig. \ref{fig:FilterMenuCW}). The fixed
+filters are designated by their width, they are centered around zero (for AM) or around
+the CW side tone frequency (for CWU and CWL). For the variable filters Var1 and Var2,
+the spin buttons can set the filter width and the filter shift. Normally you will not
+want to change the filter shift, but it may help in special cases.
+
+\rett{Enable additional CW Audio peak filter}. If the mode of the
+active receiver is CWL or CWU, there will be an addition check box in the
+top row of the menu. Here you can enable/disable an audio peak filter that
+is applied to the final audio output of the receiver, that is, on top of
+the regular filtering. The audio peak filter will only be effective in
+the CW modes, its center frequency is given by the CW side tone frequency
+and its width is automatically calculated, depending on the
+width of the primary filter. The main use of the audio peak filter is 
+\textit{not} fighting QRM, but to help tuning on a signal: suppose you use a CW
+side tone frequency of 800 Hz and a 500 Hz filter. Now you hear a CQ call, and
+if you do not have absolute hearing, it may happen that you tune such that the
+CQ call in your headphone sounds at 650 Hz, which means that you are 150 Hz off
+the frequency of your prospective QSO partner. If the other stations uses a very
+narrow CW filter, your signals may be be list un-heard since they are outside
+the pass-band of the other station. The reason why this easily happens is that
+the normal RX filters have a flat passband, that is, the signal you hear at 650 Hz
+is as strong as it would be for correct tuning. This is where the audio peak filter
+comes in: with the audio peak filter engaged, the received signal appears much louder
+when it is at 800 Hz (correct tuning) than if it were at 650 Hz. This implies that
+the width of the audio peak filter should be such that signals at the edges of the
+passband of your normal filter should still be audible. piHPSDR uses a width that
+equals one fourth of the width of the normal filter.
+
+There is the function \bltt{CW Audio Peak Filter} that can be mapped on toolbar
+buttons or GPIO/MIDI buttons so you can quickly enable/disable the audio peak
+filter. In Fig. \ref{fig:FilterMenuCW} you see the sign \rett{CW-APF} (which is the
+short string for \bltt{CW Audio Peak Filter} on the second button from the left,
+and with this button you can quickly disable/enable the peak filter. I prefer
+to have the audio peak filter engaged when I answer to CQ calls, but to have it
+disabled when doing CQ calls myself.
+
 
 \section{The \texttt{Noise} Menu}
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{NoiseMenu1.png}
 \caption{The \bltt{Noise} menu (with NR settings).}
 \label{fig:NoiseMenu1}
 \end{figure}
+
+With the \bltt{Noise} menu you can select a variety of noise reduction and/or
+noise blanker capabilities (Fig. \ref{fig:NoiseMenu1}). The upper part of the
+menu always looks the same, the lower part lets you fine-tune noise reduction
+or noise blanker parameters. For an in-depth explanation of the noise reduction
+and noise blanker capabilites, the reader is referred to the WDSP manual.
+
+\rett{SNB} This check box lets you enable/disable the spectral noise blanker.
+
+\rett{ANF} This check box enables/disables the automatic notch filter. The ANF is
+very good at eliminating a single-tone QRM carrier in SSB modes. It goes without
+saying that activating the ANF in CW is detrimental rather than beneficial, because
+here the signal is of the type the ANF tries to eliminate.
+
+\rett{Noise Reduction} With this pop-down menu, you can choose the type of noise reduction
+(no noise reduction, NR1 or NR2).
+
+\rett{Noise Blanker} With this pop-down menu, you can choose the type of noise blanker
+(no noise blanker, the preemptive wideband blanker NB or the interpolating widetband
+blanker NB2 ).
+
+\rett{NR Settings/NB Settings} Choosing one of the two buttons determines whether the
+lower part of the menu offers fine-tuning of the noise reduction or noise blanker settings.
+The set up for changing the noise reduction settings is shown in Fig. \ref{fig:NoiseMenu1},
+below (Fig \ref{fig:NoiseMenu2}) you find the set up for changing the noise blanker settings.
+We discuss the noise reduction settings first, but note again for the details you have
+to study the WDSP manual.
+
+\rett{NR2 Gain Method} The available choices for the NR2 noise reduction here are Linear, Log, and Gamma, where Gamma is the default.
+
+\rett{NR2 NPE Method} The available choices for the NR2 noise reduction here are OSMS and MMSE,
+where OSMS is the default.
+
+\rett{NR...Position} In the RX chain, the noise reduction can be placed before or after
+the automatic gain control (AGC). The choice here refers to \textit{all} noise reduction
+capabilities (SNB, ANF, NR1, NR2).
+
+\rett{NR2 Artifact Elimination} The NR2 noise reduction algorithm is prone to producing
+artifacts, so there is an option to reduce such artifacts which should normally be checked
+(artifact elminiation ,,on'').
 
 \begin{figure}[h]
 \center
@@ -1462,7 +1617,37 @@ and equalizer settings, and TX compressor settings
 \label{fig:NoiseMenu2}
 \end{figure}
 
+Note the noise blanker works very different from the noise reduction, since noise blanking
+is applied to the original RX IQ samples before any frequency shifts etc. take place. 
+If you have a single source of noise (e.g. a Plasma TV) that drives you crazy, it is worth
+the effort to play around with the NB2 parameters, especially the timings. Different
+QRM sources will require different parameters! The default parameters have been proven useful
+for many situations, but for you a different setting may produce better results!
+The options to control the noise blanker algorithms are:
+
+\rett{NB2 Mode} The available choices for the interpolating NB2 noise blanker here are Zero,
+Sample\&Hold, Mean Hold, Hold Sample, and Interpolate.
+
+\rett{NB Slew time/Lag time/Lead time/Threshold} These parameters apply both to NB and NB2.
+piHPSDR currently does not allow to have a separate set of parameters for NB and NB2.
+
+
+
 \section{The \texttt{AGC} Menu}
+
+Only few parameters can be controlled via the automatic gain control (AGC) menu.
+The first is the AGC time constant, which can be Off (no AGC), Long, Slow, Medium,
+and Fast. A very long AGC time constant protects your ears, but it also means that
+the receiver becomes ,,deaf'' for a rather long time after a strong QRM burst. This
+phenomenon is known as "AGC pumping". Generally, if you do SSB on a quiet band, the
+AGC time constant can be longer, for CW on the other hand, I personally prefer short
+time constants (Medium or Fast).
+
+The \rett{AGC Hang Threshold} is only effective if the AGC time constant is Long or Slow,
+since the AGC hang time is turned off for Medium and Fast.
+In this case, the RX spectrum scope not only shows the ,,normal'' AGC line in green,
+but also the hang threshold line in orange.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{AGCMenu.png}
@@ -1471,12 +1656,27 @@ and equalizer settings, and TX compressor settings
 \end{figure}
 
 \section{The \texttt{Diversity} Menu}
+
+\bltt{Diversity} is a very powerful tool to improve reception by using two different
+antennas and two ADCs. To explain how it works, suppose you live in a house which produces
+a lot of local QRM. Your ,,normal'' antenna will pick up the wanted DX signals, but also
+a lot of noise that originates somewhere in your house. Now suppose you have a second
+receive-only antenna placed in your house that will predominantly pick up your local
+QRM and only very little DX signal.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{DiversityMenu.png}
 \caption{The \bltt{Diversity} menu.}
 \label{fig:DiversityMenu}
 \end{figure}
+
+Of course, this RX-only antenna does not deliver anything useful at first sight. But, imagine
+you could shift the phase and the amplitude of the signal of the in-house antenna such that it
+exactly opposes the local QRM picked up by your DX antenna! Adding this (phase shifted and amplitude
+adjusted) signal from your in-house antenna to what comes from your DX antenna will produce
+a signal where the local QRM is largely eliminated while the DX signal is only weakly affected.
+This is what \bltt{Diversity} is all about.
 
 \chapter{The Main Menu: TX-related menus}
 
@@ -1556,52 +1756,76 @@ that a positioned below the screen, are bound to the eight toolbar buttons on th
 Therefore, there is no "Switches" menu for this controller, and the switches are implicitly
 configured via the Toolbar menu.
 
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{ToolbarMenu1.png}
+\caption{The Toolbar menu, just opened.}
+\label{fig:ToolbarMenu1}
+\end{figure}
+
 \section{The \texttt{Toolbar} Menu}
 We start with the "Toolbar" menu, that can be found at the top of the rightmost
 column in the main menu. The toolbar consists of eight buttons that can be assigned
 to a set of eight functions. There are six such sets, and pressing the FUNC button
-cycles through these six sets. If you click the Toolbar button, a menu pops up and
-you see the following:
+cycles through these six sets. If you click the Toolbar button, a menu pops up as
+shown in Fig. \ref{fig:ToolbarMenu1}.
 
-\begin{center}
-\includegraphics[width=12cm]{ToolbarMenu1.png}
-\end{center}
-
-The six lines denoted \texttt{F0} through \texttt{F5} indicate the six different sets. If you
-look closely, you will discover that the set \texttt{F0} is the one that is currently active,
-since the labels in this line exactly match the labels in the toolbar. In this menu, the
+The six lines denoted \rett{F0} through \rett{F5} indicate the six different layers. 
+The text on the rightmost toolbar button, \rett{FNC(0)}, indicates that the set
+0 is the one that is currently active,
+and the labels in the \rett{F0} line exactly match the labels in the toolbar. In this menu, the
 possible actions (that can be bound to a button) are written with the short text (see Appendix A),
 since this is the text that is printed on the toolbar buttons. If one now clicks (just an example)
-the \texttt{CTUN} button in the line \texttt{F1}, an ,,action dialog'' pops up that looks as follows:
+the \texttt{CTUN} button in the line \rett{F1}, an ,,action dialog'' pops up that looks as follows:
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{ToolbarMenu2.png}
-\end{center}
+\caption{Toolbar menu. Changing second button in \texttt{F1} layer.}
+\label{fig:ToolbarMenu2}
+\end{figure}
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{ToolbarMenu3.png}
+\caption{Just selected \texttt{Band20}.}
+\label{fig:ToolbarMenu3}
+\end{figure}
 
 The current action selected (\texttt{CTUN}) is high-lighted. Lists of possible actions can be rather long,
 so it might be necessary that you have to scroll up or down in such an action dialog until you have
 found what you were looking for. Now (again just an example) the button \texttt{Band 20} has been clicked
 in the action dialog, such that it gets high-lighted:
 
-\begin{center}
-\includegraphics[width=12cm]{ToolbarMenu3.png}
-\end{center}
+
 
 If one now closes the action dialog by clicking the \texttt{OK} button, the third button in the \texttt{F1}
 line of the toolbar menu has changed, it now gives the short text (\texttt{20}) of the action, which will
 switch the active receiver to the 20m band (see the explanation of all the actions in Appendix A).
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{ToolbarMenu4.png}
-\end{center}
+\caption{Toolbar assignment accomplished.}
+\label{ref:fig:ToolbarMenu4}
+\end{figure}
 You also see that the toolbar has not changed, because we have just changed the \texttt{F1} set,
-while currently the \texttt{F0} set is active. If one now, however, clicks the \texttt{FUNC}
-button at the bottom right one advances to the \texttt{F1} set and the toolbar labels
+while currently the \texttt{F0} set is active. If one now, however, clicks the rightmost
+toolbar button with the text \texttt{FNC(0)} one advances to the \texttt{F1} set and the toolbar labels
 are updated: 
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{ToolbarMenu5.png}
-\end{center}
+\caption{The new \texttt{F1} layer is operative.}
+\label{fig:ToolbarMenu5}
+\end{figure}
+
+It can be seen that the text of the first seven toolbar buttons has changed to reflect
+the functions of the \texttt{F1} set, and also the rightmost button (which is always mapped
+to \bltt{Function}) has changed to \texttt{FNC(1)} in oder to indicate the \texttt{F1}
+layer is now active. For mouse users (only), a secondary click on the rightmost toolbar
+button cycles through the layers in in reverse order.
 
 Note that it is not possible to change the assignment of the  rightmost button of the toolbar,
 it will always be assigned to \texttt{FUNC}, since if one has no access to this
@@ -1609,45 +1833,55 @@ function, one no longer cycle through the sets.
 
 
 \section{The \texttt{RigCtl} (Rig control, or CAT) Menu}
-\begin{center}
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{RigCtlMenu.png}
-\end{center}
+\end{figure}
 
 \section{The \texttt{MIDI} Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{MIDImenu1.png}
-\end{center}
+\end{figure}
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{MIDImenu2.png}
-\end{center}
+\end{figure}
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{MIDImenu3.png}
-\end{center}
+\end{figure}
  
 \section{The \texttt{Encoders} Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{EncoderMenuG2.png}
-\end{center}
+\end{figure}
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{EncoderMenuV2.png}
-\end{center}
+\end{figure}
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{EncoderMenuV1.png}
-\end{center}
+\end{figure}
 
 
 \section{The \texttt{Switches} Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{SwitchMenuG2.png}
-\end{center}
+\end{figure}
 
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{SwitchMenuV2.png}
-\end{center}
+\end{figure}
 
 \appendix
 \chapter{List of piHPSDR ,,Actions''}
@@ -1862,6 +2096,10 @@ the "new" value of the compressor is larger then  (equal to) zero.}
 {Toggle the state (on/off) of the CTUN state of the active receiver. CTUN stands for "click to tune". In CTUN mode, you can move
 the RX frequency over the whole spectrum scope, whose center then remains at a fixed frequency.}
 
+\action{CW Audio Peak Fltr}{CW-APF}{B}
+{Toggle (on/off) the CW audio peak filter for the active receiver. Note that the width of this
+filter (default: 75 Hz) can only be modified through the \bltt{CW} menu.}
+
 \action{CW Frequency}{CWFREQ}{PE}
 {Change the CW side tone frequency in the range 300-1000 Hz. This also changes the BFO frequency upon receive.}
 
@@ -1932,8 +2170,12 @@ audio frequencies for the single side band modes LSB, CWL, DIGL. This action is 
  
  \action{VFO Menu}{FREQ}{B}{This opens the \texttt{FREQ} (VFO) menu.}
  
- \action{FUNC}{FUNC}{B}{Cycle through the six toolbar sets. For the piHPSDR GPIO controller V1, where the eight switches follow the toolbar buttons, this also affects the function
+ \action{Function}{FUNC}{B}{Cycle through the six toolbar sets. For the piHPSDR GPIO controller V1, where the eight switches follow the toolbar buttons, this also affects the function
  of the switches. Note that this action is \textit{always} connected with the right-most toolbar button.}
+ 
+  \action{FuncRev}{FUNC-}{B}{Cycle backwards through the six toolbar sets. For the piHPSDR GPIO controller V1, where the eight switches follow the toolbar buttons, this also affects the function
+ of the switches. When using a mouse, this action can be invoked by a secondary mouse click
+ on the rightmost toolbar button.}
  
  \action{IF Shift}{IFSHFT}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in the  active receiver, and shifts the  filter, that is,
  it affects  the low and high cut in the same way.}
@@ -2225,6 +2467,10 @@ contains information on the ANDROMEDA version. Furthermore, if "Andromeda" is se
 \textit{send} status information to the ANDROMEDA controller using a ZZZI command. Status information is sent if something
 changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, CTUN mode, RIT and XIT status, and LOCK status),
 such that the ANDROMEDA controller can update the corresponding LEDs.
+
+\chapter{How to connect a Morse key/paddle}
+
+\chapter{Running piHPSDR alongside with DigiMode programs}
 
 \chapter[RaspPi: configure GPIO]{RaspPi: Preparations for using GPIO controllers}
 \label{sec:GPIOconfig}
