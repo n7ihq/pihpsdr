@@ -196,6 +196,7 @@ void vfoSaveState() {
     SetPropI1("vfo.%d.offset", i,           vfo[i].offset);
     SetPropI1("vfo.%d.mode", i,             vfo[i].mode);
     SetPropI1("vfo.%d.filter", i,           vfo[i].filter);
+    SetPropI1("vfo.%d.cw_apf", i,           vfo[i].cwAudioPeakFilter);
   }
 
   modesettingsSaveState();
@@ -207,25 +208,32 @@ void vfoRestoreState() {
 
   for (int i = 0; i < MAX_VFOS; i++) {
     //
-    // Set defaults
+    // Set defaults, using a simple heuristics to get a
+    // band that actually works on the current hardware.
     //
-    vfo[i].band = band20;
-    vfo[i].bandstack = 0;
-    vfo[i].frequency = 14010000;
-
-    if (protocol == SOAPYSDR_PROTOCOL) {
-      vfo[i].band = band430;
-      vfo[i].bandstack = 0;
-      vfo[i].frequency = 434010000;
+    if (radio->frequency_min >  400E6) {
+      vfo[i].band            = band430;
+      vfo[i].bandstack       = 0;
+      vfo[i].frequency       = 434010000;
+    } else if (radio->frequency_min > 100E6) {
+      vfo[i].band            = band144;
+      vfo[i].bandstack       = 0;
+      vfo[i].frequency       = 145000000;
+    } else {
+      vfo[i].band            = band20;
+      vfo[i].bandstack       = 0;
+      vfo[i].frequency       = 14010000;
     }
 
-    vfo[i].mode = modeCWU;
-    vfo[i].filter = filterF4;
-    vfo[i].lo = 0;
-    vfo[i].offset = 0;
-    vfo[i].rit_enabled = 0;
-    vfo[i].rit = 0;
-    vfo[i].ctun = 0;
+    vfo[i].mode              = modeCWU;
+    vfo[i].filter            = filterF4;
+    vfo[i].cwAudioPeakFilter = 0;
+    vfo[i].lo                = 0;
+    vfo[i].offset            = 0;
+    vfo[i].rit_enabled       = 0;
+    vfo[i].rit               = 0;
+    vfo[i].ctun              = 0;
+
     GetPropI1("vfo.%d.band", i,             vfo[i].band);
     GetPropI1("vfo.%d.frequency", i,        vfo[i].frequency);
     GetPropI1("vfo.%d.ctun", i,             vfo[i].ctun);
@@ -236,6 +244,7 @@ void vfoRestoreState() {
     GetPropI1("vfo.%d.offset", i,           vfo[i].offset);
     GetPropI1("vfo.%d.mode", i,             vfo[i].mode);
     GetPropI1("vfo.%d.filter", i,           vfo[i].filter);
+    GetPropI1("vfo.%d.cw_apf", i,           vfo[i].cwAudioPeakFilter);
 
     // Sanity check: if !ctun, offset must be zero
     if (!vfo[i].ctun) {
@@ -520,17 +529,7 @@ void vfo_a_to_b() {
   }
 
 #endif
-  vfo[VFO_B].band = vfo[VFO_A].band;
-  vfo[VFO_B].bandstack = vfo[VFO_A].bandstack;
-  vfo[VFO_B].frequency = vfo[VFO_A].frequency;
-  vfo[VFO_B].mode = vfo[VFO_A].mode;
-  vfo[VFO_B].filter = vfo[VFO_A].filter;
-  vfo[VFO_B].ctun = vfo[VFO_A].ctun;
-  vfo[VFO_B].ctun_frequency = vfo[VFO_A].ctun_frequency;
-  vfo[VFO_B].rit_enabled = vfo[VFO_A].rit_enabled;
-  vfo[VFO_B].rit = vfo[VFO_A].rit;
-  vfo[VFO_B].lo = vfo[VFO_A].lo;
-  vfo[VFO_B].offset = vfo[VFO_A].offset;
+  vfo[VFO_B] = vfo[VFO_A];
 
   if (receivers == 2) {
     receiver_vfo_changed(receiver[1]);
@@ -550,17 +549,7 @@ void vfo_b_to_a() {
   }
 
 #endif
-  vfo[VFO_A].band = vfo[VFO_B].band;
-  vfo[VFO_A].bandstack = vfo[VFO_B].bandstack;
-  vfo[VFO_A].frequency = vfo[VFO_B].frequency;
-  vfo[VFO_A].mode = vfo[VFO_B].mode;
-  vfo[VFO_A].filter = vfo[VFO_B].filter;
-  vfo[VFO_A].ctun = vfo[VFO_B].ctun;
-  vfo[VFO_A].ctun_frequency = vfo[VFO_B].ctun_frequency;
-  vfo[VFO_A].rit_enabled = vfo[VFO_B].rit_enabled;
-  vfo[VFO_A].rit = vfo[VFO_B].rit;
-  vfo[VFO_A].lo = vfo[VFO_B].lo;
-  vfo[VFO_A].offset = vfo[VFO_B].offset;
+  vfo[VFO_A] = vfo[VFO_B];
   receiver_vfo_changed(receiver[0]);
   tx_vfo_changed();
   set_alex_antennas();  // This includes scheduling hiprio and general packets
@@ -568,17 +557,6 @@ void vfo_b_to_a() {
 }
 
 void vfo_a_swap_b() {
-  int temp_band;
-  int temp_bandstack;
-  long long temp_frequency;
-  int temp_mode;
-  int temp_filter;
-  int temp_ctun;
-  long long temp_ctun_frequency;
-  int temp_rit_enabled;
-  long long temp_rit;
-  long long temp_lo;
-  long long temp_offset;
 #ifdef CLIENT_SERVER
 
   if (radio_is_remote) {
@@ -587,39 +565,10 @@ void vfo_a_swap_b() {
   }
 
 #endif
-  temp_band = vfo[VFO_A].band;
-  temp_bandstack = vfo[VFO_A].bandstack;
-  temp_frequency = vfo[VFO_A].frequency;
-  temp_mode = vfo[VFO_A].mode;
-  temp_filter = vfo[VFO_A].filter;
-  temp_ctun = vfo[VFO_A].ctun;
-  temp_ctun_frequency = vfo[VFO_A].ctun_frequency;
-  temp_rit_enabled = vfo[VFO_A].rit_enabled;
-  temp_rit = vfo[VFO_A].rit;
-  temp_lo = vfo[VFO_A].lo;
-  temp_offset = vfo[VFO_A].offset;
-  vfo[VFO_A].band = vfo[VFO_B].band;
-  vfo[VFO_A].bandstack = vfo[VFO_B].bandstack;
-  vfo[VFO_A].frequency = vfo[VFO_B].frequency;
-  vfo[VFO_A].mode = vfo[VFO_B].mode;
-  vfo[VFO_A].filter = vfo[VFO_B].filter;
-  vfo[VFO_A].ctun = vfo[VFO_B].ctun;
-  vfo[VFO_A].ctun_frequency = vfo[VFO_B].ctun_frequency;
-  vfo[VFO_A].rit_enabled = vfo[VFO_B].rit_enabled;
-  vfo[VFO_A].rit = vfo[VFO_B].rit;
-  vfo[VFO_A].lo = vfo[VFO_B].lo;
-  vfo[VFO_A].offset = vfo[VFO_B].offset;
-  vfo[VFO_B].band = temp_band;
-  vfo[VFO_B].bandstack = temp_bandstack;
-  vfo[VFO_B].frequency = temp_frequency;
-  vfo[VFO_B].mode = temp_mode;
-  vfo[VFO_B].filter = temp_filter;
-  vfo[VFO_B].ctun = temp_ctun;
-  vfo[VFO_B].ctun_frequency = temp_ctun_frequency;
-  vfo[VFO_B].rit_enabled = temp_rit_enabled;
-  vfo[VFO_B].rit = temp_rit;
-  vfo[VFO_B].lo = temp_lo;
-  vfo[VFO_B].offset = temp_offset;
+  struct  _vfo temp = vfo[VFO_A];
+  vfo[VFO_A]        = vfo[VFO_B];
+  vfo[VFO_B]        = temp;
+
   receiver_vfo_changed(receiver[0]);
 
   if (receivers == 2) {
@@ -735,7 +684,7 @@ void vfo_step(int steps) {
       delta = vfo[id].frequency - delta;
     }
 
-    sid = id == 0 ? 1 : 0;
+    sid = 1 - id;
 
     switch (sat_mode) {
     case SAT_NONE:
@@ -804,7 +753,7 @@ void vfo_id_step(int id, int steps) {
       delta = vfo[id].frequency - delta;
     }
 
-    int sid = id == 0 ? 1 : 0;
+    int sid = 1 - id;
 
     switch (sat_mode) {
     case SAT_NONE:
@@ -910,7 +859,7 @@ void vfo_id_move(int id, long long hz, int round) {
       delta = vfo[id].frequency - delta;
     }
 
-    sid = id == 0 ? 1 : 0;
+    sid = 1 - id;
 
     switch (sat_mode) {
     case SAT_NONE:
@@ -1004,7 +953,7 @@ void vfo_move_to(long long hz) {
       delta = vfo[id].frequency - delta;
     }
 
-    sid = id == 0 ? 1 : 0;
+    sid = 1 - id;
 
     switch (sat_mode) {
     case SAT_NONE:
@@ -1192,7 +1141,7 @@ void vfo_update() {
 
     case modeCWL:
     case modeCWU:
-      if (active_receiver->cwAudioPeakFilter) {
+      if (vfo[id].cwAudioPeakFilter) {
         sprintf(temp_text, "%s %sP %dwpm %dHz", mode_string[vfo[id].mode],
                 band_filter->title,
                 cw_keyer_speed,
@@ -1903,7 +1852,7 @@ void vfo_rit_update(int id) {
   }
 
 #endif
-  vfo[id].rit_enabled = vfo[id].rit_enabled == 1 ? 0 : 1;
+  TOGGLE(vfo[id].rit_enabled);
 
   if (id < receivers) {
     receiver_frequency_changed(receiver[id]);

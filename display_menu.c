@@ -110,11 +110,11 @@ static void time_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void filled_cb(GtkWidget *widget, gpointer data) {
-  display_filled = display_filled == 1 ? 0 : 1;
+  display_filled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void gradient_cb(GtkWidget *widget, gpointer data) {
-  display_gradient = display_gradient == 1 ? 0 : 1;
+  display_gradient = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void frames_per_second_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -152,28 +152,28 @@ static void waterfall_automatic_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void display_waterfall_cb(GtkWidget *widget, gpointer data) {
-  active_receiver->display_waterfall = active_receiver->display_waterfall == 1 ? 0 : 1;
+  active_receiver->display_waterfall = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   reconfigure_radio();
 }
 
 static void display_zoompan_cb(GtkWidget *widget, gpointer data) {
-  display_zoompan = display_zoompan == 1 ? 0 : 1;
+  display_zoompan = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   reconfigure_radio();
 }
 
 static void display_sliders_cb(GtkWidget *widget, gpointer data) {
-  display_sliders = display_sliders == 1 ? 0 : 1;
+  display_sliders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   reconfigure_radio();
 }
 
 
 static void display_toolbar_cb(GtkWidget *widget, gpointer data) {
-  display_toolbar = display_toolbar == 1 ? 0 : 1;
+  display_toolbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   reconfigure_radio();
 }
 
 static void display_sequence_errors_cb(GtkWidget *widget, gpointer data) {
-  display_sequence_errors = display_sequence_errors == 1 ? 0 : 1;
+  display_sequence_errors = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 void display_menu(GtkWidget *parent) {

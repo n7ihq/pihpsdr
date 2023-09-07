@@ -849,7 +849,7 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   SetTXABandpassWindow(tx->id, 1);
   SetTXABandpassRun(tx->id, 1);
   SetTXAFMEmphPosition(tx->id, pre_emphasize);
-  SetTXACFIRRun(tx->id, protocol == NEW_PROTOCOL ? 1 : 0); // turned on if new protocol
+  SetTXACFIRRun(tx->id, SET(protocol == NEW_PROTOCOL)); // turned on if new protocol
 
   //
   // enable_tx_equalizer and tx_equalizer should be part of TX
@@ -1553,19 +1553,19 @@ void tx_set_ps(TRANSMITTER *tx, int state) {
     // stop protocol, change PS state, restart protocol
     old_protocol_stop();
     usleep(100000);
-    tx->puresignal = state ? 1 : 0;
+    tx->puresignal = SET(state);
     old_protocol_run();
     break;
 
   case NEW_PROTOCOL:
     // change PS state and tell radio about it
-    tx->puresignal = state ? 1 : 0;
+    tx->puresignal = SET(state);
     schedule_high_priority();
     schedule_receive_specific();
 #ifdef SOAPY_SDR
 
   case SOAPY_PROTOCOL:
-    // are there feedback channels in SOAPY?
+    // no feedback channels in SOAPY
     break;
 #endif
   }

@@ -54,7 +54,7 @@ static gboolean close_cb () {
 }
 
 static void dither_cb(GtkWidget *widget, gpointer data) {
-  active_receiver->dither = active_receiver->dither == 1 ? 0 : 1;
+  active_receiver->dither = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
   if (protocol == NEW_PROTOCOL) {
     schedule_receive_specific();
@@ -62,7 +62,7 @@ static void dither_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void random_cb(GtkWidget *widget, gpointer data) {
-  active_receiver->random = active_receiver->random == 1 ? 0 : 1;
+  active_receiver->random = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
   if (protocol == NEW_PROTOCOL) {
     schedule_receive_specific();
@@ -71,7 +71,7 @@ static void random_cb(GtkWidget *widget, gpointer data) {
 
 static void preamp_cb(GtkWidget *widget, gpointer data) {
   if (have_preamp) {
-    active_receiver->preamp = active_receiver->preamp == 1 ? 0 : 1;
+    active_receiver->preamp = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   }
 }
 

@@ -2536,9 +2536,8 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
     case 'M': //ZZRM
 
-      // read meter value
+      // read meter value. Ignore P1 value.
       if (command[5] == ';') {
-        //int m=atoi(&command[4]);  // should have receiver[m] next line?
         sprintf(reply, "ZZRM%d%20d;", smeter, (int)receiver[0]->meter);
         send_resp(client->fd, reply);
       }
@@ -4778,7 +4777,7 @@ int parse_cmd(void *data) {
 
       // set/read stallite mode status
       if (command[2] == ';') {
-        sprintf(reply, "SA%d%d%d%d%d%d%dSAT?    ;", (sat_mode == SAT_MODE) | (sat_mode == RSAT_MODE), 0, 0, 0,
+        sprintf(reply, "SA%d%d%d%d%d%d%dSAT?    ;", (sat_mode == SAT_MODE) || (sat_mode == RSAT_MODE), 0, 0, 0,
                 sat_mode == SAT_MODE, sat_mode == RSAT_MODE, 0);
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
@@ -5454,7 +5453,7 @@ void set_blocking (int fd, int should_block) {
     return;
   }
 
-  tty.c_cc[VMIN]  = should_block ? 1 : 0;
+  tty.c_cc[VMIN]  = SET(should_block);
   tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
   if (tcsetattr (fd, TCSANOW, &tty) != 0) {

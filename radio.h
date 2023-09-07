@@ -55,6 +55,13 @@ enum {
   PA_500W
 };
 
+// TOGGLE takes a boolean expression and inverts it, using the numerical values 0 for FALSE and 1 for TRUE
+#define TOGGLE(a) a = (a) ? 0 : 1
+// NOT takes a boolean value and produces the inverse, using the numerical values 0 for FALSE and 1 for TRUE
+#define NOT(a) (a) ? 0 : 1
+// SET converts a boolean to an int, using the numerical values 0 for FALSE and 1 for TRUE
+#define SET(a) (a) ? 1 : 0
+
 extern DISCOVERED *radio;
 extern gboolean radio_is_remote;
 

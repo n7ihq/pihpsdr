@@ -152,7 +152,7 @@ static void set_btn_state() {
 }
 
 static void lock_cb(GtkWidget *widget, gpointer data) {
-  locked = locked == 1 ? 0 : 1;
+  TOGGLE(locked);
   set_btn_state();
   g_idle_add(ext_vfo_update, NULL);
 }

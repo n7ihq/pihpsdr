@@ -41,4 +41,7 @@ char version[] =
 #ifdef ANDROMEDA
   "ANDROMEDA "
 #endif
+#ifdef CLIENT_SERVER
+  "SERVER "
+#endif
   "" ;

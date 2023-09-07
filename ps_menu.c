@@ -409,7 +409,7 @@ static void resume_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void feedback_cb(GtkWidget *widget, gpointer data) {
-  transmitter->feedback = transmitter->feedback ? 0 : 1;
+  transmitter->feedback=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void reset_cb(GtkWidget *widget, gpointer data) {
@@ -419,7 +419,7 @@ static void reset_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void twotone_cb(GtkWidget *widget, gpointer data) {
-  int state = transmitter->twotone ? 0 : 1;
+  int state=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   tx_set_twotone(transmitter, state);
 }
 

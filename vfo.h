@@ -33,6 +33,7 @@ struct _vfo {
   long long frequency;
   int mode;
   int filter;
+  int cwAudioPeakFilter;  // on/off
 
   int ctun;
   long long ctun_frequency;

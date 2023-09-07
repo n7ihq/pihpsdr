@@ -124,8 +124,9 @@ ACTION_TABLE ActionTable[] = {
   {FILTER_CUT_LOW,      "Filter Cut\nLow",      "FCUTL",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {FILTER_CUT_HIGH,     "Filter Cut\nHigh",     "FCUTH",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {FILTER_CUT_DEFAULT,  "Filter Cut\nDefault",  "FCUTDEF",      MIDI_KEY   | CONTROLLER_SWITCH},
-  {MENU_FILTER,         "Filter\nMenu",           "FILT",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {FUNCTION,            "FUNC",                 "FUNC",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_FILTER,         "Filter\nMenu",         "FILT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {FUNCTION,            "Function",             "FUNC",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {FUNCTIONREV,         "FuncRev",              "FUNC-",        MIDI_KEY   | CONTROLLER_SWITCH},
   {IF_SHIFT,            "IF Shift",             "IFSHFT",       MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_SHIFT_RX1,        "IF Shift\nRX1",        "IFSHFT1",      MIDI_WHEEL | CONTROLLER_ENCODER},
   {IF_SHIFT_RX2,        "IF Shift\nRX2",        "IFSHFT2",      MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -610,7 +611,7 @@ int process_action(void *data) {
 
   case COMP_ENABLE:
     if (can_transmit && a->mode == PRESSED) {
-      transmitter_set_compressor(transmitter, transmitter->compressor ? FALSE : TRUE);
+      transmitter_set_compressor(transmitter, NOT(transmitter->compressor));
       mode_settings[transmitter->mode].compressor = transmitter->compressor;
     }
 
@@ -630,8 +631,7 @@ int process_action(void *data) {
 
   case CTUN:
     if (a->mode == PRESSED) {
-      int state = vfo[active_receiver->id].ctun ? 0 : 1;
-      vfo_ctun_update(active_receiver->id, state);
+      vfo_ctun_update(active_receiver->id, NOT(vfo[active_receiver->id].ctun));
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -639,7 +639,7 @@ int process_action(void *data) {
 
   case CW_AUDIOPEAKFILTER:
     if (a->mode == PRESSED) {
-      active_receiver->cwAudioPeakFilter = active_receiver->cwAudioPeakFilter ? 0 : 1;
+      TOGGLE(vfo[active_receiver->id].cwAudioPeakFilter);
       receiver_filter_changed(active_receiver);
       g_idle_add(ext_vfo_update, NULL);
     }
@@ -663,7 +663,7 @@ int process_action(void *data) {
 
   case DIV:
     if (a->mode == PRESSED) {
-      diversity_enabled = diversity_enabled == 1 ? 0 : 1;
+      TOGGLE(diversity_enabled);
 
       if (protocol == NEW_PROTOCOL) {
         schedule_high_priority();
@@ -706,7 +706,7 @@ int process_action(void *data) {
 
   case DUPLEX:
     if (can_transmit && !isTransmitting() && a->mode == PRESSED) {
-      duplex = duplex == 1 ? 0 : 1;
+      TOGGLE(duplex);
       g_idle_add(ext_set_duplex, NULL);
     }
 
@@ -769,6 +769,25 @@ int process_action(void *data) {
 
     break;
 
+  case FUNCTIONREV:
+    if (a->mode == PRESSED) {
+      function--;
+
+      if (function < 0) {
+        function = MAX_FUNCTIONS-1;
+      }
+
+      toolbar_switches = switches_controller1[function];
+      update_toolbar_labels();
+
+      if (controller == CONTROLLER1) {
+        switches = switches_controller1[function];
+      }
+    }
+
+    break;
+
+
   case IF_SHIFT:
     filter_shift_changed(active_receiver->id, a->val);
     break;
@@ -803,10 +822,10 @@ int process_action(void *data) {
 #ifdef CLIENT_SERVER
 
       if (radio_is_remote) {
-        send_lock(client_socket, locked == 1 ? 0 : 1);
+        send_lock(client_socket, NOT(locked));
       } else {
 #endif
-        locked = locked == 1 ? 0 : 1;
+        TOGGLE(locked);
         g_idle_add(ext_vfo_update, NULL);
 #ifdef CLIENT_SERVER
       }
@@ -1317,14 +1336,13 @@ int process_action(void *data) {
       transmitter->tune_use_drive = 1;
       show_popup_slider(TUNE_DRIVE, 0, 0.0, 100.0, 1.0, value, "TUNE DRIVE");
     }
-    
 
     break;
 
   case TUNE_FULL:
     if (a->mode == PRESSED) {
       if (can_transmit) {
-        full_tune = full_tune ? FALSE : TRUE;
+        TOGGLE(full_tune);
         memory_tune = FALSE;
       }
     }
@@ -1334,7 +1352,7 @@ int process_action(void *data) {
   case TUNE_MEMORY:
     if (a->mode == PRESSED) {
       if (can_transmit) {
-        memory_tune = memory_tune ? FALSE : TRUE;
+        TOGGLE(memory_tune);
         full_tune = FALSE;
       }
     }
@@ -1344,8 +1362,7 @@ int process_action(void *data) {
   case TWO_TONE:
     if (a->mode == PRESSED) {
       if (can_transmit) {
-        int state = transmitter->twotone ? 0 : 1;
-        tx_set_twotone(transmitter, state);
+        tx_set_twotone(transmitter, NOT(transmitter->twotone));
       }
     }
 
@@ -1443,7 +1460,7 @@ int process_action(void *data) {
   case XIT_ENABLE:
     if (a->mode == PRESSED) {
       if (can_transmit) {
-        transmitter->xit_enabled = transmitter->xit_enabled == 1 ? 0 : 1;
+        TOGGLE(transmitter->xit_enabled);
 
         if (protocol == NEW_PROTOCOL) {
           schedule_high_priority();

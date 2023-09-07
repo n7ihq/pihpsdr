@@ -67,7 +67,7 @@ static void pa_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void tx_out_of_band_cb(GtkWidget *widget, gpointer data) {
-  tx_out_of_band = tx_out_of_band == 1 ? 0 : 1;
+  tx_out_of_band = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void trim_changed_cb(GtkWidget *widget, gpointer data) {

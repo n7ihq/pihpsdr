@@ -75,6 +75,12 @@ static void cleanup() {
   }
 }
 
+static void cw_peak_cb(GtkWidget *widget, gpointer data) {
+  vfo[active_receiver->id].cwAudioPeakFilter = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  receiver_filter_changed(active_receiver);
+  g_idle_add(ext_vfo_update, NULL);
+}
+
 static gboolean default_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int mode = vfo[active_receiver->id].mode;
   int f = GPOINTER_TO_INT(data);
@@ -521,6 +527,18 @@ void filter_menu(GtkWidget *parent) {
     gtk_widget_set_name(var2_default_b, "small_button");
     g_signal_connect (var2_default_b, "button-press-event", G_CALLBACK(default_cb), GINT_TO_POINTER(filterVar2));
     gtk_grid_attach(GTK_GRID(grid), var2_default_b, 8, row + 2, 2, 1);
+
+    //
+    // Add a checkbox for the CW audio peak filter, if the mode is CWU/CWL
+    //
+   if (m == modeCWU || m == modeCWL) {
+     GtkWidget *cw_peak_b = gtk_check_button_new_with_label("Enable additional CW Audio peak filter");
+     gtk_widget_set_name(cw_peak_b, "boldlabel");
+     gtk_widget_set_halign(cw_peak_b, GTK_ALIGN_START);
+     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_peak_b), vfo[active_receiver->id].cwAudioPeakFilter);
+     gtk_grid_attach(GTK_GRID(grid), cw_peak_b, 4, 0, 6, 1);
+     g_signal_connect(cw_peak_b, "toggled", G_CALLBACK(cw_peak_cb), NULL);
+   }
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

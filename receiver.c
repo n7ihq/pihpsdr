@@ -284,8 +284,6 @@ void receiverSaveState(RECEIVER *rx) {
   SetPropI1("receiver.%d.nr", rx->id,                           rx->nr);
   SetPropI1("receiver.%d.anf", rx->id,                          rx->anf);
   SetPropI1("receiver.%d.snb", rx->id,                          rx->snb);
-  SetPropI1("receiver.%d.cw-apf", rx->id,                       rx->cwAudioPeakFilter);
-  SetPropI1("receiver.%d.cw-apw", rx->id,                       rx->cwAudioPeakWidth);
   SetPropI1("receiver.%d.nr_agc", rx->id,                       rx->nr_agc);
   SetPropI1("receiver.%d.nr2_gain_method", rx->id,              rx->nr2_gain_method);
   SetPropI1("receiver.%d.nr2_npe_method", rx->id,               rx->nr2_npe_method);
@@ -371,8 +369,6 @@ void receiverRestoreState(RECEIVER *rx) {
   GetPropI1("receiver.%d.nr", rx->id,                           rx->nr);
   GetPropI1("receiver.%d.anf", rx->id,                          rx->anf);
   GetPropI1("receiver.%d.snb", rx->id,                          rx->snb);
-  GetPropI1("receiver.%d.cw-apf", rx->id,                       rx->cwAudioPeakFilter);
-  GetPropI1("receiver.%d.cw-apw", rx->id,                       rx->cwAudioPeakWidth);
   GetPropI1("receiver.%d.nr_agc", rx->id,                       rx->nr_agc);
   GetPropI1("receiver.%d.nr2_gain_method", rx->id,              rx->nr2_gain_method);
   GetPropI1("receiver.%d.nr2_npe_method", rx->id,               rx->nr2_npe_method);
@@ -565,12 +561,14 @@ void set_filter(RECEIVER *rx) {
   FILTER *mode_filters = filters[m];
   const FILTER *filter = &mode_filters[vfo[rx->id].filter]; // ignored in FMN
 
-  if ((m == modeCWU || m == modeCWL) && rx->cwAudioPeakFilter) {
+  if ((m == modeCWU || m == modeCWL) && vfo[rx->id].cwAudioPeakFilter) {
     //
-    // Possibly engage cw peak filter. Use a fixed gain
+    // Possibly engage cw peak filter. Use a fixed gain and an automatic width that
+    // is about one fourth of the IF filter width
     //
+    int w = filter->high - filter->low;
     SetRXASPCWFreq(rx->id, (double) cw_keyer_sidetone_frequency);
-    SetRXASPCWBandwidth(rx->id, (double) rx->cwAudioPeakWidth);
+    SetRXASPCWBandwidth(rx->id, 0.25 * (double) w);
     SetRXASPCWGain(rx->id, 1.50);
     SetRXASPCWRun(rx->id, 1);
   } else {
@@ -879,8 +877,6 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->nr = 0;
   rx->anf = 0;
   rx->snb = 0;
-  rx->cwAudioPeakFilter = 0;
-  rx->cwAudioPeakWidth  = 75;
   rx->nr_agc = 0;              // NR/NR2/ANF before AGC
   rx->nr2_gain_method = 2;     // Gamma
   rx->nr2_npe_method = 0;      // OSMS

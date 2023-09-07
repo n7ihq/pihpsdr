@@ -101,8 +101,6 @@ typedef struct _receiver {
   gint nr;
   gint anf;
   gint snb;
-  gint cwAudioPeakFilter;   // on/off
-  gint cwAudioPeakWidth;    // in Hz
 
   //
   // NR/NR2/ANF: position

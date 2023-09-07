@@ -373,19 +373,19 @@ static void ck10mhz_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void ck128mhz_cb(GtkWidget *widget, gpointer data) {
-  atlas_clock_source_128mhz = gtk_combo_box_get_active (GTK_COMBO_BOX(widget)) ? 1 : 0;
+  atlas_clock_source_128mhz = SET(gtk_combo_box_get_active (GTK_COMBO_BOX(widget)));
 }
 
 static void micsource_cb(GtkWidget *widget, gpointer data) {
-  atlas_mic_source = gtk_combo_box_get_active (GTK_COMBO_BOX(widget)) ? 1 : 0;
+  atlas_mic_source = SET(gtk_combo_box_get_active (GTK_COMBO_BOX(widget)));
 }
 
 static void tx_cb(GtkWidget *widget, gpointer data) {
-  atlas_penelope = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  atlas_penelope = SET(gtk_combo_box_get_active (GTK_COMBO_BOX(widget)));
 }
 
 static void janus_cb(GtkWidget *widget, gpointer data) {
-  atlas_janus = atlas_janus == 1 ? 0 : 1;
+  atlas_janus = SET(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
 }
 
 void radio_menu(GtkWidget *parent) {
@@ -654,7 +654,7 @@ void radio_menu(GtkWidget *parent) {
     GtkWidget *ck128mhz_combo = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck128mhz_combo), NULL, "Penelope");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck128mhz_combo), NULL, "Mercury");
-    gtk_combo_box_set_active(GTK_COMBO_BOX(ck128mhz_combo), atlas_clock_source_128mhz ? 1 : 0);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(ck128mhz_combo), SET(atlas_clock_source_128mhz));
     my_combo_attach(GTK_GRID(grid), ck128mhz_combo, 4, row, 1, 1);
     g_signal_connect(ck128mhz_combo, "changed", G_CALLBACK(ck128mhz_cb), NULL);
     row++;
@@ -665,7 +665,7 @@ void radio_menu(GtkWidget *parent) {
     GtkWidget *micsource_combo = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(micsource_combo), NULL, "Janus");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(micsource_combo), NULL, "Penelope");
-    gtk_combo_box_set_active(GTK_COMBO_BOX(micsource_combo), atlas_mic_source ? 1 : 0);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(micsource_combo), SET(atlas_mic_source));
     my_combo_attach(GTK_GRID(grid), micsource_combo, 4, row, 1, 1);
     g_signal_connect(micsource_combo, "changed", G_CALLBACK(micsource_cb), NULL);
     row++;

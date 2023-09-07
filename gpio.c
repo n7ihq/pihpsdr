@@ -555,22 +555,22 @@ static void process_edge(int offset, int value) {
   for (i = 0; i < MAX_ENCODERS; i++) {
     if (encoders[i].bottom_encoder_enabled && encoders[i].bottom_encoder_address_a == offset) {
       //t_print("%s: found %d encoder %d bottom A\n",__FUNCTION__,offset,i);
-      process_encoder(i, BOTTOM_ENCODER, A, value == PRESSED ? 1 : 0);
+      process_encoder(i, BOTTOM_ENCODER, A, SET(value == PRESSED));
       found = TRUE;
       break;
     } else if (encoders[i].bottom_encoder_enabled && encoders[i].bottom_encoder_address_b == offset) {
       //t_print("%s: found %d encoder %d bottom B\n",__FUNCTION__,offset,i);
-      process_encoder(i, BOTTOM_ENCODER, B, value == PRESSED ? 1 : 0);
+      process_encoder(i, BOTTOM_ENCODER, B, SET(value == PRESSED));
       found = TRUE;
       break;
     } else if (encoders[i].top_encoder_enabled && encoders[i].top_encoder_address_a == offset) {
       //t_print("%s: found %d encoder %d top A\n",__FUNCTION__,offset,i);
-      process_encoder(i, TOP_ENCODER, A, value == PRESSED ? 1 : 0);
+      process_encoder(i, TOP_ENCODER, A, SET(value == PRESSED));
       found = TRUE;
       break;
     } else if (encoders[i].top_encoder_enabled && encoders[i].top_encoder_address_b == offset) {
       //t_print("%s: found %d encoder %d top B\n",__FUNCTION__,offset,i);
-      process_encoder(i, TOP_ENCODER, B, value == PRESSED ? 1 : 0);
+      process_encoder(i, TOP_ENCODER, B, SET(value == PRESSED));
       found = TRUE;
       break;
     } else if (encoders[i].switch_enabled && encoders[i].switch_address == offset) {
