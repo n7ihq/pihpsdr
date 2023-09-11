@@ -33,7 +33,6 @@
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *input;
-static GtkWidget *mic_in_b = NULL;
 static GtkWidget *tx_spin_low;
 static GtkWidget *tx_spin_high;
 
@@ -170,20 +169,14 @@ static void local_microphone_cb(GtkWidget *widget, gpointer data) {
 
     if (audio_open_input() == 0) {
       transmitter->local_microphone = 1;
-
-      if (mic_in_b) { gtk_widget_hide(mic_in_b); }
     } else {
       transmitter->local_microphone = 0;
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
-
-      if (mic_in_b) { gtk_widget_show(mic_in_b); }
     }
   } else {
     if (transmitter->local_microphone) {
       transmitter->local_microphone = 0;
       audio_close_input();
-
-      if (mic_in_b) { gtk_widget_show(mic_in_b); }
     }
   }
 }
@@ -242,9 +235,8 @@ void tx_menu(GtkWidget *parent) {
     gtk_widget_set_name(local_microphone_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (local_microphone_b), transmitter->local_microphone);
     gtk_widget_show(local_microphone_b);
-    gtk_grid_attach(GTK_GRID(grid), local_microphone_b, col, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), local_microphone_b, col++, row, 1, 1);
     g_signal_connect(local_microphone_b, "toggled", G_CALLBACK(local_microphone_cb), NULL);
-    col++;
     input = gtk_combo_box_text_new();
 
     for (i = 0; i < n_input_devices; i++) {
@@ -273,23 +265,30 @@ void tx_menu(GtkWidget *parent) {
       transmitter->microphone_name = g_strdup(input_devices[0].name);
     }
 
-    my_combo_attach(GTK_GRID(grid), input, col, row, 3, 1);
+    my_combo_attach(GTK_GRID(grid), input, col, row, 4, 1);
     g_signal_connect(input, "changed", G_CALLBACK(local_input_changed_cb), NULL);
   }
+
 
   row++;
   col = 0;
   GtkWidget *comp_enable = gtk_check_button_new_with_label("Compression (dB):");
   gtk_widget_set_name(comp_enable, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (comp_enable), transmitter->compressor);
-  gtk_grid_attach(GTK_GRID(grid), comp_enable, col, row, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), comp_enable, col++, row, 1, 1);
   g_signal_connect(comp_enable, "toggled", G_CALLBACK(comp_enable_cb), NULL);
-  col++;
+
   GtkWidget *comp = gtk_spin_button_new_with_range(0.0, 20.0, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(comp), (double)transmitter->compressor_level);
-  gtk_grid_attach(GTK_GRID(grid), comp, col, row, 1, 1);
+  gtk_grid_attach(GTK_GRID(grid), comp, col++, row, 1, 1);
   g_signal_connect(comp, "value-changed", G_CALLBACK(comp_cb), NULL);
-  col++;
+
+  GtkWidget *emp_b = gtk_check_button_new_with_label("FM PreEmp/ALC");
+  gtk_widget_set_name(emp_b, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
+  gtk_grid_attach(GTK_GRID(grid), emp_b, col++, row, 1, 1);
+  g_signal_connect(emp_b, "toggled", G_CALLBACK(emp_cb), NULL);
+
   gboolean device_has_microphone_input;
 
   switch (device) {
@@ -318,10 +317,14 @@ void tx_menu(GtkWidget *parent) {
   }
 
   if (device_has_microphone_input) {
+    GtkWidget *lbl=gtk_label_new("Radio Mic:");
+    gtk_widget_set_name(lbl, "boldlabel");
+    gtk_widget_set_halign(lbl,GTK_ALIGN_END);
+    gtk_grid_attach(GTK_GRID(grid), lbl, col++, row, 1, 1);
     //
     // Mic Boost, Mic In, and Line In can the handled mutually exclusive
     //
-    mic_in_b = gtk_combo_box_text_new();
+    GtkWidget *mic_in_b = gtk_combo_box_text_new();
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mic_in_b), NULL, "Mic In");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mic_in_b), NULL, "Mic Boost");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(mic_in_b), NULL, "Line In");
@@ -334,16 +337,10 @@ void tx_menu(GtkWidget *parent) {
     }
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(mic_in_b), pos);
-    my_combo_attach(GTK_GRID(grid), mic_in_b, col, row, 1, 1);
+    my_combo_attach(GTK_GRID(grid), mic_in_b, col++, row, 1, 1);
     g_signal_connect(mic_in_b, "changed", G_CALLBACK(mic_in_cb), NULL);
-    col++;
   }
 
-  GtkWidget *emp_b = gtk_check_button_new_with_label("FM TX Pre-emphasize before ALC");
-  gtk_widget_set_name(emp_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
-  gtk_grid_attach(GTK_GRID(grid), emp_b, col, row, 2, 1);
-  g_signal_connect(emp_b, "toggled", G_CALLBACK(emp_cb), NULL);
   row++;
   col = 0;
   label = gtk_label_new("TX Filter Low:");
