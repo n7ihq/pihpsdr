@@ -3280,7 +3280,6 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'B': //ZZZB
       implemented = FALSE;
       break;
-#ifdef ANDROMEDA
 
     case 'D': //ZZZD
 
@@ -3739,7 +3738,6 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       }
 
       break;
-#endif
 
     case 'Z': //ZZZZ
       implemented = FALSE;
@@ -5548,7 +5546,6 @@ static gpointer serial_server(gpointer data) {
   return NULL;
 }
 
-#ifdef ANDROMEDA
 static int last_mox;
 static int last_tune;
 static int last_ps;
@@ -5641,7 +5638,6 @@ gboolean andromeda_init(gpointer data) {
   send_resp(client->fd, "ZZZS;");
   return FALSE;
 }
-#endif
 
 int launch_serial (int id) {
   int fd;
@@ -5668,11 +5664,7 @@ int launch_serial (int id) {
   // hard-wired parity = NONE
   // if ANDROMEDA, hard-wired baud = 9600
   baud = SerialPorts[id].baud;
-#ifdef ANDROMEDA
-
   if (SerialPorts[id].andromeda) { baud = B9600; }
-
-#endif
 
   if (set_interface_attribs (fd, baud, 0) == 0) {
     set_blocking (fd, 0);                   // set no blocking
@@ -5688,16 +5680,13 @@ int launch_serial (int id) {
   serial_client[id].running = 1;
   serial_client[id].andromeda_timer = 0;
   serial_client[id].thread_id = g_thread_new( "Serial server", serial_server, &serial_client[id]);
-#ifdef ANDROMEDA
   //
   // If this is a serial line to an ANDROMEDA controller, initialize it and start a periodic GTK task
   //
   launch_andromeda(id);
-#endif
   return 1;
 }
 
-#ifdef ANDROMEDA
 void launch_andromeda (int id) {
   //
   // This is a no-op if the serial client is NOT running
@@ -5708,14 +5697,11 @@ void launch_andromeda (int id) {
     serial_client[id].andromeda_timer = g_timeout_add(500, andromeda_handler, &serial_client[id]); // executed periodically
   }
 }
-#endif
 
 // Serial Port close
 void disable_serial (int id) {
   t_print("RIGCTL: Disable Serial port %s\n", SerialPorts[id].port);
-#ifdef ANDROMEDA
   disable_andromeda(id);
-#endif
   serial_client[id].running = FALSE;
 
   if (serial_client[id].fifo) {
@@ -5740,14 +5726,12 @@ void disable_serial (int id) {
   }
 }
 
-#ifdef ANDROMEDA
 void disable_andromeda (int id) {
   if (serial_client[id].andromeda_timer != 0) {
     g_source_remove(serial_client[id].andromeda_timer);
     serial_client[id].andromeda_timer = 0;
   }
 }
-#endif
 //
 // 2-25-17 - K5JAE - create each thread with the pointer to the port number
 //                   (Port numbers now const ints instead of defines..)

@@ -59,7 +59,7 @@ gint display_width;
 gint display_height;
 gint screen_height;
 gint screen_width;
-gint full_screen = 1;
+gint full_screen;
 
 static GdkCursor *cursor_arrow;
 static GdkCursor *cursor_watch;
@@ -308,31 +308,20 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   screen_width = gdk_screen_get_width(screen);
   screen_height = gdk_screen_get_height(screen);
   t_print("Screen: width=%d height=%d\n", screen_width, screen_height);
-  display_width = gdk_screen_get_width(screen);
-  display_height = gdk_screen_get_height(screen);
 
-  // Go to "window" mode if there is enough space on the screen.
-  // Do not forget extra space needed for window top bars, screen bars etc.
+  // Start with the smallest possible screen, 800x480, since this can now
+  // be fully configured in the SCREEN menu.
+  // Go to "full screen" mode if display nearly matches 800x480
+  // This is all overridden from the props file
 
-  if (display_width > (MAX_DISPLAY_WIDTH + 10) && display_height > (MAX_DISPLAY_HEIGHT + 30)) {
-    display_width = MAX_DISPLAY_WIDTH;
-    display_height = MAX_DISPLAY_HEIGHT;
-    full_screen = 0;
-  } else {
-    //
-    // Some RaspPi variants report slightly too large screen sizes
-    // on a 7-inch screen, e.g. 848*480 while the physical resolution is 800*480
-    // Therefore, as a work-around, limit window size to 800*480
-    //
-    if (display_width > MAX_DISPLAY_WIDTH) {
-      display_width = MAX_DISPLAY_WIDTH;
-    }
+  display_width  = 800;
+  display_height = 480;
+  full_screen    = 0;
 
-    if (display_height > MAX_DISPLAY_HEIGHT) {
-      display_height = MAX_DISPLAY_HEIGHT;
-    }
-
+  if (screen_width > 780 && screen_width < 820 && screen_height > 460 && screen_height < 500) {
     full_screen = 1;
+    display_width = screen_width;
+    display_height = screen_height;
   }
 
   t_print("display_width=%d display_height=%d\n", display_width, display_height);

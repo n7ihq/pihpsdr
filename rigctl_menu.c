@@ -91,7 +91,6 @@ static void serial_port_cb(GtkWidget *widget, gpointer data) {
   strcpy(SerialPorts[id].port, cp);
 }
 
-#ifdef ANDROMEDA
 static void andromeda_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
   SerialPorts[id].andromeda = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
@@ -104,7 +103,6 @@ static void andromeda_cb(GtkWidget *widget, gpointer data) {
     disable_andromeda(id);
   }
 }
-#endif
 
 static void serial_enable_cb(GtkWidget *widget, gpointer data) {
   //
@@ -240,13 +238,11 @@ void rigctl_menu(GtkWidget *parent) {
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (serial_enable_b[i]), SerialPorts[i].enable);
     gtk_grid_attach(GTK_GRID(grid), serial_enable_b[i], 4, row, 1, 1);
     g_signal_connect(serial_enable_b[i], "toggled", G_CALLBACK(serial_enable_cb), GINT_TO_POINTER(i));
-#ifdef ANDROMEDA
     GtkWidget *andromeda_b = gtk_check_button_new_with_label("Andromeda");
     gtk_widget_set_name(andromeda_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (andromeda_b), SerialPorts[i].andromeda);
     gtk_grid_attach(GTK_GRID(grid), andromeda_b, 5, row, 1, 1);
     g_signal_connect(andromeda_b, "toggled", G_CALLBACK(andromeda_cb), GINT_TO_POINTER(i));
-#endif
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

@@ -27,9 +27,7 @@ struct _SERIALPORT {
   char port[64];    // e.g. "/dev/ttyACM0"
   int  baud;        // baud rate
   int  enable;      // is it enabled?
-#ifdef ANDROMEDA
   int  andromeda;   // flag for handling ANDROMEDA console
-#endif
 };
 
 typedef struct _SERIALPORT SERIALPORT;

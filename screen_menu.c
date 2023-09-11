@@ -28,7 +28,18 @@
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *wide_b = NULL;
+static GtkWidget *height_b = NULL;
+static GtkWidget *full_b = NULL;
 static GtkWidget *vfo_b = NULL;
+
+int set_full_screen(gpointer data) {
+  if (full_screen) {
+    gtk_window_fullscreen(GTK_WINDOW(top_window));
+  } else {
+    gtk_window_unfullscreen(GTK_WINDOW(top_window));
+  }
+  return G_SOURCE_REMOVE;
+}
 
 static void apply() {
   reconfigure_screen();
@@ -71,18 +82,35 @@ static void vfo_cb(GtkWidget *widget, gpointer data) {
 static void width_cb(GtkWidget *widget, gpointer data) {
   display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
+  if (display_width < screen_width) {
+    full_screen = 0;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
+  }
   apply();
 }
 
 static void height_cb(GtkWidget *widget, gpointer data) {
   display_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   gtk_widget_set_size_request(top_window, display_width, display_height);
+  if (display_height < screen_height) {
+    full_screen = 0;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
+  }
   apply();
 }
 
 static void horizontal_cb(GtkWidget *widget, gpointer data) {
   rx_stack_horizontal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   apply();
+}
+
+static void full_cb(GtkWidget *widget, gpointer data) {
+  full_screen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  if (full_screen) {
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) screen_width);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_b), (double) screen_height);
+  }
+  g_timeout_add(1000, set_full_screen, NULL);
 }
 
 void screen_menu(GtkWidget *parent) {
@@ -107,28 +135,26 @@ void screen_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   row++;
 
-  if (!full_screen) {
-    label = gtk_label_new("Window Width:");
-    gtk_widget_set_name(label, "boldlabel");
-    gtk_widget_set_halign(label, GTK_ALIGN_END);
-    gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
-    col++;
-    wide_b = gtk_spin_button_new_with_range(800.0, (double) screen_width, 32.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) display_width);
-    gtk_grid_attach(GTK_GRID(grid), wide_b, col, row, 1, 1);
-    g_signal_connect(wide_b, "value-changed", G_CALLBACK(width_cb), NULL);
-    col++;
-    label = gtk_label_new("Window Height:");
-    gtk_widget_set_halign(label, GTK_ALIGN_END);
-    gtk_widget_set_name(label, "boldlabel");
-    gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
-    col++;
-    button = gtk_spin_button_new_with_range(480.0, (double) screen_height, 16.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(button), (double) display_height);
-    gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
-    g_signal_connect(button, "value-changed", G_CALLBACK(height_cb), NULL);
-    row++;
-  }
+  label = gtk_label_new("Window Width:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
+  gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
+  col++;
+  wide_b = gtk_spin_button_new_with_range(800.0, (double) screen_width, 32.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) display_width);
+  gtk_grid_attach(GTK_GRID(grid), wide_b, col, row, 1, 1);
+  g_signal_connect(wide_b, "value-changed", G_CALLBACK(width_cb), NULL);
+  col++;
+  label = gtk_label_new("Window Height:");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
+  col++;
+  height_b = gtk_spin_button_new_with_range(480.0, (double) screen_height, 16.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_b), (double) display_height);
+  gtk_grid_attach(GTK_GRID(grid), height_b, col, row, 1, 1);
+  g_signal_connect(height_b, "value-changed", G_CALLBACK(height_cb), NULL);
+  row++;
 
   col = 0;
   label = gtk_label_new("Select VFO bar layout:");
@@ -154,12 +180,17 @@ void screen_menu(GtkWidget *parent) {
   g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
 
   row++;
-  col = 0;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
   gtk_widget_set_name(button, "boldlabel");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
-  gtk_grid_attach(GTK_GRID(grid), button, col, row, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), button, 0, row, 2, 1);
   g_signal_connect(button, "toggled", G_CALLBACK(horizontal_cb), NULL);
+
+  full_b = gtk_check_button_new_with_label("Full Screen Mode");
+  gtk_widget_set_name(full_b, "boldlabel");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
+  gtk_grid_attach(GTK_GRID(grid), full_b, 2, row, 2, 1);
+  g_signal_connect(full_b, "toggled", G_CALLBACK(full_cb), NULL);
 
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;

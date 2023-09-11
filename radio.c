@@ -70,6 +70,7 @@
 #include "radio_menu.h"
 #include "iambic.h"
 #include "rigctl_menu.h"
+#include "screen_menu.h"
 #ifdef MIDI
   #include "midi.h"
   #include "alsa_midi.h"
@@ -892,28 +893,22 @@ void start_radio() {
   // menu pops up upon press, and stays upon release, and the selection can
   // be made with a second press).
   //
-  // Here we set it to "mouse friendly" in the NO_CONTROLLER case,
-  // since if we use one of the GPIO controllers, chances are high that
-  // we operate with a touch-screen.
+  // Here we set it to "touch-screen friendly" by default, since it does
+  // not harm MUCH if it set to touch-screen for a mouse, but it can be
+  // it VERY DIFFICULT if "mouse friendly" settings are encountered with
+  // a touch screen.
   //
   // The setting can be changed in the RADIO menu and is stored in the
   // props file, so will be restored therefrom as well.
   //
   optimize_for_touchscreen = 1;
-#ifndef ANDROMEDA
-
-  if (controller == NO_CONTROLLER) { optimize_for_touchscreen = 0; }
-
-#endif
 
   for (int id = 0; id < MAX_SERIAL; id++) {
     //
     // Apply some default values
     //
     SerialPorts[id].enable = 0;
-#ifdef ANDROMEDA
     SerialPorts[id].andromeda = 0;
-#endif
     SerialPorts[id].baud = 0;
     sprintf(SerialPorts[id].port, "/dev/ttyACM%d", id);
   }
@@ -1435,6 +1430,7 @@ void start_radio() {
   radio_change_region(region);
   create_visual();
   reconfigure_screen();
+  g_timeout_add(1000, set_full_screen, NULL);
 
   // save every 30 seconds
   // save_timer_id=gdk_threads_add_timeout(30000, save_cb, NULL);
@@ -1583,7 +1579,7 @@ void radio_change_receivers(int r) {
     break;
   }
 
-  reconfigure_radio();
+  reconfigure_screen();
   active_receiver = receiver[0];
 #ifdef CLIENT_SERVER
 
@@ -2348,6 +2344,7 @@ void radioRestoreState() {
   GetPropI0("display_toolbar",                               display_toolbar);
   GetPropI0("display_width",                                 display_width);
   GetPropI0("display_height",                                display_height);
+  GetPropI0("full_screen",                                   full_screen);
   GetPropI0("rx_stack_horizontal",                           rx_stack_horizontal);
   GetPropI0("vfo_layout",                                    vfo_layout);
   GetPropI0("optimize_touchscreen",                          optimize_for_touchscreen);
@@ -2360,11 +2357,12 @@ void radioRestoreState() {
   // the very end of this function. However, if the radio is remote we will return
   // from this function in due course so have to check some things here.
   //
-  // Sanity check part 1:
-  //
-  if (full_screen || display_width  > screen_width  ) { display_width  = screen_width; }
+  if (display_width  > screen_width  ) { display_width  = screen_width; }
+  if (display_height > screen_height ) { display_height = screen_height; }
 
-  if (full_screen || display_height > screen_height ) { display_height = screen_height; }
+  if (full_screen) {
+    if (display_width != screen_width || display_height != screen_height) { full_screen = 0; }
+  }
 
 #ifdef CLIENT_SERVER
   GetPropI0("radio.hpsdr_server",                            hpsdr_server);
@@ -2472,9 +2470,7 @@ void radioRestoreState() {
 
   for (int id = 0; id < MAX_SERIAL; id++) {
     GetPropI1("rigctl_serial_enable[%d]", id,                SerialPorts[id].enable);
-#ifdef ANDROMEDA
     GetPropI1("rigctl_serial_andromeda[%d]", id,             SerialPorts[id].andromeda);
-#endif
     GetPropI1("rigctl_serial_baud_rate[%i]", id,             SerialPorts[id].baud);
     GetPropS1("rigctl_serial_port[%d]", id,                  SerialPorts[id].port);
   }
@@ -2574,6 +2570,7 @@ void radioSaveState() {
   SetPropI0("display_toolbar",                               hide_status ? old_tool : display_toolbar);
   SetPropI0("display_width",                                 display_width);
   SetPropI0("display_height",                                display_height);
+  SetPropI0("full_screen",                                   full_screen);
   SetPropI0("rx_stack_horizontal",                           rx_stack_horizontal);
   SetPropI0("vfo_layout",                                    vfo_layout);
   SetPropI0("optimize_touchscreen",                          optimize_for_touchscreen);
@@ -2679,9 +2676,7 @@ void radioSaveState() {
 
   for (int id = 0; id < MAX_SERIAL; id++) {
     SetPropI1("rigctl_serial_enable[%d]", id,                SerialPorts[id].enable);
-#ifdef ANDROMEDA
     SetPropI1("rigctl_serial_andromeda[%d]", id,             SerialPorts[id].andromeda);
-#endif
     SetPropI1("rigctl_serial_baud_rate[%i]", id,             SerialPorts[id].baud);
     SetPropS1("rigctl_serial_port[%d]", id,                  SerialPorts[id].port);
   }
@@ -2772,11 +2767,6 @@ int remote_start(void *data) {
   sprintf(property_path, "%s@%s.props", radio->name, server);
   radio_is_remote = TRUE;
   optimize_for_touchscreen = 1;
-#ifndef ANDROMEDA
-
-  if (controller == NO_CONTROLLER) { optimize_for_touchscreen = 0; }
-
-#endif
 
   switch (controller) {
   case CONTROLLER2_V1:

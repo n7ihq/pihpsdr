@@ -17,3 +17,4 @@
 */
 
 extern void screen_menu(GtkWidget *parent);
+extern int set_full_screen(gpointer data);
