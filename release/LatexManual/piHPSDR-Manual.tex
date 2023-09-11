@@ -1087,9 +1087,16 @@ via the main menu and the \bltt{Screen} button and is shown in Fig. \ref{fig:Scr
 The window width and height can be chosen with the spin buttons shown. The minimum
 values for width and height are 800 and 480, the maximum values are determined by
 the resolution of the monitor. Changes made in the spin buttons become effective
-immediately.
-The pop-down menu \rett{Select VFO bar layout} lets you choose the layout of the VFO
-bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown:
+immediately. If piHPSDR is in full screen mode (see below), which implies that the
+width and height equal the screen dimensions, and you descrease either width or
+height, the piHPSDR window auomatically switches from full screen into window mode.
+
+If the window width is decreased such that the VFO bar chosen does no longer fit,
+the first one in the list that does fit is automatically selected, and the
+current choice printed in the 
+ pop-down menu \rett{Select VFO bar layout} is updated. This menu lets you choose
+ the layout of the VFO
+bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown.
 
 \begin{figure}[h!]
 \center
@@ -1103,14 +1110,23 @@ two small ones can be used with a screen only 800 pixels wide. The VFO bar shown
 at the bottom of Fig. \ref{fig:VFObarChoice} represents the original piHPSDR layout,
 the second one from the bottom has larger characters for the VFO dials and therefore
 a few more pixels height. The VFO bar has been described in detail in chapter
-\ref{sec:VFObar}.
+\ref{sec:VFObar}. If you choose a VFO bar layout that is wider than the current
+window width allows, the window with is automatically adjusted.
 
-The check box \rett{Stack receivers horizontally}, if checked, puts the panels
+\rett{Stack receivers horizontally}. If checked, this puts the panels
 of the two receivers (if two receivers are used) side-by-side instead of on top
 of each other.
 
-If the window width is decreased such that the VFO bar chosen does no longer fit,
-the first one in the list that does fit is automatically selected. 
+\rett{Full Screen Mode}. If you check this option, the window width and height is
+set to the screen width and height, and then the piHPSDR window is put into
+,,full screen mode''. This means that there is no piHPSDR window title bar and
+no OS menu bar, and the piHPSDR window area covers the whole screen. For small screens,
+this gives some extra space to the piHPSDR window, since the maximum window
+dimensions (such that the whole window can be displayed) are smaller than the screen
+size, typically, the height is about 30 pixels less, and the width about 10 pixels less
+than the screen size. If piHPDR is is full screen mode and you \textit{uncheck} this
+box, this gives you a pihpsdr window with the size of the screen, which is slightly
+too large to be displayed completely on the screen.
 
 \section{The \texttt{Display} Menu}
 
@@ -1200,6 +1216,13 @@ happens regularly, it is no reason to worry.
 
 \section{The \texttt{Meter} menu}
 
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{MeterMenu.png}
+\caption{The \bltt{Meter} menu.}
+\label{fig:Meter}
+\end{figure}
+
 The \bltt{Meter} can either be opened simply by clicking in the meter
 area, or through the main menu. Only few choices can be made here.
 
@@ -1219,12 +1242,6 @@ display less ,,nervous'' a moving average with a rather long time constant
 (about 0.5 sec) has been implemented on top of both the Peak and Average
 S-meter readings.
 
-\begin{figure}[h]
-\center
-\includegraphics[width=12cm]{MeterMenu.png}
-\caption{The \bltt{Meter} menu.}
-\label{fig:Meter}
-\end{figure}
 
 \rett{TX ALC reading:} Here, the possible values are Peak, Average, and
 ALC gain. For a two-tone signal with maximum audio amplitude the Average
@@ -1292,6 +1309,12 @@ of the main menu. These are all VFO-related menus.
 
 \section{The \texttt{VFO}  menu}
 
+\begin{figure}[h]
+\includegraphics[width=12cm]{VFOmenu.png}
+\caption{The \bltt{VFO} menu.}
+\label{fig:VFOmenu}
+\end{figure}
+
 The \bltt{VFO} menu can be used for direct frequency entry and to
 enable/disable some frequently used options. If the menu is opened,
 it refers either to VFO-A or VFO-B. If opened via the main menu,
@@ -1309,11 +1332,6 @@ entered so far is not only shown in the upper part of the
 \bltt{VFO} menu, but also (in yellow digits) in the VFO bar.
 The other buttons of the ,,keypad'' have a special meaning:
 
-\begin{figure}[h]
-\includegraphics[width=12cm]{VFOmenu.png}
-\caption{The \bltt{VFO} menu.}
-\label{fig:VFOmenu}
-\end{figure}
 
 
 \rett{BS} Backspace. This cancels the last entered character
@@ -1381,12 +1399,6 @@ If you hit the highlighted button, you will not change the band (since you hit t
 button of the current band) but instead will cycle through the band stack of that band
 (see the \bltt{BndStack} menu).
 
-\begin{figure}[h]
-\center
-\includegraphics[width=12cm]{BandstackMenu.png}
-\caption{The \bltt{BndStack} (Bandstack) menu.}
-\label{fig:BandstackMenu}
-\end{figure}
 
 Note that the band menu may look different from the one shown here: there are many bands
 (24 bands plus up to 8 transverter bands) defined in piHPSDR. However, the bands that
@@ -1398,9 +1410,16 @@ will end up in the General band. If you have defined transverter bands (see the
 \bltt{XVTR} menu) they will be shown, with the title you have chosen, in the
 \bltt{Band} menu.
 
+
 \section{The  \texttt{BndStack} (Bandstack) menu}
 
- 
+ \begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{BandstackMenu.png}
+\caption{The \bltt{BndStack} (Bandstack) menu.}
+\label{fig:BandstackMenu}
+\end{figure}
+
 For each band, the band stack is collection of frequency/mode pairs. The idea is that
 you can have preferred or recently visited frequencies to which you can easily come back.
 If you open the \bltt{BndStack} menu (Fig. \ref{fig:BandstackMenu}), you see all these
@@ -1412,6 +1431,8 @@ is stored in the highlighted band stack entry, and then the frequency/mode of th
 entry becomes effective. Note that bandstack entries are only changed if the active
 receiver is controlled by VFO-A. 
 
+
+\section{The \texttt{Mode} menu}
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{ModeMenu.png}
@@ -1419,7 +1440,6 @@ receiver is controlled by VFO-A.
 \label{fig:ModeMenu}
 \end{figure}
 
-\section{The \texttt{Mode} menu}
 The \bltt{Mode} menu lets you change the mode of the active receiver, so you can switch,
 say, from LSB to CWU or DIGU. The mode menu simply lists the available modes, the current
 one is highlighted (Fig. \ref{fig:ModeMenu}).
@@ -1518,7 +1538,7 @@ a 1.0k filter for DIGU/DIGL passes audio frequencies between 1000 and 2000 Hz.
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{FilterMenuCW.png}
-\caption{The \bltt{Filter} menu (CW, AM, etc.).}
+\caption{The \bltt{Filter} menu for CWL/CWU.}
 \label{fig:FilterMenuCW}
 \end{figure}
 
@@ -1681,17 +1701,124 @@ This is what \bltt{Diversity} is all about.
 \chapter{The Main Menu: TX-related menus}
 
 \section{The \texttt{TX} Menu}
-\begin{figure}[h]
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{TXMenu.png}
 \caption{The \bltt{TX} menu.}
 \label{fig:TXMenu}
 \end{figure}
 
+The \bltt{TX} menu can be opened from the main menu, or just by a secondary mouse click
+into the TX panadapter (while transmitting). The menu is shown in Fig. \ref{fig:TXMenu}.
+
+
+\rett{Local Microphone}. If this box is checked, the TX audio samples come from a soundcard
+attached to the host computer, or from a virtual audio cable. The sound device can be
+selected from the pop-down menu to the right. This menu is intentionally very broad since
+audio device names can be very long. This check box, and the pop-down menu, is absent if
+there are no output sound devices available.
+
+\textbf{Note:} If the radio has the possiblity
+to connect a microphone, and if PTT comes from the radio, the radio microphone samples
+and the local (sound device) microphone samples are mixed (added). This is very convenient
+if one does SSB with a microphone attached to the radio, and digital modes with a
+local sound device or virtual audio cable: when doing SSB, the local sound device normally
+produces no audio, and while pressing PTT at the microphone, you can work SSB normally.
+So you can go from digital mode to SSB without the need to change the microphone setup
+in the TX menu.
+
+\rett{Compression (dB):} With this box the TX compressor can be enabled/disabled.
+The compression level (0-20 dB) can be chosen in the spin button to the right.
+
+\textbf{Note:} The compressor on/off flag, as well as the compression level, is
+,,stored with the mode''. So it is possible to have the compressor enabled for SSB
+(LSB/USB) 
+and disabled for digi modes (DIGL/DIGU), and when switching modes, the compressor
+settings for the new mode are automatically restored.
+
+\rett{FM PreEmp/ALC}. When transmitting FM, the audio input signals are ,,emphasized''.
+This means that from 300 to 3000 Hz (the usual range of audio frequencies in amateur
+radio FM), there is a 6 dB per octave (20 dB per decate) that leads to a 20 dB damping
+of an input signal at 300 Hz (and no damping ad 3000 Hz).
+ This manipulation can be done before or after the TX ALC.
+If it is done \textit{after} the TX ALC, the transmitter cannot be over-driven but you also cannot
+drive the transmitter to full power with a low frequency signal. Many operators consider
+the resulting signal ,,too thin'' and prefer that the pre-emphasis is done \textit{before}
+TX ALC, together with a general overall amplification of the audio signal. These two
+possibilities can be selected with this check box. If checked, pre-emphasize takes place
+\textit{before} ALC. This makes the FM signal ,,thicker'' because the TX audio input
+is boosted by 15 dB when doing FM. If the checkbox is not checked, pre-emphasize takes
+place \textit{after} ALC, which makes the 15 dB audio boost ineffective because it is
+,,corrected'' by the ALC.  So if you want more ,,punch'' in FM, check this box, but
+be aware that strong high-frequency audio input signals may lead to TX over drive. With
+normal speech this is not likely to happen because a large part of its power is in the
+low-frequency region.
+
+\rett{Radio Mic:} This text, and the pop-down menu to its right, only occurs if a microphone can
+be connected to the radio. The pop-down menu lets you choose between \rett{Mic In} which means
+that a microphone can be connected to the microphone input jack, \rett{Mic Boost}, which
+additionally switches on a hardware 20 dB mic amp, and \rett{Line In} which means that the
+"Line In" jack of the radio is used for the audio samples transferred from the radio to the
+host computer. This is part of the HPSDR protocol, it may well happen that your radio has a
+microphone jack but no line-in input. The optional 20 dB preamp may be necessary when connecting
+a dynamic microphone whose input level (few mV) is considerably lower that that of a 
+condensor (electret) microphone, or a dynamic microphone with built-in preamp.
+
+\rett{TX Filter low:} With this spin button you can set the low cut of the TX filter. The
+frequency refers to the audio domain.
+
+\rett{TX Filter high:} With this spin button you can set the high cut of the TX filter. The
+frequency refers to the audio domain.
+
+\rett{Use RX Filter} If this check box is enabled, the TX filter low/high cuts are ignored,
+and the filter edges of the current RX filter are used instead.
+
+\rett{Panadapter Low:} This spin button sets the lower edge (in dBm) of the TX panadapter.
+
+\rett{Panadapter High:} This spin button sets the upper edge (in dBm) of the TX panadapter.
+
+\rett{Panadapter Step:} This spin button determines how many horizontal lines are drawn on the
+TX panadapter. If set to 10, for example, there will be a horizontal line for every multiple
+of 10 dBm.
+
+\rett{AM carrier level:} This sets the AM carrier level for the AM modulator. If set to zero, there is no carrier and the
+signal is a DSB signal. A reasonable value is 0.5 which leads to 100\% modulation. Values larger than
+0.5 have less than 100\% modulation. This means too much power goes into the carrier.
+
+\rett{Tune use Drive} If this box is checked, TUNEing will be done with the power that corresponds to the
+current position of the drive slider, and the tune drive level is ignored.
+
+\rett{Tune Drive Level} The value that can be adjusted with this spin box is the virtual position of the drive
+slider while TUNEing. This value is ignored if the \rett{Tune use Drive} box is checked.
+
+\rett{SWR protection} If this box is checked, a very simple SWR protection is enabled. If the SWR exceeds the
+threshold value (see next point), the drive slider is set to zero. The SWR protection is disabled
+while TUNEing.
+
+\rett{SWR alarm at} The spin button to the right determines the SWR threshold. If the SWR is beyond the threshold,
+the SWR reported in the meter turns red. If SWR protection is enabled, the drive slider is set to zero if the
+SWR exceeds the threshold.
+
+\rett{CTCSS Enable} (FM only!) This checkbox enables/disables CTCSS (continuous tone coded squelch system). If enabled, a low-frequency
+tone is transmitted together with the normal TX audio. This can be used to trigger repeaters, or any other function implemented
+on the other side. The frequency itself can be chosen with the following menu point:
+
+\rett{CTCSS Frequency} This pop-down menu lets you choose the CTCSS frequency. This choice has no effect if CTCSS is disabled.
+The frequency list includes 38 standard TIA/EIA-603-D CTCSS frequencies between 67.0 and 250.3 Hz.
+
+\rett{Mac Drive level for DIGU/DIGL} This spin button restricts the range of the drive slider from 0 to the chosen value
+for the DIGU and DIGL modes. If the value is 100, this has no effect. The primary use of this menu point is PA protection,
+since many digital modes (unlike SSB voice) are constantly transmitting at full power.
+
+
 \section{The \texttt{PA} Menu}
-\begin{center}
+
+\begin{figure}
+\center
 \includegraphics[width=12cm]{PAMenuCalibrate.png}
-\end{center}
+\caption{The PA menu, PA calibration screen}
+\label{fig:PAMenuCalibrate}
+\end{figure}
 
 \begin{center}
 \includegraphics[width=12cm]{PAMenuWatt.png}
