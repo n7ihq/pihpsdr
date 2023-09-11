@@ -208,7 +208,7 @@ static double txlevel;
 
 static double tonearg,tonearg2;
 static double tonedelta,tonedelta2;
-static int    do_tone;
+static int    do_tone, t3p, t3l;
 
 int main(int argc, char *argv[]) {
   int i, j, size;
@@ -631,11 +631,25 @@ int main(int argc, char *argv[]) {
       process_ep2(buffer + 11);
       process_ep2(buffer + 523);
 
-      if (labs(14100000L - rx_freq[0]) < (24000 << rate)) {
+      if (labs(7100000L - rx_freq[0]) < (24000 << rate)) {
+        //
+        // weak single-tone signal at 7100 kHz
+        //
+        off = (double)(7100000 - rx_freq[0]);
+        tonedelta = -6.283185307179586476925286766559 * off / ((double) (48000 << rate));
+        do_tone = 3;
+        t3l = 9600 << rate;
+      } else if (labs(14100000L - rx_freq[0]) < (24000 << rate)) {
+        //
+        // -73 dBm single-tone signal at 14100 kHz
+        //
         off = (double)(14100000 - rx_freq[0]);
         tonedelta = -6.283185307179586476925286766559 * off / ((double) (48000 << rate));
         do_tone = 1;
       } else if (labs(21100000L - rx_freq[0]) < (24000 << rate)) {
+        //
+        // two -73 dBm signals at 21100.0 and 21000.9 kHz
+        //
         off = (double)(21100000 - rx_freq[0]);
         tonedelta = -6.283185307179586476925286766559 * off / ((double) (48000 << rate));
         off2 = (double)(21100900 - rx_freq[0]);
@@ -1416,7 +1430,7 @@ void *handler_ep6(void *arg) {
   struct timespec delay;
   long wait;
   int noiseIQpt, divpt, rxptr;
-  double i1, q1, fac1, fac2, fac3, fac4;
+  double i1, q1, fac1, fac1a, fac2, fac3, fac4;
   unsigned int seed;
   int decimation;
   seed = ((uintptr_t) &seed) & 0xffffff;
@@ -1506,7 +1520,8 @@ void *handler_ep6(void *arg) {
 
       pointer += 8;
       memset(pointer, 0, 504);
-      fac1 = rxatt_dbl[0] * 0.0002239;
+      fac1 = rxatt_dbl[0] * 0.0002239;     //  -73 dBm signal
+      fac1a= rxatt_dbl[0] * 0.000003162278;// -110 dBm signal
 
       if (diversity && !noiseblank) {
         fac2 = 0.0001 * rxatt_dbl[0];   // Amplitude of broad "man-made" noise to ADC1
@@ -1537,6 +1552,9 @@ void *handler_ep6(void *arg) {
         } else if (do_tone == 2) {
           adc1isample = (noiseItab[noiseIQpt] + (cos(tonearg) + cos(tonearg2)) * fac1) * 8388607.0;
           adc1qsample = (noiseQtab[noiseIQpt] + (sin(tonearg) + sin(tonearg2)) * fac1) * 8388607.0;
+        } else if (do_tone == 3 && t3p >= 0) {
+          adc1isample = (noiseItab[noiseIQpt] + cos(tonearg) * fac1a) * 8388607.0;
+          adc1qsample = (noiseQtab[noiseIQpt] + sin(tonearg) * fac1a) * 8388607.0;
         } else {
           adc1isample = (noiseItab[noiseIQpt] ) * 8388607.0;
           adc1qsample = (noiseQtab[noiseIQpt] ) * 8388607.0;
@@ -1613,6 +1631,8 @@ void *handler_ep6(void *arg) {
 
         if (noiseIQpt >= LENNOISE) { noiseIQpt = rand_r(&seed) / NOISEDIV; }
 
+        t3p++;
+        if (t3p >= t3l) { t3p = -t3l; }
         tonearg  += tonedelta;
         tonearg2 += tonedelta2;
 

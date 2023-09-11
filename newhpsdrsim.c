@@ -973,9 +973,12 @@ void *rx_thread(void *data) {
   int decimation;
   unsigned int seed;
   double off, tonearg, tonedelta;
-  int do_tone;
+  double off2, tonearg2, tonedelta2;
+  int do_tone, t3p, t3l;
   struct timespec delay;
   tonearg = 0.0;
+  tonearg2 = 0.0;
+  t3p = 0.0;
   myddc = (int) (uintptr_t) data;
 
   if (myddc < 0 || myddc >= NUMRECEIVERS) { return NULL; }
@@ -1029,10 +1032,21 @@ void *rx_thread(void *data) {
     //
     // IQ frequency of 14.1 MHz signal
     //
-    if (myadc == 0 && labs(14100000L - rxfreq[myddc]) < 500 * rxrate[myddc]) {
+    if (myadc == 0 && labs(7100000L - rxfreq[myddc]) < 500 * rxrate[myddc]) {
+      off = (double)(7100000 - rxfreq[myddc]);
+      tonedelta = -6.283185307179586476925286766559 * off / ((double) (1000 * rxrate[myddc]));
+      do_tone = 3;
+      t3l = 200 * rxrate[myddc];
+    } else if (myadc == 0 && labs(14100000L - rxfreq[myddc]) < 500 * rxrate[myddc]) {
       off = (double)(14100000 - rxfreq[myddc]);
       tonedelta = -6.283185307179586476925286766559 * off / ((double) (1000 * rxrate[myddc]));
       do_tone = 1;
+    } else if (myadc == 0 && labs(21100000L - rxfreq[myddc]) < 500 * rxrate[myddc]) {
+      off = (double)(21100000 - rxfreq[myddc]);
+      tonedelta = -6.283185307179586476925286766559 * off / ((double) (1000 * rxrate[myddc]));
+      off2 = (double)(21100900 - rxfreq[myddc]);
+      tonedelta2 = -6.283185307179586476925286766559 * off2 / ((double) (1000 * rxrate[myddc]));
+      do_tone = 2;
     } else {
       do_tone = 0;
     }
@@ -1126,7 +1140,7 @@ void *rx_thread(void *data) {
           i1sample = irsample * 0.2899;
           q1sample = qrsample * 0.2899;
         }
-      } else if (do_tone) {
+      } else if (do_tone == 1) {
         i0sample += cos(tonearg) * 0.0002239 * rxatt0_dbl;
         q0sample += sin(tonearg) * 0.0002239 * rxatt0_dbl;
         tonearg += tonedelta;
@@ -1134,7 +1148,31 @@ void *rx_thread(void *data) {
         if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
 
         if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
+
+      } else if (do_tone == 2) {
+        i0sample += (cos(tonearg)+cos(tonearg2)) * 0.0002239 * rxatt0_dbl;
+        q0sample += (sin(tonearg)+sin(tonearg2)) * 0.0002239 * rxatt0_dbl;
+        tonearg += tonedelta;
+        tonearg2+= tonedelta2;
+
+        if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
+        if (tonearg2> 6.3) { tonearg2-= 6.283185307179586476925286766559; }
+
+        if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
+        if (tonearg2< -6.3) { tonearg2+= 6.283185307179586476925286766559; }
+
+      } else if (do_tone == 3 && t3p >= 0) {
+        i0sample += cos(tonearg) * 0.000003162278 * rxatt0_dbl;
+        q0sample += sin(tonearg) * 0.000003162278 * rxatt0_dbl;
+        tonearg += tonedelta;
+
+        if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
+
+        if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
+
       }
+      t3p++;
+      if (t3p >= t3l) { t3p = -t3l; }
 
       if (diversity && !sync && myadc == 0) {
         i0sample += 0.0001 * rxatt0_dbl * divtab[divptr];
