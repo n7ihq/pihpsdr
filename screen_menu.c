@@ -34,7 +34,7 @@ static GtkWidget *vfo_b = NULL;
 
 int set_full_screen(gpointer data) {
   if (full_screen) {
-    gtk_window_fullscreen(GTK_WINDOW(top_window));
+    gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
   } else {
     gtk_window_unfullscreen(GTK_WINDOW(top_window));
   }

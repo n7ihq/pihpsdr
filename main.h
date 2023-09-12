@@ -32,10 +32,12 @@ enum {
 
 extern gint controller;
 
+extern GdkScreen *screen;
 extern gint display_width;
 extern gint display_height;
 extern gint screen_width;
 extern gint screen_height;
+extern gint this_monitor;
 
 extern gint full_screen;
 extern GtkWidget *top_window;

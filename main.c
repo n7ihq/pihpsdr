@@ -55,11 +55,13 @@
 
 struct utsname unameData;
 
+GdkScreen *screen;
 gint display_width;
 gint display_height;
 gint screen_height;
 gint screen_width;
 gint full_screen;
+gint this_monitor;
 
 static GdkCursor *cursor_arrow;
 static GdkCursor *cursor_watch;
@@ -298,42 +300,25 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   t_print("version: %s\n", unameData.version);
   t_print("machine: %s\n", unameData.machine);
   load_css();
-  GdkScreen *screen = gdk_screen_get_default();
+  GdkDisplay *display = gdk_display_get_default();
+  if (display == NULL) {
+    t_print("no default display!\n");
+    _exit(0);
+  }
+
+  screen = gdk_display_get_default_screen(display);
 
   if (screen == NULL) {
     t_print("no default screen!\n");
     _exit(0);
   }
 
-  screen_width = gdk_screen_get_width(screen);
-  screen_height = gdk_screen_get_height(screen);
-  t_print("Screen: width=%d height=%d\n", screen_width, screen_height);
-
-  // Start with the smallest possible screen, 800x480, since this can now
-  // be fully configured in the SCREEN menu.
-  // Go to "full screen" mode if display nearly matches 800x480
-  // This is all overridden from the props file
-
-  display_width  = 800;
-  display_height = 480;
-  full_screen    = 0;
-
-  if (screen_width > 780 && screen_width < 820 && screen_height > 460 && screen_height < 500) {
-    full_screen = 1;
-    display_width = screen_width;
-    display_height = screen_height;
-  }
-
-  t_print("display_width=%d display_height=%d\n", display_width, display_height);
+  //
+  // Create top window with minimum size
+  //
   t_print("create top level window\n");
   top_window = gtk_application_window_new (app);
-
-  if (full_screen) {
-    t_print("full screen\n");
-    gtk_window_fullscreen(GTK_WINDOW(top_window));
-  }
-
-  gtk_widget_set_size_request(top_window, display_width, display_height);
+  gtk_widget_set_size_request(top_window, 100, 100);
   gtk_window_set_title (GTK_WINDOW (top_window), "piHPSDR");
   //
   // do not use GTK_WIN_POS_CENTER_ALWAYS, since this will let the
@@ -343,6 +328,51 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   gtk_window_set_position(GTK_WINDOW(top_window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(top_window), FALSE);
   t_print("setting top window icon\n");
+
+  //
+  // Get the position of the top window, and then determine
+  // to which monitor this position belongs.
+  //
+  gint x, y;
+  gtk_window_get_position(GTK_WINDOW(top_window), &x, &y);
+
+  this_monitor=gdk_screen_get_monitor_at_point(screen, x, y);
+  t_print("Monitor Number within Screen=%d\n", this_monitor);
+
+  //
+  // Determine the size of "our" monitor
+  //
+  GdkRectangle rect;
+  gdk_screen_get_monitor_geometry(screen, this_monitor, &rect);
+  screen_width = rect.width;
+  screen_height = rect.height;
+  t_print("Monitor: width=%d height=%d\n", screen_width, screen_height);
+
+  // Start with the smallest possible screen, 800x480, since this can now
+  // be fully configured in the SCREEN menu.
+  // Go to "full screen" mode if display nearly matches 800x480
+  // This is all overridden from the props file
+
+  display_width  = 800;
+  display_height = 480;
+  full_screen    = 0;
+  
+  //
+  // Go to full-screen mode by default, if the screen size is approx. 800*480
+  //
+  if (screen_width > 780 && screen_width < 820 && screen_height > 460 && screen_height < 500) {
+    full_screen = 1;
+    display_width = screen_width;
+    display_height = screen_height;
+  }
+
+  t_print("display_width=%d display_height=%d\n", display_width, display_height);
+
+  if (full_screen) {
+    t_print("full screen\n");
+    gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
+  }
+
   GError *error;
 
   if (!gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "hpsdr.png", &error)) {
@@ -358,6 +388,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   // We want to use the space-bar as an alternative to go to TX
   //
   gtk_widget_add_events(top_window, GDK_KEY_PRESS_MASK);
+
   g_signal_connect(top_window, "key_press_event", G_CALLBACK(keypress_cb), NULL);
   t_print("create grid\n");
   topgrid = gtk_grid_new();
