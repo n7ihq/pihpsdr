@@ -192,6 +192,10 @@ static void new_calib(gboolean flag) {
     show_1W(flag);
     break;
 
+  case PA_5W:
+    show_W(5, flag);
+    break;
+
   case PA_10W:
     show_W(10, flag);
     break;
@@ -214,6 +218,10 @@ static void new_calib(gboolean flag) {
 
   case PA_500W:
     show_W(500, flag);
+    break;
+
+  case PA_1KW:
+    show_W(1000, flag);
     break;
   }
   GtkWidget *reset_b = gtk_button_new_with_label("Reset");
@@ -254,12 +262,14 @@ void pa_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid0), max_power_label, 1, 0, 1, 1);
   GtkWidget *max_power_b = gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "1W");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "5W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "10W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "30W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "50W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "100W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "200W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "500W");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b), NULL, "1KW");
   gtk_combo_box_set_active(GTK_COMBO_BOX(max_power_b), pa_power);
   my_combo_attach(GTK_GRID(grid0), max_power_b, 2, 0, 1, 1);
   g_signal_connect(max_power_b, "changed", G_CALLBACK(max_power_changed_cb), NULL);

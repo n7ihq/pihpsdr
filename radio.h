@@ -47,12 +47,14 @@
 
 enum {
   PA_1W = 0,
+  PA_5W,
   PA_10W,
   PA_30W,
   PA_50W,
   PA_100W,
   PA_200W,
-  PA_500W
+  PA_500W,
+  PA_1KW
 };
 
 // TOGGLE takes a boolean expression and inverts it, using the numerical values 0 for FALSE and 1 for TRUE
