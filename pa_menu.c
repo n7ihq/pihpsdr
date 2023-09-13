@@ -39,6 +39,8 @@ static GtkWidget *calibgrid;
 //
 static GtkWidget *spin[11];
 
+static void reset_cb(GtkWidget *widget, gpointer data);
+
 static void cleanup() {
   if (dialog != NULL) {
     GtkWidget *tmp=dialog;
@@ -104,6 +106,7 @@ static void trim_changed_cb(GtkWidget *widget, gpointer data) {
 
 static void show_1W(gboolean reset) {
   int i;
+  int col, row;
   char text[16];
 
   if (reset) {
@@ -112,25 +115,33 @@ static void show_1W(gboolean reset) {
     }
   }
 
+  row=1;
+  col=0;
   for (i = 1; i < 11; i++) {
     sprintf(text, "%dmW", pa_trim[i]);
     GtkWidget *label = gtk_label_new(text);
     gtk_widget_set_name(label, "boldlabel");
-    gtk_grid_attach(GTK_GRID(calibgrid), label, 0, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(calibgrid), label, col++, row, 1, 1);
     //
     // We *need* a maximum value for the spinner, but a quite large
     // value does not harm. So we allow up to 5 times the nominal
     // value.
     //
     spin[i] = gtk_spin_button_new_with_range(0.0, (double)(5 * i * 100), 1.0);
-    gtk_grid_attach(GTK_GRID(calibgrid), spin[i], 1, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(calibgrid), spin[i], col++, row, 1, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]), (double)pa_trim[i]);
     g_signal_connect(spin[i], "value_changed", G_CALLBACK(trim_changed_cb), GINT_TO_POINTER(i));
+
+    if (col == 4) {
+      row++;
+      col=0;
+    }
   }
 }
 
 static void show_W(int watts, gboolean reset) {
   int i;
+  int col, row;
   char text[16];
   int increment = watts / 10;
 
@@ -140,20 +151,28 @@ static void show_W(int watts, gboolean reset) {
     }
   }
 
+  row=1;
+  col=0;
   for (i = 1; i < 11; i++) {
     sprintf(text, "%dW", i * increment);
     GtkWidget *label = gtk_label_new(text);
     gtk_widget_set_name(label, "boldlabel");
-    gtk_grid_attach(GTK_GRID(calibgrid), label, 0, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(calibgrid), label, col++, row, 1, 1);
     //
     // We *need* a maximum value for the spinner, but a quite large
     // value does not harm. So we allow up to 5 times the nominal
     // value.
     //
     spin[i] = gtk_spin_button_new_with_range(0.0, (double)(5 * i * increment), 1.0);
-    gtk_grid_attach(GTK_GRID(calibgrid), spin[i], 1, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(calibgrid), spin[i], col++, row, 1, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]), (double)pa_trim[i]);
     g_signal_connect(spin[i], "value_changed", G_CALLBACK(trim_changed_cb), GINT_TO_POINTER(i));
+
+    if (col == 4) {
+      row++;
+      col=0;
+    }
+
   }
 }
 
@@ -166,41 +185,53 @@ static void clear_W() {
   }
 }
 
+static void new_calib(gboolean flag) {
+
+  switch (pa_power) {
+  case PA_1W:
+    show_1W(flag);
+    break;
+
+  case PA_10W:
+    show_W(10, flag);
+    break;
+
+  case PA_30W:
+    show_W(30, flag);
+    break;
+
+  case PA_50W:
+    show_W(50, flag);
+    break;
+
+  case PA_100W:
+    show_W(100, flag);
+    break;
+
+  case PA_200W:
+    show_W(200, flag);
+    break;
+
+  case PA_500W:
+    show_W(500, flag);
+    break;
+  }
+  GtkWidget *reset_b = gtk_button_new_with_label("Reset");
+  gtk_grid_attach(GTK_GRID(calibgrid), reset_b, 0, 6, 4, 1);
+  g_signal_connect(reset_b, "button-press-event", G_CALLBACK(reset_cb), NULL);
+}
+
+static void reset_cb(GtkWidget *widget, gpointer data) {
+  clear_W();
+  new_calib(TRUE);
+  gtk_widget_show_all(calibgrid);
+}
+
 static void max_power_changed_cb(GtkWidget *widget, gpointer data) {
   pa_power = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
   t_print("max_power_changed_cb: %d\n", pa_power);
   clear_W();
-
-  switch (pa_power) {
-  case PA_1W:
-    show_1W(TRUE);
-    break;
-
-  case PA_10W:
-    show_W(10, TRUE);
-    break;
-
-  case PA_30W:
-    show_W(30, TRUE);
-    break;
-
-  case PA_50W:
-    show_W(50, TRUE);
-    break;
-
-  case PA_100W:
-    show_W(100, TRUE);
-    break;
-
-  case PA_200W:
-    show_W(200, TRUE);
-    break;
-
-  case PA_500W:
-    show_W(500, TRUE);
-    break;
-  }
-
+  new_calib(TRUE);
   gtk_widget_show_all(calibgrid);
 }
 
@@ -282,35 +313,7 @@ void pa_menu(GtkWidget *parent) {
   calibgrid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(calibgrid), 10);
 
-  switch (pa_power) {
-  case PA_1W:
-    show_1W(FALSE);
-    break;
-
-  case PA_10W:
-    show_W(10, FALSE);
-    break;
-
-  case PA_30W:
-    show_W(30, FALSE);
-    break;
-
-  case PA_50W:
-    show_W(50, FALSE);
-    break;
-
-  case PA_100W:
-    show_W(100, FALSE);
-    break;
-
-  case PA_200W:
-    show_W(200, FALSE);
-    break;
-
-  case PA_500W:
-    show_W(500, FALSE);
-    break;
-  }
+  new_calib(FALSE);
 
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook), calibgrid, gtk_label_new("Watt Meter Calibrate"));
   gtk_grid_attach(GTK_GRID(grid0), notebook, 0, 1, 6, 1);
