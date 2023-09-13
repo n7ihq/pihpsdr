@@ -32,15 +32,6 @@ static GtkWidget *height_b = NULL;
 static GtkWidget *full_b = NULL;
 static GtkWidget *vfo_b = NULL;
 
-int set_full_screen(gpointer data) {
-  if (full_screen) {
-    gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
-  } else {
-    gtk_window_unfullscreen(GTK_WINDOW(top_window));
-  }
-  return G_SOURCE_REMOVE;
-}
-
 static void apply() {
   reconfigure_screen();
   //
@@ -81,22 +72,12 @@ static void vfo_cb(GtkWidget *widget, gpointer data) {
 
 static void width_cb(GtkWidget *widget, gpointer data) {
   display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  gtk_widget_set_size_request(top_window, display_width, display_height);
-  if (display_width < screen_width) {
-    full_screen = 0;
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
-  }
-  apply();
+  if (!full_screen) { apply(); }
 }
 
 static void height_cb(GtkWidget *widget, gpointer data) {
   display_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  gtk_widget_set_size_request(top_window, display_width, display_height);
-  if (display_height < screen_height) {
-    full_screen = 0;
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
-  }
-  apply();
+  if (!full_screen) { apply(); }
 }
 
 static void horizontal_cb(GtkWidget *widget, gpointer data) {
@@ -106,11 +87,7 @@ static void horizontal_cb(GtkWidget *widget, gpointer data) {
 
 static void full_cb(GtkWidget *widget, gpointer data) {
   full_screen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  if (full_screen) {
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) screen_width);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_b), (double) screen_height);
-  }
-  g_timeout_add(1000, set_full_screen, NULL);
+  apply();
 }
 
 void screen_menu(GtkWidget *parent) {

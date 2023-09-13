@@ -372,7 +372,8 @@ static void choose_vfo_layout() {
     vfo_layout = 0;
   }
 
-  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
+  VFO_WIDTH = full_screen ? screen_width : display_width;
+  VFO_WIDTH -=(MENU_WIDTH + METER_WIDTH);
 
   //
   // If chosen layout does not fit:
@@ -397,12 +398,27 @@ static void choose_vfo_layout() {
   }
 }
 
+static guint sfs_timer = 0;
+
+static int set_full_screen(gpointer data) {
+  //
+  // Put the top window in full-screen mode, if full_screen is set
+  //
+  sfs_timer=0;
+  if (full_screen) {
+    gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
+  }
+  return G_SOURCE_REMOVE;
+}
+
 void reconfigure_screen() {
   //
   // Re-configure the piHPSDR screen after dimensions have changed
   // Start with removing the toolbar, the slider area and the zoom/pan area
   // (these will be re-constructed in due course)
   //
+  int my_width  = full_screen ? screen_width  : display_width;
+  int my_height = full_screen ? screen_height : display_height;
   if (toolbar) {
     gtk_container_remove(GTK_CONTAINER(fixed), toolbar);
     toolbar = NULL;
@@ -422,13 +438,13 @@ void reconfigure_screen() {
   VFO_HEIGHT = vfo_layout_list[vfo_layout].height;
   MENU_HEIGHT = VFO_HEIGHT / 2;
   METER_HEIGHT = VFO_HEIGHT;
-  //t_print("%s: display = %dx%d, vfo height = %dx%d, meter width = %d\n",
-  //        __FUNCTION__,
-  //        display_width, display_height, VFO_WIDTH, VFO_HEIGHT, METER_WIDTH);
   //
   // Change sizes of main window, Hide and Menu buttons, meter, and vfo
   //
-  gtk_widget_set_size_request(top_window, display_width, display_height);
+  if (!full_screen) {
+    gtk_window_unfullscreen(GTK_WINDOW(top_window));
+  }
+  gtk_window_resize(GTK_WINDOW(top_window), my_width, my_height);
   gtk_widget_set_size_request(hide_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(menu_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(meter,  METER_WIDTH, METER_HEIGHT);
@@ -451,13 +467,24 @@ void reconfigure_screen() {
   //
   reconfigure_radio();
   g_idle_add(ext_vfo_update, NULL);
+  //
+  // For some reason, the screen freezes if one goes immediately
+  // to full-screen mode. So set full-screen after a long timeout
+  //
+  if (sfs_timer > 0) {
+    g_source_remove(sfs_timer);
+  }
+  sfs_timer=g_timeout_add(1000, set_full_screen, NULL);
 }
 
 void reconfigure_radio() {
   int i;
   int y;
   t_print("%s: receivers=%d\n", __FUNCTION__, receivers);
-  rx_height = display_height - VFO_HEIGHT;
+  int my_height = full_screen ? screen_height : display_height;
+  int my_width  = full_screen ? screen_width  : display_width;
+
+  rx_height = my_height - VFO_HEIGHT;
 
   if (display_zoompan) {
     rx_height -= ZOOMPAN_HEIGHT;
@@ -479,20 +506,20 @@ void reconfigure_radio() {
 
     for (i = 0; i < receivers; i++) {
       RECEIVER *rx = receiver[i];
-      rx->width = display_width / receivers;
+      rx->width = my_width / receivers;
       receiver_update_zoom(rx);
       reconfigure_receiver(rx, rx_height);
       gtk_fixed_move(GTK_FIXED(fixed), rx->panel, x, y);
       rx->x = x;
       rx->y = y;
-      x = x + display_width / receivers;
+      x = x + my_width / receivers;
     }
 
     y += rx_height;
   } else {
     for (i = 0; i < receivers; i++) {
       RECEIVER *rx = receiver[i];
-      rx->width = display_width;
+      rx->width = my_width;
       receiver_update_zoom(rx);
       reconfigure_receiver(rx, rx_height / receivers);
       gtk_fixed_move(GTK_FIXED(fixed), rx->panel, 0, y);
@@ -504,7 +531,7 @@ void reconfigure_radio() {
 
   if (display_zoompan) {
     if (zoompan == NULL) {
-      zoompan = zoompan_init(display_width, ZOOMPAN_HEIGHT);
+      zoompan = zoompan_init(my_width, ZOOMPAN_HEIGHT);
       gtk_fixed_put(GTK_FIXED(fixed), zoompan, 0, y);
     } else {
       gtk_fixed_move(GTK_FIXED(fixed), zoompan, 0, y);
@@ -521,7 +548,7 @@ void reconfigure_radio() {
 
   if (display_sliders) {
     if (sliders == NULL) {
-      sliders = sliders_init(display_width, SLIDERS_HEIGHT);
+      sliders = sliders_init(my_width, SLIDERS_HEIGHT);
       gtk_fixed_put(GTK_FIXED(fixed), sliders, 0, y);
     } else {
       gtk_fixed_move(GTK_FIXED(fixed), sliders, 0, y);
@@ -540,7 +567,7 @@ void reconfigure_radio() {
 
   if (display_toolbar) {
     if (toolbar == NULL) {
-      toolbar = toolbar_init(display_width, TOOLBAR_HEIGHT);
+      toolbar = toolbar_init(my_width, TOOLBAR_HEIGHT);
       gtk_fixed_put(GTK_FIXED(fixed), toolbar, 0, y);
     } else {
       gtk_fixed_move(GTK_FIXED(fixed), toolbar, 0, y);
@@ -555,7 +582,7 @@ void reconfigure_radio() {
   }
 
   if (can_transmit && !duplex) {
-    reconfigure_transmitter(transmitter, display_width, rx_height);
+    reconfigure_transmitter(transmitter, my_width, rx_height);
   }
 }
 
@@ -628,7 +655,11 @@ static void create_visual() {
   gtk_container_remove(GTK_CONTAINER(top_window), topgrid);
   gtk_container_add(GTK_CONTAINER(top_window), fixed);
   //t_print("radio: vfo_init\n");
-  VFO_WIDTH = display_width - MENU_WIDTH - METER_WIDTH;
+
+  int my_height = full_screen ? screen_height : display_height;
+  int my_width  = full_screen ? screen_width  : display_width;
+
+  VFO_WIDTH = my_width - MENU_WIDTH - METER_WIDTH;
   vfo_panel = vfo_init(VFO_WIDTH, VFO_HEIGHT);
   gtk_fixed_put(GTK_FIXED(fixed), vfo_panel, 0, y);
   //t_print("radio: meter_init\n");
@@ -646,7 +677,8 @@ static void create_visual() {
   g_signal_connect (menu_b, "button-press-event", G_CALLBACK(menu_cb), NULL) ;
   gtk_fixed_put(GTK_FIXED(fixed), menu_b, VFO_WIDTH + METER_WIDTH, y);
   y += MENU_HEIGHT;
-  rx_height = display_height - VFO_HEIGHT;
+
+  rx_height = my_height - VFO_HEIGHT;
 
   if (display_zoompan) {
     rx_height -= ZOOMPAN_HEIGHT;
@@ -671,7 +703,7 @@ static void create_visual() {
       receiver_create_remote(receiver[i]);
     } else {
 #endif
-      receiver[i] = create_receiver(CHANNEL_RX0 + i, display_width, updates_per_second, display_width, rx_height / RECEIVERS);
+      receiver[i] = create_receiver(CHANNEL_RX0 + i, my_width, updates_per_second, my_width, rx_height / RECEIVERS);
       setSquelch(receiver[i]);
 #ifdef CLIENT_SERVER
     }
@@ -710,17 +742,9 @@ static void create_visual() {
     //t_print("Create transmitter\n");
     if (can_transmit) {
       if (duplex) {
-        transmitter = create_transmitter(CHANNEL_TX, updates_per_second, display_width / 4, display_height / 2);
+        transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width / 4, my_height / 2);
       } else {
-        int tx_height = display_height - VFO_HEIGHT;
-
-        if (display_zoompan) { tx_height -= ZOOMPAN_HEIGHT; }
-
-        if (display_sliders) { tx_height -= SLIDERS_HEIGHT; }
-
-        if (display_toolbar) { tx_height -= TOOLBAR_HEIGHT; }
-
-        transmitter = create_transmitter(CHANNEL_TX, updates_per_second, display_width, tx_height);
+        transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width, rx_height);
       }
 
       transmitter->x = 0;
@@ -731,9 +755,9 @@ static void create_visual() {
         double pk;
         tx_set_ps_sample_rate(transmitter, protocol == NEW_PROTOCOL ? 192000 : active_receiver->sample_rate);
         receiver[PS_TX_FEEDBACK] = create_pure_signal_receiver(PS_TX_FEEDBACK,
-                                   protocol == ORIGINAL_PROTOCOL ? active_receiver->sample_rate : 192000, display_width);
+                                   protocol == ORIGINAL_PROTOCOL ? active_receiver->sample_rate : 192000, my_width);
         receiver[PS_RX_FEEDBACK] = create_pure_signal_receiver(PS_RX_FEEDBACK,
-                                   protocol == ORIGINAL_PROTOCOL ? active_receiver->sample_rate : 192000, display_width);
+                                   protocol == ORIGINAL_PROTOCOL ? active_receiver->sample_rate : 192000, my_width);
 
         //
         // If the pk value is slightly too large, this does no harm, but
@@ -811,11 +835,11 @@ static void create_visual() {
 
     switch (protocol) {
     case ORIGINAL_PROTOCOL:
-      old_protocol_init(0, display_width, receiver[0]->sample_rate);
+      old_protocol_init(0, my_width, receiver[0]->sample_rate);
       break;
 
     case NEW_PROTOCOL:
-      new_protocol_init(display_width);
+      new_protocol_init(my_width);
       break;
 #ifdef SOAPYSDR
 
@@ -831,20 +855,20 @@ static void create_visual() {
 #endif
 
   if (display_zoompan) {
-    zoompan = zoompan_init(display_width, ZOOMPAN_HEIGHT);
+    zoompan = zoompan_init(my_width, ZOOMPAN_HEIGHT);
     gtk_fixed_put(GTK_FIXED(fixed), zoompan, 0, y);
     y += ZOOMPAN_HEIGHT;
   }
 
   if (display_sliders) {
     //t_print("create sliders\n");
-    sliders = sliders_init(display_width, SLIDERS_HEIGHT);
+    sliders = sliders_init(my_width, SLIDERS_HEIGHT);
     gtk_fixed_put(GTK_FIXED(fixed), sliders, 0, y);
     y += SLIDERS_HEIGHT;
   }
 
   if (display_toolbar) {
-    toolbar = toolbar_init(display_width, TOOLBAR_HEIGHT);
+    toolbar = toolbar_init(my_width, TOOLBAR_HEIGHT);
     gtk_fixed_put(GTK_FIXED(fixed), toolbar, 0, y);
   }
 
@@ -1430,7 +1454,6 @@ void start_radio() {
   radio_change_region(region);
   create_visual();
   reconfigure_screen();
-  g_timeout_add(1000, set_full_screen, NULL);
 
   // save every 30 seconds
   // save_timer_id=gdk_threads_add_timeout(30000, save_cb, NULL);
@@ -2359,10 +2382,6 @@ void radioRestoreState() {
   //
   if (display_width  > screen_width  ) { display_width  = screen_width; }
   if (display_height > screen_height ) { display_height = screen_height; }
-
-  if (full_screen) {
-    if (display_width != screen_width || display_height != screen_height) { full_screen = 0; }
-  }
 
 #ifdef CLIENT_SERVER
   GetPropI0("radio.hpsdr_server",                            hpsdr_server);

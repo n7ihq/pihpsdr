@@ -156,6 +156,7 @@ static void split_cb(GtkWidget *widget, gpointer data) {
 //
 void setDuplex() {
   if (duplex) {
+    // TX is in separate window, also in full-screen mode
     gtk_container_remove(GTK_CONTAINER(fixed), transmitter->panel);
     reconfigure_transmitter(transmitter, display_width / 4, display_height / 2);
     create_dialog(transmitter);
@@ -164,7 +165,8 @@ void setDuplex() {
     gtk_container_remove(GTK_CONTAINER(content), transmitter->panel);
     gtk_widget_destroy(transmitter->dialog);
     transmitter->dialog = NULL;
-    reconfigure_transmitter(transmitter, display_width, rx_height);
+    int width = full_screen ? screen_width : display_width;
+    reconfigure_transmitter(transmitter, width, rx_height);
   }
 
   g_idle_add(ext_vfo_update, NULL);
