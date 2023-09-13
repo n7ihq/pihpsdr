@@ -54,6 +54,8 @@ static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
 }
 
 void toolbar_menu(GtkWidget *parent) {
+  GtkWidget *widget;
+
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Toolbar configuration");
@@ -74,23 +76,19 @@ void toolbar_menu(GtkWidget *parent) {
   const int max_switches = 8;
 
   for (lfunction = 0; lfunction < MAX_FUNCTIONS; lfunction++) {
-    gchar text[64];
-    sprintf(text,"F%d", lfunction);
-    GtkWidget *widget=gtk_label_new(text);
-    gtk_widget_set_name(widget, "boldlabel");
-
-    gtk_grid_attach(GTK_GRID(grid), widget, 0, lfunction+1, 1, 1);
     SWITCH *sw = switches_controller1[lfunction];
 
     for (int i = 0; i < max_switches; i++) {
       if (i == max_switches - 1) {
         // Rightmost switch is hardwired to FUNCTION
         sw[i].switch_function = FUNCTION;
-        widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
-        gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, lfunction+1, 2, 1);
+	gchar text[16];
+	sprintf(text, "FNC(%d)", lfunction);
+        widget = gtk_button_new_with_label(text);
+        gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction+1, 1, 1);
       } else {
         widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
-        gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, lfunction+1, 2, 1);
+        gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction+1, 1, 1);
         g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), (gpointer) &sw[i]);
       }
     }
