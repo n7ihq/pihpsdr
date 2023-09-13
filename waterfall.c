@@ -41,8 +41,8 @@ static int colorHighB = 0;
 
 static double hz_per_pixel;
 
-static int display_width;
-static int display_height;
+static int my_width;
+static int my_heigt;
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean
@@ -50,11 +50,11 @@ waterfall_configure_event_cb (GtkWidget         *widget,
                               GdkEventConfigure *event,
                               gpointer           data) {
   RECEIVER *rx = (RECEIVER *)data;
-  display_width = gtk_widget_get_allocated_width (widget);
-  display_height = gtk_widget_get_allocated_height (widget);
-  rx->pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, display_width, display_height);
+  my_width = gtk_widget_get_allocated_width (widget);
+  my_heigt = gtk_widget_get_allocated_height (widget);
+  rx->pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, my_width, my_heigt);
   unsigned char *pixels = gdk_pixbuf_get_pixels (rx->pixbuf);
-  memset(pixels, 0, display_width * display_height * 3);
+  memset(pixels, 0, my_width * my_heigt * 3);
   return TRUE;
 }
 
@@ -120,7 +120,7 @@ void waterfall_update(RECEIVER *rx) {
     int width = gdk_pixbuf_get_width(rx->pixbuf);
     int height = gdk_pixbuf_get_height(rx->pixbuf);
     int rowstride = gdk_pixbuf_get_rowstride(rx->pixbuf);
-    hz_per_pixel = (double)rx->sample_rate / ((double)display_width * rx->zoom);
+    hz_per_pixel = (double)rx->sample_rate / ((double)my_width * rx->zoom);
 
     //
     // The existing waterfall corresponds to a VFO frequency rx->waterfall_frequency, a zoom value rx->waterfall_zoom and
@@ -142,11 +142,11 @@ void waterfall_update(RECEIVER *rx) {
         int rotpan  = rx->waterfall_pan - pan;                                        // shift due to pan   change
         int rotate_pixels = rotfreq + rotpan;
 
-        if (rotate_pixels >= display_width || rotate_pixels <= -display_width) {
+        if (rotate_pixels >= my_width || rotate_pixels <= -my_width) {
           //
           // If horizontal shift is too large, re-init waterfall
           //
-          memset(pixels, 0, display_width * display_height * 3);
+          memset(pixels, 0, my_width * my_heigt * 3);
           rx->waterfall_frequency = vfofreq;
           rx->waterfall_pan = pan;
         } else {
@@ -157,17 +157,17 @@ void waterfall_update(RECEIVER *rx) {
           //
           if (rotate_pixels < 0) {
             // shift left, and clear the right-most part
-            memmove(pixels, &pixels[-rotate_pixels * 3], ((display_width * display_height) + rotate_pixels) * 3);
+            memmove(pixels, &pixels[-rotate_pixels * 3], ((my_width * my_heigt) + rotate_pixels) * 3);
 
-            for (i = 0; i < display_height; i++) {
-              memset(&pixels[((i * display_width) + (width + rotate_pixels)) * 3], 0, -rotate_pixels * 3);
+            for (i = 0; i < my_heigt; i++) {
+              memset(&pixels[((i * my_width) + (width + rotate_pixels)) * 3], 0, -rotate_pixels * 3);
             }
           } else if (rotate_pixels > 0) {
             // shift right, and clear left-most part
-            memmove(&pixels[rotate_pixels * 3], pixels, ((display_width * display_height) - rotate_pixels) * 3);
+            memmove(&pixels[rotate_pixels * 3], pixels, ((my_width * my_heigt) - rotate_pixels) * 3);
 
-            for (i = 0; i < display_height; i++) {
-              memset(&pixels[(i * display_width) * 3], 0, rotate_pixels * 3);
+            for (i = 0; i < my_heigt; i++) {
+              memset(&pixels[(i * my_width) * 3], 0, rotate_pixels * 3);
             }
           }
 
@@ -184,7 +184,7 @@ void waterfall_update(RECEIVER *rx) {
       // waterfall frequency not (yet) set, sample rate changed, or zoom value changed:
       // (re-) init waterfall
       //
-      memset(pixels, 0, display_width * display_height * 3);
+      memset(pixels, 0, my_width * my_heigt * 3);
       rx->waterfall_frequency = vfofreq;
       rx->waterfall_pan = pan;
       rx->waterfall_zoom = zoom;
@@ -297,8 +297,8 @@ void waterfall_update(RECEIVER *rx) {
 }
 
 void waterfall_init(RECEIVER *rx, int width, int height) {
-  display_width = width;
-  display_height = height;
+  my_width = width;
+  my_heigt = height;
   rx->pixbuf = NULL;
   rx->waterfall_frequency = 0;
   rx->waterfall_sample_rate = 0;
