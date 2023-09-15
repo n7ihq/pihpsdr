@@ -36,7 +36,6 @@
 #include "dac.h"
 #include "audio.h"
 #include "discovered.h"
-//#include "discovery.h"
 #include "filter.h"
 #include "main.h"
 #include "mode.h"
@@ -398,27 +397,46 @@ static void choose_vfo_layout() {
   }
 }
 
-static guint sfs_timer = 0;
+static guint full_screen_timeout = 0;
 
 static int set_full_screen(gpointer data) {
+  int flag=GPOINTER_TO_INT(data);
   //
   // Put the top window in full-screen mode, if full_screen is set
   //
-  sfs_timer=0;
-  if (full_screen) {
+  full_screen_timeout=0;
+  if (flag) {
+    //
+    // Window-to-fullscreen-transition
+    //
     gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
+  } else {
+    //
+    // FullScreen to window transition
+    //
+    gtk_window_move(GTK_WINDOW(top_window),
+                    (screen_width - display_width) / 2,
+                    (screen_height - display_height) / 2);
   }
   return G_SOURCE_REMOVE;
 }
 
 void reconfigure_screen() {
+  static int last_fullscreen = -1;
+  int my_fullscreen = full_screen;  // this will not change during this procedure
+  if (last_fullscreen != my_fullscreen) {
+    if (full_screen_timeout > 0) {
+      g_source_remove(full_screen_timeout);
+      full_screen_timeout = 0;
+    }
+  }
   //
   // Re-configure the piHPSDR screen after dimensions have changed
   // Start with removing the toolbar, the slider area and the zoom/pan area
   // (these will be re-constructed in due course)
   //
-  int my_width  = full_screen ? screen_width  : display_width;
-  int my_height = full_screen ? screen_height : display_height;
+  int my_width  = my_fullscreen ? screen_width  : display_width;
+  int my_height = my_fullscreen ? screen_height : display_height;
   if (toolbar) {
     gtk_container_remove(GTK_CONTAINER(fixed), toolbar);
     toolbar = NULL;
@@ -441,8 +459,24 @@ void reconfigure_screen() {
   //
   // Change sizes of main window, Hide and Menu buttons, meter, and vfo
   //
-  if (!full_screen) {
+  if (last_fullscreen != my_fullscreen && !my_fullscreen) {
+    //
+    // A full-screen to window transition
+    //
     gtk_window_unfullscreen(GTK_WINDOW(top_window));
+    //
+    // For some reason, moving the window immediately does not work
+    // on MacOS, therefore do this after waiting a second
+    //
+    full_screen_timeout=g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(0));
+  }
+  if (last_fullscreen != full_screen && my_fullscreen) {
+    //
+    // A window-to-fullscreen transition
+    // here we move the window, the transition is then
+    // scheduled at the end of this function
+    //
+    gtk_window_move(GTK_WINDOW(top_window), 0, 0);
   }
   gtk_window_resize(GTK_WINDOW(top_window), my_width, my_height);
   gtk_widget_set_size_request(hide_b, MENU_WIDTH, MENU_HEIGHT);
@@ -467,14 +501,14 @@ void reconfigure_screen() {
   //
   reconfigure_radio();
   g_idle_add(ext_vfo_update, NULL);
-  //
-  // For some reason, the screen freezes if one goes immediately
-  // to full-screen mode. So set full-screen after a long timeout
-  //
-  if (sfs_timer > 0) {
-    g_source_remove(sfs_timer);
+  if (last_fullscreen != my_fullscreen && my_fullscreen) {
+    //
+    // For some reason, going to full-screen immediately does not
+    // work on MacOS, so do this after 1 second
+    //
+    full_screen_timeout=g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(1));
   }
-  sfs_timer=g_timeout_add(1000, set_full_screen, NULL);
+  last_fullscreen=my_fullscreen;
 }
 
 void reconfigure_radio() {

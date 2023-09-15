@@ -18,10 +18,7 @@ GPIO_INCLUDE=GPIO
 MIDI_INCLUDE=MIDI
 
 # uncomment the line below to include SATURN native xdma support
-#SATURN_INCLUDE=SATURN
-
-# uncomment the line below to include ANDROMEDA support
-#ANDROMEDA_OPTIONS=-D ANDROMEDA
+SATURN_INCLUDE=SATURN
 
 # uncomment the line below to include USB Ozy support (needs libusb)
 #USBOZY_INCLUDE=USBOZY
@@ -30,10 +27,10 @@ MIDI_INCLUDE=MIDI
 #SOAPYSDR_INCLUDE=SOAPYSDR
 
 # uncomment the line below to include support for STEMlab discovery (needs libcurl)
-#STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
+#STEMLAB_DISCOVERY=STEMLAB
 
-# uncomment to get ALSA audio module on Linux (default is now to use pulseaudio)
-#AUDIO_MODULE=ALSA
+# uncomment to get ALSA audio module on Linux (if not, use pulseaudio)
+AUDIO_MODULE=ALSA
 
 # un-comment if you link with an extended WDSP library containing new "external"
 # noise reduction capabilities ("rnnoise" and "libspecbleach")
@@ -41,10 +38,16 @@ MIDI_INCLUDE=MIDI
 # to be installed that contains calls to the "rnnoise" and "libspecbleach"
 # libraries. The new features are called "NR3" (rnnoise) and "NR4" (libspecbleach),
 # and the noise menu allows to speficy the NR4 parameters.
-#EXTENDED_NOISE_REDUCTION_OPTIONS= -DEXTNR
+#EXTENDED_NOISE_REDUCTION=EXTNR
 
 # very early code not included yet
 #SERVER_INCLUDE=SERVER
+
+###############################################################################
+#
+# NO COMPILE TIME OPTION MODIFICATIONS BELOW THIS LINE
+#
+###############################################################################
 
 CFLAGS?= -O3 -Wno-deprecated-declarations -Wall
 LINK?=   $(CC)
@@ -62,6 +65,15 @@ PKG_CONFIG = pkg-config
 # Settings for optional features, to be requested by un-commenting lines above
 #
 ##############################################################################
+
+#
+# disable GPIO and SATURN for MacOS, simply because it is not there
+#
+ifeq ($(UNAME_S), Darwin)
+GPIO_INCLUDE=
+SATURN_INCLUDE=
+endif
+
 #
 # Add modules for MIDI if requested.
 # Note these are different for Linux/MacOS
@@ -81,7 +93,7 @@ MIDI_LIBS= -lasound
 endif
 endif
 
- #
+#
 # Add libraries for Saturn support, if requested
 #
 ifeq ($(SATURN_INCLUDE),SATURN)
@@ -138,10 +150,10 @@ soapy_protocol.o
 endif
 
 #
-# disable GPIO for MacOS, simply because it is not there
+# Add support for extended noise reduction, if requested
 #
-ifeq ($(UNAME_S), Darwin)
-GPIO_INCLUDE=
+ifeq ($(EXTENDED_NOISE_REDUCTION), EXTNR)
+EXTNR_OPTIONS=-DEXTNR
 endif
 
 #
@@ -163,7 +175,7 @@ endif
 # If the RedPitaya auto-starts the SDR application upon system start,
 # this option is not needed!
 #
-ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
+ifeq ($(STEMLAB_DISCOVERY), STEMLAB)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
 STEMLAB_SOURCES=stemlab_discovery.c
@@ -267,7 +279,7 @@ OPTIONS=$(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
 	$(SATURN_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
-	$(AUDIO_OPTIONS) $(EXTENDED_NOISE_REDUCTION_OPTIONS)\
+	$(AUDIO_OPTIONS) $(EXTNR_OPTIONS)\
 	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' $(DEBUG_OPTION)
 
 INCLUDES=$(GTKINCLUDES)
@@ -576,41 +588,12 @@ clean:
 	-rm -f $(PROGRAM) hpsdrsim bootloader
 	-rm -rf $(PROGRAM).app
 
-#
-# If $DESTDIR is set, copy to that directory, otherwise use /usr/local/bin
-#
-DESTDIR?= /usr/local/bin
-
-.PHONY:	install
-install: $(PROGRAM)
-	cp $(PROGRAM) $(DESTDIR)
-
 .PHONY:	release
 release: $(PROGRAM)
 	cp $(PROGRAM) release/pihpsdr
+	cp /usr/local/lib/libwdsp.so release/pihpsdr
 	cd release; tar cvf pihpsdr.tar pihpsdr
 	cd release; tar cvf pihpsdr-$(GIT_VERSION).tar pihpsdr
-
-.PHONY:	nocontroller
-nocontroller: clean controller1 $(PROGRAM)
-	cp $(PROGRAM) release/pihpsdr
-	cd release; tar cvf pihpsdr-nocontroller.$(GIT_VERSION).tar pihpsdr
-
-.PHONY:	controller1
-controller1: clean $(PROGRAM)
-	cp $(PROGRAM) release/pihpsdr
-	cd release; tar cvf pihpsdr-controller1.$(GIT_VERSION).tar pihpsdr
-
-.PHONY:	controller2v1
-controller2v1: clean $(PROGRAM)
-	cp $(PROGRAM) release/pihpsdr
-	cd release; tar cvf pihpsdr-controller2-v1.$(GIT_VERSION).tar pihpsdr
-
-.PHONY:	controller2v2
-controller2v2: clean $(PROGRAM)
-	cp $(PROGRAM) release/pihpsdr
-	cd release; tar cvf pihpsdr-controller2-v2.$(GIT_VERSION).tar pihpsdr
-
 
 #############################################################################
 #
@@ -644,6 +627,10 @@ bootloader:	bootloader.c
 	$(CC) -o bootloader bootloader.c -lpcap
 
 debian:
+	mkdir -p pkg/pihpsdr/usr/local/bin
+	mkdir -p pkg/pihpsdr/usr/local/lib
+	mkdir -p pkg/pihpsdr/usr/share/pihpsdr
+	mkdir -p pkg/pihpsdr/usr/share/applications
 	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin
 	cp /usr/local/lib/libwdsp.so pkg/pihpsdr/usr/local/lib
 	cp release/pihpsdr/hpsdr.png pkg/pihpsdr/usr/share/pihpsdr

@@ -20,17 +20,8 @@ char build_date[] = GIT_DATE;
 char build_version[] = GIT_VERSION;
 
 char version[] =
-#ifdef STEMLAB_DISCOVERY
-  "STEMlab "
-#endif
-#ifdef USBOZY
-  "OZY(USB) "
-#endif
 #ifdef GPIO
   "GPIO "
-#endif
-#ifdef SOAPYSDR
-  "SOAPYSDR "
 #endif
 #ifdef MIDI
   "MIDI "
@@ -38,8 +29,20 @@ char version[] =
 #ifdef SATURN
   "SATURN "
 #endif
-#ifdef ANDROMEDA
-  "ANDROMEDA "
+#ifdef USBOZY
+  "USBOZY "
+#endif
+#ifdef SOAPYSDR
+  "SOAPYSDR "
+#endif
+#ifdef STEMLAB_DISCOVERY
+  "STEMLAB "
+#endif
+#ifdef ALSA
+  "ALSA "
+#endif
+#ifdef EXTNR
+ "EXTNR "
 #endif
 #ifdef CLIENT_SERVER
   "SERVER "

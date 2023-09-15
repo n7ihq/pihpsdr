@@ -211,11 +211,11 @@ void vfoRestoreState() {
     // Set defaults, using a simple heuristics to get a
     // band that actually works on the current hardware.
     //
-    if (radio->frequency_min >  400E6) {
+    if (radio->frequency_min <  430E6 && radio->frequency_max > 440E6) {
       vfo[i].band            = band430;
       vfo[i].bandstack       = 0;
       vfo[i].frequency       = 434010000;
-    } else if (radio->frequency_min > 100E6) {
+    } else if (radio->frequency_min < 144E6 && radio->frequency_max > 146E6 ) {
       vfo[i].band            = band144;
       vfo[i].bandstack       = 0;
       vfo[i].frequency       = 145000000;

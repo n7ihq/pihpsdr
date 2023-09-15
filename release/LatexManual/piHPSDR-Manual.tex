@@ -12,6 +12,7 @@
 \parskip 6pt
 \def\rett#1{\texttt{\color{red}#1}}
 \def\bltt#1{\texttt{\color{blue}#1}}
+\def\grtt#1{\texttt{\color{magenta}#1}}
 \begin{document}
 \frontmatter
 \title{
@@ -137,10 +138,9 @@ elsewhere.
 
 If the piHPSDR program is started for the first time, it opens a window that looks like Fig. \ref{fig:Planning}. 
 Besides stating a version number and when piHPSDR was built, a list of optional features (to be activated
-at compile time) is stated, in this case, GPIO, MIDI, SATURN, and ANDROMEDA. These options indicate
-that the program has GPIO support (this is only possible on Raspberry Pi or similar single board computers),
-that is has support for MIDI devices, that it can run natively on the compute module of the latest
-G2 (generation two) SDRs from Apache labs, and that is has support for Laurence Barker's ANDROMEDA controller.
+at compile time) is stated, in this case, GPIO, MIDI, SATURN. These are compile-time options that are detailed in Appendix
+\ref{sec:compiletime}.
+
 What is important here that you have to wait. This only applies to the very first time you start piHPSDR.
 On CPUs with a rather simple instruction set (like the ARM processor in the Raspberry Pi, or the Apple
 Silicon processor in recent Macintosh computers), this so-called  \textit{planning} step is quite fast. For example, on my
@@ -1086,10 +1086,12 @@ via the main menu and the \bltt{Screen} button and is shown in Fig. \ref{fig:Scr
 
 The window width and height can be chosen with the spin buttons shown. The minimum
 values for width and height are 800 and 480, the maximum values are determined by
-the resolution of the monitor. Changes made in the spin buttons become effective
-immediately. If piHPSDR is in full screen mode (see below), which implies that the
-width and height equal the screen dimensions, and you descrease either width or
-height, the piHPSDR window auomatically switches from full screen into window mode.
+the resolution of the monitor. If more than one monitor is attached, the dimension
+of the monitor on which the initial piHPSDR window was opened determines
+the maximum width and height. Changes made in the spin buttons become effective
+immediately. If piHPSDR is in full screen mode (see below), you can change the
+values of the window width and height, but they do not become effective until
+you leave the full screen mode.
 
 If the window width is decreased such that the VFO bar chosen does no longer fit,
 the first one in the list that does fit is automatically selected, and the
@@ -1117,16 +1119,12 @@ window width allows, the window with is automatically adjusted.
 of the two receivers (if two receivers are used) side-by-side instead of on top
 of each other.
 
-\rett{Full Screen Mode}. If you check this option, the window width and height is
-set to the screen width and height, and then the piHPSDR window is put into
-,,full screen mode''. This means that there is no piHPSDR window title bar and
-no OS menu bar, and the piHPSDR window area covers the whole screen. For small screens,
-this gives some extra space to the piHPSDR window, since the maximum window
-dimensions (such that the whole window can be displayed) are smaller than the screen
-size, typically, the height is about 30 pixels less, and the width about 10 pixels less
-than the screen size. If piHPDR is is full screen mode and you \textit{uncheck} this
-box, this gives you a pihpsdr window with the size of the screen, which is slightly
-too large to be displayed completely on the screen.
+\rett{Full Screen Mode}. If you check this option, piHPSDR goes to full screen mode.
+In this mode, the window width and height is ignore, instead, piHPSDR occupies
+the whole area of the screen. In a multi-monitor setup, the area of the monitor
+on which the piHPSDR window was opened upon program start is filled.
+If you leave full screen mode, the size of the piHPSDR window is again
+determined by the width and height chosen above.
 
 \section{The \texttt{Display} Menu}
 
@@ -1479,12 +1477,6 @@ the data. So if you have some often used frequencies (e.g. for a net), the
 
 The second column of tghe main menu contains menus which allow you to change 
 receiver settings.
-\begin{figure}[h]
-\center
-\includegraphics[width=12cm]{RXMenu.png}
-\caption{The \bltt{RX} menu.}
-\label{fig:RXMenu}
-\end{figure}
 
 \section{The \texttt{RX} Menu}
 
@@ -1510,6 +1502,45 @@ can be used for connecting a dedicated RX antenna.
 
 \textbf{Note: Diversity}. When using \bltt{Diversity} reception, the ADC setting is
 overridden, since there data streams from ADC0 and ADC1 are combined (mixed).
+
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{RXMenu.png}
+\caption{The \bltt{RX} menu.}
+\label{fig:RXMenu}
+\end{figure}
+
+\rett{Dither}. When checked, the ,,dither'' bit is set which affects the operation of
+the ADC converter in some HPSDR boards.
+
+\rett{Random}. When checked, the ,,random'' bit is set which affects the operation of
+the ADC converter in some HPSDR boards.
+
+\rett{Preamp}. This checkbox is not shown in Fig. \ref{fig:RXmenu}, it only occurs
+for some legacy HPSDR boards which had a switch-able RX preamp.
+
+\rett{Mute when not active}. If checked, the audio from this receiver is muted when
+it is not the active receiver.
+
+\rett{Mute audio}. If checked, the audio from this receiver is muted, no matter whether
+it is active or not.
+
+\rett{Local Audio Output:} If checked, the audio from this radio is sent to a local
+sound card (or virtual audio cable). The sound card itself is selected in the
+pop-down menu below this check box. One line below, one can select between 
+\texttt{STEREO}, \texttt{LEFT} and \texttt{RIGHT}, and select whether the RX
+audio should be sent to both channels or to the left or right one only. This way,
+one can use one sound device for the first receiver and select LEFT,
+and choose another sound device for the second
+receiver and choose RIGHT. If one then mixes these two audio streams (either by
+operating system facilities or in hardware), one gets the first receiver audio
+on the left ear and the second receiver audio on the right ear, which may help
+in split operation in DX chasing.
+ 
+In the example shown, checking the Local Audio box would send the RX audio
+samples to the HDMI monitor attached to the RaspPi, but one could equally
+well choose the headphone output or a virtual cable, if one wants to use
+digital modes.
 
 \section{The \texttt{Filter} menu}
 
@@ -1556,30 +1587,17 @@ is applied to the final audio output of the receiver, that is, on top of
 the regular filtering. The audio peak filter will only be effective in
 the CW modes, its center frequency is given by the CW side tone frequency
 and its width is automatically calculated, depending on the
-width of the primary filter. The main use of the audio peak filter is 
-\textit{not} fighting QRM, but to help tuning on a signal: suppose you use a CW
-side tone frequency of 800 Hz and a 500 Hz filter. Now you hear a CQ call, and
-if you do not have absolute hearing, it may happen that you tune such that the
-CQ call in your headphone sounds at 650 Hz, which means that you are 150 Hz off
-the frequency of your prospective QSO partner. If the other stations uses a very
-narrow CW filter, your signals may be be list un-heard since they are outside
-the pass-band of the other station. The reason why this easily happens is that
-the normal RX filters have a flat passband, that is, the signal you hear at 650 Hz
-is as strong as it would be for correct tuning. This is where the audio peak filter
-comes in: with the audio peak filter engaged, the received signal appears much louder
-when it is at 800 Hz (correct tuning) than if it were at 650 Hz. This implies that
-the width of the audio peak filter should be such that signals at the edges of the
-passband of your normal filter should still be audible. piHPSDR uses a width that
-equals one fourth of the width of the normal filter.
+width of the primary filter. The audio peak filter can be used to dig out
+the CW signal from the noise (making the regular filter narrower also
+does this job). The audio peak filter can also help to tune to the correct
+frequency: the regular filters have a flat pass band so the received
+signal equally loud as long as it is in the pass band. The audio peak filter
+has a marked peak at the side tone frequency so you can tune for maximum
+signal volume to adjust your frequency to the received signal.
 
 There is the function \bltt{CW Audio Peak Filter} that can be mapped on toolbar
 buttons or GPIO/MIDI buttons so you can quickly enable/disable the audio peak
-filter. In Fig. \ref{fig:FilterMenuCW} you see the sign \rett{CW-APF} (which is the
-short string for \bltt{CW Audio Peak Filter} on the second button from the left,
-and with this button you can quickly disable/enable the peak filter. I prefer
-to have the audio peak filter engaged when I answer to CQ calls, but to have it
-disabled when doing CQ calls myself.
-
+filter.
 
 \section{The \texttt{Noise} Menu}
 
@@ -1714,8 +1732,8 @@ into the TX panadapter (while transmitting). The menu is shown in Fig. \ref{fig:
 
 \rett{Local Microphone}. If this box is checked, the TX audio samples come from a soundcard
 attached to the host computer, or from a virtual audio cable. The sound device can be
-selected from the pop-down menu to the right. This menu is intentionally very broad since
-audio device names can be very long. This check box, and the pop-down menu, is absent if
+selected from the pop-down menu to the right. 
+ This check box, and the pop-down menu, is absent if
 there are no output sound devices available.
 
 \textbf{Note:} If the radio has the possiblity
@@ -1738,21 +1756,19 @@ settings for the new mode are automatically restored.
 
 \rett{FM PreEmp/ALC}. When transmitting FM, the audio input signals are ,,emphasized''.
 This means that from 300 to 3000 Hz (the usual range of audio frequencies in amateur
-radio FM), there is a 6 dB per octave (20 dB per decate) that leads to a 20 dB damping
-of an input signal at 300 Hz (and no damping ad 3000 Hz).
- This manipulation can be done before or after the TX ALC.
-If it is done \textit{after} the TX ALC, the transmitter cannot be over-driven but you also cannot
-drive the transmitter to full power with a low frequency signal. Many operators consider
-the resulting signal ,,too thin'' and prefer that the pre-emphasis is done \textit{before}
-TX ALC, together with a general overall amplification of the audio signal. These two
-possibilities can be selected with this check box. If checked, pre-emphasize takes place
-\textit{before} ALC. This makes the FM signal ,,thicker'' because the TX audio input
-is boosted by 15 dB when doing FM. If the checkbox is not checked, pre-emphasize takes
-place \textit{after} ALC, which makes the 15 dB audio boost ineffective because it is
-,,corrected'' by the ALC.  So if you want more ,,punch'' in FM, check this box, but
-be aware that strong high-frequency audio input signals may lead to TX over drive. With
-normal speech this is not likely to happen because a large part of its power is in the
-low-frequency region.
+radio FM), there is a 6 dB per octave (20 dB per decade) that leads to a 20 dB damping
+of an input signal at 300 Hz (8 dB damping at 1200 Hz, and no damping ad 3000 Hz).
+This of course distorts the audio, but the reverse process is built into FM demodulators
+to correct for this. Because there is a lot of damping of the audio signal, piHPDSR
+applies a 15 dB boost to the TX audio input samples when the mode is FMN.
+
+This boost is nearly ineffective if the FM pre-emphasis takes place \textit{after}
+the TX ALC stage, since the ALC will cancel most of the extra boost and the FM
+modulation sounds ,,thin''. If the \rett{FM PreEmp/ALC} box is checked, FM
+pre-emphasis takes place \textit{before} the TX ALC, such that the ALC ,,sees''
+the TX audio input after applying both the boost and the damping of the pre-emphasis. This gives the
+transmitted signal a little more ,,punch''. It is generally recommended to have this box checked
+if doing FM.
 
 \rett{Radio Mic:} This text, and the pop-down menu to its right, only occurs if a microphone can
 be connected to the radio. The pop-down menu lets you choose between \rett{Mic In} which means
@@ -1813,62 +1829,368 @@ since many digital modes (unlike SSB voice) are constantly transmitting at full 
 
 \section{The \texttt{PA} Menu}
 
-\begin{figure}
+In the \bltt{PA} menu, you can adjust the output level of your HPSDR board
+to the PA being used, and you can establish a calibration of the 
+power begin displayed in the meter section while transmitting.
+The menu presents itself as shown in Fig. \ref{fig:PAMenuCalibrate}.
+
+\begin{figure}[h]
 \center
 \includegraphics[width=12cm]{PAMenuCalibrate.png}
 \caption{The PA menu, PA calibration screen}
 \label{fig:PAMenuCalibrate}
 \end{figure}
 
-\begin{center}
+In the first line, you can choose the maximum PA power of your
+radio. The available values are 1, 5, 10, 30, 50, 100, 200, and
+500 Watt. If your radio has a different maximum power, choose the
+next largest value. The choice of this value only affects the
+watt meter calibration (see below). If the  box
+\rett{Transmit out of band} is checked, this allows piHPSDR
+to go TX if you are outside of the amateur radio bands.
+
+
+
+\textbf{PA calibration.} If the \rett{Calibrate} sub-menu is active
+(as shown in Fig. \ref{fig:PAMenuCalibrate}) you can adjust your
+HPSDR board to your PA. This has to be done for each band separately,
+and you need a dummy load and a watt meter to do so. Most watt meters
+used by radio amateurs are not highly accurate, so if you can borrow
+an accurate one, do so. The PA calibration values are the fictious
+amplification of the PA. If the value is \textit{increased}, 
+piHPSDR assumes a higher amplification and will thus \textit{decrease}
+the output power of the HPSDR board. Thus, \textit{increasing} the
+PA calibration value will \textit{decrease} the output power. A calibration
+value of 38.8 dB corresponds to the maximum RF output of the HPSDR board,
+so the allowed range of values starts at 38.8.
+
+To start calibration, go to the \bltt{TX} menu and check the
+box \rett{Tune use Drive}. Then, hit the rightmost toolbar button
+until one of these buttons reads \bltt{TUNE}. This way, when
+TUNEing, you send a carrier with the power according to the drive
+slider. For each band, go to the middle of the band, open the PA
+menu, put the drive (\rett{TX Drv}) slider at 50 and hit the TUNE button. If the
+output (measured with the Watt meter) is higher than half
+ of your nominal PA power, increase the
+PA calibration value of that band, otherwise decrease it. Choose
+a value such that your Watt meter reads half the nominal output
+power. For fine adjusting, move the drive slider to 100 and
+adjust the PA calibration value until your Watt meter shows the
+nominal output  power. The calibration values will  (slightly)
+differ from band to band, often one needs smaller values for the
+higher bands since the amplification of the PA is smaller there.
+
+\textbf{Watt meter calibration.} When PA calibration is complete,
+you can calibrate the power reading within the meter section of
+the piHPSDR window. If you open the \bltt{PA} menu and click
+on the text \rett{Watt Meter Calibrate}, the menu changes
+and looks like in Fig. \ref{fig:PAMenuWatt}.
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{PAMenuWatt.png}
-\end{center}
+\caption{The PA menu, Watt meter calibration}
+\label{fig:PAMenuWatt}
+\end{figure}
+
+You have 10 Watt values from $\frac{1}{10}$ to the full nominal power. Initially,
+the values of the spin buttons beside the Watt ratings have the nominal value.
+The calibration values can always be re-set to these nominal values by hitting
+the \rett{Reset} button. Watt meter calibration is not done seperately for all
+bands, so it is suggested to perform the following procedure on the 20m band.
+piHPSDR will convert the ,,measured'' into the ,,reported'' value by linear
+interpolation between two adjacent calibration values.
+
+Start with resetting the value by hitting the \rett{Reset} button. Then, move the
+drive slider to 100 (the unit of the drive slider is per cent, not Watt!) and hit
+TUNE. After the PA calibration described above, your (external) Watt meter should
+show the nominal PA output power (e.g. 100 Watt for an ANAN-7000). Now look at the
+forward power reported in the meter section (top right of the piHPSDR window).
+Suppose you read "250 W" there although your output is 200 Watt. Then simply
+insert the number 250 in the spin button to the right of the string
+\rett{200W}. Now your watt meter reading should be close to 200W, you can fine-tune
+it with the spin button. Note that \textit{increasing} the calibration value
+with the spin button will \textit{decrease} the power indicated in the meter section.
+
+You will observe that the calibration values for the lower powers also have changed.
+This only happens if you start from nominal calibration values and change the
+calibration value of the highest power. For example, if you have entered 250 in
+the 200W spin button, then the value in the 100W spin button will read 125. So in a
+single shot, you have roughly calibrated the Watt meter.
+
+A finer calibration only makes sense if you have a highly accurate Watt meter. If you do,
+you can now move the drive slider until your Watt meter exactly reads one of the
+lower power values, and use the corresponding spin button to change the calibration
+until piHPSDR exactly reports the correct power.
+
+The procedures is the virtually the same if our nominal output power is different.
+The only complication arises if your radio has a nominal power that is not in the menu,
+for example 150 Watt.
+
+In this case, choose 200W in the top line of the PA menu. TUNE and move the drive
+slider until your Watt meter reads the largest value possible that occurs
+in the Watt meter calibration menu (in this example, it is 140W). Adjust the
+140W spin button until piHPSDR reports 140 Watt. Then go to full power
+(150W) and adjust the 200W spin button until piHPSDR reports 150 Watt.
+Then, proceed with 120, 100, 80, etc. Watts.
 
 \section{The \texttt{VOX} Menu}
-\begin{center}
+
+VOX (voice control) means that you can just speak into the microphone and the
+radio goes TX, without the need to press a PTT button. VOX can also be used
+in digital modes, if there is no possiblity that the digimode program can
+put piHPSDR into TX mode via CAT commands or hardware lines. The VOX menu
+is shown in Fig. \ref{fig:VOXMenu}.
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{VOXMenu.png}
-\end{center}
+\caption{The VOX menu}
+\label{fig:VOXMenu}
+\end{figure}
+
+With the \rett{VOX Enable} check box, you can enable/disable VOX. For VOX operation,
+there are two parameters, namely the VOX threshold and the VOX hang time. The VOX threshold
+is the microphone amplitude required to trigger a RX/TX transition. If the radio goes TX
+when the neighbour's hound starts barking, then the VOX threshold is too small. If the radio
+does not go TX  although you speak loudly into the microphone, the threshold is too large.
+The VOX menu features an indicator which can be green or red (in Fig. \ref{fig:VOXMenu}, this
+is the green bar). This indicator flashes red if the microphone amplitude is above the VOX
+threshold. Adjust the threshold with the slider such that the indicator becomes red if  you
+speak into the microphone, but stays green if you don't speak.
+
+The VOX hang time determines how long the radio stays in TX mode after the last time the
+microphone delivered a signal that was above the VOX threshold. Typical values are 250 to
+500 milli seconds. If your radio produces relay chatter because it goes RX between your words,
+increase the hang time. However, this will also increase the turn-around between you finished
+your message and go RX.
+
+VOX is very nice for rag-chew phone QSOs, I won't recommend it for contest operation.
 
 \section{The \texttt{PS} (PureSignal) Menu}
-\begin{center}
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{PSMenu.png}
-\end{center}
-\begin{center}
+\caption{The PureSignal (PS) menu}
+\label{fig:PSMenu}
+\end{figure}
+
+PureSignal is the ,,street name'' for adaptive pre-distortion. What this means is, that
+the signal from the \textit{output} of the PA (the ,,antenna signal'') is coupled
+back (through an attenuator of typically 40-60 dB) to the radio and is analyzed 
+whether is looks like it should. If it is distorted (e.g. by non-linearities of the PA),
+then the PureSignal algorithm calculates how an input signal to the PA should look like
+to produce the desired output. This is usually measured and calibrated with a so-called
+two-tone experiment. In this experiment, two constant carriers, for example 7100 kHz
+and 7101 kHz, are transmitted. If both carriers contain 25W power, this is
+a 100W PEP signal. Non-linearities of the PA first lead to the occurence of harmonics
+(in this case around 14.2, 21.3, and 28.4 MHz). This is not a problem because
+such harmonics are  damped by the TX low-pass filters. Higher-order non-linear effects,
+however, lead to additional in-band signals, in our example they occur at
+7102/7099, 7103/7098 etc. kHz. The low-pass filters cannot eliminiate these signals,
+they lead to unwanted signals (,,splatter'') that disturb QSOs on neighbouring
+frequencies. With PureSignal, you can greatly reduce these un-wanted signals.
+If you open the \bltt{PS} menu for the first time it looks like shown in Fig.
+\ref{fig:PSMenu}.
+
+
+
+The elements have the following function:
+
+\rett{Enable PS} With this check box, PS can be enabled/disabled.
+
+\rett{Two Tone} With this button, a two-tone experiment can be started/stopped. The button
+will be highlighted as long as the two-tone signal is transmitted.
+
+\rett{Auto Attenuate} This enables/disables automatic adjustment of the RF input
+attenuator to give the feedback level the correct strength. It is highly recommened
+to use this option.
+
+\rett{OFF} With this button, the PS correction can be stopped (the \rett{status} will
+then change to RESET).
+
+\rett{Restart} With this button, the PS correction can be resumed, for example after
+it has been stopped.
+
+\rett{MON} With this button, it can be chosen whether the TX spectrum scope shows
+the signal sent to the PA (MON button not highlighted) or whether the feedback signal
+from the antenna is shown (MON button highlighted).
+
+\rett{PS Feedback ANT} Here it must be specified which antenna jack is used for the
+PS feedback signal. It can be \rett{Internal} which means internal feedback
+(for example as built into the Anan-7000 or  simply the cross-talk from the
+TX/RX relay), or it can be \rett{Ext1} or \rett{ByPass} which refers to the
+auxiliary antenna jacks. 
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{PSnomon.png}
-\end{center}
-\begin{center}
+\caption{PS: TwoTone without MON}
+\label{fig:PSnomon}
+\end{figure}
+
+\rett{Feedback Lvl} When doing a PS calibration through a two-tone experiment, this string
+turns red if the feedback level is good. It turns yellow if the feedback level is slightly
+to weak and read if it is too weak. A blue colour indicates a too string feedback level.
+The feedback level reported by the PS calibration algorithm is further reported in the
+,,feedbk'' field. The optimum value is about 154.
+
+\rett{Correcting} When doing a PS calibration through a two-tone experiment, this string
+is green if calibration was successful and PS correction takes place, and the string is
+red if no good calibration could be made.
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{PSmon.png}
-\end{center}
-\begin{center}
+\caption{PS: TwoTone with MON}
+\label{fig:PSmon}
+\end{figure}
+
+\rett{TX ATT} If \rett{Auto Attenuate} is not enabled, this is a spin button with which
+you can manually adjust the RF attenuation. For normal HPSDR radios, this is a value
+between 0 and 31, other radios such as the HermesLite have an extended range from
+-29 to 31. If the feedback level is too strong, this value must be increased, if it
+is too strong, it must be decreased. It is, however, recommended to enable \rett{Auto Attenuate}.
+In this case, the \rett{TX ATT} just shows the current attenuation.
+
+\rett{SetPk} This field shows the currently assumed value of the peak value of the TX DAC
+feedback signal. piHPSDR chooses is automatically. It should match the value reported
+by the calibration algorithm in the GetPk field. The  value
+chosen by piHPSDR can be incorrect if you use a highly experimental firmware on your
+HPSDR board with modified TX DAC filters, but this should normally not happen.
+
+To demonstrate what happens, I show an example. Checking both \rett{Enable PS} and
+\rett{Auto Attenuation}, and hitting the \rett{Two Tone} button, it need few
+seconds to stabilize and then Fig. \ref{fig:PSnomon} resulted, where the TX
+spectrum scope and the PS menu window have been arranged such that they do
+not cover each other. Although both the PS menu and the spectrum scope state
+that PS is working and correcting, the signal does not look as a good two-tone
+signal which would only have two peaks! The reason is, that the TX spectrum scope
+normally shows the signal that is sent to the PA, so we see a distorted signal.
+However this distortion is magically exactly such that the PA makes a nice signal
+out of this. If one wants to see what one is actually transmitting, one must
+push the \rett{MON} button such that it is highlighted. Then one sees that
+the feedback signal that shows what is going on at the antenna (Fig. \ref{fig:PSmon}):
+
+\begin{figure}
+\center
 \includegraphics[width=12cm]{PSoff.png}
-\end{center}
+\caption{PS: after hitting OFF}
+\label{fig:PSoff}
+\end{figure}
+
+Here one sees that the antenna emits a clean two-tone signal (no satellites can be seen,
+the IM3 value is better than 50 dBc). To demonstrate how effective the PS algorithm is,
+I have pushed the \rett{OFF} button which stops the PureSignal calibration, the result
+is shown in Fig. \ref{fig:PSoff}. Here we see two satellites with an IM3 value of
+about 30 dBc, which reflects the non-linearity of the PA.
 
 \section{The \texttt{CW} Menu}
-\begin{center}
+The CW menu controls parameters related to CW operation. The menu
+is shown in Fig. \ref{fig:CWMenu}.
+
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{CWMenu.png}
-\end{center}
+\caption{The CW menu}
+\label{fig:CWMenu}
+\end{figure}
+
+Many radios have a connection for a paddle or at least for
+a straight key, and contain firmware to do CW. CW handling by
+the radio firmware is enabled by the \rett{CW handled in Radio}
+check box. If unchecked, CW (that is, generating and forming
+the RF pulses) is done by piHPSDR, which implies that
+a Morse paddle, straight key or an external keyer is connected
+to the host compute (see Appendix \ref{sec:ConnectCW}). 
+
+\rett{CW Speed}. Here the speed (in wpm) can be chosen. If CW is
+handled in the Radio, the value is simply sent to the radio firmware,
+which implements the (iambic) keyer. If CW is done within piHPSDR,
+this value is used by piHPSDR's built-in iambic keyer. If using
+a straight key, or an external keyer whose output is then treated
+like a straight key, the speed has no meaning.
+
+In either case, this speed is operative when sending CW text via
+CAT commands (KY comand), and it can also be changed by CAT
+(KS command).
+
+\rett{CW Break-In} This implements some sort of ,,CW-VOX''. In
+break-in mode, the radio is automatically switched to TX when
+a key or paddle is pressed. The delay, to be set by the spin
+button to the right, is the time the radio goes RX after the
+last Morse key closure.
+
+\rett{Sidetone Level}. This is the level of the side tone, 
+either generated by the radio (if CW is handled there and the radio
+has an audio codec) or
+by piHPSDR (if CW is not handled in the radio). The allowed range
+is 0-255 (P1) or 0-127 (P1 or SoapySDR).
+
+\rett{Sidetone Freq}. This is the frequency of the side tone and the
+,,BFO offset''. That is, if a CW signal is received exactly at the
+frequency one transmits on, the CW audio signal has this pitch.
+
+\rett{Weight:} If using a iambic keyer (either in the radio or
+the builtin keyer), this value (0-100) determines the dash/dot ratio.
+The normal value is 50, which means that a dash is three times longer
+than a dot. The dash length is proportional to this value, so it can
+be from zero to six times the dot length.
+
+\rett{Paddle Mode:} Here the choice is Iambic Mode A, Iambic Mode B,
+and  Straight Key. In Straight Key mode, the key has to be connected
+to the dash paddle, since the built-in keyer implements a bug mode
+there (automatic dots from the dot paddle, straight key behaviour
+for the dash paddle). When using an external keyer, use StraightKey
+mode and connect the keyer output to the dash paddle input.
+
+\rett{Keys reversed} When checking this box, the dot and dash contacts
+are reversed.
+
+\rett{Enforce letter spacing} This option forces you to give ,,cleaner'' CW
+when in iambic mode. If at the end of an inter-element pause no key is
+pressed, then there is a forced pause of two times a dot length. While this
+prevents you from sending too short spaces between two letters, this
+might also corrupt a letter you want to send. For example, when sending
+the letter "X" and the dot paddle is pressed a little too late, you 
+instead send "TU". This option might be good for practising, but
+I personally never use it.
+
 
 \chapter{The Main Menu: menus for RX and TX}
 
 \section{The \texttt{FFT} (Signal Processing) Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{FFTMenu.png}
-\end{center}
+\caption{The FFT menu.}
+\label{fig:FFTMenu}
+\end{figure}
 
 \section{The \texttt{Equalizer} Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{EqualizerMenu.png}
-\end{center}
+\caption{The Equalizer menu}
+\label{fig:EqualizerMenu}
+\end{figure}
 
 \section{The \texttt{Ant} (Antenna) Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{AntMenu.png}
-\end{center}
+\caption{The ANT (antenna) menu.}
+\label{fig:AntMenu}
+\end{figure}
  
 \section{The \texttt{OC} (OpenCollector) Menu}
-\begin{center}
+\begin{figure}[h]
+\center
 \includegraphics[width=12cm]{OCMenu.png}
-\end{center}
+\caption{The OC (open collector) menu.}
+\label{fig:OCMenu}
+\end{figure}
 
 \chapter{The Main Menu: controlling piHPSDR}
 
@@ -1893,26 +2215,26 @@ configured via the Toolbar menu.
 \section{The \texttt{Toolbar} Menu}
 We start with the "Toolbar" menu, that can be found at the top of the rightmost
 column in the main menu. The toolbar consists of eight buttons that can be assigned
-to a set of eight functions. There are six such sets, and pressing the FUNC button
-cycles through these six sets. If you click the Toolbar button, a menu pops up as
-shown in Fig. \ref{fig:ToolbarMenu1}.
+to a set of eight functions. There are six such sets, and pressing the rightmost button
+of the toolbar cycles through these six sets. The text on the rightmost toolbar button, \rett{FNC(0)}, indicates which
+layer is currently active. 
 
-The six lines denoted \rett{F0} through \rett{F5} indicate the six different layers. 
-The text on the rightmost toolbar button, \rett{FNC(0)}, indicates that the set
-0 is the one that is currently active,
-and the labels in the \rett{F0} line exactly match the labels in the toolbar. In this menu, the
-possible actions (that can be bound to a button) are written with the short text (see Appendix A),
-since this is the text that is printed on the toolbar buttons. If one now clicks (just an example)
-the \texttt{CTUN} button in the line \rett{F1}, an ,,action dialog'' pops up that looks as follows:
-
-\begin{figure}[h]
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu2.png}
 \caption{Toolbar menu. Changing second button in \texttt{F1} layer.}
 \label{fig:ToolbarMenu2}
 \end{figure}
 
-\begin{figure}[h]
+If the \bltt{Toolbar} menu is opened, is looks like Fig. \ref{fig:ToolbarMenu1}.
+The rows correspond to the six different layers, and the rightmost button in each
+row indicates to which layer this row belongs.
+ If one now clicks (just an example)
+the \texttt{CTUN} button (third button in the second row) an ,,action dialog'' pops up that looks as 
+in Fig. \ref{fig:ToolbarMenu2}.
+
+
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu3.png}
 \caption{Just selected \texttt{Band20}.}
@@ -1922,26 +2244,26 @@ the \texttt{CTUN} button in the line \rett{F1}, an ,,action dialog'' pops up tha
 The current action selected (\texttt{CTUN}) is high-lighted. Lists of possible actions can be rather long,
 so it might be necessary that you have to scroll up or down in such an action dialog until you have
 found what you were looking for. Now (again just an example) the button \texttt{Band 20} has been clicked
-in the action dialog, such that it gets high-lighted:
+in the action dialog, such that it gets high-lighted (Fig. \ref{fig:ToolbarMenu3}).
 
-
-
-If one now closes the action dialog by clicking the \texttt{OK} button, the third button in the \texttt{F1}
+If one now closes the action dialog by clicking the \texttt{OK} button, the action select menu
+closes and on sees that in the toolbar menu now reappearing (Fig. \ref{fig:ToolbarMenu4}), the third button in the second
 line of the toolbar menu has changed, it now gives the short text (\texttt{20}) of the action, which will
 switch the active receiver to the 20m band (see the explanation of all the actions in Appendix A).
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu4.png}
 \caption{Toolbar assignment accomplished.}
-\label{ref:fig:ToolbarMenu4}
+\label{fig:ToolbarMenu4}
 \end{figure}
-You also see that the toolbar has not changed, because we have just changed the \texttt{F1} set,
-while currently the \texttt{F0} set is active. If one now, however, clicks the rightmost
-toolbar button with the text \texttt{FNC(0)} one advances to the \texttt{F1} set and the toolbar labels
-are updated: 
 
-\begin{figure}[h]
+You also see that the toolbar itself has not changed, because we have just changed the \texttt{FNC(1)} set,
+while currently the \texttt{FNC(0)} set is active. If one now, however, clicks the rightmost
+toolbar button with the text \texttt{FNC(0)} one advances to the next set and the toolbar labels
+are updated (Fig. \ref{fig:ToolbarMenu5}).
+
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu5.png}
 \caption{The new \texttt{F1} layer is operative.}
@@ -1964,38 +2286,59 @@ function, one no longer cycle through the sets.
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{RigCtlMenu.png}
+\caption{The RigCtl (Rig Control) menu.}
+\label{fig:RigCtlMenu}
 \end{figure}
 
 \section{The \texttt{MIDI} Menu}
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MIDImenu1.png}
+\caption{The (virgin) MIDI menu.}
+\label{fig:MIDImenu1}
 \end{figure}
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MIDImenu2.png}
+\caption{The MIDI menu, VFO wheel turned.}
+\label{fig:MIDImenu2}
 \end{figure}
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MIDImenu3.png}
+\caption{The MIDI menu, selecting VFO action}
+\label{fig:MIDImenu3}
 \end{figure}
  
+ \begin{figure}[h]
+\center
+\includegraphics[width=12cm]{MIDImenu4.png}
+\caption{The MIDI menu, VFO action selected}
+\label{fig:MIDImenu4}
+\end{figure}
+
 \section{The \texttt{Encoders} Menu}
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EncoderMenuG2.png}
+\caption{The Encoder menu for the G2 frontpanel controller}
+\label{fig:EncoderMenuG2}
 \end{figure}
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EncoderMenuV2.png}
+\caption{The Encoder menu for the V2 controller}
+\label{fig:EncoderMenuV2}
 \end{figure}
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EncoderMenuV1.png}
+\caption{The Encoder menu for the V1 controller}
+\label{fig:EncoderMenuV1}
 \end{figure}
 
 
@@ -2003,11 +2346,15 @@ function, one no longer cycle through the sets.
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{SwitchMenuG2.png}
+\caption{The Switches menu for the G2 frontpanel controller.}
+\label{fig:SwitchMenuG2}
 \end{figure}
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{SwitchMenuV2.png}
+\caption{The Switches menu for the V2 controller.}
+\label{fig:SwitchMenuV2}
 \end{figure}
 
 \appendix
@@ -2595,103 +2942,467 @@ contains information on the ANDROMEDA version. Furthermore, if "Andromeda" is se
 changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, CTUN mode, RIT and XIT status, and LOCK status),
 such that the ANDROMEDA controller can update the corresponding LEDs.
 
-\chapter{How to connect a Morse key/paddle}
+\chapter{How to connect a Morse key or paddle}
+\label{sec:ConnectCW}
 
 \chapter{Running piHPSDR alongside with DigiMode programs}
 
-\chapter[RaspPi: configure GPIO]{RaspPi: Preparations for using GPIO controllers}
-\label{sec:GPIOconfig}
-If you do not run piHPSDR on a Raspberry Pi, or if you do not use a GPIO controller connected
-to the Raspberry Pi GPIO I/O lines, there is no reason to read this chapter.
-There are only two aspects that need be covered here.
+\chapter{Compile-time options}
+\label{sec:compiletime}
 
-\textbf{Setting the direction of the GPIO I/O lines}. The first one is the switching of the
-direction (input or output) of the I/O lines, which has changed when the RaspPi3 was 
-replaced by the RaspPi4. So for some time, it was necessary to put all the GPIO lines
-used by piHPSDR ,,manually'' into an INPUT state (with pull-ups) when booting the RaspPi.
-The necessity to do so should fade out very quickly now, but just in case, the procedure
-is decribed here. Setting the GPIO lines used by piHPSDR ($4-27$) to input state with
-pull-up can simply be done by adding a line
+There is a number of compile-time options that are shown on the initial screen. If you are using a binary version, 
+you have what you have. If you compile from the sources, you can choose which options you want (or want not).
+It is possible to change the options without actually changing one of the files in the piHPSDR repository.
+Simply go (in a terminal window) to the directory where you compile piHPSDR and type in
 
-\texttt{gpio=4-27=ip,pu}
+\grtt{cp Makefile GNUmakefile}
 
-at the end of the file \texttt{/boot/config.txt} (this requires administrator privileges).
-For the ease of the user, a shell script with name \texttt{release/gpio.sh} has been provided
-which exactly does this.
-So it should be enough (this manual assumes that the pihpsdr directory is at top level
-within the users's home directory) to open a terminal window and issue the commmands
+This ,,trick'' takes care the further compilations use the file \texttt{GNUmakefile} rather than \texttt{Makefile},
+and changing the compile time options is accomplished by changing the file \texttt{GNUmakefile} with a text editor.
+In the \texttt{GNUmakefile} in the first 50 lines, you will find a lot of assignments of the form
 
-\texttt{cd \$HOME/pihpsdr} \\
-\texttt{release/gpio.sh}
+\texttt{\#AAAAAA=BBBBB}\\
+\texttt{XXXXXX=YYYYY}
 
-and this will update your \texttt{/boot/config.txt} file. Note that the command \texttt{sudo}
-is used to actually perform the tasks that need administrator privileges, so make sure that
-you can use this command from your user account. Depending on the installation, you might
-be asked an administrator password when executing the shell script.
+together with some comments what they are good for. The first form, with a number sign in the first column, 
+means that option BBBBB is not active, the second form, without a number sign, means that option YYYYY
+\textit{is} active. Here we give a list of available options:
 
-\textbf{Activating the I2C interface.} This is only necessary if you use a ,,version 2''
-or a G2 front-panel controller. These controllers extend the number of available input
-lines (and thus, the number of switches piHPSDR can control) by an i2c device, so 
-i2c must be enabled. This can be done via the ,,Raspberry'' $\to$ ,,Preferences'' $\to$ ,,RaspberryPi Configuration'' menu. In the ,,Interfaces'' tab, make sure that I2C is enabled.
+\rett{GPIO}. This option is needed on a RaspberryPi if you want to use GPIO input/output lines from
+within piHPSDR, for example since you have a controller (Controller1, Controller2, of G2 frontpanel)
+attached or want to use GPIO lines for CW or PTT. \textbf{It is important to deactivate this option
+if you compile for a Desktop PC running LINUX!}. This is so because Desktop PCs/Laptops do not
+have GPIO lines. For MacOS, this option is automatically disabled.
+
+\rett{MIDI}. This option activates the possiblity to control piHPSDR via MIDI devices. It should normally be
+activated, unless you port piHPSDR to some other operating system without MIDI support.
+
+\rett{SATURN}. This option is for piHPSDR running on the CM4 module within a SATURN/G2 radio. It allows
+piHPSDR to directly communicate with the FPGA via XDMA. While it does no harm to have this option activated
+on other systems, it also has no function there.
+
+\rett{USBOZY}. This option includes support for legacy HPSDR hardware connected via USB.
+
+\rett{SOAPYSDR}. This option enables piHPSDR to communicate with radios through the SoapySDR library.
+
+\rett{STEMLAB}. This is an option for RedPitaya based radios. These have an SDR app that must be
+started before one can connect. If you have a RedPitaya exclusively being used as a radio, this
+app is most likely auto-started when powering up the RedPitaya so you do not need the STEMLAB
+option. This option allows to start the SDR application on the RedPitaya through the web interface.
+If you have a RedPitay and no autostart of the SDR application there, and not compiled piHPSDR
+with the STEMLAB option, you can open a web browser, start the SDR application on the RedPitaya,
+and then start piHPSDR. With the STEMLAB option, this can all be done by piHPSDR.
+
+\rett{ALSA}. This option is only effective for LINUX systems including the Raspberry Pi. If this
+option is active, local audio output is done via the standard LINUX ALSA library, otherwise
+pulseaudio is used. On MacOS, this option has no effect since the portaudio library is used
+in any case.
+
+\rett{EXTNR}. There is a special version of the WDSP library that contains additional noise
+reduction facilities \texttt{rnnnoise} and \texttt{libspecbleach}, see \\
+ \texttt{github.com/vu3rdd/wdsp}. If you have such a version of WDSP installed, these 
+ extended noise reduction facilities can be used with piHPSDR if the EXTNR option is active.
+ 
+ \rett{SERVER}. This is not yet completed but is mentioned here anyway. There are plans to have
+ a client/server model in piHPSDR such that you can have a ,,distant'' radio with a computer
+ running piHPDSR connected to that radio, and a ,,local'' computer running piHPSDR, and an
+ internet connection between the two computers. All the time-critical data exchange happens
+ between the ,,distant'' radio and the ,,distant'' computer using a straight internet
+ cable connection, while the user interface data is exchanged between the two copies of
+ piHPSDR running on the two computers.
+
+
+
+\chapter[RaspPi: Activating I2C]{RaspPi: Activating the I2C interface}
+\label{sec:i2c}
+
+\begin{figure}[h]
+\center
+\includegraphics[width=9cm]{piEnableI2C.png}
+\caption{Enabling the I2C controller.}
+\label{fig:piEnableI2C}
+\end{figure}
+
+If you want to use the Controller2 or the G2 controller, the Raspberry Pi I2C interface
+must be enabled. This is done by opening \texttt{Menu}$\to$\texttt{Preferences}$\to$
+\texttt{Raspberry Pi Configuration} and moving to the \texttt{Interfaces} tab
+(shown in Fig. \ref{fig:piEnableI2C}. In the I2C line, move the button to the right
+(marked by the red arrows) and restart the computer. 
+Do not change the buttons in the other lines, the need not be as shown here.
+
+
+
 
 \chapter[RaspPi: binary piHPDSR installation]{Binary installation of piHPSDR (RaspPi only)}
+\label{sec:installbinary}
 
-\textbf{Note: binary installation is not recommended, you should rather try to
-compile from the sources.} A binary installation can only work if the operating system used
-to produce the binaries is more or less the same as the one where the binaries will be run.
-OS upgrades, a switch from a 32-bit to a 64-bit OS, and other changes can have the consequence
-that the binaries will not run on your system. This problem can be completely avoided if
-you compile and link piHPSDR from the sources on your system, and it is then also recommended
-to repeat this each time you do a major OS upgrade. For the same reason, \textbf{only binaries
-for the RaspberryPi} are provided, they have been produces on a RaspberryPi using the latest
-RaspberryPi OS. Note there exists a very detailed document on setting up a RaspPi and
-compiling piHPSDR from the sources, and several absolute Linux beginners have successfully
-followed these instructions. Another advantage when compiling from the sources is, that
-you always get the most recent version of piHPSDR. The binaries are only occasionally updated.
+\textit{This procedure has been tested on a Pi 4B, with a fresh and plain vanilla operating
+system (32-bit ,,BullsEye'', released May 3rd 2023, Kernel version 6.1) obtained from} \\
+\texttt{https://www.raspberrypi.com/software/operating-systems/}.
 
-So, if you continue reading here despite the long list of caveats,
- you are sure you have a RaspPi and want a binary installation.
-Such an installation is provided for the RaspPi only. To make this manageable and minimize
-the dependence on third-party libraries, the binary
-version does not contain support for SoapySDR devices or USB OZY devices, and also
-cannot start RedPitaya SDR apps through the web interface. If you need any of these features,
-you have to compile from the sources with the SOAPSDR and/or the USBOZY and/or the STEMLAB
-options activated.
+For new-bees, an easy binary-only installation is provided. This binary has the following
+properties:
 
-The easiest way to obtain the ,,tar-file'' which contains the installation. Probably the
-easiest way to download the file is using a brower (you can open the browser on your
-RaspPi or on any other computer) and go to the following URI (this is one single string without
-blanks which is broken over two lines here)
+\begin{itemize}
+\item{It runs on a 32-bit Raspberry Pi OS, currently the "bullseye" version.}
+\item{It has the GPIO, MIDI, SATURN, and ALSA options built in, so it does not use pulseaudio. See
+Appendix \ref{sec:compiletime} for a detailed description of the compile time options. If you want
+another set of options, you have to compile from the sources.}
+\item{It can be down-loaded using a web browser, and then only two commands have to be 
+entered in a terminal window.}
+\end{itemize}
 
-\texttt{https://github.com/dl1ycf/pihpsdr/blob/master/\\
-release/pihpsdr.tar}
+The following \textit{caveat} applies both to the binary installation and the compilation from
+the source code: If you want to use the Controller2 or the G2 controller, the Raspberry Pi I2C interface
+must be enabled, as described in Appendix \ref{sec:i2c}.
 
-and then click the ,,Raw'' button. This should make your browser download a file with name
-"pihpsdr.tar". Put this file into your home directory. If you have down loaded the file
-on a different computer, you have to transfer it to your RaspPi. Then, in a terminal
-window issue the three commands
+Before you shout at me, because your most-wanted compile time option is deactivated in the
+binary installation, let me explain that I want to satisfy the maximum number of people but
+with minimum complexity in the installation process. Things such as using SoapySDR devices,
+or using pulseaudio, involve heavy installation work (special libraries, etc. etc.) that make
+the installation more complicated. So the decision was to offer a binary installation on
+\textit{as is} basis, and refer to compilation from the sources
+ (explained in Appendix \ref{sec:installsources})
+for every feature beyond.
 
-\texttt{cd \$HOME}\\
-\texttt{tar xvf pihpsdr.tar} \\
-\texttt{pihpsdr/install.sh}
+Probably the easiest way do download the binary installation file \texttt{pihpsdr.tar} is to clone
+the complete repository (as you would also do it for an installation from source code) since the
+binary installation file is contained therein. So open a terminal window. If you do so, you get
+a prompt and are in your home directory. It is assumed that no directory named \texttt{pihpsdr}
+exists. If it does, and if you are a new-bee, then this is likely a left-over from some previous
+attempt to install the program and then it should be deleted.
+
+again assuming that no file or directory named \texttt{JUNK} exists (if so, just replace this
+name by another one). But look, if you are a new-bee, then most likely these last two commands
+are not necessary since why should a \texttt{pihpsdr} directory exist at top level in your
+home directory?
+
+The binary installation
+is then done via the following four commands, which have to be typed in exactly as given here:
+
+\grtt{git clone https://github.com/dl1ycf/pihpsdr} \\
+\grtt{cd pihpsdr/release} \\
+\grtt{tar xvf pihpsdr.tar} \\
+\grtt{pihpsdr/install.sh} \\
+
+\begin{figure}[h]
+\center
+\includegraphics[width=9cm]{piDontAsk.png}
+\caption{Suppress being asked options when clicking the piHPSDR desktop icon.}
+\label{fig:piDontAsk}
+\end{figure}
+
+The last command takes some time (depending on the speed of your internet connection),
+since a lot of software need be installed that piHPSDR depends on. At the end, a piHPSDR desktop
+icon should appear. In principle, you can start piHPSDR now by double-clicking the icon.
+However (at least on my test system) I get always asked \textit{how} I want to
+start the program (right away, in a terminal window, etc.). 
+To get rid of this question, open the file manager
+and go to the the \texttt{Desktop} directory in your home directory, where you should
+see the desktop icon with name piHPSDR. Select this by single-click and go to
+\texttt{Edit}$\to$\texttt{Preferences} (Fig. \ref{fig:piDontAsk}). Activate the check
+box where it is indicated by the red arrow and that's it.
 
 
-These commands will ,,extract'' the tar file. At the end you have created a folder names
-pihpsdr in your top level home directory which contains lots of files, and the third command
-as put these files in the right location and should also create a piHPSDR desktop icon.
-Please read Appendix \ref{sec:GPIOconfig} and possibly configure GPIO and/or I2C if
-you want to use GPIO controllers.
-
-The preferred way of starting piHPSDR is then double-clicking the piHPSDR desktop icon.
-As an alternative, you can open a terminal window and issue the two commands
-
-\texttt{cd \$HOME/pihpsdr} \\
-\texttt{pihpsdr}
-
+\textbf{Note:} Immediately after running the install script, the piHPSDR desktop icon
+looks quite generic and does not show the HPSDR logo. Log out and then log in again
+and the logo is there.
 
 
 \chapter[Linux: piHPDSR install from sources]{Installation of piHPSDR from the sources (Linux, RaspPi)}
+\label{sec:installsources}
+\textit{This procedure has been tested on a Pi 4B, with a fresh and plain vanilla operating
+system (32-bit ,,BullsEye'', released May 3rd 2023, Kernel version 6.1) obtained from} \\
+\texttt{https://www.raspberrypi.com/software/operating-systems/}.
+
+Installation from the sources is the preferred way of installing piHPSDR, for the following reasons
+
+\begin{itemize}
+\item{You get binaries that exactly ,,fit'' to your operating system, it is not important which version
+of the operating system you use.}
+\item{The procedure is the same for 32-bit and 64-bit systems, so it does not matter
+which of the two variants you run.}
+\item{For all the compile time options (see Appendix \ref{sec:compiletime}) you can individually choose
+whether you want to activate or deactivate this option.}
+\item{This implies that if you want to use SoapySDR devices (like the Adalm Pluto or RTL SDR sticks), or
+if you want to use pulseaudio as the backend for local RX audio, you \textit{have to} compile from
+the sources, since these compile time options are not activated in the binary installation package.}
+\end{itemize}
+
+The following \textit{caveat} applies both to the binary installation and the compilation from
+the source code: If you want to use the Controller2 or the G2 controller, the Raspberry Pi I2C interface
+must be enabled, as described in Appendix \ref{sec:i2c}.
+
+To install from the sources, open a terminal window. If you do so, you get
+a prompt and are in your home directory. It is assumed that no directory named \texttt{pihpsdr}
+exists. If it does, then this is likely a left-over from some previous
+attempt to install the program and then it should be moved elsewhere, since it may contain
+files with saved preferences (\texttt{*.props}) which you may want to re-use.
+
+The piHPSDR repository is downloaded, and support libraries are installed, with the commands
+
+\grtt{git clone https://github.com/dl1ycf/pihpsdr} \\
+\grtt{cd pihpsdr} \\
+\grtt{LINUX/libinstall.sh} \\
+
+Depending on the internet speed (and the speed of your SD card or hard disk), the first and the
+last command my take some time. The first command loads the complete piHPSDR repository from
+my github accound. The last command (\texttt{libinstall.sh}) contains all the magic,
+it not only loads all required RaspberryPi OS packages,
+but also loads and installs further libraries piHPSDR depends on, such as the WDSP library,
+and the SoapySDR library as well as SoapySDR modules for the Adalm Pluto and RTL SDR sticks.
+
+\textbf{Note.} The SoapySDR library, and all SoapySDR modules, must be compiled from the sources
+(and the libinstall.sh script does so). The reason is, that SoapySDR in the standard repository
+is quite outdated (version 0.7) while piHPDSR requires a more recent version (0.8) because the
+SoapySDR API has changed from 0.7 to 0.8.
+
+The libinstall procedure also does some other things for you, including creating a desktop icon
+for piHPSDR. If you are on a Desktop PC running LINUX, you will get error messages about
+libraries such as libgpiod that are missing in the repository, which you can ignore.
+
+\textbf{Note:} If you install on a Desktop PC running LINUX, or if you are on a RaspPi but use
+the GPIO I/O lines for some other purpose, you must de-activate the GPIO compile time option
+first, as described in Appendix \ref{sec:compiletime}.
+
+It is clear that double-clicking the piHPSDR desktop icon at this stage leads nowhere,
+since first you need to compile the program.
+However,
+this is simply done by the three commands
+
+\grtt{cd \$HOME/pihpsdr} \\
+\grtt{make clean} \\
+\grtt{make}
+
+and that't it! The first  two commands are even not necessary (since you are in the pihpsdr
+directory at that point, and since there is nothing to be cleaned up).
+But if you make changes (e.g. changing the compile time options as described in
+Appendix \ref{sec:compiletime}, or apply some code modifications)
+and want to re-compile later, this sequence is the safest way to create a new binary,
+namely go to the pihpsdr
+directory, clean up, and recompile.
+
+At this stage, double-clicking the piHPSDR desktop icon should start the program. See
+the end of Appendix \ref{sec:installbinary} how to get rid of a window popping up
+and asking you how to execute the program.
+
+\textbf{Checking the SoapySDR installation.}
+The installation of the SoapySDR core and the modules for the Adalm Pluto and for RTL SDR
+sticks is the most complicated task performed by the \texttt{libinstall.sh} command.
+Although I tried hard to let everything be done auto-magically, you may want to check
+if everything went well. If not, and if you do not plan to activate the SOAPYSDR compile time
+option, you can simply ignore this. To check the SoapySDR installation, open a new terminal
+window and just type the command (be careful to use the correct capitalization!)
+
+\grtt{SoapySDRUtil -info}
+
+On my test system, this command produced the following output:
+\begin{tiny}
+\begin{verbatim}
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Lib Version: v0.8.1-gbb33b2d2
+API Version: v0.8.200
+ABI Version: v0.8-3
+Install root: /usr/local
+Search path:  /usr/local/lib/arm-linux-gnueabihf/SoapySDR/modules0.8-3
+Module found: /usr/local/lib/arm-linux-gnueabihf/SoapySDR/modules0.8-3/libPlutoSDRSupport.so (0.2.1-b906b27)
+Module found: /usr/local/lib/arm-linux-gnueabihf/SoapySDR/modules0.8-3/librtlsdrSupport.so   (0.3.3-068aa77)
+Available factories... plutosdr, rtlsdr
+Available converters...
+ -  CF32 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CS16 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CS32 -> [CS32]
+ -   CS8 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CU16 -> [CF32, CS16, CS8]
+ -   CU8 -> [CF32, CS16, CS8]
+ -   F32 -> [F32, S16, S8, U16, U8]
+ -   S16 -> [F32, S16, S8, U16, U8]
+ -   S32 -> [S32]
+ -    S8 -> [F32, S16, S8, U16, U8]
+ -   U16 -> [F32, S16, S8]
+ -    U8 -> [F32, S16, S8]
+\end{verbatim}
+\end{tiny}
+
+(Sorry for the tiny want, I did not want to wrap output lines.)
+Note the API/ABI version (0.8). If you see 0.7 then you probably have installed SoapySDR on your computer from
+the standard repositories, and this is not going to work. The \texttt{libinstall.sh} command  has been designed 
+to work (and has been tested on) a plain vanilla operating system, not on a ,,spoiled'' one
+where the user has manually installed additional software packages that may induce incompatibilities.
+The best way out of such a problem is to re-install Linux (on a RaspPi, simply use a new SD card to do so).
 
 \chapter[MacOS: piHPDSR install from sources]{Installation of piHPSDR from the sources (MacOS)}
+
+\textit{This procedure has been tested on a  fairly recent MacBookAir (2020 model, M1 Silicon CPU, running MacOS
+Ventura 13.5.2) and on old iMac (late 2013 model, Intel CPU, running MacOS Catalina 10.15.7.
+For the old iMac the installation procedure takes very long, because most of the \texttt{HomeBrew} packages
+are no longer available in pre-compiled form and have to be compiled from the sources -- but it works!}
+
+If you want to run piHPDSR on an Apple Macintosh computer (iMac, Mac Mini, iBook Air, PowerBook), then
+you \textit{have to} compile from the sources. The author personally uses piHPSDR on an iMac, and would like
+to provide piHPSDR as a program that you simply copy on your computer and double-click. However, this is
+rather involved for an application built upon the GTK graphical user interface. If you know how to do this,
+any help is welcome. But for the time being, compiling from the sources is the only option.
+
+\textbf{The whole installation procedure depends on that your user account is an administrator account,
+such that you can execute ,,sudo'' commands in the terminal window. You may be asked the administrator
+password. If your user account does not qualify for administrator work, then you are simply not allowed
+to install the ,,HomeBrew'' universe which is the prerequisite for compiling piHPSDR. In normal cases
+(you own the Mac) you should have administrator privileges.}
+
+I still do not know whether this is necessary or not, but the recommendation is to start installing
+an X Window manager on the Macintosh. To the end, in a web browse open the link
+
+\texttt{www.xquartz.org}
+
+and install the most recent package file found there. At the time of this writing, this is version 2.8.5
+released in January 26, 2023. The package is good both for Intel and Silicon Macs. Download the package
+file (e.g. XQuartz-2.8.5.pkg) to your desktop and run it by double-clicking.
+
+
+Compiling piHPSDR on a Mac requires some basis LINUX/Unix skills. The most important program to use is
+the Terminal application (\texttt{Terminal.app}), that can be found in the Utilities folder that resides
+in the Applications folder. It is suggested to drag this application into the ,,dock'' so you have quick access.
+Although MacOS has a complete Unix ,,under the hood'', one needs additional software to to Linux-style
+programming. The most popular such ,,Unix enabler'' packages are \texttt{MacPorts} and \texttt{HomeBrew}, I am using
+\texttt{HomeBrew} but I know that piHPSDR can be compiled and run successfully with \texttt{MacPorts}
+as well. The deal is as simple as follows: if you use \texttt{MacPorts} then you are on your own, or
+have to rely on piHPSDR installations done by the \texttt{MacPorts} folks. For \texttt{HomeBrew},
+I provide semi-automatic installation scripts that do all the complicated stuff for you.
+
+To install from the sources, open a terminal window. If you do so, you get
+a prompt and are in your home directory. It is assumed that no directory named \texttt{pihpsdr}
+exists. If it does, then this is likely a left-over from some previous
+attempt to install the program and then it should be moved elsewhere, since it may contain
+files with saved preferences (\texttt{*.props}) which you may want to re-use.
+
+The piHPSDR repository is downloaded, and support libraries are installed, with the commands
+
+\grtt{git clone https://github.com/dl1ycf/pihpsdr} \\
+\grtt{cd pihpsdr} \\
+\grtt{MacOS/libinstall.sh} \\
+
+The last command starts with installing Apple's command line tools, in particular the Apple C and C++
+compilers. You may get an error message from \texttt{xcode-select} that the tools are already
+installed, which you can safely ignore. Then, the
+ \texttt{HomeBrew} universe is installed, and the installation starts with asking you for the administrator
+ password, tells you what it wants to do and requires hitting \texttt{Enter} to proceed.
+ On Apple Silicon Macs, you will be asked the administrator password another three times,
+ since here we have to create three symbolic links in \texttt{/usr/local} (see the end of this section),
+ each of which requires administrator privileges.
+ 
+Do not worry if \texttt{HomeBrew} was already installed on your computer, the installation
+procedure works in this case as well and does no harm. In addition to
+ the \texttt{HomeBrew} core, additional libraries that piHPSDR depends on (e.g. GTK+3), the SoapySDR
+ core and SoapySDR modules for several radios are installed. The WDSP library is also downloaded,
+ compiled, and stored as \texttt{/usr/local/lib/libwdsp.dylib}.
+ 
+ In case something went wrong, or simply to check that \texttt{HomeBrew} has been correctly installed,
+ open a \textit{new} terminal window and type the command
+ 
+ \grtt{brew config}
+ 
+ This should give you lots of information on the currently installed version of \texttt{HomeBrew},
+ but also on the CPU of your machine, the compilers and MacOS version info, etc. If the command
+ fails stating that the "brew" command has not been found, something is wrong, since the automatic
+ installation procedure should have taken care to update your shell profiles such that the "brew"
+ command is found. This is the reason why you have to open a new terminal window to make this test,
+ since in the originally opened window the update of the command search path is not yet effective.
+ 
+ If you want to use SoapySDR, please check the Soapy installation. Open a new terminal window and simply type
+ the command (be careful to use the correct capitalization!)
+
+\grtt{SoapySDRUtil -info}
+
+On my test system, this command produced the following output:
+
+\begin{tiny}
+\begin{verbatim}
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Lib Version: v0.8.1-release
+API Version: v0.8.0
+ABI Version: v0.8
+Install root: /usr/local
+Search path:  /usr/local/lib/SoapySDR/modules0.8
+Module found: /usr/local/lib/SoapySDR/modules0.8/libHackRFSupport.so   (0.3.3)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libLMS7Support.so     (20.10.0)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libPlutoSDRSupport.so (0.2.1)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libRedPitaya.so       (0.1.1)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libairspySupport.so   (0.2.0)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libairspyhfSupport.so (0.2.0)
+Module found: /usr/local/lib/SoapySDR/modules0.8/librtlsdrSupport.so   (0.3.2)
+Available factories... airspy, airspyhf, hackrf, lime, plutosdr, redpitaya, rtlsdr
+Available converters...
+ -  CF32 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CS16 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CS32 -> [CS32]
+ -   CS8 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CU16 -> [CF32, CS16, CS8]
+ -   CU8 -> [CF32, CS16, CS8]
+ -   F32 -> [F32, S16, S8, U16, U8]
+ -   S16 -> [F32, S16, S8, U16, U8]
+ -   S32 -> [S32]
+ -    S8 -> [F32, S16, S8, U16, U8]
+ -   U16 -> [F32, S16, S8]
+ -    U8 -> [F32, S16, S8]
+\end{verbatim}
+\end{tiny}
+
+and probably even more modules are available in \texttt{HomeBrew}. In contrast to the RaspPi
+installation, SoapySDR is already at version 0.8 in the \texttt{HomeBrew} repository so
+the modules can very simply be installed and need not be compiled from the sources.
+If anything went wrong with the SoapySDR installation, you can safely ignore this is
+you do not plan to compile piHPSDR with the SOAPYSDR option. You also do not need
+to manually disable the GPIO option since on MacOS, the GPIO and SATURN options
+do not apply and are automatically deactivated. Without changing the compile time
+options (see Appendix \ref{sec:compiletime}) the MIDI option is the only one you get
+on MacOS.
+
+Compiling the program then only requires three commands
+
+\grtt{cd \$HOME/pihpsdr} \\
+\grtt{make clean} \\
+\grtt{make app}
+
+and that't it! The first  two commands are even not necessary at this point,
+since you are in the pihpsdr
+directory at that point, and since there is nothing to be cleaned up.
+But if you make changes in the future (e.g. changing the compile time options as described in
+Appendix \ref{sec:compiletime}, or apply some code modifications)
+and want to re-compile later, this sequence of commands is the safest way to create a new binary.
+
+Note that saying \texttt{make app} instead of just saying \texttt{make} has the bonus
+that a MacOS ,,app'' bundle is automatically created within the piHPSDR directory.
+You can drag this bundle in the Finder, say, from the piHPSDR directory in your
+home directory, to the Desktop, this can also be accomplished with the additional command
+
+\grtt{mv pihpsdr.app \$HOME/Desktop}
+
+(take care that any older piHPSDR application on the Desktop is moved or deleted first).
+ 
+\textbf{\color{red}Note on HomeBrew installation on Macintosh computers with Intel and Silicon processors.}
+On Mac computers with Intel processors, \texttt{HomeBrew} is installed in \texttt{/usr/local},
+while on Mac computers with Silicon (M1, M2, M2 pro) processors, it is installed in
+\texttt{/opt/homebrew}. However, the WDSP library is not aware of this and installs its
+library and include file as \texttt{/usr/local/lib/libwdsp.dylib} and
+\texttt{/usr/local/include/wdsp.h}. There is nothing wrong with this, but on a Silicon
+Mac \texttt{/usr/local} may not contain any sub-directories. Therefore, the installation
+procedure, after completing the \texttt{HomeBrew} installation, looks whether
+ certain directories exist in \texttt{/usr/local} and, if not, places symbolic links
+there that point to
+
+\texttt{/usr/local/lib\ \ \ \ } $\quad\to\quad$ \texttt{/opt/homebrew/lib} \\
+\texttt{/usr/local/include} $\quad\to\quad$ \texttt{/opt/homebrew/include} \\
+\texttt{/usr/local/bin\ \ \ \ } $\quad\to\quad$ \texttt{/opt/homebrew/bin} \\
+
+This also solves many problems with compiling packages, since the directories
+in /usr/local are usually in the standard compiler search paths, while
+/opt/homebrew is not.
 
 \end{document}

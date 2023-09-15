@@ -1,0 +1,18 @@
+This procedure was tested on a Pi4B and CM4.
+
+To make a "release", you need a working pihpsdr executable
+in your pihpsdr directory. This implies that the
+WDSP shared library is up-to-date (the file name
+assumed is /usr/local/lib/libwdsp.so).
+
+Then, simply do "make release". This creates TWO
+tar files, namely
+
+pihpsdr.tar
+pihpsdr-GIT_VERSION.tar
+
+where GIT_VERSION expands to the current git version.
+This way, pihpsdr.tar is always the latest release,
+while older ones with their specific names accumulate
+in the release directory.
+

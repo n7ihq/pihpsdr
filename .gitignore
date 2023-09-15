@@ -11,4 +11,8 @@ wdspWisdom00
 ip.addr
 hpsdr.png
 .DS_Store
+LINUX/wdsp
+LINUX/SoapySDR
+LINUX/SoapyPlutoSDR
+MacOS/wdsp
 @*

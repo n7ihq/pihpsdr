@@ -327,7 +327,6 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   //
   gtk_window_set_position(GTK_WINDOW(top_window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(top_window), TRUE);
-  t_print("setting top window icon\n");
 
   //
   // Get the position of the top window, and then determine
