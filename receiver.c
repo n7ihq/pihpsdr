@@ -73,28 +73,6 @@ void receiver_weak_notify(gpointer data, GObject  *obj) {
 gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   const RECEIVER *rx = (RECEIVER *)data;
 
-  //
-  // TEMPORARY FIX:
-  //
-  // There seems to be a bug in GTK on MacOS (June 2023).
-  // If clicking into a menu window that does not have the focus
-  // (especially when clicking on the title bar), it does not get focus
-  // immediatedly and we end up HERE with a button-press event, without
-  // receiving the following button-release event (especially if we drag
-  // the sub-menu window out of the main window area).
-  // As a consequence, the VFO starts to move with motions of the non-pressed mouse
-  // whenever it hovers over the main window.
-  // Therefore, as long as this behaviour is observed, we must ingnore
-  // button-press-events if there is a menu window open.
-  //
-  // This means that with an open menu, you cannot "drag" the receiver. So check
-  // from time to time if this is still necessary.
-  //
-  // This problem has been observed on MacOS and RaspPi.
-  //
-  if (sub_menu || main_menu) { return TRUE; }
-
-
   if (rx == active_receiver) {
     if (event->button == GDK_BUTTON_PRIMARY) {
       last_x = (int)event->x;
@@ -179,10 +157,26 @@ gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, 
   const RECEIVER *rx = (RECEIVER *)data;
 
   //
+  // This solves a problem observed since with GTK about mid-2023:
+  // when re-focusing a (sub-)menu window after it has lost focus,
+  // it may happen that the button press event for "re-focusing"
+  // the menu window also ends up in the receiver panel, and that
+  // the subsequent button release event is not forwarded to the
+  // receiver panal.
+  // Subsequent mouse moves (without a button pressed) then led to
+  // wild VFO frequency changes. The first temporary solution was to
+  // ignore all button press events if a (sub-)menu window is open, but
+  // this reduces piHPSDR functionality. Now we solve this problem by
+  // looking HERE if the mouse button is pressed, and if not, ignore the
+  // move.
+  //
+  int button_down = (event->state & (GDK_BUTTON1_MASK | GDK_BUTTON2_MASK)) != 0;
+
+  //
   // if !pressed, we may come from the destruction
   // of a menu, and should not move the VFO.
   //
-  if (!making_active && pressed) {
+  if (!making_active && pressed && button_down) {
     gdk_window_get_device_position (event->window,
                                     event->device,
                                     &x,
