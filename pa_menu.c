@@ -89,7 +89,8 @@ static void trim_changed_cb(GtkWidget *widget, gpointer data) {
     flag = 1;
 
     for (k = 1; k < 10; k++) {
-      if (pa_trim[k] != (k * pa_trim[10]) / 10) { flag = 0; }
+      double fac = ((double) k * pa_trim[10]) / ( 10.0 * pa_trim[k]);
+      if ( fac < 0.99 || fac > 1.01) { flag = 0; }
     }
   }
 
@@ -98,43 +99,8 @@ static void trim_changed_cb(GtkWidget *widget, gpointer data) {
   if (flag) {
     // note that we have i==10 if the flag is nonzero.
     for (k = 1; k < 10; k++) {
-      pa_trim[k] = (k * pa_trim[10]) / 10;
+      pa_trim[k] = 0.1 * k * pa_trim[10];
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[k]), (double)pa_trim[k]);
-    }
-  }
-}
-
-static void show_1W(gboolean reset) {
-  int i;
-  int col, row;
-  char text[16];
-
-  if (reset) {
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 100;
-    }
-  }
-
-  row=1;
-  col=0;
-  for (i = 1; i < 11; i++) {
-    sprintf(text, "%dmW", pa_trim[i]);
-    GtkWidget *label = gtk_label_new(text);
-    gtk_widget_set_name(label, "boldlabel");
-    gtk_grid_attach(GTK_GRID(calibgrid), label, col++, row, 1, 1);
-    //
-    // We *need* a maximum value for the spinner, but a quite large
-    // value does not harm. So we allow up to 5 times the nominal
-    // value.
-    //
-    spin[i] = gtk_spin_button_new_with_range(0.0, (double)(5 * i * 100), 1.0);
-    gtk_grid_attach(GTK_GRID(calibgrid), spin[i], col++, row, 1, 1);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]), (double)pa_trim[i]);
-    g_signal_connect(spin[i], "value_changed", G_CALLBACK(trim_changed_cb), GINT_TO_POINTER(i));
-
-    if (col == 4) {
-      row++;
-      col=0;
     }
   }
 }
@@ -142,8 +108,9 @@ static void show_1W(gboolean reset) {
 static void show_W(int watts, gboolean reset) {
   int i;
   int col, row;
+  int units;
   char text[16];
-  int increment = watts / 10;
+  double increment = 0.1 * watts;
 
   if (reset) {
     for (i = 0; i < 11; i++) {
@@ -151,10 +118,27 @@ static void show_W(int watts, gboolean reset) {
     }
   }
 
+  if (watts <= 1) {
+    units = 0;
+  } else if (watts <= 5) {
+    units = 1;
+  } else {
+    units = 2;
+  }
   row=1;
   col=0;
   for (i = 1; i < 11; i++) {
-    sprintf(text, "%dW", i * increment);
+    switch (units) {
+      case 0:
+        sprintf(text, "%0.3fW", i*increment);
+        break;
+      case 1:
+        sprintf(text, "%0.1fW", i * increment);
+        break;
+      case 2:
+        sprintf(text, "%dW", (int) (i * increment));
+        break;
+    }
     GtkWidget *label = gtk_label_new(text);
     gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(calibgrid), label, col++, row, 1, 1);
@@ -163,7 +147,17 @@ static void show_W(int watts, gboolean reset) {
     // value does not harm. So we allow up to 5 times the nominal
     // value.
     //
-    spin[i] = gtk_spin_button_new_with_range(0.0, (double)(5 * i * increment), 1.0);
+    switch (units) {
+      case 0:
+        spin[i] = gtk_spin_button_new_with_range(0.001, (double)(5 * i * increment), 0.001);
+        break;
+      case 1:
+        spin[i] = gtk_spin_button_new_with_range(0.1, (double)(5 * i * increment), 0.1);
+        break;
+      case 2:
+        spin[i] = gtk_spin_button_new_with_range(1.0, (double)(5 * i * increment), 1.0);
+        break;
+    }
     gtk_grid_attach(GTK_GRID(calibgrid), spin[i], col++, row, 1, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]), (double)pa_trim[i]);
     g_signal_connect(spin[i], "value_changed", G_CALLBACK(trim_changed_cb), GINT_TO_POINTER(i));
@@ -187,43 +181,7 @@ static void clear_W() {
 
 static void new_calib(gboolean flag) {
 
-  switch (pa_power) {
-  case PA_1W:
-    show_1W(flag);
-    break;
-
-  case PA_5W:
-    show_W(5, flag);
-    break;
-
-  case PA_10W:
-    show_W(10, flag);
-    break;
-
-  case PA_30W:
-    show_W(30, flag);
-    break;
-
-  case PA_50W:
-    show_W(50, flag);
-    break;
-
-  case PA_100W:
-    show_W(100, flag);
-    break;
-
-  case PA_200W:
-    show_W(200, flag);
-    break;
-
-  case PA_500W:
-    show_W(500, flag);
-    break;
-
-  case PA_1KW:
-    show_W(1000, flag);
-    break;
-  }
+  show_W(pa_power_list[pa_power], flag);
   GtkWidget *reset_b = gtk_button_new_with_label("Reset");
   gtk_grid_attach(GTK_GRID(calibgrid), reset_b, 0, 6, 4, 1);
   g_signal_connect(reset_b, "button-press-event", G_CALLBACK(reset_cb), NULL);
@@ -237,7 +195,7 @@ static void reset_cb(GtkWidget *widget, gpointer data) {
 
 static void max_power_changed_cb(GtkWidget *widget, gpointer data) {
   pa_power = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-  t_print("max_power_changed_cb: %d\n", pa_power);
+  t_print("max_power_changed_cb: %d\n", pa_power_list[pa_power]);
   clear_W();
   new_calib(TRUE);
   gtk_widget_show_all(calibgrid);

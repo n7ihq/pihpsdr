@@ -1220,8 +1220,7 @@ void vfo_update() {
 
   // -----------------------------------------------------------
   //
-  // Draw VFO A Dial. A negative x-coordinate tells us to
-  // draw "A:" instead of "VFO A:" at the beginning
+  // Draw VFO A Dial.
   //
   // -----------------------------------------------------------
   if (vfl->vfo_a_x != 0) {
@@ -1242,11 +1241,7 @@ void vfo_update() {
     f_h = (af - 1000000LL * f_m - 1000 * f_k);
     cairo_set_font_size(cr, vfl->size2);
 
-    if (vfl->vfo_a_x > 0) {
-      cairo_show_text(cr, "VFO A:");
-    } else {
-      cairo_show_text(cr, "A:");
-    }
+    cairo_show_text(cr, "A:");
 
     cairo_set_font_size(cr, vfl->size3);
 
@@ -1285,10 +1280,7 @@ void vfo_update() {
 
   // -----------------------------------------------------------
   //
-  // Draw VFO B Dial. A negative x-coordinate tells us to
-  // draw "B:" instead of "VFO B:" at the beginning
-  //
-  // TODO: a negative y-coordinate tells us to use size1
+  // Draw VFO B Dial.
   //
   // -----------------------------------------------------------
 
@@ -1310,11 +1302,7 @@ void vfo_update() {
     f_h = (bf - 1000000LL * f_m - 1000 * f_k);
     cairo_set_font_size(cr, vfl->size2);
 
-    if (vfl->vfo_b_x > 0) {
-      cairo_show_text(cr, "VFO B:");
-    } else {
-      cairo_show_text(cr, "B:");
-    }
+    cairo_show_text(cr, "B:");
 
     cairo_set_font_size(cr, vfl->size3);
 

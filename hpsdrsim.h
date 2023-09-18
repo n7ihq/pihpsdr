@@ -112,7 +112,7 @@ EXTERN struct sockaddr_in addr_old;
 //
 // Constants for conversion of TX power
 //
-EXTERN double c1, c2;
+EXTERN double c1, c2, maxpwr;
 
 //
 // Forward declarations for new protocol stuff

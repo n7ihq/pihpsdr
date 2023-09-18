@@ -141,7 +141,8 @@ extern int tx_out_of_band;
 extern int filter_board;
 extern int pa_enabled;
 extern int pa_power;
-extern int pa_trim[11];
+extern double pa_trim[11];
+extern const int pa_power_list[];
 extern int apollo_tuner;
 
 extern int updates_per_second;

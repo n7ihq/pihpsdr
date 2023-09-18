@@ -175,6 +175,10 @@ struct hl2word {
   unsigned char c4;
 } hl2addr[64];
 
+const double hl2drv[16] = { 0.421697, 0.446684, 0.473151, 0.501187, 0.530884, 0.562341, 0.595662,
+                            0.630957, 0.668344, 0.707946, 0.749894, 0.794328, 0.841395, 0.891251,
+                            0.944061, 1.000000};
+
 // floating-point represeners of TX att, RX att, and RX preamp settings
 
 static double txdrv_dbl = 0.99;
@@ -321,16 +325,19 @@ int main(int argc, char *argv[]) {
     c1 = 3.3;
     c2 = 0.090;
     TXDAC = 1;
+    maxpwr = 20.0;
     break;
 
   case   NDEV_HERMES:
     printf("DEVICE is HERMES\n");
     c1 = 3.3;
     c2 = 0.095;
+    maxpwr = 200.0;
 
     if (anan10e) {
       TXDAC = 1;
       printf("Anan10E/Anan100B simulation\n");
+      maxpwr = 20.0;
     } else {
       TXDAC = 3;
     }
@@ -342,6 +349,7 @@ int main(int argc, char *argv[]) {
     c1 = 3.3;
     c2 = 0.095;
     TXDAC = 3;
+    maxpwr = 200.0;
     break;
 
   case   NDEV_ANGELIA:
@@ -349,20 +357,23 @@ int main(int argc, char *argv[]) {
     c1 = 3.3;
     c2 = 0.095;
     TXDAC = 4;
+    maxpwr = 200.0;
     break;
 
   case   NDEV_HERMES_LITE:
     printf("DEVICE is HermesLite V1\n");
     c1 = 3.3;
-    c2 = 0.095;
+    c2 = 1.5;
     TXDAC = 1;
+    maxpwr = 7.0;
     break;
 
   case   NDEV_HERMES_LITE2:
     printf("DEVICE is HermesLite V2\n");
     c1 = 3.3;
-    c2 = 0.095;
+    c2 = 1.5;
     TXDAC = 3;
+    maxpwr = 7.0;
     break;
 
   case   NDEV_ORION:
@@ -370,6 +381,7 @@ int main(int argc, char *argv[]) {
     c1 = 5.0;
     c2 = 0.108;
     TXDAC = 4;
+    maxpwr = 200.0;
     break;
 
   case   NDEV_ORION2:
@@ -377,6 +389,7 @@ int main(int argc, char *argv[]) {
     c1 = 5.0;
     c2 = 0.12;
     TXDAC = 4;
+    maxpwr = 500.0;
     break;
 
   case   NDEV_SATURN:
@@ -384,6 +397,7 @@ int main(int argc, char *argv[]) {
     c1 = 5.0;
     c2 = 0.12;
     TXDAC = 4;
+    maxpwr = 200.0;
     break;
 
   case   NDEV_C25:
@@ -391,6 +405,7 @@ int main(int argc, char *argv[]) {
     c1 = 3.3;
     c2 = 0.090;
     TXDAC = 3;
+    maxpwr = 20.0;
     break;
   }
 
@@ -1267,7 +1282,12 @@ void process_ep2(uint8_t *frame) {
     chk_data((frame[3] >> 7) & 0x01, alexTRdisable, "ALEX T/R disable");
     chk_data(frame[4], alex_lpf, "ALEX LPF");
     // reset TX level. Leve a little head-room for noise
-    txdrv_dbl = (double) txdrive * 0.00390625; // div. by. 256
+    if (OLDDEVICE == ODEV_HERMES_LITE2) {
+      txdrv_dbl = hl2drv[txdrive/16];
+    } else {
+      // reset TX level. Leve a little head-room for noise
+      txdrv_dbl = (double) txdrive * 0.003921; // div. by. 255
+    }
     break;
 
   case 20:
@@ -1493,7 +1513,7 @@ void *handler_ep6(void *arg) {
         }
 
         // AIN1: Forward Power
-        j = (int) ((4095.0 / c1) * sqrt(500.0 * txlevel * c2));
+        j = (int) ((4095.0 / c1) * sqrt(maxpwr * txlevel * c2));
         *(pointer + 6) = (j >> 8) & 0xFF;
         *(pointer + 7) = (j     ) & 0xFF;
         header_offset = 16;

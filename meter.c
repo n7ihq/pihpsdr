@@ -112,8 +112,8 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
   double rxlvl;   // only used for RX input level, clones "value"
   double pwr;     // only used for TX power, clones "value"
   char sf[32];
-  char *units = "W";
-  double interval = 10.0;
+  int  units = 2;          // 0: xxx mW, 1: xx.y W, 2: xxx W
+  double interval = 10.0;  // 1/10 of full reflection
   cairo_t *cr = cairo_create (meter_surface);
   const BAND *band = band_get_current_band();
 
@@ -157,41 +157,10 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
     }
 
     if (band->disablePA || !pa_enabled) {
-      units = "mW";
-      interval = 100.0;
-      pwr = pwr * 1000.0;
+      units = 0;  // x mW
+      interval = 0.1;
     } else {
-      switch (pa_power) {
-      case PA_1W:
-        units = "mW";
-        interval = 100.0;
-        pwr = pwr * 1000.0;
-        break;
-
-      case PA_10W:
-        interval = 1.0;
-        break;
-
-      case PA_30W:
-        interval = 3.0;
-        break;
-
-      case PA_50W:
-        interval = 5.0;
-        break;
-
-      case PA_100W:
-        interval = 10.0;
-        break;
-
-      case PA_200W:
-        interval = 20.0;
-        break;
-
-      case PA_500W:
-        interval = 50.0;
-        break;
-      }
+      interval = 0.1 * pa_power_list[pa_power];
     }
 
     if (max_count > CNTMAX) {
@@ -330,7 +299,7 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
       cairo_stroke(cr);
       cairo_set_source_rgba(cr, COLOUR_METER);
       sprintf(sf, "%d dBm", (int)(max_rxlvl + 0.5));
-      cairo_move_to(cr, 80, METER_HEIGHT - 2);
+      cairo_move_to(cr, 80, cx - radius + 30);
       cairo_show_text(cr, sf);
     }
     break;
@@ -366,7 +335,15 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
           cairo_stroke(cr);
 
           if ((i % 20) == 0) {
-            sprintf(sf, "%d", (i / 10) * (int)interval);
+            switch (units) {
+              case 0:
+              case 1:
+                sprintf(sf, "%0.1f", 0.1*interval*i);
+                break;
+              case 2:
+                sprintf(sf, "%d", (int) (0.1*interval*i));
+                break;
+            }
             cairo_arc(cr, cx, cx, radius + 5, radians, radians);
             cairo_get_current_point(cr, &x, &y);
             cairo_new_path(cr);
@@ -381,14 +358,26 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
 
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      angle = (max_pwr * 10.0 / (double)interval) + offset;
+      angle = (max_pwr * 10.0 / interval) + offset;
+      if (angle > 110.0 + offset) { angle = 110.0 + offset; }
       radians = angle * M_PI / 180.0;
       cairo_arc(cr, cx, cx, radius + 8, radians, radians);
       cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      sprintf(sf, "%d%s", (int)(max_pwr + 0.5), units);
-      cairo_move_to(cr, 80, METER_HEIGHT - 22);
+      switch (pa_power) {
+        case PA_1W:
+          sprintf(sf, "%dmW", (int)(1000.0*max_pwr + 0.5));
+          break;
+        case PA_5W:
+        case PA_10W:
+          sprintf(sf, "%0.1fW", max_pwr);
+          break;
+        default:
+          sprintf(sf, "%dW", (int)(max_pwr+0.5));
+          break;
+      }
+      cairo_move_to(cr, 80, cx - radius + 15);
       cairo_show_text(cr, sf);
 
       if (swr > transmitter->swr_alarm) {
@@ -398,11 +387,11 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
       }
 
       sprintf(sf, "SWR: %1.1f:1", swr);
-      cairo_move_to(cr, 60, METER_HEIGHT - 12);
+      cairo_move_to(cr, 60, cx -radius + 28);
       cairo_show_text(cr, sf);
       cairo_set_source_rgba(cr, COLOUR_METER);
       sprintf(sf, "ALC: %2.1f dB", max_alc);
-      cairo_move_to(cr, 60, METER_HEIGHT - 2);
+      cairo_move_to(cr, 60, cx -radius + 41);
       cairo_show_text(cr, sf);
     }
     break;
@@ -610,7 +599,18 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
         //
         // Power/Alc/SWR not available for SOAPY.
         //
-        sprintf(sf, "FWD: %d%s", (int)(max_pwr + 0.5), units);
+        switch (pa_power) {
+          case PA_1W:
+            sprintf(sf, "FWD: %dmW", (int)(1000.0*max_pwr + 0.5));
+            break;
+          case PA_5W:
+          case PA_10W:
+            sprintf(sf, "FWD: %0.1fW", max_pwr);
+            break;
+          default:
+            sprintf(sf, "FWD: %dW", (int)(max_pwr + 0.5));
+            break;
+        } 
         cairo_move_to(cr, 10, Y2);
         cairo_show_text(cr, sf);
 

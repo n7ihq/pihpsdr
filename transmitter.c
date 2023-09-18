@@ -257,51 +257,21 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
 }
 
 static double compute_power(double p) {
-  double interval = 10.0;
 
-  switch (pa_power) {
-  case PA_1W:
-    interval = 100.0; // mW
-    break;
-
-  case PA_10W:
-    interval = 1.0; // W
-    break;
-
-  case PA_30W:
-    interval = 3.0; // W
-    break;
-
-  case PA_50W:
-    interval = 5.0; // W
-    break;
-
-  case PA_100W:
-    interval = 10.0; // W
-    break;
-
-  case PA_200W:
-    interval = 20.0; // W
-    break;
-
-  case PA_500W:
-    interval = 50.0; // W
-    break;
-  }
-
+  double interval = 0.1 * pa_power_list[pa_power];
   int i = 0;
 
-  if (p > (double)pa_trim[10]) {
+  if (p > pa_trim[10]) {
     i = 9;
   } else {
-    while (p > (double)pa_trim[i]) {
+    while (p > pa_trim[i]) {
       i++;
     }
 
     if (i > 0) { i--; }
   }
 
-  double frac = (p - (double)pa_trim[i]) / ((double)pa_trim[i + 1] - (double)pa_trim[i]);
+  double frac = (p - pa_trim[i]) / (pa_trim[i + 1] - pa_trim[i]);
   return interval * ((1.0 - frac) * (double)i + frac * (double)(i + 1));
 }
 

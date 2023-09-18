@@ -1404,7 +1404,7 @@ void *send_highprio_thread(void *data) {
     *p++ = 0;
     *p++ = txdrive;
     p += 6;
-    rc = (int) ((4095.0 / c1) * sqrt(500.0 * txlevel * c2));
+    rc = (int) ((4095.0 / c1) * sqrt(maxpwr * txlevel * c2));
     *p++ = (rc >> 8) & 0xFF;
     *p++ = (rc     ) & 0xFF;
     buffer[49] = 63; // about 13 volts supply

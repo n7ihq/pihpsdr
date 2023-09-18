@@ -173,7 +173,8 @@ int alc = TXA_ALC_PK;
 int filter_board = ALEX;
 int pa_enabled = PA_ENABLED;
 int pa_power = 0;
-int pa_trim[11];
+const int pa_power_list[]={1, 5, 10, 30, 50, 100, 200, 500, 1000};
+double pa_trim[11];
 
 int updates_per_second = 10;
 
@@ -999,14 +1000,15 @@ void start_radio() {
   case DEVICE_METIS:
   case DEVICE_OZY:
   case NEW_DEVICE_ATLAS:
-  case DEVICE_HERMES_LITE:
-  case NEW_DEVICE_HERMES_LITE:
     pa_power = PA_1W;
     break;
 
   case DEVICE_HERMES_LITE2:
-  case DEVICE_STEMLAB:
   case NEW_DEVICE_HERMES_LITE2:
+    pa_power = PA_5W;
+    break;
+
+  case DEVICE_STEMLAB:
     pa_power = PA_10W;
     break;
 
@@ -1045,55 +1047,8 @@ void start_radio() {
 
   drive_digi_max = drive_max; // To be updated when reading props file
 
-  switch (pa_power) {
-  case PA_1W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 100;
-    }
-
-    break;
-
-  case PA_10W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i;
-    }
-
-    break;
-
-  case PA_30W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 3;
-    }
-
-    break;
-
-  case PA_50W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 5;
-    }
-
-    break;
-
-  case PA_100W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 10;
-    }
-
-    break;
-
-  case PA_200W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 20;
-    }
-
-    break;
-
-  case PA_500W:
-    for (i = 0; i < 11; i++) {
-      pa_trim[i] = i * 50;
-    }
-
-    break;
+  for (i = 0; i < 11; i++) {
+    pa_trim[i] = i * pa_power_list[pa_power] * 0.1;
   }
 
   //
@@ -2169,11 +2124,11 @@ void calcDriveLevel() {
     transmitter->do_scale = 1;
   }
 
-  if (transmitter->do_scale) {
-    //t_print("%s: Level=%d Fac=%f\n", __FUNCTION__, transmitter->drive_level, transmitter->drive_scale);
-  } else {
-    //t_print("%s: Level=%d\n", __FUNCTION__, transmitter->drive_level);
-  }
+  //if (transmitter->do_scale) {
+  //  t_print("%s: Level=%d Fac=%f\n", __FUNCTION__, transmitter->drive_level, transmitter->drive_scale);
+  //} else {
+  //  t_print("%s: Level=%d\n", __FUNCTION__, transmitter->drive_level);
+  //}
 
   if (isTransmitting()  && protocol == NEW_PROTOCOL) {
     schedule_high_priority();
@@ -2518,7 +2473,7 @@ void radioRestoreState() {
   }
 
   for (int i = 0; i < 11; i++) {
-    GetPropI1("pa_trim[%d]", i,                              pa_trim[i]);
+    GetPropF1("pa_trim[%d]", i,                              pa_trim[i]);
   }
 
   for (int id = 0; id < MAX_SERIAL; id++) {
@@ -2724,7 +2679,7 @@ void radioSaveState() {
   }
 
   for (int i = 0; i < 11; i++) {
-    SetPropI1("pa_trim[%d]", i,                              pa_trim[i]);
+    SetPropF1("pa_trim[%d]", i,                              pa_trim[i]);
   }
 
   for (int id = 0; id < MAX_SERIAL; id++) {
