@@ -1085,20 +1085,13 @@ via the main menu and the \bltt{Screen} button and is shown in Fig. \ref{fig:Scr
 \end{figure}
 
 The window width and height can be chosen with the spin buttons shown. The minimum
-values for width and height are 800 and 480, the maximum values are determined by
+values for width and height are 640 and 400, the maximum values are determined by
 the resolution of the monitor. If more than one monitor is attached, the dimension
 of the monitor on which the initial piHPSDR window was opened determines
 the maximum width and height. Changes made in the spin buttons become effective
 immediately. If piHPSDR is in full screen mode (see below), you can change the
 values of the window width and height, but they do not become effective until
 you leave the full screen mode.
-
-If the window width is decreased such that the VFO bar chosen does no longer fit,
-the first one in the list that does fit is automatically selected, and the
-current choice printed in the 
- pop-down menu \rett{Select VFO bar layout} is updated. This menu lets you choose
- the layout of the VFO
-bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown.
 
 \begin{figure}[h!]
 \center
@@ -1107,13 +1100,38 @@ bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown.
 \label{fig:VFObarChoice}
 \end{figure}
 
-The two largest ones require a window width of about 1000 and 900 pixels, while the
-two small ones can be used with a screen only 800 pixels wide. The VFO bar shown
-at the bottom of Fig. \ref{fig:VFObarChoice} represents the original piHPSDR layout,
-the second one from the bottom has larger characters for the VFO dials and therefore
-a few more pixels height. The VFO bar has been described in detail in chapter
+If the window width is decreased such that the VFO bar chosen does no longer fit,
+the first one in the list that does fit is automatically selected, and the
+current choice printed in the 
+ pop-down menu \rett{Select VFO bar layout} is updated. This menu lets you choose
+ the layout of the VFO
+bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown.
+
+
+
+These layouts require a screen size of 1010, 895, 795, and 635 pixels (from top to
+bottom).
+The VFO bar has been described in detail in chapter
 \ref{sec:VFObar}. If you choose a VFO bar layout that is wider than the current
 window width allows, the window with is automatically adjusted.
+
+\begin{figure}[h!]
+\center
+\includegraphics[width=9cm]{640x400.png}
+\caption{piHPSDR running in a 640 x 400 window.}
+\label{fig:640x400}
+\end{figure}
+
+Fig. \ref{fig:640x400} shows, as an example, piHPSDR running in a window as small
+as 640*400 pixels. It is admitted that this looks rather squeezed, and this
+will only be useful if a single receiver is run with no waterfall. However, for
+portable operations such small windows are often desired,
+if piHPSDR is to be run alongside with a logbook and/or digimode program on a small laptop.
+Note that the piHPSDR menus are designed to fit on a window 800*480 pixels large, so
+it is not recommended to run piHPSDR on a \textit{screen} that small. On the other hand,
+if piHPSDR is run on a laptop in a small 640*400 window, then menus may be larger than
+that but still fit well on the screen (thus hiding, momentarily, the window of,
+say, your logbook program).
 
 \rett{Stack receivers horizontally}. If checked, this puts the panels
 of the two receivers (if two receivers are used) side-by-side instead of on top
@@ -2161,6 +2179,7 @@ I personally never use it.
 \chapter{The Main Menu: menus for RX and TX}
 
 \section{The \texttt{FFT} (Signal Processing) Menu}
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{FFTMenu.png}
@@ -2168,7 +2187,48 @@ I personally never use it.
 \label{fig:FFTMenu}
 \end{figure}
 
+The \bltt{FFT} menu sets parameters for the filters inside WDSP
+(and thus has no effect if using SoapySDR radios).
+Filter characteristics can be specified separately for the RX1 (and RX2, if
+running two receivers) and TX filters. Most users will
+very rarely need to invoke this menu, which is shown
+in Fig. \ref{fig:FFTMenu}.
+
+\rett{Filter Type}. Digital filters can be designed such that a signal within the
+passband leaves the filter in a shape as similar as possible
+to what went into the filter. This requires that the phase
+difference between input and output signal is a linear
+function of the frequency. Another desirable property
+of a linear filter is that the time delay between a signal
+going into a filter and what comes out is as small as
+possible. Unfortunately there some sort of uncertainty
+relation between these two properties, so you only can
+trade one for the other. The options for the filter type
+are thus \rett{Linear Phase} or \rett{Low Latency}.
+But note that there is a lot of latency in the HPSDR data
+processing which you cannot avoid, so ,,low'' latency
+is not really low. Therefore, the default option
+is \rett{Linear Phase}, and there should be little reason
+to change this.
+
+\rett{Filter Size}. This is the number of ,,taps'' of the digital
+filter. Increasing this size will inevitably increase the latency,
+but makes the filter edges steeper. The allowed values are
+powers of 2, and the minimum value equals the buffer size, which
+is hard-coded in piHPSDR to be 1024 (except for the transmitter in P2,
+where it is reduced to 512). The default value of 2048 should be
+fine in almost all cases, if you increase it, you can notice that
+the filter edges become little more ,,brick wall'' like.
+
 \section{The \texttt{Equalizer} Menu}
+
+In the \bltt{Equalizer} menu, you can modify the frequency response of
+the RX and TX audio. You can adjust the RX equalizer to your personal
+preferences for listening to the RX audio. The TX equalizer affects
+your transmitted signal. You can, for example, provide some extra
+amplification to the low-frequency part of your voice. The menu
+is shown in Fig. \ref{fig:EqualizerMenu}.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EqualizerMenu.png}
@@ -2176,15 +2236,73 @@ I personally never use it.
 \label{fig:EqualizerMenu}
 \end{figure}
 
+Using \rett{Enable RX Equalizer} and \rett{Enable TX Equalizer},
+you can individually enable/disable the RX and TX equalizer.
+If the RX equalizer is enabled, the EQ indicator in the
+VFO bar, upon receiving, turns yellow and reads \rett{RxEQ}.
+If the TX equalizer is enabled, this indicator turns yellow
+while transmitting and reads \rett{TxEQ}. So while receiving,
+you cannot tell, from the VFO bar, whether the TX equalizer is 
+actually enabled or not!
+
+For both equalizers, there are four sliders which affect the
+overall gain (Preamp), and the amplification in the low/mid/high
+frequency range. Equalizer settings are saved with the mode, so
+if you adjust the Equaliziers when doing SSB, and then switch to
+DIGU, the equalizers are disabled and they resume their SSB
+settings upon going back to LSB/USB. This also applies to other
+modes such as CWU/CWL, where the TX equalizer has no meaning 
+anyway, and where the RX equalizer is normally not needed because
+CW filters usually are narrow.
+
 \section{The \texttt{Ant} (Antenna) Menu}
+
+The \bltt{Ant} menu, as shown in Fig. \ref{fig:ANTmenu}, 
+applies to HPSDR radios. For SoapySDR radios, the layout
+is much simpler because there are much fewer choices possible.
+
 \begin{figure}[h]
 \center
-\includegraphics[width=12cm]{AntMenu.png}
+\includegraphics[width=12cm]{ANTmenu.png}
 \caption{The ANT (antenna) menu.}
-\label{fig:AntMenu}
+\label{fig:ANTmenu}
 \end{figure}
  
+ Standard HPSDR radios have, in most cases, three main antenna jacks
+ denoted Ant1, Ant2, Ant3, which can be used both for receiving to 
+ the first ADC and
+ transmitting. Then there are additional antenna jacks (Ext1, Ext2, 
+ and Xvtr) which can only be used for receiving and are also connected
+ to the first ADC. If the radio has more than one ADC, the (RX only)
+ antenna jack, usually denoted RX2, is hard-wired to the second ADC.
+ 
+ For each band, one can now choose one (out the three) antennas for
+ transmitting and one (out of six) antennas for receiving. The main purpose
+ of this is the possibility to connect an additional receive-only antenna
+such as a beverage antenna which often has a better signal-to-noise
+ ration than standard antennas used for transmitting.
+ 
 \section{The \texttt{OC} (OpenCollector) Menu}
+
+Standard HPSDR radios have seven individually programmable outputs wired as
+open collector output. In the \bltt{OC} menu, you can specify, separately
+for each band, and separately for receive and transmit, which output should
+be ,,set''. This can be used to switch the band filters of an external PA
+or of an external RX preselector, to control an automatic antenna tuner,
+and many more things, since it is
+your external hardware which in the end has to make sense of the output
+bit pattern.
+
+To facilitate control of an automatic tuner, there are seven \rett{TUNE}
+bits which are ORed with the bit pattern chosen for TX on the actual band,
+as long as you are TUNEing with piHPSDR. Besides the \bltt{TUNE} action,
+there are the \bltt{Full TUNE} and \bltt{Memory Tune} actions which are
+functionally equivalent, except that the open collector tuning pattern
+is removed for \bltt{Full Tune} after the full tune delay, and for \bltt{Memory Tune}
+after the memory tune delay, which can also be specified in this menu.
+This can be used to send short tuning pulsed of varying length to the
+external automatic tuner at the beginning of the tuning.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{OCMenu.png}
