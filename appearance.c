@@ -46,7 +46,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
   // which requires a width of 745 and a height of 78
   //
   {
-    .description = "Large dials for 1024px windows",
+    .description = "VFO bar for 1024px windows",
     .width = 745,
     .height = 82,
     .size1 = 14,
@@ -108,7 +108,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .filter_y = 21
   },
   {
-    .description = "Large dials for 900px windows",
+    .description = "VFO bar for 900px windows",
     .width = 630,
     .height = 82,
     .size1 = 14,
@@ -167,7 +167,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .filter_x = 0
   },
   {
-    .description = "Large dials for 800px windows",
+    .description = "VFO bar for 800px windows",
     .width = 530,
     .height = 68,
     .size1 = 13,
@@ -240,7 +240,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .size3 = 26,
     .vfo_a_x = 5,
     .vfo_a_y = 41,
-    .vfo_b_x = 190,
+    .vfo_b_x = 200,
     .vfo_b_y = 41,
     .mode_x = 5,
     .mode_y = 15,

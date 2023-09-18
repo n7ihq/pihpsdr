@@ -692,7 +692,11 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   }
 
   if (have_rx_att) {
-    attenuation_label = gtk_label_new("Att (dB):");
+    if (my_width >= 800) {
+      attenuation_label = gtk_label_new("Att (dB):");
+    } else {
+      attenuation_label = gtk_label_new("Att:");
+    }
     gtk_widget_set_name(attenuation_label, "boldlabel");
     gtk_widget_set_halign(attenuation_label, GTK_ALIGN_END);
     gtk_widget_show(attenuation_label);
@@ -777,7 +781,11 @@ GtkWidget *sliders_init(int my_width, int my_height) {
     drive_scale = NULL;
   }
 
-  squelch_label = gtk_label_new("Squelch:");
+  if (my_width >= 800) {
+    squelch_label = gtk_label_new("Squelch:");
+  } else {
+    squelch_label = gtk_label_new("Sqlch:");
+  }
   gtk_widget_set_name(squelch_label, "boldlabel");
   gtk_widget_set_halign(squelch_label, GTK_ALIGN_END);
   gtk_widget_show(squelch_label);
