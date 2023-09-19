@@ -423,8 +423,13 @@ static int set_full_screen(gpointer data) {
 }
 
 void reconfigure_screen() {
-  static int last_fullscreen = -1;
-  int my_fullscreen = full_screen;  // this will not change during this procedure
+  GdkWindow *gw = gtk_widget_get_window(top_window);
+  GdkWindowState ws = gdk_window_get_state(GDK_WINDOW(gw));
+  int last_fullscreen = SET(ws & GDK_WINDOW_STATE_FULLSCREEN);
+
+  int my_fullscreen = SET(full_screen);  // this will not change during this procedure
+  g_print("RECONFIG: old=%d new=%d\n", last_fullscreen, my_fullscreen);
+
   if (last_fullscreen != my_fullscreen) {
     if (full_screen_timeout > 0) {
       g_source_remove(full_screen_timeout);

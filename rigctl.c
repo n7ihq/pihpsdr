@@ -5650,7 +5650,13 @@ int launch_serial (int id) {
     g_mutex_init(&mutex_busy->m);
   }
 
-  fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC);
+  //
+  // If the O_NONBLOCK parameter is omitted, then pihpsdr may hang upon
+  // opening the port. So even if you want "blocking" I/O, you should
+  // open the port non-blocking and then activate blocking later on
+  //
+  t_print("RIGCTL: Launch Serial port %s\n", SerialPorts[id].port);
+  fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
 
   if (fd < 0) {
     t_perror("RIGCTL (open serial):");
@@ -5671,7 +5677,8 @@ int launch_serial (int id) {
   } else {
     //
     // This tells the server that fd is something else
-    // than a serial line.
+    // than a serial line (most likely a FIFO), but it
+    // can still be used.
     //
     t_print("serial port is probably a FIFO\n");
     serial_client[id].fifo = 1;
