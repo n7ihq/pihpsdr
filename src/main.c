@@ -430,7 +430,7 @@ int main(int argc, char **argv) {
   int rc;
   char name[1024];
 #ifdef __APPLE__
-  void MacOSstartup(char *path);
+  void MacOSstartup(const char *path);
   MacOSstartup(argv[0]);
 #endif
   sprintf(name, "org.g0orx.pihpsdr.pid%d", getpid());

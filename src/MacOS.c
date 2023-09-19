@@ -42,7 +42,7 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
 
-void MacOSstartup(char *path) {
+void MacOSstartup(const char *path) {
   //
   // We used to do this from a wrapper shell script.
   // However, this confuses MacOS when it comes to

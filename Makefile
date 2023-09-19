@@ -55,7 +55,7 @@ LINK?=   $(CC)
 # The "official" way to compile+link with pthreads is now to use the -pthread option
 # *both* for the compile and the link step.
 #
-CFLAGS+=-pthread
+CFLAGS+=-pthread -I./src
 LINK+=-pthread
 
 PKG_CONFIG = pkg-config
@@ -82,13 +82,13 @@ ifeq ($(MIDI_INCLUDE),MIDI)
 MIDI_OPTIONS=-D MIDI
 MIDI_HEADERS= midi.h midi_menu.h alsa_midi.h
 ifeq ($(UNAME_S), Darwin)
-MIDI_SOURCES= mac_midi.c midi2.c midi3.c midi_menu.c
-MIDI_OBJS= mac_midi.o midi2.o midi3.o midi_menu.o
+MIDI_SOURCES= src/mac_midi.c src/midi2.c src/midi3.c src/midi_menu.c
+MIDI_OBJS= src/mac_midi.o src/midi2.o src/midi3.o src/midi_menu.o
 MIDI_LIBS= -framework CoreMIDI -framework Foundation
 endif
 ifeq ($(UNAME_S), Linux)
-MIDI_SOURCES= alsa_midi.c midi2.c midi3.c midi_menu.c
-MIDI_OBJS= alsa_midi.o midi2.o midi3.o midi_menu.o
+MIDI_SOURCES= src/alsa_midi.c src/midi2.c src/midi3.c src/midi_menu.c
+MIDI_OBJS= src/alsa_midi.o src/midi2.o src/midi3.o src/midi_menu.o
 MIDI_LIBS= -lasound
 endif
 endif
@@ -99,23 +99,23 @@ endif
 ifeq ($(SATURN_INCLUDE),SATURN)
 SATURN_OPTIONS=-D SATURN
 SATURN_SOURCES= \
-saturndrivers.c \
-saturnregisters.c \
-saturnserver.c \
-saturnmain.c \
-saturn_menu.c
+src/saturndrivers.c \
+src/saturnregisters.c \
+src/saturnserver.c \
+src/saturnmain.c \
+src/saturn_menu.c
 SATURN_HEADERS= \
-saturndrivers.h \
-saturnregisters.h \
-saturnserver.h \
-saturnmain.h \
-saturn_menu.h
+src/saturndrivers.h \
+src/saturnregisters.h \
+src/saturnserver.h \
+src/saturnmain.h \
+src/saturn_menu.h
 SATURN_OBJS= \
-saturndrivers.o \
-saturnregisters.o \
-saturnserver.o \
-saturnmain.o \
-saturn_menu.o
+src/saturndrivers.o \
+src/saturnregisters.o \
+src/saturnserver.o \
+src/saturnmain.o \
+src/saturn_menu.o
 endif
 
 #
@@ -125,11 +125,11 @@ ifeq ($(USBOZY_INCLUDE),USBOZY)
 USBOZY_OPTIONS=-D USBOZY
 USBOZY_LIBS=-lusb-1.0
 USBOZY_SOURCES= \
-ozyio.c
+src/ozyio.c
 USBOZY_HEADERS= \
-ozyio.h
+src/ozyio.h
 USBOZY_OBJS= \
-ozyio.o
+src/ozyio.o
 endif
 
 #
@@ -139,14 +139,14 @@ ifeq ($(SOAPYSDR_INCLUDE),SOAPYSDR)
 SOAPYSDR_OPTIONS=-D SOAPYSDR
 SOAPYSDRLIBS=-lSoapySDR
 SOAPYSDR_SOURCES= \
-soapy_discovery.c \
-soapy_protocol.c
+src/soapy_discovery.c \
+src/soapy_protocol.c
 SOAPYSDR_HEADERS= \
-soapy_discovery.h \
-soapy_protocol.h
+src/soapy_discovery.h \
+src/soapy_protocol.h
 SOAPYSDR_OBJS= \
-soapy_discovery.o \
-soapy_protocol.o
+src/soapy_discovery.o \
+src/soapy_protocol.o
 endif
 
 #
@@ -178,9 +178,9 @@ endif
 ifeq ($(STEMLAB_DISCOVERY), STEMLAB)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
-STEMLAB_SOURCES=stemlab_discovery.c
-STEMLAB_HEADERS=stemlab_discovery.h
-STEMLAB_OBJS=stemlab_discovery.o
+STEMLAB_SOURCES=src/stemlab_discovery.c
+STEMLAB_HEADERS=src/stemlab_discovery.h
+STEMLAB_OBJS=src/stemlab_discovery.o
 endif
 
 #
@@ -194,11 +194,11 @@ endif
 ifeq ($(SERVER_INCLUDE), SERVER)
 SERVER_OPTIONS=-D CLIENT_SERVER
 SERVER_SOURCES= \
-client_server.c server_menu.c
+src/client_server.c src/server_menu.c
 SERVER_HEADERS= \
-client_server.h server_menu.h
+src/client_server.h src/server_menu.h
 SERVER_OBJS= \
-client_server.o server_menu.o
+src/client_server.o src/server_menu.o
 endif
 
 #
@@ -223,8 +223,8 @@ endif
 ifeq ($(AUDIO_MODULE), PULSEAUDIO)
 AUDIO_OPTIONS=-DPULSEAUDIO
 AUDIO_LIBS=-lpulse-simple -lpulse -lpulse-mainloop-glib
-AUDIO_SOURCES=pulseaudio.c
-AUDIO_OBJS=pulseaudio.o
+AUDIO_SOURCES=src/pulseaudio.c
+AUDIO_OBJS=src/pulseaudio.o
 endif
 
 #
@@ -233,8 +233,8 @@ endif
 ifeq ($(AUDIO_MODULE), ALSA)
 AUDIO_OPTIONS=-DALSA
 AUDIO_LIBS=-lasound
-AUDIO_SOURCES=audio.c
-AUDIO_OBJS=audio.o
+AUDIO_SOURCES=src/audio.c
+AUDIO_OBJS=src/audio.o
 endif
 
 #
@@ -243,8 +243,8 @@ endif
 ifeq ($(AUDIO_MODULE), PORTAUDIO)
 AUDIO_OPTIONS=-DPORTAUDIO `$(PKG_CONFIG) --cflags portaudio-2.0`
 AUDIO_LIBS=`$(PKG_CONFIG) --libs portaudio-2.0`
-AUDIO_SOURCES=portaudio.c
-AUDIO_OBJS=portaudio.o
+AUDIO_SOURCES=src/portaudio.c
+AUDIO_OBJS=src/portaudio.o
 endif
 
 ##############################################################################
@@ -303,237 +303,237 @@ PROGRAM=pihpsdr
 # The core *.c files in alphabetical order
 #
 SOURCES= \
-MacOS.c \
-about_menu.c \
-actions.c \
-action_dialog.c \
-agc_menu.c \
-ant_menu.c \
-appearance.c \
-band.c \
-band_menu.c \
-bandstack_menu.c \
-css.c \
-configure.c \
-cw_menu.c \
-cwramp.c \
-discovered.c \
-discovery.c \
-display_menu.c \
-diversity_menu.c \
-encoder_menu.c \
-equalizer_menu.c \
-exit_menu.c \
-ext.c \
-fft_menu.c \
-filter.c \
-filter_menu.c \
-gpio.c \
-i2c.c \
-iambic.c \
-led.c \
-main.c \
-message.c \
-meter.c \
-meter_menu.c \
-mode.c \
-mode_menu.c \
-new_discovery.c \
-new_menu.c \
-new_protocol.c \
-noise_menu.c \
-oc_menu.c \
-old_discovery.c \
-old_protocol.c \
-pa_menu.c \
-property.c \
-protocols.c \
-ps_menu.c \
-radio.c \
-radio_menu.c \
-receiver.c \
-rigctl.c \
-rigctl_menu.c \
-rx_menu.c \
-rx_panadapter.c \
-screen_menu.c \
-sintab.c \
-sliders.c \
-store.c \
-store_menu.c \
-switch_menu.c \
-toolbar.c \
-toolbar_menu.c \
-transmitter.c \
-tx_menu.c \
-tx_panadapter.c \
-version.c \
-vfo.c \
-vfo_menu.c \
-vox.c \
-vox_menu.c \
-waterfall.c \
-xvtr_menu.c \
-zoompan.c
+src/MacOS.c \
+src/about_menu.c \
+src/actions.c \
+src/action_dialog.c \
+src/agc_menu.c \
+src/ant_menu.c \
+src/appearance.c \
+src/band.c \
+src/band_menu.c \
+src/bandstack_menu.c \
+src/css.c \
+src/configure.c \
+src/cw_menu.c \
+src/cwramp.c \
+src/discovered.c \
+src/discovery.c \
+src/display_menu.c \
+src/diversity_menu.c \
+src/encoder_menu.c \
+src/equalizer_menu.c \
+src/exit_menu.c \
+src/ext.c \
+src/fft_menu.c \
+src/filter.c \
+src/filter_menu.c \
+src/gpio.c \
+src/i2c.c \
+src/iambic.c \
+src/led.c \
+src/main.c \
+src/message.c \
+src/meter.c \
+src/meter_menu.c \
+src/mode.c \
+src/mode_menu.c \
+src/new_discovery.c \
+src/new_menu.c \
+src/new_protocol.c \
+src/noise_menu.c \
+src/oc_menu.c \
+src/old_discovery.c \
+src/old_protocol.c \
+src/pa_menu.c \
+src/property.c \
+src/protocols.c \
+src/ps_menu.c \
+src/radio.c \
+src/radio_menu.c \
+src/receiver.c \
+src/rigctl.c \
+src/rigctl_menu.c \
+src/rx_menu.c \
+src/rx_panadapter.c \
+src/screen_menu.c \
+src/sintab.c \
+src/sliders.c \
+src/store.c \
+src/store_menu.c \
+src/switch_menu.c \
+src/toolbar.c \
+src/toolbar_menu.c \
+src/transmitter.c \
+src/tx_menu.c \
+src/tx_panadapter.c \
+src/version.c \
+src/vfo.c \
+src/vfo_menu.c \
+src/vox.c \
+src/vox_menu.c \
+src/waterfall.c \
+src/xvtr_menu.c \
+src/zoompan.c
 
 #
 # The core *.h (header) files in alphabetical order
 #
 HEADERS= \
-MacOS.h \
-about_menu.h \
-actions.h \
-action_dialog.h \
-adc.h \
-agc.h \
-agc_menu.h \
-alex.h \
-ant_menu.h \
-appearance.h \
-band.h \
-band_menu.h \
-bandstack_menu.h \
-bandstack.h \
-channel.h \
-configure.h \
-css.h \
-cw_menu.h \
-dac.h \
-discovered.h \
-discovery.h \
-display_menu.h \
-diversity_menu.h \
-encoder_menu.h \
-equalizer_menu.h \
-exit_menu.h \
-ext.h \
-fft_menu.h \
-filter.h \
-filter_menu.h \
-gpio.h \
-iambic.h \
-i2c.h \
-led.h \
-main.h \
-message.h \
-meter.h \
-meter_menu.h \
-mode.h \
-mode_menu.h \
-new_discovery.h \
-new_menu.h \
-new_protocol.h \
-noise_menu.h \
-oc_menu.h \
-old_discovery.h \
-old_protocol.h \
-pa_menu.h \
-property.h \
-protocols.h \
-ps_menu.h \
-radio.h \
-radio_menu.h \
-receiver.h \
-rigctl.h \
-rigctl_menu.h \
-rx_menu.h \
-rx_panadapter.h \
-screen_menu.h \
-sintab.h \
-sliders.h \
-store.h \
-store_menu.h \
-switch_menu.h \
-toolbar.h \
-toolbar_menu.h \
-transmitter.h \
-tx_menu.h \
-tx_panadapter.h \
-version.h \
-vfo.h \
-vfo_menu.h \
-vox.h \
-vox_menu.h \
-waterfall.h \
-xvtr_menu.h \
-zoompan.h
+src/MacOS.h \
+src/about_menu.h \
+src/actions.h \
+src/action_dialog.h \
+src/adc.h \
+src/agc.h \
+src/agc_menu.h \
+src/alex.h \
+src/ant_menu.h \
+src/appearance.h \
+src/band.h \
+src/band_menu.h \
+src/bandstack_menu.h \
+src/bandstack.h \
+src/channel.h \
+src/configure.h \
+src/css.h \
+src/cw_menu.h \
+src/dac.h \
+src/discovered.h \
+src/discovery.h \
+src/display_menu.h \
+src/diversity_menu.h \
+src/encoder_menu.h \
+src/equalizer_menu.h \
+src/exit_menu.h \
+src/ext.h \
+src/fft_menu.h \
+src/filter.h \
+src/filter_menu.h \
+src/gpio.h \
+src/iambic.h \
+src/i2c.h \
+src/led.h \
+src/main.h \
+src/message.h \
+src/meter.h \
+src/meter_menu.h \
+src/mode.h \
+src/mode_menu.h \
+src/new_discovery.h \
+src/new_menu.h \
+src/new_protocol.h \
+src/noise_menu.h \
+src/oc_menu.h \
+src/old_discovery.h \
+src/old_protocol.h \
+src/pa_menu.h \
+src/property.h \
+src/protocols.h \
+src/ps_menu.h \
+src/radio.h \
+src/radio_menu.h \
+src/receiver.h \
+src/rigctl.h \
+src/rigctl_menu.h \
+src/rx_menu.h \
+src/rx_panadapter.h \
+src/screen_menu.h \
+src/sintab.h \
+src/sliders.h \
+src/store.h \
+src/store_menu.h \
+src/switch_menu.h \
+src/toolbar.h \
+src/toolbar_menu.h \
+src/transmitter.h \
+src/tx_menu.h \
+src/tx_panadapter.h \
+src/version.h \
+src/vfo.h \
+src/vfo_menu.h \
+src/vox.h \
+src/vox_menu.h \
+src/waterfall.h \
+src/xvtr_menu.h \
+src/zoompan.h
 
 #
 # The core *.o (object) files in alphabetical order
 #
 OBJS= \
-MacOS.o \
-about_menu.o \
-actions.o \
-action_dialog.o \
-agc_menu.o \
-ant_menu.o \
-appearance.o \
-band.o \
-band_menu.o \
-bandstack_menu.o \
-configure.o \
-css.o \
-cw_menu.o \
-cwramp.o \
-discovered.o \
-discovery.o \
-display_menu.o \
-diversity_menu.o \
-encoder_menu.o \
-equalizer_menu.o \
-exit_menu.o \
-ext.o \
-fft_menu.o \
-filter.o \
-filter_menu.o \
-gpio.o \
-iambic.o \
-i2c.o \
-led.o \
-main.o \
-message.o \
-meter.o \
-meter_menu.o \
-mode.o \
-mode_menu.o \
-new_discovery.o \
-new_menu.o \
-new_protocol.o \
-noise_menu.o \
-oc_menu.o \
-old_discovery.o \
-old_protocol.o \
-pa_menu.o \
-property.o \
-protocols.o \
-ps_menu.o \
-radio.o \
-radio_menu.o \
-receiver.o \
-rigctl.o \
-rigctl_menu.o \
-rx_menu.o \
-rx_panadapter.o \
-screen_menu.o \
-sintab.o \
-sliders.o \
-store.o \
-store_menu.o \
-switch_menu.o \
-toolbar.o \
-toolbar_menu.o \
-transmitter.o \
-tx_menu.o \
-tx_panadapter.o \
-version.o \
-vfo.o \
-vfo_menu.o \
-vox.o \
-vox_menu.o \
-xvtr_menu.o \
-waterfall.o \
-zoompan.o
+src/MacOS.o \
+src/about_menu.o \
+src/actions.o \
+src/action_dialog.o \
+src/agc_menu.o \
+src/ant_menu.o \
+src/appearance.o \
+src/band.o \
+src/band_menu.o \
+src/bandstack_menu.o \
+src/configure.o \
+src/css.o \
+src/cw_menu.o \
+src/cwramp.o \
+src/discovered.o \
+src/discovery.o \
+src/display_menu.o \
+src/diversity_menu.o \
+src/encoder_menu.o \
+src/equalizer_menu.o \
+src/exit_menu.o \
+src/ext.o \
+src/fft_menu.o \
+src/filter.o \
+src/filter_menu.o \
+src/gpio.o \
+src/iambic.o \
+src/i2c.o \
+src/led.o \
+src/main.o \
+src/message.o \
+src/meter.o \
+src/meter_menu.o \
+src/mode.o \
+src/mode_menu.o \
+src/new_discovery.o \
+src/new_menu.o \
+src/new_protocol.o \
+src/noise_menu.o \
+src/oc_menu.o \
+src/old_discovery.o \
+src/old_protocol.o \
+src/pa_menu.o \
+src/property.o \
+src/protocols.o \
+src/ps_menu.o \
+src/radio.o \
+src/radio_menu.o \
+src/receiver.o \
+src/rigctl.o \
+src/rigctl_menu.o \
+src/rx_menu.o \
+src/rx_panadapter.o \
+src/screen_menu.o \
+src/sintab.o \
+src/sliders.o \
+src/store.o \
+src/store_menu.o \
+src/switch_menu.o \
+src/toolbar.o \
+src/toolbar_menu.o \
+src/transmitter.o \
+src/tx_menu.o \
+src/tx_panadapter.o \
+src/version.o \
+src/vfo.o \
+src/vfo_menu.o \
+src/vox.o \
+src/vox_menu.o \
+src/xvtr_menu.o \
+src/waterfall.o \
+src/zoompan.o
 
 #
 # How to link the program
@@ -551,7 +551,7 @@ all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYS
 
 .PHONY:	prebuild
 prebuild:
-	rm -f version.o
+	rm -f src/version.o
 
 #
 # "make check" invokes the cppcheck program to do a source-code checking.
@@ -584,7 +584,7 @@ cppcheck:
 
 .PHONY:	clean
 clean:
-	-rm -f *.o
+	-rm -f src/*.o
 	-rm -f $(PROGRAM) hpsdrsim bootloader
 	-rm -rf $(PROGRAM).app
 
@@ -604,14 +604,15 @@ release: $(PROGRAM)
 #
 #############################################################################
 
-hpsdrsim.o:     hpsdrsim.c  hpsdrsim.h
-	$(CC) -c $(CFLAGS) hpsdrsim.c
+src/hpsdrsim.o:     src/hpsdrsim.c  src/hpsdrsim.h
+	$(CC) -c $(CFLAGS) -o src/hpsdrsim.o src/hpsdrsim.c
 	
-newhpsdrsim.o:	newhpsdrsim.c hpsdrsim.h
-	$(CC) -c $(CFLAGS) newhpsdrsim.c
+src/newhpsdrsim.o:	src/newhpsdrsim.c src/hpsdrsim.h
+	$(CC) -c $(CFLAGS) -o src/newhpsdrsim.o src/newhpsdrsim.c
 
-hpsdrsim:       hpsdrsim.o newhpsdrsim.o
-	$(LINK) -o hpsdrsim hpsdrsim.o newhpsdrsim.o -lm
+hpsdrsim:       src/hpsdrsim.o src/newhpsdrsim.o
+	$(LINK) -o hpsdrsim src/hpsdrsim.o src/newhpsdrsim.o -lm
+
 
 #############################################################################
 #
@@ -623,8 +624,8 @@ hpsdrsim:       hpsdrsim.o newhpsdrsim.o
 #
 #############################################################################
 
-bootloader:	bootloader.c
-	$(CC) -o bootloader bootloader.c -lpcap
+bootloader:	src/bootloader.c
+	$(CC) -o bootloader src/bootloader.c -lpcap
 
 debian:
 	mkdir -p pkg/pihpsdr/usr/local/bin
