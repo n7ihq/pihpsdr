@@ -35,13 +35,14 @@ the Creative Commons licence CC BY-SA, version 4 or later, so it can be freely d
 as long as attribution is given to the creator. The license allows for commercial use.
 If you modify or build upon the material, you must license the modified material under identical terms.
 
-\textbf{Disclaimer.} The manual has been written with the intention that it is useful. It is quite clear that it
-still contains errors, therefore it is stressed here that it comes without any warranty. The reader is hereby
-explicitly warned that through wrong use of an SDR program such as piHPSDR, it is possible to damage the
-radio hardware.
+\textbf{Disclaimer.} The manual has been written with the intention that it is useful. It is quite clear
+that it still contains errors, therefore it is stressed here that it comes without any warranty. The reader
+is hereby explicitly warned that through wrong use of an SDR program such as piHPSDR, it is possible to
+damage the radio hardware.
 
-\textbf{Trade marks.} Registered trade marks are not marked with a sign in this manual. From the absence of a
-trademark sign, it cannot be concluded that a mark you find in this manual is not registered or not protected.
+\textbf{Trade marks.} Registered trade marks are not marked with a sign in this manual. From the absence of
+a trademark sign, it cannot be concluded that a mark you find in this manual is not registered or not
+protected.
 
 \bigskip
 \textbf{The author:}
@@ -59,13 +60,14 @@ be merged in  the  future, although this  will  be hard  work.
 If you think you can improve the manual, you are welcome.
 Simply fork the above repository and make a pull request, or (this is the recommended way) write an
 email to the author: \texttt{dl1ycf@darc.de}
-
 \tableofcontents
 \mainmatter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Introduction}
 piHPSDR is a program that can operate with software defined radios (SDRs). As a graphical user interface,
 it uses the GTK-3 toolkit, while the actual signal processing is done by Warren Pratt's WDSP library. Thus,
-piHPSDR organizes the transfer of digitized radio frequency (RF) data between the radio hardware and the WDSP library, the
+piHPSDR organizes the transfer of digitized radio frequency (RF) data between the radio hardware and the
+WDSP library, the
 transfer of audio data (either from a microphone or to a headphone), as well as the processing of user
 input (either by mouse/touch-screen, keyboard, or external "knobs and buttons"),
  and the graphical display of the RF data. piHPSDR is intended
@@ -81,10 +83,10 @@ lines of a Raspberry Pi. At least two generations of such controllers have
 been put on the market by Apache labs, and I know of several projects where home-brewn controllers have
 successfully been made. As an alternative, MIDI devices can be used for user interaction. For desktop/laptop
 computers that do not have GPIO lines, MIDI offers an easy-to-use possibility of having push-bottons and
-dials that control piHPSDR. Apart from homebrew projects in which a micro-controller such as an Arduino Micro
-controls the actual buttons/knobs and acts as a MIDI device to the computer to which it is connected via USB,
-there are low-cost so-called "DJ controllers" (DJ stands for disk jockey) from various brands which have
-successfully been used with piHPSDR. A third possibility to control piHPSDR is via a serial interface
+dials that control piHPSDR. Apart from homebrew projects in which a micro-controller such as an Arduino
+Micro controls the actual buttons/knobs and acts as a MIDI device to the computer to which it is connected
+via USB, there are low-cost so-called "DJ controllers" (DJ stands for disk jockey) from various brands which
+have successfully been used with piHPSDR. A third possibility to control piHPSDR is via a serial interface
 through CAT (computer aided transceiver) commands. The CAT model used by piHPSDR is based on the Kenwood
 TS-2000 command set with lots of PowerSDR extensions.
 
@@ -108,22 +110,24 @@ the present manual. This manual starts with the first invocation of a freshly co
 Within this manual, we shall use a typewriter font in red color if we refer to a text or a button within
 a menu of within the VFO bar. piHPSDR menus and commands are indicated through a typewriter font
 printed in blue. The author hopes that this improves readability. In some cases, if the name of a command
-or  menu is written on the screen, you may find the same string both typed in red and blue in the description,
-depending on whether the text refers to the command in an abstract sense or to the string as it can be found
-on the screen. This may be confusing upon first reading, but I shall try to follow the coloring convention
-as laid out here.
+or  menu is written on the screen, you may find the same string both typed in red and blue in the
+description, depending on whether the text refers to the command in an abstract sense or to the string as it
+can be found on the screen. This may be confusing upon first reading, but I shall try to follow the coloring convention as laid out here.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Starting piHPSDR for the first time}
 Let us assume you have an SDR (say, an ANAN-7000 or a HermesLite-II) powered up and connected to an antenna,
 and you have piHPSDR installed on a computer (say, a Raspberry Pi or an Apple Macintosh), the first thing to
-do is to establish a proper connection between the computer and the radio. Although advocated at many places,
+do is to establish a proper connection between the computer and the radio. Although advocated at many 
+places,
 I do highly recommend against a WiFi connection. WiFi routers often use optimizations where they hold
 back data packets for a given client for a while, to be able to send a collection of them in a burst. While
 this certainly optimizes the through-put because it minimizes clear-channel arbitration events, such jitters
 are desastrous in SDR operation. The safest way of connecting the radio and the computer is to have a
 managed switch with a built-in DHCP server, and to connect both the computer and the radio with a suitable
 cable to the switch. If the computer has both a RJ45 jack for an ethernet cable, and a WiFi interface, my
-personal recommendation is to use WiFi to connect the computer to the internet, and use a single direct cable plugged
+personal recommendation is to use WiFi to connect the computer to the internet, and use a single direct 
+cable plugged
 into the RJ45 jacks of the computer and of the radio. This is a little bit tricky since both the computer
 and the radio have to be set to a fixed IP address (e.g. computer: 192.168.1.50, radio: 192.168.1.51) with
 the same netmask. However, once this has been done, this is the safest connection with no perturbations from
@@ -136,21 +140,23 @@ elsewhere.
 \label{fig:Planning}
 \end{figure}
 
-If the piHPSDR program is started for the first time, it opens a window that looks like Fig. \ref{fig:Planning}. 
+If the piHPSDR program is started for the first time, it opens a window that looks like Fig. 
+\ref{fig:Planning}. 
 Besides stating a version number and when piHPSDR was built, a list of optional features (to be activated
-at compile time) is stated, in this case, GPIO, MIDI, SATURN. These are compile-time options that are detailed in Appendix
-\ref{sec:compiletime}.
+at compile time) is stated, in this case, GPIO, MIDI, SATURN. These are compile-time options that are 
+detailed in Appendix \ref{sec:compiletime}.
 
 What is important here that you have to wait. This only applies to the very first time you start piHPSDR.
 On CPUs with a rather simple instruction set (like the ARM processor in the Raspberry Pi, or the Apple
-Silicon processor in recent Macintosh computers), this so-called  \textit{planning} step is quite fast. For example, on my
+Silicon processor in recent Macintosh computers), this so-called  \textit{planning} step is quite fast. For 
+example, on my
 Apple M2 Mac mini, this step only takes 6 seconds, and you have to wait for 34 seconds on a RaspberryPi 4.
 On the contrary, on CPUs with 
 complex instruction sets, more planning is necessary: on my other Mac mini with a 3 GHz x86 processor, it
 takes 16 minutes! But note
 this has only to be done once, in subsequent starts of piHPSDR, the wisdom will simply be read from
-the file created during the \textit{wisdom plans}. These plans contain, for a large number of dimensions, the
-fasted way how to perform FFTs (fast Fourier transformations) on the given CPU.
+the file created during the \textit{wisdom plans}. These plans contain, for a large number of dimensions, 
+the fasted way how to perform FFTs (fast Fourier transformations) on the given CPU.
 When the wisdom is secured, piHPSDR tries to detect a radio on the network. If everything went well with
 the network connection, you then see a screen with a discovery menu (Fig. \ref{fig:Start}).
 
@@ -164,11 +170,11 @@ the network connection, you then see a screen with a discovery menu (Fig. \ref{f
 At this point, you can start the radio by clicking the \rett{Start} button, but let us first explain the
 purpose of the other buttons! Easiest to explain is the \rett{Exit} button, this will simply terminate
 the program. Most likely, you may want to go into the \rett{Protocols} menu sooner or later.
- By default, piHPSDR tries to
-discover the presence of a radio using all protocols known to piHPSDR. However, if you know that your radio, for
-example, uses P2 (Protocol 2), then trying to discover a P1 (Protocol 1) radio is just a waste of time. So if you
-know which types of radio you want to connect to, you can enable (only) these in the \rett{Protocols} menu.
-The available protocols are
+By default, piHPSDR tries to discover the presence of a radio using all protocols known to piHPSDR. However, 
+if you know that your radio, for example, uses P2 (Protocol 2), then trying to discover a P1 (Protocol 1) 
+radio is just a waste of time. So if you know which types of radio you want to connect to, you can enable 
+(only) these in the \rett{Protocols} menu. The available protocols are
+
 \begin{itemize}[font=\texttt, left=80pt]
 \item[Protocol 1]{This is the "original" HPSDR protocol.}
 \item[Protocol 2]{This is the "new" HPSDR protocol.}
@@ -178,50 +184,64 @@ if piHPSDR is compiled with the \texttt{SATURN}  option.}
 is compiled with the \texttt{USBOZY} option.}
 \item[SoapySDR]{This is used to talk to a radio through the SoapySDR library, for example to an AdalmPLUTO. 
 Only available if piHPSDR is compiled with the \texttt{SOAPYSDR} option.}
-\item[STEMlab]{This is used to connect to RedPitaya based SDRs through the WEB interface. Only available if piHPSDR is
-compiled with the \texttt{STEMLAB\_DISCOVERY} option. Starting the radio using this protocol is a two-step process:
+\item[STEMlab]{This is used to connect to RedPitaya based SDRs through the WEB interface. Only available if 
+piHPSDR is compiled with the \texttt{STEMLAB\_DISCOVERY} option. Starting the radio using this protocol is a 
+two-step process:
 first, the RedPitaya's WEB interface is located, and the \texttt{Start} button then starts the SDR app
-on the RedPitaya. Then, piHPSDR tries to connect to this SDR app and upon success offers a new \texttt{Start} button
-to start the radio. If the RedPitaya is exclusively used as a radio, it is recommended to auto-start the SDR app
-when the RedPitaya is powered up. In this case, the STEMlab protocol is not used, because the SDR app can be started
-through Protocol-2.}
-\item[Autostart]{This is a very useful option. It indicates that if exactly one radio has been found, it is automatically
-started. So in normal operation, when starting piHPSDR subsequently, and all settings are still valid, the radio is
-started without user intervention. If this option is activated and one radio is present, you will not see this menu, so in order
-to make further changes here, you have to disconnect the radio from the ethernet cable, start piHPSDR until you see this
-menu, and reconnect the radio.}
+on the RedPitaya. Then, piHPSDR tries to connect to this SDR app and upon success offers a new
+\texttt{Start} button to start the radio. If the RedPitaya is exclusively used as a radio, it is recommended 
+to auto-start the SDR app
+when the RedPitaya is powered up. In this case, the STEMlab protocol is not used, because the SDR app can be started through Protocol-2.}
+\item[Autostart]{This is a very useful option. It indicates that if exactly one radio has been found, it is 
+automatically started. So in normal operation, when starting piHPSDR subsequently, and all settings are 
+still valid, the radio is started without user intervention. If this option is activated and one radio is 
+present, you will not see this menu, so in order to make further changes here, you have to disconnect the 
+radio from the ethernet cable, start piHPSDR until you see this menu, and reconnect the radio.}
 \end{itemize}
 
-Sometimes piHPSDR needs to know the IP address of the radio. This is, for example, the case for the \texttt{STEMlab} discovery
+Sometimes piHPSDR needs to know the IP address of the radio. This is, for example, the case for the 
+\texttt{STEMlab} discovery
 described above. In such a case the IP address in numerical form (xxx.xxx.xxx.xxx) can be entered in the box
-with the label \rett{Radio IP Addr:}. If a legal IP address is contained in this box, protocol-1 and protocol-2 discoveries
-will also send to the IP address specified, in addition to the standard broadcast discovery packets which can only reach
+with the label \rett{Radio IP Addr:}. If a legal IP address is contained in this box, protocol-1 and 
+protocol-2 discoveries
+will also send to the IP address specified, in addition to the standard broadcast discovery packets which 
+can only reach
 radios on the same network segment. With a known IP address,  one can
-connect to radios which are not on the same subnet as the computer, in principle you can connect to any radio on the world
-provided it is on the internet. However, the original HPSDR standard states that a broadcast packet must be used, so several
-radios won't reply. On the other hand, there are some radios such as a RedPitaya or a HermesLite-II which allow being discovered
-by such a routed packet. 
+connect to radios which are not on the same subnet as the computer, in principle you can connect to any 
+radio on the world
+provided it is on the internet. However, the original HPSDR standard states that a broadcast packet must be 
+used, so several
+radios won't reply. On the other hand, there are some radios such as a RedPitaya or a HermesLite-II which 
+allow being discovered by such a routed packet. 
 
-The \rett{Discover} button re-starts the discovery process. This is useful if the radio has been powered up too late and
+The \rett{Discover} button re-starts the discovery process. This is useful if the radio has been powered up 
+too late and
 was not yet ready when piHPSDR was started. Simply press \rett{Discover} to give another try.
 
-The combo-box (pop-down menu) to the left of the \rett{Discover} button lets you choose which type of GPIO controller you
-have attached to the computer. This menu is only available if piHPSDR has been compiled with the \texttt{GPIO} option, which
+The combo-box (pop-down menu) to the left of the \rett{Discover} button lets you choose which type of GPIO 
+controller you
+have attached to the computer. This menu is only available if piHPSDR has been compiled with the 
+\texttt{GPIO} option, which
 is not the case on desktop/laptop computers. The menu lets you choose between
 
 \begin{itemize}[font=\texttt, left=80pt]
-\item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi. This is the default when you first start piHPSDR.}
-\item[Contoller1]{Choose this if you have a "version 1" piHPSDR controller.}
-\item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller with single encoders.}
+\item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi. This is the default 
+when you first start piHPSDR.}
+\item[Contoller1]{Choose this if you have the original piHPSDR controller.}
+\item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller with 
+single encoders.}
 \item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encocders.}
 \item[G2 Front Panel]{Choose this if you have an ANAN G2 radio with a built-in controller.}
 \end{itemize}
 
-\textbf{Attention.} Be sure to choose a controller only if such a controller is actually connected to your Raspberry Pi. If
-you choose, for example, a controller which uses an I2C expander for the switches, but no I2C interface is present on
+\textbf{Attention.} Be sure to choose a controller only if such a controller is actually connected to your 
+Raspberry Pi. If
+you choose, for example, a controller which uses an I2C expander for the switches, but no I2C interface is 
+present on
 your Raspberry Pi, the program my hang when trying to open the I2C connection.
 
-All settings (protocols, controller, IP address) made in this menu are stored in the global (radio-indepentend) settings
+All settings (protocols, controller, IP address) made in this menu are stored in the global (radio-
+indepentend) settings
 and are restored when piHPSDR is started the next time. 
 
 If all went well, a radio could be discovered and you hit the \rett{Start} button, the radio is started, and
@@ -235,13 +255,20 @@ by default when using a controller.}
 \label{fig:FirstDisplay}
 \end{figure}
 
-The bottom of the window looks different (more controls) if you have chosen \rett{No Controller} in the preceeding menu.
-You see two receiver panels stacked vertically, both of them having a spectrum display and a waterfall area. At the top,
-just below the window title, you have the VFO bar which contains information on the frequencies of the two VFOs A and B,
-as well as lots of further information, to be explained later. At the top right, there are two buttons \rett{Hide}
-and \rett{Menu} which will be explained in the next chapter. To the left of these two buttons, there is the meter
-bar which by default is a digital S-meter. At this point, you have started piHPSDR successfully for the first time.
+The bottom of the window looks different (more controls) if you have chosen \rett{No Controller} in the 
+preceeding menu.
+You see two receiver panels stacked vertically, both of them having a spectrum display and a waterfall area. 
+At the top,
+just below the window title, you have the VFO bar which contains information on the frequencies of the two 
+VFOs A and B,
+as well as lots of further information, to be explained later. At the top right, there are two buttons 
+\rett{Hide}
+and \rett{Menu} which will be explained in the next chapter. To the left of these two buttons, there is the 
+meter bar which by default is a digital S-meter. At this point, you have started piHPSDR successfully for 
+the first time.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Main window layout}
 
 \section{One or two receivers}
@@ -315,9 +342,9 @@ Sliders, Toolbar) at the  bottom.}
  by VFO-A. VFO-B then actually controls nothing (except the TX
  frequency in split mode), but the data stored in VFO-B can
  be quickly used, for example by copying VFO-B to VFO-A (the
- \bltt{A<B} command), or by swapping the two VFOs (the
- \bltt{A<>B} command).
+ \bltt{A<B} command), or by swapping the two VFOs (the \bltt{A<>B} command).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Spectrum scope options}
 \label{sec:FillingGradient}
 
@@ -349,6 +376,7 @@ refers to both receivers when there are two. Note that the TX
 spectrum can be a filled one or a line spectrum, but that the
 gradient option does not apply.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Zoom and Pan}
 
 \begin{figure}[h]
@@ -388,6 +416,7 @@ above, the dial frequency (14.100 MHz) is found in the RX
 panel close to the left edge, and this has been done
 by moving the \rett{Pan} slider.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Hide} button}
 \begin{figure}[h]
 \center
@@ -408,6 +437,7 @@ The text on the button then changes to \rett{Show}, and
 clicking this button again will then return to the
 previous display.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Window areas}
 
 Look again at Fig. \ref{fig:SingleReceiver}! Starting from the
@@ -481,7 +511,7 @@ of eight ,,buttons'' which you can click with a mouse or on a touchscreen.
 If you are using the original (V1) piHPSDR GPIO controller, is has eight
 push buttons below the screen and pressing those is equivalent to clicking
 the buttons on the screen. You might still want to keep the toolbar on display
-even if you are using the V1 controller since it shows you to which functions
+even if you are using the Controller1 since it shows you to which functions
 the buttons are actually assigned. This assignments consists of six ,,layers''
 (0 through 5). The rightmost button is hard-wired to the \bltt{Function}
 action which cycles through the layers. The button text includes the 
@@ -497,7 +527,7 @@ If you use a V2 or G2-frontpanel GPIO controller or a MIDI console, then you
 can also map this function (\bltt{FuncRev}) to a spare button.
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Mouse clicks in the main window}
 The main window ,,accepts'' mouse or touchscreen click events.
 Some of them come from the standard handlers of the GUI. It is
@@ -563,6 +593,7 @@ non-active receiver without making it temporarily active. In the
 same way, a secondary click in the TX panel will open the
 \bltt{TX} menu.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VFO bar and status  indicators}
 \label{sec:VFObar}
 \begin{figure}[h]
@@ -716,6 +747,7 @@ one of the variable filters (\texttt{Var1} or \texttt{Var2}) have been
 selected. The green caret indicates the default filter edges,  while the
 red one above denotes the current filter edges. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Meter section}
 \label{sec:MeterSection}
 Fig. \ref{fig:MeterDesigns} shows the different designs that exist for
@@ -750,6 +782,8 @@ could be increased to get full output  power.
 Further info on the meters (e.g. switching between ,,peak'' and ,,average'' reporting)
 is described in the \bltt{Meter} menu.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: introduction}
 
 \begin{figure}[h]
@@ -817,7 +851,7 @@ can be used to change AF volume or TX output power. \textbf{,,Switches''} are pu
 can be used to trigger a function such as transmitting a carrier for tuning, toggle
 between RX and TX, open a menu, and so forth.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Exit} Menu}
 
 \begin{figure}[h]
@@ -842,8 +876,8 @@ and switches are built into a single common enclosure. On the other hand, when r
 piHPSDR on desktop or laptop computers, clicking "Reboot" or "Shutdown" both leave the piHPSDR
 program but no re-boot or shutdown takes place, due to missing administrator privileges.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{About} Menu}
-
 
 \begin{figure}[h]
 \center
@@ -862,6 +896,8 @@ For diagnostic purposes, you also see the MAC address of the radio, its IP addre
 IP address of the computer running piHPSDR. The MAC address is of interest since the radio-specific
 preferences are stored in a file whose name is derived from the radio's MAC address.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: Radio-related menus}
 \section{The \texttt{Radio} Menu}
 
@@ -873,7 +909,8 @@ preferences are stored in a file whose name is derived from the radio's MAC addr
 \end{figure}
 
 
-The \bltt{Radio} menu lets you make settings which affect the general setting, and the hardware of the radio.
+The \bltt{Radio} menu lets you make settings which affect the general setting, and the hardware of the 
+radio.
 The following figure (Fig. \ref{fig:RadioMenu}) shows the menu as it opens on an Anan G2 radio.
 Note this menu looks slightly different for different radios and protocols, this will be discussed
 at the end of the section. First, we go through all the elements we see in Fig. \ref{fig:RadioMenu},
@@ -889,9 +926,10 @@ for RIT and XIT. For example, if the RIT step is 10 Hz, then you can change the 
 10 Hz with the RIT+ or RIT- buttons in the toolbar or on the GPIO/MIDI controller.
 
 \rett{Region:} Although not obvious, this selects settings for the 60m band. Possible choices are "Other",
- "UK" and "WRC15". The \texttt{Other} and \texttt{UK} choices implement the channel structure of the 60m band according
-to the regulations valid in the USA and Great Britain. "WRC15" gives you a small (15 kHz wide) 60m band according to the WRC15
-(World Radio Conference 2015) document, which is now implemented in many countries. 
+ "UK" and "WRC15". The \texttt{Other} and \texttt{UK} choices implement the channel structure of the 60m 
+ band according to the regulations valid in the USA and Great Britain. "WRC15" gives you a small (15 kHz 
+ wide) 60m band according to the WRC15 (World Radio Conference 2015) document, which is now implemented in 
+ many countries. 
 
 \rett{Orion/Saturn Mic jack:} This part of the menu is not shown for pre-Orion boards. 
 The Orion, Orion2, and Saturn boards can switch the connections
@@ -902,9 +940,9 @@ enable the PTT function of the jack, and select whether a bias (DC offset) is ap
 (this is necessary for condensor microphones and detrimental if a dynamic mirophone is connected without
 a blocking capacitor).
 
-\rett{Mic Input:} This is only shown for Saturn boards. These radios have two jacks for connecting a microphone,
-either a 3.5mm TRS jack in the front panel, or an XLR connection in the back panel. The pop-down menu lets you
-choose between these two options.
+\rett{Mic Input:} This is only shown for Saturn boards. These radios have two jacks for connecting a 
+microphone, either a 3.5mm TRS jack in the front panel, or an XLR connection in the back panel. The pop-down 
+menu lets you choose between these two options.
 
 \rett{SAT mode:} Here you can choose between \texttt{SAT off}, \texttt{SAT}, and \texttt{RSAT}. In SAT mode,
 frequency moves applied to one of the two VFOs are applied to the other VFO as well. This is convenient
@@ -912,12 +950,13 @@ for cross-band operation over satellites with (normal) linear transponders. In R
 moves applied to one of the two VFOs are applied to the other with the sign inversed, that is, if
 for example you move the frequency of VFO A up by 3 kHz, the frequency of VFO B moves down by the same
 amount. This is convenient for cross-band operation over satellites with inverted transponders. Inverted
-transponders are sometimes find in low and fast moving satellites because this leads to some 
-Doppler correction.
+transponders are sometimes find in low and fast moving satellites because this leads to some Doppler
+ correction.
 
 \rett{Filter board:} Normally SDRs have some sort of built-in PA with a filter board. Filters in the TX path
 between the PA and the antenna are always required, and filters in the RX path provide some protection
-against ADC overloads from strong out-of-band signals. Here you can choose between \texttt{NONE}, \texttt{ALEX},
+against ADC overloads from strong out-of-band signals. Here you can choose between \texttt{NONE}, 
+\texttt{ALEX},
 \texttt{APOLLO}, \texttt{CHARLY25}, and \texttt{N2ADR}. Choose \texttt{NONE} if none of the other cases
 apply, and hope your radio does things right automatically. \texttt{ALEX} is the most frequent choice
 and applies to the largest part of current HPSDR radios. \texttt{APOLLO} is an early design of a
@@ -1069,6 +1108,7 @@ is partly built on speculation (that is, studying the specs) and exchanging e-ma
 people who still run such hardware. If you meet any inconsistencies, please contact
 the author.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Screen} Menu}
 
 The \bltt{Screen} menu lets you dynamically change the size of the piHPSDR main
@@ -1144,6 +1184,7 @@ on which the piHPSDR window was opened upon program start is filled.
 If you leave full screen mode, the size of the piHPSDR window is again
 determined by the width and height chosen above.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Display} Menu}
 
 The \bltt{Display} menu is used to customize the overall layout of the piHPSDR
@@ -1229,7 +1270,7 @@ Sequence errors during RX often cause cracks in the RX audio. Unless this
 happens regularly, it is no reason to worry.
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Meter} menu}
 
 \begin{figure}[h]
@@ -1271,7 +1312,7 @@ so you can put the drive slider to zero, then put the radio into TX mode,
 whistle into the microphone and slowly increase the Mic gain until the
 ALC value shown is only slightly less than zero.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{XVTR} (Transverter) Menu}
 
 The \bltt{XVTR} menu lets you define additional bands 
@@ -1316,7 +1357,8 @@ low-power output that is used to drive the transverter.
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: VFO-related menus}
 
 In this chapter we discuss the menus from the second column
@@ -1390,7 +1432,7 @@ in Duplex or Split mode, see the \bltt{Radio} menu.
 CTUN mode. In CTUN mode, the spectrum scope does not move when changing the frequency, 
 rather, the RX ,,window'' moves. CTUN mode does not affect TX operation.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Band} menu}
 
 The \bltt{Band} menu lets you change the band of the active receiver. It is shown
@@ -1426,7 +1468,7 @@ will end up in the General band. If you have defined transverter bands (see the
 \bltt{XVTR} menu) they will be shown, with the title you have chosen, in the
 \bltt{Band} menu.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The  \texttt{BndStack} (Bandstack) menu}
 
  \begin{figure}[h!]
@@ -1447,7 +1489,7 @@ is stored in the highlighted band stack entry, and then the frequency/mode of th
 entry becomes effective. Note that bandstack entries are only changed if the active
 receiver is controlled by VFO-A. 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Mode} menu}
 \begin{figure}[h]
 \center
@@ -1472,6 +1514,7 @@ and equalizer settings, and TX compressor settings
  switch between DIGU and USB/LSB and have the correct settings automatically. The same applies
  to CWL/CWU where you will normally use different settings compared to both USB/LSB and DIGU.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{The \texttt{Memory}  menu}
 
@@ -1491,6 +1534,8 @@ the data. So if you have some often used frequencies (e.g. for a net), the
 \label{fig:MemMenu}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: RX-related menus}
 
 The second column of tghe main menu contains menus which allow you to change 
@@ -1560,6 +1605,7 @@ samples to the HDMI monitor attached to the RaspPi, but one could equally
 well choose the headphone output or a virtual cable, if one wants to use
 digital modes.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Filter} menu}
 
 \begin{figure}[h]
@@ -1617,6 +1663,7 @@ There is the function \bltt{CW Audio Peak Filter} that can be mapped on toolbar
 buttons or GPIO/MIDI buttons so you can quickly enable/disable the audio peak
 filter.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Noise} Menu}
 
 \begin{figure}[h]
@@ -1688,7 +1735,7 @@ Sample\&Hold, Mean Hold, Hold Sample, and Interpolate.
 piHPSDR currently does not allow to have a separate set of parameters for NB and NB2.
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{AGC} Menu}
 
 Only few parameters can be controlled via the automatic gain control (AGC) menu.
@@ -1711,6 +1758,7 @@ but also the hang threshold line in orange.
 \label{fig:AGCMenu}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Diversity} Menu}
 
 \bltt{Diversity} is a very powerful tool to improve reception by using two different
@@ -1734,6 +1782,8 @@ adjusted) signal from your in-house antenna to what comes from your DX antenna w
 a signal where the local QRM is largely eliminated while the DX signal is only weakly affected.
 This is what \bltt{Diversity} is all about.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: TX-related menus}
 
 \section{The \texttt{TX} Menu}
@@ -1815,36 +1865,42 @@ and the filter edges of the current RX filter are used instead.
 TX panadapter. If set to 10, for example, there will be a horizontal line for every multiple
 of 10 dBm.
 
-\rett{AM carrier level:} This sets the AM carrier level for the AM modulator. If set to zero, there is no carrier and the
+\rett{AM carrier level:} This sets the AM carrier level for the AM modulator. If set to zero, there is no 
+carrier and the
 signal is a DSB signal. A reasonable value is 0.5 which leads to 100\% modulation. Values larger than
 0.5 have less than 100\% modulation. This means too much power goes into the carrier.
 
 \rett{Tune use Drive} If this box is checked, TUNEing will be done with the power that corresponds to the
 current position of the drive slider, and the tune drive level is ignored.
 
-\rett{Tune Drive Level} The value that can be adjusted with this spin box is the virtual position of the drive
-slider while TUNEing. This value is ignored if the \rett{Tune use Drive} box is checked.
+\rett{Tune Drive Level} The value that can be adjusted with this spin box is the virtual position of the 
+drive slider while TUNEing. This value is ignored if the \rett{Tune use Drive} box is checked.
 
-\rett{SWR protection} If this box is checked, a very simple SWR protection is enabled. If the SWR exceeds the
-threshold value (see next point), the drive slider is set to zero. The SWR protection is disabled
+\rett{SWR protection} If this box is checked, a very simple SWR protection is enabled. If the SWR exceeds 
+the threshold value (see next point), the drive slider is set to zero. The SWR protection is disabled
 while TUNEing.
 
-\rett{SWR alarm at} The spin button to the right determines the SWR threshold. If the SWR is beyond the threshold,
-the SWR reported in the meter turns red. If SWR protection is enabled, the drive slider is set to zero if the
-SWR exceeds the threshold.
+\rett{SWR alarm at} The spin button to the right determines the SWR threshold. If the SWR is beyond the 
+threshold, the SWR reported in the meter turns red. If SWR protection is enabled, the drive slider is set to 
+zero if the SWR exceeds the threshold.
 
-\rett{CTCSS Enable} (FM only!) This checkbox enables/disables CTCSS (continuous tone coded squelch system). If enabled, a low-frequency
-tone is transmitted together with the normal TX audio. This can be used to trigger repeaters, or any other function implemented
+\rett{CTCSS Enable} (FM only!) This checkbox enables/disables CTCSS (continuous tone coded squelch system). 
+If enabled, a low-frequency
+tone is transmitted together with the normal TX audio. This can be used to trigger repeaters, or any other 
+function implemented
 on the other side. The frequency itself can be chosen with the following menu point:
 
-\rett{CTCSS Frequency} This pop-down menu lets you choose the CTCSS frequency. This choice has no effect if CTCSS is disabled.
+\rett{CTCSS Frequency} This pop-down menu lets you choose the CTCSS frequency. This choice has no effect if 
+CTCSS is disabled.
 The frequency list includes 38 standard TIA/EIA-603-D CTCSS frequencies between 67.0 and 250.3 Hz.
 
-\rett{Mac Drive level for DIGU/DIGL} This spin button restricts the range of the drive slider from 0 to the chosen value
-for the DIGU and DIGL modes. If the value is 100, this has no effect. The primary use of this menu point is PA protection,
+\rett{Mac Drive level for DIGU/DIGL} This spin button restricts the range of the drive slider from 0 to the 
+chosen value
+for the DIGU and DIGL modes. If the value is 100, this has no effect. The primary use of this menu point is 
+PA protection,
 since many digital modes (unlike SSB voice) are constantly transmitting at full power.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{PA} Menu}
 
 In the \bltt{PA} menu, you can adjust the output level of your HPSDR board
@@ -1952,6 +2008,7 @@ in the Watt meter calibration menu (in this example, it is 140W). Adjust the
 (150W) and adjust the 200W spin button until piHPSDR reports 150 Watt.
 Then, proceed with 120, 100, 80, etc. Watts.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{VOX} Menu}
 
 VOX (voice control) means that you can just speak into the microphone and the
@@ -1985,6 +2042,7 @@ your message and go RX.
 
 VOX is very nice for rag-chew phone QSOs, I won't recommend it for contest operation.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{PS} (PureSignal) Menu}
 
 \begin{figure}[h]
@@ -2104,6 +2162,7 @@ I have pushed the \rett{OFF} button which stops the PureSignal calibration, the 
 is shown in Fig. \ref{fig:PSoff}. Here we see two satellites with an IM3 value of
 about 30 dBc, which reflects the non-linearity of the PA.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{CW} Menu}
 The CW menu controls parameters related to CW operation. The menu
 is shown in Fig. \ref{fig:CWMenu}.
@@ -2175,7 +2234,8 @@ the letter "X" and the dot paddle is pressed a little too late, you
 instead send "TU". This option might be good for practising, but
 I personally never use it.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: menus for RX and TX}
 
 \section{The \texttt{FFT} (Signal Processing) Menu}
@@ -2220,6 +2280,7 @@ where it is reduced to 512). The default value of 2048 should be
 fine in almost all cases, if you increase it, you can notice that
 the filter edges become little more ,,brick wall'' like.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Equalizer} Menu}
 
 In the \bltt{Equalizer} menu, you can modify the frequency response of
@@ -2255,6 +2316,7 @@ modes such as CWU/CWL, where the TX equalizer has no meaning
 anyway, and where the RX equalizer is normally not needed because
 CW filters usually are narrow.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Ant} (Antenna) Menu}
 
 The \bltt{Ant} menu, as shown in Fig. \ref{fig:ANTmenu}, 
@@ -2281,7 +2343,8 @@ is much simpler because there are much fewer choices possible.
  of this is the possibility to connect an additional receive-only antenna
 such as a beverage antenna which often has a better signal-to-noise
  ration than standard antennas used for transmitting.
- 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{OC} (OpenCollector) Menu}
 
 Standard HPSDR radios have seven individually programmable outputs wired as
@@ -2310,6 +2373,8 @@ external automatic tuner at the beginning of the tuning.
 \label{fig:OCMenu}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: controlling piHPSDR}
 
 In this chapter, the customization of the toolbar (at the bottom of the piHPSDR window),
@@ -2331,6 +2396,7 @@ configured via the Toolbar menu.
 \end{figure}
 
 \section{The \texttt{Toolbar} Menu}
+\label{sec:toolbarmenu}
 We start with the "Toolbar" menu, that can be found at the top of the rightmost
 column in the main menu. The toolbar consists of eight buttons that can be assigned
 to a set of eight functions. There are six such sets, and pressing the rightmost button
@@ -2365,7 +2431,8 @@ found what you were looking for. Now (again just an example) the button \texttt{
 in the action dialog, such that it gets high-lighted (Fig. \ref{fig:ToolbarMenu3}).
 
 If one now closes the action dialog by clicking the \texttt{OK} button, the action select menu
-closes and on sees that in the toolbar menu now reappearing (Fig. \ref{fig:ToolbarMenu4}), the third button in the second
+closes and on sees that in the toolbar menu now reappearing (Fig. \ref{fig:ToolbarMenu4}), the third button 
+in the second
 line of the toolbar menu has changed, it now gives the short text (\texttt{20}) of the action, which will
 switch the active receiver to the 20m band (see the explanation of all the actions in Appendix A).
 
@@ -2395,11 +2462,33 @@ layer is now active. For mouse users (only), a secondary click on the rightmost 
 button cycles through the layers in in reverse order.
 
 Note that it is not possible to change the assignment of the  rightmost button of the toolbar,
-it will always be assigned to \texttt{FUNC}, since if one has no access to this
-function, one no longer cycle through the sets.
+it will always be assigned to \bltt{Function}, since if one has no access to this
+function, one is stuck and can no longer cycle through the function layers.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{RigCtl} (Rig control, or CAT) Menu}
+
+piHPSDR has a built-in rig control or CAT (computer aided transceiver) facility. This can be used to control 
+piHPSDR from
+other programs or even other computers. You can have up to three simultaneous CAT connections via TCP, and 
+two additional CAT
+connections via serial lines (provided the host computer running piHPSDR has those serial interfaces 
+available). It is
+also possible to use FIFOs (also known as named pipes) instead of real serial devices, which offers a 
+hardware-free connection
+of, say, a logbook program running on the same computer to piHPSDR, even if the logbook programm cannot use 
+TCP.
+piHPSDR fully supports (thanks Rick!) the ANDROMEDA controller (see \texttt{github.com/laurencebarker/
+Andromeda\_front\_panel}).
+This controller (or rather the Arduino inside) is connected to the host computer via USB and appears as a 
+USB-to-serial
+device on the host computer. The CAT command set is explained in Appendix \ref{sec:catcommands}. In most 
+cases, using
+the Kenwood TS-2000 as the radio model would do it, if the digimode or laptop program uses hamlib to 
+interface with
+radios, either choose TS-2000 or (preferably) the ,,OpenHPSDR piHPSDR'' radio model because this uses time-
+out values
+adapted to piHPSDR. The \bltt{RigCtl} menu is shown in Fig. \ref{fig:RigCtlMenu}.
 
 \begin{figure}[h]
 \center
@@ -2408,13 +2497,152 @@ function, one no longer cycle through the sets.
 \label{fig:RigCtlMenu}
 \end{figure}
 
+\rett{RigCtl TCP Port}. This sets the TCP port number for CAT connection to TCP. The default value (19090) 
+is rather standard,
+using another one is only necessary if you are running more than one SDR program on the host computer at the 
+same time.
+This port number must match the port number used in the (digimode or logbook) program that wants to connect. 
+This value
+has no meaning for serial (or named pipe) connections.
+
+\rett{RigCtl Enable}. This checkbock enables or disables the piHPSDR CAT subsystem. Disabling it 
+automatically also disables
+all serial ports.
+
+\rett{Debug}. If enabled, the piHPSDR CAT subsystem sends lots of debug messages to the standard output. If 
+piHPSDR is run
+from within a terminal window, these messages appear in the terminal window. If it is run from double-
+clicking a desktop icon,
+these messages can be found in a log file within the piHSPDR working directory (this is the directory where 
+the preferences
+are stored. This checkbox is only of interest for software developers to analyze programming or connection 
+errors, and should
+not be checked for normal use.
+
+\rett{Serial Port}. In this text field, enter the device name of the serial port or the named pipe to use. 
+Which names to use 
+is highly operating system dependent. On a RaspPi, built-in serial ports have names such as \texttt{/dev/
+ttyACM0}. USB-to-serial
+adapters (which are nowadays the standard way to add serial ports to a computer) have names such as
+\texttt{/dev/ttyUSB0} (on RaspPi) or \texttt{/dev/tty.usbserial-....} (on MacOS). piHPSDR does not try 
+to ,,detect'' serial
+ports, you must know the proper name (e.g. by looking at the contents of the \texttt{/dev} directory).
+
+To the right of the serial port text field, there is a pop-down menu for choosing the baud rate. Only 4800, 
+9600, 19200, and 38400 baud are offered, but this should cover most cases. Then, further to the right, is 
+the \rett{Enable} button which enables a CAT connection on that serial line. Finally, there is the 
+\rett{Andromeda} check box which must be checked
+if that serial port is an ANDROMEDA controller. If \rett{Andromeda} is enabled, the baud rate pop-down menu 
+disappears because for ANDROMEDA, the baud rate is hard-wired to 9600 baud.
+
+Note that once a serial CAT connection is enabled, you cannot change the ANDROMEDA status. This is necessary 
+since ANDROMEDA
+requires a fixed baud rate but you cannot change or set the baud rate once the serial port is already open.
+The check box is still there
+and shows the status but this cannot be changed. If you want to change the ANDROMEDA status and the serial 
+line is already in use, you have to close and re-open it with the \rett{Enable} box.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{MIDI} Menu}
+\label{sec:midimenu}
+MIDI (musical instrument digital interface) is a protocol designed for the communication of
+musical instruments, such as keyboards and tone generators. Because of its widespread use,
+support in all major operating systems, and it inherent ability to deliver real-time ,,events'',
+it is also an ideal protocol to control an SDR program. The only MIDI messages piHPSDR processes
+are NoteOn, NoteOff, and ControllerChange messages. Typically, a NoteOn message is sent if
+a key on a keyboard is hit. The first parameter of a NoteOn/Off message is the key
+it refers to. Although keyboards rarely have more than 88 keys, the allowed range for
+the key is 0-127. There is an additional parameter (,,velocity'', range 0-127) that tells how
+fast the key has been hit (this makes the difference between a soft and loud tone on the piano).
+NoteOn/Off messages are ideally suited for indicating button press and release events. In principle,
+piHPSDR does not need the velocity. However, several MIDI consoles, in a sloppy interpretation of
+the MIDI standard, send a NoteOn value with zero velocity if a button is released. Therefore,
+piHPSDR interprets a NoteOn message with a velocity different from zero as a ,,button press'',
+and interprets both a NoteOn messages with zero velocity and a NoteOff message as a ,,button release''.
+
+The original MIDI standard was built upon a daisy-chained serial connection. Each device
+echos all messages it receives at its input side to the output. Therefore, a key-down
+message that originated on one keyboard is sent to all tone generators. Likewise, a tone
+generator receiving a key-down message cannot tell from which device the message
+was originally sent. To resolve possible conflicts, each MIDI message contains a channel
+number. There is some confusion about channel numbers: the MIDI says channel numbers
+go from 1 to 16. Because this is encoded in a 4-bit data field whose numerical value
+goes from 0 to 15, computer users normally refer to channel numbers from 0 to 15,
+and this convention is also followed by piHPDSR. Different channel numbers can be used
+to discriminate MIDI events from different sources (devices). An example of such a setup
+is if you connect a DJ console as well as a microcontroller to which a CW key is attached.
+
+The second type of messages are ControllerChange messages. Typically, they report the value of
+an expression pedal, if it has changed. A ControllerChange message also has two parameters,
+namely the number of the controller (0-127) and the value (0-127). A ControllerChange
+message could be sent if the MIDI controller has a potentiometer, to report its position,
+encoded from 0 (full counter clock wise) to 127 (full clock wise). Such a message could then be
+used to control in piHPSDR, say, the AF volume or the TX drive. Such a potentiometer is
+not suited to become a ,,VFO knob''. Here one uses rotary encoders, a piece of hardware which
+you can turn (as long as you like) in either direction, and which reports (by hardware pulses)
+how fast and it which direction it is turned. Unfortunately, there is no standard how to
+encode these increments into MIDI ControllerChange messages. My Behringer CMD-PL1 console,
+for examples, uses ControllerChange numbers 65, 66, 67, $\ldots$ for clockwise rotations
+and 63, 62, 61, $\ldots$ for counter clock wise rotations, and further encodes the speed of
+rotation in how far the value differs from 64. Other brands interpret the 7-bit number
+as a signed quantity, such that values 0, 1, 2, $\ldots$ correspond to clockwise,
+and numbers 127, 126, 125, $\ldots$ to counter-clockwise rotations. It is clear that
+the piHPSDR MIDI configuration menu must be flexible enough to handle all these situations.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{MIDImenu1.png}
 \caption{The (virgin) MIDI menu.}
 \label{fig:MIDImenu1}
 \end{figure}
+
+From this it is clear that within piHPSDR, we have to distinguish three types of sources
+of MIDI commands:
+
+\rett{KEY}. This type is generated by NoteOn/Off MIDI events. piHPSDR functions (,,Actions'') that
+can be assigend to this type are typically those which can also be assigned to toolbar
+buttons.
+
+\rett{KNOB/SLIDER}. This type is generaged by ControllerChange MIDI events. It can be used
+for piHPSDR functions that are usually controlled by a slider, such as adjusting the AF
+volume, setting the TX drive, setting the AGC gain, etc.
+
+\rett{WHEEL}. This type is also generated by ControllerChange MIDI events. This means
+that if such an event is configured, the user has to decide whether this event 
+originated from a potentiometer or from a rotary encoder. The prototypical piHPSDR
+function controlled by a WHEEL is a VFO knob, which you can spin forever. However,
+you can also assign to to the AF volume control. piHPSDR takes care that the
+AF volume stops at the extreme cases (-40 and 0 dB for AF volume) even if you continue
+spinning.
+
+The first kind of MIDI device which is often used for SDRs are the so-called MIDI DJ
+consoles. If you search the internet for ,,Hercules DJ controller'' or ,,Behringer
+DJ controller'' you will find lots of examples. For a very decent price, you
+can obtain a device which features lots of controls which you can conveniently use
+as VFO knobs, smaller knobs for controlling the AF volume etc., and push buttons
+to be used, for example, instead of toolbar buttons. The second kind of MIDI devices
+are small MIDI-capable microcontrollers, starting with Teensy and Arduino devices
+which have a 32U4 microcontroller which has built-in MIDI capability. With such a
+microcontroller, you can build your own "DJ controller". Let the 32U4 control
+lots of push buttons and rotary encoders, and send the MIDI messages via USB to the
+computer. Using such a micro controller is also the most convenient and general way
+to connect a Morse key or paddle to the host computer running piHPSDR (see
+Appendix \ref{sec:ConnectCW}, you can but need not use the same micro controller
+for taking care of the buttons/encoders and the CW key).
+
+If you open the \bltt{MIDI} menu for the first time, it presents itself as shown
+in Fig. \ref{fig:MIDImenu1}.
+
+
+
+At the top of the menu, besides the close button, you find a list of MIDI devices
+in the system, each of which with a check box. In Fig. \ref{fig:MIDImenu1}, there is only
+one such device with name ,,CMD PL-1 MIDI 1''. You will find all MIDI devices attached
+to the host computer here. With the check box(es), enable those you want to use.
+This way it is possible to run two instances of piHPSDR on the same computer, both
+connected to different radios, and control them independently with two different MIDI
+consoles. The first thing you have to do is to check all MIDI devices you want to use.
 
 \begin{figure}[h]
 \center
@@ -2423,21 +2651,82 @@ function, one no longer cycle through the sets.
 \label{fig:MIDImenu2}
 \end{figure}
 
-\begin{figure}[h]
+It is important to note that as long as the MIDI menu is open, piHPSDR cannot be
+operated through MIDI. Instead all MIDI messages are captured by the menu and
+displayed. This is used to implement a ,,self-learning'' configuration. To explain
+this in detail, we demonstrate how to configure MIDI such that the big wheel on the
+controller is used as a VFO knob. After I have activated the checkbox of our
+MIDI device, I just turned the big wheel of the MIDI console a bit. This resulted
+in a menu window that is shown in Fig. \ref{fig:MIDImenu2}. In the third line,
+below \rett{Event}, you see \texttt{CTRL} which indicates that the last MIDI messages
+received was a ControllerChange message. In the case of a NoteOn/Off messages, this
+field would read \texttt{NOTE}. You should rotate the knob in both directions to
+see what happens: below \rett{Value} the ControllerChange value of the latest
+message is recorded, while the \rett{Min} and \rett{Max} fields report the smallest
+and largest value seen (all in the range 0-127). By playing around, it became
+quickly clear that this is a rotary encoder, sending messages in the range 65, 66, 67,
+$\ldots$ for clockwise rotation and values 63, 62, 61, $\ldots$ for counter clockwise
+rotation. If it were a potentiometer, you would see values between 0 and 127 
+depending on the position of the potentiometer.
+
+Below \rett{Channel}, you see the value zero which
+indicates that the channel number of that MIDI message was 1 (see above on the
+different channel numberings). Below \rett{Type}, you see a pop-down menu, here
+you can choose between \rett{WHEEL} and \rett{Knob/Slider}. In the example shown,
+it must be a \rett{WHEEL} since this is a rotary encoder. Because there is no
+standard how the values map to increments, a separate panel
+\rett{Configure WHEEL parameters} pops up when a wheel is to be configured.
+Here one has to define ranges of values that apply for very fast left turns,
+fast left turns, normal left turns, normal right turns, fast right turns,
+and very fast right turns. Specifying an interval from $-1$ to $-1$ means that
+this case will never be realized. In the example shown (Fig. \ref{fig:MIDImenu2}),
+we have chosen to map all values from 0-63 to a left turn, and all values from 65-127
+to a right turn.
+
+Now we have to specify which piHPSDR function should be triggered when moving the wheel.
+The current action is shown in a button below the string \rett{Action} and defaults to \bltt{NONE}.
+By clicking this button, a dialog to choose the function opens as described for the
+\bltt{Toolbar} menu (chapter \ref{sec:toolbarmenu}), with the current choice (\bltt{NONE})
+highlighted. The only difference is that now only functions are listed that can be
+assigned to encoders.
+Because we want to assign the wheel to the \bltt{VFO} function, we click
+the \bltt{VFO} button, which then becomes highlighted (Fig. \ref{fig:MIDImenu3}).
+
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{MIDImenu3.png}
 \caption{The MIDI menu, selecting VFO action}
 \label{fig:MIDImenu3}
 \end{figure}
  
- \begin{figure}[h]
+
+ 
+ \begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{MIDImenu4.png}
 \caption{The MIDI menu, VFO action selected}
 \label{fig:MIDImenu4}
 \end{figure}
 
+ Then one has to click the OK button to make the choice, and one returns to the
+ MIDI menu (see Fig. \ref{fig:MIDImenu4}).
+ 
+One sees that the choise has entered the MIDI configuration, as documented by the
+list in the bottom right part of the menu. At this stage, we can continue
+assigning more encoders, potentiometers, or buttons. If we close the menu at
+this point, then the big wheel on the MIDI console can immediately be used
+to change the VFO frequency.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Encoders} Menu}
+
+The encoders menu can be used to assign functions to the encoders of a
+piHPSDR Controller1, Controller2 or the G2 front panel controller.
+If \texttt{No Controller} has been chosen in the initial discovery screen
+(Fig. \ref{fig:Start}), this menu is not available.
+Note that the ,,large knob'' of these controllers
+cannot be assigned a function, it is hard-wired to the \bltt{VFO} function.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EncoderMenuG2.png}
@@ -2445,22 +2734,67 @@ function, one no longer cycle through the sets.
 \label{fig:EncoderMenuG2}
 \end{figure}
 
+While the function of this menu is the same in all three cases (Controller1, Controller2,
+G2 frontpanel), the layout is different, because the position of the menu buttons
+are meant to indicate which encoder is referred to.
+
+The G2 frontpanel has four small knobs, two (one above the other)
+at the left edge and two at the right edge. All four knobs are double encoders with
+a switch. This means that there is an inner/upper knob (,,top encoder'') 
+and an outer/lower knob (,,bottom encoder''), which
+are two separate encoders. Furthermore, you can push the knob and have and additional
+push button function (,,Switch''). If you open the \bltt{Encoders} menu for
+a G2 frontpanel controller, the menu opens as shown in Fig. \ref{fig:EncoderMenuG2}.
+You see four groups with three buttons (Switch, Top, Bottom) each, and it should be
+clear which group belongs to which encoder. With the buttons, you can choose which function
+to assign, in the same way as described for the \bltt{Toolbar} (chapter \ref{sec:toolbarmenu})
+and \bltt{MIDI} (chapter \ref{sec:midimenu}) menus.
+
+If you run piHPSDR with a Controller2, then the menu looks different (Fig. \ref{fig:EncoderMenuV2}).
+The Controller2 has (besides the VFO knob) three knobs (arranged horizontally) at the bottom left,
+and a fourth knob at the top right, all of which are double encoders with a switch. The menu shows
+for groups with three buttons each, and it should be clear which group belongs to which know.
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EncoderMenuV2.png}
-\caption{The Encoder menu for the V2 controller}
+\caption{The Encoder menu for Controller2}
 \label{fig:EncoderMenuV2}
 \end{figure}
+
+Finally, the Controller1 has three knobs, arranged vertically at the right edge. These knobs
+are single encoders with a switch (you can turn the knob, but you can also push it). Therefore,
+the \bltt{Encoders} menu in this case (Fig. \ref{fig:EncoderMenuV1}) shows three groups with
+two buttons each.
 
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{EncoderMenuV1.png}
-\caption{The Encoder menu for the V1 controller}
+\caption{The Encoder menu for Controller1}
 \label{fig:EncoderMenuV1}
 \end{figure}
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Switches} Menu}
+
+The encoders menu can be used to assign functions to the push buttons of a
+piHPSDR  Controller2 or the G2 front panel controller.
+If \texttt{No Controller} or \texttt{Controller1} has been chosen in the initial discovery screen
+(Fig. \ref{fig:Start}), this menu is not available. This menu is not available
+for the Controller1 because the eight push buttons of this controller are hard-wired to
+the toolbar buttons and their functions as thus assigned via the \bltt{Toolbar} menu
+(see Chapter \ref{sec:toolbarmenu}). 
+
+On the G2 frontpanel, there are a lot of push buttons: at the left edge, to the right
+of the left edge encoders, are two buttons, at the bottom right, below the VFO knob,
+there are two more buttons, and at the top right, to the right of the left edge
+encoders, is an array of 12 (4x3) buttons. The layout of the \bltt{Switches} menu
+for the G2 frontpanel (Fig. \ref{fig:SwitchMenuG2}) features (besides the Close
+button) sixteen buttons, and their arrangement is such that you can easily guess
+which menu button refers to which button on your G2 frontpanel. Assigning functions
+to these buttons is done exactly as described for the \bltt{Toolbar} menu
+(chapter \ref{sec:toolbarmenu}).
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{SwitchMenuG2.png}
@@ -2468,24 +2802,41 @@ function, one no longer cycle through the sets.
 \label{fig:SwitchMenuG2}
 \end{figure}
 
+The Controller2 also has 16 push buttons, but they are arranged differently:
+at the bottom edge there are 7 buttons arranged horizontally. At the right
+edge, there is an array of 8 buttons (4x2) with one additional button
+above the right column that is to the right of the fourth encoder, just
+below the power button. Looking at the \bltt{Switches} menu for the
+Controller2 (Fig. \ref{fig:SwitchMenuV2}), you see representations of
+these 16 buttons in an arrangement for which it is self evident which
+menu button refers to which Controller2 push button.
+Assigning functions
+to these buttons is done exactly as described for the \bltt{Toolbar} menu
+(chapter \ref{sec:toolbarmenu}).
+
+
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{SwitchMenuV2.png}
-\caption{The Switches menu for the V2 controller.}
+\caption{The Switches menu for Controller2.}
 \label{fig:SwitchMenuV2}
 \end{figure}
 
 \appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{List of piHPSDR ,,Actions''}
 
-In this chapter, we give a list of ,,actions'' implemented in the piHPSDR program. These actions can be assigned to
-toolbar buttons on the screen, or pushbuttons/encoders of a GPIO-connected or MIDI controller. Not all actions can
-be assigned to all control elements. Changing the AF volume, for example, can only be assigned to a knob which
-you can turn, while switching RIT on/off can only be assigned to a button that you can push. For each action
-in the following table, there is a long and a short string assigned. The long string will be used when there is
-enough space, while the short string is used for small buttons and to store actions in preference files (therefore
-the short strings never contain a blank character or a line break). Then, for each action we give the type of control
-element allowed for this action as a combination of the letters B, P, E, which stand for
+In this chapter, we give a list of ,,actions'' implemented in the piHPSDR program. These actions can be 
+assigned to toolbar buttons on the screen, or pushbuttons/encoders of a GPIO-connected or MIDI controller. 
+Not all actions can be assigned to all control elements. Changing the AF volume, for example, can only be 
+assigned to a knob 
+which you can turn, while switching RIT on/off can only be assigned to a button that you can push. For each 
+action in the following table, there is a long and a short string assigned. The long string will be used 
+when there is enough space, while the short string is used for small buttons and to store actions in 
+preference files (therefore the short strings never contain a blank character or a line break). Then, for 
+each action we give the type of control element allowed for this action as a combination of the letters B, 
+P, E, which stand for
 
 \begin{itemize}[font=\texttt, left=0pt]
 \item[B] {"Button": A button in the toolbar, or a push-button or switch on a GPIO or MIDI connected console}
@@ -2493,11 +2844,13 @@ element allowed for this action as a combination of the letters B, P, E, which s
 \item[E] {"Encoder": A rotary encoder on a GPIO or MIDI connected console}
 \end{itemize}
 
-The main difference between a "potentiometer" and an "encoder" is, that the former has a min and max position, while
+The main difference between a "potentiometer" and an "encoder" is, that the former has a min and max 
+position, while
 an encoder can be turned in either direction without stopping. This means that a potentiometer
 reports a value between min and max, while an encoder reports an increment,
 that is, whether it has been turned clock wise or counter clock wise.
-The existing GPIO consoles do not have potentiometers (most likely because of the lack of analog inputs), but
+The existing GPIO consoles do not have potentiometers (most likely because of the lack of analog inputs), 
+but
 many MIDI consoles do have, and Arduino-based MIDI controllers might have it because there analog inputs
 to read out potentiometers are available.
 
@@ -2522,11 +2875,13 @@ $\phantom{\Big|}$\bltt{\large #1} & \texttt{\large #2} & \texttt{\large #3} \\\c
 }
 
 
-\action{NONE}{NONE}{BPE}{This is an action which does nothing. It can be assigned to buttons or enco\-ders that
+\action{NONE}{NONE}{BPE}{This is an action which does nothing. It can be assigned to buttons or enco\-ders 
+that
 are often accidentally operated. Some MIDI consoles, for example, report a button press event if the VFO
 knob is touched, and this we want to ignore.}
 
-\action{A<>B}{A<>B}{B}{Swap VFOs A and B. This will not only swap the frequencies, but also all other settings
+\action{A<>B}{A<>B}{B}{Swap VFOs A and B. This will not only swap the frequencies, but also all other 
+settings
 associated with that VFO, such as mode, filter, CTUN, and RIT settings.}
 
 \action{A<B}{A<B}{B}{Copy VFO B to VFO A.}
@@ -2548,8 +2903,8 @@ This funciton is only available for radios that have such an attenuator.}
 
 \action{Band 10}{10}{B}
 {Change band of the active receiver to the 10m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.} 
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.} 
 
 \action{Band 12}{12}{B}
 {Change band of the active receiver to the 12m band. If already on that band, move to
@@ -2558,112 +2913,115 @@ of the radio.}
 
 \action{Band 1240}{1240}{B}
 {Change band of the active receiver to the 1240 MHz (23 cm) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 144}{144}{B}
 {Change band of the active receiver to the 144 MHz (2m) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 15}{15}{B}
 {Change band of the active receiver to the 15m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 160}{160}{B}
 {Change band of the active receiver to the 160m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 17}{17}{B}
 {Change band of the active receiver to the 15m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 20}{20}{B}
 {Change band of the active receiver to the 15m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 220}{220}{B}
 {Change band of the active receiver to the 220 MHz (1.25 m) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 2300}{2300}{B}
 {Change band of the active receiver to the 2300MHz (13 cm) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 30}{30}{B}
 {Change band of the active receiver to the 30m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 3400}{3400}{B}
 {Change band of the active receiver to the 3400 Mhz (9 cm) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 40}{40}{B}
 {Change band of the active receiver to the 40m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 430}{430}{B}
 {Change band of the active receiver to the 430 MHz (70 cm) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 6}{6}{B}
 {Change band of the active receiver to the 6m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 60}{60}{B}
 {Change band of the active receiver to the 60m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 70}{70}{B}
 {Change band of the active receiver to the 70 MHz (4m)  band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 80}{80}{B}
 {Change band of the active receiver to the 80m band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band 902}{902}{B}
 {Change band of the active receiver to the 902 MHz (33 cm) band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band AIR}{AIR}{B}
-{Change band of the active receiver to the 108 MHz band, used for aircraft communication. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.} 
+{Change band of the active receiver to the 108 MHz band, used for aircraft communication. If already on that 
+band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.} 
 
 \action{Band GEN}{GEN}{B}
-{Change band of the active receiver to the current bandstack entry of the "general" band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+{Change band of the active receiver to the current bandstack entry of the "general" band. If already on that 
+band, move to
+the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency 
+range of the radio.}
 
 \action{Band -}{BND-}{B}
-{Change band of the active receiver to the next lower band in the list of bands. If already at the lowest band, switch to
-the highest band (including transverter bands which have been defined) whose frequency is with the radio's frequency range.}
+{Change band of the active receiver to the next lower band in the list of bands. If already at the lowest
+band, switch to the highest band (including transverter bands which have been defined) whose frequency is 
+with the radio's frequency range.}
 
 \action{Band +}{BND+}{B}
-{Change band of the active receiver to the next higher band in the list of bands (including transverter bands that have been
-defined). If already at the highest band, switch to
-the lowest band whose frequency is with the radio's frequency range.}
+{Change band of the active receiver to the next higher band in the list of bands (including transverter 
+bands that have been defined). If already at the highest band, switch to the lowest band whose frequency is 
+with the radio's frequency range.}
 
 \action{Band WWV}{WWV}{B}
-{Change band of the active receiver to the current bandstack entry of the WWV band. If already on that band, move to
-the next bandstack entry. This action is a no-op if the frequency of the band falls outside the frequency range
-of the radio.}
+{Change band of the active receiver to the current bandstack entry of the WWV band. If already on that band, 
+move to the next bandstack entry. This action is a no-op if the frequency of the band falls outside the 
+frequency range of the radio.}
 
 \action{BndStack -}{BSTK-}{B}
 {Cylcle backward through the bandstack entries of the active receiver.}
@@ -2681,11 +3039,12 @@ of the radio.}
 {Toggle the state (on/off) of the compressor used in the TX audio input.}
 
 \action{Cmpr Level}{COMPVAL}{PE}
-{Change the value of the compressor (0-20 dB) used in the TX audio input. The compressor is automaticall switched on (off) if
-the "new" value of the compressor is larger then  (equal to) zero.}
+{Change the value of the compressor (0-20 dB) used in the TX audio input. The compressor is automaticall 
+switched on (off) if the "new" value of the compressor is larger then  (equal to) zero.}
 
 \action{CTUN}{CTUN}{B}
-{Toggle the state (on/off) of the CTUN state of the active receiver. CTUN stands for "click to tune". In CTUN mode, you can move
+{Toggle the state (on/off) of the CTUN state of the active receiver. CTUN stands for "click to tune". In 
+CTUN mode, you can move
 the RX frequency over the whole spectrum scope, whose center then remains at a fixed frequency.}
 
 \action{CW Audio Peak Fltr}{CW-APF}{B}
@@ -2693,125 +3052,170 @@ the RX frequency over the whole spectrum scope, whose center then remains at a f
 filter (default: 75 Hz) can only be modified through the \bltt{CW} menu.}
 
 \action{CW Frequency}{CWFREQ}{PE}
-{Change the CW side tone frequency in the range 300-1000 Hz. This also changes the BFO frequency upon receive.}
+{Change the CW side tone frequency in the range 300-1000 Hz. This also changes the BFO frequency upon 
+receive.}
 
 \action{CW Left}{CWL}{B}
-{This action indicates the closure/opening of the left paddle of a CW key. It is usually assigned to a GPIO line or a MIDI
-controller to which a Morse paddle is attached, and works with the iambic keyer that is built into piHPSDR. This keyer
+{This action indicates the closure/opening of the left paddle of a CW key. It is usually assigned to a GPIO 
+line or a MIDI
+controller to which a Morse paddle is attached, and works with the iambic keyer that is built into piHPSDR. 
+This keyer
 is only active if CW is \textit{not} handled in the radio (see CW menu).}
 
 \action{CW Right}{CWR}{B}
-{This action indicates the closure/opening of the right paddle of a CW key. It is usually assigned to a GPIO line or a MIDI
-controller to which a Morse paddle is attached, and works with the iambic keyer that is built into piHPSDR. This keyer
+{This action indicates the closure/opening of the right paddle of a CW key. It is usually assigned to a GPIO 
+line or a MIDI
+controller to which a Morse paddle is attached, and works with the iambic keyer that is built into piHPSDR. 
+This keyer
 is only active if CW is \textit{not} handled in the radio (see CW menu).}
 
 \action{CW Speed}{CWSPD}{PE}
-{Change the CW side tone frequency in the range 1-60 wpm. This affect the built-in iambic keyer or the keyer inside the radio,
+{Change the CW side tone frequency in the range 1-60 wpm. This affect the built-in iambic keyer or the keyer 
+inside the radio,
 depending on whether CW is handled in the radio or not (see CW menu).}
 
-\action{CW Key (keyer)}{CWKy}{B}{Straith key key-down or key-up event. Usually assigned to a GPIO line of  MIDI controller to
-which a straight key or an external keyer is attached. Note that this action does not automatically switch to TX, so it must
+\action{CW Key (keyer)}{CWKy}{B}{Straith key key-down or key-up event. Usually assigned to a GPIO line of  
+MIDI controller to
+which a straight key or an external keyer is attached. Note that this action does not automatically switch 
+to TX, so it must
 be used together with either manual RX/TX switching, or with the "\texttt{PTT (CW Keyer)}" action.}
 
-\action{PTT (keyer)}{CWKyPTT}{B}{This very similar to the \texttt{PTT} action (see below) with the exception that CW handling
-in the radio is temporarily disabled (thus, CW handling in piHPSDR is enabled). This allows to have, e.g. a paddle attached
+\action{PTT (keyer)}{CWKyPTT}{B}{This very similar to the \texttt{PTT} action (see below) with the exception 
+that CW handling in the radio is temporarily disabled (thus, CW handling in piHPSDR is enabled). This allows 
+to have, e.g. a paddle attached
 to the radio while a contest logging program ,,talks'' to piHPSDR.}
 
 \action{DIV On/Off}{DIVT}{B}{Toggles (enabled/disabled) DIVERSITY reception.}
 
-\action{DIV Gain}{DIVG}{E}{Adjust DIVERSITY gain. One tick of the encoder increments of decrements the gain by an amount of 0.5}
+\action{DIV Gain}{DIVG}{E}{Adjust DIVERSITY gain. One tick of the encoder increments of decrements the gain 
+by an amount of 0.5}
 
-\action{DIV Gain Coarse}{DIVGC}{E}{Adjust DIVERSITY gain (coarse adjustment).  One tick of the encoder increments of decrements the gain by an amount of 2.5}
+\action{DIV Gain Coarse}{DIVGC}{E}{Adjust DIVERSITY gain (coarse adjustment).  One tick of the encoder 
+increments of decrements the gain by an amount of 2.5}
 
-\action{DIV Gain Fine}{DIVGF}{E}{Adjust DIVERSITY gain (fine adjustment).  One tick of the encoder increments of decrements the gain by an amount of 0.1.
-Since adjusting the DIVERSITY gain (or phase) is sometimes difficult, assigning one encoder to a coarse and another encoder to a fine adjustment may
+\action{DIV Gain Fine}{DIVGF}{E}{Adjust DIVERSITY gain (fine adjustment).  One tick of the encoder 
+increments of decrements the gain by an amount of 0.1.
+Since adjusting the DIVERSITY gain (or phase) is sometimes difficult, assigning one encoder to a coarse and 
+another encoder to a fine adjustment may
 help in locating the ,,sweet spot''.}
 
-\action{DIV Phase}{DIVP}{E}{Adjust DIVERSITY phase (fine adjustment). One tick of the encoder increments of decrements the gain by an amount of 0.5}
+\action{DIV Phase}{DIVP}{E}{Adjust DIVERSITY phase (fine adjustment). One tick of the encoder increments of 
+decrements the gain by an amount of 0.5}
 
-\action{DIV Phase Coarse}{DIVPC}{E}{Adjust DIVERSITY gain (coarse adjustment). One tick of the encoder increments of decrements the gain by an amount of 2.5}
+\action{DIV Phase Coarse}{DIVPC}{E}{Adjust DIVERSITY gain (coarse adjustment). One tick of the encoder 
+increments of decrements the gain by an amount of 2.5}
 
-\action{DIV Phase Fine}{DIVPF}{E}{Adjust DIVERSITY gain (coarse adjustment). One tick of the encoder increments of decrements the gain by an amount of 20.1}
+\action{DIV Phase Fine}{DIVPF}{E}{Adjust DIVERSITY gain (coarse adjustment). One tick of the encoder 
+increments of decrements the gain by an amount of 20.1}
 
 \action{DIV Menu}{DIV}{B}{Open the DIVERSITY menu.}
 
-\action{Duplex}{DUP}{B}{Toggle (on/off) DUPLEX status. IN the DUPLEX mode, the receivers continue to work during TX, and the RX panels are not
-removed during TX. Instead, a separate TX window opens during transmitting. Generally, DUPLEX only make sense when using different and well
+\action{Duplex}{DUP}{B}{Toggle (on/off) DUPLEX status. IN the DUPLEX mode, the receivers continue to work 
+during TX, and the RX panels are not
+removed during TX. Instead, a separate TX window opens during transmitting. Generally, DUPLEX only make 
+sense when using different and well
 decoupled RX and TX antennas.}
 
-\action{Filter -}{FL-}{B}{Cycle forward (!) through the list of filters for the current mode of the active receiver. Normally, this means switching
-to a narrower filter (hence the name \texttt{FILTER -}). When reaching the last filter in the list, further cycling switches to the first
+\action{Filter -}{FL-}{B}{Cycle forward (!) through the list of filters for the current mode of the active 
+receiver. Normally, this means switching
+to a narrower filter (hence the name \texttt{FILTER -}). When reaching the last filter in the list, further 
+cycling switches to the first
 (widest) filter.}
 
- \action{Filter +}{FL+}{B}{Cycle backward (!) through the list of filters for the current mode of the active receiver. Normally, this means switching
-to a wider filter (hence the name \texttt{FILTER +}). When reaching the first filter in the list, further cycling switches to the last
+ \action{Filter +}{FL+}{B}{Cycle backward (!) through the list of filters for the current mode of the active 
+receiver. Normally, this means switching
+to a wider filter (hence the name \texttt{FILTER +}). When reaching the first filter in the list, further 
+cycling switches to the last
 filter which is the variable \texttt{Var2} filter.}
 
-\action{Filter Cut Low}{FCUTL}{E}{Adjust the low-cut of the current filter. Note that the notion of ,,low'' edge of the filter refers to
-audio frequencies for the single side band modes LSB, CWL, DIGL. This action is a no-op unless the current filter is one of the two variable filters
+\action{Filter Cut Low}{FCUTL}{E}{Adjust the low-cut of the current filter. Note that the notion of ,,low'' 
+edge of the filter refers to
+audio frequencies for the single side band modes LSB, CWL, DIGL. This action is a no-op unless the current 
+filter is one of the two variable filters
  \texttt{Var1} or \texttt{Var2}.}
 
-\action{Filter Cut High}{FCUTL}{E}{Adjust the high-cut of the current filter. Note that the notion of ,,high'' edge of the filter refers to
-audio frequencies for the single side band modes LSB, CWL, DIGL. This action is a no-op unless the current filter is one of the two variable filters
+\action{Filter Cut High}{FCUTL}{E}{Adjust the high-cut of the current filter. Note that the notion 
+of ,,high'' edge of the filter refers to
+audio frequencies for the single side band modes LSB, CWL, DIGL. This action is a no-op unless the current 
+filter is one of the two variable filters
  \texttt{Var1} or \texttt{Var2}.}
  
- \action{Filter Cut Default}{FCUTDEF}{B}{Reset the low and high cut of the current filter to the default values. This action is a no-op unless the current filter is one of the two variable filters
+ \action{Filter Cut Default}{FCUTDEF}{B}{Reset the low and high cut of the current filter to the default 
+ values. This action is a no-op unless the current filter is one of the two variable filters
  \texttt{Var1} or \texttt{Var2}.}
  
  \action{Filter Menu}{FILT}{B}{This opens the \texttt{Filter} menu.}
  
  \action{VFO Menu}{FREQ}{B}{This opens the \texttt{FREQ} (VFO) menu.}
  
- \action{Function}{FUNC}{B}{Cycle through the six toolbar sets. For the piHPSDR GPIO controller V1, where the eight switches follow the toolbar buttons, this also affects the function
+ \action{Function}{FUNC}{B}{Cycle through the six toolbar sets. For the piHPSDR GPIO Controller1, where 
+ the eight switches follow the toolbar buttons, this also affects the function
  of the switches. Note that this action is \textit{always} connected with the right-most toolbar button.}
  
-  \action{FuncRev}{FUNC-}{B}{Cycle backwards through the six toolbar sets. For the piHPSDR GPIO controller V1, where the eight switches follow the toolbar buttons, this also affects the function
+  \action{FuncRev}{FUNC-}{B}{Cycle backwards through the six toolbar sets. For the piHPSDR GPIO Controller1,
+   where the eight switches follow the toolbar buttons, this also affects the function
  of the switches. When using a mouse, this action can be invoked by a secondary mouse click
  on the rightmost toolbar button.}
  
- \action{IF Shift}{IFSHFT}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in the  active receiver, and shifts the  filter, that is,
+ \action{IF Shift}{IFSHFT}{E}{This command is effective only if one of the variable filters Var1 or Var2 is 
+ currently used in the  active receiver, and shifts the  filter, that is,
  it affects  the low and high cut in the same way.}
  
- \action{IF Shift RX1}{IFSHFT1}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-A, and shifts the filter, that is,
+ \action{IF Shift RX1}{IFSHFT1}{E}{This command is effective only if one of the variable filters Var1 or 
+ Var2 is currently used in VFO-A, and shifts the filter, that is,
  it affects  the low and high cut in the same way.}
  
- \action{IF Shift RX2}{IFSHFT2}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-B, and shifts the filter, that is,
+ \action{IF Shift RX2}{IFSHFT2}{E}{This command is effective only if one of the variable filters Var1 or 
+ Var2 is currently used in VFO-B, and shifts the filter, that is,
  it affects  the low and high cut in the same way.}
  
- \action{IF Width}{IFWIDTH}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in the  active receiver, and changes the  filter width, that is,
+ \action{IF Width}{IFWIDTH}{E}{This command is effective only if one of the variable filters Var1 or Var2 is  
+ currently used in the  active receiver, and changes the  filter width, that is,
  it affects  the low and high cut in an opposite way.}
  
- \action{IF Width RX1}{IFWIDTH1}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-A, and changes the  filter width, that is,
+ \action{IF Width RX1}{IFWIDTH1}{E}{This command is effective only if one of the variable filters Var1 or 
+ Var2 is currently used in VFO-A, and changes the  filter width, that is,
  it affects  the low and high cut in an opposite way.}
  
- action{IF Width RX2}{IFWIDTH2}{E}{This command is effective only if one of the variable filters Var1 or Var2 is currently used in VFO-B, and changes the  filter width, that is,
+ action{IF Width RX2}{IFWIDTH2}{E}{This command is effective only if one of the variable filters Var1 or 
+ Var2 is currently used in VFO-B, and changes the  filter width, that is,
  it affects  the low and high cut in an opposite way.}
  
 \action{Linein Gain}{LIGAIN}{PE}{Change the line-in gain of the radio. If the
      radio does not have a line-in input, this control has no effect.}
      
-\action{Lock}{LOCK}{B}{Lock the VFOs. A locked VFO will not accept VFO frequency steps in either direction, and cannot be moved by dragging with the  mouse. Band changes etc.
+\action{Lock}{LOCK}{B}{Lock the VFOs. A locked VFO will not accept VFO frequency steps in either direction, 
+and cannot be moved by dragging with the  mouse. Band changes etc.
 are still possible, though. The command is intended to guard against accidentally moving the VFO dial.}
   
 \action{Memory Menu}{MEM}{B}{Open the \texttt{MEM} (Memory) menu.}
   
-\action{Mic Gain}{MICGAIN}{PE}{Change the mic gain (from -12 to 50 dB). The amplification of the microphone audio data is done in software, and applies to the TX audio
+\action{Mic Gain}{MICGAIN}{PE}{Change the mic gain (from -12 to 50 dB). The amplification of the microphone 
+audio data is done in software, and applies to the TX audio
 input samples whereever they come from. (See the discussion of local microphones in the \texttt{TX} menu.}
 
-\action{Mode -}{MD-}{B}{Cycle backwards through the list of modes for the active receiver. When the first mode (LSB) has been reached, jump to the last one (DRM). Note that when
-changing the mode, the current filter, noise reduction, equalizer, VFO step size, and TX compressor settings are stored for the old mode, and the settings last used with the
-new mode are restored. This allows to quickly switch between SSB and CW, or between SSB and digi modes, without re-adjusting these settings.}
+\action{Mode -}{MD-}{B}{Cycle backwards through the list of modes for the active receiver. When the first 
+mode (LSB) has been reached, jump to the last one (DRM). Note that when
+changing the mode, the current filter, noise reduction, equalizer, VFO step size, and TX compressor settings 
+are stored for the old mode, and the settings last used with the
+new mode are restored. This allows to quickly switch between SSB and CW, or between SSB and digi modes, 
+without re-adjusting these settings.}
 
-\action{Mode +}{MD+}{B}{Cycle forward through the list of modes for the active receiver. When the last mode (DRM) has been reached, jump to the first one (LSB). Note that when
-changing the mode, the current filter, noise reduction, equalizer, VFO step size, and TX compressor settings are stored for the old mode, and the settings last used with the
-new mode are restored. This allows to quickly switch between SSB and CW, or between SSB and digi modes, without re-adjusting these settings.}
+\action{Mode +}{MD+}{B}{Cycle forward through the list of modes for the active receiver. When the last mode 
+(DRM) has been reached, jump to the first one (LSB). Note that when
+changing the mode, the current filter, noise reduction, equalizer, VFO step size, and TX compressor settings 
+are stored for the old mode, and the settings last used with the
+new mode are restored. This allows to quickly switch between SSB and CW, or between SSB and digi modes, 
+without re-adjusting these settings.}
 
 \action{Mode Menu}{MODE}{B}{Open the \bltt{Mode} menu.}
 
-\action{MOX}{MOX}{B}{Toggle between TX and RX. Unlike the PTT action, which puts the radio into TX when pressed and into RX when released, this button toggles the PTT state
+\action{MOX}{MOX}{B}{Toggle between TX and RX. Unlike the PTT action, which puts the radio into TX when 
+pressed and into RX when released, this button toggles the PTT state
 when pressed.}
 
-\action{Mute}{MUTE}{B}{Toggles the ,,mute'' state of the active receiver. If a receiver is muted, it produces zero-amplitude audio output.}
+\action{Mute}{MUTE}{B}{Toggles the ,,mute'' state of the active receiver. If a receiver is muted, it 
+produces zero-amplitude audio output.}
 
 \action{NB}{NB}{B}{Cycles through the noise blanker states (NB off/NB1/NB2).}
 
@@ -2819,164 +3223,204 @@ when pressed.}
 
 \action{Noise Menu}{NOISE}{B}{Opens the \texttt{NOISE} menu.}
 
-\action{NumPad 0}{0}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,0''
-in the \texttt{VFO} (VFO) menu.}
+\action{NumPad 0}{0}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,0'' in the \texttt{VFO} (VFO) menu.}
 
-\action{NumPad 1}{1}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,1''
-in the \texttt{VFO} menu.}
+\action{NumPad 1}{1}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,1'' in the \texttt{VFO} menu.}
 
-\action{NumPad 2}{2}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,2''
-in the \texttt{VFO} menu.}
+\action{NumPad 2}{2}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,2'' in the \texttt{VFO} menu.}
 
-\action{NumPad 3}{3}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,3''
-in the \texttt{VFO} menu.}
+\action{NumPad 3}{3}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,3'' in the \texttt{VFO} menu.}
 
-\action{NumPad 4}{4}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,4''
-in the \texttt{VFO} menu.}
+\action{NumPad 4}{4}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,4'' in the \texttt{VFO} menu.}
 
-\action{NumPad 5}{5}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,5''
-in the \texttt{VFO} menu.}
+\action{NumPad 5}{5}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,5'' in the \texttt{VFO} menu.}
 
-\action{NumPad 6}{6}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,6''
-in the \texttt{VFO} menu.}
+\action{NumPad 6}{6}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,6'' in the \texttt{VFO} menu.}
 
-\action{NumPad 7}{7}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,7''
-in the \texttt{VFO} menu.}
+\action{NumPad 7}{7}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,7'' in the \texttt{VFO} menu.}
 
-\action{NumPad 8}{8}{B}{(Used for direct frequency entry. This is the same as hitting the corresponding button ,,8''
-in the \texttt{VFO}  menu.}
+\action{NumPad 8}{8}{B}{(Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,8'' in the \texttt{VFO}  menu.}
 
-\action{NumPad 9}{9}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button ,,9''
-in the \texttt{VFO}  menu.}
+\action{NumPad 9}{9}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button ,,9'' in the \texttt{VFO}  menu.}
 
-\action{NumPad BS}{BS}{B}{Used for direct frequency entry (BS = backstep). This is the same as hitting the corresponding button 
-in the \texttt{VFO} menu. It cancels the last-entered digit.}
+\action{NumPad BS}{BS}{B}{Used for direct frequency entry (BS = backstep). This is the same as hitting the 
+corresponding button  in the \texttt{VFO} menu. It cancels the last-entered digit.}
 
-\action{NumPad CL}{CL}{B}{Used for direct frequency entry (CL = clear). This is the same as hitting the corresponding button 
-in the \texttt{VFO}  menu. It cancels all entered digits so far.}
+\action{NumPad CL}{CL}{B}{Used for direct frequency entry (CL = clear). This is the same as hitting the 
+corresponding button  in the \texttt{VFO}  menu. It cancels all entered digits so far.}
 
-\action{NumPad Dec}{DEC}{B}{Used for direct frequency entry (DEC = decimal point). This is the same as hitting the corresponding button 
-in the \texttt{VFO} menu.}
+\action{NumPad Dec}{DEC}{B}{Used for direct frequency entry (DEC = decimal point). This is the same as 
+hitting the corresponding button  in the \texttt{VFO} menu.}
 
-\action{NumPad kHz}{KHZ}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button 
-in the \texttt{VFO}  menu. The VFO frequency is changed to the value entered so far, multiplied with 1,000. For example, to
-go to 7.040 MHz, one can enter the sequence ,,7'', ,,0'', ,,4'', ,,0'', ,,KHZ''.}
+\action{NumPad kHz}{KHZ}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button  in the \texttt{VFO}  menu. The VFO frequency is changed to the value entered so far, multiplied with 
+1000. For example, to go to 7.040 MHz, one can enter the sequence ,,7'', ,,0'', ,,4'', ,,0'', ,,KHZ''.}
 
-\action{NumPad MHz}{MHZ}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button 
-in the \texttt{VFO}  menu. The VFO frequency is changed to the value entered so far, multiplied with 1,000,000.
+\action{NumPad MHz}{MHZ}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button 
+in the \texttt{VFO}  menu. The VFO frequency is changed to the value entered so far, multiplied with 
+1,000,000.
 For example, to go to 7.040 MHz, one can enter the sequence ,,7'', ,,DEC'', ,,0'', ,,4'', ,,MHZ''.}
 
-\action{NumPad Enter}{EN}{B}{Used for direct frequency entry. This is the same as hitting the corresponding button 
-in the \texttt{VFO}  menu. The VFO frequency is changed to the value entered so far.
-For example, to go to 7.040 MHz, one can enter the sequence ,,7'',  ,,0'', ,,4'', ,,0'', ,,0'', ,,0'', ,,0''. This
+\action{NumPad Enter}{EN}{B}{Used for direct frequency entry. This is the same as hitting the corresponding 
+button  in the \texttt{VFO}  menu. The VFO frequency is changed to the value entered so far.
+For example, to go to 7.040 MHz, one can enter the 
+sequence ,,7'',  ,,0'', ,,4'', ,,0'', ,,0'', ,,0'', ,,0''. This
 is rarely used but offers Hz-resolution for the direct frequency entry.}
 
-\action{PanZoom}{PAN}{E}{Change the Pan value. This control is only effective when the Zoom value is larger than 1.}
+\action{PanZoom}{PAN}{E}{Change the Pan value. This control is only effective when the Zoom value is larger 
+than 1.}
 
-\action{Pan-}{PAN-}{B}{Decrease the PAN value by 100. This control is only effective when the Zoom value is larger than 1.}
+\action{Pan-}{PAN-}{B}{Decrease the PAN value by 100. This control is only effective when the Zoom value is 
+larger than 1.}
 
-\action{Pan+}{PAN+}{B}{Increase the PAN value by 100. This control is only effective when the Zoom value is larger than 1.}
+\action{Pan+}{PAN+}{B}{Increase the PAN value by 100. This control is only effective when the Zoom value is 
+larger than 1.}
 
-\action{Panadapter High}{PANH}{PE}{Change the dBm value (from -60 to +20) at the top of the spectrum scope of the active receiver. Values outside
+\action{Panadapter High}{PANH}{PE}{Change the dBm value (from -60 to +20) at the top of the spectrum scope 
+of the active receiver. Values outside
 this range can be set in the \texttt{DISPLAY} menu.}
 
-\action{Panadapter Low}{PANL}{PE}{Change the dBm value (from -160 to -60) at the bottom of the spectrum scope of the active receiver.
+\action{Panadapter Low}{PANL}{PE}{Change the dBm value (from -160 to -60) at the bottom of the spectrum 
+scope of the active receiver.
 Values outside this range can be set in the \texttt{DISPLAY} menu.}
 
-\action{Panadapter Step}{PANS}{PE}{Change the step size (from 5 to 30) of the panadapter of the active receiver. This is the spacing
+\action{Panadapter Step}{PANS}{PE}{Change the step size (from 5 to 30) of the panadapter of the active 
+receiver. This is the spacing
 of the thin horizontal  lines in the spectrum scope.}
 
-\action{Preamp On/Off}{PRE}{B}{Toggle the preamp of the active receiver. Although the preamp switching is part of the HPSDR protocol,
+\action{Preamp On/Off}{PRE}{B}{Toggle the preamp of the active receiver. Although the preamp switching is 
+part of the HPSDR protocol,
 this has no effect in current radio models since the preamp is hard-wired ,,on''.}
 
 \action{PS On/Off}{PST}{B}{Toggle (on/off) adaptive predistortion (PureSignal).}
 
 \action{PS Menu}{PS}{B}{Open the \texttt{PS} (PureSignal) menu.}
 
-\action{PTT}{PTT}{B}{Put the radio  into TX mode when the button is pressed, and go back to RX when the button is released. This is
-one of the few actions where a button release event is significant. When attaching, say, the PTT contact of a microphone to
-a GPIO line for this purpose, take care of proper debouncine, since piHPSDR is not good at debouncing switches where both
+\action{PTT}{PTT}{B}{Put the radio  into TX mode when the button is pressed, and go back to RX when the 
+button is released. This is
+one of the few actions where a button release event is significant. When attaching, say, the PTT contact of 
+a microphone to
+a GPIO line for this purpose, take care of proper debouncine, since piHPSDR is not good at debouncing 
+switches where both
 the press and release events are significant.}
 
-\action{RF Gain}{RFGAIN}{PE}{Set the gain of the RF front end of the active receiver. Only effective for radios that have such a
-gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end instead. Small SDR radios
-using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have an RF gain control.}
+\action{RF Gain}{RFGAIN}{PE}{Set the gain of the RF front end of the active receiver. Only effective for 
+radios that have such a
+gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end 
+instead. Small SDR radios
+using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have 
+an RF gain control.}
 
-\action{RF Gain RX1}{RFGAIN1}{PE}{Set the gain of the RF front end of RX1. Only effective for radios that have such a
-gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end instead. Small SDR radios
-using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have an RF gain control.}
+\action{RF Gain RX1}{RFGAIN1}{PE}{Set the gain of the RF front end of RX1. Only effective for radios that 
+have such a
+gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end 
+instead. Small SDR radios
+using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have 
+an RF gain control.}
 
-\action{RF Gain RX2}{RFGAIN2}{PE}{Set the gain of the RF front end of RX2. Only effective for radios that have such a
-gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end instead. Small SDR radios
-using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have an RF gain control.}
+\action{RF Gain RX2}{RFGAIN2}{PE}{Set the gain of the RF front end of RX2. Only effective for radios that 
+have such a
+gain control. Most HPSDR radios do not have RF  gain, they have a step attenuator in the RF front end 
+instead. Small SDR radios
+using the AD9866 chip (HermesLite, RadioBerry) and radios connected via the SoapySDR library usually do have 
+an RF gain control.}
 
-\action{RIT}{RIT}{E}{Change the RIT value of the active receiver in the range -9999 to 9999 Hz. If a zero value is set, RIT is
+\action{RIT}{RIT}{E}{Change the RIT value of the active receiver in the range -9999 to 9999 Hz. If a zero 
+value is set, RIT is
 automatically disabled, if a non-zero value ist set, RIT is enabled.}
 
-\action{RIT Clear}{RITCL}{B}{Set the RIT value of the active receiver to zero. As a side effect, RIT is disabled for the
-active receiver}
+\action{RIT Clear}{RITCL}{B}{Set the RIT value of the active receiver to zero. As a side effect, RIT is 
+disabled for the active receiver}
 
-\action{RIT On/Off}{RITT}{B}{Toggle RIT (enabled/disabled) for the active receiver. Note the RIT value is not changed, so you can
+\action{RIT On/Off}{RITT}{B}{Toggle RIT (enabled/disabled) for the active receiver. Note the RIT value is 
+not changed, so you can
 temporarily disable RIT, and then enable it with the same offset (RIT value) used before.}
 
 \action{RIT -}{RIT-}{B}{Decrement the RIT value of the active receiver by the RIT step size, in the range
 -9999 to 9999 Hz. If a value of zero
 is reached, RIT is automatically disabled, and if a nonzero value is reached, RIT is automatically enabled. 
-Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold RIT- (either
-on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+Note that this action belongs to the few ones for which a button release event has an effect. If you press 
+and hold RIT- (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated 
+every 250 msec until
 the RIT- button is released.}
 
 \action{RIT +}{RIT+}{B}{Increment the RIT value of the active receiver by the RIT step size, in the range
 -9999 to 9999 Hz. If a value of zero
 is reached, RIT is automatically disabled, and if a nonzero value is reached, RIT is automatically enabled. 
-Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold RIT+ (either
-on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+Note that this action belongs to the few ones for which a button release event has an effect. If you press 
+and hold RIT+ (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated 
+every 250 msec until
 the RIT+ button is released.}
 
-\action{RIT RX1}{RIT1}{E}{Change the RIT value of RX1 in the range -9999 to 9999 Hz. If a zero value is set, RIT is
-automatically disabled, if a non-zero value ist set, RIT is enabled.}
+\action{RIT RX1}{RIT1}{E}{Change the RIT value of RX1 in the range -9999 to 9999 Hz. If a zero value is set, 
+RIT is automatically disabled, if a non-zero value ist set, RIT is enabled.}
 
-\action{RIT RX2}{RIT2}{E}{Change the RIT value of RX2 in the range -9999 to 9999 Hz. If a zero value is set, RIT is
-automatically disabled, if a non-zero value ist set, RIT is enabled.}
+\action{RIT RX2}{RIT2}{E}{Change the RIT value of RX2 in the range -9999 to 9999 Hz. If a zero value is set, 
+RIT is automatically disabled, if a non-zero value ist set, RIT is enabled.}
 
 \action{RIT Step}{RITST}{B}{Cycle through the possible values (1 Hz, 10 Hz, 100 Hz) of the RIT step.}
 
-\action{RSAT}{RSAT}{B}{If the SAT mode is either Off or SAT, change it to RSAT. If the SAT mode  is RSAT, change it to Off. In RSAT mode
-all VFO frequency \textit{changes} applied to one of the two VFOs will be applied to the other VFO with the sign reversed.}
+\action{RSAT}{RSAT}{B}{If the SAT mode is either Off or SAT, change it to RSAT. If the SAT mode  is RSAT, 
+change it to Off. In RSAT mode
+all VFO frequency \textit{changes} applied to one of the two VFOs will be applied to the other VFO with the 
+sign reversed.}
 
-\action{SAT}{SAT}{B}{If the SAT mode is either Off or RSAT, change it to SAT. If the SAT mode  is SAT, change it to Off. In SAT mode
+\action{SAT}{SAT}{B}{If the SAT mode is either Off or RSAT, change it to SAT. If the SAT mode  is SAT, 
+change it to Off. In SAT mode
 all VFO frequency \textit{changes} applied to one of the two VFOs will be applied to the other VFO as well.}
 
 \action{SNB}{SNB}{B}{Toggle (enable/diable) the spectral noise blanker for the active  receiver.}
 
 \action{Split}{SPLIT}{B}{Toggle (on/off) the  split status of the radio.}
 
-\action{Squelch}{SQUELCH}{PE}{Change the squelch threshold value of the active receiver. Squelch is automatically enabled (disbled) if
+\action{Squelch}{SQUELCH}{PE}{Change the squelch threshold value of the active receiver. Squelch is 
+automatically enabled (disbled) if
 the resulting value  is non-zero (zero).} 
 
-\action{Squelch RX1}{SQUELCH1}{PE}{Change the squelch threshold value of RX1. Squelch is automatically enabled (disbled) if
-the resulting value  is non-zero (zero).} 
+\action{Squelch RX1}{SQUELCH1}{PE}{Change the squelch threshold value of RX1. Squelch is automatically 
+enabled (disbled) if  the resulting value  is non-zero (zero).} 
 
-\action{Squelch RX2}{SQUELCH2}{PE}{Change the squelch threshold value of RX2. Squelch is automatically enabled (disbled) if
-the resulting value  is non-zero (zero).} 
+\action{Squelch RX2}{SQUELCH2}{PE}{Change the squelch threshold value of RX2. Squelch is automatically 
+enabled (disbled) if the resulting value  is non-zero (zero).} 
 
-\action{Swap RX}{SWAPRX}{B}{Make the inactive receiver the active one. This action is only effective if piHPDSR is running two receivers.}
+\action{Swap RX}{SWAPRX}{B}{Make the inactive receiver the active one. This action is only effective if 
+piHPDSR is running two receivers.}
 
-\action{Tune}{TUNE}{B}{Toggle (on/off) TUNE. If selected in the OC menu, an OC output will become active (low). This can then be used
+\action{Tune}{TUNE}{B}{Toggle (on/off) TUNE. If selected in the OC menu, an OC output will become active 
+(low). This can then be used
 to start an external automatic tuner.}
 
-\action{Tune Drv}{TUNDRV}{E}{Change the drive  level (0-100) used for TUNEing. This is equivalent to changing the "Tune drive level"
+\action{Tune Drv}{TUNDRV}{E}{Change the drive  level (0-100) used for TUNEing. This is equivalent to 
+changing the "Tune drive level"
 spin button in the \texttt{TX} menu \textbf{and} to check the "Tune use drive" box.}
 
-\action{Tune Full}{TUNF}{B}{Set the "full tune" flag and clear the "memory tune" flag. If an OC output is assigned to the TUNE state,
-it will be cleared (go  high again)  2800 msec after starting TUNE (this  time can also be adjusted  in the OC menu).} 
+\action{Tune Full}{TUNF}{B}{Set the "full tune" flag and clear the "memory tune" flag. If an OC output is 
+assigned to the TUNE state,
+it will be cleared (go  high again)  2800 msec after starting TUNE (this  time can also be adjusted  in the 
+OC menu).} 
 
-\action{Tune Mem}{TUNM}{B}{Set the "memory tune" flag and clear the "full tune" flag. If an OC output is assigned to the TUNE state,
-it will be cleared (go  high again)  550 msec after starting TUNE (this  time can also be adjusted  in the OC menu).} 
+\action{Tune Mem}{TUNM}{B}{Set the "memory tune" flag and clear the "full tune" flag. If an OC output is 
+assigned to the TUNE state,
+it will be cleared (go  high again)  550 msec after starting TUNE (this  time can also be adjusted  in the 
+OC menu).} 
 
 \action{TX Drive}{TXDRV}{PE}{Set the TX drive level (0-100).}
 
-\action{Two-Tone}{2TONE}{B}{Toggle (on/off) the two-tone state of the transmitter. If the two-tone state is engaged, the radio will go
+\action{Two-Tone}{2TONE}{B}{Toggle (on/off) the two-tone state of the transmitter. If the two-tone state is 
+engaged, the radio will go
 TX and emit a two-tone signal.}
 
 \action{VFO}{VFO}{E}{This is  the VFO frequency control of the active receiver.}
@@ -2985,98 +3429,141 @@ TX and emit a two-tone signal.}
 
 \action{VFO B}{VFOB}{E}{This is  the VFO frequency control of VFO-B.}
 
-\action{VOX On/Off}{VOX}{B}{Toggle (on/off) vox status. If vox is enabled, you can automatically key the transmitter
+\action{VOX On/Off}{VOX}{B}{Toggle (on/off) vox status. If vox is enabled, you can automatically key the 
+transmitter
 by talking into the microphone, without the need to press a PTT button. See the \texttt{VOX} menu.}
 
-\action{VOX Level}{VOXLEV}{E}{Change the VOX level threshold. If  you operate vox, and the radio does not go TX
-while talking into the  microphone, decrease the VOX threshold. If the radio goes TX simply because the neighbour's
+\action{VOX Level}{VOXLEV}{E}{Change the VOX level threshold. If  you operate vox, and the radio does not go 
+TX
+while talking into the  microphone, decrease the VOX threshold. If the radio goes TX simply because the 
+neighbour's
 hound starts barking, increase the VOX threshold.}
 
-\action{Wfall High}{WFALLH}{E}{Change the "high" level (-100 dBm ... 0 dBm) of the waterfalls. Signal levels between low and high are colour
-coded from black to yellow, while signals above "high" are yellow and signals below "low" are black. This value has
-no effect if the automatic waterfall coloring is chosen ("waterfall automatic"), which is usually preferable.}
+\action{Wfall High}{WFALLH}{E}{Change the "high" level (-100 dBm ... 0 dBm) of the waterfalls. Signal levels 
+between low and high are colour
+coded from black to yellow, while signals above "high" are yellow and signals below "low" are black. This 
+value has
+no effect if the automatic waterfall coloring is chosen ("waterfall automatic"), which is usually 
+preferable.}
 
-\action{Wfall Low}{WFALLL}{E}{Change the "low" level (-150 dBm ... -50 dBm) of the waterfalls. Signal levels between low and high are colour
-coded from black to yellow, while signals above "high" are yellow and signals below "low" are black. This value has
-no effect if the automatic waterfall coloring is chosen ("waterfall automatic"), which is usually preferable.}
+\action{Wfall Low}{WFALLL}{E}{Change the "low" level (-150 dBm ... -50 dBm) of the waterfalls. Signal levels 
+between low and high are colour
+coded from black to yellow, while signals above "high" are yellow and signals below "low" are black. This 
+value has
+no effect if the automatic waterfall coloring is chosen ("waterfall automatic"), which is usually 
+preferable.}
 
-\action{XIT}{XIT}{E}{Change the XIT value of the transceiver in the range -9999 to 9999 Hz. If a zero value is set, XIT is
+\action{XIT}{XIT}{E}{Change the XIT value of the transceiver in the range -9999 to 9999 Hz. If a zero value 
+is set, XIT is
 automatically disabled, if a non-zero value ist set, XIT is enabled.}
 
-\action{XIT Clear}{XITCL}{B}{Set the XIT value of the transmitter to zero. As a side effect, XIT is disabled.}
+\action{XIT Clear}{XITCL}{B}{Set the XIT value of the transmitter to zero. As a side effect, XIT is 
+disabled.}
 
-\action{XIT On/Off}{XITT}{B}{Toggle XIT (enabled/disabled) for the transceiver. Note the XIT value is not changed, so you can
+\action{XIT On/Off}{XITT}{B}{Toggle XIT (enabled/disabled) for the transceiver. Note the XIT value is not 
+changed, so you can
 temporarily disable XIT, and then enable it with the same offset (XIT value) used before.}
 
 \action{XIT -}{XIT-}{B}{Decrement the XIT value of the transmitter by the  RIT (!) step size, in the range
 -9999 to 9999 Hz. If a value of zero
 is reached, XIT is automatically disabled, and if a nonzero value is reached, XIT is automatically enabled. 
-Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold XIT- (either
-on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+Note that this action belongs to the few ones for which a button release event has an effect. If you press 
+and hold XIT- (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated 
+every 250 msec until
 the XIT- button is released.}
 
 \action{XIT +}{XIT+}{B}{Increment the XIT value of the transmitter  by the  RIT (!) step size, in the range
 -9999 to 9999 Hz. If a value of zero
 is reached, XIT is automatically disabled, and if a nonzero value is reached, XIT is automatically enabled. 
-Note that this action belongs to the few ones for which a button release event has an effect. If you press and hold XIT+ (either
-on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated every 250 msec until
+Note that this action belongs to the few ones for which a button release event has an effect. If you press 
+and hold XIT+ (either
+on the toolbar, or on a GPIO or MIDI console), there is an auto-repeat such that the action will be repeated 
+every 250 msec until
 the XIT+ button is released.}
 
 \action{Zoom}{ZOOM}{PE}{Change the ZOOM value (1...8) of the active receiver.}
 
-\action{Zoom -}{ZOOM-}{B}{Decrease the ZOOM value of the active receiver by one. If the ZOOM value was already 1, this is a no-op.}
+\action{Zoom -}{ZOOM-}{B}{Decrease the ZOOM value of the active receiver by one. If the ZOOM value was 
+already 1, this is a no-op.}
 
-\action{Zoom -}{ZOOM-}{B}{Increase the ZOOM value of the active receiver by one. If the ZOOM value was already 8, this is a no-op.}
-
+\action{Zoom -}{ZOOM-}{B}{Increase the ZOOM value of the active receiver by one. If the ZOOM value was 
+already 8, this is a no-op.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{piHPSDR keyboard bindings}
 
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{piHPSDR CAT commands}
-The CAT model of piHPSDR largely follows that for other SDR programs. It is based upon the Kenwood TS-2000 CAT command
-set, which can easily be found on the internet (see the Appendix of the Kenwood TS-2000 instruction manual) and will not be reproduced here
+\label{sec:catcommands}
+The CAT model of piHPSDR largely follows that for other SDR programs. It is based upon the Kenwood TS-2000 
+CAT command
+set, which can easily be found on the internet (see the Appendix of the Kenwood TS-2000 instruction manual) 
+and will not be reproduced here
 for copyright reasons. So if you want to connect a logbook
-or contest logging program to piHPSDR, you will normally tell this program that it has to control a Kenwood TS-2000.
+or contest logging program to piHPSDR, you will normally tell this program that it has to control a Kenwood 
+TS-2000.
 
-In the SDR community, there exist a heavily extended TS-2000 CAT command set known as the ,,PowerSDR CAT command set'', the original
+In the SDR community, there exist a heavily extended TS-2000 CAT command set known as the ,,PowerSDR CAT 
+command set'', the original
 source is probably
 
 \texttt{https://www.flexradio.com/documentation/}\\
 \texttt{powersdr-cat-command-reference-guide/}
 
-Many (but probably not all) of the commands listed there are implemented in piHPSDR, because it seems that there exist SDR controllers
-which communicate over the serial line. In recent years, such an open-source controller, the ANDROMEDA controller, has been
+Many (but probably not all) of the commands listed there are implemented in piHPSDR, because it seems that 
+there exist SDR controllers
+which communicate over the serial line. In recent years, such an open-source controller, the ANDROMEDA 
+controller, has been
 developed by Laurence Barker G8NJJ, see
 
 \texttt{https://github.com/laurencebarker/Andromeda\_front\_panel}
 
-This controller uses some additional CAT commands to communicate with the radio, and these commands have also been implemented into 
-the RIGCTL module of piHPSDR by Rick Koch N1GP (thanks Rick). These are the ZZZD and ZZZU commands for moving the VFO frequency
-down/up, and the ZZZP and ZZZE commands for sending information about push-buttons and encoders, and a ZZZS command which
-contains information on the ANDROMEDA version. Furthermore, if "Andromeda" is selected in the RIGCTL menu, piHPSDR will constantly
-\textit{send} status information to the ANDROMEDA controller using a ZZZI command. Status information is sent if something
-changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, CTUN mode, RIT and XIT status, and LOCK status),
+This controller uses some additional CAT commands to communicate with the radio, and these commands have 
+also been implemented into 
+the RIGCTL module of piHPSDR by Rick Koch N1GP (thanks Rick). These are the ZZZD and ZZZU commands for 
+moving the VFO frequency
+down/up, and the ZZZP and ZZZE commands for sending information about push-buttons and encoders, and a ZZZS 
+command which
+contains information on the ANDROMEDA version. Furthermore, if "Andromeda" is selected in the RIGCTL menu, 
+piHPSDR will constantly
+\textit{send} status information to the ANDROMEDA controller using a ZZZI command. Status information is 
+sent if something
+changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, CTUN mode, RIT and XIT 
+status, and LOCK status),
 such that the ANDROMEDA controller can update the corresponding LEDs.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{How to connect a Morse key or paddle}
 \label{sec:ConnectCW}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Running piHPSDR alongside with DigiMode programs}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Compile-time options}
 \label{sec:compiletime}
 
-There is a number of compile-time options that are shown on the initial screen. If you are using a binary version, 
-you have what you have. If you compile from the sources, you can choose which options you want (or want not).
+There is a number of compile-time options that are shown on the initial screen. If you are using a binary 
+version, 
+you have what you have. If you compile from the sources, you can choose which options you want (or want 
+not).
 It is possible to change the options without actually changing one of the files in the piHPSDR repository.
 Simply go (in a terminal window) to the directory where you compile piHPSDR and type in
 
 \grtt{cp Makefile GNUmakefile}
 
-This ,,trick'' takes care the further compilations use the file \texttt{GNUmakefile} rather than \texttt{Makefile},
-and changing the compile time options is accomplished by changing the file \texttt{GNUmakefile} with a text editor.
+This ,,trick'' takes care the further compilations use the file \texttt{GNUmakefile} rather than 
+\texttt{Makefile},
+and changing the compile time options is accomplished by changing the file \texttt{GNUmakefile} with a text 
+editor.
 In the \texttt{GNUmakefile} in the first 50 lines, you will find a lot of assignments of the form
 
 \texttt{\#AAAAAA=BBBBB}\\
@@ -3130,7 +3617,8 @@ reduction facilities \texttt{rnnnoise} and \texttt{libspecbleach}, see \\
  piHPSDR running on the two computers.
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[RaspPi: Activating I2C]{RaspPi: Activating the I2C interface}
 \label{sec:i2c}
 
@@ -3141,7 +3629,7 @@ reduction facilities \texttt{rnnnoise} and \texttt{libspecbleach}, see \\
 \label{fig:piEnableI2C}
 \end{figure}
 
-If you want to use the Controller2 or the G2 controller, the Raspberry Pi I2C interface
+If you want to use the Controller2 or the G2 frontpanel controller, the Raspberry Pi I2C interface
 must be enabled. This is done by opening \texttt{Menu}$\to$\texttt{Preferences}$\to$
 \texttt{Raspberry Pi Configuration} and moving to the \texttt{Interfaces} tab
 (shown in Fig. \ref{fig:piEnableI2C}. In the I2C line, move the button to the right
@@ -3150,7 +3638,8 @@ Do not change the buttons in the other lines, the need not be as shown here.
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[RaspPi: binary piHPDSR installation]{Binary installation of piHPSDR (RaspPi only)}
 \label{sec:installbinary}
 
@@ -3171,7 +3660,8 @@ entered in a terminal window.}
 \end{itemize}
 
 The following \textit{caveat} applies both to the binary installation and the compilation from
-the source code: If you want to use the Controller2 or the G2 controller, the Raspberry Pi I2C interface
+the source code: If you want to use the Controller2 or the G2 frontpanel controller,
+ the Raspberry Pi I2C interface
 must be enabled, as described in Appendix \ref{sec:i2c}.
 
 Before you shout at me, because your most-wanted compile time option is deactivated in the
@@ -3226,7 +3716,8 @@ box where it is indicated by the red arrow and that's it.
 looks quite generic and does not show the HPSDR logo. Log out and then log in again
 and the logo is there.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[Linux: piHPDSR install from sources]{Installation of piHPSDR from the sources (Linux, RaspPi)}
 \label{sec:installsources}
 \textit{This procedure has been tested on a Pi 4B, with a fresh and plain vanilla operating
@@ -3248,7 +3739,8 @@ the sources, since these compile time options are not activated in the binary in
 \end{itemize}
 
 The following \textit{caveat} applies both to the binary installation and the compilation from
-the source code: If you want to use the Controller2 or the G2 controller, the Raspberry Pi I2C interface
+the source code: If you want to use the Controller2 or the G2 frontpanel controller,
+ the Raspberry Pi I2C interface
 must be enabled, as described in Appendix \ref{sec:i2c}.
 
 To install from the sources, open a terminal window. If you do so, you get
@@ -3346,15 +3838,20 @@ Available converters...
 \end{tiny}
 
 (Sorry for the tiny want, I did not want to wrap output lines.)
-Note the API/ABI version (0.8). If you see 0.7 then you probably have installed SoapySDR on your computer from
-the standard repositories, and this is not going to work. The \texttt{libinstall.sh} command  has been designed 
+Note the API/ABI version (0.8). If you see 0.7 then you probably have installed SoapySDR on your computer 
+from
+the standard repositories, and this is not going to work. The \texttt{libinstall.sh} command  has been 
+designed 
 to work (and has been tested on) a plain vanilla operating system, not on a ,,spoiled'' one
 where the user has manually installed additional software packages that may induce incompatibilities.
 The best way out of such a problem is to re-install Linux (on a RaspPi, simply use a new SD card to do so).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[MacOS: piHPDSR install from sources]{Installation of piHPSDR from the sources (MacOS)}
 
-\textit{This procedure has been tested on a  fairly recent MacBookAir (2020 model, M1 Silicon CPU, running MacOS
+\textit{This procedure has been tested on a  fairly recent MacBookAir (2020 model, M1 Silicon CPU, running 
+MacOS
 Ventura 13.5.2) and on old iMac (late 2013 model, Intel CPU, running MacOS Catalina 10.15.7.
 For the old iMac the installation procedure takes very long, because most of the \texttt{HomeBrew} packages
 are no longer available in pre-compiled form and have to be compiled from the sources -- but it works!}
@@ -3383,9 +3880,11 @@ file (e.g. XQuartz-2.8.5.pkg) to your desktop and run it by double-clicking.
 
 Compiling piHPSDR on a Mac requires some basis LINUX/Unix skills. The most important program to use is
 the Terminal application (\texttt{Terminal.app}), that can be found in the Utilities folder that resides
-in the Applications folder. It is suggested to drag this application into the ,,dock'' so you have quick access.
+in the Applications folder. It is suggested to drag this application into the ,,dock'' so you have quick 
+access.
 Although MacOS has a complete Unix ,,under the hood'', one needs additional software to to Linux-style
-programming. The most popular such ,,Unix enabler'' packages are \texttt{MacPorts} and \texttt{HomeBrew}, I am using
+programming. The most popular such ,,Unix enabler'' packages are \texttt{MacPorts} and \texttt{HomeBrew}, I 
+am using
 \texttt{HomeBrew} but I know that piHPSDR can be compiled and run successfully with \texttt{MacPorts}
 as well. The deal is as simple as follows: if you use \texttt{MacPorts} then you are on your own, or
 have to rely on piHPSDR installations done by the \texttt{MacPorts} folks. For \texttt{HomeBrew},
@@ -3421,7 +3920,8 @@ procedure works in this case as well and does no harm. In addition to
  In case something went wrong, or simply to check that \texttt{HomeBrew} has been correctly installed,
  open a \textit{new} terminal window and type the command
  
- \grtt{brew config}
+ 
+\grtt{brew config}
  
  This should give you lots of information on the currently installed version of \texttt{HomeBrew},
  but also on the CPU of your machine, the compilers and MacOS version info, etc. If the command
@@ -3430,8 +3930,8 @@ procedure works in this case as well and does no harm. In addition to
  command is found. This is the reason why you have to open a new terminal window to make this test,
  since in the originally opened window the update of the command search path is not yet effective.
  
- If you want to use SoapySDR, please check the Soapy installation. Open a new terminal window and simply type
- the command (be careful to use the correct capitalization!)
+ If you want to use SoapySDR, please check the Soapy installation. Open a new terminal window and simply
+ type the command (be careful to use the correct capitalization!)
 
 \grtt{SoapySDRUtil -info}
 
