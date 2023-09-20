@@ -5481,6 +5481,14 @@ void set_blocking (int fd, int should_block) {
   struct termios tty;
   memset (&tty, 0, sizeof tty);
 
+  int flags = fcntl(fd, F_GETFL, 0);
+  if (should_block) {
+    flags &= ~O_NONBLOCK;
+  } else {
+    flags |= O_NONBLOCK;
+  }
+  fcntl(fd, F_SETFL, flags);
+
   if (tcgetattr (fd, &tty) != 0) {
     t_perror ("RIGCTL (tggetattr):");
     return;
@@ -5502,6 +5510,10 @@ static gpointer serial_server(gpointer data) {
   char *command = g_new(char, MAXDATASIZE);
   int command_index = 0;
   int i;
+  fd_set fds;
+  struct timeval tv;
+
+  t_print("%s: Entering Thread\n", __FUNCTION__);
   g_mutex_lock(&mutex_a->m);
   cat_control++;
 
@@ -5538,14 +5550,27 @@ static gpointer serial_server(gpointer data) {
     client->done = 0;
 
     if (!client->running) { break; }
+    //
+    // Blocking I/O with a time-out
+    //
+    FD_ZERO(&fds);
+    FD_SET(client->fd, &fds);
+    tv.tv_usec=250000; // 250 msec
+    tv.tv_sec=0;
 
-    //
-    // ATTN: if the "serial line" is a FIFO, the "NONBLOCK" flag
-    //       has not been set so we might get stuck in the read()
-    //
+    if (select(client->fd+1, &fds, NULL, NULL, &tv) <= 0) {
+      continue;
+    }
     int numbytes = read (client->fd, cmd_input, sizeof cmd_input);
 
-    if (!client->running || numbytes < 0) { break; }
+    //
+    // On my MacOS using a FIFO, I have seen that numbytes can be -1
+    // (with errno = EAGAIN) although the select() inidcated that data
+    // is available. Therefore the serial thread is not shut down if
+    // the read() failed -- it will try again and again until it is
+    // shut down by the rigctl menu.
+
+    if (!client->running) { break; }
 
     if (numbytes > 0) {
       for (i = 0; i < numbytes; i++) {
@@ -5578,6 +5603,7 @@ static gpointer serial_server(gpointer data) {
 
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update, NULL);
+  t_print("%s: Exiting Thread, running=%d\n", __FUNCTION__, client->running);
   return NULL;
 }
 
@@ -5689,9 +5715,8 @@ int launch_serial (int id) {
   }
 
   //
-  // If the O_NONBLOCK parameter is omitted, then pihpsdr may hang upon
-  // opening the port. So even if you want "blocking" I/O, you should
-  // open the port non-blocking and then activate blocking later on
+  // Use O_NONBLOCK to prevent "hanging" upon open(), set blocking mode
+  // later.
   //
   fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
 
@@ -5711,7 +5736,7 @@ int launch_serial (int id) {
   if (SerialPorts[id].andromeda) { baud = B9600; }
 
   if (set_interface_attribs (fd, baud, 0) == 0) {
-    set_blocking (fd, 0);                   // set no blocking
+    set_blocking (fd, 1);                   // set blocking
   } else {
     //
     // This tells the server that fd is something else
