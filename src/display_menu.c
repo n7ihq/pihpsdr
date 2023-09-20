@@ -35,7 +35,7 @@ static GtkWidget *waterfall_low_r = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -190,7 +190,7 @@ void display_menu(GtkWidget *parent) {
   int col = 0;
   int row = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
-  gtk_widget_set_name(close_b,"close_button");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   row++;

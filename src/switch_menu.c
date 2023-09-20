@@ -42,7 +42,7 @@ static SWITCH *temp_switches;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;

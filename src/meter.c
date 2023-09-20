@@ -336,14 +336,16 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
 
           if ((i % 20) == 0) {
             switch (units) {
-              case 0:
-              case 1:
-                sprintf(sf, "%0.1f", 0.1*interval*i);
-                break;
-              case 2:
-                sprintf(sf, "%d", (int) (0.1*interval*i));
-                break;
+            case 0:
+            case 1:
+              sprintf(sf, "%0.1f", 0.1 * interval * i);
+              break;
+
+            case 2:
+              sprintf(sf, "%d", (int) (0.1 * interval * i));
+              break;
             }
+
             cairo_arc(cr, cx, cx, radius + 5, radians, radians);
             cairo_get_current_point(cr, &x, &y);
             cairo_new_path(cr);
@@ -359,39 +361,47 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
       cairo_set_line_width(cr, PAN_LINE_THICK);
       cairo_set_source_rgba(cr, COLOUR_METER);
       angle = (max_pwr * 10.0 / interval) + offset;
+
       if (angle > 110.0 + offset) { angle = 110.0 + offset; }
+
       radians = angle * M_PI / 180.0;
       cairo_arc(cr, cx, cx, radius + 8, radians, radians);
       cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
       cairo_set_source_rgba(cr, COLOUR_METER);
+
       switch (pa_power) {
-        case PA_1W:
-          sprintf(sf, "%dmW", (int)(1000.0*max_pwr + 0.5));
-          break;
-        case PA_5W:
-        case PA_10W:
-          sprintf(sf, "%0.1fW", max_pwr);
-          break;
-        default:
-          sprintf(sf, "%dW", (int)(max_pwr+0.5));
-          break;
+      case PA_1W:
+        sprintf(sf, "%dmW", (int)(1000.0 * max_pwr + 0.5));
+        break;
+
+      case PA_5W:
+      case PA_10W:
+        sprintf(sf, "%0.1fW", max_pwr);
+        break;
+
+      default:
+        sprintf(sf, "%dW", (int)(max_pwr + 0.5));
+        break;
       }
+
       cairo_move_to(cr, 80, cx - radius + 15);
       cairo_show_text(cr, sf);
 
-      if (swr > transmitter->swr_alarm) {
-        cairo_set_source_rgba(cr, COLOUR_ALARM);  // display SWR in red color
-      } else {
-        cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
+      if (can_transmit) {
+        if (swr > transmitter->swr_alarm) {
+          cairo_set_source_rgba(cr, COLOUR_ALARM);  // display SWR in red color
+        } else {
+          cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
+        }
       }
 
       sprintf(sf, "SWR: %1.1f:1", swr);
-      cairo_move_to(cr, 60, cx -radius + 28);
+      cairo_move_to(cr, 60, cx - radius + 28);
       cairo_show_text(cr, sf);
       cairo_set_source_rgba(cr, COLOUR_METER);
       sprintf(sf, "ALC: %2.1f dB", max_alc);
-      cairo_move_to(cr, 60, cx -radius + 41);
+      cairo_move_to(cr, 60, cx - radius + 41);
       cairo_show_text(cr, sf);
     }
     break;
@@ -600,24 +610,29 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
         // Power/Alc/SWR not available for SOAPY.
         //
         switch (pa_power) {
-          case PA_1W:
-            sprintf(sf, "FWD: %dmW", (int)(1000.0*max_pwr + 0.5));
-            break;
-          case PA_5W:
-          case PA_10W:
-            sprintf(sf, "FWD: %0.1fW", max_pwr);
-            break;
-          default:
-            sprintf(sf, "FWD: %dW", (int)(max_pwr + 0.5));
-            break;
-        } 
+        case PA_1W:
+          sprintf(sf, "FWD: %dmW", (int)(1000.0 * max_pwr + 0.5));
+          break;
+
+        case PA_5W:
+        case PA_10W:
+          sprintf(sf, "FWD: %0.1fW", max_pwr);
+          break;
+
+        default:
+          sprintf(sf, "FWD: %dW", (int)(max_pwr + 0.5));
+          break;
+        }
+
         cairo_move_to(cr, 10, Y2);
         cairo_show_text(cr, sf);
 
-        if (swr > transmitter->swr_alarm) {
-          cairo_set_source_rgba(cr, COLOUR_ALARM);  // display SWR in red color
-        } else {
-          cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
+        if (can_transmit) {
+          if (swr > transmitter->swr_alarm) {
+            cairo_set_source_rgba(cr, COLOUR_ALARM);  // display SWR in red color
+          } else {
+            cairo_set_source_rgba(cr, COLOUR_METER); // display SWR in white color
+          }
         }
 
         cairo_select_font_face(cr, DISPLAY_FONT,

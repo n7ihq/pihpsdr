@@ -425,7 +425,8 @@ static gpointer discover_receive_thread(gpointer data) {
             break;
           }
 
-          t_print("old_discovery: name=%s min=%0.3f MHz max=%0.3f Mhz\n", discovered[devices].name, discovered[devices].frequency_min * 1E-6,
+          t_print("old_discovery: name=%s min=%0.3f MHz max=%0.3f Mhz\n", discovered[devices].name,
+                  discovered[devices].frequency_min * 1E-6,
                   discovered[devices].frequency_max * 1E-6);
 
           for (i = 0; i < 6; i++) {

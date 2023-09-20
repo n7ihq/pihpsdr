@@ -43,7 +43,7 @@ static GtkWidget *nb_container;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -326,11 +326,9 @@ void noise_menu(GtkWidget *parent) {
   gtk_combo_box_set_active(GTK_COMBO_BOX(nb_combo), active_receiver->nb);
   my_combo_attach(GTK_GRID(grid), nb_combo, 3, 2, 1, 1);
   g_signal_connect(nb_combo, "changed", G_CALLBACK(nb_cb), NULL);
-
   GtkWidget *line = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_widget_set_size_request(line, -1, 3);
   gtk_grid_attach(GTK_GRID(grid), line, 0, 3, 4, 1);
-
   //
   // Third row: select settings: NR, NB, NR4 settings
   //

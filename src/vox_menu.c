@@ -93,7 +93,7 @@ static gpointer level_thread(gpointer arg) {
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -154,21 +154,18 @@ void vox_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(enable_b), vox_enabled);
   g_signal_connect (enable_b, "toggled", G_CALLBACK(enable_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), enable_b, 3, 0, 1, 1);
-
   GtkWidget *level_label = gtk_label_new("Mic Level:");
   gtk_widget_set_name(level_label, "boldlabel");
-  gtk_widget_set_halign(level_label,GTK_ALIGN_END);
+  gtk_widget_set_halign(level_label, GTK_ALIGN_END);
   gtk_widget_show(level_label);
   gtk_grid_attach(GTK_GRID(grid), level_label, 0, 1, 1, 1);
   level = gtk_progress_bar_new();
   gtk_widget_show(level);
   gtk_grid_attach(GTK_GRID(grid), level, 1, 1, 3, 1);
   gtk_widget_set_valign(level, GTK_ALIGN_CENTER);
-
-
   GtkWidget *threshold_label = gtk_label_new("VOX Threshold:");
   gtk_widget_set_name(threshold_label, "boldlabel");
-  gtk_widget_set_halign(threshold_label,GTK_ALIGN_END);
+  gtk_widget_set_halign(threshold_label, GTK_ALIGN_END);
   gtk_widget_show(threshold_label);
   gtk_grid_attach(GTK_GRID(grid), threshold_label, 0, 2, 1, 1);
   GtkWidget *vox_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 1000.0, 1.0);
@@ -180,7 +177,7 @@ void vox_menu(GtkWidget *parent) {
   g_signal_connect(G_OBJECT(vox_scale), "value_changed", G_CALLBACK(vox_value_changed_cb), NULL);
   GtkWidget *hang_label = gtk_label_new("VOX Hang (ms):");
   gtk_widget_set_name(hang_label, "boldlabel");
-  gtk_widget_set_halign(hang_label,GTK_ALIGN_END);
+  gtk_widget_set_halign(hang_label, GTK_ALIGN_END);
   gtk_widget_show(hang_label);
   gtk_grid_attach(GTK_GRID(grid), hang_label, 0, 4, 1, 1);
   GtkWidget *vox_hang_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 1000.0, 1.0);

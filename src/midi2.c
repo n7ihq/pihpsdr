@@ -81,7 +81,6 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
           new = (val * 100 + 63) / 127;
           DoTheMidi(desc->action, desc->type, new);
         } else if (desc->type == MIDI_WHEEL) {
-
           // translate value to direction/speed
           new = 0;
 
@@ -102,7 +101,6 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
           //                               val, new, desc->vfl1, desc->vfl2, desc->fl1, desc->fl2, desc->lft1, desc->lft2,
           //                               desc->rgt1, desc->rgt2, desc->fr1, desc->fr2, desc->vfr1, desc->vfr2);
           if (new != 0) { DoTheMidi(desc->action, desc->type, new); }
-
         }
 
         break;
@@ -115,7 +113,6 @@ void NewMidiEvent(enum MIDIevent event, int channel, int note, int val) {
         }
 
         break;
-
       }
 
       break;

@@ -39,7 +39,7 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -127,13 +127,13 @@ void encoder_menu(GtkWidget *parent) {
     break;
 
   case CONTROLLER1:
-    // 3 vertical single encoders with switches plus VFO
 
+    // 3 vertical single encoders with switches plus VFO
     for (int i = 0; i < 3; i++) {
       col = 4;
       widget = gtk_label_new("Switch");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
       widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
@@ -144,7 +144,7 @@ void encoder_menu(GtkWidget *parent) {
       col = 4;
       widget = gtk_label_new("Encoder");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
       widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
@@ -152,9 +152,10 @@ void encoder_menu(GtkWidget *parent) {
       g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       row++;
+
       if (i < 2) {
         // vertical padding
-        widget=gtk_label_new("  ");
+        widget = gtk_label_new("  ");
         gtk_widget_set_size_request(widget, 0, 10);
         gtk_grid_attach(GTK_GRID(grid), widget, 4, row, 1, 1);
         row++;
@@ -185,7 +186,7 @@ void encoder_menu(GtkWidget *parent) {
     for (int i = 0; i < 3; i++) {
       widget = gtk_label_new("Switch");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
       widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
@@ -196,12 +197,11 @@ void encoder_menu(GtkWidget *parent) {
     }
 
     row++;
-
     col = 0;
 
     for (int i = 0; i < 3; i++) {
       widget = gtk_label_new("Encoder");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_widget_set_name(widget, "boldlabel");
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
@@ -216,7 +216,7 @@ void encoder_menu(GtkWidget *parent) {
     row = 1;
     col = 6;
     widget = gtk_label_new("Switch");
-    gtk_widget_set_halign(widget,GTK_ALIGN_END);
+    gtk_widget_set_halign(widget, GTK_ALIGN_END);
     gtk_widget_set_name(widget, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
     col++;
@@ -225,18 +225,16 @@ void encoder_menu(GtkWidget *parent) {
     g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(3));
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
     row++;
-
     col = 6;
     widget = gtk_label_new("Encoder");
     gtk_widget_set_name(widget, "boldlabel");
-    gtk_widget_set_halign(widget,GTK_ALIGN_END);
+    gtk_widget_set_halign(widget, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
     col++;
     widget = gtk_button_new_with_label(ActionTable[encoders[3].bottom_encoder_function].str);
     gtk_widget_set_name(widget, "small_button");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(3));
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
-
 #if 0
     //
     // The main dial is always associated with VFO so need not occur here
@@ -253,7 +251,6 @@ void encoder_menu(GtkWidget *parent) {
     gtk_widget_set_name(widget, "small_button");
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
 #endif
-
     break;
 
   case CONTROLLER2_V2:
@@ -264,7 +261,7 @@ void encoder_menu(GtkWidget *parent) {
     for (int i = 0; i < 3; i++) {
       widget = gtk_label_new("Switch");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
       widget = gtk_button_new_with_label(ActionTable[encoders[i].switch_function].str);
@@ -280,7 +277,7 @@ void encoder_menu(GtkWidget *parent) {
     for (int i = 0; i < 3; i++) {
       widget = gtk_label_new("Top");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
       widget = gtk_button_new_with_label(ActionTable[encoders[i].top_encoder_function].str);
@@ -296,7 +293,7 @@ void encoder_menu(GtkWidget *parent) {
     for (int i = 0; i < 3; i++) {
       widget = gtk_label_new("Bottom");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget,GTK_ALIGN_END);
+      gtk_widget_set_halign(widget, GTK_ALIGN_END);
       gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
       col++;
       widget = gtk_button_new_with_label(ActionTable[encoders[i].bottom_encoder_function].str);
@@ -310,7 +307,7 @@ void encoder_menu(GtkWidget *parent) {
     col = 6;
     widget = gtk_label_new("Switch");
     gtk_widget_set_name(widget, "boldlabel");
-    gtk_widget_set_halign(widget,GTK_ALIGN_END);
+    gtk_widget_set_halign(widget, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
     col++;
     widget = gtk_button_new_with_label(ActionTable[encoders[3].switch_function].str);
@@ -321,7 +318,7 @@ void encoder_menu(GtkWidget *parent) {
     col = 6;
     widget = gtk_label_new("Top");
     gtk_widget_set_name(widget, "boldlabel");
-    gtk_widget_set_halign(widget,GTK_ALIGN_END);
+    gtk_widget_set_halign(widget, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
     col++;
     widget = gtk_button_new_with_label(ActionTable[encoders[3].top_encoder_function].str);
@@ -331,7 +328,7 @@ void encoder_menu(GtkWidget *parent) {
     row++;
     col = 6;
     widget = gtk_label_new("Bottom");
-    gtk_widget_set_halign(widget,GTK_ALIGN_END);
+    gtk_widget_set_halign(widget, GTK_ALIGN_END);
     gtk_widget_set_name(widget, "boldlabel");
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
     col++;
@@ -339,7 +336,6 @@ void encoder_menu(GtkWidget *parent) {
     gtk_widget_set_name(widget, "small_button");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(3));
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
-
 #if 0
     //
     // The main dial is always associated with VFO so need not occur here
@@ -356,7 +352,6 @@ void encoder_menu(GtkWidget *parent) {
     gtk_widget_set_name(widget, "small_button");
     gtk_grid_attach(GTK_GRID(grid), widget, col, row, 1, 1);
 #endif
-
     break;
 
   case G2_FRONTPANEL:
@@ -418,6 +413,7 @@ void encoder_menu(GtkWidget *parent) {
       g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
       gtk_grid_attach(GTK_GRID(grid), widget, 6, 1 + i, 1, 1);
     }
+
 #endif
     // 2 vertical double encoders with switch, both on the left and on the right side
     // variable i = 0,1 for left, right
@@ -427,7 +423,6 @@ void encoder_menu(GtkWidget *parent) {
     gtk_widget_set_halign(widget, GTK_ALIGN_START);
     gtk_widget_set_valign(widget, GTK_ALIGN_CENTER);
     gtk_grid_attach(GTK_GRID(grid), widget, 0, 1, 2, 1);
-
     widget = gtk_label_new("Right edge Encoders");
     gtk_widget_set_name(widget, "small_button");
     gtk_widget_set_size_request(widget, 0, 30);
@@ -435,61 +430,57 @@ void encoder_menu(GtkWidget *parent) {
     gtk_widget_set_valign(widget, GTK_ALIGN_CENTER);
     gtk_grid_attach(GTK_GRID(grid), widget, 3, 1, 2, 1);
 
-    for (int i = 0; i< 2; i++) {
-      row=4;
+    for (int i = 0; i < 2; i++) {
+      row = 4;
       widget = gtk_label_new("Switch");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START :GTK_ALIGN_END);
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
+      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START : GTK_ALIGN_END);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       widget = gtk_label_new("Top");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START :GTK_ALIGN_END);
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
+      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START : GTK_ALIGN_END);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       widget = gtk_label_new("Bottom");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START :GTK_ALIGN_END);
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
+      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START : GTK_ALIGN_END);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       widget = gtk_label_new("  ");
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       widget = gtk_label_new("Switch");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START :GTK_ALIGN_END);
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
+      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START : GTK_ALIGN_END);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       widget = gtk_label_new("Top");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START :GTK_ALIGN_END);
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
+      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START : GTK_ALIGN_END);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       widget = gtk_label_new("Bottom");
       gtk_widget_set_name(widget, "boldlabel");
-      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START :GTK_ALIGN_END);
-      gtk_grid_attach(GTK_GRID(grid), widget, 2*i+1, row++, 1, 1);
-    
+      gtk_widget_set_halign(widget, i == 0 ? GTK_ALIGN_START : GTK_ALIGN_END);
+      gtk_grid_attach(GTK_GRID(grid), widget, 2 * i + 1, row++, 1, 1);
       // j counts the encoders, 0...3. Encoders 0,1 are left and 2,3 are right
-      row=4;
-      for (int j = 2*i; j < 2*i+2; j++) {
+      row = 4;
+
+      for (int j = 2 * i; j < 2 * i + 2; j++) {
         widget = gtk_button_new_with_label(ActionTable[encoders[j].switch_function].str);
         gtk_widget_set_name(widget, "small_button");
         g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid), widget, 4*i, row++, 1, 1);
-
+        gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
         widget = gtk_button_new_with_label(ActionTable[encoders[j].top_encoder_function].str);
         gtk_widget_set_name(widget, "small_button");
         g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid), widget, 4*i, row++, 1, 1);
-
+        gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
         widget = gtk_button_new_with_label(ActionTable[encoders[j].bottom_encoder_function].str);
         gtk_widget_set_name(widget, "small_button");
         g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid), widget, 4*i, row++, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
 
-        if  (j == 2*i) {
+        if  (j == 2 * i) {
           widget = gtk_label_new("  ");
-          gtk_grid_attach(GTK_GRID(grid), widget, 4*i, row++, 1, 1);
-       }
-
+          gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
+        }
+      }
     }
-    }
-
 
 #if 0
     //
@@ -504,7 +495,6 @@ void encoder_menu(GtkWidget *parent) {
     gtk_widget_set_name(widget, "small_button");
     gtk_grid_attach(GTK_GRID(grid), widget, 3, 6, 1, 1);
 #endif
-
     break;
   }
 

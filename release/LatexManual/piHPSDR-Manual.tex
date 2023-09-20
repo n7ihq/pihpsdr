@@ -2531,16 +2531,20 @@ ports, you must know the proper name (e.g. by looking at the contents of the \te
 To the right of the serial port text field, there is a pop-down menu for choosing the baud rate. Only 4800, 
 9600, 19200, and 38400 baud are offered, but this should cover most cases. Then, further to the right, is 
 the \rett{Enable} button which enables a CAT connection on that serial line. Finally, there is the 
-\rett{Andromeda} check box which must be checked
-if that serial port is an ANDROMEDA controller. If \rett{Andromeda} is enabled, the baud rate pop-down menu 
-disappears because for ANDROMEDA, the baud rate is hard-wired to 9600 baud.
+\rett{Andromeda} check box which should be checked
+if that serial port is an ANDROMEDA controller.
 
-Note that once a serial CAT connection is enabled, you cannot change the ANDROMEDA status. This is necessary 
-since ANDROMEDA
-requires a fixed baud rate but you cannot change or set the baud rate once the serial port is already open.
-The check box is still there
-and shows the status but this cannot be changed. If you want to change the ANDROMEDA status and the serial 
-line is already in use, you have to close and re-open it with the \rett{Enable} box.
+If you enable \rett{Andromeda}, the baud rate is automatically set to 9600 baud, and you cannot
+change this until you disable \rett{Andromeda}. If you change the baud rate for a serial
+port that is already in use (enabled), the serial connection is closed and re-openend
+(disabled and enabled).  This also applies
+if you enable \rett{Andromeda} for a running serial connection with a baud rate different
+from 9600 baud.
+
+The only effect of enabling \rett{Andromeda}, besides fixing the baud rate to 9600 baud,
+is that the ANDROMEDA software version is requested (and put into the piHPSDR log file)
+once, and that status information is sent over the serial line such that the LEDs of
+the ANDROMEDA controller always reflect the current status of piHPSDR. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

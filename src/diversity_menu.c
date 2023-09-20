@@ -44,14 +44,12 @@ static double phase_coarse, phase_fine;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
-
     gain_coarse_scale = NULL;
     gain_fine_scale = NULL;
     phase_coarse_scale = NULL;
     phase_fine_scale = NULL;
-
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;

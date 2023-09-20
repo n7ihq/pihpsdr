@@ -91,7 +91,7 @@ char *css =
   "    font-size: 15px;\n"
   "    }\n"
   "  #small_toggle_button {\n"
-  "    padding: 1px;\n"               
+  "    padding: 1px;\n"
   "    font-family: Sans;\n"
   "    font-size: 15px;\n"
   "    background-image: none;\n"

@@ -36,7 +36,7 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -50,8 +50,11 @@ static gboolean close_cb () {
 }
 
 void set_eq() {
-  SetTXAGrphEQ(transmitter->id, tx_equalizer);
-  SetTXAEQRun(transmitter->id, enable_tx_equalizer);
+  if (can_transmit) {
+    SetTXAGrphEQ(transmitter->id, tx_equalizer);
+    SetTXAEQRun(transmitter->id, enable_tx_equalizer);
+  }
+
   SetRXAGrphEQ(active_receiver->id, rx_equalizer);
   SetRXAEQRun(active_receiver->id, enable_rx_equalizer);
 }
@@ -126,20 +129,23 @@ void equalizer_menu(GtkWidget *parent) {
   gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-
   GtkWidget *enable_rx_b = gtk_check_button_new_with_label("Enable RX Equalizer");
   gtk_widget_set_name(enable_rx_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_rx_b), enable_rx_equalizer);
   g_signal_connect(enable_rx_b, "toggled", G_CALLBACK(enable_cb), GINT_TO_POINTER(0));
   gtk_grid_attach(GTK_GRID(grid), enable_rx_b, 1, 1, 2, 1);
-  // This makes column #3 "empty" so it acts as a separator
-  label = gtk_label_new(NULL);
-  gtk_grid_attach(GTK_GRID(grid), label, 3, 1, 1, 1);
-  GtkWidget *enable_tx_b = gtk_check_button_new_with_label("Enable TX Equalizer");
-  gtk_widget_set_name(enable_tx_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_tx_b), enable_tx_equalizer);
-  g_signal_connect(enable_tx_b, "toggled", G_CALLBACK(enable_cb), GINT_TO_POINTER(1));
-  gtk_grid_attach(GTK_GRID(grid), enable_tx_b, 4, 1, 2, 1);
+
+  if (can_transmit) {
+    // This makes column #3 "empty" so it acts as a separator
+    label = gtk_label_new(NULL);
+    gtk_grid_attach(GTK_GRID(grid), label, 3, 1, 1, 1);
+    GtkWidget *enable_tx_b = gtk_check_button_new_with_label("Enable TX Equalizer");
+    gtk_widget_set_name(enable_tx_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_tx_b), enable_tx_equalizer);
+    g_signal_connect(enable_tx_b, "toggled", G_CALLBACK(enable_cb), GINT_TO_POINTER(1));
+    gtk_grid_attach(GTK_GRID(grid), enable_tx_b, 4, 1, 2, 1);
+  }
+
   label = gtk_label_new("Preamp  ");
   gtk_widget_set_name(label, "boldlabel");
   gtk_widget_set_halign(label, GTK_ALIGN_END);
@@ -159,6 +165,8 @@ void equalizer_menu(GtkWidget *parent) {
 
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 2; j++) {
+      if (!can_transmit && j == 1 ) { break; }
+
       GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -12.0, 15.0, 1.0);
       gtk_range_set_increments (GTK_RANGE(scale), 1.0, 1.0);
 

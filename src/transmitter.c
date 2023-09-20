@@ -160,7 +160,7 @@ void reconfigure_transmitter(TRANSMITTER *tx, int width, int height) {
     // Upon calling, width either equals display_width (non-duplex) and
     // the *shown* TX spectrum is 24 kHz wide, or width equals 1/4 display_width (duplex)
     // and the *shown* TX spectrum is 6 kHz wide. In both cases, display_width pixels
-    // correspond to 24 kHz, while the width of the whole spectrum is TXIQ. 
+    // correspond to 24 kHz, while the width of the whole spectrum is TXIQ.
     // The mic sample rate is fixed to 48k , so ratio is TXIQ/24k.
     // The value of tx->pixels corresponds to the *full* TX spectrum in the
     // target resolution.
@@ -257,7 +257,6 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
 }
 
 static double compute_power(double p) {
-
   double interval = 0.1 * pa_power_list[pa_power];
   int i = 0;
 

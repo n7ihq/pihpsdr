@@ -48,16 +48,16 @@ static struct _CHOICE *current = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
 
     while (first != NULL) {
       CHOICE *choice = first;
-      first=first->next;
+      first = first->next;
       g_free(choice);
     }
-    current = NULL;
 
+    current = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;
@@ -78,7 +78,6 @@ static gboolean bandstack_select_cb (GtkWidget *widget, gpointer data) {
     g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
   }
 
-
   if (active_receiver->id == 0 && current) {
     //
     // vfo_bandstack_changed() calls vfo_save_bandstack(), so the frequency/mode
@@ -93,13 +92,13 @@ static gboolean bandstack_select_cb (GtkWidget *widget, gpointer data) {
     } else {
       f = (double) vfo[0].frequency * 1E-6;
     }
-    snprintf(label, 32, "%8.3f %s", f, mode_string[vfo[0].mode]);
 
+    snprintf(label, 32, "%8.3f %s", f, mode_string[vfo[0].mode]);
     gtk_button_set_label(GTK_BUTTON(current->button), label);
   }
+
   current = choice;
   vfo_bandstack_changed(choice->info);
-
   return FALSE;
 }
 
@@ -119,7 +118,7 @@ void bandstack_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
-  gtk_widget_set_name(close_b,"close_button");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
   BAND *band = band_get_band(vfo[active_receiver->id].band);
@@ -137,25 +136,24 @@ void bandstack_menu(GtkWidget *parent) {
     } else {
       f = (double) entry->frequency * 1E-6;
     }
-    sprintf(label, "%8.3f MHz %s", f, mode_string[entry->mode]);
 
+    sprintf(label, "%8.3f MHz %s", f, mode_string[entry->mode]);
     GtkWidget *w = gtk_toggle_button_new_with_label(label);
     gtk_widget_set_name(w, "small_toggle_button");
     gtk_widget_show(w);
     gtk_grid_attach(GTK_GRID(grid), w, col, row, 1, 1);
-
     CHOICE *choice = g_new(CHOICE, 1);
     choice->next = first;
     first = choice;
-    choice->info=i;
-    choice->button=w;
+    choice->info = i;
+    choice->button = w;
 
     if (i == vfo[active_receiver->id].bandstack) {
-      current=choice;
+      current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), TRUE);
     }
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(bandstack_select_cb), choice);
 
+    choice->signal = g_signal_connect(w, "toggled", G_CALLBACK(bandstack_select_cb), choice);
     col++;
 
     if (col >= 5) {

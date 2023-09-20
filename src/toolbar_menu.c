@@ -31,7 +31,7 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -55,7 +55,6 @@ static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
 
 void toolbar_menu(GtkWidget *parent) {
   GtkWidget *widget;
-
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Toolbar configuration");
@@ -68,10 +67,9 @@ void toolbar_menu(GtkWidget *parent) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 5);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 5);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
-  gtk_widget_set_name(close_b,"close_button");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 3, 1);
-
   gint lfunction = 0;
   const int max_switches = 8;
 
@@ -82,13 +80,13 @@ void toolbar_menu(GtkWidget *parent) {
       if (i == max_switches - 1) {
         // Rightmost switch is hardwired to FUNCTION
         sw[i].switch_function = FUNCTION;
-	gchar text[16];
-	sprintf(text, "FNC(%d)", lfunction);
+        gchar text[16];
+        sprintf(text, "FNC(%d)", lfunction);
         widget = gtk_button_new_with_label(text);
-        gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction+1, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction + 1, 1, 1);
       } else {
         widget = gtk_button_new_with_label(ActionTable[sw[i].switch_function].button_str);
-        gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction+1, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction + 1, 1, 1);
         g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), (gpointer) &sw[i]);
       }
     }

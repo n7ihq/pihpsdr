@@ -108,8 +108,11 @@ static void zoom_value_changed_cb(GtkWidget *widget, gpointer data) {
 void set_zoom(int rx, double value) {
   //t_print("set_zoom: %f\n",value);
   if (rx >= receivers) { return; }
+
   int ival = (int) value;
+
   if (ival > MAX_ZOOM) { ival = MAX_ZOOM; }
+
   if (ival < 1       ) { ival = 1; }
 
   receiver[rx]->zoom = ival;
@@ -167,6 +170,7 @@ void set_pan(int rx, double value) {
     receiver[rx]->pan = 0;
     return;
   }
+
   int ival = (int) value;
 
   if (ival < 0) { ival = 0; }

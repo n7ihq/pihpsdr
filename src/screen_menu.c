@@ -42,7 +42,7 @@ static void apply() {
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -72,11 +72,13 @@ static void vfo_cb(GtkWidget *widget, gpointer data) {
 
 static void width_cb(GtkWidget *widget, gpointer data) {
   display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+
   if (!full_screen) { apply(); }
 }
 
 static void height_cb(GtkWidget *widget, gpointer data) {
   display_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+
   if (!full_screen) { apply(); }
 }
 
@@ -107,11 +109,10 @@ void screen_menu(GtkWidget *parent) {
   int row = 0;
   int col = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
-  gtk_widget_set_name(close_b,"close_button");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   row++;
-
   label = gtk_label_new("Window Width:");
   gtk_widget_set_name(label, "boldlabel");
   gtk_widget_set_halign(label, GTK_ALIGN_END);
@@ -132,7 +133,6 @@ void screen_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), height_b, col, row, 1, 1);
   g_signal_connect(height_b, "value-changed", G_CALLBACK(height_cb), NULL);
   row++;
-
   col = 0;
   label = gtk_label_new("Select VFO bar layout:");
   gtk_widget_set_name(label, "boldlabel");
@@ -155,20 +155,17 @@ void screen_menu(GtkWidget *parent) {
   // This combo-box spans three columns so the text may be really long
   gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
   g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
-
   row++;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
   gtk_widget_set_name(button, "boldlabel");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
   gtk_grid_attach(GTK_GRID(grid), button, 0, row, 2, 1);
   g_signal_connect(button, "toggled", G_CALLBACK(horizontal_cb), NULL);
-
   full_b = gtk_check_button_new_with_label("Full Screen Mode");
   gtk_widget_set_name(full_b, "boldlabel");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
   gtk_grid_attach(GTK_GRID(grid), full_b, 2, row, 2, 1);
   g_signal_connect(full_b, "toggled", G_CALLBACK(full_cb), NULL);
-
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

@@ -42,7 +42,7 @@ char version[] =
   "ALSA "
 #endif
 #ifdef EXTNR
- "EXTNR "
+  "EXTNR "
 #endif
 #ifdef CLIENT_SERVER
   "SERVER "

@@ -128,13 +128,11 @@ static void autostart_cb(GtkToggleButton *widget, gpointer data) {
 
 void configure_protocols(GtkWidget *parent) {
   int row;
-
-  dialog=gtk_dialog_new();
+  dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Protocols");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   g_signal_connect (dialog, "destroy", G_CALLBACK(close_cb), NULL);
-
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);

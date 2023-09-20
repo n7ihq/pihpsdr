@@ -36,7 +36,7 @@ GtkWidget *store_button[NUM_OF_MEMORYS];
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -54,8 +54,8 @@ static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpoin
   t_print("STORE BUTTON PUSHED=%d\n", ind);
   char workstr[40];
   store_memory_slot(ind);
-  int mode=mem[ind].mode;
-  int filter=mem[ind].filter;
+  int mode = mem[ind].mode;
+  int filter = mem[ind].filter;
   sprintf(workstr, "M%d=%8.3f MHz (%s, %s)", ind,
           (double) mem[ind].frequency * 1E-6,
           mode_string[mem[ind].mode],
@@ -93,11 +93,11 @@ void store_menu(GtkWidget *parent) {
 
   for (i = 0; i < NUM_OF_MEMORYS; i++) {
     sprintf(label_str, "Store M%d", i);
-    int mode=mem[i].mode;
-    int filter=mem[i].filter;
+    int mode = mem[i].mode;
+    int filter = mem[i].filter;
     b = gtk_button_new_with_label(label_str);
     g_signal_connect(b, "button-press-event", G_CALLBACK(store_select_cb), (gpointer)(long)i);
-    gtk_grid_attach(GTK_GRID(grid), b, 0, i+1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), b, 0, i + 1, 1, 1);
     sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", i,
             (double) mem[i].frequency * 1E-6,
             mode_string[mode],
@@ -105,7 +105,7 @@ void store_menu(GtkWidget *parent) {
     b = gtk_button_new_with_label(label_str);
     store_button[i] = b;
     g_signal_connect(b, "button-press-event", G_CALLBACK(recall_select_cb), (gpointer)(long)i);
-    gtk_grid_attach(GTK_GRID(grid), b, 1, i+1, 3, 1);
+    gtk_grid_attach(GTK_GRID(grid), b, 1, i + 1, 3, 1);
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

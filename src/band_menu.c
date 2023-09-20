@@ -52,16 +52,16 @@ static struct _CHOICE *current = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
 
     while (first != NULL) {
       CHOICE *choice = first;
-      first=first->next;
+      first = first->next;
       g_free(choice);
     }
-    current = NULL;
 
+    current = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;
@@ -87,6 +87,7 @@ gboolean band_select_cb (GtkWidget *widget, gpointer data) {
   // band stack
   //
   current = choice;
+
   if (radio_is_remote) {
 #ifdef CLIENT_SERVER
     send_band(client_socket, active_receiver->id, choice->info);
@@ -140,19 +141,18 @@ void band_menu(GtkWidget *parent) {
       gtk_widget_set_name(w, "small_toggle_button");
       gtk_widget_show(w);
       gtk_grid_attach(GTK_GRID(grid), w, j % 5, 1 + (j / 5), 1, 1);
-
       CHOICE *choice = g_new(CHOICE, 1);
       choice->next = first;
-      first = choice; 
-      choice->info=i; 
-      choice->button=w;
+      first = choice;
+      choice->info = i;
+      choice->button = w;
 
       if (i == vfo[active_receiver->id].band) {
         current = choice;
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
       }
-      choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(band_select_cb), choice);
 
+      choice->signal = g_signal_connect(w, "toggled", G_CALLBACK(band_select_cb), choice);
       j++;
     }
   }

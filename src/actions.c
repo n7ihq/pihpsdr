@@ -774,7 +774,7 @@ int process_action(void *data) {
       function--;
 
       if (function < 0) {
-        function = MAX_FUNCTIONS-1;
+        function = MAX_FUNCTIONS - 1;
       }
 
       toolbar_switches = switches_controller1[function];
@@ -786,7 +786,6 @@ int process_action(void *data) {
     }
 
     break;
-
 
   case IF_SHIFT:
     filter_shift_changed(active_receiver->id, a->val);
@@ -1092,7 +1091,7 @@ int process_action(void *data) {
     break;
 
   case PAN:
-    set_pan(active_receiver->id,  active_receiver->pan + 100*a->val);
+    set_pan(active_receiver->id,  active_receiver->pan + 100 * a->val);
     break;
 
   case PAN_MINUS:
@@ -1233,8 +1232,10 @@ int process_action(void *data) {
   case RIT_STEP:
     if (a->mode == PRESSED) {
       rit_increment = 10 * rit_increment;
+
       if (rit_increment > 100) { rit_increment = 1; }
     }
+
     g_idle_add(ext_vfo_update, NULL);
     break;
 
@@ -1430,41 +1431,40 @@ int process_action(void *data) {
     break;
 
   case XIT:
-    value = KnobOrWheel(a, (double)transmitter->xit, -9999.0, 9999.0, (double) rit_increment);
-    transmitter->xit = (int)value;
-    transmitter->xit_enabled = (value != 0);
+    if (can_transmit) {
+      value = KnobOrWheel(a, (double)transmitter->xit, -9999.0, 9999.0, (double) rit_increment);
+      transmitter->xit = (int)value;
+      transmitter->xit_enabled = (value != 0);
 
-    if (protocol == NEW_PROTOCOL) {
-      schedule_high_priority();
+      if (protocol == NEW_PROTOCOL) {
+        schedule_high_priority();
+      }
+
+      g_idle_add(ext_vfo_update, NULL);
     }
 
-    g_idle_add(ext_vfo_update, NULL);
     break;
 
   case XIT_CLEAR:
-    if (a->mode == PRESSED) {
-      if (can_transmit) {
-        transmitter->xit = 0;
-        transmitter->xit_enabled = 0;
+    if (a->mode == PRESSED && can_transmit) {
+      transmitter->xit = 0;
+      transmitter->xit_enabled = 0;
 
-        if (protocol == NEW_PROTOCOL) {
-          schedule_high_priority();
-        }
-
-        g_idle_add(ext_vfo_update, NULL);
+      if (protocol == NEW_PROTOCOL) {
+        schedule_high_priority();
       }
+
+      g_idle_add(ext_vfo_update, NULL);
     }
 
     break;
 
   case XIT_ENABLE:
-    if (a->mode == PRESSED) {
-      if (can_transmit) {
-        TOGGLE(transmitter->xit_enabled);
+    if (a->mode == PRESSED && can_transmit) {
+      TOGGLE(transmitter->xit_enabled);
 
-        if (protocol == NEW_PROTOCOL) {
-          schedule_high_priority();
-        }
+      if (protocol == NEW_PROTOCOL) {
+        schedule_high_priority();
       }
 
       g_idle_add(ext_vfo_update, NULL);

@@ -155,7 +155,6 @@ gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, 
   int x, y;
   GdkModifierType state;
   const RECEIVER *rx = (RECEIVER *)data;
-
   //
   // This solves a problem observed since with GTK about mid-2023:
   // when re-focusing a (sub-)menu window after it has lost focus,
@@ -560,12 +559,16 @@ void set_filter(RECEIVER *rx) {
     // Possibly engage cw peak filter. Use a fixed gain and an automatic width that
     // is about one fourth of the IF filter width. But do not go below 25 Hz width.
     //
-    double w = 0.25*(filter->high - filter->low);
+    double w = 0.25 * (filter->high - filter->low);
+
     if ( w < 25.0) { w = 25.0; };
 
     SetRXASPCWFreq(rx->id, (double) cw_keyer_sidetone_frequency);
+
     SetRXASPCWBandwidth(rx->id, w);
+
     SetRXASPCWGain(rx->id, 1.50);
+
     SetRXASPCWRun(rx->id, 1);
   } else {
     SetRXASPCWRun(rx->id, 0);
@@ -930,6 +933,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->zoom = 1;
   rx->pan = 0;
   receiverRestoreState(rx);
+
   //
   // If this is the second receiver in P1, over-write sample rate
   // with that of the first  receiver.
@@ -937,6 +941,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   if (protocol == ORIGINAL_PROTOCOL && id == 1) {
     rx->sample_rate = receiver[0]->sample_rate;
   }
+
   // allocate buffers
   rx->iq_input_buffer = g_new(double, 2 * rx->buffer_size);
   rx->pixels = pixels * rx->zoom;

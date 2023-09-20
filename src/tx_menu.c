@@ -38,7 +38,7 @@ static GtkWidget *tx_spin_high;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -269,7 +269,6 @@ void tx_menu(GtkWidget *parent) {
     g_signal_connect(input, "changed", G_CALLBACK(local_input_changed_cb), NULL);
   }
 
-
   row++;
   col = 0;
   GtkWidget *comp_enable = gtk_check_button_new_with_label("Compression (dB):");
@@ -277,18 +276,15 @@ void tx_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (comp_enable), transmitter->compressor);
   gtk_grid_attach(GTK_GRID(grid), comp_enable, col++, row, 1, 1);
   g_signal_connect(comp_enable, "toggled", G_CALLBACK(comp_enable_cb), NULL);
-
   GtkWidget *comp = gtk_spin_button_new_with_range(0.0, 20.0, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(comp), (double)transmitter->compressor_level);
   gtk_grid_attach(GTK_GRID(grid), comp, col++, row, 1, 1);
   g_signal_connect(comp, "value-changed", G_CALLBACK(comp_cb), NULL);
-
   GtkWidget *emp_b = gtk_check_button_new_with_label("FM PreEmp/ALC");
   gtk_widget_set_name(emp_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
   gtk_grid_attach(GTK_GRID(grid), emp_b, col++, row, 1, 1);
   g_signal_connect(emp_b, "toggled", G_CALLBACK(emp_cb), NULL);
-
   gboolean device_has_microphone_input;
 
   switch (device) {
@@ -317,9 +313,9 @@ void tx_menu(GtkWidget *parent) {
   }
 
   if (device_has_microphone_input) {
-    GtkWidget *lbl=gtk_label_new("Radio Mic:");
+    GtkWidget *lbl = gtk_label_new("Radio Mic:");
     gtk_widget_set_name(lbl, "boldlabel");
-    gtk_widget_set_halign(lbl,GTK_ALIGN_END);
+    gtk_widget_set_halign(lbl, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), lbl, col++, row, 1, 1);
     //
     // Mic Boost, Mic In, and Line In can the handled mutually exclusive

@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <termios.h>
 
 #include <wdsp.h>
 
@@ -173,7 +174,7 @@ int alc = TXA_ALC_PK;
 int filter_board = ALEX;
 int pa_enabled = PA_ENABLED;
 int pa_power = 0;
-const int pa_power_list[]={1, 5, 10, 30, 50, 100, 200, 500, 1000};
+const int pa_power_list[] = {1, 5, 10, 30, 50, 100, 200, 500, 1000};
 double pa_trim[11];
 
 int updates_per_second = 10;
@@ -373,7 +374,7 @@ static void choose_vfo_layout() {
   }
 
   VFO_WIDTH = full_screen ? screen_width : display_width;
-  VFO_WIDTH -=(MENU_WIDTH + METER_WIDTH);
+  VFO_WIDTH -= (MENU_WIDTH + METER_WIDTH);
 
   //
   // If chosen layout does not fit:
@@ -401,11 +402,12 @@ static void choose_vfo_layout() {
 static guint full_screen_timeout = 0;
 
 static int set_full_screen(gpointer data) {
-  int flag=GPOINTER_TO_INT(data);
+  int flag = GPOINTER_TO_INT(data);
   //
   // Put the top window in full-screen mode, if full_screen is set
   //
-  full_screen_timeout=0;
+  full_screen_timeout = 0;
+
   if (flag) {
     //
     // Window-to-fullscreen-transition
@@ -419,6 +421,7 @@ static int set_full_screen(gpointer data) {
                     (screen_width - display_width) / 2,
                     (screen_height - display_height) / 2);
   }
+
   return G_SOURCE_REMOVE;
 }
 
@@ -426,9 +429,7 @@ void reconfigure_screen() {
   GdkWindow *gw = gtk_widget_get_window(top_window);
   GdkWindowState ws = gdk_window_get_state(GDK_WINDOW(gw));
   int last_fullscreen = SET(ws & GDK_WINDOW_STATE_FULLSCREEN);
-
   int my_fullscreen = SET(full_screen);  // this will not change during this procedure
-  g_print("RECONFIG: old=%d new=%d\n", last_fullscreen, my_fullscreen);
 
   if (last_fullscreen != my_fullscreen) {
     if (full_screen_timeout > 0) {
@@ -436,6 +437,7 @@ void reconfigure_screen() {
       full_screen_timeout = 0;
     }
   }
+
   //
   // Re-configure the piHPSDR screen after dimensions have changed
   // Start with removing the toolbar, the slider area and the zoom/pan area
@@ -443,6 +445,7 @@ void reconfigure_screen() {
   //
   int my_width  = my_fullscreen ? screen_width  : display_width;
   int my_height = my_fullscreen ? screen_height : display_height;
+
   if (toolbar) {
     gtk_container_remove(GTK_CONTAINER(fixed), toolbar);
     toolbar = NULL;
@@ -462,6 +465,7 @@ void reconfigure_screen() {
   VFO_HEIGHT = vfo_layout_list[vfo_layout].height;
   MENU_HEIGHT = VFO_HEIGHT / 2;
   METER_HEIGHT = VFO_HEIGHT;
+
   //
   // Change sizes of main window, Hide and Menu buttons, meter, and vfo
   //
@@ -474,8 +478,9 @@ void reconfigure_screen() {
     // For some reason, moving the window immediately does not work
     // on MacOS, therefore do this after waiting a second
     //
-    full_screen_timeout=g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(0));
+    full_screen_timeout = g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(0));
   }
+
   if (last_fullscreen != full_screen && my_fullscreen) {
     //
     // A window-to-fullscreen transition
@@ -484,6 +489,7 @@ void reconfigure_screen() {
     //
     gtk_window_move(GTK_WINDOW(top_window), 0, 0);
   }
+
   gtk_window_resize(GTK_WINDOW(top_window), my_width, my_height);
   gtk_widget_set_size_request(hide_b, MENU_WIDTH, MENU_HEIGHT);
   gtk_widget_set_size_request(menu_b, MENU_WIDTH, MENU_HEIGHT);
@@ -495,26 +501,32 @@ void reconfigure_screen() {
   gtk_fixed_move(GTK_FIXED(fixed), hide_b, VFO_WIDTH + METER_WIDTH, 0);
   gtk_fixed_move(GTK_FIXED(fixed), menu_b, VFO_WIDTH + METER_WIDTH, MENU_HEIGHT);
   gtk_fixed_move(GTK_FIXED(fixed), meter, VFO_WIDTH, 0);
+
   //
   // Adjust position of the TX panel.
   // This must even be done in duplex mode, if we switch back
   // to non-duplex in the future.
   //
-  transmitter->x = 0;
-  transmitter->y = VFO_HEIGHT;
+  if (can_transmit) {
+    transmitter->x = 0;
+    transmitter->y = VFO_HEIGHT;
+  }
+
   //
   // This re-creates all the panels and the Toolbar/Slider/Zoom area
   //
   reconfigure_radio();
   g_idle_add(ext_vfo_update, NULL);
+
   if (last_fullscreen != my_fullscreen && my_fullscreen) {
     //
     // For some reason, going to full-screen immediately does not
     // work on MacOS, so do this after 1 second
     //
-    full_screen_timeout=g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(1));
+    full_screen_timeout = g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(1));
   }
-  last_fullscreen=my_fullscreen;
+
+  last_fullscreen = my_fullscreen;
 }
 
 void reconfigure_radio() {
@@ -523,7 +535,6 @@ void reconfigure_radio() {
   t_print("%s: receivers=%d\n", __FUNCTION__, receivers);
   int my_height = full_screen ? screen_height : display_height;
   int my_width  = full_screen ? screen_width  : display_width;
-
   rx_height = my_height - VFO_HEIGHT;
 
   if (display_zoompan) {
@@ -695,10 +706,8 @@ static void create_visual() {
   gtk_container_remove(GTK_CONTAINER(top_window), topgrid);
   gtk_container_add(GTK_CONTAINER(top_window), fixed);
   //t_print("radio: vfo_init\n");
-
   int my_height = full_screen ? screen_height : display_height;
   int my_width  = full_screen ? screen_width  : display_width;
-
   VFO_WIDTH = my_width - MENU_WIDTH - METER_WIDTH;
   vfo_panel = vfo_init(VFO_WIDTH, VFO_HEIGHT);
   gtk_fixed_put(GTK_FIXED(fixed), vfo_panel, 0, y);
@@ -717,7 +726,6 @@ static void create_visual() {
   g_signal_connect (menu_b, "button-press-event", G_CALLBACK(menu_cb), NULL) ;
   gtk_fixed_put(GTK_FIXED(fixed), menu_b, VFO_WIDTH + METER_WIDTH, y);
   y += MENU_HEIGHT;
-
   rx_height = my_height - VFO_HEIGHT;
 
   if (display_zoompan) {
@@ -778,8 +786,9 @@ static void create_visual() {
 
   if (!radio_is_remote) {
 #endif
-
     //t_print("Create transmitter\n");
+    transmitter = NULL;
+
     if (can_transmit) {
       if (duplex) {
         transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width / 4, my_height / 2);
@@ -942,7 +951,7 @@ void start_radio() {
   //             If the warning appears, correct the order of actions in actions.h
   //             and re-compile.
   //
-  for (i=0; i<ACTIONS; i++) {
+  for (i = 0; i < ACTIONS; i++) {
     if (i != ActionTable[i].action) {
       t_print("WARNING: action table messed up\n");
       t_print("WARNING: Position %d Action=%d str=%s\n", i, ActionTable[i].action, ActionTable[i].button_str);
@@ -1444,7 +1453,6 @@ void start_radio() {
 
   receivers = RECEIVERS;
   radioRestoreState();
-
   radio_change_region(region);
   create_visual();
   reconfigure_screen();
@@ -1636,7 +1644,10 @@ void radio_change_sample_rate(int rate) {
       receiver_change_sample_rate(receiver[PS_RX_FEEDBACK], rate);
       old_protocol_set_mic_sample_rate(rate);
       protocol_run();
-      tx_set_ps_sample_rate(transmitter, rate);
+
+      if (can_transmit) {
+        tx_set_ps_sample_rate(transmitter, rate);
+      }
     }
 
     break;
@@ -1656,6 +1667,11 @@ void radio_change_sample_rate(int rate) {
 
 static void rxtx(int state) {
   int i;
+
+  if (!can_transmit) {
+    t_print("WARNING: rxtx called but no transmitter!");
+    return;
+  }
 
   if (state) {
     // switch to tx
@@ -2011,7 +2027,11 @@ int isTransmitting() {
 }
 
 double getDrive() {
-  return transmitter->drive;
+  if (can_transmit) {
+    return transmitter->drive;
+  } else {
+    return 0.0;
+  }
 }
 
 static int calcLevel(double d) {
@@ -2037,6 +2057,8 @@ static int calcLevel(double d) {
 
 void calcDriveLevel() {
   int level;
+
+  if (!can_transmit) { return; }
 
   if (tune && !transmitter->tune_use_drive) {
     level = calcLevel(transmitter->tune_drive);
@@ -2141,6 +2163,8 @@ void calcDriveLevel() {
 }
 
 void setDrive(double value) {
+  if (!can_transmit) { return; }
+
   transmitter->drive = value;
 
   switch (protocol) {
@@ -2375,6 +2399,7 @@ void radioRestoreState() {
   // from this function in due course so have to check some things here.
   //
   if (display_width  > screen_width  ) { display_width  = screen_width; }
+
   if (display_height > screen_height ) { display_height = screen_height; }
 
 #ifdef CLIENT_SERVER
@@ -2486,6 +2511,10 @@ void radioRestoreState() {
     GetPropI1("rigctl_serial_andromeda[%d]", id,             SerialPorts[id].andromeda);
     GetPropI1("rigctl_serial_baud_rate[%i]", id,             SerialPorts[id].baud);
     GetPropS1("rigctl_serial_port[%d]", id,                  SerialPorts[id].port);
+
+    if (SerialPorts[id].andromeda) {
+      SerialPorts[id].baud = B9600;
+    }
   }
 
   for (int i = 0; i < n_adc; i++) {
@@ -2533,6 +2562,7 @@ void radioRestoreState() {
   if (RECEIVERS < 2 || n_adc < 2) {
     diversity_enabled = 0;
   }
+
   //
   // 2.) Selecting the N2ADR filter board overrides most OC settings
   //

@@ -49,16 +49,16 @@ static struct _CHOICE *current = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
 
     while (first != NULL) {
       CHOICE *choice = first;
-      first=first->next;
+      first = first->next;
       g_free(choice);
     }
-    current = NULL;
 
+    current = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;
@@ -115,19 +115,18 @@ void mode_menu(GtkWidget *parent) {
     gtk_widget_set_name(w, "small_toggle_button");
     gtk_grid_attach(GTK_GRID(grid), w, i % 5, 1 + (i / 5), 1, 1);
     gtk_widget_show(w);
-
     CHOICE *choice = g_new(CHOICE, 1);
     choice->next = first;
     first = choice;
-    choice->info=i;
-    choice->button=w;
+    choice->info = i;
+    choice->button = w;
 
     if (i == mode) {
       current = choice;
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), TRUE);
     }
-    choice->signal=g_signal_connect(w, "toggled", G_CALLBACK(mode_select_cb), choice);
 
+    choice->signal = g_signal_connect(w, "toggled", G_CALLBACK(mode_select_cb), choice);
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

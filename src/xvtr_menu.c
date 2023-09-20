@@ -40,65 +40,65 @@ static GtkWidget *lo_error[BANDS + XVTRS];
 static GtkWidget *disable_pa[BANDS + XVTRS];
 
 static void save_xvtr () {
-    const char *minf;
-    const char *maxf;
-    const char *lof;
-    const char *loerr;
+  const char *minf;
+  const char *maxf;
+  const char *lof;
+  const char *loerr;
 
-    for (int i = BANDS; i < BANDS + XVTRS; i++) {
-      BAND *xvtr = band_get_band(i);
-      BANDSTACK *bandstack = xvtr->bandstack;
-      const char *t = gtk_entry_get_text(GTK_ENTRY(title[i]));
-      strcpy(xvtr->title, t);
+  for (int i = BANDS; i < BANDS + XVTRS; i++) {
+    BAND *xvtr = band_get_band(i);
+    BANDSTACK *bandstack = xvtr->bandstack;
+    const char *t = gtk_entry_get_text(GTK_ENTRY(title[i]));
+    strcpy(xvtr->title, t);
 
-      if (strlen(t) != 0) {
-        minf = gtk_entry_get_text(GTK_ENTRY(min_frequency[i]));
-        xvtr->frequencyMin = (long long)(atof(minf) * 1000000.0);
-        maxf = gtk_entry_get_text(GTK_ENTRY(max_frequency[i]));
-        xvtr->frequencyMax = (long long)(atof(maxf) * 1000000.0);
-        lof = gtk_entry_get_text(GTK_ENTRY(lo_frequency[i]));
-        xvtr->frequencyLO = (long long)(atof(lof) * 1000000.0);
-        loerr = gtk_entry_get_text(GTK_ENTRY(lo_error[i]));
-        xvtr->errorLO = atoll(loerr);
-        xvtr->disablePA = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(disable_pa[i]));
+    if (strlen(t) != 0) {
+      minf = gtk_entry_get_text(GTK_ENTRY(min_frequency[i]));
+      xvtr->frequencyMin = (long long)(atof(minf) * 1000000.0);
+      maxf = gtk_entry_get_text(GTK_ENTRY(max_frequency[i]));
+      xvtr->frequencyMax = (long long)(atof(maxf) * 1000000.0);
+      lof = gtk_entry_get_text(GTK_ENTRY(lo_frequency[i]));
+      xvtr->frequencyLO = (long long)(atof(lof) * 1000000.0);
+      loerr = gtk_entry_get_text(GTK_ENTRY(lo_error[i]));
+      xvtr->errorLO = atoll(loerr);
+      xvtr->disablePA = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(disable_pa[i]));
 
-        //
-        // Patch up the frequencies:
-        // frequencyMax must be at most frequencyLO + max radio frequency
-        // frequencyMin must be at least frequencyLO + min radio frequency
-        //
-        if ((xvtr->frequencyMin < xvtr->frequencyLO + radio->frequency_min) ||
-            (xvtr->frequencyMin > xvtr->frequencyLO + radio->frequency_max)) {
-          xvtr->frequencyMin = xvtr->frequencyLO + radio->frequency_min;
-          //t_print("XVTR band %s MinFrequency changed to %lld\n", t, xvtr->frequencyMin);
-        }
-
-        if (xvtr->frequencyMax < xvtr->frequencyMin) {
-          xvtr->frequencyMax = xvtr->frequencyMin + 1000000LL;
-          //t_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
-        }
-
-        if (xvtr->frequencyMax > xvtr->frequencyLO + radio->frequency_max) {
-          xvtr->frequencyMax = xvtr->frequencyLO + radio->frequency_max;
-          //t_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
-        }
-
-        for (int b = 0; b < bandstack->entries; b++) {
-          BANDSTACK_ENTRY *entry = &bandstack->entry[b];
-          entry->frequency = xvtr->frequencyMin + ((xvtr->frequencyMax - xvtr->frequencyMin) / 2);
-          entry->mode = modeUSB;
-          entry->filter = filterF6;
-        }
-      } else {
-        xvtr->frequencyMin = 0;
-        xvtr->frequencyMax = 0;
-        xvtr->frequencyLO = 0;
-        xvtr->errorLO = 0;
-        xvtr->disablePA = 0;
+      //
+      // Patch up the frequencies:
+      // frequencyMax must be at most frequencyLO + max radio frequency
+      // frequencyMin must be at least frequencyLO + min radio frequency
+      //
+      if ((xvtr->frequencyMin < xvtr->frequencyLO + radio->frequency_min) ||
+          (xvtr->frequencyMin > xvtr->frequencyLO + radio->frequency_max)) {
+        xvtr->frequencyMin = xvtr->frequencyLO + radio->frequency_min;
+        //t_print("XVTR band %s MinFrequency changed to %lld\n", t, xvtr->frequencyMin);
       }
-    }
 
-    vfo_xvtr_changed();
+      if (xvtr->frequencyMax < xvtr->frequencyMin) {
+        xvtr->frequencyMax = xvtr->frequencyMin + 1000000LL;
+        //t_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
+      }
+
+      if (xvtr->frequencyMax > xvtr->frequencyLO + radio->frequency_max) {
+        xvtr->frequencyMax = xvtr->frequencyLO + radio->frequency_max;
+        //t_print("XVTR band %s MaxFrequency changed to %lld\n", t, xvtr->frequencyMax);
+      }
+
+      for (int b = 0; b < bandstack->entries; b++) {
+        BANDSTACK_ENTRY *entry = &bandstack->entry[b];
+        entry->frequency = xvtr->frequencyMin + ((xvtr->frequencyMax - xvtr->frequencyMin) / 2);
+        entry->mode = modeUSB;
+        entry->filter = filterF6;
+      }
+    } else {
+      xvtr->frequencyMin = 0;
+      xvtr->frequencyMax = 0;
+      xvtr->frequencyLO = 0;
+      xvtr->errorLO = 0;
+      xvtr->disablePA = 0;
+    }
+  }
+
+  vfo_xvtr_changed();
 }
 
 void pa_disable_cb(GtkWidget *widget, gpointer data) {
@@ -109,11 +109,9 @@ void pa_disable_cb(GtkWidget *widget, gpointer data) {
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
-
     save_xvtr();
-
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;

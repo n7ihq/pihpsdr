@@ -483,7 +483,7 @@ void soapy_protocol_set_tx_frequency(TRANSMITTER *tx) {
   int v;
   v = get_tx_vfo();
 
-  if (soapy_device != NULL) {
+  if (can_transmit && soapy_device != NULL) {
     double f;
 
     if (vfo[v].ctun) {

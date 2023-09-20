@@ -33,7 +33,7 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -58,8 +58,11 @@ static void filter_type_cb(GtkToggleButton *widget, gpointer data) {
     break;
 
   case 8:
-    transmitter->low_latency = type;
-    TXASetMP(transmitter->id, type);
+    if (can_transmit) {
+      transmitter->low_latency = type;
+      TXASetMP(transmitter->id, type);
+    }
+
     break;
   }
 
@@ -82,8 +85,11 @@ static void filter_size_cb(GtkWidget *widget, gpointer data) {
     break;
 
   case 8:
-    transmitter->fft_size = size;;
-    TXASetNC(transmitter->id, size);
+    if (can_transmit) {
+      transmitter->fft_size = size;;
+      TXASetNC(transmitter->id, size);
+    }
+
     break;
   }
 

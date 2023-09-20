@@ -128,20 +128,20 @@ void close_rigctl_ports() {
   struct linger linger = { 0 };
   linger.l_onoff = 1;
   linger.l_linger = 0;
-  t_print("close_rigctl_ports: server_socket=%d\n", server_socket);
+  t_print("%s: server_socket=%d\n", __FUNCTION__, server_socket);
   server_running = 0;
 
   for (i = 0; i < MAX_CLIENTS; i++) {
     tcp_client[i].running = 0;
 
     if (tcp_client[i].fd != -1) {
-      t_print("setting SO_LINGER to 0 for client_socket: %d\n", tcp_client[i].fd);
+      t_print("%s: setting SO_LINGER to 0 for client_socket: %d\n", __FUNCTION__, tcp_client[i].fd);
 
       if (setsockopt(tcp_client[i].fd, SOL_SOCKET, SO_LINGER, (const char *)&linger, sizeof(linger)) == -1) {
         t_perror("setsockopt(...,SO_LINGER,...) failed for client");
       }
 
-      t_print("closing client socket: %d\n", tcp_client[i].fd);
+      t_print("%s: closing client socket: %d\n", __FUNCTION__, tcp_client[i].fd);
       close(tcp_client[i].fd);
       tcp_client[i].fd = -1;
     }
@@ -153,13 +153,13 @@ void close_rigctl_ports() {
   }
 
   if (server_socket >= 0) {
-    t_print("setting SO_LINGER to 0 for server_socket: %d\n", server_socket);
+    t_print("%s: setting SO_LINGER to 0 for server_socket: %d\n", __FUNCTION__, server_socket);
 
     if (setsockopt(server_socket, SOL_SOCKET, SO_LINGER, (const char *)&linger, sizeof(linger)) == -1) {
       t_perror("setsockopt(...,SO_LINGER,...) failed for server");
     }
 
-    t_print("closing server_socket: %d\n", server_socket);
+    t_print("s: closing server_socket: %d\n", __FUNCTION__, server_socket);
     close(server_socket);
     server_socket = -1;
   }
@@ -691,7 +691,7 @@ static gpointer rigctl_server(gpointer data) {
   int port = GPOINTER_TO_INT(data);
   int on = 1;
   int i;
-  t_print("rigctl_server: starting server on port %d\n", port);
+  t_print("%s: starting TCP server on port %d\n", __FUNCTION__, port);
   server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
   if (server_socket < 0) {
@@ -753,7 +753,7 @@ static gpointer rigctl_server(gpointer data) {
     //
     // A slot is available, try to get connection via accept()
     //
-    t_print("rigctl: slot= %d waiting for connection\n", spare);
+    t_print("%s: slot= %d waiting for connection\n", __FUNCTION__, spare);
     tcp_client[spare].fd = accept(server_socket, (struct sockaddr*)&tcp_client[spare].address,
                                   &tcp_client[spare].address_length);
 
@@ -763,7 +763,7 @@ static gpointer rigctl_server(gpointer data) {
       continue;
     }
 
-    t_print("rigctl: slot= %d connected with fd=%d\n", spare, tcp_client[spare].fd);
+    t_print("%s: slot= %d connected with fd=%d\n", __FUNCTION__, spare, tcp_client[spare].fd);
     //
     // Setting TCP_NODELAY may (or may not) improve responsiveness
     // by *disabling* Nagle's algorithm for clustering small packets
@@ -791,7 +791,7 @@ static gpointer rigctl_server(gpointer data) {
 
 static gpointer rigctl_client (gpointer data) {
   CLIENT *client = (CLIENT *)data;
-  t_print("rigctl_client: starting rigctl_client: socket=%d\n", client->fd);
+  t_print("%s: starting rigctl_client: socket=%d\n", __FUNCTION__, client->fd);
   g_mutex_lock(&mutex_a->m);
   cat_control++;
 
@@ -825,14 +825,14 @@ static gpointer rigctl_client (gpointer data) {
     }
   }
 
-  t_print("RIGCTL: Leaving rigctl_client thread\n");
+  t_print("%s: Leaving rigctl_client thread\n", __FUNCTION__);
 
   //
   // If rigctl is disabled via the GUI, the connections are closed by close_rigctl_ports()
   // but even the we should decrement cat_control
   //
   if (client->fd != -1) {
-    t_print("setting SO_LINGER to 0 for client_socket: %d\n", client->fd);
+    t_print("%s: setting SO_LINGER to 0 for client_socket: %d\n", __FUNCTION__, client->fd);
     struct linger linger = { 0 };
     linger.l_onoff = 1;
     linger.l_linger = 0;
@@ -2022,7 +2022,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       break;
 
     case 'I': //ZZLI
-      if (transmitter != NULL) {
+      if (can_transmit) {
         if (command[4] == ';') {
           // send reply back
           sprintf(reply, "ZZLI%d;", transmitter->puresignal);
@@ -3058,9 +3058,11 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'C': //ZZXC
 
       // clear transmitter XIT
-      if (command[4] == ';') {
-        transmitter->xit = 0;
-        g_idle_add(ext_vfo_update, NULL);
+      if (can_transmit) {
+        if (command[4] == ';') {
+          transmitter->xit = 0;
+          g_idle_add(ext_vfo_update, NULL);
+        }
       }
 
       break;
@@ -3068,12 +3070,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'F': //ZZXF
 
       // set/read XIT
-      if (command[4] == ';') {
-        sprintf(reply, "ZZXT%+05lld;", transmitter->xit);
-        send_resp(client->fd, reply) ;
-      } else if (command[9] == ';') {
-        transmitter->xit = (long long)atoi(&command[4]);
-        g_idle_add(ext_vfo_update, NULL);
+      if (can_transmit) {
+        if (command[4] == ';') {
+          sprintf(reply, "ZZXT%+05lld;", transmitter->xit);
+          send_resp(client->fd, reply) ;
+        } else if (command[9] == ';') {
+          transmitter->xit = (long long)atoi(&command[4]);
+          g_idle_add(ext_vfo_update, NULL);
+        }
       }
 
       break;
@@ -3171,12 +3175,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'S': //ZZXS
 
       /// set/read XIT enable
-      if (command[4] == ';') {
-        sprintf(reply, "ZZXS%d;", transmitter->xit_enabled);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        transmitter->xit_enabled = atoi(&command[4]);
-        g_idle_add(ext_vfo_update, NULL);
+      if (can_transmit) {
+        if (command[4] == ';') {
+          sprintf(reply, "ZZXS%d;", transmitter->xit_enabled);
+          send_resp(client->fd, reply);
+        } else if (command[5] == ';') {
+          transmitter->xit_enabled = atoi(&command[4]);
+          g_idle_add(ext_vfo_update, NULL);
+        }
       }
 
       break;
@@ -3360,19 +3366,21 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             break;
 
           case 60: // XIT
-            if (transmitter->xit_enabled) {
-              transmitter->xit += (v == 0) ? rit_increment : -rit_increment;
-              transmitter->xit_enabled = (transmitter->xit != 0);
+            if (can_transmit) {
+              if (transmitter->xit_enabled) {
+                transmitter->xit += (v == 0) ? rit_increment : -rit_increment;
+                transmitter->xit_enabled = (transmitter->xit != 0);
 
-              if (protocol == NEW_PROTOCOL) {
-                schedule_high_priority();
-              }
+                if (protocol == NEW_PROTOCOL) {
+                  schedule_high_priority();
+                }
 
-              g_idle_add(ext_vfo_update, NULL);
+                g_idle_add(ext_vfo_update, NULL);
 
-              if (!transmitter->xit_enabled) {
-                sprintf(reply, "ZZZI090;");
-                send_resp(client->fd, reply);
+                if (!transmitter->xit_enabled) {
+                  sprintf(reply, "ZZZI090;");
+                  send_resp(client->fd, reply);
+                }
               }
             }
 
@@ -3592,20 +3600,27 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
           case 42: // RIT/XIT
             if (v == 0) {
-              if (!vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled && !transmitter->xit_enabled) {
+              // guard against using "transmitter" if not existing
+              int tx_xit_en = can_transmit ? transmitter->xit_enabled : 0;
+
+              if (!vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled && !tx_xit_en) {
                 vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled = 1;
                 sprintf(reply, "ZZZI081;");
                 send_resp(client->fd, reply);
-              } else if (vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled && !transmitter->xit_enabled) {
+              } else if (vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled && !tx_xit_en) {
                 vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled = 0;
-                transmitter->xit_enabled = 1;
+
+                if (can_transmit) { transmitter->xit_enabled = 1; }
+
                 sprintf(reply, "ZZZI080;");
                 send_resp(client->fd, reply);
                 sprintf(reply, "ZZZI091;");
                 send_resp(client->fd, reply);
               } else {
                 vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled = 0;
-                transmitter->xit_enabled = 0;
+
+                if (can_transmit) { transmitter->xit_enabled = 0; }
+
                 sprintf(reply, "ZZZI080;");
                 send_resp(client->fd, reply);
                 sprintf(reply, "ZZZI090;");
@@ -3718,7 +3733,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // ANDROMEDA version info
       if (command[11] == ';') {
-        t_print("rigctl: Andromeda FP Version: h/w:%c%c s/w:%c%c%c\n",
+        t_print("RIGCTL:INFO: Andromeda FP Version: h/w:%c%c s/w:%c%c%c\n",
                 command[6], command[7], command[8], command[9], command[10]);
       }
 
@@ -3902,12 +3917,14 @@ int parse_cmd(void *data) {
     case 'N': //CN
 
       // sets/reads CTCSS function
-      if (command[3] == ';') {
-        sprintf(reply, "CN%02d;", transmitter->ctcss + 1);
-        send_resp(client->fd, reply) ;
-      } else if (command[4] == ';') {
-        int i = atoi(&command[2]) - 1;
-        transmitter_set_ctcss(transmitter, transmitter->ctcss_enabled, i);
+      if (can_transmit) {
+        if (command[3] == ';') {
+          sprintf(reply, "CN%02d;", transmitter->ctcss + 1);
+          send_resp(client->fd, reply) ;
+        } else if (command[4] == ';') {
+          int i = atoi(&command[2]) - 1;
+          transmitter_set_ctcss(transmitter, transmitter->ctcss_enabled, i);
+        }
       }
 
       break;
@@ -3915,12 +3932,14 @@ int parse_cmd(void *data) {
     case 'T': //CT
 
       // sets/reads CTCSS status
-      if (command[2] == ';') {
-        sprintf(reply, "CT%d;", transmitter->ctcss_enabled);
-        send_resp(client->fd, reply) ;
-      } else if (command[3] == ';') {
-        int state = atoi(&command[2]);
-        transmitter_set_ctcss(transmitter, state, transmitter->ctcss);
+      if (can_transmit) {
+        if (command[2] == ';') {
+          sprintf(reply, "CT%d;", transmitter->ctcss_enabled);
+          send_resp(client->fd, reply) ;
+        } else if (command[3] == ';') {
+          int state = atoi(&command[2]);
+          transmitter_set_ctcss(transmitter, state, transmitter->ctcss);
+        }
       }
 
       break;
@@ -4195,10 +4214,20 @@ int parse_cmd(void *data) {
 
     case 'F': { //IF
       int mode = ts2000_mode(vfo[VFO_A].mode);
+      int tx_xit_en = 0;
+      int tx_ctcss_en = 0;
+      int tx_ctcss = 0;
+
+      if (can_transmit) {
+        tx_xit_en   = transmitter->xit_enabled;
+        tx_ctcss    = transmitter->ctcss;
+        tx_ctcss_en = transmitter->ctcss_enabled;
+      }
+
       sprintf(reply, "IF%011lld%04lld%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
               vfo[VFO_A].ctun ? vfo[VFO_A].ctun_frequency : vfo[VFO_A].frequency,
-              step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, transmitter == NULL ? 0 : transmitter->xit_enabled,
-              0, 0, isTransmitting(), mode, 0, 0, split, transmitter->ctcss_enabled ? 2 : 0, transmitter->ctcss, 0);
+              step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, tx_xit_en,
+              0, 0, isTransmitting(), mode, 0, 0, split, tx_ctcss_en ? 2 : 0, tx_ctcss, 0);
       send_resp(client->fd, reply);
     }
     break;
@@ -4551,11 +4580,13 @@ int parse_cmd(void *data) {
     case 'C': //PC
 
       // set/read PA Power
-      if (command[2] == ';') {
-        sprintf(reply, "PC%03d;", (int)transmitter->drive);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        set_drive((double)atoi(&command[2]));
+      if (can_transmit) {
+        if (command[2] == ';') {
+          sprintf(reply, "PC%03d;", (int)transmitter->drive);
+          send_resp(client->fd, reply);
+        } else if (command[5] == ';') {
+          set_drive((double)atoi(&command[2]));
+        }
       }
 
       break;
@@ -4573,15 +4604,17 @@ int parse_cmd(void *data) {
     case 'L': //PL
 
       // set/read speach processor input/output level
-      if (command[2] == ';') {
-        sprintf(reply, "PL%03d000;", (int)((transmitter->compressor_level / 20.0) * 100.0));
-        send_resp(client->fd, reply);
-      } else if (command[8] == ';') {
-        command[5] = '\0';
-        double level = (double)atoi(&command[2]);
-        level = (level / 100.0) * 20.0;
-        transmitter_set_compressor_level(transmitter, level);
-        g_idle_add(ext_vfo_update, NULL);
+      if (can_transmit) {
+        if (command[2] == ';') {
+          sprintf(reply, "PL%03d000;", (int)((transmitter->compressor_level / 20.0) * 100.0));
+          send_resp(client->fd, reply);
+        } else if (command[8] == ';') {
+          command[5] = '\0';
+          double level = (double)atoi(&command[2]);
+          level = (level / 100.0) * 20.0;
+          transmitter_set_compressor_level(transmitter, level);
+          g_idle_add(ext_vfo_update, NULL);
+        }
       }
 
       break;
@@ -5348,12 +5381,14 @@ int parse_cmd(void *data) {
     case 'T': //XT
 
       // set/read XIT enable
-      if (command[2] == ';') {
-        sprintf(reply, "XT%d;", transmitter->xit_enabled);
-        send_resp(client->fd, reply);
-      } else if (command[3] == ';') {
-        transmitter->xit_enabled = atoi(&command[2]);
-        g_idle_add(ext_vfo_update, NULL);
+      if (can_transmit) {
+        if (command[2] == ';') {
+          sprintf(reply, "XT%d;", transmitter->xit_enabled);
+          send_resp(client->fd, reply);
+        } else if (command[3] == ';') {
+          transmitter->xit_enabled = atoi(&command[2]);
+          g_idle_add(ext_vfo_update, NULL);
+        }
       }
 
       break;
@@ -5590,10 +5625,12 @@ gboolean andromeda_handler(gpointer data) {
     last_tune = tune;
   }
 
-  if (last_ps != transmitter->puresignal) {
-    sprintf(reply, "ZZZI04%d;", transmitter->puresignal);
-    send_resp(client->fd, reply);
-    last_ps = transmitter->puresignal;
+  if (can_transmit) {
+    if (last_ps != transmitter->puresignal) {
+      sprintf(reply, "ZZZI04%d;", transmitter->puresignal);
+      send_resp(client->fd, reply);
+      last_ps = transmitter->puresignal;
+    }
   }
 
   if (last_ctun != vfo[active_receiver->id].ctun) {
@@ -5608,10 +5645,12 @@ gboolean andromeda_handler(gpointer data) {
     last_rit = vfo[active_receiver->id].rit_enabled;
   }
 
-  if (last_xit != transmitter->xit_enabled) {
-    sprintf(reply, "ZZZI09%d;", transmitter->xit_enabled);
-    send_resp(client->fd, reply);
-    last_xit = transmitter->xit_enabled;
+  if (can_transmit) {
+    if (last_xit != transmitter->xit_enabled) {
+      sprintf(reply, "ZZZI09%d;", transmitter->xit_enabled);
+      send_resp(client->fd, reply);
+      last_xit = transmitter->xit_enabled;
+    }
   }
 
   if (last_lock != locked) {
@@ -5642,11 +5681,10 @@ gboolean andromeda_init(gpointer data) {
 int launch_serial (int id) {
   int fd;
   int baud;
-  t_print("RIGCTL: Launch Serial port %s\n", SerialPorts[id].port);
+  t_print("%s: Open Serial Port %s\n", __FUNCTION__, SerialPorts[id].port);
 
   if (mutex_busy == NULL) {
     mutex_busy = g_new(GT_MUTEX, 1);
-    t_print("launch_serial: mutex_busy=%p\n", mutex_busy);
     g_mutex_init(&mutex_busy->m);
   }
 
@@ -5655,7 +5693,6 @@ int launch_serial (int id) {
   // opening the port. So even if you want "blocking" I/O, you should
   // open the port non-blocking and then activate blocking later on
   //
-  t_print("RIGCTL: Launch Serial port %s\n", SerialPorts[id].port);
   fd = open (SerialPorts[id].port, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
 
   if (fd < 0) {
@@ -5663,13 +5700,14 @@ int launch_serial (int id) {
     return 0 ;
   }
 
-  t_print("serial port fd=%d\n", fd);
+  t_print("%s: serial port fd=%d\n", __FUNCTION__, fd);
   serial_client[id].fd = fd;
   serial_client[id].busy = 0;
   serial_client[id].fifo = 0;
   // hard-wired parity = NONE
   // if ANDROMEDA, hard-wired baud = 9600
   baud = SerialPorts[id].baud;
+
   if (SerialPorts[id].andromeda) { baud = B9600; }
 
   if (set_interface_attribs (fd, baud, 0) == 0) {
@@ -5680,7 +5718,7 @@ int launch_serial (int id) {
     // than a serial line (most likely a FIFO), but it
     // can still be used.
     //
-    t_print("serial port is probably a FIFO\n");
+    t_print("%s: serial port is probably a FIFO\n", __FUNCTION__);
     serial_client[id].fifo = 1;
   }
 
@@ -5699,6 +5737,7 @@ void launch_andromeda (int id) {
   // This is a no-op if the serial client is NOT running
   //
   if (SerialPorts[id].andromeda && serial_client[id].running) {
+    t_print("%s: Enable ANDROMEDA on Port %s\n", __FUNCTION__, SerialPorts[id].port);
     usleep(700000L); // Need to wait for andromedas serial to settle, Andromeda FP Version: h/w:01 s/w:006
     g_idle_add(andromeda_init, &serial_client[id]);           // executed once
     serial_client[id].andromeda_timer = g_timeout_add(500, andromeda_handler, &serial_client[id]); // executed periodically
@@ -5707,7 +5746,7 @@ void launch_andromeda (int id) {
 
 // Serial Port close
 void disable_serial (int id) {
-  t_print("RIGCTL: Disable Serial port %s\n", SerialPorts[id].port);
+  t_print("%s: Close Serial Port %s\n", __FUNCTION__, SerialPorts[id].port);
   disable_andromeda(id);
   serial_client[id].running = FALSE;
 
@@ -5735,6 +5774,7 @@ void disable_serial (int id) {
 
 void disable_andromeda (int id) {
   if (serial_client[id].andromeda_timer != 0) {
+    t_print("%s: disable ANDROMEDA on port %s\n", __FUNCTION__, SerialPorts[id].port);
     g_source_remove(serial_client[id].andromeda_timer);
     serial_client[id].andromeda_timer = 0;
   }
@@ -5744,7 +5784,7 @@ void disable_andromeda (int id) {
 //                   (Port numbers now const ints instead of defines..)
 //
 void launch_rigctl () {
-  t_print( "LAUNCHING RIGCTL!!\n");
+  t_print( "---- LAUNCHING RIGCTL ----\n");
   cat_control = 0;
   mutex_a = g_new(GT_MUTEX, 1); // memory leak
   g_mutex_init(&mutex_a->m);

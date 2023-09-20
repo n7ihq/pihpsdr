@@ -82,7 +82,7 @@ static GtkWidget *entry[INFO_SIZE];
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     //
     // Let PS thread terminate before destroying dialog
@@ -409,7 +409,7 @@ static void resume_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void feedback_cb(GtkWidget *widget, gpointer data) {
-  transmitter->feedback=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  transmitter->feedback = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void reset_cb(GtkWidget *widget, gpointer data) {
@@ -419,7 +419,7 @@ static void reset_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void twotone_cb(GtkWidget *widget, gpointer data) {
-  int state=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   tx_set_twotone(transmitter, state);
 }
 
@@ -453,14 +453,14 @@ void ps_menu(GtkWidget *parent) {
   int row = 0;
   int col = 0;
   GtkWidget *close_b = gtk_button_new_with_label("Close");
-  gtk_widget_set_name(close_b,"close_button");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, col, row, 1, 1);
   gtk_widget_set_name(close_b, "close_button");
   row++;
   col = 0;
   GtkWidget *enable_b = gtk_check_button_new_with_label("Enable PS");
-  gtk_widget_set_name(enable_b,"boldlabel");
+  gtk_widget_set_name(enable_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (enable_b), transmitter->puresignal);
   gtk_grid_attach(GTK_GRID(grid), enable_b, col, row, 1, 1);
   g_signal_connect(enable_b, "toggled", G_CALLBACK(enable_cb), NULL);
@@ -473,7 +473,7 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect(twotone_b, "toggled", G_CALLBACK(twotone_cb), NULL);
   col++;
   GtkWidget *auto_b = gtk_check_button_new_with_label("Auto Attenuate");
-  gtk_widget_set_name(auto_b,"boldlabel");
+  gtk_widget_set_name(auto_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_b), transmitter->auto_on);
   gtk_grid_attach(GTK_GRID(grid), auto_b, col, row, 1, 1);
   g_signal_connect(auto_b, "toggled", G_CALLBACK(auto_cb), NULL);
@@ -506,7 +506,7 @@ void ps_menu(GtkWidget *parent) {
   // (before February, 2015) ANAN-100/200 devices.
   //
   GtkWidget *ps_ant_label = gtk_label_new("PS FeedBk ANT:");
-  gtk_widget_set_name(ps_ant_label,"boldlabel");
+  gtk_widget_set_name(ps_ant_label, "boldlabel");
   gtk_widget_show(ps_ant_label);
   gtk_grid_attach(GTK_GRID(grid), ps_ant_label, col, row, 1, 1);
   col++;
@@ -534,12 +534,12 @@ void ps_menu(GtkWidget *parent) {
   row++;
   col = 0;
   feedback_l = gtk_label_new("Feedback Lvl");
-  gtk_widget_set_name(feedback_l,"boldlabel");
+  gtk_widget_set_name(feedback_l, "boldlabel");
   gtk_widget_show(feedback_l);
   gtk_grid_attach(GTK_GRID(grid), feedback_l, col, row, 1, 1);
   col++;
   correcting_l = gtk_label_new("Correcting");
-  gtk_widget_set_name(correcting_l,"boldlabel");
+  gtk_widget_set_name(correcting_l, "boldlabel");
   gtk_widget_show(correcting_l);
   gtk_grid_attach(GTK_GRID(grid), correcting_l, col, row, 1, 1);
   row++;
@@ -577,7 +577,7 @@ void ps_menu(GtkWidget *parent) {
 
     if (display) {
       GtkWidget *lbl = gtk_label_new(label);
-      gtk_widget_set_name(lbl,"boldlabel");
+      gtk_widget_set_name(lbl, "boldlabel");
       entry[i] = gtk_entry_new();
       gtk_entry_set_max_length(GTK_ENTRY(entry[i]), 10);
       gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
@@ -598,7 +598,7 @@ void ps_menu(GtkWidget *parent) {
   row++;
   col = 0;
   GtkWidget *lbl = gtk_label_new("GetPk");
-  gtk_widget_set_name(lbl,"boldlabel");
+  gtk_widget_set_name(lbl, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   get_pk = gtk_entry_new();
@@ -606,7 +606,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_entry_set_width_chars(GTK_ENTRY(get_pk), 10);
   col++;
   lbl = gtk_label_new("SetPk");
-  gtk_widget_set_name(lbl,"boldlabel");
+  gtk_widget_set_name(lbl, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   GetPSHWPeak(transmitter->id, &pk_val);
@@ -618,7 +618,7 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect(set_pk, "activate", G_CALLBACK(setpk_cb), NULL);
   col++;
   lbl = gtk_label_new("TX ATT");
-  gtk_widget_set_name(lbl,"boldlabel");
+  gtk_widget_set_name(lbl, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   tx_att = gtk_entry_new();

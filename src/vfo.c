@@ -121,31 +121,35 @@ static void modesettingsRestoreState() {
     //               filter and VFO step size depends on the mode
     //
     switch (i) {
-      case modeLSB:
-      case modeUSB:
-      case modeDSB:
-        mode_settings[i].filter = filterF5; //  2700 Hz
-        mode_settings[i].step   = 100;
-        break;
-      case modeDIGL:
-      case modeDIGU:
-        mode_settings[i].filter = filterF6; //  1000 Hz
-        mode_settings[i].step   = 50;
-        break;
-      case modeCWL:
-      case modeCWU:
-        mode_settings[i].filter = filterF4; //   500 Hz
-        mode_settings[i].step   = 25;
-        break;
-      case modeAM:
-      case modeSAM:
-      case modeSPEC:
-      case modeDRM:
-      case modeFMN:  // nowhere used for FM
-        mode_settings[i].filter = filterF3; //  8000 Hz
-        mode_settings[i].step   = 100;
-        break;
+    case modeLSB:
+    case modeUSB:
+    case modeDSB:
+      mode_settings[i].filter = filterF5; //  2700 Hz
+      mode_settings[i].step   = 100;
+      break;
+
+    case modeDIGL:
+    case modeDIGU:
+      mode_settings[i].filter = filterF6; //  1000 Hz
+      mode_settings[i].step   = 50;
+      break;
+
+    case modeCWL:
+    case modeCWU:
+      mode_settings[i].filter = filterF4; //   500 Hz
+      mode_settings[i].step   = 25;
+      break;
+
+    case modeAM:
+    case modeSAM:
+    case modeSPEC:
+    case modeDRM:
+    case modeFMN:  // nowhere used for FM
+      mode_settings[i].filter = filterF3; //  8000 Hz
+      mode_settings[i].step   = 100;
+      break;
     }
+
     mode_settings[i].nr = 0;
     mode_settings[i].nb = 0;
     mode_settings[i].anf = 0;
@@ -233,7 +237,6 @@ void vfoRestoreState() {
     vfo[i].rit_enabled       = 0;
     vfo[i].rit               = 0;
     vfo[i].ctun              = 0;
-
     GetPropI1("vfo.%d.band", i,             vfo[i].band);
     GetPropI1("vfo.%d.frequency", i,        vfo[i].frequency);
     GetPropI1("vfo.%d.ctun", i,             vfo[i].ctun);
@@ -353,6 +356,7 @@ void vfo_band_changed(int id, int b) {
   if (b != vfo[id].band) {
     bandstack = bandstack_get_bandstack(b);
     double f = bandstack->entry[bandstack->current_entry].frequency;
+
     if (f < radio->frequency_min || f > radio->frequency_max) {
       return;
     }
@@ -568,7 +572,6 @@ void vfo_a_swap_b() {
   struct  _vfo temp = vfo[VFO_A];
   vfo[VFO_A]        = vfo[VFO_B];
   vfo[VFO_B]        = temp;
-
   receiver_vfo_changed(receiver[0]);
 
   if (receivers == 2) {
@@ -1152,6 +1155,7 @@ void vfo_update() {
                 cw_keyer_speed,
                 cw_keyer_sidetone_frequency);
       }
+
       break;
 
     case modeLSB:
@@ -1195,7 +1199,7 @@ void vfo_update() {
   //
   // Adjust VFO_A frequency for RIT/XIT
   //
-  if (isTransmitting() && txvfo == 0) {
+  if (can_transmit && isTransmitting() && txvfo == 0) {
     if (transmitter->xit_enabled) { af += transmitter->xit; }
   } else {
     if (vfo[0].rit_enabled) { af += vfo[0].rit; }
@@ -1204,7 +1208,7 @@ void vfo_update() {
   //
   // Adjust VFO_B frequency for RIT/XIT
   //
-  if (isTransmitting() && txvfo == 1) {
+  if (can_transmit && isTransmitting() && txvfo == 1) {
     if (transmitter->xit_enabled) { bf += transmitter->xit; }
   } else {
     if (vfo[1].rit_enabled) { bf += vfo[1].rit; }
@@ -1240,9 +1244,7 @@ void vfo_update() {
     f_k = (af - 1000000LL * f_m) / 1000;
     f_h = (af - 1000000LL * f_m - 1000 * f_k);
     cairo_set_font_size(cr, vfl->size2);
-
     cairo_show_text(cr, "A:");
-
     cairo_set_font_size(cr, vfl->size3);
 
     if (txvfo == 0 && oob) {
@@ -1301,9 +1303,7 @@ void vfo_update() {
     f_k = (bf - 1000000LL * f_m) / 1000;
     f_h = (bf - 1000000LL * f_m - 1000 * f_k);
     cairo_set_font_size(cr, vfl->size2);
-
     cairo_show_text(cr, "B:");
-
     cairo_set_font_size(cr, vfl->size3);
 
     if (txvfo == 0 && oob) {
@@ -1370,7 +1370,7 @@ void vfo_update() {
   if ((protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) && can_transmit && vfl->ps_x != 0) {
     cairo_move_to(cr, vfl->ps_x, vfl->ps_y);
 
-    if (transmitter->puresignal) {
+    if (can_transmit && transmitter->puresignal) {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
     } else {
       cairo_set_source_rgba(cr, COLOUR_SHADE);

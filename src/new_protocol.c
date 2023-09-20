@@ -539,7 +539,6 @@ void new_protocol_init(int pixels) {
     socklen_t optlen = sizeof(optval);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
-
 #ifdef SET_SOCK_BUF_SIZE
     //
     // We need a receive buffer with a decent size, to be able to
@@ -585,8 +584,8 @@ void new_protocol_init(int pixels) {
     } else {
       if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
     }
-#endif
 
+#endif
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF
@@ -1350,7 +1349,7 @@ static void new_protocol_transmit_specific() {
   }
 
   // 0..31
-  transmit_specific_buffer[51] = (int)((linein_gain + 34.0)*0.6739 + 0.5);
+  transmit_specific_buffer[51] = (int)((linein_gain + 34.0) * 0.6739 + 0.5);
   // Attenuator for ADC0 upon TX
   transmit_specific_buffer[59] = transmitter->attenuation;
 

@@ -188,6 +188,10 @@ int audio_open_input() {
   int i;
   int padev;
 
+  if (!can_transmit) {
+    return -1;
+  }
+
   if (transmitter->microphone_name == NULL) {
     transmitter->local_microphone = 0;
     return -1;

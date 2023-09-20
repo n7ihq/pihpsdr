@@ -43,7 +43,7 @@ static void reset_cb(GtkWidget *widget, gpointer data);
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -90,6 +90,7 @@ static void trim_changed_cb(GtkWidget *widget, gpointer data) {
 
     for (k = 1; k < 10; k++) {
       double fac = ((double) k * pa_trim[10]) / ( 10.0 * pa_trim[k]);
+
       if ( fac < 0.99 || fac > 1.01) { flag = 0; }
     }
   }
@@ -125,48 +126,56 @@ static void show_W(int watts, gboolean reset) {
   } else {
     units = 2;
   }
-  row=1;
-  col=0;
+
+  row = 1;
+  col = 0;
+
   for (i = 1; i < 11; i++) {
     switch (units) {
-      case 0:
-        sprintf(text, "%0.3fW", i*increment);
-        break;
-      case 1:
-        sprintf(text, "%0.1fW", i * increment);
-        break;
-      case 2:
-        sprintf(text, "%dW", (int) (i * increment));
-        break;
+    case 0:
+      sprintf(text, "%0.3fW", i * increment);
+      break;
+
+    case 1:
+      sprintf(text, "%0.1fW", i * increment);
+      break;
+
+    case 2:
+      sprintf(text, "%dW", (int) (i * increment));
+      break;
     }
+
     GtkWidget *label = gtk_label_new(text);
     gtk_widget_set_name(label, "boldlabel");
     gtk_grid_attach(GTK_GRID(calibgrid), label, col++, row, 1, 1);
+
     //
     // We *need* a maximum value for the spinner, but a quite large
     // value does not harm. So we allow up to 5 times the nominal
     // value.
     //
     switch (units) {
-      case 0:
-        spin[i] = gtk_spin_button_new_with_range(0.001, (double)(5 * i * increment), 0.001);
-        break;
-      case 1:
-        spin[i] = gtk_spin_button_new_with_range(0.1, (double)(5 * i * increment), 0.1);
-        break;
-      case 2:
-        spin[i] = gtk_spin_button_new_with_range(1.0, (double)(5 * i * increment), 1.0);
-        break;
+    case 0:
+      spin[i] = gtk_spin_button_new_with_range(0.001, (double)(5 * i * increment), 0.001);
+      break;
+
+    case 1:
+      spin[i] = gtk_spin_button_new_with_range(0.1, (double)(5 * i * increment), 0.1);
+      break;
+
+    case 2:
+      spin[i] = gtk_spin_button_new_with_range(1.0, (double)(5 * i * increment), 1.0);
+      break;
     }
+
     gtk_grid_attach(GTK_GRID(calibgrid), spin[i], col++, row, 1, 1);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin[i]), (double)pa_trim[i]);
     g_signal_connect(spin[i], "value_changed", G_CALLBACK(trim_changed_cb), GINT_TO_POINTER(i));
 
     if (col == 4) {
       row++;
-      col=0;
+      col = 0;
     }
-
   }
 }
 
@@ -180,7 +189,6 @@ static void clear_W() {
 }
 
 static void new_calib(gboolean flag) {
-
   show_W(pa_power_list[pa_power], flag);
   GtkWidget *reset_b = gtk_button_new_with_label("Reset");
   gtk_grid_attach(GTK_GRID(calibgrid), reset_b, 0, 6, 4, 1);
@@ -280,9 +288,7 @@ void pa_menu(GtkWidget *parent) {
 
   calibgrid = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(calibgrid), 10);
-
   new_calib(FALSE);
-
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook), calibgrid, gtk_label_new("Watt Meter Calibrate"));
   gtk_grid_attach(GTK_GRID(grid0), notebook, 0, 1, 6, 1);
   gtk_container_add(GTK_CONTAINER(content), grid0);

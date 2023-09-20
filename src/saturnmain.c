@@ -214,7 +214,6 @@ bool CreateDynamicMemory(void) {                            // return true if er
   DMAHeadPtr = DMAReadBuffer + VBASE;
   DMABasePtr = DMAReadBuffer + VBASE;
   memset(DMAReadBuffer, 0, DMABufferSize);
-
   return Result;
 }
 
@@ -314,7 +313,7 @@ void saturn_discovery() {
       discovered[devices].supported_receivers = 2;
       t_print("discovery: found saturn device min=%0.3f MHz max=%0.3f MHz\n",
               discovered[devices].frequency_min * 1E-6,
-              discovered[devices].frequency_max* 1E-6);
+              discovered[devices].frequency_max * 1E-6);
       devices++;
     }
   }
@@ -515,6 +514,7 @@ static gpointer saturn_high_priority_thread(gpointer arg) {
   while (!Exiting) {
     uint32_t SequenceCounter = 0;                       // sequence count
     uint32_t SequenceCounter2 = 0;
+
     while (!SDRActive) {
       usleep(10000);
     }
@@ -681,6 +681,7 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   while (!Exiting) {
     uint32_t SequenceCounter = 0;
     uint32_t SequenceCounter2 = 0;
+
     while (!SDRActive) {
       usleep(10000);
     }

@@ -55,7 +55,7 @@ static GtkWidget *mute_rx_b;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -79,7 +79,7 @@ static void rx_gain_element_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void tx_gain_element_changed_cb(GtkWidget *widget, gpointer data) {
-  if (device == SOAPYSDR_USB_DEVICE) {
+  if (can_transmit && device == SOAPYSDR_USB_DEVICE) {
     int gain = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     soapy_protocol_set_tx_gain_element(transmitter, (char *)gtk_widget_get_name(widget), gain);
   }
@@ -155,6 +155,8 @@ static void split_cb(GtkWidget *widget, gpointer data) {
 // call-able from outside, e.g. toolbar or MIDI, through g_idle_add
 //
 void setDuplex() {
+  if (!can_transmit) { return; }
+
   if (duplex) {
     // TX is in separate window, also in full-screen mode
     gtk_container_remove(GTK_CONTAINER(fixed), transmitter->panel);
@@ -390,7 +392,6 @@ static void janus_cb(GtkWidget *widget, gpointer data) {
 
 void radio_menu(GtkWidget *parent) {
   int col;
-
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Radio");
@@ -408,7 +409,6 @@ void radio_menu(GtkWidget *parent) {
   gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-
   row = 1;
   GtkWidget *receivers_label = gtk_label_new("Receivers:");
   gtk_widget_set_name(receivers_label, "boldlabel");
@@ -502,7 +502,6 @@ void radio_menu(GtkWidget *parent) {
   }
 
   max_row = row;
-
   row = 1;
   GtkWidget *rit_label = gtk_label_new("RIT/XIT step (Hz):");
   gtk_widget_set_name(rit_label, "boldlabel");
@@ -613,7 +612,6 @@ void radio_menu(GtkWidget *parent) {
   gtk_widget_set_name(vfo_divisor_label, "boldlabel");
   gtk_widget_set_halign(vfo_divisor_label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), vfo_divisor_label, 0, row, 2, 1);
-
   GtkWidget *vfo_divisor = gtk_spin_button_new_with_range(1.0, 60.0, 1.0);
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(vfo_divisor), (double)vfo_encoder_divisor);
   gtk_grid_attach(GTK_GRID(grid), vfo_divisor, 2, row, 1, 1);
@@ -763,30 +761,34 @@ void radio_menu(GtkWidget *parent) {
   gtk_widget_set_size_request(Separator, -1, 3);
   gtk_grid_attach(GTK_GRID(grid), Separator, col, row, 5, 1);
   row++;
-  GtkWidget *split_b = gtk_check_button_new_with_label("Split");
-  gtk_widget_set_name(split_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (split_b), split);
-  gtk_grid_attach(GTK_GRID(grid), split_b, col, row, 1, 1);
-  g_signal_connect(split_b, "toggled", G_CALLBACK(split_cb), NULL);
-  col++;
-  duplex_b = gtk_check_button_new_with_label("Duplex");
-  gtk_widget_set_name(duplex_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplex_b), duplex);
-  gtk_grid_attach(GTK_GRID(grid), duplex_b, col, row, 1, 1);
-  g_signal_connect(duplex_b, "toggled", G_CALLBACK(duplex_cb), NULL);
-  col++;
-  mute_rx_b = gtk_check_button_new_with_label("Mute RX when TX");
-  gtk_widget_set_name(mute_rx_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_rx_b), mute_rx_while_transmitting);
-  gtk_grid_attach(GTK_GRID(grid), mute_rx_b, col, row, 1, 1);
-  g_signal_connect(mute_rx_b, "toggled", G_CALLBACK(mute_rx_cb), NULL);
-  col++;
-  GtkWidget *PA_enable_b = gtk_check_button_new_with_label("PA enable");
-  gtk_widget_set_name(PA_enable_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (PA_enable_b), pa_enabled);
-  gtk_grid_attach(GTK_GRID(grid), PA_enable_b, col, row, 1, 1);
-  g_signal_connect(PA_enable_b, "toggled", G_CALLBACK(PA_enable_cb), NULL);
-  row++;
+
+  if (can_transmit) {
+    GtkWidget *split_b = gtk_check_button_new_with_label("Split");
+    gtk_widget_set_name(split_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (split_b), split);
+    gtk_grid_attach(GTK_GRID(grid), split_b, col, row, 1, 1);
+    g_signal_connect(split_b, "toggled", G_CALLBACK(split_cb), NULL);
+    col++;
+    duplex_b = gtk_check_button_new_with_label("Duplex");
+    gtk_widget_set_name(duplex_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplex_b), duplex);
+    gtk_grid_attach(GTK_GRID(grid), duplex_b, col, row, 1, 1);
+    g_signal_connect(duplex_b, "toggled", G_CALLBACK(duplex_cb), NULL);
+    col++;
+    mute_rx_b = gtk_check_button_new_with_label("Mute RX when TX");
+    gtk_widget_set_name(mute_rx_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_rx_b), mute_rx_while_transmitting);
+    gtk_grid_attach(GTK_GRID(grid), mute_rx_b, col, row, 1, 1);
+    g_signal_connect(mute_rx_b, "toggled", G_CALLBACK(mute_rx_cb), NULL);
+    col++;
+    GtkWidget *PA_enable_b = gtk_check_button_new_with_label("PA enable");
+    gtk_widget_set_name(PA_enable_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (PA_enable_b), pa_enabled);
+    gtk_grid_attach(GTK_GRID(grid), PA_enable_b, col, row, 1, 1);
+    g_signal_connect(PA_enable_b, "toggled", G_CALLBACK(PA_enable_cb), NULL);
+    row++;
+  }
+
   col = 0;
   GtkWidget *touchscreen_b = gtk_check_button_new_with_label("Optimize for TouchScreen");
   gtk_widget_set_name(touchscreen_b, "boldlabel");
@@ -869,7 +871,13 @@ void radio_menu(GtkWidget *parent) {
     //
     int display_gains = 0;
 
-    if (strcmp(radio->name, "sdrplay") == 0 || strcmp(radio->name, "rtlsdr") == 0) { display_gains = 1; }
+    //
+    // For RTL sticks, there is a single gain element named "TUNER", and this is very well
+    // controlled by the main RF gain slider. This perhaps also true for sdrplay, but
+    // I could not test this because I do not have the hardware
+    //
+    //if (strcmp(radio->name, "sdrplay") == 0 || strcmp(radio->name, "rtlsdr") == 0) { display_gains = 1; }
+    if (strcmp(radio->name, "sdrplay") == 0 )  { display_gains = 1; }
 
     if (radio->info.soapy.rx_gains > 1) { display_gains = 1; }
 
@@ -879,20 +887,16 @@ void radio_menu(GtkWidget *parent) {
       //
       // Select RX gain from one out of a list of ranges (represented by spin buttons)
       //
-      if (radio->info.soapy.rx_gains > 1) {
-        GtkWidget *rx_gain = gtk_label_new("RX Gains:");
-        gtk_widget_set_name(rx_gain, "boldlabel");
-        gtk_widget_set_halign(rx_gain, GTK_ALIGN_START);
-        gtk_grid_attach(GTK_GRID(grid), rx_gain, 0, row, 1, 1);
-      }
+      GtkWidget *rx_gain = gtk_label_new("RX Gains:");
+      gtk_widget_set_name(rx_gain, "boldlabel");
+      gtk_widget_set_halign(rx_gain, GTK_ALIGN_START);
+      gtk_grid_attach(GTK_GRID(grid), rx_gain, 0, row, 1, 1);
 
       if (can_transmit) {
-        if (radio->info.soapy.rx_gains > 1) {
-          GtkWidget *tx_gain = gtk_label_new("TX Gains:");
-          gtk_widget_set_name(tx_gain, "boldlabel");
-          gtk_widget_set_halign(tx_gain, GTK_ALIGN_START);
-          gtk_grid_attach(GTK_GRID(grid), tx_gain, 2, row, 1, 1);
-        }
+        GtkWidget *tx_gain = gtk_label_new("TX Gains:");
+        gtk_widget_set_name(tx_gain, "boldlabel");
+        gtk_widget_set_halign(tx_gain, GTK_ALIGN_START);
+        gtk_grid_attach(GTK_GRID(grid), tx_gain, 2, row, 1, 1);
       }
     }
 

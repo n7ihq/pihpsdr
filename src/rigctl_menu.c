@@ -41,7 +41,7 @@ static GtkWidget *serial_port_entry;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -80,7 +80,6 @@ static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
 
       SerialPorts[id].enable = 0;
       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(serial_enable_b[id]), 0);
-      gtk_widget_set_sensitive(andromeda_b[id], TRUE);
     }
 
     disable_rigctl();
@@ -90,7 +89,6 @@ static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
 static void serial_port_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
   const char *cp = gtk_entry_get_text(GTK_ENTRY(widget));
-  //t_print("%s: ID=%d port=%s\n", __FUNCTION__, id, cp);
   strcpy(SerialPorts[id].port, cp);
 }
 
@@ -99,13 +97,14 @@ static void andromeda_cb(GtkWidget *widget, gpointer data) {
   SerialPorts[id].andromeda = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
   if (SerialPorts[id].andromeda) {
-    gtk_widget_hide(baud_combo[id]);
     if (SerialPorts[id].enable) {
       launch_andromeda(id);
     }
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(baud_combo[id]), 1);
+    SerialPorts[id].baud = B9600;
   } else {
     disable_andromeda(id);
-    gtk_widget_show(baud_combo[id]);
   }
 }
 
@@ -129,37 +128,64 @@ static void serial_enable_cb(GtkWidget *widget, gpointer data) {
   } else {
     disable_serial(id);
   }
-  //
-  // If serial rigctl is already running, ANDROMEDA cannot be changed
-  //
-  gtk_widget_set_sensitive(andromeda_b[id], NOT(SerialPorts[id].enable));
-  t_print("RIGCTL_MENU: Serial enable : ID=%d Enabled=%d\n", id, SerialPorts[id].enable);
+
+  t_print("%s: Serial enable : ID=%d Enabled=%d\n", __FUNCTION__, id, SerialPorts[id].enable);
 }
 
 // Set Baud Rate
 static void baud_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
   int bd = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
+  int new;
 
+  //
+  // If ANDROMEDA is active, keep 9600
+  //
+  if (SerialPorts[id].andromeda && SerialPorts[id].baud == B9600) {
+    gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 1);
+    return;
+  }
+
+  //
+  // Do nothing if the baud rate is already effective.
+  // If a serial client is already running and the baud rate is changed, we close and re-open it
+  //
   switch (bd) {
   case 0:
-    SerialPorts[id].baud = B4800;
+  default:
+    new = B4800;
     break;
 
   case 1:
-    SerialPorts[id].baud = B9600;
+    new = B9600;
     break;
 
   case 2:
-    SerialPorts[id].baud = B19200;
+    new = B19200;
     break;
 
   case 3:
-    SerialPorts[id].baud = B38400;
+    new = B38400;
     break;
   }
 
-  t_print("RIGCTL_MENU: Baud rate changed: ID=%d Baud=%d\n", id, SerialPorts[id].baud);
+  if (new == SerialPorts[id].baud) {
+    return;
+  }
+
+  SerialPorts[id].baud = new;
+
+  if (SerialPorts[id].enable) {
+    t_print("%s: closing/re-opening serial port %s\n", __FUNCTION__, SerialPorts[id].port);
+    disable_serial(id);
+
+    if (launch_serial(id) == 0) {
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(serial_enable_b[id]), FALSE);
+      SerialPorts[id].enable = 0;
+    }
+  }
+
+  t_print("%s: Baud rate changed: Port=%s Baud=%d\n", __FUNCTION__, SerialPorts[id].port, SerialPorts[id].baud);
 }
 
 void rigctl_menu(GtkWidget *parent) {
@@ -175,7 +201,6 @@ void rigctl_menu(GtkWidget *parent) {
   gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
-
   GtkWidget *rigctl_port_label = gtk_label_new("RigCtl TCP Port");
   gtk_widget_set_name(rigctl_port_label, "boldlabel");
   gtk_widget_set_halign(rigctl_port_label, GTK_ALIGN_END);
@@ -186,14 +211,12 @@ void rigctl_menu(GtkWidget *parent) {
   gtk_widget_show(rigctl_port_spinner);
   gtk_grid_attach(GTK_GRID(grid), rigctl_port_spinner, 1, 1, 1, 1);
   g_signal_connect(rigctl_port_spinner, "value_changed", G_CALLBACK(rigctl_value_changed_cb), NULL);
-
   GtkWidget *rigctl_enable_b = gtk_check_button_new_with_label("Rigctl Enable");
   gtk_widget_set_name(rigctl_enable_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rigctl_enable_b), rigctl_enable);
   gtk_widget_show(rigctl_enable_b);
   gtk_grid_attach(GTK_GRID(grid), rigctl_enable_b, 2, 1, 1, 1);
   g_signal_connect(rigctl_enable_b, "toggled", G_CALLBACK(rigctl_enable_cb), NULL);
-
   GtkWidget *rigctl_debug_b = gtk_check_button_new_with_label("Debug");
   gtk_widget_set_name(rigctl_debug_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rigctl_debug_b), rigctl_debug);
@@ -252,20 +275,6 @@ void rigctl_menu(GtkWidget *parent) {
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (andromeda_b[i]), SerialPorts[i].andromeda);
     gtk_grid_attach(GTK_GRID(grid), andromeda_b[i], 5, row, 1, 1);
     g_signal_connect(andromeda_b[i], "toggled", G_CALLBACK(andromeda_cb), GINT_TO_POINTER(i));
-
-    //
-    // Once RigCtl is already running on a serial port, we cannot change ANDROMEDA
-    //
-    if (SerialPorts[i].enable) {
-      gtk_widget_set_sensitive(andromeda_b[i], FALSE);
-    }
-    //
-    // If ANDROMEDA is enabled, the baud rate is fixed to 9600,
-    // so hide the baud combobox
-    //
-    if (SerialPorts[i].andromeda) {
-      gtk_widget_hide(baud_combo[i]);
-    }
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

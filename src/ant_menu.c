@@ -44,7 +44,7 @@ static GtkWidget *xvtr_container = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -91,7 +91,7 @@ static void dac0_antenna_cb(GtkComboBox *widget, gpointer data) {
 
   if (radio->protocol == NEW_PROTOCOL) {
     schedule_high_priority();
-  } else if (device == SOAPYSDR_USB_DEVICE) {
+  } else if (device == SOAPYSDR_USB_DEVICE && can_transmit) {
     soapy_protocol_set_tx_antenna(transmitter, mydac->antenna);
   }
 }

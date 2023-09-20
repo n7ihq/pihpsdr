@@ -198,6 +198,10 @@ int audio_open_input() {
   char hw[64];
   int i;
 
+  if (!can_transmit) {
+    return -1;
+  }
+
   if (transmitter->microphone_name == NULL) {
     transmitter->local_microphone = 0;
     return -1;

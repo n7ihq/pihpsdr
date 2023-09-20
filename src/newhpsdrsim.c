@@ -1148,19 +1148,19 @@ void *rx_thread(void *data) {
         if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
 
         if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
-
       } else if (do_tone == 2) {
-        i0sample += (cos(tonearg)+cos(tonearg2)) * 0.0002239 * rxatt0_dbl;
-        q0sample += (sin(tonearg)+sin(tonearg2)) * 0.0002239 * rxatt0_dbl;
+        i0sample += (cos(tonearg) + cos(tonearg2)) * 0.0002239 * rxatt0_dbl;
+        q0sample += (sin(tonearg) + sin(tonearg2)) * 0.0002239 * rxatt0_dbl;
         tonearg += tonedelta;
-        tonearg2+= tonedelta2;
+        tonearg2 += tonedelta2;
 
         if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
-        if (tonearg2> 6.3) { tonearg2-= 6.283185307179586476925286766559; }
+
+        if (tonearg2 > 6.3) { tonearg2 -= 6.283185307179586476925286766559; }
 
         if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
-        if (tonearg2< -6.3) { tonearg2+= 6.283185307179586476925286766559; }
 
+        if (tonearg2 < -6.3) { tonearg2 += 6.283185307179586476925286766559; }
       } else if (do_tone == 3 && t3p >= 0) {
         i0sample += cos(tonearg) * 0.000003162278 * rxatt0_dbl;
         q0sample += sin(tonearg) * 0.000003162278 * rxatt0_dbl;
@@ -1169,9 +1169,10 @@ void *rx_thread(void *data) {
         if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
 
         if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
-
       }
+
       t3p++;
+
       if (t3p >= t3l) { t3p = -t3l; }
 
       if (diversity && !sync && myadc == 0) {

@@ -452,8 +452,8 @@ static void open_udp_socket() {
   } else {
     if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
   }
-#endif
 
+#endif
 #ifdef __APPLE__
   //optval = 0x10;  // IPTOS_LOWDELAY
   optval = 0xb8;  // DSCP EF
@@ -578,8 +578,8 @@ static void open_tcp_socket() {
   } else {
     if (optlen == sizeof(optval)) { t_print("TCP Socket SND buf size=%d\n", optval); }
   }
-#endif
 
+#endif
 #ifdef __APPLE__
   //optval = 0x10;  // IPTOS_LOWDELAY
   optval = 0xb8;  // DSCP EF
@@ -1922,7 +1922,7 @@ void ozy_send_buffer() {
       }
 
       // map input value -34 ... +12 onto 0 ... 31
-      output_buffer[C2] |=  (int)((linein_gain + 34.0)*0.6739 + 0.5);
+      output_buffer[C2] |=  (int)((linein_gain + 34.0) * 0.6739 + 0.5);
 
       if (transmitter->puresignal) {
         output_buffer[C2] |= 0x40;

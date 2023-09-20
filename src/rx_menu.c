@@ -40,7 +40,7 @@ static GtkWidget *output = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -209,7 +209,6 @@ void rx_menu(GtkWidget *parent) {
   int row = 1;
 
   if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
-
     switch (protocol) {
     case NEW_PROTOCOL: { // Sample rate in RX menu only for P2
       GtkWidget *sample_rate_label = gtk_label_new("Sample Rate");
@@ -329,7 +328,7 @@ void rx_menu(GtkWidget *parent) {
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (preamp_b), active_receiver->preamp);
         gtk_grid_attach(GTK_GRID(grid), preamp_b, 0, row, 1, 1);
         g_signal_connect(preamp_b, "toggled", G_CALLBACK(preamp_cb), NULL);
-	row++;
+        row++;
       }
     }
   }

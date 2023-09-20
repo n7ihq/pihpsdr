@@ -66,12 +66,11 @@ static GtkWidget *btn[16];
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;
-
     num_pad(-1, v);
   }
 }
@@ -174,12 +173,11 @@ void vfo_menu(GtkWidget *parent, int id) {
   gtk_grid_set_column_spacing (GTK_GRID(grid), 4);
   gtk_grid_set_row_spacing (GTK_GRID(grid), 4);
   GtkWidget *close_b = gtk_button_new_with_label("Close");
-  gtk_widget_set_name(close_b,"close_button");
+  gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 3, 1);
-
   label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label),"<big><b>0</b></big>");
+  gtk_label_set_markup(GTK_LABEL(label), "<big><b>0</b></big>");
   gtk_widget_set_size_request(label, 150, 0);
   gtk_misc_set_alignment (GTK_MISC (label), 1, .5);
   gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 3, 1);
@@ -188,11 +186,13 @@ void vfo_menu(GtkWidget *parent, int id) {
     btn[i] = gtk_button_new_with_label(btn_labels[i]);
     gtk_widget_set_name(btn[i], "close_button");
     gtk_widget_show(btn[i]);
+
     if (i == 15) {
       gtk_grid_attach(GTK_GRID(grid), btn[i], i % 3, 2 + (i / 3), 3, 1);
     } else {
       gtk_grid_attach(GTK_GRID(grid), btn[i], i % 3, 2 + (i / 3), 1, 1);
     }
+
     g_signal_connect(btn[i], "button-press-event", G_CALLBACK(num_pad_cb), GINT_TO_POINTER(i));
   }
 
@@ -240,21 +240,18 @@ void vfo_menu(GtkWidget *parent, int id) {
   g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
   my_combo_attach(GTK_GRID(grid), vfo_b, 4, 3, 1, 1);
   row = 4;
-
   GtkWidget *lock_b = gtk_check_button_new_with_label("Lock VFOs");
   gtk_widget_set_name(lock_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (lock_b), locked);
   gtk_grid_attach(GTK_GRID(grid), lock_b, 3, row, 2, 1);
   g_signal_connect(lock_b, "toggled", G_CALLBACK(lock_cb), NULL);
   row++;
-
   GtkWidget *duplex_b = gtk_check_button_new_with_label("Duplex");
   gtk_widget_set_name(duplex_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplex_b), duplex);
   gtk_grid_attach(GTK_GRID(grid), duplex_b, 3, row, 2, 1);
   g_signal_connect(duplex_b, "toggled", G_CALLBACK(duplex_cb), NULL);
   row++;
-
   GtkWidget *ctun_b = gtk_check_button_new_with_label("CTUN");
   gtk_widget_set_name(ctun_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctun_b), vfo[id].ctun);

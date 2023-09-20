@@ -46,8 +46,8 @@ static void action_select_cb(GtkWidget *widget, gpointer data) {
 
 int action_dialog(GtkWidget *parent, int filter, int currentAction) {
   int i, j;
-  GtkRequisition min; 
-  GtkRequisition nat; 
+  GtkRequisition min;
+  GtkRequisition nat;
   int width, height;
   CHOICE *previous = NULL;
   CHOICE *choice = NULL;
@@ -95,23 +95,22 @@ int action_dialog(GtkWidget *parent, int filter, int currentAction) {
   gtk_container_add(GTK_CONTAINER(scrolled_window), grid);
   gtk_container_add(GTK_CONTAINER(content), scrolled_window);
   gtk_widget_show_all(content);
-
   //
   // Look how large the scrolled window is! If it is too large for the
   // screen, shrink it. But for large screens we can avoid scrolling by
   // making the dialog just large enough
   //
   gtk_widget_get_preferred_size(scrolled_window, &min, &nat);
-    
   width  = nat.width;
   height = nat.height;
-  if (width < 750) width = 750;
-  if (nat.width  > display_width -  50) width  = display_width -  50;
-  if (nat.height > display_height - 50) height = display_height - 50;
-  
+
+  if (width < 750) { width = 750; }
+
+  if (nat.width  > display_width -  50) { width  = display_width -  50; }
+
+  if (nat.height > display_height - 50) { height = display_height - 50; }
+
   gtk_widget_set_size_request(scrolled_window, width, height);
-
-
   //
   // Block the GUI  while this dialog is running, if it has completed
   // (Either OK or Cancel button pressed), destroy it.

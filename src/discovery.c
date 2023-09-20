@@ -243,6 +243,7 @@ void discovery() {
   }
 
 #ifdef USBOZY
+
   if (enable_usbozy && !discover_only_stemlab) {
     //
     // first: look on USB for an Ozy
@@ -269,18 +270,21 @@ void discovery() {
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;
       t_print("discovery: found USB OZY device min=%0.3f MHz max=%0.3f MHz\n",
-              discovered[devices].frequency_min*1E-6,
-              discovered[devices].frequency_max*1E-6);
+              discovered[devices].frequency_min * 1E-6,
+              discovered[devices].frequency_max * 1E-6);
       devices++;
     }
   }
+
 #endif
 #ifdef SATURN
 #include "saturnmain.h"
+
   if (enable_saturn_xdma && !discover_only_stemlab) {
     status_text("Looking for /dev/xdma* based saturn devices");
     saturn_discovery();
   }
+
 #endif
 #ifdef STEMLAB_DISCOVERY
 
@@ -388,12 +392,12 @@ void discovery() {
       }
 
       GtkWidget *label = gtk_label_new(text);
-      gtk_widget_set_name(label,"boldlabel");
+      gtk_widget_set_name(label, "boldlabel");
       gtk_widget_set_halign (label, GTK_ALIGN_START);
       gtk_widget_show(label);
       gtk_grid_attach(GTK_GRID(grid), label, 0, row, 3, 1);
       GtkWidget *start_button = gtk_button_new_with_label("Start");
-      gtk_widget_set_name(start_button,"big_txt");
+      gtk_widget_set_name(start_button, "big_txt");
       gtk_widget_show(start_button);
       gtk_grid_attach(GTK_GRID(grid), start_button, 3, row, 1, 1);
       g_signal_connect(start_button, "button-press-event", G_CALLBACK(start_cb), (gpointer)d);
@@ -532,7 +536,7 @@ void discovery() {
   gtk_entry_set_text(GTK_ENTRY(tcpaddr), ipaddr_radio);
   g_signal_connect (tcpaddr, "changed", G_CALLBACK(radio_ip_cb), NULL);
   GtkWidget *exit_b = gtk_button_new_with_label("Exit");
-  gtk_widget_set_name(exit_b,"close_button");
+  gtk_widget_set_name(exit_b, "close_button");
   g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), exit_b, 3, row, 1, 1);
   gtk_container_add (GTK_CONTAINER (content), grid);

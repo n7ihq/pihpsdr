@@ -237,6 +237,10 @@ int audio_open_input() {
   pa_sample_spec sample_spec;
   int result = 0;
 
+  if (!can_transmit) {
+    return -1;
+  }
+
   if (transmitter->microphone_name == NULL) {
     return -1;
   }

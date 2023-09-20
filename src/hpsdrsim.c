@@ -177,7 +177,8 @@ struct hl2word {
 
 const double hl2drv[16] = { 0.421697, 0.446684, 0.473151, 0.501187, 0.530884, 0.562341, 0.595662,
                             0.630957, 0.668344, 0.707946, 0.749894, 0.794328, 0.841395, 0.891251,
-                            0.944061, 1.000000};
+                            0.944061, 1.000000
+                          };
 
 // floating-point represeners of TX att, RX att, and RX preamp settings
 
@@ -210,8 +211,8 @@ static int  anan10e = 0; // HERMES with anan10e set behaves like METIS
 
 static double txlevel;
 
-static double tonearg,tonearg2;
-static double tonedelta,tonedelta2;
+static double tonearg, tonearg2;
+static double tonedelta, tonedelta2;
 static int    do_tone, t3p, t3l;
 
 int main(int argc, char *argv[]) {
@@ -261,8 +262,7 @@ int main(int argc, char *argv[]) {
   const int MAC4 = 0xA2;
   int MAC5 = 0x10;
   const int MAC6 = 0xDD;  // P1
-  const int MAC6N= 0xDD;  // P2
-
+  const int MAC6N = 0xDD; // P2
   OLDDEVICE = ODEV_ORION2;
   NEWDEVICE = NDEV_ORION2;
 
@@ -1281,13 +1281,15 @@ void process_ep2(uint8_t *frame) {
     chk_data((frame[3] >> 6) & 0x01, lna6m, "ALEX 6m LNA");
     chk_data((frame[3] >> 7) & 0x01, alexTRdisable, "ALEX T/R disable");
     chk_data(frame[4], alex_lpf, "ALEX LPF");
+
     // reset TX level. Leve a little head-room for noise
     if (OLDDEVICE == ODEV_HERMES_LITE2) {
-      txdrv_dbl = hl2drv[txdrive/16];
+      txdrv_dbl = hl2drv[txdrive / 16];
     } else {
       // reset TX level. Leve a little head-room for noise
       txdrv_dbl = (double) txdrive * 0.003921; // div. by. 255
     }
+
     break;
 
   case 20:
@@ -1541,7 +1543,7 @@ void *handler_ep6(void *arg) {
       pointer += 8;
       memset(pointer, 0, 504);
       fac1 = rxatt_dbl[0] * 0.0002239;     //  -73 dBm signal
-      fac1a= rxatt_dbl[0] * 0.000003162278;// -110 dBm signal
+      fac1a = rxatt_dbl[0] * 0.000003162278; // -110 dBm signal
 
       if (diversity && !noiseblank) {
         fac2 = 0.0001 * rxatt_dbl[0];   // Amplitude of broad "man-made" noise to ADC1
@@ -1652,14 +1654,18 @@ void *handler_ep6(void *arg) {
         if (noiseIQpt >= LENNOISE) { noiseIQpt = rand_r(&seed) / NOISEDIV; }
 
         t3p++;
+
         if (t3p >= t3l) { t3p = -t3l; }
+
         tonearg  += tonedelta;
         tonearg2 += tonedelta2;
 
         if (tonearg > 6.3) { tonearg -= 6.283185307179586476925286766559; }
+
         if (tonearg2 > 6.3) { tonearg2 -= 6.283185307179586476925286766559; }
 
         if (tonearg < -6.3) { tonearg += 6.283185307179586476925286766559; }
+
         if (tonearg2 < -6.3) { tonearg2  += 6.283185307179586476925286766559; }
 
         divpt += decimation;

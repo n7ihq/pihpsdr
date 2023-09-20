@@ -320,7 +320,7 @@ void InitialiseDACAttenROMs(void) {
 
     // atten to go in the current setting DAC
     double ResidualAtten = DesiredAtten - ((double)StepValue *
-                                    0.5);        // this needs to be achieved through the current setting drive
+                                           0.5);        // this needs to be achieved through the current setting drive
     // int value to go to DAC ROM
     unsigned int DACDrive = (unsigned int)(255.0 / pow(10.0, (ResidualAtten / 20.0)));
     DACCurrentROM[Level] = DACDrive;

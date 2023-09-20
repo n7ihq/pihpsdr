@@ -37,7 +37,7 @@ static GtkWidget *dialog = NULL;
 
 static void cleanup() {
   if (dialog != NULL) {
-    GtkWidget *tmp=dialog;
+    GtkWidget *tmp = dialog;
     dialog = NULL;
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
@@ -109,10 +109,9 @@ static void oc_memory_tune_time_cb(GtkWidget *widget, gpointer data) {
 
 void oc_menu(GtkWidget *parent) {
   int i, j;
-  GtkRequisition min; 
-  GtkRequisition nat; 
+  GtkRequisition min;
+  GtkRequisition nat;
   int width, height;
-
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Open Collector Output");
@@ -225,7 +224,7 @@ void oc_menu(GtkWidget *parent) {
     g_signal_connect(oc_tune_b, "toggled", G_CALLBACK(oc_tune_cb), (gpointer)(long)j);
   }
 
-  j=10;
+  j = 10;
   GtkWidget *oc_full_tune_time_title = gtk_label_new("Full Tune(ms):");
   gtk_widget_set_name(oc_full_tune_time_title, "boldlabel");
   gtk_widget_show(oc_full_tune_time_title);
@@ -248,28 +247,25 @@ void oc_menu(GtkWidget *parent) {
   gtk_widget_show(oc_memory_tune_time_b);
   gtk_grid_attach(GTK_GRID(grid), oc_memory_tune_time_b, 18, j, 2, 2);
   g_signal_connect(oc_memory_tune_time_b, "value_changed", G_CALLBACK(oc_memory_tune_time_cb), NULL);
-
   gtk_container_add(GTK_CONTAINER(viewport), grid);
   gtk_container_add(GTK_CONTAINER(sw), viewport);
-
   gtk_container_add(GTK_CONTAINER(content), sw);
   gtk_widget_show_all(dialog);
   sub_menu = dialog;
-
   //
   // Look how large the scrolled window is! If it is too large for the
   // screen, shrink it. But for large screens we can avoid scrolling by
   // making the dialog just large enough
   //
   gtk_widget_get_preferred_size(viewport, &min, &nat);
-
   width  = nat.width;
   height = nat.height;
-  if (nat.width  > display_width - 150) width  = display_width - 150;
-  if (nat.height > display_height - 80) height = display_height - 80;
+
+  if (nat.width  > display_width - 150) { width  = display_width - 150; }
+
+  if (nat.height > display_height - 80) { height = display_height - 80; }
 
   gtk_widget_set_size_request(viewport, width, height);
   gtk_widget_set_size_request(sw, width, height);
-
 }
 

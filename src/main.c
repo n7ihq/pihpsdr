@@ -112,16 +112,18 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
   //
   switch (event->keyval) {
   case GDK_KEY_space:
-    if (getTune() == 1) {
-      setTune(0);
-    }
+    if (can_transmit) {
+      if (getTune() == 1) {
+        setTune(0);
+      }
 
-    if (getMox() == 1) {
-      setMox(0);
-    } else if (canTransmit() || tx_out_of_band) {
-      setMox(1);
-    } else {
-      transmitter_set_out_of_band(transmitter);
+      if (getMox() == 1) {
+        setMox(0);
+      } else if (TransmitAllowed()) {
+        setMox(1);
+      } else {
+        transmitter_set_out_of_band(transmitter);
+      }
     }
 
     break;
@@ -301,6 +303,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   t_print("machine: %s\n", unameData.machine);
   load_css();
   GdkDisplay *display = gdk_display_get_default();
+
   if (display == NULL) {
     t_print("no default display!\n");
     _exit(0);
@@ -327,17 +330,14 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   //
   gtk_window_set_position(GTK_WINDOW(top_window), GTK_WIN_POS_CENTER);
   gtk_window_set_resizable(GTK_WINDOW(top_window), TRUE);
-
   //
   // Get the position of the top window, and then determine
   // to which monitor this position belongs.
   //
   gint x, y;
   gtk_window_get_position(GTK_WINDOW(top_window), &x, &y);
-
-  this_monitor=gdk_screen_get_monitor_at_point(screen, x, y);
+  this_monitor = gdk_screen_get_monitor_at_point(screen, x, y);
   t_print("Monitor Number within Screen=%d\n", this_monitor);
-
   //
   // Determine the size of "our" monitor
   //
@@ -346,16 +346,14 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   screen_width = rect.width;
   screen_height = rect.height;
   t_print("Monitor: width=%d height=%d\n", screen_width, screen_height);
-
   // Start with the smallest possible screen, 800x480, since this can now
   // be fully configured in the SCREEN menu.
   // Go to "full screen" mode if display nearly matches 800x480
   // This is all overridden from the props file
-
   display_width  = 800;
   display_height = 480;
   full_screen    = 0;
-  
+
   //
   // Go to full-screen mode by default, if the screen size is approx. 800*480
   //
@@ -387,7 +385,6 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   // We want to use the space-bar as an alternative to go to TX
   //
   gtk_widget_add_events(top_window, GDK_KEY_PRESS_MASK);
-
   g_signal_connect(top_window, "key_press_event", G_CALLBACK(keypress_cb), NULL);
   t_print("create grid\n");
   topgrid = gtk_grid_new();
@@ -403,7 +400,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   gtk_grid_attach(GTK_GRID(topgrid), image, 0, 0, 1, 2);
   t_print("create pi label\n");
   GtkWidget *pi_label = gtk_label_new("piHPSDR by John Melton G0ORX/N6LYT");
-  gtk_widget_set_name(pi_label,"big_txt");
+  gtk_widget_set_name(pi_label, "big_txt");
   gtk_widget_set_halign(pi_label, GTK_ALIGN_START);
   t_print("add pi label to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), pi_label, 1, 0, 3, 1);
@@ -416,7 +413,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   gtk_grid_attach(GTK_GRID(topgrid), build_date_label, 1, 1, 3, 1);
   t_print("create status\n");
   status_label = gtk_label_new(NULL);
-  gtk_widget_set_name(status_label,"med_txt");
+  gtk_widget_set_name(status_label, "med_txt");
   gtk_widget_set_halign(status_label, GTK_ALIGN_START);
   t_print("add status to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), status_label, 1, 2, 3, 1);
