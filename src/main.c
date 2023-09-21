@@ -104,8 +104,9 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
   // u                 ==>  VFO up
   // d                 ==>  VFO down
   // Keypad 0..9       ==>  NUMPAD 0 ... 9
-  // Keypad Divide     ==>  NUMPAD CL
+  // Keypad Decimal    ==>  NUMPAD DEC
   // Keypad Subtract   ==>  NUMPAD BS
+  // Keypad Divide     ==>  NUMPAD CL
   // Keypad Multiply   ==>  NUMPAD Hz
   // Keypad Add        ==>  NUMPAD kHz
   // Keypad Enter      ==>  NUMPAD MHz
