@@ -70,7 +70,7 @@ void memRestoreState() {
     GetPropI1("mem.%d.freqA", b,           mem[b].frequency);
     GetPropI1("mem.%d.mode", b,            mem[b].mode);
     GetPropI1("mem.%d.filter", b,          mem[b].filter);
-    SetPropI1("mem.%d.deviation", b,       mem[b].deviation);
+    GetPropI1("mem.%d.deviation", b,       mem[b].deviation);
     GetPropI1("mem.%d.ctcss_enabled", b,   mem[b].ctcss_enabled);
     GetPropI1("mem.%d.ctcss", b,           mem[b].ctcss);
   }
