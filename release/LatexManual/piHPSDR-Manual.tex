@@ -877,6 +877,7 @@ piHPSDR on desktop or laptop computers, clicking "Reboot" or "Shutdown" both lea
 program but no re-boot or shutdown takes place, due to missing administrator privileges.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
 \section{The \texttt{About} Menu}
 
 \begin{figure}[h]
@@ -1001,6 +1002,9 @@ minimum position while transmitting.
 \rett{PA enable} This enables/disables the PA in the radio. In addition to this global
 flag, there is a per-band PA enable option for the transverter bands (see the \bltt{XVTR}
 menu).
+
+Note that the last four options (\rett{Split}, \rett{Duplex}, \rett{Mute RX when TX},
+and \rett{PA enable} are not shown for RX-only radios.
 
 \rett{Optimize for TouchScreen} The normal procedure to make a selection from a
 pop-down menu (such as the \rett{Receivers:} button on this screen) is to click
@@ -1312,6 +1316,8 @@ so you can put the drive slider to zero, then put the radio into TX mode,
 whistle into the microphone and slowly increase the Mic gain until the
 ALC value shown is only slightly less than zero.
 
+For RX-only radios, the TX ALC setting will not be shown in the menu.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{XVTR} (Transverter) Menu}
 
@@ -1478,10 +1484,13 @@ will end up in the General band. If you have defined transverter bands (see the
 \label{fig:BandstackMenu}
 \end{figure}
 
-For each band, the band stack is collection of frequency/mode pairs. The idea is that
+For each band, the band stack is collection of operating frequencies. The idea is that
 you can have preferred or recently visited frequencies to which you can easily come back.
-If you open the \bltt{BndStack} menu (Fig. \ref{fig:BandstackMenu}), you see all these
-frequency/mode pairs, the band stack entry currently selected is highlighted.
+What is actually stored is the frequency and the band, the mode (e.g. USB or FMN),
+the filter, whether CTUN is enabled or disabled, and the CTCSS setting (the latter
+only becomes effective for the FMN mode).
+If you open the \bltt{BndStack} menu (Fig. \ref{fig:BandstackMenu}), the buttons
+tell you about the frequency and the mode, and the band stack entry currently selected is highlighted.
 
 If you press the highlighted button, the current frequency/mode is stored in that band stack
 entry. If you press another (non highlighted) bandstack entry, the current frequency/mode
@@ -1515,15 +1524,17 @@ and equalizer settings, and TX compressor settings
  to CWL/CWU where you will normally use different settings compared to both USB/LSB and DIGU.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+\clearpage
 \section{The \texttt{Memory}  menu}
 
 The \bltt{Memory} menu gives you access to five memory slots. The menu is shown in Fig. \ref{fig:MemMenu}.
 You can store the current
-frequency and mode of the active receiver in any of the five slots by clicking a
+operating frequency  of the active receiver in any of the five slots by clicking a
 button in the leftmost columns (e.g. "Store M2"), or you can restore
-data from any slot. The current memory contents are shown in the right column (frequency,
-mode, and filter width) and clicking on of the five buttons there will restore
+data from any slot. Besides the frequency and the mode, the filter used and the CTCSS setting
+is part of the memory slot.
+The right column shows the frequency, the mode,
+and filter currently stored in the memory slot and clicking on of the five buttons there will restore
 the data. So if you have some often used frequencies (e.g. for a net), the
 \bltt{Memory} menu allows you to become QRV there with only few mouse clicks.
 
@@ -1785,6 +1796,10 @@ This is what \bltt{Diversity} is all about.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: TX-related menus}
+
+Note that for RX-only radios, only the \bltt{CW} menu will be shown here
+because there one can set the pitch of the CW side tone, which also affects
+the RX ,,BFO frequency''.
 
 \section{The \texttt{TX} Menu}
 \begin{figure}[h!]
@@ -2250,7 +2265,8 @@ I personally never use it.
 The \bltt{FFT} menu sets parameters for the filters inside WDSP
 (and thus has no effect if using SoapySDR radios).
 Filter characteristics can be specified separately for the RX1 (and RX2, if
-running two receivers) and TX filters. Most users will
+running two receivers) and TX (if the radio does have a transmitter)
+filters. Most users will
 very rarely need to invoke this menu, which is shown
 in Fig. \ref{fig:FFTMenu}.
 
@@ -2316,6 +2332,8 @@ modes such as CWU/CWL, where the TX equalizer has no meaning
 anyway, and where the RX equalizer is normally not needed because
 CW filters usually are narrow.
 
+For RX-only radios, the TX part of the equalizer menu is not shown.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Ant} (Antenna) Menu}
 
@@ -2355,6 +2373,8 @@ or of an external RX preselector, to control an automatic antenna tuner,
 and many more things, since it is
 your external hardware which in the end has to make sense of the output
 bit pattern.
+
+For non-HPSDR radios, the \bltt{OC} menu does not appear in the main menu.
 
 To facilitate control of an automatic tuner, there are seven \rett{TUNE}
 bits which are ORed with the bit pattern chosen for TX on the actual band,
@@ -2477,7 +2497,8 @@ available). It is
 also possible to use FIFOs (also known as named pipes) instead of real serial devices, which offers a 
 hardware-free connection
 of, say, a logbook program running on the same computer to piHPSDR, even if the logbook programm cannot use 
-TCP.
+TCP. On my Macintosh computer for example, using a named pipe and the Kenwood TS-2000 radio model,
+I can connect the MacLogger DX logbook program with piHPSDR.
 piHPSDR fully supports (thanks Rick!) the ANDROMEDA controller (see \texttt{github.com/laurencebarker/
 Andromeda\_front\_panel}).
 This controller (or rather the Arduino inside) is connected to the host computer via USB and appears as a 
@@ -2486,7 +2507,7 @@ device on the host computer. The CAT command set is explained in Appendix \ref{s
 cases, using
 the Kenwood TS-2000 as the radio model would do it, if the digimode or laptop program uses hamlib to 
 interface with
-radios, either choose TS-2000 or (preferably) the ,,OpenHPSDR piHPSDR'' radio model because this uses time-
+radios, either choose TS-2000 or (preferably) the ,,OpenHPSDR PiHPSDR'' radio model because this uses time-
 out values
 adapted to piHPSDR. The \bltt{RigCtl} menu is shown in Fig. \ref{fig:RigCtlMenu}.
 
@@ -2527,6 +2548,8 @@ adapters (which are nowadays the standard way to add serial ports to a computer)
 \texttt{/dev/ttyUSB0} (on RaspPi) or \texttt{/dev/tty.usbserial-....} (on MacOS). piHPSDR does not try 
 to ,,detect'' serial
 ports, you must know the proper name (e.g. by looking at the contents of the \texttt{/dev} directory).
+Named pipes can be created everywhere in the file system hierarchy using the command
+,,\texttt{mkdir -p <some\_arbitrary\_name>}''.
 
 To the right of the serial port text field, there is a pop-down menu for choosing the baud rate. Only 4800, 
 9600, 19200, and 38400 baud are offered, but this should cover most cases. Then, further to the right, is 
@@ -2686,7 +2709,19 @@ and very fast right turns. Specifying an interval from $-1$ to $-1$ means that
 this case will never be realized. In the example shown (Fig. \ref{fig:MIDImenu2}),
 we have chosen to map all values from 0-63 to a left turn, and all values from 65-127
 to a right turn.
-
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{MIDImenu3.png}
+\caption{The MIDI menu, selecting VFO action}
+\label{fig:MIDImenu3}
+\end{figure}
+ 
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{MIDImenu4.png}
+\caption{The MIDI menu, VFO action selected}
+\label{fig:MIDImenu4}
+\end{figure}
 Now we have to specify which piHPSDR function should be triggered when moving the wheel.
 The current action is shown in a button below the string \rett{Action} and defaults to \bltt{NONE}.
 By clicking this button, a dialog to choose the function opens as described for the
@@ -2696,21 +2731,7 @@ assigned to encoders.
 Because we want to assign the wheel to the \bltt{VFO} function, we click
 the \bltt{VFO} button, which then becomes highlighted (Fig. \ref{fig:MIDImenu3}).
 
-\begin{figure}[h!]
-\center
-\includegraphics[width=12cm]{MIDImenu3.png}
-\caption{The MIDI menu, selecting VFO action}
-\label{fig:MIDImenu3}
-\end{figure}
- 
 
- 
- \begin{figure}[h!]
-\center
-\includegraphics[width=12cm]{MIDImenu4.png}
-\caption{The MIDI menu, VFO action selected}
-\label{fig:MIDImenu4}
-\end{figure}
 
  Then one has to click the OK button to make the choice, and one returns to the
  MIDI menu (see Fig. \ref{fig:MIDImenu4}).
@@ -2723,13 +2744,12 @@ to change the VFO frequency.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Encoders} Menu}
-
-The encoders menu can be used to assign functions to the encoders of a
-piHPSDR Controller1, Controller2 or the G2 front panel controller.
-If \texttt{No Controller} has been chosen in the initial discovery screen
-(Fig. \ref{fig:Start}), this menu is not available.
-Note that the ,,large knob'' of these controllers
-cannot be assigned a function, it is hard-wired to the \bltt{VFO} function.
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{g2_frontpanel.png}
+\caption{A picture of the G2 frontpanel (image courtesy of Apache Labs).}
+\label{fig:g2_frontpanel}
+\end{figure}
 
 \begin{figure}[h]
 \center
@@ -2737,12 +2757,24 @@ cannot be assigned a function, it is hard-wired to the \bltt{VFO} function.
 \caption{The Encoder menu for the G2 frontpanel controller}
 \label{fig:EncoderMenuG2}
 \end{figure}
+The encoders menu can be used to assign functions to the encoders of a
+piHPSDR Controller1, Controller2 or the G2 front panel controller.
+If \texttt{No Controller} has been chosen in the initial discovery screen
+(Fig. \ref{fig:Start}), this menu is not available.
+Note that the ,,large knob'' of these controllers
+cannot be assigned a function, it is hard-wired to the \bltt{VFO} function.
+
+
 
 While the function of this menu is the same in all three cases (Controller1, Controller2,
 G2 frontpanel), the layout is different, because the position of the menu buttons
 are meant to indicate which encoder is referred to.
 
-The G2 frontpanel has four small knobs, two (one above the other)
+
+
+The G2 frontpanel (Fig. \ref{fig:g2_frontpanel}) has,
+in addition to the large VFO knob at the bottom right,
+four small knobs, two (one above the other)
 at the left edge and two at the right edge. All four knobs are double encoders with
 a switch. This means that there is an inner/upper knob (,,top encoder'') 
 and an outer/lower knob (,,bottom encoder''), which
@@ -2754,19 +2786,41 @@ clear which group belongs to which encoder. With the buttons, you can choose whi
 to assign, in the same way as described for the \bltt{Toolbar} (chapter \ref{sec:toolbarmenu})
 and \bltt{MIDI} (chapter \ref{sec:midimenu}) menus.
 
-If you run piHPSDR with a Controller2, then the menu looks different (Fig. \ref{fig:EncoderMenuV2}).
-The Controller2 has (besides the VFO knob) three knobs (arranged horizontally) at the bottom left,
-and a fourth knob at the top right, all of which are double encoders with a switch. The menu shows
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{Apache_Controller2.png}
+\caption{A picture of the Controller2 (image by courtesy of Apache Labs).}
+\label{fig:Apache_Controller2}
+\end{figure}
+
+The Controller2 (see Fig. \ref{fig:Apache_Controller2} 
+has (besides the VFO knob at the bottom right) three knobs (arranged horizontally) at the bottom left,
+and a fourth knob at the top right, all of which are double encoders with a switch.
+So if you run piHPSDR with a Controller2, then the menu looks different (Fig. \ref{fig:EncoderMenuV2}).
+ The menu shows
 for groups with three buttons each, and it should be clear which group belongs to which know.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{EncoderMenuV2.png}
 \caption{The Encoder menu for Controller2}
 \label{fig:EncoderMenuV2}
 \end{figure}
 
-Finally, the Controller1 has three knobs, arranged vertically at the right edge. These knobs
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{Apache_Controller1.png}
+\caption{A picture of the Controller1 (image by courtesy of Apache Labs).}
+\label{fig:Apache_Controller1}
+\end{figure}
+
+The default functions associated with the encoders are printed
+on the enclosure for the G2 frontpanel and the Controller2. So you might not wish
+to re-assign different functions, but at least you can.
+
+Finally, the Controller1 (see Fig. \ref{fig:Apache_Controller1})
+has (besides the big VFO knob at the bottom right)
+three knobs denoted E1, E2, E3, , arranged vertically at the right edge. These knobs
 are single encoders with a switch (you can turn the knob, but you can also push it). Therefore,
 the \bltt{Encoders} menu in this case (Fig. \ref{fig:EncoderMenuV1}) shows three groups with
 two buttons each.
@@ -2789,7 +2843,8 @@ for the Controller1 because the eight push buttons of this controller are hard-w
 the toolbar buttons and their functions as thus assigned via the \bltt{Toolbar} menu
 (see Chapter \ref{sec:toolbarmenu}). 
 
-On the G2 frontpanel, there are a lot of push buttons: at the left edge, to the right
+On the G2 frontpanel (see Fig. \ref{fig:g2_frontpanel}),
+ there are a lot of push buttons: at the left edge, to the right
 of the left edge encoders, are two buttons, at the bottom right, below the VFO knob,
 there are two more buttons, and at the top right, to the right of the left edge
 encoders, is an array of 12 (4x3) buttons. The layout of the \bltt{Switches} menu
@@ -2806,7 +2861,8 @@ to these buttons is done exactly as described for the \bltt{Toolbar} menu
 \label{fig:SwitchMenuG2}
 \end{figure}
 
-The Controller2 also has 16 push buttons, but they are arranged differently:
+The Controller2 (see Fig. \ref{fig:Apache_Controller2} in the last section)
+also has 16 push buttons, but they are arranged differently:
 at the bottom edge there are 7 buttons arranged horizontally. At the right
 edge, there is an array of 8 buttons (4x2) with one additional button
 above the right column that is to the right of the fourth encoder, just
@@ -2818,7 +2874,6 @@ Assigning functions
 to these buttons is done exactly as described for the \bltt{Toolbar} menu
 (chapter \ref{sec:toolbarmenu}).
 
-
 \begin{figure}[h]
 \center
 \includegraphics[width=12cm]{SwitchMenuV2.png}
@@ -2826,10 +2881,15 @@ to these buttons is done exactly as described for the \bltt{Toolbar} menu
 \label{fig:SwitchMenuV2}
 \end{figure}
 
+The default functions associated with the push buttons are printed
+on the enclosure for the G2 frontpanel and the Controller2. So you might not wish
+to re-assign different functions, but at least you can.
+
 \appendix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{List of piHPSDR ,,Actions''}
+\label{sec:actionlist}
 
 In this chapter, we give a list of ,,actions'' implemented in the piHPSDR program. These actions can be 
 assigned to toolbar buttons on the screen, or pushbuttons/encoders of a GPIO-connected or MIDI controller. 
@@ -3497,7 +3557,42 @@ already 8, this is a no-op.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{piHPSDR keyboard bindings}
 
+There are a lot of keyboard bindings effective if you run piHPSDR. Most of them are
+standard key bindings of the GTK user interface. For example, when using a normal
+slider, you can use the up-arrow and down-arrow keys to fine adjust the value. In this
+section we will only list the keyboard binding that are captured and processed by piHPSDR
 
+\rett{space bar} Hitting the space bar will execute the \bltt{MOX} command, that is, a
+transition from RX to TX or from TX to RX. Use this as the last resort for TRX switching
+if your microphone does not have PTT.
+
+\rett{u} Hitting a lower-caps letter ,,u'' moves the VFO frequency up by the current VFO
+step size.
+
+\rett{d} Hitting a lower-caps letter ,,d'' moves the VFO frequency up by the current VFO
+step size.
+
+\rett{Keypad 0} $\ldots$ \rett{Keypad 9} Hitting a digit on the numerical keypad executes one of the
+\bltt{NumPad 0} to \bltt{NumPad 9} commands. This can be used for direct frequency entry
+via the keyboard.
+
+\rett{Keypad Decimal} Hitting the decimal point on the keypad executes the \bltt{NumPad Dec}
+command which will enter a decimal point during direct frequency entry.
+
+\rett{Keypad Subtract} Hitting the ,,subtract'' (minus) key on the numerical keypad executes the
+\bltt{NumPad BS} (back space) command.
+
+\rett{Keypad Divide} Hitting the ,,divide'' key on the numerical keypad executes the \bltt{NumPad CL}
+command which will clear any frequency entered so far.
+
+\rett{Keypad Multiply} Hitting the ,,multiply'' key on the numerical keypad executes the \bltt{NumPad Hz}
+command which will transfer the frequency entered (in Hz) to the VFO of the active receiver.
+
+\rett{Keypad Add} Hitting the ,,add'' (plus) key on the numerical keypad executes the \bltt{NumPad kHz}
+command which will transfer the frequency entered (in kHz) to the VFO of the active receiver.
+
+\rett{Keypad Enter} Hitting the ,,enter'' key on the numerical keypad executes the \bltt{NumPad MHz}
+command which will enter the frequency entered (in MHz) to the VFO of the active receiver.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3543,12 +3638,577 @@ such that the ANDROMEDA controller can update the corresponding LEDs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{How to connect a Morse key or paddle}
+\chapter[Connect a Morse Key]{How to connect a Morse key or paddle}
 \label{sec:ConnectCW}
 
+Most SDR radios have the possibility to connect a Paddle or at least a straight key to the
+radio itself, and then the firmware inside the radio takes care of all the CW processing.
+If, in addition, the radio has the option to  connect a headphone, you will get a low-latency
+side tone, generated by the radio firmware, in this headphon.
+This is the easiest case (do not forget to check \rett{CW handled in Radio} within the
+\bltt{CW} menu). If the radio (such as the HermesLite-II) can only connect a straight key,
+use an external keyer and connect the output of the keyer to the straight key input of the radio.
+Note, however, that the HermesLite-II does not have an audio codec and thus does not produce a
+side tone. You can use the keyer output to key a hardware side tone generator and mix its
+output with the audio that you feed to your headphone. This gives a hardware generated low
+latency side tone.
+
+More complications arise if you have to connect the Morse key to the host computer running
+piHPSDR. This is necessary, for example, if there is a considerable distance between the
+radio and the host computer running piHPSDR. Imagine, for example, that the radio is
+in the attic close to the antenna feed point, but that you are sitting in your living room
+in front of the host computer running piHPSDR, and that there is a long ethernet cable
+between your computer and your radio.
+
+\textbf{RaspPi GPIO.} If your host computer is a RaspPi, and if you are running either no controller
+or Controller1, then there are spare GPIO input lines which you can use for connecting a Morse
+key. The pre-defined GPIO lines are, if there is "No Controller":
+
+\begin{itemize}
+\item{GPIO line 7 for \bltt{CW Left}}
+\item{GPIO line 21 for \bltt{CW Right}}
+\item{GPIO line 14 for \bltt{PTT (keyer)}}
+\item{GPIO line 10 for \bltt{CW Key (keyer)}}
+\end{itemize}
+
+In the case of \texttt{Controller1} the GPIO lines are
+
+\begin{itemize}
+\item{GPIO line 9 for \bltt{CW Left}}
+\item{GPIO line 11 for \bltt{CW Right}}
+\item{GPIO line 14 for \bltt{PTT (keyer)}}
+\item{GPIO line 10 for \bltt{CW Key (keyer)}}
+\end{itemize}
+
+All lines are active-low lines with a pull-up, so the active state is reached
+by connecting the input line to ground. See Appendix \ref{sec:actionlist} for
+an explanation of the commands. Briefly, use \bltt{CW Left} and \bltt{CW Right}
+when using piHPSDR's internal iambic keyer, and use \bltt{PTT (keyer)} and
+\bltt{CW Key (keyer)} when using an external keyer. Note when using an external
+keyer, it must generate both a key-down and a PTT signal, and it must be configured
+such that the PTT signal arrives about 150 msec earlier than the first key-down.
+K1EL WinKey keyers and Arduino clones thereof, which are the most abundant sort
+of keyers used, can easily be configured to do so. Depending on the audio subsystem,
+the latency of the side tone, when using the internal keyer, may be a problem.
+The ALSA audio (instead of pulseaudio) module takes special provisions to
+keep this latency small.
+
+\textbf{MIDI}
+If there are no spare GPIO lines (this is the case for the RaspPi if using the
+Controller2 or the G2 frontpanel), or if there are no GPIO lines at all (this is
+the case for piHPSDR running on Desktop Linux or Macintosh computers), the best
+choice to get "the key into the computer" is to use MIDI. There are low-cost
+microcontrollers which can be programmed such that they act as MIDI input devices
+if connected (via USB) to the host computer (Arduino Leonardo, Teensy LC). You can
+run a Winkey Clone on the microcontroller and add code that for key-up/down and
+PTT on/off sends MIDI NoteOn/Off messages to the computer. The use the
+\bltt{MIDI} menu to configure. More powerful microcontrollers (e.g. the Teensy4)
+can even show up at the computer as a MIDI input device \textit{and} a serial port,
+in this case you can even connect from a contest logging program to  the keyer
+via the WinKey protocol over the serial port, and get the key-up/down messages
+via MIDI back to piHPSDR. The Teensy4 is even so powerful that it can act, in
+addition to a MIDI device and a serial port, as a USB audio sound card.
+Using all these three components together you can route the RX audio to the
+Teensy, which then takes care of mixing the CW side tone with this audio
+before sending it to the headphone attached. This is perhaps the most
+sophisticated way to connect a key, see \texttt{https://github.com/softerhardware/CWKeyer}.
+Using the \bltt{MIDI} menu to assign the \bltt{CW Key (Keyer)} and \bltt{PTT (keyer)}
+actions is a little bit tricky, since the menu only allows to assign an action to
+the latest event received. Proceed as follows:
+
+\begin{itemize}
+\item{Press and hold one of the two paddles. The keyer will start sending a NoteOn
+message for PTT, and then infinitely send NoteOn/Off messages for key up/down.
+Use the \bltt{MIDI} menu to assign the \bltt{CW Key (keyer)} action to this MIDI event.}
+\item{Then, release the paddle. Some time (the hang time of the keyer) after the last
+key-up, a NoteOff message for PTT will be sent. After this, you can assign the
+\bltt{PTT (keyer)} action to this MIDI event. You should see that it has a different
+Note value than you saw while the keyer was sending the infinite string of dots or
+dashes.}
+\end{itemize}
+
+As an example, we show a short sketch which has been tested with the Arduino Leonardo
+You must install the MIDIUSB library from within the Arduino IDE, through the
+\texttt{Tools} $\to$ \texttt{Manage Libraries ...}  menu. The sketch monitors four
+input lines (0, 1, 2, 3 in the example) with debouncing. You can connect a CW paddle
+to lines 0 and 1, or the Key and PTT outputs of a Keyer to lines 2 and 3.
+
+\clearpage
+\begin{small}
+\begin{verbatim}
+/*
+ * define four I/O lines for the four inputs
+ */
+ 
+#define CWLEFT_IO   0   // Dot paddle
+#define CWRIGHT_IO  1   // Dash paddle or StraightKey
+#define CWKEY_IO    2   // from Keyer: CW
+#define PTT_IO      3   // from Keyer: PTT
+
+
+/*
+ * define MIDI channel four MIDI notes for these four events
+ */
+
+#define MIDI_CHANNEL 10
+#define CWLEFT_NOTE  10
+#define CWRIGHT_NOTE 11
+#define CWKEY_NOTE   12
+#define PTT_NOTE     13
+
+/*
+ * define a debouncing time for CWLEFT/CWRIGHT
+ * and a (possibly shorter) one for CWKEY/PTT
+ */
+
+#define DEBOUNCE_PADDLE 15
+#define DEBOUNCE_KEYER   5
+
+#include "MIDIUSB.h"
+
+/*
+ * Debouncing timers
+ */
+
+static uint8_t CWLEFT_time;
+static uint8_t CWRIGHT_time;
+static uint8_t CWKEY_time;
+static uint8_t PTT_time; 
+\end{verbatim}
+\clearpage
+\begin{verbatim}
+/*
+ * last reported states
+ */
+ 
+static uint8_t CWLEFT_last;
+static uint8_t CWRIGHT_last; 
+static uint8_t CWKEY_last;
+static uint8_t PTT_last;
+
+void setup() {
+  pinMode(CWLEFT_IO,  INPUT_PULLUP);
+  pinMode(CWRIGHT_IO, INPUT_PULLUP);
+  pinMode(CWKEY_IO,   INPUT_PULLUP);
+  pinMode(PTT_IO,     INPUT_PULLUP);
+  CWLEFT_time =255;
+  CWRIGHT_time=255;
+  CWKEY_time  =255;
+  PTT_time    =255;
+  CWLEFT_last =0;
+  CWRIGHT_last=0;
+  CWKEY_last  =0;
+  PTT_last    =0;
+}
+\end{verbatim}
+\clearpage
+\begin{verbatim}
+/*
+ * Send MIDI NoteOn/Off message
+ */
+ 
+void SendOnOff(int note, int state) {
+  midiEventPacket_t event;
+  if (state) {
+    // Note On
+    event.header = 0x09;
+    event.byte1  = 0x90 | MIDI_CHANNEL;
+    event.byte2  = note;
+    event.byte3  = 127;
+  } else {
+    // NoteOff, but we use NoteOn with velocity=0
+    event.header = 0x09;
+    event.byte1  = 0x90 | MIDI_CHANNEL;
+    event.byte2  = note;
+    event.byte3  = 0;
+  }
+  MidiUSB.sendMIDI(event);
+  // this is CW, so flush each single event
+  MidiUSB.flush(); 
+}
+\end{verbatim}
+\clearpage
+\begin{verbatim}
+/*
+ * Process an input line.
+ * Note that HIGH input means "inactive"
+ * and LOW input means "active"
+ * This function does noting during the debounce
+ * settlement time.
+ * After the settlement time, if the input state
+ * has changed, the settlement time is reset and
+ * a MIDI message (with the new state) sent.
+ */
+ 
+void process(uint8_t *time, uint8_t *oldstate,
+             uint8_t ioline, uint8_t note,
+             uint8_t debounce) {
+  if (*time < 255) (*time)++;
+  if (*time > debounce) {
+    uint8_t newstate = !digitalRead(ioline);
+    if (newstate != *oldstate) {  
+      *time=0;
+      *oldstate = newstate;
+      SendOnOff(note, newstate);
+    }
+  }
+}
+\end{verbatim}
+\clearpage
+\begin{verbatim}
+void loop() {
+  uint8_t state;
+ /*
+  * For each line, do nothing during the debounce settlement
+  * time. After that, look at the input line, if it changed,
+  * reset debounce timer and report value
+  */
+
+  process (&CWLEFT_time,
+           &CWLEFT_last,
+           CWLEFT_IO,
+           CWLEFT_NOTE,
+           DEBOUNCE_PADDLE);
+           
+  process (&CWRIGHT_time,
+           &CWRIGHT_last,
+            CWRIGHT_IO,
+            CWRIGHT_NOTE,
+            DEBOUNCE_PADDLE);
+            
+  process (&CWKEY_time,
+           &CWKEY_last,
+           CWKEY_IO,
+           CWKEY_NOTE,
+           DEBOUNCE_KEYER);
+  
+  process (&PTT_time,
+           &PTT_last,
+           PTT_IO,
+           PTT_NOTE,
+           DEBOUNCE_KEYER);
+
+
+ /*
+  * Execute loop() approximately (!) once per milli-second
+  */
+ delayMicroseconds(950);
+}
+\end{verbatim}
+\end{small}
+\clearpage
+Copy-and-Paste from an PDF file often does not give you what you think, so
+this sketch is available under the name \texttt{MIDI.ino} in the \texttt{release}
+directory in the piHPSDR repository. Note you can
+also use this sketch to connect a microphone PTT button to input line 3. Once the
+Leonardo has been programmed,
+it will show up as an ,,Arduino Leonardo'' in the \bltt{MIDI} menu. As a basic test,
+open the \bltt{MIDI} menu, check the box for the Leonardo device,
+ and shortly ground input pin 0. Then the menu should report
+that a ,,NOTE'' event on channel 10 with a note 10 occured, which you can then
+(by clicking the \rett{Action} button) assign to, say, \bltt{CW Left}.
+
+\textbf{Note}. It should be obvious how to extend this sketch to monitor additional
+input lines where you can then connect push buttons to which you can assign piHPSDR
+functions via the MIDI menu. Monitoring rotary encoders is more difficult and not
+shown here.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Running piHPSDR alongside with DigiMode programs}
+\chapter[piHPSDR and digimode programs]{Running piHPSDR alongside with DigiMode programs}
+
+In this section, we will cover four different scenarios, namely
+\begin{itemize}
+\item{piHPDSR and digimode program running on different computers.}
+\item{piHPSDR and digimode program running on the same LINUX computer 
+(including RaspPi) using ALSA.}
+\item{piHPSDR and digimode program running on the same LINUX computer
+(including RaspPi) using pulseaudio.}
+\item{piHPSDR and digimode program running on the same MacOS computer.}
+\end{itemize}
+
+\textbf{\color{red}Running piHPSDR and Digi on different computers}. \\
+This typically is the situation if piHPSDR is running on a computer with a very small
+screen, such as it is the case if you are using a piHPSDR controller or the G2 frontpanel.
+This situation also occurs if you want to run the DigiMode program on a Windows computer,
+since (as far as I know) piHPSDR has not yet been adapted to run with the Windows operating
+system.
+
+There is not much to say here, because this setup is largely the same as for conventional
+(analog) rigs: you need a sound interface connected to the computer running the digi program,
+and then you connect the sound interface either to the headphone and mic jacks of the radio,
+or to the input/output of a sound card connected to the computer running piHPSDR. In the
+latter case, you have to select this soundcard for local audio output in the \bltt{RX} menu,
+and for local microphone input in the \bltt{TX} menu.
+
+Unless you are using VOX, you also need a CAT command connection between the digimode program
+and piHPSDR. Via CAT commands, the digimode program can induce RX/TX transitions in piHPSDR,
+change frequencies or modes, etc. If both computers are connected via ethernet,
+TCP is the method of choice for such a connection. piHPSDR listens on port 19090 (by default,
+can be changed in the \bltt{RigCtl} menu). For standard digimode operation, choose the
+Kenwood TS-2000 radio model. If your digimode program can use the hamlib CAT connection
+library (for example, both Fldigi and WSJTX can), choose the ,,OpenHPSDR PiHPSDR'' radio
+model.
+
+If there is no ethernet connection between the compupter running piHPSDR and the computer
+running the digimode program, you need two USB-to-serial interfaces and must connect them
+via a null modem. Then use the serial port both in piHPSDR (\bltt{RigCtl} menu) and the
+digimode program.
+
+\textbf{\color{red}Running piHPSDR and Digi on the same computer}. \\
+In this case it is strongly recommended that the audio never goes analog, but is 
+exchanged (transferred to and from)
+as digital data between piHPSDR and the digimode program. To this end, you need 
+virtual audio devices known as {\color{red} virtual audio cables} or {\color{red}
+loopbacks}. A virtual audio cable is a pair of connected (virtual) audio devices,
+one input (,,microphone'') device and one output (,,headphone'') device. You can,
+for example, open the output device of such a virtual cable in program X at a place
+where you could also open a device driving a headphone. In another program Y, you can
+open the input device of the same virtual audio cable at a place where you could also
+open a device attached to a microphone. The ,,trick'' is now that all audio data which
+program X sends to the output device can be retrieved by program Y by reading the input device.
+
+
+
+For digimode operation, you need two such virtual audio cables, which we will name here
+RXcable and TXcable, just to give an example. The idea behind the names is, that audio data
+flows through the RXcable upon RX and through the TXcable while transmitting. Having said this,
+it is clear that
+
+\begin{itemize}
+\item{In the piHPSDR \bltt{RX} menu, chose the output device of RXcable for local audio output.}
+\item{In the piHPSDR \bltt{TX} menu, chose the input device of TXcable for local microphone input.}
+\item{In the audio menu of the digimode program, choose the input device of RXcable for audio input.}
+\item{In the audio menu of the digimode program, choose the output device of TXcable for output output.}
+\end{itemize}
+
+With this, the only question remaining is, how to create virtual audio cables, and how to access them.
+This is not only different between Linux and MacOS, but also is different on Linux depending on
+whether the ALSA compile time option (see Appendix \ref{sec:compiletime}) was activated during 
+compilation of piHPSDR. By default (and if piHPSDR has been put onto you computer by binary
+installation), ALSA is active.
+
+
+\textbf{\color{red}Virtual audio cables. Linux ALSA case.} \\
+The command for creating the two virtual cables (put everything in one line) is
+
+\texttt{sudo modprobe snd-aloop index=5,6 id=RXcable,TXcable\\
+enable=1,1 pcm\_substreams=2,2}
+
+The two indices chosen (5, 6) should leave enough head-room for sound devices
+already present. On a ,,naked'' Pi4, indices 0 and 1 refer to the HDMI
+and headphone audio output devices, but more indices may already be assigned
+if you have plugged in additional sound cards. You can verify the existence of
+the virtual audio cables using the command
+
+\texttt{aplay -l}
+
+and part of the output, as obtained on my Pi4, is printed here:
+
+\begin{small}
+\begin{verbatim}
+card 5: RXcable [Loopback], device 0: Loopback PCM [Loopback PCM]
+  Subdevices: 2/2
+  Subdevice #0: subdevice #0
+  Subdevice #1: subdevice #1
+card 5: RXcable [Loopback], device 1: Loopback PCM [Loopback PCM]
+  Subdevices: 2/2
+  Subdevice #0: subdevice #0
+  Subdevice #1: subdevice #1
+card 6: TXcable [Loopback], device 0: Loopback PCM [Loopback PCM]
+  Subdevices: 2/2
+  Subdevice #0: subdevice #0
+  Subdevice #1: subdevice #1
+card 6: TXcable [Loopback], device 1: Loopback PCM [Loopback PCM]
+  Subdevices: 2/2
+  Subdevice #0: subdevice #0
+  Subdevice #1: subdevice #1
+\end{verbatim}
+\end{small}
+Remember that the device with index 5 is our RXcable and index 6 belongs to TXcable since
+not all programs (including piHPSDR) report the names (RXcable, TXcable) assigned. It is
+important to realize that each ,,cable'' offers two devices: the first one (0) is
+the input device and the second one (1) is the output device.
+Note that
+the two devices created by ,,modprobe'' only exist until the next shut-down of the computer and
+you have to re-create them each time after booting. There are ways to make this permanent (search
+the internet) or to include the ,,modprobe'' in a startup script that is exected once after each
+boot (again, search the internet). Now we show how to set this up and show piHPSDR's \bltt{RX} and
+\bltt{TX} menu, as well as the audio menu of WSJTX. 
+
+We begin with the piHPSDR settings in the \bltt{RX} (Fig. \ref{fig:rx_settings_alsa_audio}) and
+\bltt{TX} (Fig. \ref{fig:tx_settings_alsa_audio}) menu:
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{rx_settings_alsa_audio.png}
+\caption{RX menu settings for using loopback with ALSA.}
+\label{fig:rx_settings_alsa_audio}
+\end{figure}
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{tx_settings_alsa_audio.png}
+\caption{TX menu settings for using loopback with ALSA.}
+\label{fig:rx_settings_alsa_audio}
+\end{figure}
+
+Is clearly seen that the output device of RXcable (5,1) is used for local RX audio, and the input
+device of TXcable (6,0) is used for local microphone input. The corresponding WSJTX settings audio
+tab looks similar (Fig. \ref{fig:wsjtx_settings_alsa_audio}, only the upper part of the
+window is shown):
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{wsjtx_settings_alsa_audio.png}
+\caption{WSJTX audio settings for using loopback with ALSA.}
+\label{fig:wsjtx_settings_alsa_audio}
+\end{figure}
+
+Here, the \textit{input} device of RXcable is used for audio input, and the
+\textit{output} device of TXcable for audio output. Note this program reports the
+clear names of the devices rather than its ID numbers. Finally, we show the WSJTX ,,Radio''
+tab for establishing the CAT connection, although this is not specific to ALSA 
+(Fig. \ref{fig:wsjtx_settings_radio}):
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{wsjtx_settings_radio.png}
+\caption{WSJTX radio settings for CAT connection to piHPSDR.}
+\label{fig:wsjtx_settings_radio}
+\end{figure}
+
+Important here is to choose the correct rig model \rett{OpenHPSDR PiHPSDR} and
+port \rett{:19090} (note the colon!). The other parameters in the left side of the tab
+have no meaning for a TCP connection. In the right tab, choose \rett{CAT} as
+the PTT method (TRX transition controlled by CAT commands). Checking \rett{Data/Pkt}
+takes care WSJTX switches piHPSDR to DIGU mode, and using \rett{Fake It} for the Split
+Operation method is just my personal preference.
+
+\clearpage
+\textbf{\color{red}Virtual audio cables, Pulseaudio case.}\\
+There are no explicit loopback devices with pulseaudio since they are not needed.
+For \textit{every} pulseaudio output device, there is a corresponding ,,Monitor'' device
+which can be used for sound input, and where the data sent to the primary (output) device
+can be red. This means, you can send the RX audio to the headphone device as you would do
+for normal SSB operation, and can then use the Monitor of the headphone device as audio
+input in WSJTX. Then we need, however, a \textit{second} output device which we can use
+as audio  output in WSJTX, and the Monitor thereof can then be chosen, in the piHPSDR
+\bltt{TX} menu, as the local microphone. We could use any un-used audio output device for
+this purpose, but if we do not have one, we have to create one. This is easy, since
+in pulseaudio there are the so-called ,,null sink'' devices which are output devices
+that are just black holes that swallow all audio output sent to them. Their only purpose
+is that they also have a monitor device associated which you can then use.
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{rx_settings_pa_audio.png}
+\caption{RX menu settings with pulseaudio}
+\label{fig:rx_settings_pa_audio}
+\end{figure}
+
+So the bottom line is: we need no RXcable, but we have to create a null-sink device which
+we shall call TXcable. This is done by the command (do not enter the line break)
+
+\texttt{pacmd load-module module-null-sink sink\_name=TXcable rate=48000 \\
+sink\_properties="device.description=TXcable"
+}
+
+The effect can be controlled with the commane \texttt{pacmd list sinks}, which produces
+a very long output from which only the relevant parts are reported here:
+
+\begin{small}
+\begin{verbatim}
+...
+3 sink(s) available.
+...
+    index: 2
+	name: <TXcable>
+	driver: <module-null-sink.c>
+	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
+	state: SUSPENDED
+	suspend cause: IDLE
+...
+3 source(s) available.
+...
+    index: 2
+	name: <TXcable.monitor>
+	driver: <module-null-sink.c>
+	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
+	state: SUSPENDED
+...
+\end{verbatim}
+\end{small}
+
+As you can see, an output device with name TXcable has been created, and the corresponding
+monitor device is also present. Note these null-sink devices only exist until you shut
+down the machine. They can be made permanent quite easily (by inserting commands into
+the \texttt{defaults.pa} file), but I recommend to have a startup script executed
+exactly once upon booting that includes the above command. The reason why I prefer a startup
+script is that you can have all your settings for various components (ethernet, audio,
+monitor, etc.) in one file.
+
+The necessary configuration for piHPSDR and WSJTX is not almost evident. The
+piHPSDR settings are shown in Fig. \ref{fig:rx_settings_pa_audio} (\bltt{RX} menu)
+and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
+
+
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{tx_settings_pa_audio.png}
+\caption{TX menu settings with pulseaudio}
+\label{fig:tx_settings_pa_audio}
+\end{figure}
+
+In the WSJTX audio tab, the input/output assigments are just reversed:
+
+\begin{figure}[h]
+\center
+\includegraphics[width=12cm]{wsjtx_settings_pa_audio.png}
+\caption{WSJTX audio settings with pulseaudio}
+\label{fig:wstx_settings_pa_audio}
+\end{figure}
+
+If you do not want to use the headphone output for RX audio, it should be clear how to
+create an additional null-sink device with name, say, RXcable, to be used instead.
+The CAT connection between WSJTX and piHPSDR is the same as in the ALSA case.
+
+\textbf{\color{red}Using ,,loopback'' in MacOS}\\
+In MacOS, the easist, most flexible, and (from my side) most recommended option is
+to buy a third-party product,  ,,loopback'' from RogueAmoeba
+(\texttt{https://rogueamoeba.com/loopback/}) .
+Note I have no connections with that company, I am just using this product and
+can recommend it. It can not only be used to create loopback devices, but you get
+a patch panel so you can, for example, send the RX audio both to a headphone device
+and to a virtual cable, thus eliminating the need to change piHPSDR menu settings
+when switching between SSB and digi. The following picture just shows my setup
+(Figs. \ref{fig:loopback_rx} and \ref{fig:loopback_tx}).
+
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{loopback_rx.png}
+\caption{Setting up ,,loopback'' on MacOS, RXcable}
+\label{fig:loopback_rx}
+\end{figure}
+
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{loopback_tx.png}
+\caption{Setting up ,,loopback'' on MacOS, TXcable}
+\label{fig:loopback_tx}
+\end{figure}
+
+As one can see, two devices have been created, with name RXcable and TXcable.
+While the configuration of the TXcable is the minimum (default) one, all the
+output sent to RXcable is further routed to the Build-in Output (headphone
+connector) of the Macintosh. One could also modify the TXcable to accept a
+microphone as a second input, but then the microphone must be mutable
+(On/Off switch) such that it does not pickup noise while doing digimode.
+In piHPSDR, simply choose RXcable and local RX output in the \bltt{RX} menu,
+and a local microphone with device TXcable in the \bltt{TX} menu. In WSJTX,
+simply choose RXcable as the input and TXcable as the output device.
+
+CAT connection in MacOS is the same as described for Linux above.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3747,6 +4407,12 @@ the source code: If you want to use the Controller2 or the G2 frontpanel control
  the Raspberry Pi I2C interface
 must be enabled, as described in Appendix \ref{sec:i2c}.
 
+{\color{red} \textbf{For Non-RaspPi Linux systems:} The whole installation procedure depends on that your user account is an administrator account,
+such that you can execute ,,sudo'' commands in the terminal window. You may be asked the administrator
+password. If your user account does not qualify for administrator work, then you are simply not allowed
+to install the ,,HomeBrew'' universe which is the prerequisite for compiling piHPSDR. In normal cases
+(you own the computer) you should have administrator privileges.}
+
 To install from the sources, open a terminal window. If you do so, you get
 a prompt and are in your home directory. It is assumed that no directory named \texttt{pihpsdr}
 exists. If it does, then this is likely a left-over from some previous
@@ -3809,7 +4475,7 @@ option, you can simply ignore this. To check the SoapySDR installation, open a n
 window and just type the command (be careful to use the correct capitalization!)
 
 \grtt{SoapySDRUtil -info}
-
+\clearpage
 On my test system, this command produced the following output:
 \begin{tiny}
 \begin{verbatim}
@@ -3841,7 +4507,7 @@ Available converters...
 \end{verbatim}
 \end{tiny}
 
-(Sorry for the tiny want, I did not want to wrap output lines.)
+(Sorry for the tiny font, I did not want to wrap output lines.)
 Note the API/ABI version (0.8). If you see 0.7 then you probably have installed SoapySDR on your computer 
 from
 the standard repositories, and this is not going to work. The \texttt{libinstall.sh} command  has been 
@@ -3866,7 +4532,7 @@ to provide piHPSDR as a program that you simply copy on your computer and double
 rather involved for an application built upon the GTK graphical user interface. If you know how to do this,
 any help is welcome. But for the time being, compiling from the sources is the only option.
 
-\textbf{The whole installation procedure depends on that your user account is an administrator account,
+{\color{red} The whole installation procedure depends on that your user account is an administrator account,
 such that you can execute ,,sudo'' commands in the terminal window. You may be asked the administrator
 password. If your user account does not qualify for administrator work, then you are simply not allowed
 to install the ,,HomeBrew'' universe which is the prerequisite for compiling piHPSDR. In normal cases
@@ -3938,7 +4604,7 @@ procedure works in this case as well and does no harm. In addition to
  type the command (be careful to use the correct capitalization!)
 
 \grtt{SoapySDRUtil -info}
-
+\clearpage
 On my test system, this command produced the following output:
 
 \begin{tiny}
