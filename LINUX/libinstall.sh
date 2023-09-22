@@ -155,7 +155,25 @@ sudo ldconfig
 
 ################################################################
 #
-# g) create desktop icons, start scripts, etc.  for pihpsdr
+# g) download and install Soapy for RTL sticks
+#
+################################################################
+
+cd $THISDIR
+yes | rm -rf SoapyRTLSDR
+git clone https://github.com/pothosware/SoapyRTLSDR
+
+cd $THISDIR/SoapyRTLSDR
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+make -j 4
+sudo make install
+sudo ldconfig
+
+################################################################
+#
+# h) create desktop icons, start scripts, etc.  for pihpsdr
 #
 ################################################################
 
@@ -189,7 +207,7 @@ cp $TARGET/release/pihpsdr/hpsdr_icon.png $TARGET
 
 ################################################################
 #
-# h) default GPIO lines to input + pullup
+# i) default GPIO lines to input + pullup
 #
 ################################################################
 
