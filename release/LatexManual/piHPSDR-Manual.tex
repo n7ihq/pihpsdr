@@ -100,12 +100,14 @@ the code. A lot of extensions and improvements have been added by myself, theref
 to the version of piHPSDR that can be found on my github account \texttt{https://github.com/dl1ycf/pihpsdr}.
 
 Because piHPSDR can be used on many different types of computers, and because operating systems change
-rather quickly over time, I generally do not recommend to have a ,,binary release'' with files that you
-can just copy to your computer and then it runs. Instead, my personal recommendation is to build piHPSDR
-and WDSP from the sources, only this procedure guarantees compatibility of the final program with your
-operating system. A manual of how to compile piHPSDR from the sources is available separately,
-see \texttt{https://github.com/dl1ycf/pihpsdr-compile-from-sources}, so this will not be covered in 
-the present manual. This manual starts with the first invocation of a freshly compiled piHPSDR.
+rather quickly over time, I generally do not recommend to do a ,,binary installation'' although such
+a bundle is provided in the repository (for the RapsberryPi only) and the process is decribed in Appendix \ref{sec:installbinary}.
+ Instead, my personal recommendation is to build piHPSDR
+from the sources, only this procedure guarantees compatibility of the final program with your
+operating system. Shell scripts for a semi-automatic installation have been provided,
+and the procedure is described in Appendix \ref{sec:installsources} for Linux (including RaspPi)
+computers and in Appendix \ref{sec:installmacosx} for Mac OSX.
+This manual starts in its first chapter with the first invocation of a freshly compiled piHPSDR.
 
 Within this manual, we shall use a typewriter font in red color if we refer to a text or a button within
 a menu of within the VFO bar. piHPSDR menus and commands are indicated through a typewriter font
@@ -637,6 +639,8 @@ For the CW (CWU and CWL) modes, the CW speed (in wpm) and the side tone
 frequency (in Hz) is stated as well. For CW, the filter size may be appended
 by a ,,P'', which indicates whether the CW audio peak filter (see the
 \bltt{Filter} menu) is effective on top of the normal filter.
+For the FMN mode, an indicator of the form C=xxx.y is added if
+CTCSS is enables, and then xxx.y shows the CTCSS frequency.
 
 Now we continue line by line, from left to right and find
 the string \rett{AGC med} printed in yellow. This means
@@ -1477,25 +1481,26 @@ will end up in the General band. If you have defined transverter bands (see the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The  \texttt{BndStack} (Bandstack) menu}
 
- \begin{figure}[h!]
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{BandstackMenu.png}
 \caption{The \bltt{BndStack} (Bandstack) menu.}
 \label{fig:BandstackMenu}
 \end{figure}
 
-For each band, the band stack is collection of operating frequencies. The idea is that
+For each band, the band stack is collection of operating frequencies/parameters. The idea is that
 you can have preferred or recently visited frequencies to which you can easily come back.
-What is actually stored is the frequency and the band, the mode (e.g. USB or FMN),
-the filter, whether CTUN is enabled or disabled, and the CTCSS setting (the latter
-only becomes effective for the FMN mode).
+The parameters that are actually stored are the frequency, the mode (e.g. USB or FMN),
+the filter, and whether CTUN is enabled or disabled. The bandstack parameters
+also encompass some FMN-specific parameters,  namely the deviation and
+the  CTCSS setting.
 If you open the \bltt{BndStack} menu (Fig. \ref{fig:BandstackMenu}), the buttons
 tell you about the frequency and the mode, and the band stack entry currently selected is highlighted.
 
-If you press the highlighted button, the current frequency/mode is stored in that band stack
-entry. If you press another (non highlighted) bandstack entry, the current frequency/mode
-is stored in the highlighted band stack entry, and then the frequency/mode of the new 
-entry becomes effective. Note that bandstack entries are only changed if the active
+If you press the highlighted button, the parameters which are currently effective are stored in that band stack
+entry. If you press another (non highlighted) bandstack button, then first the current 
+parameters are stored in the highlighted band stack entry, and then the parameters of the
+new entry become effective. Note that parameters in bandstack entries are only changed if the active
 receiver is controlled by VFO-A. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1531,8 +1536,8 @@ The \bltt{Memory} menu gives you access to five memory slots. The menu is shown 
 You can store the current
 operating frequency  of the active receiver in any of the five slots by clicking a
 button in the leftmost columns (e.g. "Store M2"), or you can restore
-data from any slot. Besides the frequency and the mode, the filter used and the CTCSS setting
-is part of the memory slot.
+data from any slot. Parameters stored in the memory slot are 
+the frequency and the mode, the filter used, the deviation, and the CTCSS setting.
 The right column shows the frequency, the mode,
 and filter currently stored in the memory slot and clicking on of the five buttons there will restore
 the data. So if you have some often used frequencies (e.g. for a net), the
@@ -4519,6 +4524,7 @@ The best way out of such a problem is to re-install Linux (on a RaspPi, simply u
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[MacOS: piHPDSR install from sources]{Installation of piHPSDR from the sources (MacOS)}
+\label{sec:installmacosx}
 
 \textit{This procedure has been tested on a  fairly recent MacBookAir (2020 model, M1 Silicon CPU, running 
 MacOS

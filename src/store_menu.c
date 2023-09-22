@@ -52,15 +52,22 @@ static gboolean close_cb () {
 static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int ind = GPOINTER_TO_INT(data);
   t_print("STORE BUTTON PUSHED=%d\n", ind);
-  char workstr[40];
+  char label_str[40];
   store_memory_slot(ind);
   int mode = mem[ind].mode;
   int filter = mem[ind].filter;
-  sprintf(workstr, "M%d=%8.3f MHz (%s, %s)", ind,
+  if (mode == modeFMN) {
+    sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
           (double) mem[ind].frequency * 1E-6,
-          mode_string[mem[ind].mode],
+          mode_string[mode],
+          mem[ind].deviation == 2500 ? "11k" : "16k");
+  } else {
+    sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
+          (double) mem[ind].frequency * 1E-6,
+          mode_string[mode],
           filters[mode][filter].title);
-  gtk_button_set_label(GTK_BUTTON(store_button[ind]), workstr);
+  }
+  gtk_button_set_label(GTK_BUTTON(store_button[ind]), label_str);
   return FALSE;
 }
 
@@ -73,8 +80,6 @@ static gboolean recall_select_cb (GtkWidget *widget, GdkEventButton *event, gpoi
 
 void store_menu(GtkWidget *parent) {
   GtkWidget *b;
-  int i;
-  char label_str[50];
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Memories");
@@ -91,21 +96,29 @@ void store_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 1, 1);
 
-  for (i = 0; i < NUM_OF_MEMORYS; i++) {
-    sprintf(label_str, "Store M%d", i);
-    int mode = mem[i].mode;
-    int filter = mem[i].filter;
+  for (int ind = 0; ind < NUM_OF_MEMORYS; ind++) {
+    char label_str[50];
+    sprintf(label_str, "Store M%d", ind);
+    int mode = mem[ind].mode;
+    int filter = mem[ind].filter;
     b = gtk_button_new_with_label(label_str);
-    g_signal_connect(b, "button-press-event", G_CALLBACK(store_select_cb), (gpointer)(long)i);
-    gtk_grid_attach(GTK_GRID(grid), b, 0, i + 1, 1, 1);
-    sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", i,
-            (double) mem[i].frequency * 1E-6,
+    g_signal_connect(b, "button-press-event", G_CALLBACK(store_select_cb), GINT_TO_POINTER(ind));
+    gtk_grid_attach(GTK_GRID(grid), b, 0, ind + 1, 1, 1);
+    if (mode == modeFMN) {
+      sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
+            (double) mem[ind].frequency * 1E-6,
+            mode_string[mode],
+            mem[ind].deviation == 2500 ? "11k" : "16k");
+    } else {
+      sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
+            (double) mem[ind].frequency * 1E-6,
             mode_string[mode],
             filters[mode][filter].title);
+    }
     b = gtk_button_new_with_label(label_str);
-    store_button[i] = b;
-    g_signal_connect(b, "button-press-event", G_CALLBACK(recall_select_cb), (gpointer)(long)i);
-    gtk_grid_attach(GTK_GRID(grid), b, 1, i + 1, 3, 1);
+    store_button[ind] = b;
+    g_signal_connect(b, "button-press-event", G_CALLBACK(recall_select_cb), GINT_TO_POINTER(ind));
+    gtk_grid_attach(GTK_GRID(grid), b, 1, ind + 1, 3, 1);
   }
 
   gtk_container_add(GTK_CONTAINER(content), grid);

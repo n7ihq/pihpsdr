@@ -67,10 +67,6 @@
 #define  SAM_VAR1_DEFAULT_HIGH  3300
 #define  SAM_VAR2_DEFAULT_LOW  -3300
 #define  SAM_VAR2_DEFAULT_HIGH  3300
-#define  FMN_VAR1_DEFAULT_LOW  -3300
-#define  FMN_VAR1_DEFAULT_HIGH  3300
-#define  FMN_VAR2_DEFAULT_LOW  -3300
-#define  FMN_VAR2_DEFAULT_HIGH  3300
 #define  DSB_VAR1_DEFAULT_LOW  -3300
 #define  DSB_VAR1_DEFAULT_HIGH  3300
 #define  DSB_VAR2_DEFAULT_LOW  -3300
@@ -263,22 +259,21 @@ static FILTER filterDRM[FILTERS] = {
 
 //
 // This FMN filter edges are nowhere used, this data is
-// just there to avoid voids. The FMN filter edges are
-// instead determined from the FM deviation
+// just there to avoid voids.
 //
 static FILTER filterFMN[FILTERS] = {
-  {-8000, 8000, "16k"},
-  {-6000, 6000, "12k"},
-  {-5000, 5000, "10k"},
-  {-4000, 4000, "8k"},
-  {-3300, 3300, "6.6k"},
-  {-2600, 2600, "5.2k"},
-  {-2000, 2000, "4.0k"},
-  {-1550, 1550, "3.1k"},
-  {-1450, 1450, "2.9k"},
-  {-1200, 1200, "2.4k"},
-  {FMN_VAR1_DEFAULT_LOW, FMN_VAR1_DEFAULT_HIGH, "Var1"},
-  {FMN_VAR2_DEFAULT_LOW, FMN_VAR2_DEFAULT_HIGH, "Var2"}
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"},
+  {0, 0, "FM"}
 };
 
 //
@@ -313,7 +308,7 @@ const int var1_default_low[MODES] = {
   DSB_VAR1_DEFAULT_LOW,
   CWL_VAR1_DEFAULT_LOW,
   CWU_VAR1_DEFAULT_LOW,
-  FMN_VAR1_DEFAULT_LOW,
+  0,
   AM_VAR1_DEFAULT_LOW,
   DIGU_VAR1_DEFAULT_LOW,
   SPEC_VAR1_DEFAULT_LOW,
@@ -328,7 +323,7 @@ const int var1_default_high[MODES] = {
   DSB_VAR1_DEFAULT_HIGH,
   CWL_VAR1_DEFAULT_HIGH,
   CWU_VAR1_DEFAULT_HIGH,
-  FMN_VAR1_DEFAULT_HIGH,
+  0,
   AM_VAR1_DEFAULT_HIGH,
   DIGU_VAR1_DEFAULT_HIGH,
   SPEC_VAR1_DEFAULT_HIGH,
@@ -343,7 +338,7 @@ const int var2_default_low[MODES] = {
   DSB_VAR2_DEFAULT_LOW,
   CWL_VAR2_DEFAULT_LOW,
   CWU_VAR2_DEFAULT_LOW,
-  FMN_VAR2_DEFAULT_LOW,
+  0,
   AM_VAR2_DEFAULT_LOW,
   DIGU_VAR2_DEFAULT_LOW,
   SPEC_VAR2_DEFAULT_LOW,
@@ -358,7 +353,7 @@ const int var2_default_high[MODES] = {
   DSB_VAR2_DEFAULT_HIGH,
   CWL_VAR2_DEFAULT_HIGH,
   CWU_VAR2_DEFAULT_HIGH,
-  FMN_VAR2_DEFAULT_HIGH,
+  0,
   AM_VAR2_DEFAULT_HIGH,
   DIGU_VAR2_DEFAULT_HIGH,
   SPEC_VAR2_DEFAULT_HIGH,
@@ -402,10 +397,6 @@ void filterSaveState() {
   SetPropI0("filter.sam.var1.high",           filterSAM[filterVar1].high);
   SetPropI0("filter.sam.var2.low",            filterSAM[filterVar2].low);
   SetPropI0("filter.sam.var2.high",           filterSAM[filterVar2].high);
-  SetPropI0("filter.fmn.var1.low",            filterFMN[filterVar1].low);
-  SetPropI0("filter.fmn.var1.high",           filterFMN[filterVar1].high);
-  SetPropI0("filter.fmn.var2.low",            filterFMN[filterVar2].low);
-  SetPropI0("filter.fmn.var2.high",           filterFMN[filterVar2].high);
   SetPropI0("filter.dsb.var1.low",            filterDSB[filterVar1].low);
   SetPropI0("filter.dsb.var1.high",           filterDSB[filterVar1].high);
   SetPropI0("filter.dsb.var2.low",            filterDSB[filterVar2].low);
@@ -446,10 +437,6 @@ void filterRestoreState() {
   GetPropI0("filter.sam.var1.high",           filterSAM[filterVar1].high);
   GetPropI0("filter.sam.var2.low",            filterSAM[filterVar2].low);
   GetPropI0("filter.sam.var2.high",           filterSAM[filterVar2].high);
-  GetPropI0("filter.fmn.var1.low",            filterFMN[filterVar1].low);
-  GetPropI0("filter.fmn.var1.high",           filterFMN[filterVar1].high);
-  GetPropI0("filter.fmn.var2.low",            filterFMN[filterVar2].low);
-  GetPropI0("filter.fmn.var2.high",           filterFMN[filterVar2].high);
   GetPropI0("filter.dsb.var1.low",            filterDSB[filterVar1].low);
   GetPropI0("filter.dsb.var1.high",           filterDSB[filterVar1].high);
   GetPropI0("filter.dsb.var2.low",            filterDSB[filterVar2].low);

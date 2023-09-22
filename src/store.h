@@ -31,6 +31,7 @@ struct _MEM_STORE {
   long long frequency;
   int mode;
   int filter;
+  int deviation;
   int ctcss_enabled;
   int ctcss;
 };

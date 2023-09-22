@@ -50,176 +50,176 @@ int info_band;
 // The var1/2 low/high frequencies were removed because they were nowhere used.
 //
 BANDSTACK_ENTRY bandstack_entries136[] = {
-  {135800LL, 0, 0LL, modeCWL, filterF6, 0, 0},
-  {137100LL, 0, 0LL, modeCWL, filterF6, 0, 0}
+  {135800LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0},
+  {137100LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries472[] = {
-  {472100LL, 0, 0LL, modeCWL, filterF6, 0, 0},
-  {475100LL, 0, 0LL, modeCWL, filterF6, 0, 0}
+  {472100LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0},
+  {475100LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries160[] = {
-  {1810000LL, 0, 0LL, modeCWL, filterF6, 0, 0},
-  {1835000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {1845000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {1810000LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0},
+  {1835000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {1845000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries80[] = {
-  {3501000LL, 0, 0LL, modeCWL, filterF6, 0, 0},
-  {3751000LL, 0, 0LL, modeLSB, filterF5, 0, 0},
-  {3850000LL, 0, 0LL, modeLSB, filterF5, 0, 0}
+  {3501000LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0},
+  {3751000LL, 0, 0LL, modeLSB, filterF5, 2500, 0, 0},
+  {3850000LL, 0, 0LL, modeLSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries60_WRC15[] = {
-  {5352750LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {5357000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5363000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {5352750LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {5357000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5363000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries60_OTHER[] = {
-  {5332000LL, 0, 0LL, modeUSB, filterF5, 0, 0}, // default channels for
-  {5348000LL, 0, 0LL, modeUSB, filterF5, 0, 0}, // 60m band, US regulations
-  {5358500LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5373000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5405000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {5332000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}, // default channels for
+  {5348000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}, // 60m band, US regulations
+  {5358500LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5373000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5405000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries60_UK[] = {
-  {5261250LL, 0, 0LL, modeUSB, filterF5, 0, 0}, // default channels for
-  {5280000LL, 0, 0LL, modeUSB, filterF5, 0, 0}, // 60m band, UK regulations
-  {5290250LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5302500LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5318000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5335500LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5356000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5368250LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5380000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5398250LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {5405000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {5261250LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}, // default channels for
+  {5280000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}, // 60m band, UK regulations
+  {5290250LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5302500LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5318000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5335500LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5356000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5368250LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5380000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5398250LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {5405000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries40[] = {
-  {7001000LL, 0, 0LL, modeCWL, filterF6, 0, 0},
-  {7152000LL, 0, 0LL, modeLSB, filterF5, 0, 0},
-  {7255000LL, 0, 0LL, modeLSB, filterF5, 0, 0}
+  {7001000LL, 0, 0LL, modeCWL, filterF6, 2500, 0, 0},
+  {7152000LL, 0, 0LL, modeLSB, filterF5, 2500, 0, 0},
+  {7255000LL, 0, 0LL, modeLSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries30[] = {
-  {10120000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {10130000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {10140000LL, 0, 0LL, modeCWU, filterF6, 0, 0}
+  {10120000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {10130000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {10140000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries20[] = {
-  {14010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {14150000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {14230000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {14336000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {14010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {14150000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {14230000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {14336000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries17[] = {
-  {18068600LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {18125000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {18140000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {18068600LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {18125000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {18140000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries15[] = {
-  {21001000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {21255000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {21300000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {21001000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {21255000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {21300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries12[] = {
-  {24895000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {24900000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {24910000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {24895000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {24900000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {24910000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries10[] = {
-  {28010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {28300000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {28400000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {28010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {28300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {28400000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries6[] = {
-  {50010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {50125000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {50200000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {50010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {50125000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {50200000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries70[] = {
-  {70010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {70200000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {70250000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {70010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {70200000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {70250000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries144[] = {
-  {144010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {144200000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {144250000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {145600000LL, 0, 0LL, modeFMN, filterF1, 0, 0},
-  {145725000LL, 0, 0LL, modeFMN, filterF1, 0, 0},
-  {145900000LL, 0, 0LL, modeFMN, filterF1, 0, 0}
+  {144010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {144200000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {144250000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {145600000LL, 0, 0LL, modeFMN, filterF0, 2500, 0, 0},
+  {145725000LL, 0, 0LL, modeFMN, filterF0, 2500, 0, 0},
+  {145900000LL, 0, 0LL, modeFMN, filterF0, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries220[] = {
-  {220010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {220200000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {220250000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {220010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {220200000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {220250000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries430[] = {
-  {430010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {432100000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {432300000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {430010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {432100000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {432300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries902[] = {
-  {902010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {902100000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {902300000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {902010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {902100000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {902300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries1240[] = {
-  {1240010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {1240100000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {1240300000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {1240010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {1240100000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {1240300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries2300[] = {
-  {2300010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {2300100000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {2300300000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {2300010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {2300100000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {2300300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entries3400[] = {
-  {3400010000LL, 0, 0LL, modeCWU, filterF6, 0, 0},
-  {3400100000LL, 0, 0LL, modeUSB, filterF5, 0, 0},
-  {3400300000LL, 0, 0LL, modeUSB, filterF5, 0, 0}
+  {3400010000LL, 0, 0LL, modeCWU, filterF6, 2500, 0, 0},
+  {3400100000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0},
+  {3400300000LL, 0, 0LL, modeUSB, filterF5, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entriesAIR[] = {
-  {118800000LL, 0, 0LL, modeAM, filterF3, 0, 0},
-  {120000000LL, 0, 0LL, modeAM, filterF3, 0, 0},
-  {121700000LL, 0, 0LL, modeAM, filterF3, 0, 0},
-  {124100000LL, 0, 0LL, modeAM, filterF3, 0, 0},
-  {126600000LL, 0, 0LL, modeAM, filterF3, 0, 0},
-  {136500000LL, 0, 0LL, modeAM, filterF3, 0, 0}
+  {118800000LL, 0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {120000000LL, 0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {121700000LL, 0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {124100000LL, 0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {126600000LL, 0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {136500000LL, 0, 0LL, modeAM, filterF3, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entriesGEN[] = {
-  {909000LL,    0, 0LL, modeAM, filterF3, 0, 0},
-  {5975000LL,   0, 0LL, modeAM, filterF3, 0, 0},
-  {13845000LL,  0, 0LL, modeAM, filterF3, 0, 0}
+  {909000LL,    0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {5975000LL,   0, 0LL, modeAM, filterF3, 2500, 0, 0},
+  {13845000LL,  0, 0LL, modeAM, filterF3, 2500, 0, 0}
 };
 
 BANDSTACK_ENTRY bandstack_entriesWWV[] = {
-  {2500000LL,   0, 0LL, modeSAM, filterF3, 0, 0},
-  {5000000LL,   0, 0LL, modeSAM, filterF3, 0, 0},
-  {10000000LL,  0, 0LL, modeSAM, filterF3, 0, 0},
-  {15000000LL,  0, 0LL, modeSAM, filterF3, 0, 0},
-  {20000000LL,  0, 0LL, modeSAM, filterF3, 0, 0}
+  {2500000LL,   0, 0LL, modeSAM, filterF3, 2500, 0, 0},
+  {5000000LL,   0, 0LL, modeSAM, filterF3, 2500, 0, 0},
+  {10000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0},
+  {15000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0},
+  {20000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0}
 };
 
 BANDSTACK bandstack160 = {3, 1, bandstack_entries160};
@@ -254,44 +254,44 @@ BANDSTACK bandstack472 = {2, 0, bandstack_entries472};
 /* ----------------------------------------------------------------------------*/
 
 BANDSTACK_ENTRY bandstack_entries_xvtr_0[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_1[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_2[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_3[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_4[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_5[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_6[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 BANDSTACK_ENTRY bandstack_entries_xvtr_7[] = {
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0},
-  {0LL, 0, 0LL, modeUSB, filterF6, 0, 0}
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0},
+  {0LL, 0, 0LL, modeUSB, filterF6, 2500, 0, 0}
 };
 
 BANDSTACK bandstack_xvtr_0 = {3, 0, bandstack_entries_xvtr_0};
@@ -430,8 +430,9 @@ void bandSaveState() {
       SetPropI2("band.%d.stack.%d.filter", b,                stack, entry->filter);
       SetPropI2("band.%d.stack.%d.ctun", b, stack,           entry->ctun);
       SetPropI2("band.%d.stack.%d.c", b, stack,              entry->ctun_frequency);
-      SetPropI2("band.%d.ctcss_enabled.%d.c", b, stack,      entry->ctcss_enabled);
-      SetPropI2("band.%d.ctcss.%d.c", b, stack,              entry->ctcss);
+      SetPropI2("band.%d.stack.%d.deviation", b, stack,      entry->deviation);
+      SetPropI2("band.%d.stack.%d.ctcss_enabled", b, stack,  entry->ctcss_enabled);
+      SetPropI2("band.%d.stack.%d.ctcss", b, stack,          entry->ctcss);
     }
   }
 }
@@ -473,8 +474,9 @@ void bandRestoreState() {
       GetPropI2("band.%d.stack.%d.filter", b,                stack, entry->filter);
       GetPropI2("band.%d.stack.%d.ctun", b, stack,           entry->ctun);
       GetPropI2("band.%d.stack.%d.c", b, stack,              entry->ctun_frequency);
-      GetPropI2("band.%d.ctcss_enabled.%d.c", b, stack,      entry->ctcss_enabled);
-      GetPropI2("band.%d.ctcss.%d.c", b, stack,              entry->ctcss);
+      GetPropI2("band.%d.stack.%d.deviation", b, stack,      entry->deviation);
+      GetPropI2("band.%d.stack.%d.ctcss_enabled", b, stack,  entry->ctcss_enabled);
+      GetPropI2("band.%d.stack.%d.ctcss", b, stack,          entry->ctcss);
     }
   }
 

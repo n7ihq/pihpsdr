@@ -85,7 +85,8 @@ static void vfoSaveBandstack() {
   entry->filter = vfo[0].filter;
   entry->ctun = vfo[0].ctun;
   entry->ctun_frequency = vfo[0].ctun_frequency;
-  if (get_tx_vfo() == 0 && can_transmit) {
+  entry->deviation = receiver[0]->deviation;
+  if (can_transmit) {
     entry->ctcss_enabled = transmitter->ctcss_enabled;
     entry->ctcss = transmitter->ctcss;
   }
@@ -392,9 +393,12 @@ void vfo_band_changed(int id, int b) {
   vfo[id].ctun_frequency = entry->ctun_frequency;
   vfo[id].mode = entry->mode;
   vfo[id].lo = band->frequencyLO + band->errorLO;
+  vfo[id].filter = entry->filter;
 
-  if (id == get_tx_vfo() && can_transmit) {
+  if (can_transmit) {
     transmitter_set_ctcss(transmitter, entry->ctcss_enabled, entry->ctcss);
+    transmitter->deviation = entry->deviation;
+    transmitter_set_deviation(transmitter);
   }
   //
   // In the case of CTUN, the offset is re-calculated
@@ -406,6 +410,11 @@ void vfo_band_changed(int id, int b) {
   }
 
   if (id < receivers) {
+    //
+    // This VFO controls a receiver
+    //
+    receiver[id]->deviation = entry->deviation;
+    set_deviation(receiver[id]);
     vfo_apply_mode_settings(receiver[id]);
     receiver_vfo_changed(receiver[id]);
   }
@@ -451,11 +460,19 @@ void vfo_bandstack_changed(int b) {
   vfo[id].mode = entry->mode;
   vfo[id].filter = entry->filter;
 
+  if (can_transmit) {
+    transmitter->deviation = entry->deviation;
+    transmitter_set_deviation(transmitter);
+    transmitter_set_ctcss(transmitter, entry->ctcss_enabled, entry->ctcss);
+  }
+
   if (id == 0) {
     bandstack->current_entry = vfo[id].bandstack;
   }
 
   if (id < receivers) {
+    receiver[id]->deviation = entry->deviation;
+    set_deviation(receiver[id]);
     vfo_apply_mode_settings(receiver[id]);
     receiver_vfo_changed(receiver[id]);
   }
@@ -1137,14 +1154,34 @@ void vfo_update() {
   if (vfl->mode_x != 0) {
     switch (vfo[id].mode) {
     case modeFMN:
-
+      {
+      int dev, en;
+      const char *wid;
       //
       // filter edges are +/- 5500 if deviation==2500,
       //              and +/- 8000 if deviation==5000
-      if (active_receiver->deviation == 2500) {
-        sprintf(temp_text, "%s 11k", mode_string[vfo[id].mode]);
+      dev = active_receiver->deviation;
+      en = 0;
+      if (can_transmit) {
+        en = SET(transmitter->ctcss_enabled);
+      }
+      switch (dev) {
+        case 2500:
+          wid = "11k";
+          break;
+        case 5000:
+          wid = "16k";
+          break;
+        default:
+          wid = "???";
+          break;
+      }
+      if (en) {
+        sprintf(temp_text, "%s %s C=%0.1f", mode_string[vfo[id].mode],wid,
+             ctcss_frequencies[transmitter->ctcss]);
       } else {
-        sprintf(temp_text, "%s 16k", mode_string[vfo[id].mode]);
+        sprintf(temp_text, "%s %s", mode_string[vfo[id].mode], wid);
+      }
       }
 
       break;
@@ -1377,7 +1414,7 @@ void vfo_update() {
   if ((protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) && can_transmit && vfl->ps_x != 0) {
     cairo_move_to(cr, vfl->ps_x, vfl->ps_y);
 
-    if (can_transmit && transmitter->puresignal) {
+    if (transmitter->puresignal) {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
     } else {
       cairo_set_source_rgba(cr, COLOUR_SHADE);

@@ -1690,11 +1690,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       } else if (command[5] == ';') {
         int d = atoi(&command[4]);
 
-        if (d == 0) {
-          active_receiver->deviation = 2500;
-        } else if (d == 1) {
-          active_receiver->deviation = 5000;
-        } else {
+        // TODO: should we check for the mode being FMN?
+        active_receiver->deviation = d ? 5000 : 2500;
+        set_filter(active_receiver);
+        set_deviation(active_receiver);
+        if (can_transmit) {
+          transmitter->deviation = d ? 5000 : 2500;
+          tx_set_filter(transmitter);
+          transmitter_set_deviation(transmitter);
         }
 
         g_idle_add(ext_vfo_update, NULL);
@@ -3924,6 +3927,7 @@ int parse_cmd(void *data) {
         } else if (command[4] == ';') {
           int i = atoi(&command[2]) - 1;
           transmitter_set_ctcss(transmitter, transmitter->ctcss_enabled, i);
+          g_idle_add(ext_vfo_update, NULL);
         }
       }
 
@@ -3939,6 +3943,7 @@ int parse_cmd(void *data) {
         } else if (command[3] == ';') {
           int state = atoi(&command[2]);
           transmitter_set_ctcss(transmitter, state, transmitter->ctcss);
+          g_idle_add(ext_vfo_update, NULL);
         }
       }
 
@@ -4132,11 +4137,21 @@ int parse_cmd(void *data) {
             filter->low = -5500;
             filter->high = 5500;
             active_receiver->deviation = 2500;
+            if (can_transmit) { transmitter->deviation = 2500; }
           } else {
             filter->low = -8000;
             filter->high = 8000;
             active_receiver->deviation = 5000;
+            if (can_transmit) { transmitter->deviation = 5000; }
           }
+          set_filter(active_receiver);
+          set_deviation(active_receiver);
+          if (can_transmit) {
+            transmitter->deviation = 2500;
+            tx_set_filter(transmitter);
+            transmitter_set_deviation(transmitter);
+          }
+          g_idle_add(ext_vfo_update, NULL);
 
           break;
 

@@ -43,6 +43,7 @@ void memSaveState() {
     SetPropI1("mem.%d.freqA", b,           mem[b].frequency);
     SetPropI1("mem.%d.mode", b,            mem[b].mode);
     SetPropI1("mem.%d.filter", b,          mem[b].filter);
+    SetPropI1("mem.%d.deviation", b,       mem[b].deviation);
     SetPropI1("mem.%d.ctcss_enabled", b,   mem[b].ctcss_enabled);
     SetPropI1("mem.%d.ctcss", b,           mem[b].ctcss);
   }
@@ -59,7 +60,8 @@ void memRestoreState() {
     //
     mem[b].frequency = 28010000LL;
     mem[b].mode = modeCWU;
-    mem[b].filter = filterF0;
+    mem[b].filter = filterF5;
+    mem[b].deviation = 2500;
     mem[b].ctcss_enabled = 0;
     mem[b].ctcss = 0;
     //
@@ -68,6 +70,7 @@ void memRestoreState() {
     GetPropI1("mem.%d.freqA", b,           mem[b].frequency);
     GetPropI1("mem.%d.mode", b,            mem[b].mode);
     GetPropI1("mem.%d.filter", b,          mem[b].filter);
+    SetPropI1("mem.%d.deviation", b,       mem[b].deviation);
     GetPropI1("mem.%d.ctcss_enabled", b,   mem[b].ctcss_enabled);
     GetPropI1("mem.%d.ctcss", b,           mem[b].ctcss);
   }
@@ -79,25 +82,27 @@ void recall_memory_slot(int index) {
   //
   // Recalling a memory slot is equivalent to the following actions
   //
-  // a) set the new frequency via the "Freq" menu
-  // b) set the new mode via the "Mode" menu
-  // c) set the new filter via the "Filter" menu
-  // d) set CTCSS via the "TX" menu
+  // - set new deviation and CTCSS parameters
+  // - set the new frequency via the "Freq" menu
+  // - set the new mode via the "Mode" menu
+  // - set the new filter via the "Filter" menu
+  // - set CTCSS via the "TX" menu
   //
-  // Step b) automatically restores the filter, noise reduction, and
+  // This automatically restores the filter, noise reduction, and
   // equalizer settings stored with that mode
   //
-  // Step c) will not only change the filter but also store the new setting
+  // This will not only change the filter but also store the new setting
   // with that mode.
   //
-  // Step d) will only be done if the active receiver controls the TX
-  //
+  if (can_transmit) {
+    transmitter->deviation = mem[index].deviation;
+    transmitter_set_ctcss(transmitter, mem[index].ctcss_enabled, mem[index].ctcss);
+  }
+  active_receiver->deviation = mem[index].deviation;
+
   vfo_set_frequency(active_receiver->id, new_freq);
   vfo_mode_changed(mem[index].mode);
   vfo_filter_changed(mem[index].filter);
-  if (active_receiver->id == get_tx_vfo() && can_transmit) {
-    transmitter_set_ctcss(transmitter, mem[index].ctcss_enabled, mem[index].ctcss);
-  }
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -115,7 +120,7 @@ void store_memory_slot(int index) {
 
   mem[index].mode = vfo[id].mode;
   mem[index].filter = vfo[id].filter;
-  if (id == get_tx_vfo() && can_transmit) {
+  if (can_transmit) {
     mem[index].ctcss_enabled = transmitter->ctcss_enabled;
     mem[index].ctcss = transmitter->ctcss;
   }

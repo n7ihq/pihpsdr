@@ -116,11 +116,13 @@ static void am_carrier_level_value_changed_cb(GtkWidget *widget, gpointer data) 
 static void ctcss_cb (GtkWidget *widget, gpointer data) {
   int state = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
   transmitter_set_ctcss(transmitter, state, transmitter->ctcss);
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 static void ctcss_frequency_cb(GtkWidget *widget, gpointer data) {
   int i = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
   transmitter_set_ctcss(transmitter, transmitter->ctcss_enabled, i);
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 static void tune_use_drive_cb (GtkWidget *widget, gpointer data) {
