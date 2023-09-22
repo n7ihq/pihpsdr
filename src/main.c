@@ -101,8 +101,8 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
   // Everything that is not intercepted is handled downstream.
   //
   // space             ==>  MOX
-  // u                 ==>  VFO up
-  // d                 ==>  VFO down
+  // u                 ==>  active receiver VFO up
+  // d                 ==>  active receiver VFO down
   // Keypad 0..9       ==>  NUMPAD 0 ... 9
   // Keypad Decimal    ==>  NUMPAD DEC
   // Keypad Subtract   ==>  NUMPAD BS
@@ -137,6 +137,20 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     vfo_step(1);
     break;
 
+  //
+  // This is for Richard (test version), using z and s for changing
+  // the frequency of the non-active receiver (if there are two)
+  //
+  case  GDK_KEY_U:
+    if (receivers > 1) {
+      vfo_id_step(1-active_receiver->id, 10);
+     }
+    break;
+  case  GDK_KEY_D:
+    if (receivers > 1) {
+      vfo_id_step(1-active_receiver->id, -10);
+     }
+    break;
   //
   // This is a contribution of Ron, it uses a keypad for
   // entering a frequency
