@@ -42,7 +42,9 @@ void memSaveState() {
   for (int b = 0; b < NUM_OF_MEMORYS; b++) {
     SetPropI1("mem.%d.freqA", b,           mem[b].frequency);
     SetPropI1("mem.%d.mode", b,            mem[b].mode);
-    SetPropI1("mem.%d.filter", b,           mem[b].filter);
+    SetPropI1("mem.%d.filter", b,          mem[b].filter);
+    SetPropI1("mem.%d.ctcss_enabled", b,   mem[b].ctcss_enabled);
+    SetPropI1("mem.%d.ctcss", b,           mem[b].ctcss);
   }
 }
 
@@ -58,28 +60,29 @@ void memRestoreState() {
     mem[b].frequency = 28010000LL;
     mem[b].mode = modeCWU;
     mem[b].filter = filterF0;
+    mem[b].ctcss_enabled = 0;
+    mem[b].ctcss = 0;
     //
     // Read from props
     //
     GetPropI1("mem.%d.freqA", b,           mem[b].frequency);
     GetPropI1("mem.%d.mode", b,            mem[b].mode);
-    GetPropI1("mem.%d.filter", b,           mem[b].filter);
+    GetPropI1("mem.%d.filter", b,          mem[b].filter);
+    GetPropI1("mem.%d.ctcss_enabled", b,   mem[b].ctcss_enabled);
+    GetPropI1("mem.%d.ctcss", b,           mem[b].ctcss);
   }
 }
 
 void recall_memory_slot(int index) {
   long long new_freq;
   new_freq = mem[index].frequency;
-  t_print("recall_select_cb: Index=%d\n", index);
-  t_print("recall_select_cb: freqA=%11lld\n", new_freq);
-  t_print("recall_select_cb: mode=%d\n", mem[index].mode);
-  t_print("recall_select_cb: filter=%d\n", mem[index].filter);
   //
   // Recalling a memory slot is equivalent to the following actions
   //
   // a) set the new frequency via the "Freq" menu
   // b) set the new mode via the "Mode" menu
   // c) set the new filter via the "Filter" menu
+  // d) set CTCSS via the "TX" menu
   //
   // Step b) automatically restores the filter, noise reduction, and
   // equalizer settings stored with that mode
@@ -87,9 +90,14 @@ void recall_memory_slot(int index) {
   // Step c) will not only change the filter but also store the new setting
   // with that mode.
   //
+  // Step d) will only be done if the active receiver controls the TX
+  //
   vfo_set_frequency(active_receiver->id, new_freq);
   vfo_mode_changed(mem[index].mode);
   vfo_filter_changed(mem[index].filter);
+  if (active_receiver->id == get_tx_vfo() && can_transmit) {
+    transmitter_set_ctcss(transmitter, mem[index].ctcss_enabled, mem[index].ctcss);
+  }
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -107,10 +115,10 @@ void store_memory_slot(int index) {
 
   mem[index].mode = vfo[id].mode;
   mem[index].filter = vfo[id].filter;
-  t_print("store_select_cb: Index=%d\n", index);
-  t_print("store_select_cb: freqA=%11lld\n", mem[index].frequency);
-  t_print("store_select_cb: mode=%d\n", mem[index].mode);
-  t_print("store_select_cb: filter=%d\n", mem[index].filter);
-  memSaveState();
+  if (id == get_tx_vfo() && can_transmit) {
+    mem[index].ctcss_enabled = transmitter->ctcss_enabled;
+    mem[index].ctcss = transmitter->ctcss;
+  }
+  //memSaveState();
 }
 

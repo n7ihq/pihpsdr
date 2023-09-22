@@ -3916,7 +3916,7 @@ int parse_cmd(void *data) {
 
     case 'N': //CN
 
-      // sets/reads CTCSS function
+      // sets/reads CTCSS function (frequency)
       if (can_transmit) {
         if (command[3] == ';') {
           sprintf(reply, "CN%02d;", transmitter->ctcss + 1);
@@ -3931,7 +3931,7 @@ int parse_cmd(void *data) {
 
     case 'T': //CT
 
-      // sets/reads CTCSS status
+      // sets/reads CTCSS status (on/off)
       if (can_transmit) {
         if (command[2] == ';') {
           sprintf(reply, "CT%d;", transmitter->ctcss_enabled);

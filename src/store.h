@@ -31,6 +31,8 @@ struct _MEM_STORE {
   long long frequency;
   int mode;
   int filter;
+  int ctcss_enabled;
+  int ctcss;
 };
 
 typedef struct _MEM_STORE MEM;

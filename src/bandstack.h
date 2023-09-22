@@ -28,6 +28,7 @@
 // a) ctun and ctun_frequency added such that one returns to the "old"
 //    setup when switching bands.
 // b) variable filter frequencies removed because they were nowhere used
+// c) CTCSS status added
 //
 struct _BANDSTACK_ENTRY {
   long long frequency;
@@ -35,6 +36,8 @@ struct _BANDSTACK_ENTRY {
   long long ctun_frequency;
   int mode;
   int filter;
+  int ctcss_enabled;
+  int ctcss;
 };
 
 typedef struct _BANDSTACK_ENTRY BANDSTACK_ENTRY;

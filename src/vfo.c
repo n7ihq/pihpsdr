@@ -85,6 +85,10 @@ static void vfoSaveBandstack() {
   entry->filter = vfo[0].filter;
   entry->ctun = vfo[0].ctun;
   entry->ctun_frequency = vfo[0].ctun_frequency;
+  if (get_tx_vfo() == 0 && can_transmit) {
+    entry->ctcss_enabled = transmitter->ctcss_enabled;
+    entry->ctcss = transmitter->ctcss;
+  }
 }
 
 static void modesettingsSaveState() {
@@ -389,6 +393,9 @@ void vfo_band_changed(int id, int b) {
   vfo[id].mode = entry->mode;
   vfo[id].lo = band->frequencyLO + band->errorLO;
 
+  if (id == get_tx_vfo() && can_transmit) {
+    transmitter_set_ctcss(transmitter, entry->ctcss_enabled, entry->ctcss);
+  }
   //
   // In the case of CTUN, the offset is re-calculated
   // during receiver_vfo_changed ==> receiver_frequency_changed
