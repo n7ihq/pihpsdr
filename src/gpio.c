@@ -142,9 +142,20 @@ int lines = 0;
 
 long settle_time = 50; // ms
 
-// VFO Encoder is always last
+//
+// The "static const" data is the DEFAULT assignment for encoders,
+// and for Controller2 and G2 front panel switches
+// These defaults are read-only and copied to my_encoders and my_switches
+// when restoring default values
+//
+// Controller1 has 3 small encoders + VFO, and  8 switches in 6 layers
+// Controller2 has 4 small encoders + VFO, and 16 switches
+// G2 panel    has 4 small encoders + VFO, and 16 switches
+//
+// The controller1 switches are hard-wired to the toolbar buttons
+//
 
-ENCODER encoders_no_controller[MAX_ENCODERS] = {
+static const ENCODER encoders_no_controller[MAX_ENCODERS] = {
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
@@ -152,7 +163,7 @@ ENCODER encoders_no_controller[MAX_ENCODERS] = {
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
 };
 
-ENCODER encoders_controller1[MAX_ENCODERS] = {
+static const ENCODER encoders_controller1[MAX_ENCODERS] = {
   {TRUE, TRUE, 20, 1, 26, 1, 0, AF_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE, TRUE, 25, MENU_BAND, 0L},
   {TRUE, TRUE, 16, 1, 19, 1, 0, AGC_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE, TRUE, 8, MENU_BANDSTACK, 0L},
   {TRUE, TRUE, 4, 1, 21, 1, 0, DRIVE, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE, TRUE, 7, MENU_MODE, 0L},
@@ -160,7 +171,7 @@ ENCODER encoders_controller1[MAX_ENCODERS] = {
   {FALSE, TRUE, 0, 1, 0, 0, 1, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
 };
 
-ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
+static const ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
   {TRUE, TRUE, 20, 1, 26, 1, 0, AF_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE, TRUE, 22, MENU_BAND, 0L},
   {TRUE, TRUE, 4, 1, 21, 1, 0, AGC_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE, TRUE, 27, MENU_BANDSTACK, 0L},
   {TRUE, TRUE, 16, 1, 19, 1, 0, IF_WIDTH, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE, TRUE, 23, MENU_MODE, 0L},
@@ -168,7 +179,7 @@ ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
   {TRUE, TRUE, 18, 1, 17, 1, 0, VFO, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
 };
 
-ENCODER encoders_controller2_v2[MAX_ENCODERS] = {
+static const ENCODER encoders_controller2_v2[MAX_ENCODERS] = {
   {TRUE, TRUE, 5, 1, 6, 1, 0, DRIVE, R_START, TRUE, TRUE, 26, 1, 20, 1, 0, AF_GAIN, R_START, TRUE, TRUE, 22, MENU_BAND, 0L}, //ENC2
   {TRUE, TRUE, 9, 1, 7, 1, 0, ATTENUATION, R_START, TRUE, TRUE, 21, 1, 4, 1, 0, AGC_GAIN, R_START, TRUE, TRUE, 27, MENU_MODE, 0L}, //ENC3
   {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN, R_START, TRUE, TRUE, 19, 1, 16, 1, 0, DIV_PHASE, R_START, TRUE, TRUE, 23, DIV, 0L}, //ENC4
@@ -176,15 +187,13 @@ ENCODER encoders_controller2_v2[MAX_ENCODERS] = {
   {TRUE, TRUE, 18, 1, 17, 1, 0, VFO, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},   //ENC1/VFO
 };
 
-ENCODER encoders_g2_frontpanel[MAX_ENCODERS] = {
+static const ENCODER encoders_g2_frontpanel[MAX_ENCODERS] = {
   {TRUE, TRUE, 5, 1, 6, 1, 0, DRIVE, R_START, TRUE, TRUE, 26, 1, 20, 1, 0, MIC_GAIN, R_START, TRUE, TRUE, 22, PS, 0L}, //ENC1
   {TRUE, TRUE, 9, 1, 7, 1, 0, AGC_GAIN, R_START, TRUE, TRUE, 21, 1, 4, 1, 0, AF_GAIN, R_START, TRUE, TRUE, 27, MUTE, 0L}, //ENC3
   {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN, R_START, TRUE, TRUE, 19, 1, 16, 1, 0, DIV_PHASE, R_START, TRUE, TRUE, 23, DIV, 0L}, //ENC7
   {TRUE, TRUE, 13, 1, 12, 1, 0, XIT, R_START, TRUE, TRUE, 8, 1, 25, 1, 0, RIT, R_START, TRUE, TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
   {TRUE, TRUE, 18, 1, 17, 1, 0, VFO, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},  //VFO
 };
-
-ENCODER *encoders = encoders_no_controller;
 
 SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES] = {
   { {TRUE, TRUE, 27, MOX, 0L},
@@ -292,7 +301,7 @@ SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES] = {
 
 };
 
-SWITCH switches_controller2_v1[MAX_SWITCHES] = {
+static const SWITCH switches_controller2_v1[MAX_SWITCHES] = {
   {FALSE, FALSE, 0, MOX, 0L},
   {FALSE, FALSE, 0, TUNE, 0L},
   {FALSE, FALSE, 0, PS, 0L},
@@ -311,7 +320,7 @@ SWITCH switches_controller2_v1[MAX_SWITCHES] = {
   {FALSE, FALSE, 0, CTUN, 0L}
 };
 
-SWITCH switches_controller2_v2[MAX_SWITCHES] = {
+static const SWITCH switches_controller2_v2[MAX_SWITCHES] = {
   {FALSE, FALSE, 0, MOX, 0L},   //GPB7 SW2
   {FALSE, FALSE, 0, TUNE, 0L},  //GPB6 SW3
   {FALSE, FALSE, 0, PS, 0L},    //GPB5 SW4
@@ -330,7 +339,7 @@ SWITCH switches_controller2_v2[MAX_SWITCHES] = {
   {FALSE, FALSE, 0, CTUN, 0L}   //GPB0 SW17
 };
 
-SWITCH switches_g2_frontpanel[MAX_SWITCHES] = {
+static const SWITCH switches_g2_frontpanel[MAX_SWITCHES] = {
   {FALSE, FALSE, 0, XIT_ENABLE, 0L}, //GPB7 SW22
   {FALSE, FALSE, 0, RIT_ENABLE, 0L}, //GPB6 SW21
   {FALSE, FALSE, 0, FUNCTION, 0L}, //GPB5 SW20
@@ -349,7 +358,11 @@ SWITCH switches_g2_frontpanel[MAX_SWITCHES] = {
   {FALSE, FALSE, 0, FILTER_MINUS, 0L} //GPB0 SW15
 };
 
-SWITCH *switches = switches_controller1[0];
+ENCODER my_encoders[MAX_ENCODERS];
+SWITCH  my_switches[MAX_SWITCHES];
+
+ENCODER *encoders = NULL;
+SWITCH *switches = NULL;
 
 #ifdef GPIO
 
@@ -680,6 +693,46 @@ static int interrupt_cb(int event_type, unsigned int line, const struct timespec
 }
 #endif
 
+void gpio_default_encoders(int ctrlr) {
+  switch (ctrlr) {
+  case NO_CONTROLLER:
+  default:
+    memcpy(my_encoders, encoders_no_controller, sizeof(my_encoders));
+    break;
+  case CONTROLLER1:
+    memcpy(my_encoders, encoders_controller1, sizeof(my_encoders));
+    break;
+  case CONTROLLER2_V1:
+    memcpy(my_encoders, encoders_controller2_v1, sizeof(my_encoders));
+    break;
+  case CONTROLLER2_V2:
+    memcpy(my_encoders, encoders_controller2_v2, sizeof(my_encoders));
+    break;
+  case G2_FRONTPANEL:
+    memcpy(my_encoders, encoders_g2_frontpanel, sizeof(my_encoders));
+    break;
+  }
+}
+
+void gpio_default_switches(int ctrlr) {
+  switch (ctrlr) {
+  case NO_CONTROLLER:
+  case CONTROLLER1:
+  default:
+    // my_switches remains 'empty', since the toolbar table is used
+    break;
+  case CONTROLLER2_V1:
+    memcpy(my_switches, switches_controller2_v1, sizeof(my_switches));
+    break;
+  case CONTROLLER2_V2:
+    memcpy(my_switches, switches_controller2_v2, sizeof(my_switches));
+    break;
+  case G2_FRONTPANEL:
+    memcpy(my_switches, switches_g2_frontpanel, sizeof(my_switches));
+    break;
+  }
+}
+
 //
 // If there is non-standard hardware at the GPIO lines
 // the code below in the NO_CONTROLLER section must
@@ -692,22 +745,16 @@ static int interrupt_cb(int event_type, unsigned int line, const struct timespec
 void gpio_set_defaults(int ctrlr) {
   t_print("%s: %d\n", __FUNCTION__, ctrlr);
 
+  gpio_default_encoders(ctrlr);
+  gpio_default_switches(ctrlr);
+  
   switch (ctrlr) {
-  case NO_CONTROLLER:
-    CWL_BUTTON = 7;
-    CWR_BUTTON = 21;
-    PTT_BUTTON = 14;
-    CWKEY_BUTTON = 10;
-    encoders = encoders_no_controller;
-    switches = switches_controller1[0];
-    break;
-
   case CONTROLLER1:
     CWL_BUTTON = 9;
     CWR_BUTTON = 11;
     PTT_BUTTON = 14;
     CWKEY_BUTTON = 10;
-    encoders = encoders_controller1;
+    encoders = my_encoders;
     switches = switches_controller1[0];
     break;
 
@@ -716,22 +763,11 @@ void gpio_set_defaults(int ctrlr) {
     CWR_BUTTON = 11;
     PTT_BUTTON = 14;
     CWKEY_BUTTON = 10;
-    encoders = encoders_controller2_v1;
-    switches = switches_controller2_v1;
+    encoders = my_encoders;
+    switches = my_switches;
     break;
 
   case CONTROLLER2_V2:
-    //
-    // no GPIO lines available for CW etc.
-    //
-    CWL_BUTTON = -1;
-    CWR_BUTTON = -1;
-    PTT_BUTTON = -1;
-    CWKEY_BUTTON = -1;
-    encoders = encoders_controller2_v2;
-    switches = switches_controller2_v2;
-    break;
-
   case G2_FRONTPANEL:
     //
     // no GPIO lines available for CW etc.
@@ -740,8 +776,18 @@ void gpio_set_defaults(int ctrlr) {
     CWR_BUTTON = -1;
     PTT_BUTTON = -1;
     CWKEY_BUTTON = -1;
-    encoders = encoders_g2_frontpanel;
-    switches = switches_g2_frontpanel;
+    encoders = my_encoders;
+    switches = my_switches;
+    break;
+
+  case NO_CONTROLLER:
+  default:
+    CWL_BUTTON = 7;
+    CWR_BUTTON = 21;
+    PTT_BUTTON = 14;
+    CWKEY_BUTTON = 10;
+    encoders = my_encoders;
+    switches = switches_controller1[0];
     break;
   }
 }

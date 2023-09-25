@@ -60,9 +60,6 @@ typedef struct _switch {
 } SWITCH;
 
 extern SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES];
-extern SWITCH switches_controller2_v1[MAX_SWITCHES];
-extern SWITCH switches_controller2_v2[MAX_SWITCHES];
-extern SWITCH switches_g2_frontpanel[MAX_SWITCHES];
 
 extern SWITCH *switches;
 
@@ -70,6 +67,8 @@ extern int *sw_action;
 
 extern long settle_time;
 
+extern void gpio_default_encoders(int ctrlr);
+extern void gpio_default_switches(int ctrlr);
 extern void gpio_set_defaults(int ctrlr);
 extern void gpioRestoreActions(void);
 extern void gpioRestoreState(void);
