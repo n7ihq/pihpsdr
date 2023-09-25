@@ -464,15 +464,15 @@ void encoder_menu(GtkWidget *parent) {
       for (int j = 2 * i; j < 2 * i + 2; j++) {
         widget = gtk_button_new_with_label(ActionTable[encoders[j].switch_function].str);
         gtk_widget_set_name(widget, "small_button");
-        g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(i));
+        g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_switch_cb), GINT_TO_POINTER(j));
         gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
         widget = gtk_button_new_with_label(ActionTable[encoders[j].top_encoder_function].str);
         gtk_widget_set_name(widget, "small_button");
-        g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(i));
+        g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_top_cb), GINT_TO_POINTER(j));
         gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
         widget = gtk_button_new_with_label(ActionTable[encoders[j].bottom_encoder_function].str);
         gtk_widget_set_name(widget, "small_button");
-        g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(i));
+        g_signal_connect(widget, "button-press-event", G_CALLBACK(encoder_bottom_cb), GINT_TO_POINTER(j));
         gtk_grid_attach(GTK_GRID(grid), widget, 4 * i, row++, 1, 1);
 
         if  (j == 2 * i) {

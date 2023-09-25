@@ -613,6 +613,7 @@ int process_action(void *data) {
     if (can_transmit && a->mode == PRESSED) {
       transmitter_set_compressor(transmitter, NOT(transmitter->compressor));
       mode_settings[transmitter->mode].compressor = transmitter->compressor;
+      g_idle_add(ext_vfo_update, NULL);
     }
 
     break;
