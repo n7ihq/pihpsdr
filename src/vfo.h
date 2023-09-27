@@ -28,22 +28,41 @@ enum {
 };
 
 struct _vfo {
+  //
+  // Band data
+  //
   int band;
   int bandstack;
+  //
+  // Frequency data,including CTUN, RIT, XIT
+  //
   long long frequency;
-  int mode;
-  int filter;
-  int cwAudioPeakFilter;  // on/off
-
   int ctun;
   long long ctun_frequency;
 
   int rit_enabled;
   long long rit;
+  int xit_enabled;
+  long long xit;
 
   long long lo;
   long long offset;
 
+  //
+  // Mode data
+  //
+  int mode;
+
+  //
+  // Filter data
+  //
+  int filter;
+  int  deviation;         // only for FMN
+  int cwAudioPeakFilter;  // only for CWU/CWL
+
+  //
+  // temporary storage for direct "NumPad" frequency entry
+  //
   char entered_frequency[16];  // need 13, but rounded up to next multiple of 4
 
 };
@@ -51,8 +70,12 @@ struct _vfo {
 extern struct _vfo vfo[MAX_VFOS];
 
 //
-// Store filter and NR settings on a per-mode basis
-// all elements are "on/off"
+// Store settings on a per-mode basis for settings that
+// are likely to be "bound" to a mode rather than to a band
+// If a mode changes, these settings are restored to what
+// has been effective the last time the "new" mode has
+// been used.
+//
 //
 struct _mode_settings {
   int filter;               // actual filter used
@@ -93,6 +116,7 @@ extern void vfo_band_changed(int id, int b);
 extern void vfo_bandstack_changed(int b);
 extern void vfo_mode_changed(int m);
 extern void vfo_filter_changed(int f);
+extern void vfo_deviation_changed(int dev);
 extern void vfo_a_to_b(void);
 extern void vfo_b_to_a(void);
 extern void vfo_a_swap_b(void);
@@ -103,9 +127,16 @@ extern long long get_tx_freq(void);
 
 extern void vfo_xvtr_changed(void);
 
-extern void vfo_rit_update(int rx);
-extern void vfo_rit_clear(int rx);
-extern void vfo_rit(int rx, int i);
+extern void vfo_xit_toggle();
+extern void vfo_xit_incr(int incr);
+extern void vfo_xit_onoff(int enable);
+extern void vfo_xit_value(long long value);
+
+extern void vfo_rit_toggle(int rx);
+extern void vfo_rit_onoff(int rx, int enable);
+extern void vfo_rit_incr(int rx, int incr);
+extern void vfo_rit_value(int rx, long long value);
+
 extern void vfo_set_frequency(int vfo, long long f);
 
 extern void vfo_ctun_update(int id, int state);

@@ -205,7 +205,7 @@ static void *handler_ep6(void *arg);
 
 static double  last_i_sample = 0.0;
 static double  last_q_sample = 0.0;
-static int  txptr = 0;
+static int  txptr = -1;
 static int  oldnew = 3;  // 1: only P1, 2: only P2, 3: P1 and P2,
 static int  anan10e = 0; // HERMES with anan10e set behaves like METIS
 
@@ -487,6 +487,7 @@ int main(int argc, char *argv[]) {
   //
   //      clear TX fifo
   //
+  txptr = -1;
   memset (isample, 0, OLDRTXLEN * sizeof(double));
   memset (qsample, 0, OLDRTXLEN * sizeof(double));
 
@@ -675,6 +676,9 @@ int main(int argc, char *argv[]) {
       }
 
       if (active_thread) {
+        if (txptr < 0) {
+          txptr = OLDRTXLEN / 2;
+        }
         // Put TX IQ samples into the ring buffer
         // In the old protocol, samples come in groups of 8 bytes L1 L0 R1 R0 I1 I0 Q1 Q0
         // Here, L1/L0 and R1/R0 are audio samples, and I1/I0 and Q1/Q0 are the TX iq samples
@@ -836,6 +840,8 @@ int main(int argc, char *argv[]) {
 
       while (active_thread) { usleep(1000); }
 
+      txptr = -1;
+
       if (sock_TCP_Client > -1) {
         close(sock_TCP_Client);
         sock_TCP_Client = -1;
@@ -866,12 +872,6 @@ int main(int argc, char *argv[]) {
       addr_old.sin_family = AF_INET;
       addr_old.sin_addr.s_addr = addr_from.sin_addr.s_addr;
       addr_old.sin_port = addr_from.sin_port;
-      //
-      // The initial value of txptr defines the delay between
-      // TX samples sent to the SDR and PureSignal feedback
-      // samples arriving
-      //
-      txptr = OLDRTXLEN / 2;
       memset(isample, 0, OLDRTXLEN * sizeof(double));
       memset(qsample, 0, OLDRTXLEN * sizeof(double));
       enable_thread = 1;
@@ -1126,6 +1126,14 @@ int main(int argc, char *argv[]) {
 void process_ep2(uint8_t *frame) {
   int rc;
   int mod;
+
+  if (!(frame[0] & 1) && ptt) {
+    // TX/RX transition: reset TX fifo
+    txptr = -1;
+    memset (isample, 0, OLDRTXLEN * sizeof(double));
+    memset (qsample, 0, OLDRTXLEN * sizeof(double));
+  }
+
   chk_data(frame[0] & 1, ptt, "PTT");
 
   switch (frame[0]) {
@@ -1461,13 +1469,7 @@ void *handler_ep6(void *arg) {
   counter = 0;
   noiseIQpt = 0;
   divpt = 0;
-  // The rxptr should never "overtake" the txptr, but
-  // it also must not lag behind by too much. Let's take
-  // the typical TX FIFO size
-  rxptr = txptr - 4096;
-
-  if (rxptr < 0) { rxptr += OLDRTXLEN; }
-
+  rxptr = OLDRTXLEN / 2 - 4096;
   clock_gettime(CLOCK_MONOTONIC, &delay);
 
   while (1) {
@@ -1556,6 +1558,12 @@ void *handler_ep6(void *arg) {
         fac4 = 0.0;
       }
 
+      //
+      // Let rxptr start running only if the TX has begun
+      //
+      if (txptr < 0) {
+        rxptr = OLDRTXLEN/2 - 4096;
+      }
       for (j = 0; j < n; j++) {
         // ADC1: noise + weak tone on RX, feedback sig. on TX (except STEMlab)
         if (ptt && (OLDDEVICE != ODEV_C25)) {

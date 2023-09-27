@@ -210,8 +210,6 @@ void transmitterSaveState(const TRANSMITTER *tx) {
   SetPropI1("transmitter.%d.do_scale",          tx->id,               tx->do_scale);
   SetPropI1("transmitter.%d.compressor",        tx->id,               tx->compressor);
   SetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor);
-  SetPropI1("transmitter.%d.xit_enabled",       tx->id,               tx->xit_enabled);
-  SetPropI1("transmitter.%d.xit",               tx->id,               tx->xit);
   SetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
   SetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
 }
@@ -250,8 +248,6 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
   GetPropI1("transmitter.%d.do_scale",          tx->id,               tx->do_scale);
   GetPropI1("transmitter.%d.compressor",        tx->id,               tx->compressor);
   GetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor);
-  GetPropI1("transmitter.%d.xit_enabled",       tx->id,               tx->xit_enabled);
-  GetPropI1("transmitter.%d.xit",               tx->id,               tx->xit);
   GetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
   GetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
 }
@@ -752,8 +748,6 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   tx->local_microphone = 0;
   tx->microphone_name = g_new(gchar, 128);
   strcpy(tx->microphone_name, "NO LOCAL MIC");
-  tx->xit_enabled = FALSE;
-  tx->xit = 0LL;
   tx->dialog_x = -1;
   tx->dialog_y = -1;
   tx->swr = 1.0;
@@ -887,16 +881,19 @@ void tx_set_filter(TRANSMITTER *tx) {
   // load default values
   int low  = tx_filter_low;
   int high = tx_filter_high;  // 0 < low < high
+  int txvfo = get_tx_vfo();
+  int rxvfo = active_receiver->id;
+
+  tx->deviation = vfo[txvfo].deviation;
 
   if (tx->use_rx_filter) {
     //
     // Use only 'compatible' parts of RX filter settings
     // to change TX values (important for split operation)
     //
-    int id = active_receiver->id;
-    int rxmode = vfo[id].mode;
+    int rxmode = vfo[rxvfo].mode;
     FILTER *mode_filters = filters[rxmode];
-    const FILTER *filter = &mode_filters[vfo[id].filter];
+    const FILTER *filter = &mode_filters[vfo[rxvfo].filter];
 
     switch (rxmode) {
     case modeDSB:
@@ -974,6 +971,7 @@ void tx_set_filter(TRANSMITTER *tx) {
 
   double fl = tx->filter_low;
   double fh = tx->filter_high;
+  SetTXAFMDeviation(tx->id, (double)tx->deviation);
   SetTXABandpassFreqs(tx->id, fl, fh);
 }
 
@@ -1201,12 +1199,11 @@ static void full_tx_buffer(TRANSMITTER *tx) {
         }
       }
     }
-  } else {
-    //
-    // When the buffer has not been sent because MOX has gone,
-    // instead flush the current TX IQ buffer
-    //
-    if (txflag == 1 && protocol == NEW_PROTOCOL) { new_protocol_flush_iq_samples(); }
+  } else {   // isTransmitting()
+    if (txflag == 1 && protocol == NEW_PROTOCOL) {
+      // We arrive here ONCE after a TX/RX transition
+      new_protocol_flush_iq_samples();
+    }
 
     txflag = 0;
   }

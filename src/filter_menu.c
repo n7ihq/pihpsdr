@@ -167,15 +167,13 @@ static gboolean deviation_select_cb (GtkWidget *widget, gpointer data) {
   }
 
   if (current != choice) {
+    int id = active_receiver->id;
     current = choice;
-    active_receiver->deviation = choice->info;
+    vfo[id].deviation = choice->info;
     set_filter(active_receiver);
-    set_deviation(active_receiver);
 
     if (can_transmit) {
-      transmitter->deviation = choice->info;
       tx_set_filter(transmitter);
-      transmitter_set_deviation(transmitter);
     }
 
     g_idle_add(ext_vfo_update, NULL);

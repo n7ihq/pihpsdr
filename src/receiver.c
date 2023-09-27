@@ -550,11 +550,12 @@ void set_mode(RECEIVER *rx, int m) {
 }
 
 void set_filter(RECEIVER *rx) {
-  int m = vfo[rx->id].mode;
+  int id = rx->id;
+  int m = vfo[id].mode;
   FILTER *mode_filters = filters[m];
-  const FILTER *filter = &mode_filters[vfo[rx->id].filter]; // ignored in FMN
+  const FILTER *filter = &mode_filters[vfo[id].filter]; // ignored in FMN
 
-  if ((m == modeCWU || m == modeCWL) && vfo[rx->id].cwAudioPeakFilter) {
+  if ((m == modeCWU || m == modeCWL) && vfo[id].cwAudioPeakFilter) {
     //
     // Possibly engage cw peak filter. Use a fixed gain and an automatic width that
     // is about one fourth of the IF filter width. But do not go below 25 Hz width.
@@ -563,15 +564,15 @@ void set_filter(RECEIVER *rx) {
 
     if ( w < 25.0) { w = 25.0; };
 
-    SetRXASPCWFreq(rx->id, (double) cw_keyer_sidetone_frequency);
+    SetRXASPCWFreq(id, (double) cw_keyer_sidetone_frequency);
 
-    SetRXASPCWBandwidth(rx->id, w);
+    SetRXASPCWBandwidth(id, w);
 
-    SetRXASPCWGain(rx->id, 1.50);
+    SetRXASPCWGain(id, 1.50);
 
-    SetRXASPCWRun(rx->id, 1);
+    SetRXASPCWRun(id, 1);
   } else {
-    SetRXASPCWRun(rx->id, 0);
+    SetRXASPCWRun(id, 0);
   }
 
   switch (m) {
@@ -594,6 +595,7 @@ void set_filter(RECEIVER *rx) {
     // FM filter settings are ignored, instead, the filter
     // size is calculated from the deviation
     //
+    rx->deviation = vfo[id].deviation;
     if (rx->deviation == 2500) {
       rx->filter_low = -5500;
       rx->filter_high = 5500;
@@ -602,7 +604,6 @@ void set_filter(RECEIVER *rx) {
       rx->filter_high = 8000;
     }
 
-    set_deviation(rx);
     break;
 
   default:
@@ -611,7 +612,8 @@ void set_filter(RECEIVER *rx) {
     break;
   }
 
-  RXASetPassband(rx->id, (double)rx->filter_low, (double)rx->filter_high);
+  SetRXAFMDeviation(id, (double)rx->deviation);
+  RXASetPassband(id, (double)rx->filter_low, (double)rx->filter_high);
   //
   // The AGC line position on the panadapter depends on the filter width,
   // therefore we need to re-calculate. In order to avoid code duplication,
@@ -1266,8 +1268,8 @@ void receiver_frequency_changed(RECEIVER *rx) {
 void receiver_filter_changed(RECEIVER *rx) {
   set_filter(rx);
 
-  if (can_transmit && transmitter != NULL) {
-    if (transmitter->use_rx_filter && rx == active_receiver) {
+  if (can_transmit) {
+    if ((transmitter->use_rx_filter && rx == active_receiver) || transmitter->mode == modeFMN) {
       tx_set_filter(transmitter);
     }
   }

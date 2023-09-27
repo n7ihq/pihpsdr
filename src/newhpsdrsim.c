@@ -117,7 +117,7 @@ static double txdrv_dbl = 0.0;
 
 // End of state variables
 
-static int txptr = 10000;
+static int txptr = -1;
 
 static pthread_t ddc_specific_thread_id;
 static pthread_t duc_specific_thread_id;
@@ -725,6 +725,7 @@ void *highprio_thread(void *data) {
     if (rc != run) {
       run = rc;
       hp_mod = 1;
+      txptr = -1;
       printf("HP: Run=%d\n", rc);
 
       // if run=0, wait for threads to complete, otherwise spawn them off
@@ -785,6 +786,7 @@ void *highprio_thread(void *data) {
       printf("HP: PTT=%d\n", rc);
 
       if (ptt == 0) {
+        txptr = -1;
         memset(isample, 0, sizeof(double)*NEWRTXLEN);
         memset(qsample, 0, sizeof(double)*NEWRTXLEN);
       }
@@ -1009,9 +1011,7 @@ void *rx_thread(void *data) {
   noisept = 0;
   clock_gettime(CLOCK_MONOTONIC, &delay);
   printf("RX thread %d, enabled=%d\n", myddc, ddcenable[myddc]);
-  rxptr = txptr - 4096;
-
-  if (rxptr < 0) { rxptr += NEWRTXLEN; }
+  rxptr = NEWRTXLEN / 2 - 8192;
 
   divptr = 0;
 
@@ -1019,10 +1019,6 @@ void *rx_thread(void *data) {
     if (ddcenable[myddc] <= 0 || rxrate[myddc] == 0 || rxfreq[myddc] == 0) {
       usleep(5000);
       clock_gettime(CLOCK_MONOTONIC, &delay);
-      rxptr = txptr - 4096;
-
-      if (rxptr < 0) { rxptr += NEWRTXLEN; }
-
       continue;
     }
 
@@ -1102,6 +1098,9 @@ void *rx_thread(void *data) {
     *p++ = 0;
     *p++ = sync ? 2 * size : size; // should be 238 in either case
 
+    if (txptr < 0) {
+      rxptr = NEWRTXLEN / 2 - 8192;
+    }
     for (i = 0; i < size; i++) {
       //
       // produce noise depending on the ADC
@@ -1113,7 +1112,7 @@ void *rx_thread(void *data) {
 
       //
       // PS: produce sample PAIRS,
-      // a) distorted TX data (with Drive and Attenuation)
+      // a) distorted TX data (with Drive and Attenuation and ADC noise)
       // b) original TX data (normalized)
       //
       // DIV: produce sample PAIRS,
@@ -1314,6 +1313,9 @@ void *tx_thread(void * data) {
     p = buffer + 4;
     sum = 0.0;
 
+    if (txptr < 0) {
+      txptr = NEWRTXLEN / 2;
+    }
     for (i = 0; i < 240; i++) {
       // process 240 TX iq samples
       sample  = (int)((signed char) (*p++)) << 16;

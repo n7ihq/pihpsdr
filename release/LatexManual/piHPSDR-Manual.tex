@@ -1679,6 +1679,15 @@ There is the function \bltt{CW Audio Peak Filter} that can be mapped on toolbar
 buttons or GPIO/MIDI buttons so you can quickly enable/disable the audio peak
 filter.
 
+\textbf{Filter menu and FM mode.} In FM mode, the \bltt{Filter} menu only lets you
+choose between a deviation of 2500 Hz or a deviation of 5000 Hz. 
+Irrespective of whether the box \rett{Use RX Filter} in the TX menu (see
+Chapter \ref{sec:txmenu}) is checked, the deviation setting is used both for RX and TX. 
+Filter edges (both for
+TX and RX) are then calculated according to Carson's rule. Assuming a maximum audio
+frequency of 3000 Hz, a filter width of 11 kHz and 16 kHz result for deviations of 2500
+and 5000 Hz.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Noise} Menu}
 
@@ -1807,6 +1816,7 @@ because there one can set the pitch of the CW side tone, which also affects
 the RX ,,BFO frequency''.
 
 \section{The \texttt{TX} Menu}
+\label{sec:txmenu}
 \begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{TXMenu.png}
@@ -2789,7 +2799,10 @@ a G2 frontpanel controller, the menu opens as shown in Fig. \ref{fig:EncoderMenu
 You see four groups with three buttons (Switch, Top, Bottom) each, and it should be
 clear which group belongs to which encoder. With the buttons, you can choose which function
 to assign, in the same way as described for the \bltt{Toolbar} (chapter \ref{sec:toolbarmenu})
-and \bltt{MIDI} (chapter \ref{sec:midimenu}) menus.
+and \bltt{MIDI} (chapter \ref{sec:midimenu}) menus. With the \rett{Default} button, you can
+re-assign the default values (those shown in Fig. \ref{fig:EncoderMenuG2})
+to the encoder functions, which match the silk printing 
+on the enclosure (see Fig. \ref{fig:g2_frontpanel}).
 
 \begin{figure}[h!]
 \center
@@ -2803,7 +2816,8 @@ has (besides the VFO knob at the bottom right) three knobs (arranged horizontall
 and a fourth knob at the top right, all of which are double encoders with a switch.
 So if you run piHPSDR with a Controller2, then the menu looks different (Fig. \ref{fig:EncoderMenuV2}).
  The menu shows
-for groups with three buttons each, and it should be clear which group belongs to which know.
+for groups with three buttons each, and it should be clear which group belongs to which button. The
+\rett{Default} button again re-installs the default functions (those shown in Fig. \ref{fig:EncoderMenuV2}).
 
 \begin{figure}[h!]
 \center
@@ -2819,18 +2833,17 @@ for groups with three buttons each, and it should be clear which group belongs t
 \label{fig:Apache_Controller1}
 \end{figure}
 
-The default functions associated with the encoders are printed
-on the enclosure for the G2 frontpanel and the Controller2. So you might not wish
-to re-assign different functions, but at least you can.
 
 Finally, the Controller1 (see Fig. \ref{fig:Apache_Controller1})
 has (besides the big VFO knob at the bottom right)
-three knobs denoted E1, E2, E3, , arranged vertically at the right edge. These knobs
+three knobs (denoted E1, E2, E3), rranged vertically at the right edge. These knobs
 are single encoders with a switch (you can turn the knob, but you can also push it). Therefore,
 the \bltt{Encoders} menu in this case (Fig. \ref{fig:EncoderMenuV1}) shows three groups with
-two buttons each.
+two buttons each. The \rett{Default} button again re-installs the default values shown in
+Fig. \ref{fig:EncoderMenuV1}, these are chosen just for convenience since there are no default
+function printed on the enclosure.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \center
 \includegraphics[width=12cm]{EncoderMenuV1.png}
 \caption{The Encoder menu for Controller1}
@@ -2857,7 +2870,8 @@ for the G2 frontpanel (Fig. \ref{fig:SwitchMenuG2}) features (besides the Close
 button) sixteen buttons, and their arrangement is such that you can easily guess
 which menu button refers to which button on your G2 frontpanel. Assigning functions
 to these buttons is done exactly as described for the \bltt{Toolbar} menu
-(chapter \ref{sec:toolbarmenu}).
+(chapter \ref{sec:toolbarmenu}). With \rett{Default} one re-installs the default values
+shown in Fig. \ref{fig:SwitchMenuG2} which match the functions printed on the enclosure.
 
 \begin{figure}[h]
 \center
@@ -2878,6 +2892,8 @@ menu button refers to which Controller2 push button.
 Assigning functions
 to these buttons is done exactly as described for the \bltt{Toolbar} menu
 (chapter \ref{sec:toolbarmenu}).
+With \rett{Default} one re-installs the default values
+shown in Fig. \ref{fig:SwitchMenuV2} which match the functions printed on the enclosure.
 
 \begin{figure}[h]
 \center
@@ -2886,9 +2902,6 @@ to these buttons is done exactly as described for the \bltt{Toolbar} menu
 \label{fig:SwitchMenuV2}
 \end{figure}
 
-The default functions associated with the push buttons are printed
-on the enclosure for the G2 frontpanel and the Controller2. So you might not wish
-to re-assign different functions, but at least you can.
 
 \appendix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3446,6 +3459,10 @@ RIT is automatically disabled, if a non-zero value ist set, RIT is enabled.}
 change it to Off. In RSAT mode
 all VFO frequency \textit{changes} applied to one of the two VFOs will be applied to the other VFO with the 
 sign reversed.}
+
+\action{RX1}{RX1}{B}{Make the first receiver the active one, if piHPDSR is running two receivers.}
+
+\action{RX2}{RX2}{B}{Make the second receiver the active one, if piHPDSR is running two receivers.}
 
 \action{SAT}{SAT}{B}{If the SAT mode is either Off or RSAT, change it to SAT. If the SAT mode  is SAT, 
 change it to Off. In SAT mode

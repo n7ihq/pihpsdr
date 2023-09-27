@@ -114,6 +114,8 @@ static struct sockaddr_in data_addr[7];
 static int data_addr_length[7];
 
 static GThread *new_protocol_thread_id;
+static GThread *new_protocol_rxaudio_thread_id;
+static GThread *new_protocol_txiq_thread_id;
 static GThread *new_protocol_timer_thread_id;
 
 static long high_priority_sequence = 0;
@@ -123,8 +125,6 @@ static long tx_specific_sequence = 0;
 static long ddc_sequence[7];
 
 static long tx_iq_sequence = 0;
-static unsigned char iqbuffer[1444];
-static int iqindex;
 
 static long response_sequence = 0;
 static long highprio_rcvd_sequence = 0;
@@ -166,14 +166,47 @@ static GThread *mic_line_thread_id;
 #endif
 static GThread *iq_thread_id[7];
 
-static long audiosequence;
-static unsigned char audiobuffer[260];
-static int audioindex;
+static long audio_sequence = 0;
 
 // Use this to determine the source port of messages received
 static struct sockaddr_in addr;
 static socklen_t length = sizeof(addr);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Ring buffer for outgoing samples.
+// Samples going to the radio are produced in big chunks.
+// The TX engine receives bunches of mic samples (e.g. 512),
+// and produces bunches of TX IQ samples (2048 in this case).
+// During RX, audio samples are also created in chunks although
+// they are smaller, namely 1024 / (sample_rate/48).
+//
+// So the idea is to put all the samples that go to the radio into
+// a large ring buffer (about 4k samples), and send them to the
+// radio following the pace of incoming mic samples.
+//
+// TXIQRINGBUF must contain a multiple of 6 bytes (1 sample = 6 bytes,
+// since there are two 24-bit IQ numbers). RXAUDIORINGBUF must
+// contain a multiple of 4 bytes (1 sample = 4 bytes, L+R with
+// 16 bits each).
+//
+// The ring buffers must be thread-safe.
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define TXIQRINGBUFLEN    49152  // 8k TX IQ samples     ( 43 msec )
+#define RXAUDIORINGBUFLEN  8192  // 2k RX audio samples  ( 43 msec )
+
+static unsigned char RXAUDIORINGBUF[RXAUDIORINGBUFLEN];
+static unsigned char TXIQRINGBUF[TXIQRINGBUFLEN];
+
+static int txiq_inptr        = 0;  // pointer updated when writing into the ring buffer
+static int txiq_outptr       = 0;  // pointer updated when reading from the ring buffer
+
+static int rxaudio_inptr     = 0;  // pointer updated when writing into the ring buffer
+static int rxaudio_outptr    = 0;  // pointer updated when reading from the ring buffer
+
+static pthread_mutex_t send_rxaudio_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -270,7 +303,6 @@ static pthread_mutex_t rx_spec_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t tx_spec_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hi_prio_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t general_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t audiob_mutex  = PTHREAD_MUTEX_INITIALIZER;
 
 static int local_ptt = 0;
 
@@ -280,6 +312,8 @@ static void new_protocol_general(void);
 static void new_protocol_receive_specific(void);
 static void new_protocol_transmit_specific(void);
 static gpointer new_protocol_thread(gpointer data);
+static gpointer new_protocol_rxaudio_thread(gpointer data);
+static gpointer new_protocol_txiq_thread(gpointer data);
 static gpointer new_protocol_timer_thread(gpointer data);
 static gpointer command_response_thread(gpointer data);
 static gpointer high_priority_thread(gpointer data);
@@ -522,9 +556,6 @@ void new_protocol_init(int pixels) {
   if (have_saturn_xdma) {
 #ifdef SATURN
     saturn_init();
-    iqindex = 4;
-    audioindex = 4; // leave space for sequence
-    audiosequence = 0L;
     running = 1;
 #endif
   } else {
@@ -645,6 +676,17 @@ void new_protocol_init(int pixels) {
     new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
     t_print( "new_protocol_thread: id=%p\n", new_protocol_thread_id);
   }
+  //
+  // start RX audio and TXIQ sending threads
+  //
+  txiq_inptr = 0;
+  txiq_outptr = 0;
+  rxaudio_inptr = 0;
+  rxaudio_outptr = 0;
+  new_protocol_rxaudio_thread_id = g_thread_new( "RX audio sender", new_protocol_rxaudio_thread, NULL);
+  t_print( "new_protocol_rxaudio_thread: id=%p\n", new_protocol_rxaudio_thread_id);
+  new_protocol_txiq_thread_id = g_thread_new( "TX IQ sender", new_protocol_txiq_thread, NULL);
+  t_print( "new_protocol_txiq_thread: id=%p\n", new_protocol_txiq_thread_id);
 
   new_protocol_general();
   new_protocol_start();
@@ -833,8 +875,8 @@ static void new_protocol_high_priority() {
 
   if (vfo[txvfo].ctun) { txFrequency += vfo[txvfo].offset; }
 
-  if (transmitter->xit_enabled) {
-    txFrequency += transmitter->xit;
+  if (vfo[txvfo].xit_enabled) {
+    txFrequency += vfo[txvfo].xit;
   }
 
   if (!cw_is_on_vfo_freq) {
@@ -1526,6 +1568,8 @@ void new_protocol_menu_stop() {
 
   if (have_saturn_xdma) {
     g_thread_join(new_protocol_timer_thread_id);
+    g_thread_join(new_protocol_rxaudio_thread_id);
+    g_thread_join(new_protocol_txiq_thread_id);
     new_protocol_high_priority();
     usleep(200000); // 200 ms
     return;
@@ -1568,7 +1612,7 @@ void new_protocol_menu_start() {
   response_sequence = 0;
   highprio_rcvd_sequence = 0;
   micsamples_sequence = 0;
-  audiosequence = 0;
+  audio_sequence = 0;
   tx_iq_sequence = 0;
   memset(rxcase, 0, sizeof(rxcase));
   memset(rxid, 0, sizeof(rxid));
@@ -1583,11 +1627,136 @@ void new_protocol_menu_start() {
   if (!have_saturn_xdma) {
     new_protocol_thread_id = g_thread_new( "new protocol", new_protocol_thread, NULL);
   }
+  txiq_inptr = 0;
+  txiq_outptr = 0;
+  rxaudio_inptr = 0;
+  rxaudio_outptr = 0;
+  new_protocol_rxaudio_thread_id = g_thread_new( "RX audio sender", new_protocol_rxaudio_thread, NULL);
+  new_protocol_txiq_thread_id = g_thread_new( "TX IQ sender", new_protocol_txiq_thread, NULL);
 
   // start the protocol
   new_protocol_general();
   new_protocol_start();
   new_protocol_high_priority();
+}
+
+static gpointer new_protocol_rxaudio_thread(gpointer data) {
+  int avail;
+  int audioindex;
+  int timer = 9999;
+  unsigned char audiobuffer[260];
+  //
+  // Ideally, a RX audio buffer with 64 samples is sent every 1333 usecs.
+  // We thus wait until we have 64 samples, and then send a packet
+  // (in network mode) or start DMA (in xdma mode).
+  // After sending a packet in network mode, wait 1000 usecs before
+  // attempting to send the next one.
+  //
+  while (running) {
+    avail = rxaudio_inptr - rxaudio_outptr;
+
+    if (avail < 0) { avail += RXAUDIORINGBUFLEN; }
+
+    if (avail < 256) {
+      // not enough data, retry after 500 usec
+      usleep(500);
+      if (timer < 9999) timer += 500;
+      continue;
+    }
+
+    audiobuffer[0] = audio_sequence >> 24;
+    audiobuffer[1] = audio_sequence >> 16;
+    audiobuffer[2] = audio_sequence >> 8;
+    audiobuffer[3] = audio_sequence;
+
+    audioindex = 4;
+    for (int i=0; i< 64; i++) {
+      audiobuffer[audioindex++] = RXAUDIORINGBUF[rxaudio_outptr++];
+      audiobuffer[audioindex++] = RXAUDIORINGBUF[rxaudio_outptr++];
+      audiobuffer[audioindex++] = RXAUDIORINGBUF[rxaudio_outptr++];
+      audiobuffer[audioindex++] = RXAUDIORINGBUF[rxaudio_outptr++];
+
+      if (rxaudio_outptr >= RXAUDIORINGBUFLEN) { rxaudio_outptr = 0; }
+    }
+    if (have_saturn_xdma) {
+#ifdef SATURN
+      saturn_handle_speaker_audio(audiobuffer);
+#endif
+    } else {
+      if (timer < 1000) {
+        usleep(1000-timer);
+      }
+      int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
+
+      if (rc != sizeof(audiobuffer)) {
+        t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
+      }
+      timer = 0;
+    }
+  }
+
+  return NULL;
+}
+
+static gpointer new_protocol_txiq_thread(gpointer data) {
+  int avail;
+  int iqindex;
+  int timer = 9999;
+  unsigned char iqbuffer[1444];
+  //
+  // Ideally, a TX IQ buffer with 240 sample is sent every 1250 usecs.
+  // We thus wait until we have 240 samples, and then send
+  // a packet (in network mode) or start DMA (in xdma mode).
+  // After sending a packet in network mode, take care that
+  // after sending a packet, there is a delay of 1000 usec before
+  // sending the next one.
+  //
+  while (running) {
+    avail = txiq_inptr - txiq_outptr;
+
+    if (avail < 0) { avail += TXIQRINGBUFLEN; }
+
+    if (avail < 1440) {
+      // Not enough data, retry after 500 usec
+      usleep(500);
+      // prevent overflows during long RX periods
+      if (timer < 9999) timer += 500;
+      continue;
+    }   
+
+    iqbuffer[0] = tx_iq_sequence >> 24;
+    iqbuffer[1] = tx_iq_sequence >> 16;
+    iqbuffer[2] = tx_iq_sequence >> 8;
+    iqbuffer[3] = tx_iq_sequence;
+
+    iqindex = 4;
+    for (int i=0; i<240; i++) {
+      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr++];
+      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr++];
+      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr++];
+      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr++];
+      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr++];
+      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr++];
+
+      if (txiq_outptr >= TXIQRINGBUFLEN) { txiq_outptr = 0; }
+    }
+
+    if (have_saturn_xdma) {
+#ifdef SATURN
+      saturn_handle_duc_iq(false, iqbuffer);
+#endif
+    } else {
+      if (timer < 1000) {
+        usleep(1000-timer);
+      }
+      if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
+        t_perror("sendto socket failed for iq:");
+        exit(1);
+      }
+      timer = 0;
+    }
+  }
+  return NULL;
 }
 
 static gpointer new_protocol_thread(gpointer data) {
@@ -1597,9 +1766,6 @@ static gpointer new_protocol_thread(gpointer data) {
   int bytesread;
   mybuffer *mybuf;
   t_print("new_protocol_thread\n");
-  iqindex = 4;
-  audioindex = 4; // leave space for sequence
-  audiosequence = 0L;
   running = 1;
 
   while (running) {
@@ -2139,38 +2305,15 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
     //
     // Only process samples if transmitting in CW
     //
-    pthread_mutex_lock(&audiob_mutex);
-    // insert the samples
-    audiobuffer[audioindex++] = left_audio_sample >> 8;
-    audiobuffer[audioindex++] = left_audio_sample;
-    audiobuffer[audioindex++] = right_audio_sample >> 8;
-    audiobuffer[audioindex++] = right_audio_sample;
+    pthread_mutex_lock(&send_rxaudio_mutex);
+    RXAUDIORINGBUF[rxaudio_inptr++] = left_audio_sample >> 8;
+    RXAUDIORINGBUF[rxaudio_inptr++] = left_audio_sample;
+    RXAUDIORINGBUF[rxaudio_inptr++] = right_audio_sample >> 8;
+    RXAUDIORINGBUF[rxaudio_inptr++] = right_audio_sample;
 
-    if (audioindex >= sizeof(audiobuffer)) {
-      // insert the sequence
-      audiobuffer[0] = audiosequence >> 24;
-      audiobuffer[1] = audiosequence >> 16;
-      audiobuffer[2] = audiosequence >> 8;
-      audiobuffer[3] = audiosequence;
-      // send the buffer
+    if (rxaudio_inptr >= RXAUDIORINGBUFLEN) { rxaudio_inptr = 0; }
 
-      if (have_saturn_xdma) {
-#ifdef SATURN
-        saturn_handle_speaker_audio(audiobuffer);
-#endif
-      } else {
-        int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
-
-        if (rc != sizeof(audiobuffer)) {
-          t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
-        }
-      }
-
-      audioindex = 4;
-      audiosequence++;
-    }
-
-    pthread_mutex_unlock(&audiob_mutex);
+    pthread_mutex_unlock(&send_rxaudio_mutex);
   }
 }
 
@@ -2183,99 +2326,49 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
   //
   if (isTransmitting() && (txmode == modeCWU || txmode == modeCWL)) { return; }
 
-  pthread_mutex_lock(&audiob_mutex);
-  // insert the samples
-  audiobuffer[audioindex++] = left_audio_sample >> 8;
-  audiobuffer[audioindex++] = left_audio_sample;
-  audiobuffer[audioindex++] = right_audio_sample >> 8;
-  audiobuffer[audioindex++] = right_audio_sample;
+  pthread_mutex_lock(&send_rxaudio_mutex);
+  RXAUDIORINGBUF[rxaudio_inptr++] = left_audio_sample >> 8;
+  RXAUDIORINGBUF[rxaudio_inptr++] = left_audio_sample; 
+  RXAUDIORINGBUF[rxaudio_inptr++] = right_audio_sample >> 8;
+  RXAUDIORINGBUF[rxaudio_inptr++] = right_audio_sample;
+   
+  if (rxaudio_inptr >= RXAUDIORINGBUFLEN) { rxaudio_inptr = 0; }
 
-  if (audioindex >= sizeof(audiobuffer)) {
-    // insert the sequence
-    audiobuffer[0] = audiosequence >> 24;
-    audiobuffer[1] = audiosequence >> 16;
-    audiobuffer[2] = audiosequence >> 8;
-    audiobuffer[3] = audiosequence;
-    // send the buffer
-
-    if (have_saturn_xdma) {
-#ifdef SATURN
-      saturn_handle_speaker_audio(audiobuffer);
-#endif
-    } else {
-      int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
-
-      if (rc != sizeof(audiobuffer)) {
-        t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
-      }
-    }
-
-    audioindex = 4;
-    audiosequence++;
-  }
-
-  pthread_mutex_unlock(&audiob_mutex);
+  pthread_mutex_unlock(&send_rxaudio_mutex);
 }
 
 void new_protocol_flush_iq_samples() {
   //
   // this is called at the end of a TX phase:
-  // zero out "rest" of TX IQ buffer and send it
+  // add zeroes to the TX IQ ring buffer until it contains
+  // a multiple of 240 samples.
   //
-  while (iqindex < sizeof(iqbuffer)) {
-    iqbuffer[iqindex++] = 0;
+  int avail = txiq_inptr - txiq_outptr;
+  if (avail < 0) { avail += TXIQRINGBUFLEN; }
+
+  while (avail < 1440) {
+    TXIQRINGBUF[txiq_inptr++] = 0;
+    TXIQRINGBUF[txiq_inptr++] = 0;
+    TXIQRINGBUF[txiq_inptr++] = 0;
+    TXIQRINGBUF[txiq_inptr++] = 0;
+    TXIQRINGBUF[txiq_inptr++] = 0;
+    TXIQRINGBUF[txiq_inptr++] = 0;
+ 
+    if (txiq_inptr >= TXIQRINGBUFLEN) { txiq_inptr = 0; }
+
+    avail++;
   }
-
-  iqbuffer[0] = tx_iq_sequence >> 24;
-  iqbuffer[1] = tx_iq_sequence >> 16;
-  iqbuffer[2] = tx_iq_sequence >> 8;
-  iqbuffer[3] = tx_iq_sequence;
-
-  // send the buffer
-  if (have_saturn_xdma) {
-#ifdef SATURN
-    saturn_handle_duc_iq(false, iqbuffer);
-#endif
-  } else {
-    if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
-      t_perror("sendto socket failed for iq:");
-      exit(1);
-    }
-  }
-
-  iqindex = 4;
-  tx_iq_sequence++;
 }
 
 void new_protocol_iq_samples(int isample, int qsample) {
-  iqbuffer[iqindex++] = isample >> 16;
-  iqbuffer[iqindex++] = isample >> 8;
-  iqbuffer[iqindex++] = isample;
-  iqbuffer[iqindex++] = qsample >> 16;
-  iqbuffer[iqindex++] = qsample >> 8;
-  iqbuffer[iqindex++] = qsample;
+  TXIQRINGBUF[txiq_inptr++] = isample >> 16;
+  TXIQRINGBUF[txiq_inptr++] = isample >> 8;
+  TXIQRINGBUF[txiq_inptr++] = isample;
+  TXIQRINGBUF[txiq_inptr++] = qsample >> 16;
+  TXIQRINGBUF[txiq_inptr++] = qsample >> 8;
+  TXIQRINGBUF[txiq_inptr++] = qsample;
 
-  if (iqindex == sizeof(iqbuffer)) {
-    iqbuffer[0] = tx_iq_sequence >> 24;
-    iqbuffer[1] = tx_iq_sequence >> 16;
-    iqbuffer[2] = tx_iq_sequence >> 8;
-    iqbuffer[3] = tx_iq_sequence;
-
-    // send the buffer
-    if (have_saturn_xdma) {
-#ifdef SATURN
-      saturn_handle_duc_iq(false, iqbuffer);
-#endif
-    } else {
-      if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr*)&iq_addr, iq_addr_length) < 0) {
-        t_perror("sendto socket failed for iq:");
-        exit(1);
-      }
-    }
-
-    iqindex = 4;
-    tx_iq_sequence++;
-  }
+  if (txiq_inptr >= TXIQRINGBUFLEN) { txiq_inptr = 0; }
 }
 
 void* new_protocol_timer_thread(void* arg) {

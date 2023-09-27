@@ -14,5 +14,6 @@ hpsdr.png
 LINUX/wdsp
 LINUX/SoapySDR
 LINUX/SoapyPlutoSDR
+LINUX/SoapyRTLSDR
 MacOS/wdsp
 @*

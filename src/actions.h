@@ -145,6 +145,8 @@ enum ACTION {
   RIT_RX2,
   RIT_STEP,
   RSAT,
+  RX1,
+  RX2,
   SAT,
   SNB,
   SPLIT,

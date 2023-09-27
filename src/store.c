@@ -82,11 +82,10 @@ void recall_memory_slot(int index) {
   //
   // Recalling a memory slot is equivalent to the following actions
   //
-  // - set new deviation and CTCSS parameters
-  // - set the new frequency via the "Freq" menu
-  // - set the new mode via the "Mode" menu
-  // - set the new filter via the "Filter" menu
-  // - set CTCSS via the "TX" menu
+  // - set new CTCSS parameters
+  // - set the new frequency
+  // - set the new mode
+  // - set the new filter and deviation
   //
   // This automatically restores the filter, noise reduction, and
   // equalizer settings stored with that mode
@@ -94,15 +93,16 @@ void recall_memory_slot(int index) {
   // This will not only change the filter but also store the new setting
   // with that mode.
   //
+
   if (can_transmit) {
-    transmitter->deviation = mem[index].deviation;
     transmitter_set_ctcss(transmitter, mem[index].ctcss_enabled, mem[index].ctcss);
   }
-  active_receiver->deviation = mem[index].deviation;
 
+  vfo_deviation_changed(mem[index].deviation);
   vfo_set_frequency(active_receiver->id, new_freq);
   vfo_mode_changed(mem[index].mode);
   vfo_filter_changed(mem[index].filter);
+  
   g_idle_add(ext_vfo_update, NULL);
 }
 

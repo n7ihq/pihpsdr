@@ -138,18 +138,15 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     break;
 
   //
-  // This is for Richard (test version), using z and s for changing
-  // the frequency of the non-active receiver (if there are two)
+  // Suggestion of Richard: using U and D for changing
+  // the frequency of the "other" VFO in large steps
+  // (useful for split operation)
   //
   case  GDK_KEY_U:
-    if (receivers > 1) {
-      vfo_id_step(1-active_receiver->id, 10);
-     }
+    vfo_id_step(1-active_receiver->id, 10);
     break;
   case  GDK_KEY_D:
-    if (receivers > 1) {
-      vfo_id_step(1-active_receiver->id, -10);
-     }
+    vfo_id_step(1-active_receiver->id, -10);
     break;
   //
   // This is a contribution of Ron, it uses a keypad for

@@ -96,7 +96,7 @@ int VFO_WIDTH = 530;         // taken from the current VFO bar layout
 int METER_HEIGHT = 60;       // always set to  VFO_HEIGHT
 int METER_WIDTH = 200;       // nowhere changed
 int ZOOMPAN_HEIGHT = 50;     // nowhere changed
-int SLIDERS_HEIGHT = 105;    // nowhere changed
+int SLIDERS_HEIGHT = 100;    // nowhere changed
 int TOOLBAR_HEIGHT = 30;     // nowhere changed
 
 int rx_stack_horizontal = 0;
@@ -781,20 +781,40 @@ static void create_visual() {
   //
   receiver[PS_RX_FEEDBACK] = NULL;
   receiver[PS_TX_FEEDBACK] = NULL;
-  // TEMP
 #ifdef CLIENT_SERVER
 
   if (!radio_is_remote) {
 #endif
     //t_print("Create transmitter\n");
     transmitter = NULL;
+    can_transmit = 0;
 
-    if (can_transmit) {
+//
+//  do not set can_transmit before transmitter exists, because we assume
+//  if (can_transmit) is equivalent to if (transmitter)
+//
+    int local_can_transmit;
+
+    switch (protocol) {
+    case ORIGINAL_PROTOCOL:
+    case NEW_PROTOCOL:
+      local_can_transmit = 1;
+      break;
+#ifdef SOAPYSDR
+
+    case SOAPYSDR_PROTOCOL:
+      local_can_transmit = (radio->info.soapy.tx_channels != 0);
+      break;
+#endif
+    }
+
+    if (local_can_transmit) {
       if (duplex) {
         transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width / 4, my_height / 2);
       } else {
         transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width, rx_height);
       }
+      can_transmit = 1;
 
       transmitter->x = 0;
       transmitter->y = VFO_HEIGHT;
@@ -860,13 +880,6 @@ static void create_visual() {
     }
 
 #ifdef CLIENT_SERVER
-  }
-
-#endif
-#ifdef GPIO
-
-  if (gpio_init() < 0) {
-    t_print("GPIO failed to initialize\n");
   }
 
 #endif
@@ -957,6 +970,14 @@ void start_radio() {
       t_print("WARNING: Position %d Action=%d str=%s\n", i, ActionTable[i].action, ActionTable[i].button_str);
     }
   }
+
+#ifdef GPIO
+
+  if (gpio_init() < 0) {
+    t_print("GPIO failed to initialize\n");
+  }
+
+#endif
 
   //t_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_WATCH));
@@ -1123,23 +1144,6 @@ void start_radio() {
 
   if (have_rx_gain) {
     have_rx_att = 0;
-  }
-
-  //
-  // can_transmit decides whether we have a transmitter.
-  //
-  switch (protocol) {
-  case ORIGINAL_PROTOCOL:
-  case NEW_PROTOCOL:
-    can_transmit = 1;
-    break;
-#ifdef SOAPYSDR
-
-  case SOAPYSDR_PROTOCOL:
-    can_transmit = (radio->info.soapy.tx_channels != 0);
-    t_print("start_radio: can_transmit=%d tx_channels=%d\n", can_transmit, (int)radio->info.soapy.tx_channels);
-    break;
-#endif
   }
 
   //

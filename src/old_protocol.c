@@ -131,7 +131,6 @@ static int current_rx = 0;
 
 static int mic_samples = 0;
 static int mic_sample_divisor = 1;
-static int micsamplecount = 0;
 
 static int local_ptt = 0;
 static int dash = 0;
@@ -141,7 +140,6 @@ static unsigned char output_buffer[OZY_BUFFER_SIZE];
 
 static int command = 1;
 
-static GThread *receive_thread_id;
 static gpointer receive_thread(gpointer arg);
 static void process_ozy_input_buffer(unsigned const char  *buffer);
 void ozy_send_buffer(void);
@@ -168,7 +166,6 @@ static int how_many_receivers(void);
   //
   #include "ozyio.h"
 
-  static GThread *ozy_EP6_rx_thread_id;
   static gpointer ozy_ep6_rx_thread(gpointer arg);
   static void start_usb_receive_threads(void);
   static void ozyusb_write(unsigned char* buffer, int length);
@@ -189,7 +186,7 @@ static pthread_mutex_t send_audio_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
 //
 // This mutex "protects" ozy_send_buffer. This is necessary only for
-// TCP and USB-OZY since here the communication is a byte stream.
+// TCP and USB-OZY since there the communication is a byte stream.
 //
 static pthread_mutex_t send_ozy_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
@@ -225,11 +222,69 @@ static pthread_mutex_t send_ozy_mutex   = PTHREAD_MUTEX_INITIALIZER;
 // this is not necessary since everything happens within the
 // P1 "receive thread".
 //
-#define TXRINGBUFLEN 32768
+#define TXRINGBUFLEN 32768     // 85 msec
 static unsigned char TXRINGBUF[TXRINGBUFLEN];
 static unsigned int txring_inptr = 0;  // pointer updated when writing into the ring buffer
 static unsigned int txring_outptr = 0; // pointer updated when reading from the ring buffer
 static unsigned int txring_flag = 0;   // 0: RX, 1: TX
+
+static gpointer old_protocol_txiq_thread(gpointer data) {
+  int avail;
+  int timer = 9999;
+  //
+  // Ideally, an output METIS buffer with 126 samples is sent every 2625 usec.
+  // We thus wait until we have 126 samples, and then send a packet.
+  // After sending the packet, wait 2000 usecs before sending the next one.
+  //
+  for (;;) {
+    avail = txring_inptr - txring_outptr;
+    if (avail < 0) { avail += TXRINGBUFLEN; }
+
+    if (avail < 1008) {
+      usleep (500);
+      if (timer < 9999) timer += 500;
+      continue;
+    }
+
+    if (pthread_mutex_trylock(&send_ozy_mutex)) {
+      //
+      // This can only happen if the GUI thread initiates
+      // a protocol stop/start sequence, as it does e.g.
+      // when changing the number of receivers, changing
+      // the sample rate, en/dis-abling PureSignal or
+      // DIVERSITY, or executing the RESTART button.
+      // In these cases, the TX ring buffer is reset anyway
+      // so we do not have to do anything here.
+      //
+    } else {
+      if (timer < 2000) {
+        usleep(2000 - timer);
+      }
+      for (int j = 0; j < 2; j++) {
+        unsigned char *p = output_buffer + 8;
+
+        for (int k = 0; k < 63; k++) {
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+          *p++ = TXRINGBUF[txring_outptr++];
+
+          if (txring_outptr >= TXRINGBUFLEN) { txring_outptr = 0; }
+        }
+
+        ozy_send_buffer();
+      }
+      timer = 0;
+      pthread_mutex_unlock(&send_ozy_mutex);
+    }
+  }
+  return NULL;
+}
+
 
 // This function is used in debug code
 void dump_buffer(unsigned char *buffer, int length, const char *who) {
@@ -283,11 +338,17 @@ void old_protocol_set_mic_sample_rate(int rate) {
   mic_sample_divisor = rate / 48000;
 }
 
+//
+// old_protocol_init is only called ONCE.
+// old_protocol_stop and old_protocol_run just send start/stop packets
+// but do not shut down the communication
+//
 void old_protocol_init(int rx, int pixels, int rate) {
   int i;
   t_print("old_protocol_init: num_hpsdr_receivers=%d\n", how_many_receivers());
   pthread_mutex_lock(&send_ozy_mutex);
   old_protocol_set_mic_sample_rate(rate);
+  g_thread_new("P1/OZY Host->Radio thread", old_protocol_txiq_thread, NULL);
 
   if (transmitter->local_microphone) {
     if (audio_open_input() != 0) {
@@ -314,8 +375,7 @@ void old_protocol_init(int rx, int pixels, int rate) {
       open_udp_socket();
     }
 
-    receive_thread_id = g_thread_new( "old protocol", receive_thread, NULL);
-    t_print( "receive_thread: id=%p\n", receive_thread_id);
+    g_thread_new( "P1 Radio->Host thread", receive_thread, NULL);
   }
 
   t_print("old_protocol_init: prime radio\n");
@@ -336,7 +396,7 @@ void old_protocol_init(int rx, int pixels, int rate) {
 //
 static void start_usb_receive_threads() {
   t_print("old_protocol starting USB receive thread\n");
-  ozy_EP6_rx_thread_id = g_thread_new( "OZY EP6 RX", ozy_ep6_rx_thread, NULL);
+  g_thread_new( "OZY EP6 Radio->Host", ozy_ep6_rx_thread, NULL);
 }
 
 //
@@ -868,8 +928,8 @@ static long long channel_freq(int chan) {
 
     if (vfo[vfonum].ctun) { freq += vfo[vfonum].offset; }
 
-    if (transmitter->xit_enabled) {
-      freq += transmitter->xit;
+    if (vfo[vfonum].xit_enabled) {
+      freq += vfo[vfonum].xit;
     }
 
     if (!cw_is_on_vfo_freq) {
@@ -1301,9 +1361,6 @@ static void process_ozy_byte(int b) {
       }
 
       add_mic_sample(transmitter, fsample);
-      // micsamplecount is the "heart beat" for sending data from the
-      // ring buffer to the radio
-      micsamplecount++;
       mic_samples = 0;
     }
 
@@ -1330,59 +1387,6 @@ static void process_ozy_input_buffer(unsigned const char  *buffer) {
 
   for (i = 0; i < 512; i++) {
     process_ozy_byte(buffer[i] & 0xFF);
-
-    //
-    // The first time data is available, micsamplecount will be
-    // MUCH larger than 126. It is reset to zero once the first
-    // buffer has been sent. This way, a complete buffer is sent
-    // as early as possible. Note we send two buffers at once since
-    // METIS sends buffers in UDP packets containing two of them.
-    //
-    if (micsamplecount >= 126) {
-      int avail = txring_inptr - txring_outptr;
-
-      if (avail < 0) { avail += TXRINGBUFLEN; }
-
-      if (avail >= 1008) {
-        //
-        // ship out two buffers with 2*63 samples
-        // the k-loop could be done with 1-2 memcpy
-        //
-        if (pthread_mutex_trylock(&send_ozy_mutex)) {
-          //
-          // This can only happen if the GUI thread initiates
-          // a protocol stop/start sequence, as it does e.g.
-          // when changing the number of receivers, changing
-          // the sample rate, en/dis-abling PureSignal or
-          // DIVERSITY, or executing the RESTART button.
-          // In these cases, the TX ring buffer is reset anywas
-          // so we do not have to do anything here.
-          //
-        } else {
-          for (int j = 0; j < 2; j++) {
-            unsigned char *p = output_buffer + 8;
-
-            for (int k = 0; k < 63; k++) {
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-              *p++ = TXRINGBUF[txring_outptr++];
-
-              if (txring_outptr >= TXRINGBUFLEN) { txring_outptr = 0; }
-            }
-
-            ozy_send_buffer();
-          }
-
-          micsamplecount = 0;
-          pthread_mutex_unlock(&send_ozy_mutex);
-        }
-      }
-    }
   }
 }
 
@@ -1436,7 +1440,7 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
     if (!txring_flag) {
       //
       // First time we arrive here after a RX->TX transition:
-      // Clear tX IQ ring buffer so the samples will be sent
+      // Clear TX IQ ring buffer so the samples will be sent
       // as soon as possible.
       //
       txring_flag = 1;

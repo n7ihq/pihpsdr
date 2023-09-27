@@ -20,6 +20,7 @@
 #include "css.h"
 #include "message.h"
 
+//////////////////////////////////////////////////////////////////////////////////////////
 //
 // Normally one wants to inherit everything from the GTK theme.
 // In some cases, however, this does not work too well. But the
@@ -55,14 +56,33 @@
 //
 // radiobutton         see checkbutton.
 //
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+// Note on font sizes:
+//
+// A RaspPi has different default settings whether you have a small screen, a medium
+// screen or a large screen (RaspBerry Menu ==> Preferences ==> Appearances Settings).
+//
+// For a fixed size such as the height of the Sliders or Zoompan area, we therefore
+// MUST specify the font size. If not, it may happen that the sliders cannot be
+// displayed on a large screen
+//
+//////////////////////////////////////////////////////////////////////////////////////////
 char *css =
+  "  * { font-family: Sans; }\n"
+  "  combobox { font-size: 15px; }\n"
+  "  button   { font-size: 15px; }\n"
+  "  checkbutton label { font-size: 15px; }\n"
+  "  spinbutton { font-size: 15px; }\n"
+  "  radiobutton label  { font-size: 15px; }\n"
+  "  scale { font-size: 15px; }\n"
+  "  entry { font-size: 15px; }\n"
+  "  notebook { font-size: 15px; }\n"
   "  #boldlabel {\n"
   "    padding: 3px;\n"
   "    font-family: Sans;\n"
   "    font-weight: bold;\n"
-#ifdef __APPLE__
-  "    font-size: 14px;\n"
-#endif
+  "    font-size: 15px;\n"
   "  }\n"
   "  #big_txt {\n"
   "    font-family: Sans;\n"
@@ -90,6 +110,12 @@ char *css =
   "    font-family: Sans;\n"
   "    font-size: 15px;\n"
   "    }\n"
+  "  #small_button_with_border {\n"
+  "    padding: 3px;\n"
+  "    font-family: Sans;\n"
+  "    font-size: 15px;\n"
+  "    border: 1px solid rgb(50%, 50%, 50%);\n"
+  "    }\n"
   "  #small_toggle_button {\n"
   "    padding: 1px;\n"
   "    font-family: Sans;\n"
@@ -112,17 +138,12 @@ char *css =
   "    }\n"
   "  #popup_scale value {\n"
   "    color: rgb(100%, 10%, 10%);\n"              // digits
+  "    font-size: 15px;\n"
   "    }\n"
   "  checkbutton check {\n"
-  //"    background-image: none;\n"
-  //"    background-color: rgb(75%, 75%, 75%);\n"    // good for light and dark theme
-  //"    color: rgb(00%, 00%, 100%);\n"
   "    border: 1px solid rgb(50%, 50%, 50%);\n"
   "    }\n"
   "  radiobutton radio {\n"
-  //"    background-image: none;\n"
-  //"    background-color: rgb(75%, 75%, 75%);\n"    // good for light and dark theme
-  //"    color: rgb(00%, 00%, 100%);\n"
   "    border: 1px solid rgb(50%, 50%, 50%);\n"
   "    }\n"
   ;

@@ -345,4 +345,9 @@ extern int max_band(void);
 extern void protocol_run(void);
 extern void protocol_stop(void);
 extern void protocol_restart(void);
+
+//
+// Macro to flag an unimplemented client/server feature
+//
+#define CLIENT_MISSING if (radio_is_remote) { t_print("%s: TODO: CLIENT/SERVER\n", __FUNCTION__); return; }
 #endif

@@ -1685,19 +1685,18 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read deviation
       if (command[4] == ';') {
-        sprintf(reply, "ZZFD%d;", active_receiver->deviation == 2500 ? 0 : 1);
+        int id=active_receiver->id;
+        sprintf(reply, "ZZFD%d;", vfo[id].deviation == 2500 ? 0 : 1);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
+        int id=active_receiver->id;
         int d = atoi(&command[4]);
 
         // TODO: should we check for the mode being FMN?
-        active_receiver->deviation = d ? 5000 : 2500;
+        vfo[id].deviation = d ? 5000 : 2500;
         set_filter(active_receiver);
-        set_deviation(active_receiver);
         if (can_transmit) {
-          transmitter->deviation = d ? 5000 : 2500;
           tx_set_filter(transmitter);
-          transmitter_set_deviation(transmitter);
         }
 
         g_idle_add(ext_vfo_update, NULL);
@@ -2500,26 +2499,24 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // clear RIT frequency
       if (command[4] == ';') {
-        vfo[VFO_A].rit = 0;
-        g_idle_add(ext_vfo_update, NULL);
+        schedule_action(RIT_CLEAR, PRESSED, 0);
       }
 
       break;
 
     case 'D': //ZZRD
 
-      // decrement RIT frequency
       if (command[4] == ';') {
-        if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
-          vfo[VFO_A].rit -= 10;
+        int id=active_receiver->id;
+        // decrement RIT frequency
+        if (vfo[id].mode == modeCWL || vfo[id].mode == modeCWU) {
+          vfo_rit_incr(id, -10);
         } else {
-          vfo[VFO_A].rit -= rit_increment;
+          vfo_rit_incr(id, -rit_increment);
         }
-
-        g_idle_add(ext_vfo_update, NULL);
       } else if (command[9] == ';') {
-        vfo[VFO_A].rit = atoi(&command[4]);
-        g_idle_add(ext_vfo_update, NULL);
+        // set RIT frequency
+        vfo_rit_value(VFO_A, atoi(&command[4]));
       }
 
       break;
@@ -2531,7 +2528,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         sprintf(reply, "ZZRF%+5lld;", vfo[VFO_A].rit);
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
-        vfo[VFO_A].rit = atoi(&command[4]);
+        vfo_rit_value(VFO_A, atoi(&command[4]));
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -2572,8 +2569,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         sprintf(reply, "ZZRT%d;", vfo[VFO_A].rit_enabled);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
-        vfo[VFO_A].rit_enabled = atoi(&command[4]);
-        g_idle_add(ext_vfo_update, NULL);
+        vfo_rit_onoff(VFO_A, SET(atoi(&command[4])));
       }
 
       break;
@@ -2583,15 +2579,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // increments RIT Frequency
       if (command[4] == ';') {
         if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
-          vfo[VFO_A].rit += 10;
+          vfo_rit_incr(VFO_A, 10);
         } else {
-          vfo[VFO_A].rit += rit_increment;
+          vfo_rit_incr(VFO_A, rit_increment);
         }
 
-        g_idle_add(ext_vfo_update, NULL);
       } else if (command[9] == ';') {
-        vfo[VFO_A].rit = atoi(&command[4]);
-        g_idle_add(ext_vfo_update, NULL);
+        vfo_rit_value(VFO_A,  atoi(&command[4]));
       }
 
       break;
@@ -3061,26 +3055,17 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'C': //ZZXC
 
       // clear transmitter XIT
-      if (can_transmit) {
-        if (command[4] == ';') {
-          transmitter->xit = 0;
-          g_idle_add(ext_vfo_update, NULL);
-        }
-      }
-
+      schedule_action(XIT_CLEAR, PRESSED, 0);
       break;
 
     case 'F': //ZZXF
 
       // set/read XIT
-      if (can_transmit) {
-        if (command[4] == ';') {
-          sprintf(reply, "ZZXT%+05lld;", transmitter->xit);
-          send_resp(client->fd, reply) ;
-        } else if (command[9] == ';') {
-          transmitter->xit = (long long)atoi(&command[4]);
-          g_idle_add(ext_vfo_update, NULL);
-        }
+      if (command[4] == ';') {
+        sprintf(reply, "ZZXT%+05lld;", vfo[get_tx_vfo()].xit);
+        send_resp(client->fd, reply) ;
+      } else if (command[9] == ';') {
+        vfo_xit_value(atoi(&command[4]));
       }
 
       break;
@@ -3178,14 +3163,15 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'S': //ZZXS
 
       /// set/read XIT enable
-      if (can_transmit) {
-        if (command[4] == ';') {
-          sprintf(reply, "ZZXS%d;", transmitter->xit_enabled);
-          send_resp(client->fd, reply);
-        } else if (command[5] == ';') {
-          transmitter->xit_enabled = atoi(&command[4]);
-          g_idle_add(ext_vfo_update, NULL);
+      if (command[4] == ';') {
+        sprintf(reply, "ZZXS%d;", vfo[get_tx_vfo()].xit_enabled);
+        send_resp(client->fd, reply);
+      } else if (command[5] == ';') {
+        vfo[get_tx_vfo()].xit_enabled = atoi(&command[4]);
+        if (protocol == NEW_PROTOCOL) {
+          schedule_high_priority();
         }
+        g_idle_add(ext_vfo_update, NULL);
       }
 
       break;
@@ -3357,10 +3343,10 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             break;
 
           case 59: // RIT
-            if (vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled) {
-              vfo_rit(active_receiver->id, (v == 0) ? 1 : -1);
+            if (vfo[active_receiver->id].rit_enabled) {
+              schedule_action(RIT, RELATIVE, (v == 0) ? 1 : -1);
 
-              if (!vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled) {
+              if (!vfo[active_receiver->id].rit_enabled) {
                 sprintf(reply, "ZZZI080;");
                 send_resp(client->fd, reply);
               }
@@ -3369,24 +3355,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             break;
 
           case 60: // XIT
-            if (can_transmit) {
-              if (transmitter->xit_enabled) {
-                transmitter->xit += (v == 0) ? rit_increment : -rit_increment;
-                transmitter->xit_enabled = (transmitter->xit != 0);
-
-                if (protocol == NEW_PROTOCOL) {
-                  schedule_high_priority();
-                }
-
-                g_idle_add(ext_vfo_update, NULL);
-
-                if (!transmitter->xit_enabled) {
-                  sprintf(reply, "ZZZI090;");
-                  send_resp(client->fd, reply);
-                }
+            if (vfo[get_tx_vfo()].xit_enabled) {
+              schedule_action(XIT, RELATIVE, (v == 0) ? 1 : -1);
+              if (!vfo[get_tx_vfo()].xit_enabled) {
+                sprintf(reply, "ZZZI090;");
+                send_resp(client->fd, reply);
               }
             }
-
             break;
 
           case 61: // Mic Gain
@@ -3603,27 +3578,23 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
           case 42: // RIT/XIT
             if (v == 0) {
-              // guard against using "transmitter" if not existing
-              int tx_xit_en = can_transmit ? transmitter->xit_enabled : 0;
-
-              if (!vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled && !tx_xit_en) {
-                vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled = 1;
+              if (!vfo[active_receiver->id].rit_enabled && !vfo[get_tx_vfo()].xit_enabled) {
+                // neither RIT nor XIT: ==> activate RIT
+                vfo_rit_onoff(active_receiver->id, 1);
                 sprintf(reply, "ZZZI081;");
                 send_resp(client->fd, reply);
-              } else if (vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled && !tx_xit_en) {
-                vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled = 0;
-
-                if (can_transmit) { transmitter->xit_enabled = 1; }
-
+              } else if (vfo[active_receiver->id].rit_enabled && !vfo[get_tx_vfo()].xit_enabled) {
+                // RIT but no XIT: ==> de-activate RIT and activate XIT
+                vfo_rit_onoff(active_receiver->id, 0);
+                vfo_xit_onoff(1);
                 sprintf(reply, "ZZZI080;");
                 send_resp(client->fd, reply);
                 sprintf(reply, "ZZZI091;");
                 send_resp(client->fd, reply);
               } else {
-                vfo[(active_receiver->id == 0) ? VFO_A : VFO_B].rit_enabled = 0;
-
-                if (can_transmit) { transmitter->xit_enabled = 0; }
-
+                // else deactivate both.
+                vfo_rit_onoff(active_receiver->id, 0);
+                vfo_xit_onoff(0);
                 sprintf(reply, "ZZZI080;");
                 send_resp(client->fd, reply);
                 sprintf(reply, "ZZZI090;");
@@ -4136,20 +4107,15 @@ int parse_cmd(void *data) {
           if (fw == 0) {
             filter->low = -5500;
             filter->high = 5500;
-            active_receiver->deviation = 2500;
-            if (can_transmit) { transmitter->deviation = 2500; }
+            vfo[active_receiver->id].deviation = 2500;
           } else {
             filter->low = -8000;
             filter->high = 8000;
-            active_receiver->deviation = 5000;
-            if (can_transmit) { transmitter->deviation = 5000; }
+            vfo[active_receiver->id].deviation = 5000;
           }
           set_filter(active_receiver);
-          set_deviation(active_receiver);
           if (can_transmit) {
-            transmitter->deviation = 2500;
             tx_set_filter(transmitter);
-            transmitter_set_deviation(transmitter);
           }
           g_idle_add(ext_vfo_update, NULL);
 
@@ -4234,7 +4200,7 @@ int parse_cmd(void *data) {
       int tx_ctcss = 0;
 
       if (can_transmit) {
-        tx_xit_en   = transmitter->xit_enabled;
+        tx_xit_en   = vfo[get_tx_vfo()].xit_enabled;
         tx_ctcss    = transmitter->ctcss;
         tx_ctcss_en = transmitter->ctcss_enabled;
       }
@@ -5398,11 +5364,10 @@ int parse_cmd(void *data) {
       // set/read XIT enable
       if (can_transmit) {
         if (command[2] == ';') {
-          sprintf(reply, "XT%d;", transmitter->xit_enabled);
+          sprintf(reply, "XT%d;", vfo[get_tx_vfo()].xit_enabled);
           send_resp(client->fd, reply);
         } else if (command[3] == ';') {
-          transmitter->xit_enabled = atoi(&command[2]);
-          g_idle_add(ext_vfo_update, NULL);
+          vfo_xit_onoff(SET(atoi(&command[2])));
         }
       }
 
@@ -5687,10 +5652,11 @@ gboolean andromeda_handler(gpointer data) {
   }
 
   if (can_transmit) {
-    if (last_xit != transmitter->xit_enabled) {
-      sprintf(reply, "ZZZI09%d;", transmitter->xit_enabled);
+    int new_xit = vfo[get_tx_vfo()].xit_enabled;
+    if (last_xit != new_xit) {
+      sprintf(reply, "ZZZI09%d;", new_xit);
       send_resp(client->fd, reply);
-      last_xit = transmitter->xit_enabled;
+      last_xit = new_xit;
     }
   }
 

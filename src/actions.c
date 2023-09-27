@@ -183,6 +183,8 @@ ACTION_TABLE ActionTable[] = {
   {RIT_RX2,             "RIT\nRX2",             "RIT2",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {RIT_STEP,            "RIT\nStep",            "RITST",        MIDI_KEY   | CONTROLLER_SWITCH},
   {RSAT,                "RSAT",                 "RSAT",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RX1,                 "RX1",                  "RX1",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {RX2,                 "RX2",                  "RX2",          MIDI_KEY   | CONTROLLER_SWITCH},
   {SAT,                 "SAT",                  "SAT",          MIDI_KEY   | CONTROLLER_SWITCH},
   {SNB,                 "SNB",                  "SNB",          MIDI_KEY   | CONTROLLER_SWITCH},
   {SPLIT,               "Split",                "SPLIT",        MIDI_KEY   | CONTROLLER_SWITCH},
@@ -1173,26 +1175,26 @@ int process_action(void *data) {
     break;
 
   case RIT:
-    vfo_rit(active_receiver->id, a->val);
+    vfo_rit_incr(active_receiver->id, rit_increment*a->val);
     break;
 
   case RIT_CLEAR:
     if (a->mode == PRESSED) {
-      vfo_rit_clear(active_receiver->id);
+      vfo_rit_value(active_receiver->id, 0);
     }
 
     break;
 
   case RIT_ENABLE:
     if (a->mode == PRESSED) {
-      vfo_rit_update(active_receiver->id);
+      vfo_rit_toggle(active_receiver->id);
     }
 
     break;
 
   case RIT_MINUS:
     if (a->mode == PRESSED) {
-      vfo_rit(active_receiver->id, -1);
+      vfo_rit_incr(active_receiver->id, -rit_increment);
 
       if (timer == 0) {
         timer = g_timeout_add(250, timeout_cb, a);
@@ -1208,7 +1210,7 @@ int process_action(void *data) {
 
   case RIT_PLUS:
     if (a->mode == PRESSED) {
-      vfo_rit(active_receiver->id, 1);
+      vfo_rit_incr(active_receiver->id, rit_increment);
 
       if (timer == 0) {
         timer = g_timeout_add(250, timeout_cb, a);
@@ -1223,11 +1225,11 @@ int process_action(void *data) {
     break;
 
   case RIT_RX1:
-    vfo_rit(0, a->val);
+    vfo_rit_incr(0, rit_increment*a->val);
     break;
 
   case RIT_RX2:
-    vfo_rit(1, a->val);
+    vfo_rit_incr(1, rit_increment*a->val);
     break;
 
   case RIT_STEP:
@@ -1240,6 +1242,30 @@ int process_action(void *data) {
     g_idle_add(ext_vfo_update, NULL);
     break;
 
+  case RX1:
+    if (a->mode == PRESSED && receivers == 2) {
+      active_receiver = receiver[0];
+      g_idle_add(menu_active_receiver_changed, NULL);
+      g_idle_add(sliders_active_receiver_changed, NULL);
+      g_idle_add(ext_vfo_update, NULL);
+
+      t_print("%s: TODO: report RX1 switch upstream\n", __FUNCTION__);
+    }
+
+    break;
+    
+  case RX2:
+    if (a->mode == PRESSED && receivers == 2) {
+      active_receiver = receiver[1];
+      g_idle_add(menu_active_receiver_changed, NULL);
+      g_idle_add(sliders_active_receiver_changed, NULL);
+      g_idle_add(ext_vfo_update, NULL);
+
+      t_print("%s: TODO: report RX2 switch upstream\n", __FUNCTION__);
+    }
+
+    break;
+    
   case RSAT:
     if (a->mode == PRESSED) {
       if (sat_mode == RSAT_MODE) {
@@ -1432,111 +1458,50 @@ int process_action(void *data) {
     break;
 
   case XIT:
-    if (can_transmit) {
-      value = KnobOrWheel(a, (double)transmitter->xit, -9999.0, 9999.0, (double) rit_increment);
-      transmitter->xit = (int)value;
-      transmitter->xit_enabled = (value != 0);
-
-      if (protocol == NEW_PROTOCOL) {
-        schedule_high_priority();
-      }
-
-      g_idle_add(ext_vfo_update, NULL);
-    }
-
+    vfo_xit_incr(rit_increment*a->val);
     break;
 
   case XIT_CLEAR:
-    if (a->mode == PRESSED && can_transmit) {
-      transmitter->xit = 0;
-      transmitter->xit_enabled = 0;
-
-      if (protocol == NEW_PROTOCOL) {
-        schedule_high_priority();
-      }
-
-      g_idle_add(ext_vfo_update, NULL);
+    if (a->mode == PRESSED) {
+      vfo_xit_value(0);
     }
-
     break;
 
   case XIT_ENABLE:
     if (a->mode == PRESSED && can_transmit) {
-      TOGGLE(transmitter->xit_enabled);
-
-      if (protocol == NEW_PROTOCOL) {
-        schedule_high_priority();
-      }
-
-      g_idle_add(ext_vfo_update, NULL);
+      vfo_xit_toggle();
     }
 
     break;
 
   case XIT_MINUS:
-    if (can_transmit) {
-      if (a->mode == PRESSED) {
-        value = (double)transmitter->xit;
-        value -= (double)rit_increment;
-
-        if (value < -9999.0) {
-          value = -9999.0;
-        } else if (value > 9999.0) {
-          value = 9999.0;
-        }
-
-        transmitter->xit = (int)value;
-        transmitter->xit_enabled = (transmitter->xit != 0);
-
-        if (protocol == NEW_PROTOCOL) {
-          schedule_high_priority();
-        }
-
-        g_idle_add(ext_vfo_update, NULL);
-
-        if (timer == 0) {
-          timer = g_timeout_add(250, timeout_cb, a);
-          timer_released = FALSE;
-        }
-
-        free_action = FALSE;
-      } else {
-        timer_released = TRUE;
+    if (a->mode == PRESSED) {
+      vfo_xit_incr(-rit_increment);         
+  
+      if (timer == 0) { 
+        timer = g_timeout_add(250, timeout_cb, a);
+        timer_released = FALSE;                 
       }
+  
+      free_action = FALSE;
+    } else {
+      timer_released = TRUE;
     }
 
     break;
 
   case XIT_PLUS:
-    if (can_transmit) {
-      if (a->mode == PRESSED) {
-        value = (double)transmitter->xit;
-        value += (double)rit_increment;
+    if (a->mode == PRESSED) {
+      vfo_xit_incr(rit_increment);                     
 
-        if (value < -10000.0) {
-          value = -10000.0;
-        } else if (value > 10000.0) {
-          value = 10000.0;
-        }
-
-        transmitter->xit = (int)value;
-        transmitter->xit_enabled = (transmitter->xit != 0);
-
-        if (protocol == NEW_PROTOCOL) {
-          schedule_high_priority();
-        }
-
-        g_idle_add(ext_vfo_update, NULL);
-
-        if (timer == 0) {
-          timer = g_timeout_add(250, timeout_cb, a);
-          timer_released = FALSE;
-        }
-
-        free_action = FALSE;
-      } else {
-        timer_released = TRUE;
+      if (timer == 0) {
+        timer = g_timeout_add(250, timeout_cb, a);
+        timer_released = FALSE;
       }
+
+      free_action = FALSE;
+    } else {
+      timer_released = TRUE;
     }
 
     break;

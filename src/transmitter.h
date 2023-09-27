@@ -109,9 +109,6 @@ typedef struct _transmitter {
   gboolean swr_protection;
   double swr_alarm;
 
-  gint xit_enabled;
-  long long xit;
-
   int x;
   int y;
 
