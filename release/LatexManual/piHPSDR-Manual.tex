@@ -867,7 +867,7 @@ between RX and TX, open a menu, and so forth.
 
 Via the \bltt{Exit} menu, you can leave the piHPSDR program. When leaving the program,
 the radio protocol is stopped and all the settings are written to a preferences file. This
-file is located in the piHPSDR directory and takes the name xx-xx-xx-xx-xx-xx.progs, where
+file is located in the piHPSDR directory and takes the name xx-xx-xx-xx-xx-xx.props, where
 the xx encode the MAC address for the radio. So the preferences for different radios (if you
 have more than one) are stored in different files. To leave the program, just click the
 "Exit" button in this menu. If you decide you want to continue, you can leave the \bltt{Exit}
@@ -1151,7 +1151,7 @@ you leave the full screen mode.
 
 If the window width is decreased such that the VFO bar chosen does no longer fit,
 the first one in the list that does fit is automatically selected, and the
-current choice printed in the 
+current choice shown in the 
  pop-down menu \rett{Select VFO bar layout} is updated. This menu lets you choose
  the layout of the VFO
 bar. In Fig. \ref{fig:VFObarChoice} the pre-defined layouts are shown.
@@ -1162,7 +1162,9 @@ These layouts require a screen size of 1010, 895, 795, and 635 pixels (from top 
 bottom).
 The VFO bar has been described in detail in chapter
 \ref{sec:VFObar}. If you choose a VFO bar layout that is wider than the current
-window width allows, the window with is automatically adjusted.
+window width allows, the window width is automatically adjusted (increased). On the
+other hand, choosing a VFO bar layout that is smaller than before does not affect
+the screen dimensions.
 
 \begin{figure}[ht!]
 \center
@@ -1180,7 +1182,7 @@ Note that the piHPSDR menus are designed to fit on a window 800*480 pixels large
 it is not recommended to run piHPSDR on a \textit{screen} that small. On the other hand,
 if piHPSDR is run on a laptop in a small 640*400 window, then menus may be larger than
 that but still fit well on the screen (thus hiding, momentarily, the window of,
-say, your logbook program).
+say, your logbook program) and are perfectly usable.
 
 \rett{Stack receivers horizontally}. If checked, this puts the panels
 of the two receivers (if two receivers are used) side-by-side instead of on top
@@ -1228,14 +1230,16 @@ color (yellow) in the waterfall.
 
 \rett{Waterfall Low:} This is the RX dBm value below which the waterfall will be black.
 
-\rett{Waterfall Automatic:} If this box is checked, the \rett{Waterfall High:} and
-\rett{Waterfall Low:} controls are inactive and the values are not used. Instead, 
+\rett{Waterfall Automatic:} If this box is checked, the \rett{Waterfall High} and
+\rett{Waterfall Low} controls are inactive and the values are not used. Instead, 
 the lowest and highest signal strength in the RX spectrum are automaticall determined
-and are then used instead of the waterfall High/Low control values.
+in each update of the waterfall, and these min/max values
+ are then used instead of the waterfall High/Low control values to determine which
+ colour belongs to which signal strength.
 
 \rett{Detector:} Here one can choose between Peak, Rosenfell, Average and Sample. The
 Rosenfell detector is probably closest to what one knows from a spectrum analyzer.
-the Average detector is usually preferred since it is less ,,nervous''.
+The Average detector is usually preferred since it is less ,,nervous''.
 
 \rett{Averaging:} Here the possible choices are None, Recursive, Time Window and
 Log Recursive. For the details, see the WDSP manual.
@@ -1251,7 +1255,8 @@ for the RX and TX spectrum scopes (see chapter \ref{sec:FillingGradient}).
  Note color coding is not available for the TX panel.
  
  \rett{Display Waterfall} This option enables/disables the waterfall display
- of the RX panels. Note the spectrum scope is always shown.
+ of the RX panels. Note the spectrum scope is always shown (you cannot have the
+ waterfall alone).
  
  \rett{Display Zoom/Pan} This option can be used to show/hide the Zoom and
  Pan slider below the RX or TX panel. If you do not use Zoom, or control
@@ -1259,11 +1264,16 @@ for the RX and TX spectrum scopes (see chapter \ref{sec:FillingGradient}).
  some vertical space.
  
  \rett{Display Sliders} This option can be used to show/hide the slider area
- (AF through Squelch sliders). Hiding them makes little sense unless you
+ (that is where the AF or TX Drive slider resides).
+ Hiding them makes little sense unless you
  have a GPIO or MIDI controller. For temporarily gaining vertical space,
  use the \rett{Hide} button at the top right of the main window.
  
- \rett{Display Toolbar} This option can be used to show/hide the toolbar.
+ \rett{Display Toolbar} This option can be used to show/hide the toolbar. This
+ only makes sense of using an external GPIO or MIDI controller. Note that
+ when using the piHPSDR Controller1, the toolbar should remain on display since
+ this then serves as an indication which function is associtated with each of
+ the 8 push buttone immediately below the screen.
 
 \rett{Display Seq Errs} All data packets from the radio to the PC contain
 a sequence number that is increased  for each packet sent. piHPSDR
@@ -3595,6 +3605,16 @@ step size.
 \rett{d} Hitting a lower-caps letter ,,d'' moves the VFO frequency up by the current VFO
 step size.
 
+\rett{U} Hitting a upper-caps letter ,,U'' moves the VFO frequency of the ,,other'' VFO, that is,
+the VFO that is \textit{not} controlling the active receiver, up by 10 times the VFO step size.
+
+\rett{D} Hitting a upper-caps letter ,,D'' moves the VFO frequency of the ,,other'' VFO, that is,
+the VFO that is \textit{not} controlling the active receiver, up by 10 times the VFO step size.
+
+This (U/D) is for stations chasing DX and using split mode. One can tune to the DX station,
+then copy the VFO of the active receiver to the other one using \bltt{A>B} or \bltt{A<B}, then then
+one can  move the TX frequency (in split mode) using these keys in large steps.
+
 \rett{Keypad 0} $\ldots$ \rett{Keypad 9} Hitting a digit on the numerical keypad executes one of the
 \bltt{NumPad 0} to \bltt{NumPad 9} commands. This can be used for direct frequency entry
 via the keyboard.
@@ -4393,8 +4413,7 @@ icon should appear. In principle, you can start piHPSDR now by double-clicking t
 However (at least on my test system) I get always asked \textit{how} I want to
 start the program (right away, in a terminal window, etc.). 
 To get rid of this question, open the file manager
-and go to the the \texttt{Desktop} directory in your home directory, where you should
-see the desktop icon with name piHPSDR. Select this by single-click and go to
+and go to
 \texttt{Edit}$\to$\texttt{Preferences} (Fig. \ref{fig:piDontAsk}). Activate the check
 box where it is indicated by the red arrow and that's it.
 
@@ -4497,8 +4516,9 @@ if everything went well. If not, and if you do not plan to activate the SOAPYSDR
 option, you can simply ignore this. To check the SoapySDR installation, open a new terminal
 window and just type the command (be careful to use the correct capitalization!)
 
-\grtt{SoapySDRUtil -info}
 \clearpage
+\grtt{SoapySDRUtil -info}
+
 On my test system, this command produced the following output:
 \begin{tiny}
 \begin{verbatim}
@@ -4627,8 +4647,9 @@ procedure works in this case as well and does no harm. In addition to
  If you want to use SoapySDR, please check the Soapy installation. Open a new terminal window and simply
  type the command (be careful to use the correct capitalization!)
 
-\grtt{SoapySDRUtil -info}
 \clearpage
+\grtt{SoapySDRUtil -info}
+
 On my test system, this command produced the following output:
 
 \begin{tiny}

@@ -315,6 +315,8 @@ bool is_valid_config(void)
         if (ClockInfo != 0xF)
           Result = false; // not all clocks are present
 
+        CloseXDMADriver();
+
         return Result;
 }
 
