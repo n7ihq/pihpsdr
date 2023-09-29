@@ -75,26 +75,40 @@ static gboolean close_cb () {
 
 gboolean band_select_cb (GtkWidget *widget, gpointer data) {
   CHOICE *choice = (CHOICE *) data;
-
-  if (current) {
-    g_signal_handler_block(G_OBJECT(current->button), current->signal);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), current == choice);
-    g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
-  }
+  int id = active_receiver->id;
 
   //
   // If the current band has been clicked, this will cycle through the
   // band stack
   //
-  current = choice;
-
   if (radio_is_remote) {
 #ifdef CLIENT_SERVER
-    send_band(client_socket, active_receiver->id, choice->info);
+    send_band(client_socket, id, choice->info);
 #endif
   } else {
-    vfo_band_changed(active_receiver->id, choice->info);
+    vfo_band_changed(id, choice->info);
   }
+
+  if (vfo[id].band != choice->info) {
+    //
+    // Note that a band change may fail. This can happen if the local oscillator
+    // of a transverter band has a grossly wrong frequency such that the effective
+    // radio frequency falls outside the hardware frequency range of the radio.
+    // In this case, the band button to the band that is effective must be highlighted.
+    // 
+    //
+    g_print("BM: choice=%d band=%d\n", vfo[id].band, choice->info);
+    g_signal_handler_block(G_OBJECT(choice->button), choice->signal);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(choice->button), FALSE);
+    g_signal_handler_unblock(G_OBJECT(choice->button), choice->signal);
+    return FALSE;
+  }
+  if (current) {
+    g_signal_handler_block(G_OBJECT(current->button), current->signal);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), current == choice);
+    g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
+  }
+  current = choice;
 
   return FALSE;
 }

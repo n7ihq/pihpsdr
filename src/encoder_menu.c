@@ -50,7 +50,7 @@ static void cleanup() {
 }
 
 static gboolean default_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
-  gpio_default_encoders(controller);
+  gpio_default_encoder_actions(controller);
   cleanup();
   encoder_menu(top_window);
   return TRUE;

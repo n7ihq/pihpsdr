@@ -470,7 +470,6 @@ void filter_cut_default(int id) {
   }
 
   g_idle_add(ext_vfo_update, NULL);
-  t_print("%s: mode=%d filter=%d low=%d high=%d\n", __FUNCTION__, mode, f, filter->low, filter->high);
 }
 //
 // This function is a no-op unless the vfo referenced uses a Var1 or Var2 filter
@@ -481,35 +480,68 @@ void filter_cut_changed(int id, int action, int increment) {
   int mode = vfo[id].mode;
   int f = vfo[id].filter;
 
+  if (mode == modeFMN) {
+    return;
+  }
+
   if (f == filterVar1 || f == filterVar2) {
     FILTER *filter = &(filters[mode][f]);
-    int st = (mode == modeCWU || mode == modeCWL) ? 2 : 5;
-    int lsb = (mode == modeCWL) || (mode == modeLSB) || (mode == modeDIGL);
 
     //
     // Note that set_filter_cut_high/low *only* puts a scale on the screen
     //
     switch (action) {
     case FILTER_CUT_HIGH:
-      if (lsb) {
-        filter->low -= increment * st;
+      switch (mode) {
+      case modeLSB:
+      case modeDIGL:
+        filter->low -= increment * 25;
         set_filter_cut_high(id, -filter->low);
-      } else {
-        filter->high += increment * st;
+        break;
+      case modeCWL:
+        filter->low -= increment * 5;
+        set_filter_cut_high(id, -filter->low);
+        break;
+      case  modeCWU:
+        filter->high += increment * 5;
         set_filter_cut_high(id, filter->high);
+        break;
+      case modeUSB:
+      case modeDIGU:
+        filter->high += increment * 25;
+        set_filter_cut_high(id, filter->high);
+        break;
+      default:
+        filter->high += increment * 50;
+        set_filter_cut_high(id, filter->high);
+        break;
       }
-
       break;
-
     case FILTER_CUT_LOW:
-      if (lsb) {
-        filter->high -= increment * st;
+      switch (mode) {
+      case modeLSB:
+      case modeDIGL:
+        filter->high -= increment * 25;
         set_filter_cut_low(id, -filter->high);
-      } else {
-        filter->low += increment * st;
+        break;
+      case modeCWL:
+        filter->high -= increment * 5;
+        set_filter_cut_low(id, -filter->high);
+        break;
+      case modeCWU:
+        filter->low += increment * 5;
         set_filter_cut_low(id, filter->low);
+        break;
+      case modeUSB:
+      case modeDIGU:
+        filter->low -= increment * 25;
+        set_filter_cut_low(id, -filter->low);
+        break;
+      default:
+        filter->low -= increment * 50;
+        set_filter_cut_low(id, -filter->low);
+        break;
       }
-
       break;
 
     default:
@@ -518,7 +550,6 @@ void filter_cut_changed(int id, int action, int increment) {
 
     vfo_filter_changed(f);
     g_idle_add(ext_vfo_update, NULL);
-    //t_print("%s: rx=%d action=%d, mode=%d filter=%d low=%d high=%d\n", __FUNCTION__,id,action,mode,f,filter->low, filter->high);
   }
 }
 
@@ -531,72 +562,99 @@ void filter_width_changed(int id, int increment) {
   int f = vfo[id].filter;
   FILTER *filter = &(filters[mode][f]);
 
+  if (mode == modeFMN) {
+    return;
+  }
+
   if (f == filterVar1 || f == filterVar2) {
     switch (mode) {
     case modeLSB:
     case modeDIGL:
-      filter->low -= increment * 5;
+      filter->low -= increment * 25;
       break;
 
     case modeUSB:
     case modeDIGU:
-      filter->high += increment * 5;
+      filter->high += increment * 25;
       break;
 
     case modeCWL:
     case modeCWU:
-      filter->low  -= increment * 2;
-      filter->high += increment * 2;
+      filter->low  -= increment * 5;
+      filter->high += increment * 5;
       break;
 
     default:
-      filter->low  -= increment * 5;
-      filter->high += increment * 5;
+      filter->low  -= increment * 50;
+      filter->high += increment * 50;
       break;
     }
 
     vfo_filter_changed(f);
-    g_idle_add(ext_vfo_update, NULL);
     // this *only* displays a scale on the screen
     set_filter_width(id, filter->high - filter->low);
-    //t_print("%s: rx=%d mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,id,vfo[id].mode,vfo[id].filter,filter->low,filter->high);
+    g_idle_add(ext_vfo_update, NULL);
   }
 }
 
 //
 // This function is a no-op unless the vfo referenced uses a Var1 or Var2 filter
+// The shift is defined as the difference of the filter passband mid-point
+// w.r.t. 1500 (USB, DIGU), -1500 (LSB, DIGL), SideToneFreq (CWU), -SideToneFreq (CWL)
+// or zero (everything else).
+//
+// This function changes the shift but leaves the width unchanged
 //
 void filter_shift_changed(int id, int increment) {
   int mode = vfo[id].mode;
   int f = vfo[id].filter;
 
+  if (mode == modeFMN) {
+    return;
+  }
+
   if (f == filterVar1 || f == filterVar2) {
     FILTER *filter = &(filters[mode][f]);
+    int step;
+    int ref;
+    int mid = (filter->high + filter->low) / 2;
+    int wid = (filter->high - filter->low);
+    int shft;
+    int sgn = 1;
 
     switch (mode) {
     case modeLSB:
     case modeDIGL:
-      filter->low = filter->low - (increment * 5);
-      filter->high = filter->high - (increment * 5);
-      // this *only* displays a scale on the screen
-      set_filter_shift(id, filter->high);
+      step = 25;
+      ref  = -1500;
+      sgn  = -1;
       break;
-
     case modeUSB:
     case modeDIGU:
-      filter->low = filter->low + (increment * 5);
-      filter->high = filter->high + (increment * 5);
-      // this *only* displays a scale on the screen
-      set_filter_shift(id, filter->low);
+      step = 25;
+      ref  = 1500;
       break;
-
+    case modeCWL:
+      step = 5;
+      ref  = 0;
+      sgn  = -1;
+      break;
+    case modeCWU:
+      step = 5;
+      ref = 0;
+      break;
     default:
-      // shifting only useful for "single side band" modes.
+      step = 50;
+      ref = 0;
       break;
     }
+    shft = mid - ref;
+    shft += increment * step * sgn;
+    filter->low =  ref + shft - wid / 2;
+    filter->high = ref + shft + wid / 2;
+    set_filter_shift(id, sgn*shft);
 
-    vfo_filter_changed(f),
-                       g_idle_add(ext_vfo_update, NULL);
-    //t_print("%s: rx=%d mode=%d filter=%d low=%d high=%d\n",__FUNCTION__,id,vfo[id].mode,vfo[id].filter,filter->low,filter->high);
+    vfo_filter_changed(f);
+    g_idle_add(ext_vfo_update, NULL);
   }
 }

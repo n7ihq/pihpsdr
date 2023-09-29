@@ -367,10 +367,13 @@ void vfo_band_changed(int id, int b) {
   // If the band is not equal to the current band, look at the frequency of the
   // new bandstack entry.
   // Return quickly if the frequency is not compatible with the radio.
+  // Note the LO frequency of the *new* band must be subtracted here
   //
   if (b != vfo[id].band) {
+    const BAND *band = band_get_band(b);
     bandstack = bandstack_get_bandstack(b);
-    double f = bandstack->entry[bandstack->current_entry].frequency;
+    long long f = bandstack->entry[bandstack->current_entry].frequency;
+    f -= (band->frequencyLO + band->errorLO);
 
     if (f < radio->frequency_min || f > radio->frequency_max) {
       return;

@@ -13,6 +13,7 @@
 \def\rett#1{\texttt{\color{red}#1}}
 \def\bltt#1{\texttt{\color{blue}#1}}
 \def\grtt#1{\texttt{\color{magenta}#1}}
+\graphicspath{{./figures/}}
 \begin{document}
 \frontmatter
 \title{
@@ -323,7 +324,7 @@ piHPSDR can be switched between having one or two receivers in the
  resolution, of course.
  
   
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{SingleReceiver.png}
 \caption{piHPSDR with a single RX and all controls (Zoom/Pan,
@@ -362,7 +363,7 @@ filled below the line. In the picture below, the first and third
 example have no filling, while the second and fourth spectrum
 are filled:
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ScopeFilling.png}
 \caption{Display options for the spectrum scope.}
@@ -381,7 +382,7 @@ gradient option does not apply.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Zoom and Pan}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ZoomPan.png}
 \caption{The spectrum scope of Fig. \ref{fig:SingleReceiver} with a
@@ -420,7 +421,7 @@ by moving the \rett{Pan} slider.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Hide} button}
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{Hidden.png}
 \caption{piHPSDR window with the Toolbar/Sliders/Zoom
@@ -598,7 +599,7 @@ same way, a secondary click in the TX panel will open the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VFO bar and status  indicators}
 \label{sec:VFObar}
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{VFObar.png}
 \caption{The VFO bar}
@@ -759,7 +760,7 @@ the meter. To the left (right) there are the digital (analog) meters,
 while the top panels show the meter during RX and the lower panels
 during TX.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=8cm]{MeterDesigns.png}
 \caption{Different designs for the meter.}
@@ -790,7 +791,7 @@ is described in the \bltt{Meter} menu.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: introduction}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{MainMenu.png}
 \caption{The Main men, opened by the \rett{Menu} button.}
@@ -858,7 +859,7 @@ between RX and TX, open a menu, and so forth.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Exit} Menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ExitMenu.png}
 \caption{The \bltt{Exit} menu.}
@@ -884,7 +885,7 @@ program but no re-boot or shutdown takes place, due to missing administrator pri
 \clearpage
 \section{The \texttt{About} Menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{AboutMenu.png}
 \caption{The \bltt{About} menu.}
@@ -906,7 +907,7 @@ preferences are stored in a file whose name is derived from the radio's MAC addr
 \chapter{The Main Menu: Radio-related menus}
 \section{The \texttt{Radio} Menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{RadioMenu.png}
 \caption{The \bltt{Radio} menu.}
@@ -1068,7 +1069,7 @@ if the signal shown is too strong. For normal HPSDR radios, the default value is
  settings, as shown in Fig. \ref{fig:RadioMenuMetis}. You will see this only if the radio identifies
  itself as a METIS board.
   
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{RadioMenuMetis.png}
 \caption{The \bltt{Radio} menu for a legacy HPSDR board.}
@@ -1125,7 +1126,7 @@ the screen size has been the most frequent feature request in the last years,
 so I finally decided to implement it. The menu is opened
 via the main menu and the \bltt{Screen} button and is shown in Fig. \ref{fig:ScreenMenu}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ScreenMenu.png}
 \caption{The \bltt{Screen} menu.}
@@ -1141,7 +1142,7 @@ immediately. If piHPSDR is in full screen mode (see below), you can change the
 values of the window width and height, but they do not become effective until
 you leave the full screen mode.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{VFObarChoice.png}
 \caption{Four choices for the VFO bar built into piHPSDR.}
@@ -1163,7 +1164,7 @@ The VFO bar has been described in detail in chapter
 \ref{sec:VFObar}. If you choose a VFO bar layout that is wider than the current
 window width allows, the window with is automatically adjusted.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=9cm]{640x400.png}
 \caption{piHPSDR running in a 640 x 400 window.}
@@ -1200,7 +1201,7 @@ window and the RX panadapters. Adjustments
 for the TX panadapter must be done in the \bltt{TX} menu. The menu is shown
 in Fig. \ref{fig:DisplayMenu}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{DisplayMenu.png}
 \caption{The \bltt{Display} menu.}
@@ -1281,7 +1282,7 @@ happens regularly, it is no reason to worry.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Meter} menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{MeterMenu.png}
 \caption{The \bltt{Meter} menu.}
@@ -1335,7 +1336,7 @@ between 28 and 30 MHz and which will convert them to the frequency
 range 144 to 146 MHz, and which will receive frequencies in that
 range and mix them down to the 10m band. The data you have to enter
 in the \bltt{XVTR} menu (use the first free entry) are as follows:
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{XVTRMenu.png}
 \caption{The \bltt{XVTR} (transverter) menu.}
@@ -1377,7 +1378,7 @@ of the main menu. These are all VFO-related menus.
 
 \section{The \texttt{VFO}  menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \includegraphics[width=12cm]{VFOmenu.png}
 \caption{The \bltt{VFO} menu.}
 \label{fig:VFOmenu}
@@ -1449,7 +1450,7 @@ The \bltt{Band} menu lets you change the band of the active receiver. It is show
 in Fig. \ref{fig:BandMenu}. When the menu opens, the button of the current band
 is highlighted.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{BandMenu.png}
 \caption{The \bltt{Band} menu.}
@@ -1481,7 +1482,7 @@ will end up in the General band. If you have defined transverter bands (see the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The  \texttt{BndStack} (Bandstack) menu}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{BandstackMenu.png}
 \caption{The \bltt{BndStack} (Bandstack) menu.}
@@ -1505,7 +1506,7 @@ receiver is controlled by VFO-A.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Mode} menu}
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ModeMenu.png}
 \caption{The \bltt{Mode} menu.}
@@ -1543,7 +1544,7 @@ and filter currently stored in the memory slot and clicking on of the five butto
 the data. So if you have some often used frequencies (e.g. for a net), the
 \bltt{Memory} menu allows you to become QRV there with only few mouse clicks.
 
- \begin{figure}[h]
+ \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{MemMenu.png}
 \caption{The \bltt{Memory} menu.}
@@ -1582,7 +1583,7 @@ can be used for connecting a dedicated RX antenna.
 \textbf{Note: Diversity}. When using \bltt{Diversity} reception, the ADC setting is
 overridden, since there data streams from ADC0 and ADC1 are combined (mixed).
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{RXMenu.png}
 \caption{The \bltt{RX} menu.}
@@ -1595,7 +1596,7 @@ the ADC converter in some HPSDR boards.
 \rett{Random}. When checked, the ,,random'' bit is set which affects the operation of
 the ADC converter in some HPSDR boards.
 
-\rett{Preamp}. This checkbox is not shown in Fig. \ref{fig:RXmenu}, it only occurs
+\rett{Preamp}. This checkbox is not shown in Fig. \ref{fig:RXMenu}, it only occurs
 for some legacy HPSDR boards which had a switch-able RX preamp.
 
 \rett{Mute when not active}. If checked, the audio from this receiver is muted when
@@ -1624,7 +1625,7 @@ digital modes.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Filter} menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{FilterMenuUSB.png}
 \caption{The \bltt{Filter} menu (single side band modes).}
@@ -1646,7 +1647,7 @@ The pre-defined filters for the digital modes DIGU and DIGL are a little bit dif
 For filter widths up to 3 kHz, the filter is centered around 1500 Hz. For example,
 a 1.0k filter for DIGU/DIGL passes audio frequencies between 1000 and 2000 Hz.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{FilterMenuCW.png}
 \caption{The \bltt{Filter} menu for CWL/CWU.}
@@ -1691,7 +1692,7 @@ and 5000 Hz.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Noise} Menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{NoiseMenu1.png}
 \caption{The \bltt{Noise} menu (with NR settings).}
@@ -1738,7 +1739,7 @@ capabilities (SNB, ANF, NR1, NR2).
 artifacts, so there is an option to reduce such artifacts which should normally be checked
 (artifact elminiation ,,on'').
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{NoiseMenu2.png}
 \caption{The \bltt{Noise} menu (with NB settings).}
@@ -1776,7 +1777,7 @@ since the AGC hang time is turned off for Medium and Fast.
 In this case, the RX spectrum scope not only shows the ,,normal'' AGC line in green,
 but also the hang threshold line in orange.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{AGCMenu.png}
 \caption{The \bltt{AGC} menu.}
@@ -1793,7 +1794,7 @@ a lot of noise that originates somewhere in your house. Now suppose you have a s
 receive-only antenna placed in your house that will predominantly pick up your local
 QRM and only very little DX signal.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{DiversityMenu.png}
 \caption{The \bltt{Diversity} menu.}
@@ -1817,7 +1818,7 @@ the RX ,,BFO frequency''.
 
 \section{The \texttt{TX} Menu}
 \label{sec:txmenu}
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{TXMenu.png}
 \caption{The \bltt{TX} menu.}
@@ -1938,7 +1939,7 @@ to the PA being used, and you can establish a calibration of the
 power begin displayed in the meter section while transmitting.
 The menu presents itself as shown in Fig. \ref{fig:PAMenuCalibrate}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{PAMenuCalibrate.png}
 \caption{The PA menu, PA calibration screen}
@@ -1990,7 +1991,7 @@ the piHPSDR window. If you open the \bltt{PA} menu and click
 on the text \rett{Watt Meter Calibrate}, the menu changes
 and looks like in Fig. \ref{fig:PAMenuWatt}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{PAMenuWatt.png}
 \caption{The PA menu, Watt meter calibration}
@@ -2047,7 +2048,7 @@ in digital modes, if there is no possiblity that the digimode program can
 put piHPSDR into TX mode via CAT commands or hardware lines. The VOX menu
 is shown in Fig. \ref{fig:VOXMenu}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{VOXMenu.png}
 \caption{The VOX menu}
@@ -2075,7 +2076,7 @@ VOX is very nice for rag-chew phone QSOs, I won't recommend it for contest opera
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{PS} (PureSignal) Menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{PSMenu.png}
 \caption{The PureSignal (PS) menu}
@@ -2129,7 +2130,7 @@ PS feedback signal. It can be \rett{Internal} which means internal feedback
 TX/RX relay), or it can be \rett{Ext1} or \rett{ByPass} which refers to the
 auxiliary antenna jacks. 
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{PSnomon.png}
 \caption{PS: TwoTone without MON}
@@ -2146,7 +2147,7 @@ The feedback level reported by the PS calibration algorithm is further reported 
 is green if calibration was successful and PS correction takes place, and the string is
 red if no good calibration could be made.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{PSmon.png}
 \caption{PS: TwoTone with MON}
@@ -2197,7 +2198,7 @@ about 30 dBc, which reflects the non-linearity of the PA.
 The CW menu controls parameters related to CW operation. The menu
 is shown in Fig. \ref{fig:CWMenu}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{CWMenu.png}
 \caption{The CW menu}
@@ -2270,7 +2271,7 @@ I personally never use it.
 
 \section{The \texttt{FFT} (Signal Processing) Menu}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{FFTMenu.png}
 \caption{The FFT menu.}
@@ -2321,7 +2322,7 @@ your transmitted signal. You can, for example, provide some extra
 amplification to the low-frequency part of your voice. The menu
 is shown in Fig. \ref{fig:EqualizerMenu}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{EqualizerMenu.png}
 \caption{The Equalizer menu}
@@ -2356,7 +2357,7 @@ The \bltt{Ant} menu, as shown in Fig. \ref{fig:ANTmenu},
 applies to HPSDR radios. For SoapySDR radios, the layout
 is much simpler because there are much fewer choices possible.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ANTmenu.png}
 \caption{The ANT (antenna) menu.}
@@ -2401,7 +2402,7 @@ after the memory tune delay, which can also be specified in this menu.
 This can be used to send short tuning pulsed of varying length to the
 external automatic tuner at the beginning of the tuning.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{OCMenu.png}
 \caption{The OC (open collector) menu.}
@@ -2423,7 +2424,7 @@ that a positioned below the screen, are bound to the eight toolbar buttons on th
 Therefore, there is no "Switches" menu for this controller, and the switches are implicitly
 configured via the Toolbar menu.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{ToolbarMenu1.png}
 \caption{The Toolbar menu, just opened.}
@@ -2438,7 +2439,7 @@ to a set of eight functions. There are six such sets, and pressing the rightmost
 of the toolbar cycles through these six sets. The text on the rightmost toolbar button, \rett{FNC(0)}, indicates which
 layer is currently active. 
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu2.png}
 \caption{Toolbar menu. Changing second button in \texttt{F1} layer.}
@@ -2453,7 +2454,7 @@ the \texttt{CTUN} button (third button in the second row) an ,,action dialog'' p
 in Fig. \ref{fig:ToolbarMenu2}.
 
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu3.png}
 \caption{Just selected \texttt{Band20}.}
@@ -2471,7 +2472,7 @@ in the second
 line of the toolbar menu has changed, it now gives the short text (\texttt{20}) of the action, which will
 switch the active receiver to the 20m band (see the explanation of all the actions in Appendix A).
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu4.png}
 \caption{Toolbar assignment accomplished.}
@@ -2483,7 +2484,7 @@ while currently the \texttt{FNC(0)} set is active. If one now, however, clicks t
 toolbar button with the text \texttt{FNC(0)} one advances to the next set and the toolbar labels
 are updated (Fig. \ref{fig:ToolbarMenu5}).
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{ToolbarMenu5.png}
 \caption{The new \texttt{F1} layer is operative.}
@@ -2526,7 +2527,7 @@ radios, either choose TS-2000 or (preferably) the ,,OpenHPSDR PiHPSDR'' radio mo
 out values
 adapted to piHPSDR. The \bltt{RigCtl} menu is shown in Fig. \ref{fig:RigCtlMenu}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{RigCtlMenu.png}
 \caption{The RigCtl (Rig Control) menu.}
@@ -2632,7 +2633,7 @@ as a signed quantity, such that values 0, 1, 2, $\ldots$ correspond to clockwise
 and numbers 127, 126, 125, $\ldots$ to counter-clockwise rotations. It is clear that
 the piHPSDR MIDI configuration menu must be flexible enough to handle all these situations.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{MIDImenu1.png}
 \caption{The (virgin) MIDI menu.}
@@ -2686,7 +2687,7 @@ This way it is possible to run two instances of piHPSDR on the same computer, bo
 connected to different radios, and control them independently with two different MIDI
 consoles. The first thing you have to do is to check all MIDI devices you want to use.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{MIDImenu2.png}
 \caption{The MIDI menu, VFO wheel turned.}
@@ -2724,14 +2725,14 @@ and very fast right turns. Specifying an interval from $-1$ to $-1$ means that
 this case will never be realized. In the example shown (Fig. \ref{fig:MIDImenu2}),
 we have chosen to map all values from 0-63 to a left turn, and all values from 65-127
 to a right turn.
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{MIDImenu3.png}
 \caption{The MIDI menu, selecting VFO action}
 \label{fig:MIDImenu3}
 \end{figure}
  
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{MIDImenu4.png}
 \caption{The MIDI menu, VFO action selected}
@@ -2759,14 +2760,14 @@ to change the VFO frequency.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Encoders} Menu}
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{g2_frontpanel.png}
 \caption{A picture of the G2 frontpanel (image courtesy of Apache Labs).}
 \label{fig:g2_frontpanel}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{EncoderMenuG2.png}
 \caption{The Encoder menu for the G2 frontpanel controller}
@@ -2804,7 +2805,7 @@ re-assign the default values (those shown in Fig. \ref{fig:EncoderMenuG2})
 to the encoder functions, which match the silk printing 
 on the enclosure (see Fig. \ref{fig:g2_frontpanel}).
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{Apache_Controller2.png}
 \caption{A picture of the Controller2 (image by courtesy of Apache Labs).}
@@ -2819,14 +2820,14 @@ So if you run piHPSDR with a Controller2, then the menu looks different (Fig. \r
 for groups with three buttons each, and it should be clear which group belongs to which button. The
 \rett{Default} button again re-installs the default functions (those shown in Fig. \ref{fig:EncoderMenuV2}).
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{EncoderMenuV2.png}
 \caption{The Encoder menu for Controller2}
 \label{fig:EncoderMenuV2}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{Apache_Controller1.png}
 \caption{A picture of the Controller1 (image by courtesy of Apache Labs).}
@@ -2843,7 +2844,7 @@ two buttons each. The \rett{Default} button again re-installs the default values
 Fig. \ref{fig:EncoderMenuV1}, these are chosen just for convenience since there are no default
 function printed on the enclosure.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{EncoderMenuV1.png}
 \caption{The Encoder menu for Controller1}
@@ -2873,7 +2874,7 @@ to these buttons is done exactly as described for the \bltt{Toolbar} menu
 (chapter \ref{sec:toolbarmenu}). With \rett{Default} one re-installs the default values
 shown in Fig. \ref{fig:SwitchMenuG2} which match the functions printed on the enclosure.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{SwitchMenuG2.png}
 \caption{The Switches menu for the G2 frontpanel controller.}
@@ -2895,7 +2896,7 @@ to these buttons is done exactly as described for the \bltt{Toolbar} menu
 With \rett{Default} one re-installs the default values
 shown in Fig. \ref{fig:SwitchMenuV2} which match the functions printed on the enclosure.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{SwitchMenuV2.png}
 \caption{The Switches menu for Controller2.}
@@ -4060,18 +4061,18 @@ boot (again, search the internet). Now we show how to set this up and show piHPS
 We begin with the piHPSDR settings in the \bltt{RX} (Fig. \ref{fig:rx_settings_alsa_audio}) and
 \bltt{TX} (Fig. \ref{fig:tx_settings_alsa_audio}) menu:
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{rx_settings_alsa_audio.png}
 \caption{RX menu settings for using loopback with ALSA.}
 \label{fig:rx_settings_alsa_audio}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{tx_settings_alsa_audio.png}
 \caption{TX menu settings for using loopback with ALSA.}
-\label{fig:rx_settings_alsa_audio}
+\label{fig:tx_settings_alsa_audio}
 \end{figure}
 
 Is clearly seen that the output device of RXcable (5,1) is used for local RX audio, and the input
@@ -4079,7 +4080,7 @@ device of TXcable (6,0) is used for local microphone input. The corresponding WS
 tab looks similar (Fig. \ref{fig:wsjtx_settings_alsa_audio}, only the upper part of the
 window is shown):
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{wsjtx_settings_alsa_audio.png}
 \caption{WSJTX audio settings for using loopback with ALSA.}
@@ -4092,7 +4093,7 @@ clear names of the devices rather than its ID numbers. Finally, we show the WSJT
 tab for establishing the CAT connection, although this is not specific to ALSA 
 (Fig. \ref{fig:wsjtx_settings_radio}):
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{wsjtx_settings_radio.png}
 \caption{WSJTX radio settings for CAT connection to piHPSDR.}
@@ -4121,7 +4122,7 @@ in pulseaudio there are the so-called ,,null sink'' devices which are output dev
 that are just black holes that swallow all audio output sent to them. Their only purpose
 is that they also have a monitor device associated which you can then use.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{rx_settings_pa_audio.png}
 \caption{RX menu settings with pulseaudio}
@@ -4175,7 +4176,7 @@ and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
 
 
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{tx_settings_pa_audio.png}
 \caption{TX menu settings with pulseaudio}
@@ -4184,7 +4185,7 @@ and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
 
 In the WSJTX audio tab, the input/output assigments are just reversed:
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{wsjtx_settings_pa_audio.png}
 \caption{WSJTX audio settings with pulseaudio}
@@ -4206,14 +4207,14 @@ and to a virtual cable, thus eliminating the need to change piHPSDR menu setting
 when switching between SSB and digi. The following picture just shows my setup
 (Figs. \ref{fig:loopback_rx} and \ref{fig:loopback_tx}).
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{loopback_rx.png}
 \caption{Setting up ,,loopback'' on MacOS, RXcable}
 \label{fig:loopback_rx}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \center
 \includegraphics[width=12cm]{loopback_tx.png}
 \caption{Setting up ,,loopback'' on MacOS, TXcable}
@@ -4308,7 +4309,7 @@ reduction facilities \texttt{rnnnoise} and \texttt{libspecbleach}, see \\
 \chapter[RaspPi: Activating I2C]{RaspPi: Activating the I2C interface}
 \label{sec:i2c}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=9cm]{piEnableI2C.png}
 \caption{Enabling the I2C controller.}
@@ -4379,7 +4380,7 @@ is then done via the following four commands, which have to be typed in exactly 
 \grtt{tar xvf pihpsdr.tar} \\
 \grtt{pihpsdr/install.sh} \\
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \center
 \includegraphics[width=9cm]{piDontAsk.png}
 \caption{Suppress being asked options when clicking the piHPSDR desktop icon.}

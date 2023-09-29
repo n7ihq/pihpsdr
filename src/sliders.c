@@ -102,6 +102,9 @@ void show_popup_slider(enum ACTION action, int rx, double min, double max, doubl
   //
   static GtkWidget *popup_scale = NULL;
   static int scale_rx;
+  static double scale_min;
+  static double scale_max;
+  static double scale_wid;
 
   //
   // a) if there is still a pop-up slider on the screen for a different action, destroy it
@@ -120,6 +123,9 @@ void show_popup_slider(enum ACTION action, int rx, double min, double max, doubl
     //
     scale_status = action;
     scale_rx = rx;
+    scale_min = min;
+    scale_max = max;
+    scale_wid = max - min;
     scale_dialog = gtk_dialog_new_with_buttons(title, GTK_WINDOW(top_window), GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
     GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
     popup_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, min, max, delta);
@@ -136,6 +142,16 @@ void show_popup_slider(enum ACTION action, int rx, double min, double max, doubl
     // c) if a pop-up slider for THIS action is still on display, adjust value and reset timeout
     //
     g_source_remove(scale_timer);
+    if (value > scale_min + 1.01 * scale_wid) {
+      scale_min = scale_min + 0.5 * scale_wid;
+      scale_max = scale_max + 0.5 * scale_wid;
+      gtk_range_set_range(GTK_RANGE(popup_scale), scale_min, scale_max);
+    }
+    if (value < scale_max - 1.01 * scale_wid) {
+      scale_min = scale_min - 0.5 * scale_wid;
+      scale_max = scale_max - 0.5 * scale_wid;
+      gtk_range_set_range(GTK_RANGE(popup_scale), scale_min, scale_max);
+    }
     gtk_range_set_value (GTK_RANGE(popup_scale), value),
                         scale_timer = g_timeout_add(2000, scale_timeout_cb, NULL);
   }
@@ -485,26 +501,23 @@ void set_rf_gain(int rx, double value) {
 
 void set_filter_width(int rx, int width) {
   //t_print("%s width=%d\n",__FUNCTION__, width);
-  double min, max;
   char title[64];
   sprintf(title, "Filter Width RX %d (Hz)", rx);
-
-  if (width < 1000) {
-    min = 0.0;
-    max = 2000;
-  } else {
-    min = (double) (width - 1000);
-    max = (double) (width + 1000);
+  int min = width - 1000;
+  int max = width + 1000;
+  if (min < 0) {
+    min = 0;
   }
-
-  show_popup_slider(IF_WIDTH, rx, min, max, 1.0, (double) width, title);
+  show_popup_slider(IF_WIDTH, rx, (double)(min), (double)(max), 1.0, (double) width, title);
 }
 
 void set_filter_shift(int rx, int shift) {
   //t_print("%s shift=%d\n",__FUNCTION__, shift);
   char title[64];
   sprintf(title, "Filter SHIFT RX %d (Hz)", rx);
-  show_popup_slider(IF_SHIFT, rx,  (double)(shift - 1000), (double) (shift + 1000), 1.0, (double) shift, title);
+  int min = shift - 1000;
+  int max = shift + 1000;
+  show_popup_slider(IF_SHIFT, rx,  (double)(min), (double) (max), 1.0, (double) shift, title);
 }
 
 static void linein_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -579,14 +592,24 @@ void set_filter_cut_high(int rx, int var) {
   //t_print("%s var=%d\n",__FUNCTION__,var);
   char title[64];
   sprintf(title, "Filter Cut High RX %d (Hz)", rx);
-  show_popup_slider(FILTER_CUT_HIGH, rx, (double)(var - 1000), (double)(var + 1000), 1.00, (double) var, title);
+  int min = var - 1000;
+  int max = var + 1000;
+  if (min < 0) {
+    min = 0;
+  }
+  show_popup_slider(FILTER_CUT_HIGH, rx, (double)(min), (double)(max), 1.00, (double) var, title);
 }
 
 void set_filter_cut_low(int rx, int var) {
   //t_print("%s var=%d\n",__FUNCTION__,var);
   char title[64];
   sprintf(title, "Filter Cut Low RX %d (Hz)", rx);
-  show_popup_slider(FILTER_CUT_LOW, rx, (double)(var - 1000), (double)(var + 1000), 1.00, (double) var, title);
+  int min = var - 1000;
+  int max = var + 1000;
+  if (min < 0) {
+    min = 0;
+  }
+  show_popup_slider(FILTER_CUT_LOW, rx, (double)(min), (double)(max), 1.00, (double) var, title);
 }
 
 static void squelch_value_changed_cb(GtkWidget *widget, gpointer data) {

@@ -67,8 +67,8 @@ extern int *sw_action;
 
 extern long settle_time;
 
-extern void gpio_default_encoders(int ctrlr);
-extern void gpio_default_switches(int ctrlr);
+extern void gpio_default_encoder_actions(int ctrlr);
+extern void gpio_default_switch_actions(int ctrlr);
 extern void gpio_set_defaults(int ctrlr);
 extern void gpioRestoreActions(void);
 extern void gpioRestoreState(void);

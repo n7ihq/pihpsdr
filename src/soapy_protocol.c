@@ -492,8 +492,8 @@ void soapy_protocol_set_tx_frequency(TRANSMITTER *tx) {
       f = (double)(vfo[v].frequency);
     }
 
-    if (transmitter->xit_enabled) {
-      f += (double)(transmitter->xit);
+    if (vfo[v].xit_enabled) {
+      f += (double)(vfo[v].xit);
     }
 
     //t_print("soapy_protocol_set_tx_frequency: %f\n",f);

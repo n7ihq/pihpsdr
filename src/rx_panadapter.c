@@ -267,11 +267,20 @@ void rx_panadapter_update(RECEIVER *rx) {
   else if (divisor >   1000LL) { divisor =   2000LL; }
   else { divisor =   1000LL; }
 
+  //
+  // Calculate the actual distance of frequency markers
+  // (in pixels)
+  //
+  int marker_distance = (rx->pixels * divisor) / rx->sample_rate;
   f = ((min_display / divisor) * divisor) + divisor;
   cairo_select_font_face(cr, DISPLAY_FONT,
                          CAIRO_FONT_SLANT_NORMAL,
                          CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
+  //
+  // If space is available, increase font size of freq. labels a bit
+  //
+  int marker_extra = (marker_distance > 100) ? 2 : 0;
+  cairo_set_font_size(cr, DISPLAY_FONT_SIZE2 + marker_extra);
 
   while (f < max_display) {
     double x = (double)(f - min_display) / HzPerPixel;
@@ -289,7 +298,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       // display all digits here so we give three dots
       // and three "Mhz" digits
       //
-      if (f > 10000000000LL) {
+      if (f > 10000000000LL && marker_distance < 80) {
         sprintf(v, "...%03lld.%03lld", (f / 1000000) % 1000, (f % 1000000) / 1000);
       } else {
         sprintf(v, "%0lld.%03lld", f / 1000000, (f % 1000000) / 1000);
@@ -297,7 +306,7 @@ void rx_panadapter_update(RECEIVER *rx) {
 
       // center text at "x" position
       cairo_text_extents(cr, v, &extents);
-      cairo_move_to(cr, x - (extents.width / 2.0), 10.0);
+      cairo_move_to(cr, x - (extents.width / 2.0), 10 + marker_extra);
       cairo_show_text(cr, v);
     }
 

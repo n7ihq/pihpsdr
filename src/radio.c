@@ -793,22 +793,22 @@ static void create_visual() {
 //  do not set can_transmit before transmitter exists, because we assume
 //  if (can_transmit) is equivalent to if (transmitter)
 //
-    int local_can_transmit;
+    int radio_has_transmitter=0;
 
     switch (protocol) {
     case ORIGINAL_PROTOCOL:
     case NEW_PROTOCOL:
-      local_can_transmit = 1;
+      radio_has_transmitter = 1;
       break;
 #ifdef SOAPYSDR
 
     case SOAPYSDR_PROTOCOL:
-      local_can_transmit = (radio->info.soapy.tx_channels != 0);
+      radio_has_transmitter = (radio->info.soapy.tx_channels != 0);
       break;
 #endif
     }
 
-    if (local_can_transmit) {
+    if (radio_has_transmitter) {
       if (duplex) {
         transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width / 4, my_height / 2);
       } else {

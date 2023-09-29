@@ -77,7 +77,7 @@ sudo apt-get install --yes libiio-dev
 sudo apt-get install --yes bison
 sudo apt-get install --yes flex
 sudo apt-get install --yes libxml2-dev
-
+sudo apt-get install --yes librtlsdr-dev
 
 ################################################################
 #
