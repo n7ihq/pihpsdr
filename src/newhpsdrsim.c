@@ -40,33 +40,33 @@
  * These variables represent the state of the machine
  */
 // data from general packet
-static int ddc_port = 0;
-static int duc_port = 0;
-static int hp_port = 0;
-static int shp_port = 0;
-static int audio_port = 0;
-static int duc0_port = 0;
-static int ddc0_port = 0;
-static int mic_port = 0;
-static int wide_port = 0;
-static int wide_enable = 0;
-static int wide_len = 0;
-static int wide_size = 0;
-static int wide_rate = 0;
-static int wide_ppf = 0;
-static int port_mm = 0;
-static int port_smm = 0;
-static int pwm_min = 0;
-static int pwm_max = 0;
-static int bits = 0;
-static int hwtim = 0;
-static int pa_enable = 0;
-static int alex0_enable = 0;
-static int alex1_enable = 0;
-static int iqform = 0;
+static int ddc_port = -1;
+static int duc_port = -1;
+static int hp_port = -1;
+static int shp_port = -1;
+static int audio_port = -1;
+static int duc0_port = -1;
+static int ddc0_port = -1;
+static int mic_port = -1;
+static int wide_port = -1;
+static int wide_enable = -1;
+static int wide_len = -1;
+static int wide_size = -1;
+static int wide_rate = -1;
+static int wide_ppf = -1;
+static int port_mm = -1;
+static int port_smm = -1;
+static int pwm_min = -1;
+static int pwm_max = -1;
+static int bits = -1;
+static int hwtim = -1;
+static int pa_enable = -1;
+static int alex0_enable = -1;
+static int alex1_enable = -1;
+static int iqform = -1;
 
 // data from rx specific packet
-static int n_adc = 0;
+static int n_adc = -1;
 static int adcdither[8];
 static int adcrandom[8];
 static int ddcenable[NUMRECEIVERS];
@@ -75,37 +75,37 @@ static int rxrate[NUMRECEIVERS];
 static int syncddc[NUMRECEIVERS];
 
 //data from tx specific packet
-static int dac = 0;
-static int cwmode = 0;
-static int sidelevel = 0;
-static int sidefreq = 0;
-static int speed = 0;
-static int weight = 0;
-static int hang = 0;
-static int delay = 0;
-static int txrate = 0;
-static int ducbits = 0;
-static int orion = 0;
-static int gain = 0;
-static int txatt = 0;
+static int dac = -1;
+static int cwmode = -1;
+static int sidelevel = -1;
+static int sidefreq = -1;
+static int speed = -1;
+static int weight = -1;
+static int hang = -1;
+static int delay = -1;
+static int txrate = -1;
+static int ducbits = -1;
+static int orion = -1;
+static int gain = -1;
+static int txatt = -1;
 
 //stat from high-priority packet
 static int run = 0;
-static int ptt = 0;
-static int cwx = 0;
-static int dot = 0;
-static int dash = 0;
+static int ptt = -1;
+static int cwx = -1;
+static int dot = -1;
+static int dash = -1;
 static long rxfreq[NUMRECEIVERS];
-static long txfreq = 0;
-static int txdrive = 0;
-static int w1400 = 0; // Xvtr and Audio enable
-static int ocout = 0;
-static int db9 = 0;
-static int mercury_atts = 0;
+static long txfreq = -1;
+static int txdrive = -1;
+static int w1400 = -1; // Xvtr and Audio enable
+static int ocout = -1;
+static int db9 = -1;
+static int mercury_atts = -1;
 static int alex0[32];
 static int alex1[32];
-static int stepatt0 = 0;
-static int stepatt1 = 0;
+static int stepatt0 = -1;
+static int stepatt1 = -1;
 
 //
 // floating point representation of TX-Drive and ADC0-Attenuator
@@ -618,20 +618,10 @@ void *duc_specific_thread(void *data) {
     }
 
     if (orion != buffer[50]) {
+      printf("---------------------------------------------------\n");
       orion = buffer[50];
 
-      if (orion & 0x04) {
-        printf("TX: ORION MicPtt disabled\n");
-      } else {
-        printf("TX: ORION MicPtt enabled\n");
-      }
-
-      if (orion & 0x08) {
-        printf("TX: ORION PTT=ring MIC=tip\n");
-      } else {
-        printf("TX: ORION PTT=tip  MIC=ring\n");
-      }
-
+      // Bit 0:  0=LineIn, 1=No LineIn (Mic)
       if (orion & 0x01) {
         gain = buffer[51];
         printf("TX: ORION Line-In selected\n");
@@ -639,11 +629,41 @@ void *duc_specific_thread(void *data) {
         printf("TX: ORION Microphone selected\n");
       }
 
+      // Bit 1: MicBoost 0=Off 1=On
       if (orion & 0x02) {
         printf("TX: ORION Microphone 20dB boost selected\n");
       } else {
         printf("TX: ORION Microphone 20dB boost NOT selected\n");
       }
+
+      // Bit 2: PTT 0=Enabled 1=Disabled
+      if (orion & 0x04) {
+        printf("TX: ORION MicPtt disabled\n");
+      } else {
+        printf("TX: ORION MicPtt enabled\n");
+      }
+
+      // Bit 3: TIP connection 0=Mic  1=PTT
+      if (orion & 0x08) {
+        printf("TX: ORION TIP <-- Mic\n");
+      } else {
+        printf("TX: ORION TIP <--- PTT\n");
+      }
+
+      // Bit 4: BIAS 0=off 1=on
+      if (orion & 0x10)  {
+        printf("TX: MicBias enabled\n");
+      } else {
+        printf("TX: MicBias disabled\n");
+      }
+
+      // Bit 5: Saturn Mic: 0=Mic 1=XLR
+      if (orion & 0x20)  {
+        printf("TX: Saturn XLR jack\n");
+      } else {
+        printf("TX: Saturn Mic jack\n");
+      }
+      printf("---------------------------------------------------\n");
     }
 
     if (gain != buffer[51]) {

@@ -4354,6 +4354,8 @@ Do not change the buttons in the other lines, the need not be as shown here.
 system (32-bit ,,BullsEye'', released May 3rd 2023, Kernel version 6.1) obtained from} \\
 \texttt{https://www.raspberrypi.com/software/operating-systems/}.
 
+
+
 For new-bees, an easy binary-only installation is provided. This binary has the following
 properties:
 
@@ -4370,6 +4372,28 @@ The following \textit{caveat} applies both to the binary installation and the co
 the source code: If you want to use the Controller2 or the G2 frontpanel controller,
  the Raspberry Pi I2C interface
 must be enabled, as described in Appendix \ref{sec:i2c}.
+
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} -------------- A Note on using RealVNC --------------}
+\end{center}
+Very often, RealVNC is used to display the RaspPi
+desktop onto the screen of the main computer one is using. One has to be aware that this is not
+only consuming a lot of CPU power (on both sides), but also puts a high load on the network
+connection. While using VNC is perfectly OK for compiling and installing software, it is
+{\color{red} highly recommended} to shut down RealVNC on the RaspPi when connecting to a radio.
+Many users have reported audio cracks and other signs of failures in the data stream between the
+radio and the RapsPi when using RealVNC. An indication of network or CPU congestion is, if
+the audio problems get worse when the sample rate changes, say, from 48k to 96k to 192k.
+It has also been reported that when using VNC, the situation gets worse then the piHPSDR window
+is made larger, which is also an indication that problems are rooted in the resources
+consumed by the VNC connection.
+}
+}
+\end{center}
+
 
 Before you shout at me, because your most-wanted compile time option is deactivated in the
 binary installation, let me explain that I want to satisfy the maximum number of people but
@@ -4449,11 +4473,48 @@ the source code: If you want to use the Controller2 or the G2 frontpanel control
  the Raspberry Pi I2C interface
 must be enabled, as described in Appendix \ref{sec:i2c}.
 
-{\color{red} \textbf{For Non-RaspPi Linux systems:} The whole installation procedure depends on that your user account is an administrator account,
-such that you can execute ,,sudo'' commands in the terminal window. You may be asked the administrator
-password. If your user account does not qualify for administrator work, then you are simply not allowed
-to install the ,,HomeBrew'' universe which is the prerequisite for compiling piHPSDR. In normal cases
-(you own the computer) you should have administrator privileges.}
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} -------------- A Note on using RealVNC --------------}
+\end{center}
+Very often, RealVNC is used to display the RaspPi
+desktop onto the screen of the main computer one is using. One has to be aware that this is not
+only consuming a lot of CPU power (on both sides), but also puts a high load on the network
+connection. While using VNC is perfectly OK for compiling and installing software, it is
+{\color{red} highly recommended} to shut down RealVNC on the RaspPi when connecting to a radio.
+Many users have reported audio cracks and other signs of failures in the data stream between the
+radio and the RapsPi when using RealVNC. An indication of network or CPU congestion is, if
+the audio problems get worse when the sample rate changes, say, from 48k to 96k to 192k.
+It has also been reported that when using VNC, the situation gets worse then the piHPSDR window
+is made larger, which is also an indication that problems are rooted in the resources
+consumed by the VNC connection.
+}
+}
+\end{center}
+
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} ----- Administrator privileges on Linux systems -----}
+\end{center}
+ The whole installation procedure depends on that your user account is an administrator account,
+such that you can execute ,,sudo'' commands in the terminal window. 
+Some Linux distros maintain a ,,sudoers'' file where users that are allowed to execute
+administrative task via the \grtt{sudo} program are listed.
+ In normal cases
+(you own the computer and/or have installed the Linux operating system)
+ you should have administrator privileges.
+ 
+On a RaspBerry Pi, the user account that you created during installation
+will have administrator privileges by default, and no password is asked when
+executing \grtt{sudo} commands.
+}
+}
+\end{center}
+
 
 To install from the sources, open a terminal window. If you do so, you get
 a prompt and are in your home directory. It is assumed that no directory named \texttt{pihpsdr}
@@ -4516,7 +4577,6 @@ if everything went well. If not, and if you do not plan to activate the SOAPYSDR
 option, you can simply ignore this. To check the SoapySDR installation, open a new terminal
 window and just type the command (be careful to use the correct capitalization!)
 
-\clearpage
 \grtt{SoapySDRUtil -info}
 
 On my test system, this command produced the following output:
@@ -4576,11 +4636,20 @@ to provide piHPSDR as a program that you simply copy on your computer and double
 rather involved for an application built upon the GTK graphical user interface. If you know how to do this,
 any help is welcome. But for the time being, compiling from the sources is the only option.
 
-{\color{red} The whole installation procedure depends on that your user account is an administrator account,
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} -------------- A note on administrator privileges --------------}
+\end{center}
+The whole installation procedure depends on that your user account is an administrator account,
 such that you can execute ,,sudo'' commands in the terminal window. You may be asked the administrator
 password. If your user account does not qualify for administrator work, then you are simply not allowed
 to install the ,,HomeBrew'' universe which is the prerequisite for compiling piHPSDR. In normal cases
-(you own the Mac) you should have administrator privileges.}
+(you own the Mac) you should have administrator privileges.
+}
+}
+\end{center}
 
 I still do not know whether this is necessary or not, but the recommendation is to start installing
 an X Window manager on the Macintosh. To the end, in a web browse open the link
@@ -4647,7 +4716,6 @@ procedure works in this case as well and does no harm. In addition to
  If you want to use SoapySDR, please check the Soapy installation. Open a new terminal window and simply
  type the command (be careful to use the correct capitalization!)
 
-\clearpage
 \grtt{SoapySDRUtil -info}
 
 On my test system, this command produced the following output:
@@ -4687,9 +4755,12 @@ Available converters...
 \end{verbatim}
 \end{tiny}
 
-and probably even more modules are available in \texttt{HomeBrew}. In contrast to the RaspPi
+In contrast to the RaspPi
 installation, SoapySDR is already at version 0.8 in the \texttt{HomeBrew} repository so
 the modules can very simply be installed and need not be compiled from the sources.
+I have added (as you can see) support for quite a few SoapySDR radios, and most
+likely even more SoapySDR modules are available in the \texttt{HomeBrew} repository.
+
 If anything went wrong with the SoapySDR installation, you can safely ignore this is
 you do not plan to compile piHPSDR with the SOAPYSDR option. You also do not need
 to manually disable the GPIO option since on MacOS, the GPIO and SATURN options
@@ -4719,7 +4790,12 @@ home directory, to the Desktop, this can also be accomplished with the additiona
 
 (take care that any older piHPSDR application on the Desktop is moved or deleted first).
  
-\textbf{\color{red}Note on HomeBrew installation on Macintosh computers with Intel and Silicon processors.}
+ \begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} -------- A note on Macs with Apple Processors --------}
+\end{center}
 On Mac computers with Intel processors, \texttt{HomeBrew} is installed in \texttt{/usr/local},
 while on Mac computers with Silicon (M1, M2, M2 pro) processors, it is installed in
 \texttt{/opt/homebrew}. However, the WDSP library is not aware of this and installs its
@@ -4737,5 +4813,9 @@ there that point to
 This also solves many problems with compiling packages, since the directories
 in /usr/local are usually in the standard compiler search paths, while
 /opt/homebrew is not.
+}
+}
+\end{center}
+
 
 \end{document}
