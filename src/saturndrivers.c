@@ -81,7 +81,12 @@ int OpenXDMADriver(void) {
   return Result;
 }
 
-
+//
+// close connection to the XDMA device driver for register and DMA access
+//
+int CloseXDMADriver(void) {
+  return close(register_fd);
+}
 
 
 //

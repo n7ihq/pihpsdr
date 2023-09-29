@@ -264,7 +264,7 @@ int is_already_running() {
   fp = popen("lsof /dev/xdma0_user | grep pihpsdr", "r");
 
   if (fp == NULL) {
-    t_print("Failed to run command\n" );
+    t_print("Failed to run command in %s\n", __FUNCTION__ );
     exit(1);
   }
 
@@ -274,12 +274,54 @@ int is_already_running() {
   return (strstr(path, "pihpsdr") == NULL) ? 0 : 1;
 }
 
+#define SATURNPRODUCTID 1                               // Saturn, any version
+#define SATURNGOLDENCONFIGID 3                          // "golden" configuration id
+#define SATURNPRIMARYCONFIGID 4                         // "primary" configuration id
+#define VADDRPRODVERSIONREG 0XC004
+
+//
+// Check for a valid configuration
+// returns true if valid
+//
+bool is_valid_config(void)
+{
+        bool Result = true;
+        uint32_t SoftwareInformation;                   // swid & version
+        uint32_t ProductInformation;                    // product id & version
+
+        uint32_t SWID;                                  // s/w id
+        uint32_t ProdID;                                // product version and id
+        uint32_t ClockInfo;                             // clock status
+
+        OpenXDMADriver();
+
+        //
+        // read the raw data from registers
+        //
+        SoftwareInformation = RegisterRead(VADDRSWVERSIONREG);
+        ProductInformation = RegisterRead(VADDRPRODVERSIONREG);
+
+        ClockInfo = (SoftwareInformation & 0xF);                        // 4 clock bits
+        SWID = SoftwareInformation >> 20;                               // 12 bit software ID
+
+        ProdID = ProductInformation >> 16;                              // 16 bit product ID
+
+        if (ProdID != SATURNPRODUCTID)
+          Result = false;
+
+        if (SWID != SATURNGOLDENCONFIGID && SWID != SATURNPRIMARYCONFIGID)
+          Result = false;
+
+        if (ClockInfo != 0xF)
+          Result = false; // not all clocks are present
+}
+
 void saturn_discovery() {
   if (devices < MAX_DEVICES) {
     struct stat sb;
     uint8_t *mac = discovered[devices].info.network.mac_address;
 
-    if (stat("/dev/xdma/card0", &sb) == 0 && S_ISDIR(sb.st_mode)) {
+    if (stat("/dev/xdma0_user", &sb) == 0 && S_ISCHR(sb.st_mode) && is_valid_config()) {
       char buf[256];
       discovered[devices].status = (is_already_running()) ? STATE_SENDING : STATE_AVAILABLE;
       saturn_register_init();
@@ -481,6 +523,7 @@ void saturn_exit() {
   SetTXEnable(false);
   EnableCW(false, false);
   ServerActive = false;
+  CloseXDMADriver();
   sem_destroy(&DDCInSelMutex);
   sem_destroy(&DDCResetFIFOMutex);
   sem_destroy(&RFGPIOMutex);

@@ -73,11 +73,12 @@ void CodecRegisterWrite(uint32_t Address, uint32_t Data);
 //
 // open connection to the XDMA device driver for register and DMA access
 //
-//
-// open connection to the XDMA device driver for register and DMA access
-//
 int OpenXDMADriver(void);
 
+//
+// close connection to the XDMA device driver for register and DMA access
+//
+int CloseXDMADriver(void);
 
 //
 // initiate a DMA to the FPGA with specified parameters
