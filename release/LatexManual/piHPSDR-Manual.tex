@@ -3650,6 +3650,22 @@ for copyright reasons. So if you want to connect a logbook
 or contest logging program to piHPSDR, you will normally tell this program that it has to control a Kenwood 
 TS-2000.
 
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} ---  piHPSDR vs. Kenwood TRX model ---}
+\end{center}
+Note that the tranceiver model behind the CAT commands is ,,inherited'' from the Kenwood protocol and
+differs from piHPSDR's model in one important aspect: in piHPSDR, a control command such as changing
+the mode, the filter, or the frequency always affects the active receiver unless the VFO is explicitly
+speficied. For CAT commands on the other hand, such a command without explicit VFO speficication will
+always affect VFO-A.}
+}
+\end{center}
+
+
+
 In the SDR community, there exist a heavily extended TS-2000 CAT command set known as the ,,PowerSDR CAT 
 command set'', the original
 source is probably
@@ -4790,7 +4806,7 @@ home directory, to the Desktop, this can also be accomplished with the additiona
 
 (take care that any older piHPSDR application on the Desktop is moved or deleted first).
  
- \begin{center}
+\begin{center}
 \fbox{
 \parbox{\textwidth - 1cm}{
 \begin{center}

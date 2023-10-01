@@ -165,8 +165,6 @@ void close_rigctl_ports() {
   }
 }
 
-int vfo_sm = 0; // VFO State Machine - this keeps track of
-
 //
 //  CW ring buffer
 //
@@ -971,11 +969,11 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // read/set audio gain
       if (command[4] == ';') {
         // send reply back
-        sprintf(reply, "ZZAG%03d;", (int)(active_receiver->volume * 100.0));
+        sprintf(reply, "ZZAG%03d;", (int)(receiver[0]->volume * 100.0));
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
-        active_receiver->volume = (double)gain / 100.0;
+        receiver[0]->volume = (double)gain / 100.0;
         update_af_gain();
       }
 
@@ -1461,7 +1459,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       if (command[4] == ';') {
         int v = 0;
 
-        if (active_receiver->display_waterfall) {
+        if (receiver[0]->display_waterfall) {
           v = 8;
         } else {
           v = 2;
@@ -1478,7 +1476,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read waterfall low
       if (command[4] == ';') {
-        sprintf(reply, "ZZDN%+4d;", active_receiver->waterfall_low);
+        sprintf(reply, "ZZDN%+4d;", receiver[0]->waterfall_low);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1489,7 +1487,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read waterfall high
       if (command[4] == ';') {
-        sprintf(reply, "ZZDO%+4d;", active_receiver->waterfall_high);
+        sprintf(reply, "ZZDO%+4d;", receiver[0]->waterfall_high);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1500,7 +1498,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read panadapter high
       if (command[4] == ';') {
-        sprintf(reply, "ZZDP%+4d;", active_receiver->panadapter_high);
+        sprintf(reply, "ZZDP%+4d;", receiver[0]->panadapter_high);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1511,7 +1509,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read panadapter low
       if (command[4] == ';') {
-        sprintf(reply, "ZZDQ%+4d;", active_receiver->panadapter_low);
+        sprintf(reply, "ZZDQ%+4d;", receiver[0]->panadapter_low);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1522,7 +1520,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read panadapter step
       if (command[4] == ';') {
-        sprintf(reply, "ZZDR%2d;", active_receiver->panadapter_step);
+        sprintf(reply, "ZZDR%2d;", receiver[0]->panadapter_step);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1685,16 +1683,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read deviation
       if (command[4] == ';') {
-        int id=active_receiver->id;
-        sprintf(reply, "ZZFD%d;", vfo[id].deviation == 2500 ? 0 : 1);
+        sprintf(reply, "ZZFD%d;", vfo[VFO_A].deviation == 2500 ? 0 : 1);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
-        int id=active_receiver->id;
         int d = atoi(&command[4]);
 
         // TODO: should we check for the mode being FMN?
-        vfo[id].deviation = d ? 5000 : 2500;
-        set_filter(active_receiver);
+        vfo[VFO_A].deviation = d ? 5000 : 2500;
+        set_filter(receiver[0]);
         if (can_transmit) {
           tx_set_filter(transmitter);
         }
@@ -1717,13 +1713,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
         // make sure filter is filterVar1
         if (vfo[VFO_A].filter != filterVar1) {
-          vfo_filter_changed(filterVar1);
+          vfo_id_filter_changed(VFO_A, filterVar1);
         }
 
         FILTER *mode_filters = filters[vfo[VFO_A].mode];
         FILTER *filter = &mode_filters[filterVar1];
         filter->high = fh;
-        vfo_filter_changed(filterVar1);
+        vfo_id_filter_changed(VFO_A, filterVar1);
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -1738,7 +1734,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       } else if (command[6] == ';') {
         int filter = atoi(&command[4]);
         // update RX1 filter
-        vfo_filter_changed(filter);
+        vfo_id_filter_changed(VFO_A, filter);
       }
 
       break;
@@ -1769,13 +1765,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
         // make sure filter is filterVar1
         if (vfo[VFO_A].filter != filterVar1) {
-          vfo_filter_changed(filterVar1);
+          vfo_id_filter_changed(VFO_A, filterVar1);
         }
 
         FILTER *mode_filters = filters[vfo[VFO_A].mode];
         FILTER *filter = &mode_filters[filterVar1];
         filter->low = fl;
-        vfo_filter_changed(filterVar1);
+        vfo_id_filter_changed(VFO_A, filterVar1);
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -2050,7 +2046,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     switch (command[3]) {
     case 'A': { //ZZMA
       int mute = atoi(&command[4]);
-      active_receiver->mute_radio = mute;
+      receiver[0]->mute_radio = mute;
     }
     break;
 
@@ -2065,7 +2061,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         sprintf(reply, "ZZMD%02d;", vfo[VFO_A].mode);
         send_resp(client->fd, reply);
       } else if (command[6] == ';') {
-        vfo_mode_changed(atoi(&command[4]));
+        vfo_id_mode_changed(VFO_A, atoi(&command[4]));
       }
 
       break;
@@ -2077,7 +2073,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         sprintf(reply, "ZZMD%02d;", vfo[VFO_B].mode);
         send_resp(client->fd, reply);
       } else if (command[6] == ';') {
-        vfo_mode_changed(atoi(&command[4]));
+        vfo_id_mode_changed(VFO_A, atoi(&command[4]));
       }
 
       break;
@@ -2507,12 +2503,11 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
     case 'D': //ZZRD
 
       if (command[4] == ';') {
-        int id=active_receiver->id;
         // decrement RIT frequency
-        if (vfo[id].mode == modeCWL || vfo[id].mode == modeCWU) {
-          vfo_rit_incr(id, -10);
+        if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
+          vfo_rit_incr(VFO_A, -10);
         } else {
-          vfo_rit_incr(id, -rit_increment);
+          vfo_rit_incr(VFO_A, -rit_increment);
         }
       } else if (command[9] == ';') {
         // set RIT frequency
@@ -2603,7 +2598,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // move VFO A down one step
       if (command[4] == ';') {
-        vfo_step(-1);
+        vfo_id_step(VFO_A, -1);
       }
 
       break;
@@ -2612,7 +2607,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // move VFO A up one step
       if (command[4] == ';') {
-        vfo_step(1);
+        vfo_id_step(VFO_A, 1);
       }
 
       break;
@@ -3249,7 +3244,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         int v = atoi(&command[4]);
 
         if (v >= 0 && v < receivers) {
-          active_receiver = receiver[v];
+          receiver_set_active(receiver[v]);
         } else {
           implemented = FALSE;
         }
@@ -3276,7 +3271,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       implemented = FALSE;
       break;
 
-    case 'D': //ZZZD
+    case 'D': //ZZZD  ANDROMEDA command
 
       // move VFO down
       if (command[6] == ';') {
@@ -3291,7 +3286,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       break;
 
-    case 'E': //ZZZE
+    case 'E': //ZZZE ANDROMEDA commmand
 
       // Encoders
       if (command[7] == ';') {
@@ -3376,7 +3371,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       break;
 
-    case 'P': //ZZZP
+    case 'P': //ZZZP ANDROMEDA command
 
       // Push Buttons
       if (command[7] == ';') {
@@ -3703,7 +3698,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       break;
 
-    case 'S': //ZZZS
+    case 'S': //ZZZS ANDROMEDA command
 
       // ANDROMEDA version info
       if (command[11] == ';') {
@@ -4025,7 +4020,7 @@ int parse_cmd(void *data) {
         int id = atoi(&command[2]);
 
         if (id >= 0 && id < receivers) {
-          active_receiver = receiver[id];
+          receiver_set_active(receiver[id]);
         } else {
           implemented = FALSE;
         }
@@ -4058,10 +4053,10 @@ int parse_cmd(void *data) {
       // set/read filter width. Switch to Var1 only when setting
       if (command[2] == ';') {
         int val = 0;
-        FILTER *mode_filters = filters[vfo[active_receiver->id].mode];
-        const FILTER *filter = &mode_filters[vfo[active_receiver->id].filter];
+        FILTER *mode_filters = filters[vfo[VFO_A].mode];
+        const FILTER *filter = &mode_filters[vfo[VFO_A].filter];
 
-        switch (vfo[active_receiver->id].mode) {
+        switch (vfo[VFO_A].mode) {
         case modeCWL:
         case modeCWU:
           val = filter->low * 2;
@@ -4073,7 +4068,7 @@ int parse_cmd(void *data) {
           break;
 
         case modeFMN:
-          val = active_receiver->deviation == 5000;
+          val = vfo[VFO_A].deviation == 5000;
           break;
 
         default:
@@ -4087,16 +4082,16 @@ int parse_cmd(void *data) {
         }
       } else if (command[6] == ';') {
         // make sure filter is filterVar1
-        if (vfo[active_receiver->id].filter != filterVar1) {
-          vfo_filter_changed(filterVar1);
+        if (vfo[VFO_A].filter != filterVar1) {
+          vfo_id_filter_changed(VFO_A, filterVar1);
         }
 
-        FILTER *mode_filters = filters[vfo[active_receiver->id].mode];
+        FILTER *mode_filters = filters[vfo[VFO_A].mode];
         FILTER *filter = &mode_filters[filterVar1];
         int fw = atoi(&command[2]);
         filter->low = fw;
 
-        switch (vfo[active_receiver->id].mode) {
+        switch (vfo[VFO_A].mode) {
         case modeCWL:
         case modeCWU:
           filter->low = fw / 2;
@@ -4107,13 +4102,13 @@ int parse_cmd(void *data) {
           if (fw == 0) {
             filter->low = -5500;
             filter->high = 5500;
-            vfo[active_receiver->id].deviation = 2500;
+            vfo[VFO_A].deviation = 2500;
           } else {
             filter->low = -8000;
             filter->high = 8000;
-            vfo[active_receiver->id].deviation = 5000;
+            vfo[VFO_A].deviation = 5000;
           }
-          set_filter(active_receiver);
+          set_filter(receiver[0]);
           if (can_transmit) {
             tx_set_filter(transmitter);
           }
@@ -4139,7 +4134,7 @@ int parse_cmd(void *data) {
         }
 
         if (implemented) {
-          vfo_filter_changed(filterVar1);
+          vfo_id_filter_changed(VFO_A, filterVar1);
           g_idle_add(ext_vfo_update, NULL);
         }
       }
@@ -4406,7 +4401,7 @@ int parse_cmd(void *data) {
           break;
         }
 
-        vfo_mode_changed(mode);
+        vfo_id_mode_changed(VFO_A, mode);
       }
 
       break;
@@ -4468,10 +4463,10 @@ int parse_cmd(void *data) {
 
       // set/read noise blanker
       if (command[2] == ';') {
-        sprintf(reply, "NB%d;", active_receiver->nb);
+        sprintf(reply, "NB%d;", receiver[0]->nb);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
-        active_receiver->nb = atoi(&command[2]);
+        receiver[0]->nb = atoi(&command[2]);
         update_noise();
       }
 
@@ -4486,10 +4481,10 @@ int parse_cmd(void *data) {
 
       // set/read noise reduction
       if (command[2] == ';') {
-        sprintf(reply, "NR%d;", active_receiver->nr);
+        sprintf(reply, "NR%d;", receiver[0]->nr);
         send_resp(client->fd, reply);
       } else if (command[3] == ';')  {
-        active_receiver->nr = atoi(&command[2]);
+        receiver[0]->nr = atoi(&command[2]);
         update_noise();
       }
 
@@ -4499,10 +4494,10 @@ int parse_cmd(void *data) {
 
       // set/read ANF
       if (command[2] == ';') {
-        sprintf(reply, "NT%d;", active_receiver->anf);
+        sprintf(reply, "NT%d;", receiver[0]->anf);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
-        active_receiver->anf = atoi(&command[2]);
+        receiver[0]->anf = atoi(&command[2]);
         update_noise();
       }
 
@@ -4545,10 +4540,10 @@ int parse_cmd(void *data) {
 
       // set/read preamp function status
       if (command[2] == ';') {
-        sprintf(reply, "PA%d0;", active_receiver->preamp);
+        sprintf(reply, "PA%d0;", receiver[0]->preamp);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
-        active_receiver->preamp = command[2] == '1';
+        receiver[0]->preamp = command[2] == '1';
       }
 
       break;
@@ -4663,13 +4658,13 @@ int parse_cmd(void *data) {
 
         if (have_rx_gain) {
           // map gain value -12...48 to 0...99
-          att = (int)(adc[active_receiver->adc].attenuation + 12);
+          att = (int)(adc[receiver[0]->adc].attenuation + 12);
           att = (int)(((double)att / 60.0) * 99.0);
         }
 
         if (have_rx_att) {
           // map att value -31 ... 0 to 0...99
-          att = (int)(adc[active_receiver->adc].attenuation);
+          att = (int)(adc[receiver[0]->adc].attenuation);
           att = (int)(((double)att / 31.0) * 99.0);
         }
 
@@ -4681,7 +4676,7 @@ int parse_cmd(void *data) {
         if (have_rx_gain) {
           // map 0...99 scale to -12...48
           att = (int)((((double)att / 99.0) * 60.0) - 12.0);
-          set_rf_gain(active_receiver->id, (double)att);
+          set_rf_gain(VFO_A, (double)att);
         }
 
         if (have_rx_att) {
@@ -4842,12 +4837,12 @@ int parse_cmd(void *data) {
 
       // set/read filter high, switch to Var1 only when setting
       if (command[2] == ';') {
-        FILTER *mode_filters = filters[vfo[active_receiver->id].mode];
-        const FILTER *filter = &mode_filters[vfo[active_receiver->id].filter];
+        FILTER *mode_filters = filters[vfo[VFO_A].mode];
+        const FILTER *filter = &mode_filters[vfo[VFO_A].filter];
         int fh = 5;
         int high = filter->high;
 
-        if (vfo[active_receiver->id].mode == modeLSB) {
+        if (vfo[VFO_A].mode == modeLSB) {
           high = abs(filter->low);
         }
 
@@ -4881,16 +4876,16 @@ int parse_cmd(void *data) {
         send_resp(client->fd, reply) ;
       } else if (command[4] == ';') {
         // make sure filter is filterVar1
-        if (vfo[active_receiver->id].filter != filterVar1) {
-          vfo_filter_changed(filterVar1);
+        if (vfo[VFO_A].filter != filterVar1) {
+          vfo_id_filter_changed(VFO_A, filterVar1);
         }
 
-        FILTER *mode_filters = filters[vfo[active_receiver->id].mode];
+        FILTER *mode_filters = filters[vfo[VFO_A].mode];
         FILTER *filter = &mode_filters[filterVar1];
         int i = atoi(&command[2]);
         int fh = 100;
 
-        switch (vfo[active_receiver->id].mode) {
+        switch (vfo[VFO_A].mode) {
         case modeLSB:
         case modeUSB:
         case modeFMN:
@@ -4977,13 +4972,13 @@ int parse_cmd(void *data) {
           break;
         }
 
-        if (vfo[active_receiver->id].mode == modeLSB) {
+        if (vfo[VFO_A].mode == modeLSB) {
           filter->low = -fh;
         } else {
           filter->high = fh;
         }
 
-        vfo_filter_changed(filterVar1);
+        vfo_id_filter_changed(VFO_A, filterVar1);
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -4998,12 +4993,12 @@ int parse_cmd(void *data) {
 
       // set/read filter low, switch to Var1 only when setting
       if (command[2] == ';') {
-        FILTER *mode_filters = filters[vfo[active_receiver->id].mode];
-        const FILTER *filter = &mode_filters[vfo[active_receiver->id].filter];
+        FILTER *mode_filters = filters[vfo[VFO_A].mode];
+        const FILTER *filter = &mode_filters[vfo[VFO_A].filter];
         int fl = 2;
         int low = filter->low;
 
-        if (vfo[active_receiver->id].mode == modeLSB) {
+        if (vfo[VFO_A].mode == modeLSB) {
           low = abs(filter->high);
         }
 
@@ -5037,16 +5032,16 @@ int parse_cmd(void *data) {
         send_resp(client->fd, reply) ;
       } else if (command[4] == ';') {
         // make sure filter is filterVar1
-        if (vfo[active_receiver->id].filter != filterVar1) {
-          vfo_filter_changed(filterVar1);
+        if (vfo[VFO_A].filter != filterVar1) {
+          vfo_id_filter_changed(VFO_A, filterVar1);
         }
 
-        FILTER *mode_filters = filters[vfo[active_receiver->id].mode];
+        FILTER *mode_filters = filters[vfo[VFO_A].mode];
         FILTER *filter = &mode_filters[filterVar1];
         int i = atoi(&command[2]);
         int fl = 100;
 
-        switch (vfo[active_receiver->id].mode) {
+        switch (vfo[VFO_A].mode) {
         case modeLSB:
         case modeUSB:
         case modeFMN:
@@ -5133,13 +5128,13 @@ int parse_cmd(void *data) {
           break;
         }
 
-        if (vfo[active_receiver->id].mode == modeLSB) {
+        if (vfo[VFO_A].mode == modeLSB) {
           filter->high = -fl;
         } else {
           filter->low = fl;
         }
 
-        vfo_filter_changed(filterVar1);
+        vfo_id_filter_changed(VFO_A, filterVar1);
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -5179,14 +5174,14 @@ int parse_cmd(void *data) {
         int p1 = atoi(&command[2]);
 
         if (p1 == 0) { // Main receiver
-          sprintf(reply, "SQ%d%03d;", p1, (int)((double)active_receiver->squelch / 100.0 * 255.0 + 0.5));
+          sprintf(reply, "SQ%d%03d;", p1, (int)((double)receiver[0]->squelch / 100.0 * 255.0 + 0.5));
           send_resp(client->fd, reply);
         }
       } else if (command[6] == ';') {
         if (command[2] == '0') {
           int p2 = atoi(&command[3]);
-          active_receiver->squelch = (int)((double)p2 / 255.0 * 100.0 + 0.5);
-          set_squelch(active_receiver);
+          receiver[0]->squelch = (int)((double)p2 / 255.0 * 100.0 + 0.5);
+          set_squelch(receiver[0]);
         }
       } else {
       }
@@ -5289,7 +5284,7 @@ int parse_cmd(void *data) {
 
       // move VFO A up by step
       if (command[2] == ';') {
-        vfo_step(1);
+        vfo_id_step(VFO_A, 1);
       }
 
       break;

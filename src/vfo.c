@@ -484,6 +484,10 @@ void vfo_bandstack_changed(int b) {
 
 void vfo_mode_changed(int m) {
   int id = active_receiver->id;
+   vfo_id_mode_changed(id, m);
+}
+
+void vfo_id_mode_changed(int id, int m) {
 #ifdef CLIENT_SERVER
 
   if (radio_is_remote) {
@@ -518,14 +522,25 @@ void vfo_mode_changed(int m) {
 
 void vfo_deviation_changed(int dev) {
   int id = active_receiver->id;
+  vfo_id_deviation_changed(id, dev);
+}
+
+void vfo_id_deviation_changed(int id, int dev) {
   vfo[id].deviation = dev;
-  receiver_filter_changed(active_receiver);
+
+  if (id < receivers) {
+    receiver_filter_changed(receiver[id]);
+  }
 
   g_idle_add(ext_vfo_update, NULL);
 }
 
 void vfo_filter_changed(int f) {
   int id = active_receiver->id;
+  vfo_id_filter_changed(id, f);
+}
+
+void vfo_id_filter_changed(int id, int f) {
 #ifdef CLIENT_SERVER
 
   if (radio_is_remote) {
@@ -548,7 +563,9 @@ void vfo_filter_changed(int f) {
       receiver_filter_changed(receiver[i]);
     }
   } else {
-    receiver_filter_changed(active_receiver);
+    if (id < receivers) {
+      receiver_filter_changed(receiver[id]);
+    }
   }
 
   g_idle_add(ext_vfo_update, NULL);
@@ -654,24 +671,35 @@ void vfo_set_stepsize(int newstep) {
 
 void vfo_step(int steps) {
   int id = active_receiver->id;
-  long long delta;
-  int sid;
-#ifdef CLIENT_SERVER
+  vfo_id_step(id, steps);
+}
 
+void vfo_id_step(int id, int steps) {
+#ifdef CLIENT_SERVER
+  
   if (radio_is_remote) {
     update_vfo_step(id, steps);
     return;
   }
-
-#endif
+                                        
+#endif                                  
 
   if (!locked) {
+    long long delta;
+
     if (vfo[id].ctun) {
-      // don't let ctun go beyond end of passband
+      // CTUN offset is limited by half the sample rate
+      // if "id" does not refer to a running RX, take the active receiver
+      RECEIVER *myrx;
+      if (id < receivers) {
+        myrx = receiver[id];
+      } else {
+        myrx = active_receiver;
+      }
       long long frequency = vfo[id].frequency;
-      long long rx_low = ROUND(vfo[id].ctun_frequency, steps) + active_receiver->filter_low;
-      long long rx_high = ROUND(vfo[id].ctun_frequency, steps) + active_receiver->filter_high;
-      long long half = (long long)active_receiver->sample_rate / 2LL;
+      long long rx_low = ROUND(vfo[id].ctun_frequency, steps) + myrx->filter_low;
+      long long rx_high = ROUND(vfo[id].ctun_frequency, steps) + myrx->filter_high;
+      long long half = (long long)myrx->sample_rate / 2LL;
       long long min_freq = frequency - half;
       long long max_freq = frequency + half;
 
@@ -681,67 +709,6 @@ void vfo_step(int steps) {
         return;
       }
 
-      delta = vfo[id].ctun_frequency;
-      vfo[id].ctun_frequency = ROUND(vfo[id].ctun_frequency, steps);
-      delta = vfo[id].ctun_frequency - delta;
-    } else {
-      delta = vfo[id].frequency;
-      vfo[id].frequency = ROUND(vfo[id].frequency, steps);
-      delta = vfo[id].frequency - delta;
-    }
-
-    sid = 1 - id;
-
-    switch (sat_mode) {
-    case SAT_NONE:
-      break;
-
-    case SAT_MODE:
-
-      // A and B increment and decrement together
-      if (vfo[sid].ctun) {
-        vfo[sid].ctun_frequency += delta;
-      } else {
-        vfo[sid].frequency      += delta;
-      }
-
-      if (receivers == 2) {
-        receiver_frequency_changed(receiver[sid]);
-      }
-
-      break;
-
-    case RSAT_MODE:
-
-      // A increments and B decrements or A decrments and B increments
-      if (vfo[sid].ctun) {
-        vfo[sid].ctun_frequency -= delta;
-      } else {
-        vfo[sid].frequency      -= delta;
-      }
-
-      if (receivers == 2) {
-        receiver_frequency_changed(receiver[sid]);
-      }
-
-      break;
-    }
-
-    receiver_frequency_changed(active_receiver);
-    g_idle_add(ext_vfo_update, NULL);
-  }
-}
-//
-// DL1YCF: essentially a duplicate of vfo_step but
-//         changing a specific VFO freq instead of
-//         changing the VFO of the active receiver
-//
-void vfo_id_step(int id, int steps) {
-  CLIENT_MISSING;
-  if (!locked) {
-    long long delta;
-
-    if (vfo[id].ctun) {
       delta = vfo[id].ctun_frequency;
       vfo[id].ctun_frequency = ROUND(vfo[id].ctun_frequency, steps);
       delta = vfo[id].ctun_frequency - delta;
@@ -766,7 +733,7 @@ void vfo_id_step(int id, int steps) {
         vfo[sid].frequency      += delta;
       }
 
-      if (receivers == 2) {
+      if (sid < receivers) {
         receiver_frequency_changed(receiver[sid]);
       }
 
@@ -781,14 +748,14 @@ void vfo_id_step(int id, int steps) {
         vfo[sid].frequency      -= delta;
       }
 
-      if (receivers == 2) {
+      if (sid < receivers) {
         receiver_frequency_changed(receiver[sid]);
       }
 
       break;
     }
 
-    receiver_frequency_changed(active_receiver);
+    receiver_frequency_changed(receiver[id]);
     g_idle_add(ext_vfo_update, NULL);
   }
 }
@@ -823,10 +790,16 @@ void vfo_id_move(int id, long long hz, int round) {
   if (!locked) {
     if (vfo[id].ctun) {
       // don't let ctun go beyond end of passband
+      RECEIVER *myrx;
+      if (id < receivers) {
+        myrx = receiver[id];
+      } else {
+        myrx = active_receiver;
+      }
       long long frequency = vfo[id].frequency;
-      long long rx_low = vfo[id].ctun_frequency + hz + active_receiver->filter_low;
-      long long rx_high = vfo[id].ctun_frequency + hz + active_receiver->filter_high;
-      long long half = (long long)active_receiver->sample_rate / 2LL;
+      long long rx_low = vfo[id].ctun_frequency + hz + myrx->filter_low;
+      long long rx_high = vfo[id].ctun_frequency + hz + myrx->filter_high;
+      long long half = (long long)myrx->sample_rate / 2LL;
       long long min_freq = frequency - half;
       long long max_freq = frequency + half;
 
@@ -872,7 +845,7 @@ void vfo_id_move(int id, long long hz, int round) {
         vfo[sid].frequency      += delta;
       }
 
-      if (receivers == 2) {
+      if (sid < receivers) {
         receiver_frequency_changed(receiver[sid]);
       }
 
@@ -887,7 +860,7 @@ void vfo_id_move(int id, long long hz, int round) {
         vfo[sid].frequency      -= delta;
       }
 
-      if (receivers == 2) {
+      if (sid < receivers) {
         receiver_frequency_changed(receiver[sid]);
       }
 
@@ -904,10 +877,28 @@ void vfo_move(long long hz, int round) {
 }
 
 void vfo_move_to(long long hz) {
+  int id=active_receiver->id;
+  vfo_id_move_to(id, hz);
+}
+
+void vfo_id_move_to(int id, long long hz) {
+#ifdef CLIENT_SERVER
+
+  if (radio_is_remote) {
+    send_vfo_move_to(client_socket, id, hz);
+    return;
+  }
+
+#endif
   // hz is the offset from the min displayed frequency
-  int id = active_receiver->id;
+  RECEIVER *myrx;
+  if (id < receivers) {
+    myrx = receiver[id];
+  } else {
+    myrx = active_receiver;
+  }
   long long offset = hz;
-  long long half = (long long)(active_receiver->sample_rate / 2);
+  long long half = (long long)(myrx->sample_rate / 2);
   long long f;
   long long delta;
   int sid;
@@ -924,7 +915,7 @@ void vfo_move_to(long long hz) {
     offset = ROUND(hz, 0);
   }
 
-  f = (vfo[id].frequency - half) + offset + ((double)active_receiver->pan * active_receiver->hz_per_pixel);
+  f = (vfo[id].frequency - half) + offset + ((double)myrx->pan * myrx->hz_per_pixel);
 
   if (!locked) {
     if (vfo[id].ctun) {
@@ -966,7 +957,7 @@ void vfo_move_to(long long hz) {
         vfo[sid].frequency      += delta;
       }
 
-      if (receivers == 2) {
+      if (sid < receivers) {
         receiver_frequency_changed(receiver[sid]);
       }
 
@@ -981,14 +972,14 @@ void vfo_move_to(long long hz) {
         vfo[sid].frequency      -= delta;
       }
 
-      if (receivers == 2) {
+      if (sid < receivers) {
         receiver_frequency_changed(receiver[sid]);
       }
 
       break;
     }
 
-    receiver_vfo_changed(active_receiver);
+    receiver_vfo_changed(receiver[id]);
     g_idle_add(ext_vfo_update, NULL);
   }
 }

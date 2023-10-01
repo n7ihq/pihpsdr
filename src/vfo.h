@@ -106,6 +106,7 @@ extern void vfo_step(int steps);
 extern void vfo_id_step(int id, int steps);
 extern void vfo_move(long long hz, int round);
 extern void vfo_id_move(int id, long long hz, int round);
+extern void vfo_id_move_to(int id, long long hz);
 extern void vfo_move_to(long long hz);
 extern void vfo_update(void);
 
@@ -114,8 +115,11 @@ extern void vfoRestoreState(void);
 
 extern void vfo_band_changed(int id, int b);
 extern void vfo_bandstack_changed(int b);
+extern void vfo_id_mode_changed(int id, int m);
 extern void vfo_mode_changed(int m);
+extern void vfo_id_filter_changed(int id, int f);
 extern void vfo_filter_changed(int f);
+extern void vfo_id_deviation_changed(int id, int dev);
 extern void vfo_deviation_changed(int dev);
 extern void vfo_a_to_b(void);
 extern void vfo_b_to_a(void);
