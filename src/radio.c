@@ -560,7 +560,9 @@ void reconfigure_radio() {
       rx->width = my_width / receivers;
       receiver_update_zoom(rx);
       reconfigure_receiver(rx, rx_height);
-      gtk_fixed_move(GTK_FIXED(fixed), rx->panel, x, y);
+      if (!isTransmitting() || duplex) {
+        gtk_fixed_move(GTK_FIXED(fixed), rx->panel, x, y);
+      }
       rx->x = x;
       rx->y = y;
       x = x + my_width / receivers;
@@ -573,7 +575,9 @@ void reconfigure_radio() {
       rx->width = my_width;
       receiver_update_zoom(rx);
       reconfigure_receiver(rx, rx_height / receivers);
-      gtk_fixed_move(GTK_FIXED(fixed), rx->panel, 0, y);
+      if (!isTransmitting() || duplex) {
+        gtk_fixed_move(GTK_FIXED(fixed), rx->panel, 0, y);
+      }
       rx->x = 0;
       rx->y = y;
       y += rx_height / receivers;
