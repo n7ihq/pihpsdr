@@ -3271,7 +3271,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       implemented = FALSE;
       break;
 
-    case 'D': //ZZZD  ANDROMEDA command
+    case 'D': //ZZZD  ANDROMEDA command applied to VFO of active receiver
 
       // move VFO down
       if (command[6] == ';') {
@@ -3307,7 +3307,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             schedule_action(AF_GAIN_RX1, RELATIVE, (v == 0) ? 1 : -1);
             break;
 
-          case 52: // RX1 RF Gain
+          case 52: // RX1 RF (better: AGC) Gain
             schedule_action(AGC_GAIN_RX1, RELATIVE, (v == 0) ? 1 : -1);
             break;
 
@@ -3315,7 +3315,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             schedule_action(AF_GAIN_RX2, RELATIVE, (v == 0) ? 1 : -1);
             break;
 
-          case 54: // RX2 RF Gain
+          case 54: // RX2 RF (better: AGC) Gain
             schedule_action(AGC_GAIN_RX2, RELATIVE, (v == 0) ? 1 : -1);
             break;
 
@@ -3337,9 +3337,11 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
             break;
 
-          case 59: // RIT
+          case 59: // RIT of the VFO of the active receiver
             if (vfo[active_receiver->id].rit_enabled) {
-              schedule_action(RIT, RELATIVE, (v == 0) ? 1 : -1);
+              // cannot use schedule_action because we inspect rit_enabled immediately,
+              // but the scheduled action may be deferred
+              vfo_rit_incr(active_receiver->id, (v == 0) ? rit_increment : -rit_increment);
 
               if (!vfo[active_receiver->id].rit_enabled) {
                 sprintf(reply, "ZZZI080;");
@@ -3351,7 +3353,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
           case 60: // XIT
             if (vfo[get_tx_vfo()].xit_enabled) {
-              schedule_action(XIT, RELATIVE, (v == 0) ? 1 : -1);
+              vfo_xit_incr((v == 0) ? rit_increment : -rit_increment);
               if (!vfo[get_tx_vfo()].xit_enabled) {
                 sprintf(reply, "ZZZI090;");
                 send_resp(client->fd, reply);
@@ -3605,14 +3607,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             if (receivers == 2) {
               if (v == 0) {
                 if (active_receiver->id == 0) {
-                  active_receiver = receiver[1];
+                  receiver_set_active(receiver[1]);
                   sprintf(reply, "ZZZI07%d;", vfo[VFO_B].ctun);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI08%d;", vfo[VFO_B].rit_enabled);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI100;");
                 } else {
-                  active_receiver = receiver[0];
+                  receiver_set_active(receiver[0]);
                   sprintf(reply, "ZZZI07%d;", vfo[VFO_A].ctun);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI08%d;", vfo[VFO_A].rit_enabled);
@@ -3708,7 +3710,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       break;
 
-    case 'U': //ZZZU
+    case 'U': //ZZZU ANDROMEDA command operating on VFO of active receiver
 
       // move VFO up
       if (command[6] == ';') {

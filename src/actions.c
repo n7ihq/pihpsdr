@@ -1244,24 +1244,14 @@ int process_action(void *data) {
 
   case RX1:
     if (a->mode == PRESSED && receivers == 2) {
-      active_receiver = receiver[0];
-      g_idle_add(menu_active_receiver_changed, NULL);
-      g_idle_add(sliders_active_receiver_changed, NULL);
-      g_idle_add(ext_vfo_update, NULL);
-
-      t_print("%s: TODO: report RX1 switch upstream\n", __FUNCTION__);
+      receiver_set_active(receiver[0]);
     }
 
     break;
     
   case RX2:
     if (a->mode == PRESSED && receivers == 2) {
-      active_receiver = receiver[1];
-      g_idle_add(menu_active_receiver_changed, NULL);
-      g_idle_add(sliders_active_receiver_changed, NULL);
-      g_idle_add(ext_vfo_update, NULL);
-
-      t_print("%s: TODO: report RX2 switch upstream\n", __FUNCTION__);
+      receiver_set_active(receiver[1]);
     }
 
     break;
