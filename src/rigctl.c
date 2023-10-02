@@ -3244,7 +3244,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         int v = atoi(&command[4]);
 
         if (v >= 0 && v < receivers) {
-          receiver_set_active(receiver[v]);
+          schedule_action(v == 0 ? RX1 : RX2, PRESSED, 0);
         } else {
           implemented = FALSE;
         }
@@ -3607,14 +3607,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             if (receivers == 2) {
               if (v == 0) {
                 if (active_receiver->id == 0) {
-                  receiver_set_active(receiver[1]);
+                  schedule_action(RX1, PRESSED, 0);
                   sprintf(reply, "ZZZI07%d;", vfo[VFO_B].ctun);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI08%d;", vfo[VFO_B].rit_enabled);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI100;");
                 } else {
-                  receiver_set_active(receiver[0]);
+                  schedule_action(RX2, PRESSED, 0);
                   sprintf(reply, "ZZZI07%d;", vfo[VFO_A].ctun);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI08%d;", vfo[VFO_A].rit_enabled);
@@ -4022,7 +4022,7 @@ int parse_cmd(void *data) {
         int id = atoi(&command[2]);
 
         if (id >= 0 && id < receivers) {
-          receiver_set_active(receiver[id]);
+          schedule_action(id == 0 ? RX1 : RX2, PRESSED, 0);
         } else {
           implemented = FALSE;
         }
