@@ -262,7 +262,7 @@ void* saturn_server(void *arg) {
     2,                                            // 2 if not active; 3 if active
     0, 0, 0, 0, 0, 0,                             // SDR (raspberry i) MAC address
     10,                                           // board type. Saturn
-    38,                                           // protocol version 3.8
+    39,                                           // protocol version 3.9
     20,                                           // this SDR firmware version. >17 to enable QSK
     0, 0, 0, 0, 0, 0,                             // Mercury, Metis, Penny version numbers
     6,                                            // 6 DDC's for network client
@@ -683,7 +683,7 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
   uint32_t SpkBufferSize = VDMABUFFERSIZE;
   unsigned char* SpkBasePtr;                // ptr to DMA location in spk memory
   int DMAWritefile_fd = -1;               // DMA read file device
-  bool FIFOOverflow;
+  bool FIFOOverflow, FIFOUnderflow, FIFOOverThreshold;
   //uint32_t RegVal = 0;                    // debug
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
@@ -710,6 +710,7 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
     return NULL;
   }
 
+  SetupFIFOMonitorChannel(eSpkCodecDMA, false);
   ResetDMAStreamFIFO(eSpkCodecDMA);
 
   //
@@ -734,12 +735,16 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
     if (size == VSPEAKERAUDIOSIZE) {                        // we have received a packet!
       NewMessageReceived = true;
       //RegVal += 1;            //debug
-      int Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow);        // read the FIFO free locations
-      t_print("speaker packet received; depth = %d\n", Depth);
+      int Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow); // read the FIFO free locations
+      //t_print("speaker packet received; depth = %d\n", Depth);
 
       while (Depth < VMEMWORDSPERFRAME) {     // loop till space available
         usleep(1000);                                   // 1ms wait
-        Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow);    // read the FIFO free locations
+        Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow); // read the FIFO free locations
+        //if(FIFOOverThreshold)
+        //  t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", Depth);
+        //if(FIFOUnderflow)
+        //  t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", Depth);
       }
 
       // copy data from UDP Buffer & DMA write it

@@ -99,6 +99,9 @@ extern bool MOXAsserted;
 #define VDMAMICTRANSFERSIZE 128                        // read 1 message at a time
 #define VMICPACKETSIZE 132
 
+// uncomment to display debug printouts for FPGA data over/under flows
+//#define DISPLAY_OVER_UNDER_FLOWS 1
+
 static gpointer saturn_rx_thread(gpointer arg);
 static GThread *saturn_rx_thread_id;
 static gpointer saturn_micaudio_thread(gpointer arg);
@@ -408,6 +411,7 @@ void saturn_init_duc_iq() {
   EnableDUCMux(false);                                  // disable temporarily
   SetTXIQDeinterleaved(false);                          // not interleaved (at least for now!)
   ResetDUCMux();                                        // reset 64 to 48 mux
+  SetupFIFOMonitorChannel(eTXDUCDMA, false);
   ResetDMAStreamFIFO(eTXDUCDMA);
   EnableDUCMux(true);                                   // enable operation
 }
@@ -419,7 +423,7 @@ void saturn_handle_duc_iq(bool FromNetwork, uint8_t *UDPInBuffer) {
   uint8_t* SrcPtr;                                        // pointer to data from Thetis
   uint8_t* DestPtr;                                       // pointer to DMA buffer data
   uint32_t DepthDUC = 0;
-  bool FIFDUCOOverflow;
+  bool FIFODUCOverflow, FIFODUCUnderflow, FIFODUCOverThreshold;
 
   //t_print("DUC I/Q %sbuffer received, TXActive=%d\n", (FromNetwork)?"network ":"", TXActive);
   if (FromNetwork) { //RRK
@@ -428,11 +432,17 @@ void saturn_handle_duc_iq(bool FromNetwork, uint8_t *UDPInBuffer) {
     if (TXActive == 2) { return; }
   }
 
-  DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFDUCOOverflow);           // read the FIFO free locations
+  DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFODUCOverflow, &FIFODUCOverThreshold, &FIFODUCUnderflow);  // read the FIFO free locations
 
   while (DepthDUC < VMEMDUCWORDSPERFRAME) {     // loop till space available
     usleep(500);                                    // 0.5ms wait
-    DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFDUCOOverflow);       // read the FIFO free locations
+    DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFODUCOverflow, &FIFODUCOverThreshold, &FIFODUCUnderflow); // read the FIFO free locations
+#ifdef DISPLAY_OVER_UNDER_FLOWS
+    if(FIFODUCOverThreshold)
+      t_print("TX DUC FIFO Overthreshold, depth now = %d\n", DepthDUC);
+    if(FIFODUCUnderflow)
+      t_print("TX DUC FIFO Underflowed, depth now = %d\n", DepthDUC);
+#endif
   }
 
   // copy data from UDP Buffer & DMA write it
@@ -490,21 +500,28 @@ void saturn_init_speaker_audio() {
     exit( -1 );
   }
 
+  SetupFIFOMonitorChannel(eSpkCodecDMA, false);
   ResetDMAStreamFIFO(eSpkCodecDMA);
   return;
 }
 
 void saturn_handle_speaker_audio(uint8_t *UDPInBuffer) {
   //uint32_t RegVal = 0;    //debug
-  bool FIFOSpkOverflow;
+  bool FIFOSpkOverflow, FIFOSpkUnderflow, FIFOSpkOverThreshold;;
   uint32_t DepthSpk = 0;
   //RegVal += 1;            //debug
-  DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow);        // read the FIFO free locations
+  DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow, &FIFOSpkOverThreshold, &FIFOSpkUnderflow);  // read the FIFO free locations
 
   //t_print("speaker data received; depth = %d\n", DepthSpk);
   while (DepthSpk < VMEMWORDSPERFRAME) {     // loop till space available
     usleep(1000);                                   // 1ms wait
-    DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow);    // read the FIFO free locations
+    DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow, &FIFOSpkOverThreshold, &FIFOSpkUnderflow); // read the FIFO free locations
+#ifdef DISPLAY_OVER_UNDER_FLOWS
+    if(FIFOSpkOverThreshold)
+      t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", DepthSpk);
+    if(FIFOSpkUnderflow)
+      t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", DepthSpk);
+#endif
   }
 
   // copy data from UDP Buffer & DMA write it
@@ -679,7 +696,7 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   uint32_t Depth;
   int DMAReadfile_fd = -1;                  // DMA read file device
   uint32_t RegisterValue;
-  bool FIFOOverflow;
+  bool FIFOOverflow, FIFOUnderflow, FIFOOverThreshold;
   uint8_t UDPBuffer[VMICPACKETSIZE];
   int Error;
   //
@@ -717,7 +734,7 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   //
   SetupFIFOMonitorChannel(eMicCodecDMA, false);
   ResetDMAStreamFIFO(eMicCodecDMA);
-  RegisterValue = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow);        // read the FIFO Depth register
+  RegisterValue = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
   t_print("%s: mic FIFO Depth register = %08x (should be ~0)\n", __FUNCTION__, RegisterValue);
 
   //
@@ -748,12 +765,23 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
       //
       // now wait until there is data, then DMA it
       //
-      Depth = ReadFIFOMonitorChannel(eMicCodecDMA,
-                                     &FIFOOverflow);      // read the FIFO Depth register. 4 mic words per 64 bit word.
+      Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);	// read the FIFO Depth register. 4 mic words per 64 bit word.
+      if(FIFOOverThreshold)
+        t_print("Codec Mic FIFO Overthreshold, depth now = %d\n", Depth);
+      // note this would often generate a message because we deliberately read it down to zero.
+      // this isn't a problem as we can send the data on without the code becoming blocked.
+      // if(FIFOUnderflow)
+      //   t_print("Codec Mic FIFO Underflowed, depth now = %d\n", Depth);
 
       while (Depth < (VMICSAMPLESPERFRAME / 4)) {         // 16 locations = 64 samples
         usleep(1000);                       // 1ms wait
-        Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow);        // read the FIFO Depth register
+        Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+#ifdef DISPLAY_OVER_UNDER_FLOWS
+        if(FIFOOverThreshold)
+          t_print("Codec Mic FIFO Overthreshold, depth now = %d\n", Depth);
+        //if(FIFOUnderflow)
+        //  t_print("Codec Mic FIFO Underflowed, depth now = %d\n", Depth);
+#endif
       }
 
       DMAReadFromFPGA(DMAReadfile_fd, MicBasePtr, VDMAMICTRANSFERSIZE, VADDRMICSTREAMREAD);
@@ -821,7 +849,7 @@ static gpointer saturn_rx_thread(gpointer arg) {
   uint32_t Depth;
   int IQReadfile_fd = -1;                     // DMA read file device
   uint32_t RegisterValue;
-  bool FIFOOverflow;
+  bool FIFOOverflow, FIFOUnderflow, FIFOOverThreshold;
   int DDC;                                                    // iterator
   int Error;
   //
@@ -876,8 +904,8 @@ static gpointer saturn_rx_thread(gpointer arg) {
   usleep(1000);                           // give FIFO time to stop recording
   SetupFIFOMonitorChannel(eRXDDCDMA, false);
   ResetDMAStreamFIFO(eRXDDCDMA);
-  RegisterValue = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow);       // read the FIFO Depth register
-  t_print("%s: DDC FIFO Depth register = %08x (should be 0)\n", __FUNCTION__, RegisterValue);
+  RegisterValue = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);	// read the FIFO Depth register
+  t_print("%s: DDC FIFO Depth register = %08x (should be ~0)\n", __FUNCTION__, RegisterValue);
   SetByteSwapping(true);                                            // h/w to generate network byte order
   //
   // thread loop. runs continuously until commanded by main loop to exit
@@ -983,13 +1011,25 @@ static gpointer saturn_rx_thread(gpointer arg) {
       // and copy it like we do with IQ data so the next readout begins at a new frame
       // the latter approach seems easier!
       //
-      Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow);       // read the FIFO Depth register
+      Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+      if(FIFOOverThreshold)
+        t_print("RX DDC FIFO Overthreshold, depth now = %d\n", Depth);
+      // note this could often generate a message at low sample rate because we deliberately read it down to zero.
+      // this isn't a problem as we can send the data on without the code becoming blocked. so not a useful trap.
+      // if(FIFOUnderflow)
+      //   t_print("RX DDC FIFO Underflowed, depth now = %d\n", Depth);
 
       //    t_print("read: depth = %d\n", Depth);
       while (Depth < (DMATransferSize / 8U)) { // 8 bytes per location
         usleep(1000);               // 1ms wait
-        Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow);       // read the FIFO Depth register
-        //      t_print("read: depth = %d\n", Depth);
+        Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+#ifdef DISPLAY_OVER_UNDER_FLOWS
+         if(FIFOOverThreshold)
+           t_print("RX DDC FIFO Overthreshold, depth now = %d\n", Depth);
+         //if(FIFOUnderflow)
+         //  t_print("RX DDC FIFO Underflowed, depth now = %d\n", Depth);
+         //  t_print("read: depth = %d\n", Depth);
+#endif
       }
 
       //            t_print("DDC DMA read %d bytes from destination to base\n", DMATransferSize);
