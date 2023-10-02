@@ -172,8 +172,8 @@ static void show_xvtr() {
   GtkWidget *label; // re-used for all labels
   int num = 0;
 
-  for (int i = 0; i < XVTRS; i++) {
-    const BAND *band = band_get_band(BANDS + i);
+  for (int i = BANDS; i < BANDS+XVTRS; i++) {
+    const BAND *band = band_get_band(i);
 
     if (strlen(band->title) > 0) { num++; }
   }
@@ -219,8 +219,8 @@ static void show_xvtr() {
   int col = 0;
   int row = 1;
 
-  for (int i = 0; i < XVTRS; i++) {
-    const BAND *band = band_get_band(BANDS + i);
+  for (int i = BANDS; i < BANDS+XVTRS; i++) {
+    const BAND *band = band_get_band(i);
 
     if (strlen(band->title) > 0) {
       if (col > 6) {
