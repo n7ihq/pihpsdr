@@ -63,6 +63,7 @@
 
 #define STATE_AVAILABLE 2
 #define STATE_SENDING 3
+#define STATE_INCOMPATIBLE 4
 
 #define ORIGINAL_PROTOCOL 0
 #define NEW_PROTOCOL      1

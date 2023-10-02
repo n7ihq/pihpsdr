@@ -396,16 +396,25 @@ void discovery() {
       gtk_widget_set_halign (label, GTK_ALIGN_START);
       gtk_widget_show(label);
       gtk_grid_attach(GTK_GRID(grid), label, 0, row, 3, 1);
-      GtkWidget *start_button = gtk_button_new_with_label("Start");
+      GtkWidget *start_button = gtk_button_new();
       gtk_widget_set_name(start_button, "big_txt");
       gtk_widget_show(start_button);
       gtk_grid_attach(GTK_GRID(grid), start_button, 3, row, 1, 1);
       g_signal_connect(start_button, "button-press-event", G_CALLBACK(start_cb), (gpointer)d);
 
       // if not available then cannot start it
-      if (d->status != STATE_AVAILABLE) {
+      switch (d->status) {
+      case STATE_AVAILABLE:
+        gtk_button_set_label(GTK_BUTTON(start_button), "Start");
+        break;
+      case STATE_SENDING:
         gtk_button_set_label(GTK_BUTTON(start_button), "In Use");
         gtk_widget_set_sensitive(start_button, FALSE);
+        break;
+      case STATE_INCOMPATIBLE:
+        gtk_button_set_label(GTK_BUTTON(start_button), "Incompatible");
+        gtk_widget_set_sensitive(start_button, FALSE);
+        break;
       }
 
       if (d->device != SOAPYSDR_USB_DEVICE) {

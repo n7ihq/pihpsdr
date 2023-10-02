@@ -339,6 +339,14 @@ void saturn_discovery() {
       strcpy(discovered[devices].name, "saturn");
       discovered[devices].frequency_min = 0.0;
       discovered[devices].frequency_max = 61440000.0;
+
+      //
+      // THIS version requires at least software_version = 10
+      // If the software is older, set the status to STATE_INCOMPATIBLE
+      if (discovered[devices].software_version < 10) {
+        discovered[devices].status = STATE_INCOMPATIBLE;
+      }
+      
       memset(buf, 0, 256);
       FILE *fp = fopen("/sys/class/net/eth0/address", "rt");
 

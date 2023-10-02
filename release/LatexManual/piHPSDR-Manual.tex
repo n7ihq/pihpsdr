@@ -170,7 +170,18 @@ the network connection, you then see a screen with a discovery menu (Fig. \ref{f
 \label{fig:Start}
 \end{figure}
 
-At this point, you can start the radio by clicking the \rett{Start} button, but let us first explain the
+It is possible that the \rett{Start} button is deactivated and shows another text. \rett{In Use} at
+this point means that the radio is already in use (connected by another SDR application), while
+\rett{Incompatible} denotes that the radio is not compatible with this version of piHPSDR. This
+is only the case if piHPDSR runs natively on the CM4 module inside the new Anan Saturn/G2
+radios and the FPGA firmware is known to be too old for direct (XDMA) data transfer between the CM4
+module and the FPGA. Updating the FPGA firmware to the latest version
+should help in this case.
+
+If more than one radio is available, or a radio can be connected via more than one network interface,
+you will see several \rett{Start} buttons.
+If you see at least one \rett{Start} button, you can start the corresponding radio simply
+by clicking that button. But let us first explain the
 purpose of the other buttons! Easiest to explain is the \rett{Exit} button, this will simply terminate
 the program. Most likely, you may want to go into the \rett{Protocols} menu sooner or later.
 By default, piHPSDR tries to discover the presence of a radio using all protocols known to piHPSDR. However, 
@@ -199,7 +210,8 @@ when the RedPitaya is powered up. In this case, the STEMlab protocol is not used
 automatically started. So in normal operation, when starting piHPSDR subsequently, and all settings are 
 still valid, the radio is started without user intervention. If this option is activated and one radio is 
 present, you will not see this menu, so in order to make further changes here, you have to disconnect the 
-radio from the ethernet cable, start piHPSDR until you see this menu, and reconnect the radio.}
+radio from the ethernet cable, start piHPSDR until you see this menu, and update the \rett{Protocols}
+settings. Then you can re-discover using the \rett{Discover} button.}
 \end{itemize}
 
 Sometimes piHPSDR needs to know the IP address of the radio. This is, for example, the case for the 
@@ -219,7 +231,7 @@ allow being discovered by such a routed packet.
 
 The \rett{Discover} button re-starts the discovery process. This is useful if the radio has been powered up 
 too late and
-was not yet ready when piHPSDR was started. Simply press \rett{Discover} to give another try.
+was not yet ready when piHPSDR was started. Simply press \rett{Discover} to start another attempt.
 
 The combo-box (pop-down menu) to the left of the \rett{Discover} button lets you choose which type of GPIO 
 controller you
@@ -230,10 +242,12 @@ is not the case on desktop/laptop computers. The menu lets you choose between
 \begin{itemize}[font=\texttt, left=80pt]
 \item[No Controller]{Choose this if no GPIO controller is wired to your Raspberry Pi. This is the default 
 when you first start piHPSDR.}
-\item[Contoller1]{Choose this if you have the original piHPSDR controller.}
+\item[Contoller1]{Choose this if you have the original piHPSDR controller, called the Controller1 in the rest
+of this manual.}
 \item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller with 
-single encoders.}
-\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encocders.}
+single encoders. This special case is not covered in this manual.}
+\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encocders.
+This controller is denoted Controller2 in the rest of this manual.}
 \item[G2 Front Panel]{Choose this if you have an ANAN G2 radio with a built-in controller.}
 \end{itemize}
 
@@ -1376,8 +1390,54 @@ between 28 and 30 MHz will be used for operating frequencies between 144 and 146
 when using the transverter band. This implies that the radio has some sort of 
 low-power output that is used to drive the transverter.
 
+\begin{figure}[h!]
+\center
+\includegraphics[width=12cm]{QO100-XVTR.png}
+\caption{\bltt{XVTR} setup for QO-100 operation.}
+\label{fig:QO100-XVTR}
+\end{figure}
+
+To give an example of how to setup transverter operation, a sample setup for QO-100 operation
+with an Adalm Pluto is given.
+The Pluto is
+operated via the SoapySDR interface. It can transmit at 2.3 GHz so for transmitting, so one can
+simply choose the "2300" (13 cm) band. For receiving in the 10 GHz band, one uses a so-called
+LNB (low noise block) in the focus of the parabol antenna which converts the 10 GHz signal down
+to about 740 MHz. The setup for defining the "QO100" transverter band is shown in Fig.
+\ref{fig:QO100-XVTR}.
 
 
+The LO (local oscillator) frequency is always chosen such that it is below the RX frequency,
+and the difference between the RX frequency and the LO frequency is the frequency the radio
+is operating on. The name (here: QO100) can be chosen as one likes, but it cannot be left
+empty. Once the transverter band has been defined, it shows up in the \bltt{BAND} menu
+(see Chapter \ref{sec:bandmenu}), as shown in Fig. \ref{fig:QO100-BandMenu}.
+
+\begin{figure}[ht]
+\center
+\includegraphics[width=6cm]{QO100-BandMenu.png}
+\caption{The \bltt{Band} menu after defining the QO100 band.}
+\label{fig:QO100-BandMenu}
+\end{figure}
+
+Fig. \ref{fig:QO100-Waterfall} gives an impression of how this actually works. Note that the
+default setup
+is working Split, Duplex and SAT. Split mode implies that VFO-B is used for transmitting.
+Duplex mode implies that the receiver continues to work while transmitting so you can watch your own signal.
+The TX spectrum scope then appears during transmitting in a small separate window. SAT mode
+finally takes care that changes of the RX (VFO-A) frequency are applied with the same sign and
+magnitude to VFO-B, so your transmitting frequency follows your RX frequency. The RIT value
+is used to correct for small local oscillator variations in the QO-100. One could have used
+the \rett{LO Err} field in the \bltt{XVTR} menu for this purpose, but I was told that
+this frequency is varying on a daily basis so using RIT is easier than setting the
+LO correction in the \bltt{XVTR} menu.
+
+\begin{figure}[ht]
+\center
+\includegraphics[width=12cm]{QO100-Waterfall.png}
+\caption{Working QO100 with piHPSDR and the Pluto.}
+\label{fig:QO100-Waterfall}
+\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: VFO-related menus}
@@ -1455,7 +1515,7 @@ rather, the RX ,,window'' moves. CTUN mode does not affect TX operation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Band} menu}
-
+\label{sec:bandmenu}
 The \bltt{Band} menu lets you change the band of the active receiver. It is shown
 in Fig. \ref{fig:BandMenu}. When the menu opens, the button of the current band
 is highlighted.
@@ -1994,6 +2054,11 @@ adjust the PA calibration value until your Watt meter shows the
 nominal output  power. The calibration values will  (slightly)
 differ from band to band, often one needs smaller values for the
 higher bands since the amplification of the PA is smaller there.
+If transverter bands have been defined via the \bltt{XVTR} menu,
+they will also show up in this menu. Note that the PA calibration
+value affects the level of the low-power TX output of the HPSDR board
+an thus affects both the PA output (if the PA is enabled) as well
+as the low-power TX output (if the Xvtr port is active as RX antenna).
 
 \textbf{Watt meter calibration.} When PA calibration is complete,
 you can calibrate the power reading within the meter section of
@@ -2375,18 +2440,29 @@ is much simpler because there are much fewer choices possible.
 \end{figure}
  
  Standard HPSDR radios have, in most cases, three main antenna jacks
- denoted Ant1, Ant2, Ant3, which can be used both for receiving to 
+ denoted \rett{Ant1}, \rett{Ant2}, \rett{Ant3}, which can be used both for receiving to 
  the first ADC and
- transmitting. Then there are additional antenna jacks (Ext1, Ext2, 
- and Xvtr) which can only be used for receiving and are also connected
+ transmitting. Then there are up to additional antenna jacks (\rett{Ext1}, \rett{Ext2}, 
+ and \rett{Xvtr}) which can only be used for receiving and are also connected
  to the first ADC. If the radio has more than one ADC, the (RX only)
  antenna jack, usually denoted RX2, is hard-wired to the second ADC.
  
+ If the menu is opened, the \rett{HF} button is checked, and the HF bands
+ are displayed. If one checks the \rett{XVTR} button, the transverter bands
+ are shown (this leads to an empty window if no transverter bands have
+ yet been defined), and one can go back to the HF bands by re-checking
+ \rett{HF}.
  For each band, one can now choose one (out the three) antennas for
  transmitting and one (out of six) antennas for receiving. The main purpose
  of this is the possibility to connect an additional receive-only antenna
 such as a beverage antenna which often has a better signal-to-noise
  ration than standard antennas used for transmitting.
+ 
+\textbf{Transverter operation.} Newer radios (Anan-7000, 8000, and Saturn/G2) have a
+switchable low-power TX output. This is enabled if \rett{Xvtr} is selected as the RX antenna of RX1.
+The connector used for low-power TX output can also be used for receiving.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{OC} (OpenCollector) Menu}
@@ -3660,7 +3736,11 @@ Note that the tranceiver model behind the CAT commands is ,,inherited'' from the
 differs from piHPSDR's model in one important aspect: in piHPSDR, a control command such as changing
 the mode, the filter, or the frequency always affects the active receiver unless the VFO is explicitly
 speficied. For CAT commands on the other hand, such a command without explicit VFO speficication will
-always affect VFO-A.}
+always affect VFO-A.
+
+No rule without an exception: the special CAT commands that support the ANDROMEDA console (see below) are
+such that they operate on the active receiver (ZZZD, ZZZE, ZZZP, ZZZU commands).
+}
 }
 \end{center}
 
