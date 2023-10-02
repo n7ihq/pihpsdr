@@ -3607,14 +3607,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             if (receivers == 2) {
               if (v == 0) {
                 if (active_receiver->id == 0) {
-                  schedule_action(RX1, PRESSED, 0);
+                  schedule_action(RX2, PRESSED, 0);
                   sprintf(reply, "ZZZI07%d;", vfo[VFO_B].ctun);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI08%d;", vfo[VFO_B].rit_enabled);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI100;");
                 } else {
-                  schedule_action(RX2, PRESSED, 0);
+                  schedule_action(RX1, PRESSED, 0);
                   sprintf(reply, "ZZZI07%d;", vfo[VFO_A].ctun);
                   send_resp(client->fd, reply);
                   sprintf(reply, "ZZZI08%d;", vfo[VFO_A].rit_enabled);

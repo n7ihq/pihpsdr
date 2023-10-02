@@ -1882,7 +1882,7 @@ void vfo_rit_value(int id, long long value) {
 
 void vfo_rit_onoff(int id, int enable) {
   CLIENT_MISSING;
-  if (!enable) { vfo[id].rit_enabled = 0; }
+  vfo[id].rit_enabled = SET(enable);
 
   if (id < receivers) {
     receiver_frequency_changed(receiver[id]);
@@ -1893,9 +1893,7 @@ void vfo_rit_onoff(int id, int enable) {
 
 void vfo_xit_onoff(int enable) {
   CLIENT_MISSING;
-  int id=get_tx_vfo();
-  vfo[id].xit = SET(enable);
-  if (!enable) { vfo[id].xit_enabled = 0; }
+  vfo[id].xit_enabled = SET(enable);
 
   if (protocol == NEW_PROTOCOL) {
     schedule_high_priority();
