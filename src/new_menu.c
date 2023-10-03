@@ -350,13 +350,13 @@ static gboolean vox_cb (GtkWidget *widget, GdkEventButton *event, gpointer data)
   return TRUE;
 }
 
-void start_fft() {
+void start_dsp() {
   cleanup();
   fft_menu(top_window);
 }
 
-static gboolean fft_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_fft();
+static gboolean dsp_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  start_dsp();
   return TRUE;
 }
 
@@ -626,11 +626,11 @@ void new_menu() {
     col++;
     //
     // Fifth column: Menus for RX and TX
-    //               FFT, Equalizer, Meter, Ant, OC
+    //               DSP, Equalizer, Meter, Ant, OC
     //
-    GtkWidget *fft_b = gtk_button_new_with_label("FFT");
-    g_signal_connect (fft_b, "button-press-event", G_CALLBACK(fft_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid), fft_b, col, row, 1, 1);
+    GtkWidget *dsp_b = gtk_button_new_with_label("DSP");
+    g_signal_connect (dsp_b, "button-press-event", G_CALLBACK(dsp_cb), NULL);
+    gtk_grid_attach(GTK_GRID(grid), dsp_b, col, row, 1, 1);
     row++;
     GtkWidget *equalizer_b = gtk_button_new_with_label("Equalizer");
     g_signal_connect (equalizer_b, "button-press-event", G_CALLBACK(equalizer_cb), NULL);

@@ -46,6 +46,13 @@ static gboolean close_cb () {
   return TRUE;
 }
 
+static void binaural_cb(GtkWidget *widget, gpointer data) {
+  int id = GPOINTER_TO_INT(data);
+  RECEIVER *rx=receiver[id];
+  rx->binaural = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  SetRXAPanelBinaural(rx->id, rx->binaural);
+}
+
 static void filter_type_cb(GtkToggleButton *widget, gpointer data) {
   int type = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
   int channel  = GPOINTER_TO_INT(data);
@@ -100,7 +107,7 @@ void fft_menu(GtkWidget *parent) {
   GtkWidget *w;
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-  gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - FFT");
+  gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - DSP");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -116,6 +123,9 @@ void fft_menu(GtkWidget *parent) {
   w = gtk_label_new("Filter Size");
   gtk_widget_set_name(w, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), w, 0, 3, 1, 1);
+  w = gtk_label_new("Binaural");
+  gtk_widget_set_name(w, "boldlabel");
+  gtk_grid_attach(GTK_GRID(grid), w, 0, 4, 1, 1);
   int col = 1;
 
   for (int i = 0; i <= receivers; i++) {
@@ -182,6 +192,13 @@ void fft_menu(GtkWidget *parent) {
 
     my_combo_attach(GTK_GRID(grid), w, col, 3, 1, 1);
     g_signal_connect(w, "changed", G_CALLBACK(filter_size_cb), GINT_TO_POINTER(chan));
+
+    if (i < receivers) {
+      w=gtk_check_button_new();
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), receiver[i]->binaural);
+      gtk_grid_attach(GTK_GRID(grid), w, col, 4, 1, 1);
+      g_signal_connect(w, "toggled", G_CALLBACK(binaural_cb), GINT_TO_POINTER(chan));
+    }
     col++;
   }
 

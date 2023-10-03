@@ -296,6 +296,7 @@ void receiverSaveState(RECEIVER *rx) {
   SetPropI1("receiver.%d.deviation", rx->id,                    rx->deviation);
   SetPropI1("receiver.%d.squelch_enable", rx->id,               rx->squelch_enable);
   SetPropF1("receiver.%d.squelch", rx->id,                      rx->squelch);
+  SetPropI1("receiver.%d.binaural", rx->id,                     rx->binaural);
   SetPropI1("receiver.%d.zoom", rx->id,                         rx->zoom);
   SetPropI1("receiver.%d.pan", rx->id,                          rx->pan);
 }
@@ -381,6 +382,7 @@ void receiverRestoreState(RECEIVER *rx) {
   GetPropI1("receiver.%d.deviation", rx->id,                    rx->deviation);
   GetPropI1("receiver.%d.squelch_enable", rx->id,               rx->squelch_enable);
   GetPropF1("receiver.%d.squelch", rx->id,                      rx->squelch);
+  GetPropI1("receiver.%d.binaural", rx->id,                     rx->binaural);
   GetPropI1("receiver.%d.zoom", rx->id,                         rx->zoom);
   GetPropI1("receiver.%d.pan", rx->id,                          rx->pan);
 }
@@ -928,6 +930,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->audio_device = -1;
   rx->squelch_enable = 0;
   rx->squelch = 0;
+  rx->binaural = 0;
   rx->filter_high = 525;
   rx->filter_low = 275;
   rx->deviation = 2500;
@@ -1046,7 +1049,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   }
 
   SetRXAPanelGain1(rx->id, amplitude);
-  SetRXAPanelBinaural(rx->id, 0);
+  SetRXAPanelBinaural(rx->id, rx->binaural);
   SetRXAPanelRun(rx->id, 1);
 
   //
@@ -1269,7 +1272,7 @@ void receiver_filter_changed(RECEIVER *rx) {
   set_filter(rx);
 
   if (can_transmit) {
-    if ((transmitter->use_rx_filter && rx == active_receiver) || transmitter->mode == modeFMN) {
+    if ((transmitter->use_rx_filter && rx == active_receiver) || get_tx_mode() == modeFMN) {
       tx_set_filter(transmitter);
     }
   }

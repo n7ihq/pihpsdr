@@ -204,6 +204,8 @@ typedef struct _receiver {
   gint squelch_enable;
   gdouble squelch;
 
+  gint binaural;
+
   gint deviation;
 
   gint64 waterfall_frequency;

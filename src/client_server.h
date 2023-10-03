@@ -73,7 +73,7 @@ enum {
   CMD_RESP_RX_FPS,
   CMD_RESP_RX_SELECT,
   CMD_RESP_VFO,
-  CMD_RESP_RIT_UPDATE,
+  CMD_RESP_RIT_TOGGLE,
   CMD_RESP_RIT_CLEAR,
   CMD_RESP_RIT,
   CMD_RESP_XIT_UPDATE,
@@ -410,10 +410,10 @@ typedef struct __attribute__((__packed__)) _lock_command {
   uint8_t lock;
 } LOCK_COMMAND;
 
-typedef struct __attribute__((__packed__)) _rit_update_command {
+typedef struct __attribute__((__packed__)) _rit_toggle_command {
   HEADER header;
   uint8_t id;
-} RIT_UPDATE_COMMAND;
+} RIT_TOGGLE_COMMAND;
 
 typedef struct __attribute__((__packed__)) _rit_clear_command {
   HEADER header;
@@ -513,7 +513,7 @@ extern void send_fps(int s, int rx, int fps);
 extern void send_rx_select(int s, int rx);
 extern void send_vfo(int s, int action);
 extern void send_lock(int s, int lock);
-extern void send_rit_update(int s, int rx);
+extern void send_rit_toggle(int s, int rx);
 extern void send_rit_clear(int s, int rx);
 extern void send_rit(int s, int rx, int rit);
 extern void send_sample_rate(int s, int rx, int sample_rate);

@@ -614,7 +614,7 @@ int process_action(void *data) {
   case COMP_ENABLE:
     if (can_transmit && a->mode == PRESSED) {
       transmitter_set_compressor(transmitter, NOT(transmitter->compressor));
-      mode_settings[transmitter->mode].compressor = transmitter->compressor;
+      mode_settings[get_tx_mode()].compressor = transmitter->compressor;
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -625,8 +625,8 @@ int process_action(void *data) {
       value = KnobOrWheel(a, transmitter->compressor_level, 0.0, 20.0, 1.0);
       transmitter_set_compressor_level(transmitter, value);
       transmitter_set_compressor(transmitter, value > 0.5);
-      mode_settings[transmitter->mode].compressor = transmitter->compressor;
-      mode_settings[transmitter->mode].compressor_level = transmitter->compressor_level;
+      mode_settings[get_tx_mode()].compressor = transmitter->compressor;
+      mode_settings[get_tx_mode()].compressor_level = transmitter->compressor_level;
       g_idle_add(ext_vfo_update, NULL);
     }
 

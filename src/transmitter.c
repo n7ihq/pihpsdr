@@ -217,13 +217,14 @@ void transmitterSaveState(const TRANSMITTER *tx) {
 static void transmitterRestoreState(TRANSMITTER *tx) {
   char name[128];
   char *value;
+  t_print("%s: id=%d\n", __FUNCTION__, tx->id);
   GetPropI1("transmitter.%d.low_latency",       tx->id,               tx->low_latency);
   GetPropI1("transmitter.%d.fft_size",          tx->id,               tx->fft_size);
   GetPropI1("transmitter.%d.fps",               tx->id,               tx->fps);
   GetPropI1("transmitter.%d.filter_low",        tx->id,               tx->filter_low);
   GetPropI1("transmitter.%d.filter_high",       tx->id,               tx->filter_high);
   GetPropI1("transmitter.%d.use_rx_filter",     tx->id,               tx->use_rx_filter);
-  GetPropI1("transmitter.%d.ales_antenna",     tx->id,               tx->alex_antenna);
+  GetPropI1("transmitter.%d.alex_antenna",      tx->id,               tx->alex_antenna);
   GetPropI1("transmitter.%d.panadapter_low",    tx->id,               tx->panadapter_low);
   GetPropI1("transmitter.%d.panadapter_high",   tx->id,               tx->panadapter_high);
   GetPropI1("transmitter.%d.local_microphone",  tx->id,               tx->local_microphone);
@@ -870,8 +871,7 @@ void tx_set_mode(TRANSMITTER* tx, int mode) {
       }
     }
 
-    tx->mode = mode;
-    SetTXAMode(tx->id, tx->mode);
+    SetTXAMode(tx->id, mode);
     tx_set_filter(tx);
   }
 }
@@ -989,10 +989,11 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   int cwmode;
   int sidetone = 0;
   static int txflag = 0;
-  // It is important to query tx->mode and tune only *once* within this function, to assure that
+  // It is important to query the TX mode and tune only *once* within this function, to assure that
   // the two "if (cwmode)" clauses give the same result.
   // cwmode only valid in the old protocol, in the new protocol we use a different mechanism
-  cwmode = (tx->mode == modeCWL || tx->mode == modeCWU) && !tune && !tx->twotone;
+  int txmode = get_tx_mode();
+  cwmode = (txmode == modeCWL || txmode == modeCWU) && !tune && !tx->twotone;
 
   switch (protocol) {
   case ORIGINAL_PROTOCOL:
@@ -1065,7 +1066,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     //
     // Note that mic sample amplification has to be done after update_vox()
     //
-    if (tx->mode == modeFMN && !tune) {
+    if (txmode == modeFMN && !tune) {
       for (int i = 0; i < 2 * tx->samples; i += 2) {
         tx->mic_input_buffer[i] *= 5.6234;  // 20*Log(5.6234) is 15
       }
@@ -1210,7 +1211,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 }
 
 void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
-  int mode = tx->mode;
+  int txmode = get_tx_mode();
   double mic_sample_double;
   int i, j;
 
@@ -1219,7 +1220,7 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
   // (in order not to fire VOX)
   //
 
-  if (tune || mode == modeCWL || mode == modeCWU) {
+  if (tune || txmode == modeCWL || txmode == modeCWU) {
     mic_sample_double = 0.0;
   } else {
     mic_sample_double = (double)mic_sample;
@@ -1228,7 +1229,7 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
   //
   // shape CW pulses when doing CW and transmitting, else nullify them
   //
-  if ((mode == modeCWL || mode == modeCWU) && isTransmitting()) {
+  if ((txmode == modeCWL || txmode == modeCWU) && isTransmitting()) {
     int updown;
     //
     //  RigCtl CW sets the variables cw_key_up and cw_key_down
@@ -1292,7 +1293,7 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
       // produces the same volume as "internal CW".
       if (!cw_keyer_internal || CAT_cw_is_active) { s = (int) (cwsample * 65535.0); }
 
-      new_protocol_cw_audio_samples(s, s);
+      new_protocol_cw_audio_samples(s, -s);
       s = 4 * cw_shape;
       i = 4 * tx->samples;
 
@@ -1435,7 +1436,8 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx, double q_sample_tx, 
 
   if (rx_feedback->samples >= rx_feedback->buffer_size) {
     if (isTransmitting()) {
-      int cwmode = (tx->mode == modeCWL || tx->mode == modeCWU) && !tune && !tx->twotone;
+      int txmode = get_tx_mode();
+      int cwmode = (txmode == modeCWL || txmode == modeCWU) && !tune && !tx->twotone;
 #if 0
       //
       // Special code to document the amplitude of the TX IQ samples.
@@ -1552,7 +1554,7 @@ void tx_set_twotone(TRANSMITTER *tx, int state) {
 
   if (state) {
     // set frequencies and levels
-    switch (tx->mode) {
+    switch (get_tx_mode()) {
     case modeCWL:
     case modeLSB:
     case modeDIGL:

@@ -52,7 +52,6 @@ void memSaveState() {
 void memRestoreState() {
   char name[128];
   char *value;
-  t_print("memRestoreState: restore memory\n");
 
   for (int b = 0; b < NUM_OF_MEMORYS; b++) {
     //

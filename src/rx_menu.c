@@ -185,7 +185,6 @@ static void audio_channel_cb(GtkWidget *widget, gpointer data) {
     break;
   }
 
-  t_print("CHANNEL=%d\n", active_receiver->audio_channel);
 }
 
 void rx_menu(GtkWidget *parent) {

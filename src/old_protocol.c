@@ -1455,8 +1455,8 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
     } else {
       TXRINGBUF[txring_inptr++] = side >> 8;
       TXRINGBUF[txring_inptr++] = side;
-      TXRINGBUF[txring_inptr++] = side >> 8;
-      TXRINGBUF[txring_inptr++] = side;
+      TXRINGBUF[txring_inptr++] = (-side) >> 8;
+      TXRINGBUF[txring_inptr++] = -side;
     }
 
     TXRINGBUF[txring_inptr++] = isample >> 8;

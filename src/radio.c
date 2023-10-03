@@ -2561,6 +2561,7 @@ void radioRestoreState() {
 #ifdef MIDI
   midiRestoreState();
 #endif
+  t_print("%s: radio state (except receiver/transmitter) restored.\n", __FUNCTION__);
 
   //
   // Sanity check part 2:

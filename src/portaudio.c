@@ -24,11 +24,6 @@
 // If PortAudio is NOT used, this file is empty, and audio.c
 // is used instead.
 //
-// It seems that a PortAudio device can only be opened once,
-// therefore there is no need to support stereo output.
-// (cw_)audio_write therefore put the sum of left and right
-// channel to a (mono) output stream
-//
 
 #include <gtk/gtk.h>
 
@@ -48,6 +43,7 @@
 #include "portaudio.h"
 #include "audio.h"
 #include "message.h"
+#include "vfo.h"
 
 static PaStream *record_handle = NULL;
 
@@ -67,14 +63,14 @@ int n_output_devices = 0;
 // RX audio samples are put into a ring buffer and "fetched" therefreom
 // by the portaudio "headphone" callback.
 //
-// We choose a ring buffer of 9600 samples that is kept about half-full
+// We choose a ring buffer of 9600 (stereo) samples that is kept about half-full
 // during RX (latency: 0.1 sec) which should be more than enough.
 // If the buffer falls below 1800, half a buffer length of silence is
 // inserted. This usually only happens after TX/RX transitions
 //
 // If we go TX in CW mode, cw_audio_write() is called. If it is called for
 // the first time with a non-zero sidetone volume,
-// the ring buffer is cleared and only 256 samples of silence
+// the ring buffer is cleared and only 256 (stereo) samples of silence
 // are put into it. During the TX phase, the buffer filling remains low
 // which we need for small CW sidetone latencies. If we then go to RX again
 // a "low water mark" condition is detected in the first call to audio_write()
@@ -86,7 +82,7 @@ int n_output_devices = 0;
 // If the sidetone volume is zero, the audio buffers are left unchanged
 //
 
-#define MY_AUDIO_BUFFER_SIZE 256
+#define MY_AUDIO_BUFFER_SIZE 256     // Unused if paFramesPerBufferUnspecified is taken
 #define MY_RING_BUFFER_SIZE  9600
 #define MY_RING_LOW_WATER    1000
 #define MY_RING_HIGH_WATER   8600
@@ -130,7 +126,7 @@ void audio_get_cards() {
   for (int  i = 0; i < numDevices; i++ ) {
     const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo( i );
     inputParameters.device = i;
-    inputParameters.channelCount = 1;
+    inputParameters.channelCount = 1;  // Microphone samples are mono
     inputParameters.sampleFormat = paFloat32;
     inputParameters.suggestedLatency = 0; /* ignored by Pa_IsFormatSupported() */
     inputParameters.hostApiSpecificStreamInfo = NULL;
@@ -153,7 +149,7 @@ void audio_get_cards() {
     }
 
     outputParameters.device = i;
-    outputParameters.channelCount = 1;
+    outputParameters.channelCount = 2;  // audio output samples are stereo
     outputParameters.sampleFormat = paFloat32;
     outputParameters.suggestedLatency = 0; /* ignored by Pa_IsFormatSupported() */
     outputParameters.hostApiSpecificStreamInfo = NULL;
@@ -226,7 +222,7 @@ int audio_open_input() {
   inputParameters.sampleFormat = paFloat32;
   inputParameters.suggestedLatency = Pa_GetDeviceInfo(padev)->defaultLowInputLatency ;
   inputParameters.hostApiSpecificStreamInfo = NULL; //See you specific host's API docs for info on using this field
-  err = Pa_OpenStream(&record_handle, &inputParameters, NULL, 48000.0, (unsigned long) MY_AUDIO_BUFFER_SIZE,
+  err = Pa_OpenStream(&record_handle, &inputParameters, NULL, 48000.0, paFramesPerBufferUnspecified,
                       paNoFlag, pa_mic_cb, NULL);
 
   if (err != paNoError) {
@@ -294,8 +290,11 @@ int pa_out_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
       if (rx->local_audio_buffer_inpt == newpt) {
         // Ring buffer empty, send zero sample
         *out++ = 0.0;
+        *out++ = 0.0;
       } else {
-        *out++ = rx->local_audio_buffer[newpt++];
+        *out++ = rx->local_audio_buffer[2*newpt];
+        *out++ = rx->local_audio_buffer[2*newpt+1];
+        newpt++;
 
         if (newpt >= MY_RING_BUFFER_SIZE) { newpt = 0; }
 
@@ -450,14 +449,14 @@ int audio_open_output(RECEIVER *rx) {
 
   g_mutex_lock(&rx->local_audio_mutex);
   bzero( &outputParameters, sizeof( outputParameters ) ); //not necessary if you are filling in all the fields
-  outputParameters.channelCount = 1;   // Always MONO
+  outputParameters.channelCount = 2;   // audio output is stereo
   outputParameters.device = padev;
   outputParameters.hostApiSpecificStreamInfo = NULL;
   outputParameters.sampleFormat = paFloat32;
   // use a zero for the latency to get the minimum value
   outputParameters.suggestedLatency = 0.0; //Pa_GetDeviceInfo(padev)->defaultLowOutputLatency ;
   outputParameters.hostApiSpecificStreamInfo = NULL; //See you specific host's API docs for info on using this field
-  err = Pa_OpenStream(&(rx->playstream), NULL, &outputParameters, 48000.0, (unsigned long) MY_AUDIO_BUFFER_SIZE,
+  err = Pa_OpenStream(&(rx->playstream), NULL, &outputParameters, 48000.0, paFramesPerBufferUnspecified,
                       paNoFlag, pa_out_cb, rx);
 
   if (err != paNoError) {
@@ -470,7 +469,7 @@ int audio_open_output(RECEIVER *rx) {
   //
   // This is now a ring buffer much larger than a single audio buffer
   //
-  rx->local_audio_buffer = g_new(float, MY_RING_BUFFER_SIZE);
+  rx->local_audio_buffer = g_new(float, 2*MY_RING_BUFFER_SIZE);
   rx->local_audio_buffer_inpt = 0;
   rx->local_audio_buffer_outpt = 0;
 
@@ -581,14 +580,10 @@ void audio_close_output(RECEIVER *rx) {
 // normal operation.
 //
 int audio_write (RECEIVER *rx, float left, float right) {
-  int mode = modeUSB;
+  int txmode = get_tx_mode();
   float *buffer = rx->local_audio_buffer;
 
-  if (can_transmit) {
-    mode = transmitter->mode;
-  }
-
-  if (rx == active_receiver && isTransmitting() && (mode == modeCWU || mode == modeCWL) && cw_keyer_sidetone_volume > 0) {
+  if (rx == active_receiver && isTransmitting() && (txmode == modeCWU || txmode == modeCWL) && cw_keyer_sidetone_volume > 0) {
     //
     // If a CW side tone may occur, quickly return
     //
@@ -605,7 +600,7 @@ int audio_write (RECEIVER *rx, float left, float right) {
     if (avail <  MY_RING_LOW_WATER) {
       //
       // Running the RX-audio for a very long time
-      // and with audio hardware whose "48000 Hz" are a little fasterthan the "48000 Hz" of
+      // and with audio hardware whose "48000 Hz" are a little faster than the "48000 Hz" of
       // the SDR will very slowly drain the buffer. We recover from this by brutally
       // inserting half a buffer's length of silence.
       //
@@ -620,7 +615,9 @@ int audio_write (RECEIVER *rx, float left, float right) {
       int oldpt = rx->local_audio_buffer_inpt;
 
       for (int i = 0; i < MY_RING_BUFFER_SIZE / 2 - avail; i++) {
-        buffer[oldpt++] = 0.0;
+        buffer[2*oldpt] = 0.0;
+        buffer[2*oldpt+1] = 0.0;
+        oldpt++;
 
         if (oldpt >= MY_RING_BUFFER_SIZE) { oldpt = 0; }
       }
@@ -658,7 +655,8 @@ int audio_write (RECEIVER *rx, float left, float right) {
       //
       // buffer space available
       //
-      buffer[oldpt] = (left + right) * 0.5; //   mix to MONO
+      buffer[2*oldpt] = left;
+      buffer[2*oldpt+1] = right;
       rx->local_audio_buffer_inpt = newpt;
     }
   }
@@ -692,7 +690,7 @@ int cw_audio_write(RECEIVER *rx, float sample) {
       // First time producing CW audio after RX/TX transition:
       // empty audio buffer and insert *a little bit of* silence
       //
-      bzero(rx->local_audio_buffer, MY_CW_MID_WATER * sizeof(float));
+      bzero(rx->local_audio_buffer, 2 * MY_CW_MID_WATER * sizeof(float));
       rx->local_audio_buffer_inpt = MY_CW_MID_WATER;
       rx->local_audio_buffer_outpt = 0;
       avail = MY_CW_MID_WATER;
@@ -727,7 +725,8 @@ int cw_audio_write(RECEIVER *rx, float sample) {
         //
         // buffer space available
         //
-        rx->local_audio_buffer[oldpt] = sample;
+        rx->local_audio_buffer[2*oldpt] = sample;
+        rx->local_audio_buffer[2*oldpt+1] = -sample;
         rx->local_audio_buffer_inpt = newpt;
       }
 
@@ -739,11 +738,15 @@ int cw_audio_write(RECEIVER *rx, float sample) {
       // insert two samples of silence. No check on "buffer full" necessary.
       //
       oldpt = rx->local_audio_buffer_inpt;
-      rx->local_audio_buffer[oldpt++] = 0.0;
+      rx->local_audio_buffer[2*oldpt] = 0.0;
+      rx->local_audio_buffer[2*oldpt+1] = 0.0;
+      oldpt++;
 
       if (oldpt == MY_RING_BUFFER_SIZE) { oldpt = 0; }
 
-      rx->local_audio_buffer[oldpt++] = 0.0;
+      rx->local_audio_buffer[2*oldpt] = 0.0;
+      rx->local_audio_buffer[2*oldpt+1] = 0.0;
+      oldpt++;
 
       if (oldpt == MY_RING_BUFFER_SIZE) { oldpt = 0; }
 

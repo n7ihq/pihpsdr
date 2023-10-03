@@ -1801,7 +1801,7 @@ GtkWidget* vfo_init(int width, int height) {
 //
 // Some utility functions to get characteristics of the current
 // transmitter. These functions can be used even if there is no
-// transmitter (transmitter->mode may segfault).
+// transmitter
 //
 
 int get_tx_vfo() {

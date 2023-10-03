@@ -2347,22 +2347,23 @@ I personally never use it.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: menus for RX and TX}
 
-\section{The \texttt{FFT} (Signal Processing) Menu}
+\section{The \texttt{DSP} (Signal Processing) Menu}
 
 \begin{figure}[ht]
 \center
-\includegraphics[width=12cm]{FFTMenu.png}
-\caption{The FFT menu.}
-\label{fig:FFTMenu}
+\includegraphics[width=12cm]{DSPMenu.png}
+\caption{The DSP menu.}
+\label{fig:DSPMenu}
 \end{figure}
 
-The \bltt{FFT} menu sets parameters for the filters inside WDSP
-(and thus has no effect if using SoapySDR radios).
+The \bltt{DSP} menu sets parameters related to DSP (digital signal processing)
+within the WDSP library.
 Filter characteristics can be specified separately for the RX1 (and RX2, if
 running two receivers) and TX (if the radio does have a transmitter)
-filters. Most users will
+filters. In addition, enabling/disabling binaural receiver audio
+is done here.  Most users will
 very rarely need to invoke this menu, which is shown
-in Fig. \ref{fig:FFTMenu}.
+in Fig. \ref{fig:DSPMenu}.
 
 \rett{Filter Type}. Digital filters can be designed such that a signal within the
 passband leaves the filter in a shape as similar as possible
@@ -2389,6 +2390,18 @@ is hard-coded in piHPSDR to be 1024 (except for the transmitter in P2,
 where it is reduced to 512). The default value of 2048 should be
 fine in almost all cases, if you increase it, you can notice that
 the filter edges become little more ,,brick wall'' like.
+
+\rett{Binaural} The RX audio signal by default is a mono signal. Although
+you have the RX audio signal on both ears if using a headphone, both the
+left and right channel are the same. Checking \rett{Binaural} for a 
+receiver implies that its RX audio signal is stereo (left and right channel
+differ). This is accomplished by copying the primary I and Q signal of the
+RX output to the left and right channels instead of using the I signal
+for both ears (which is the default). Some users report that in modes
+such as CW and SSB, binaurel audio is more pleasant than the default.
+It is up to the user to try and set this parameter according to personal
+preferences. This checkbox is available for all receivers but not for the
+transmitter.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Equalizer} Menu}

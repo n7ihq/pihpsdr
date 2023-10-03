@@ -48,7 +48,6 @@ typedef struct _transmitter {
   guint update_timer_id;
   GMutex display_mutex;
 
-  int mode;
   int filter_low;
   int filter_high;
   gboolean use_rx_filter;
