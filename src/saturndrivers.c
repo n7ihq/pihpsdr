@@ -90,6 +90,21 @@ int CloseXDMADriver(void) {
 
 
 //
+// function call to get firmware ID and version
+//
+unsigned int GetFirmwareVersion(ESoftwareID* ID)
+{
+	unsigned int Version = 0;
+	uint32_t SoftwareInformation;			// swid & version
+
+	SoftwareInformation = RegisterRead(VADDRSWVERSIONREG);
+	Version = (SoftwareInformation >> 4) & 0xFFFF;			// 16 bit sw version
+	*ID = (ESoftwareID)(SoftwareInformation >> 20);						// 12 bit software ID
+	return Version;
+}
+
+
+//
 // initiate a DMA to the FPGA with specified parameters
 // returns 1 if success, else 0
 // fd: file device (an open file)
@@ -182,9 +197,12 @@ void RegisterWrite(uint32_t Address, uint32_t Data) {
 
 sem_t DDCResetFIFOMutex;
 
+bool GFIFOSizesInitialised = false;
+
 //
 // DMA FIFO depths
 // this is the number of 64 bit FIFO locations
+// this is now version dependent, and updated by InitialiseFIFOSizes()
 //
 uint32_t DMAFIFODepths[VNUMDMAFIFO] = {
   8192,             //  eRXDDCDMA,    selects RX
@@ -205,6 +223,12 @@ uint32_t DMAFIFODepths[VNUMDMAFIFO] = {
 void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt) {
   uint32_t Address;             // register address
   uint32_t Data;                // register content
+
+  if (!GFIFOSizesInitialised)
+  {
+    InitialiseFIFOSizes();				// load FIFO size table, if not already done
+    GFIFOSizesInitialised = true;
+  }
   Address = VADDRFIFOMONBASE + 4 * Channel + 0x10;      // config register address
   Data = DMAFIFODepths[(int)Channel];             // memory depth
 
@@ -261,6 +285,27 @@ uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool
 }
 
 
+
+
+//
+// InitialiseFIFOSizes(void)
+// initialise the FIFO size table, which is FPGA version dependent
+//
+void InitialiseFIFOSizes(void)
+{
+    ESoftwareID ID;
+    unsigned int Version = 0;
+
+    Version = GetFirmwareVersion(&ID);
+    if(Version >= 10)
+    {
+        t_print("loading new FIFO sizes for updated firmware version:%d\n", Version);
+        DMAFIFODepths[0] = 16384;       //  eRXDDCDMA,		selects RX
+        DMAFIFODepths[1] = 2048;        //  eTXDUCDMA,		selects TX
+        DMAFIFODepths[2] = 256;         //  eMicCodecDMA,	selects mic samples
+        DMAFIFODepths[3] = 1024;        //  eSpkCodecDMA	selects speaker samples
+    }
+}
 
 
 

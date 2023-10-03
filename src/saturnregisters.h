@@ -235,10 +235,31 @@ typedef enum {
 
 //extern bool GEEREnabled;                                   // P2. true if EER is enabled
 
-
-
-
 //
+// define types for product responses
+//
+typedef enum
+{
+    eInvalidProduct,                // productid = 1
+    eSaturn                         // productid=Saturn
+} EProductId;
+
+typedef enum
+{
+    ePrototype1,                // productid = 1
+    eProductionV1                         // productid=Saturn
+} EProductVersion;
+
+typedef enum
+{
+    eInvalidSWID,
+    e1stProtoFirmware,
+    e2ndProtofirmware,
+    eFallback,
+    eFullFunction
+} ESoftwareID;
+
+
 // InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us)
 // calculates an "S" shape ramp curve and loads into RAM
 // needs to be called before keyer enabled!
@@ -254,6 +275,12 @@ void InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us);
 // for "attenuation intent" values from 0 to 255
 //
 void InitialiseDACAttenROMs(void);
+
+//
+// InitialiseFIFOSizes(void)
+// initialise the FIFO size table, which is FPGA version dependent
+//
+void InitialiseFIFOSizes(void);
 
 
 //
