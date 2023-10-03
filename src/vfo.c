@@ -1893,6 +1893,7 @@ void vfo_rit_onoff(int id, int enable) {
 
 void vfo_xit_onoff(int enable) {
   CLIENT_MISSING;
+  int id=get_tx_vfo();
   vfo[id].xit_enabled = SET(enable);
 
   if (protocol == NEW_PROTOCOL) {
