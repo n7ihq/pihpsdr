@@ -3855,7 +3855,7 @@ such that the PTT signal arrives about 150 msec earlier than the first key-down.
 K1EL WinKey keyers and Arduino clones thereof, which are the most abundant sort
 of keyers used, can easily be configured to do so. Depending on the audio subsystem,
 the latency of the side tone, when using the internal keyer, may be a problem.
-The ALSA audio (instead of pulseaudio) module takes special provisions to
+The ALSA audio (instead of PulseAudio) module takes special provisions to
 keep this latency small.
 
 \textbf{MIDI}
@@ -4087,7 +4087,7 @@ In this section, we will cover four different scenarios, namely
 \item{piHPSDR and digimode program running on the same LINUX computer 
 (including RaspPi) using ALSA.}
 \item{piHPSDR and digimode program running on the same LINUX computer
-(including RaspPi) using pulseaudio.}
+(including RaspPi) using PulseAudio.}
 \item{piHPSDR and digimode program running on the same MacOS computer.}
 \end{itemize}
 
@@ -4149,8 +4149,9 @@ it is clear that
 With this, the only question remaining is, how to create virtual audio cables, and how to access them.
 This is not only different between Linux and MacOS, but also is different on Linux depending on
 whether the ALSA compile time option (see Appendix \ref{sec:compiletime}) was activated during 
-compilation of piHPSDR. By default (and if piHPSDR has been put onto you computer by binary
-installation), ALSA is active.
+compilation of piHPSDR. For the binary installation on a RaspPi (see Appendix \ref{sec:installbinary})
+ALSA is active. If compiling from the sources you get the PulseAudio module if you
+do not change the Makefile (see Appendix \ref{sec:compiletime}).
 
 
 \textbf{\color{red}Virtual audio cables. Linux ALSA case.} \\
@@ -4250,9 +4251,9 @@ takes care WSJTX switches piHPSDR to DIGU mode, and using \rett{Fake It} for the
 Operation method is just my personal preference.
 
 \clearpage
-\textbf{\color{red}Virtual audio cables, Pulseaudio case.}\\
-There are no explicit loopback devices with pulseaudio since they are not needed.
-For \textit{every} pulseaudio output device, there is a corresponding ,,Monitor'' device
+\textbf{\color{red}Virtual audio cables, PulseAudio case.}\\
+There are no explicit loopback devices with PulseAudio since they are not needed.
+For \textit{every} PulseAudio output device, there is a corresponding ,,Monitor'' device
 which can be used for sound input, and where the data sent to the primary (output) device
 can be red. This means, you can send the RX audio to the headphone device as you would do
 for normal SSB operation, and can then use the Monitor of the headphone device as audio
@@ -4260,14 +4261,14 @@ input in WSJTX. Then we need, however, a \textit{second} output device which we 
 as audio  output in WSJTX, and the Monitor thereof can then be chosen, in the piHPSDR
 \bltt{TX} menu, as the local microphone. We could use any un-used audio output device for
 this purpose, but if we do not have one, we have to create one. This is easy, since
-in pulseaudio there are the so-called ,,null sink'' devices which are output devices
+in PulseAudio there are the so-called ,,null sink'' devices which are output devices
 that are just black holes that swallow all audio output sent to them. Their only purpose
 is that they also have a monitor device associated which you can then use.
 
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{rx_settings_pa_audio.png}
-\caption{RX menu settings with pulseaudio}
+\caption{RX menu settings with PulseAudio}
 \label{fig:rx_settings_pa_audio}
 \end{figure}
 
@@ -4321,7 +4322,7 @@ and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{tx_settings_pa_audio.png}
-\caption{TX menu settings with pulseaudio}
+\caption{TX menu settings with PulseAudio}
 \label{fig:tx_settings_pa_audio}
 \end{figure}
 
@@ -4330,7 +4331,7 @@ In the WSJTX audio tab, the input/output assigments are just reversed:
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{wsjtx_settings_pa_audio.png}
-\caption{WSJTX audio settings with pulseaudio}
+\caption{WSJTX audio settings with PulseAudio}
 \label{fig:wstx_settings_pa_audio}
 \end{figure}
 
@@ -4400,26 +4401,33 @@ In the \texttt{GNUmakefile} in the first 50 lines, you will find a lot of assign
 
 together with some comments what they are good for. The first form, with a number sign in the first column, 
 means that option BBBBB is not active, the second form, without a number sign, means that option YYYYY
-\textit{is} active. Here we give a list of available options:
+\textit{is} active. Here we give a list of available options. For each of these, we note if it
+is enabled or disabled in the \texttt{Makefile} of the standard repository.
 
-\rett{GPIO}. This option is needed on a RaspberryPi if you want to use GPIO input/output lines from
+\rett{GPIO}. (default: enabled) 
+This option is needed on a RaspberryPi if you want to use GPIO input/output lines from
 within piHPSDR, for example since you have a controller (Controller1, Controller2, of G2 frontpanel)
 attached or want to use GPIO lines for CW or PTT. \textbf{It is important to deactivate this option
 if you compile for a Desktop PC running LINUX!}. This is so because Desktop PCs/Laptops do not
 have GPIO lines. For MacOS, this option is automatically disabled.
 
-\rett{MIDI}. This option activates the possiblity to control piHPSDR via MIDI devices. It should normally be
+\rett{MIDI}. (default: enabled)
+This option activates the possiblity to control piHPSDR via MIDI devices. It should normally be
 activated, unless you port piHPSDR to some other operating system without MIDI support.
 
-\rett{SATURN}. This option is for piHPSDR running on the CM4 module within a SATURN/G2 radio. It allows
+\rett{SATURN}. (default: enabled)
+This option is for piHPSDR running on the CM4 module within a SATURN/G2 radio. It allows
 piHPSDR to directly communicate with the FPGA via XDMA. While it does no harm to have this option activated
 on other systems, it also has no function there.
 
-\rett{USBOZY}. This option includes support for legacy HPSDR hardware connected via USB.
+\rett{USBOZY}. (default: disabled)
+This option includes support for legacy HPSDR hardware connected via USB.
 
-\rett{SOAPYSDR}. This option enables piHPSDR to communicate with radios through the SoapySDR library.
+\rett{SOAPYSDR}. (default: disabled)
+This option enables piHPSDR to communicate with radios through the SoapySDR library.
 
-\rett{STEMLAB}. This is an option for RedPitaya based radios. These have an SDR app that must be
+\rett{STEMLAB}. (default: disabled)
+This is an option for RedPitaya based radios. These have an SDR app that must be
 started before one can connect. If you have a RedPitaya exclusively being used as a radio, this
 app is most likely auto-started when powering up the RedPitaya so you do not need the STEMLAB
 option. This option allows to start the SDR application on the RedPitaya through the web interface.
@@ -4427,19 +4435,22 @@ If you have a RedPitay and no autostart of the SDR application there, and not co
 with the STEMLAB option, you can open a web browser, start the SDR application on the RedPitaya,
 and then start piHPSDR. With the STEMLAB option, this can all be done by piHPSDR.
 
-\rett{ALSA}. This option is only effective for LINUX systems including the Raspberry Pi. If this
+\rett{ALSA}. (default: disabled)
+This option is only effective for LINUX systems including the Raspberry Pi. If this
 option is active, local audio output is done via the standard LINUX ALSA library, otherwise
-pulseaudio is used. Note that sending audio to HDMI monitors is not (yet) supported
-with the ALSA option (with pulseaudio, this is no problem).
+PulseAudio is used. Note that sending audio to HDMI monitors is not (yet) supported
+with the ALSA option (with PulseAudio, this is no problem).
 On MacOS, this option has no effect since the portaudio library is used
 in any case.
 
-\rett{EXTNR}. There is a special version of the WDSP library that contains additional noise
+\rett{EXTNR}. (default: disabled)
+There is a special version of the WDSP library that contains additional noise
 reduction facilities \texttt{rnnnoise} and \texttt{libspecbleach}, see \\
  \texttt{github.com/vu3rdd/wdsp}. If you have such a version of WDSP installed, these 
  extended noise reduction facilities can be used with piHPSDR if the EXTNR option is active.
  
- \rett{SERVER}. This is not yet completed but is mentioned here anyway. There are plans to have
+ \rett{SERVER}. (default: disabled)
+ This is not yet completed but is mentioned here anyway. There are plans to have
  a client/server model in piHPSDR such that you can have a ,,distant'' radio with a computer
  running piHPDSR connected to that radio, and a ,,local'' computer running piHPSDR, and an
  internet connection between the two computers. All the time-critical data exchange happens
@@ -4485,8 +4496,9 @@ properties:
 
 \begin{itemize}
 \item{It runs on a 32-bit Raspberry Pi OS, currently the "bullseye" version.}
-\item{It has the GPIO, MIDI, SATURN, and ALSA options built in, so it does not use pulseaudio
-which means you cannot (yet) send RX audio to HDMI monitors. See
+\item{It has the GPIO, MIDI, SATURN options activated, and it uses the ALSA audio
+module.  So it does \textit{not} use PulseAudio
+which means you cannot send RX audio to HDMI monitors. See
 Appendix \ref{sec:compiletime} for a detailed description of the compile time options. If you want
 another set of options, you have to compile from the sources.}
 \end{itemize}
@@ -4519,7 +4531,7 @@ of the problem is, if it gets worse when increasing the piHPDSR window size.
 Before you shout at me, because your most-wanted compile time option is deactivated in the
 binary installation, let me explain that I want to satisfy the maximum number of people but
 with minimum complexity in the installation process. Things such as using SoapySDR devices,
-or using pulseaudio, involve heavy installation work (special libraries, etc. etc.) that make
+or using PulseAudio, involve heavy installation work (special libraries, etc. etc.) that make
 the installation more complicated. So the decision was to offer a binary installation on
 \textit{as is} basis, and refer to compilation from the sources
  (explained in Appendix \ref{sec:installsources})
@@ -4552,12 +4564,32 @@ are not necessary since why should a \texttt{pihpsdr} directory exist at top lev
 home directory?
 
 The binary installation
-is then done via the following four commands, which have to be typed in exactly as given here:
+is then done via the following commands, which have to be typed in exactly as given here:
 
 \grtt{git clone https://github.com/dl1ycf/pihpsdr} \\
-\grtt{cd pihpsdr/release} \\
+\grtt{cd pihpsdr} \\
+\grtt{git checkout RELEASE-2.2-DL1YCF} \\
+\grtt{cd release} \\
 \grtt{tar xvf pihpsdr.tar} \\
 \grtt{pihpsdr/install.sh} \\
+
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} ----- Release and Development version -----}
+\end{center}
+ You can leave out the command starting with \texttt{git checkout}, then you
+will get the latest (development) version. Because this is updated very frequently, it contains errors
+from time to time which will are normally corrected very quickly, but you could simply fall into this pit.
+ Checking out the \texttt{RELEASE-2.2-DL1YCF}
+release version is safer since this is more stable, and will only be updated for simple bug fixes.
+New features will be included and accumulated in the development branch until eventually a new
+release (with version 2.3) is made in the future.
+}
+}
+\end{center}
+
 
 \begin{figure}[ht]
 \center
@@ -4566,7 +4598,7 @@ is then done via the following four commands, which have to be typed in exactly 
 \label{fig:piDontAsk}
 \end{figure}
 
-The last command takes some time (depending on the speed of your internet connection),
+The last command  (\texttt{install.sh}) takes some time (depending on the speed of your internet connection),
 since a lot of software need be installed that piHPSDR depends on. At the end, a piHPSDR desktop
 icon should appear. In principle, you can start piHPSDR now by double-clicking the icon.
 However (at least on my test system) I get always asked \textit{how} I want to
@@ -4599,7 +4631,7 @@ which of the two variants you run.}
 \item{For all the compile time options (see Appendix \ref{sec:compiletime}) you can individually choose
 whether you want to activate or deactivate this option.}
 \item{This implies that if you want to use SoapySDR devices (like the Adalm Pluto or RTL SDR sticks), or
-if you want to use pulseaudio as the backend for local RX audio, you \textit{have to} compile from
+if you want to use PulseAudio as the backend for local RX audio, you \textit{have to} compile from
 the sources, since these compile time options are not activated in the binary installation package.}
 \end{itemize}
 
@@ -4659,7 +4691,25 @@ The piHPSDR repository is downloaded, and support libraries are installed, with 
 
 \grtt{git clone https://github.com/dl1ycf/pihpsdr} \\
 \grtt{cd pihpsdr} \\
+\grtt{git checkout RELEASE-2.2-DL1YCF} \\
 \grtt{LINUX/libinstall.sh} \\
+
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} ----- Release and Development version -----}
+\end{center}
+ You can leave out the command starting with \texttt{git checkout}, then you
+will get the latest (development) version. Because this is updated very frequently, it contains errors
+from time to time which will are normally corrected very quickly, but you could simply fall into this pit.
+ Checking out the \texttt{RELEASE-2.2-DL1YCF}
+release version is safer since this is more stable, and will only be updated for simple bug fixes.
+New features will be included and accumulated in the development branch until eventually a new
+release (with version 2.3) is made in the future.
+}
+}
+\end{center}
 
 Depending on the internet speed (and the speed of your SD card or hard disk), the first and the
 last command my take some time. The first command loads the complete piHPSDR repository from
@@ -4816,7 +4866,26 @@ The piHPSDR repository is downloaded, and support libraries are installed, with 
 
 \grtt{git clone https://github.com/dl1ycf/pihpsdr} \\
 \grtt{cd pihpsdr} \\
+\grtt{git checkout RELEASE-2.2-DL1YCF}
 \grtt{MacOS/libinstall.sh} \\
+
+
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} ----- Release and Development version -----}
+\end{center}
+ You can leave out the command starting with \texttt{git checkout}, then you
+will get the latest (development) version. Because this is updated very frequently, it contains errors
+from time to time which will are normally corrected very quickly, but you could simply fall into this pit.
+ Checking out the \texttt{RELEASE-2.2-DL1YCF}
+release version is safer since this is more stable, and will only be updated for simple bug fixes.
+New features will be included and accumulated in the development branch until eventually a new
+release (with version 2.3) is made in the future.
+}
+}
+\end{center}
 
 The last command starts with installing Apple's command line tools, in particular the Apple C and C++
 compilers. You may get an error message from \texttt{xcode-select} that the tools are already
