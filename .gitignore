@@ -3,6 +3,8 @@ GNUmakefile
 *.log
 *.toc
 *.o
+*.diff
+*.orig
 pihpsdr
 pihpsdr.app
 hpsdrsim
