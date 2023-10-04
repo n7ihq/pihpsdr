@@ -292,8 +292,8 @@ int pa_out_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
         *out++ = 0.0;
         *out++ = 0.0;
       } else {
-        *out++ = rx->local_audio_buffer[2*newpt];
-        *out++ = rx->local_audio_buffer[2*newpt+1];
+        *out++ = rx->local_audio_buffer[2 * newpt];
+        *out++ = rx->local_audio_buffer[2 * newpt + 1];
         newpt++;
 
         if (newpt >= MY_RING_BUFFER_SIZE) { newpt = 0; }
@@ -469,7 +469,7 @@ int audio_open_output(RECEIVER *rx) {
   //
   // This is now a ring buffer much larger than a single audio buffer
   //
-  rx->local_audio_buffer = g_new(float, 2*MY_RING_BUFFER_SIZE);
+  rx->local_audio_buffer = g_new(float, 2 * MY_RING_BUFFER_SIZE);
   rx->local_audio_buffer_inpt = 0;
   rx->local_audio_buffer_outpt = 0;
 
@@ -583,7 +583,8 @@ int audio_write (RECEIVER *rx, float left, float right) {
   int txmode = get_tx_mode();
   float *buffer = rx->local_audio_buffer;
 
-  if (rx == active_receiver && isTransmitting() && (txmode == modeCWU || txmode == modeCWL) && cw_keyer_sidetone_volume > 0) {
+  if (rx == active_receiver && isTransmitting() && (txmode == modeCWU || txmode == modeCWL)
+      && cw_keyer_sidetone_volume > 0) {
     //
     // If a CW side tone may occur, quickly return
     //
@@ -615,8 +616,8 @@ int audio_write (RECEIVER *rx, float left, float right) {
       int oldpt = rx->local_audio_buffer_inpt;
 
       for (int i = 0; i < MY_RING_BUFFER_SIZE / 2 - avail; i++) {
-        buffer[2*oldpt] = 0.0;
-        buffer[2*oldpt+1] = 0.0;
+        buffer[2 * oldpt] = 0.0;
+        buffer[2 * oldpt + 1] = 0.0;
         oldpt++;
 
         if (oldpt >= MY_RING_BUFFER_SIZE) { oldpt = 0; }
@@ -655,8 +656,8 @@ int audio_write (RECEIVER *rx, float left, float right) {
       //
       // buffer space available
       //
-      buffer[2*oldpt] = left;
-      buffer[2*oldpt+1] = right;
+      buffer[2 * oldpt] = left;
+      buffer[2 * oldpt + 1] = right;
       rx->local_audio_buffer_inpt = newpt;
     }
   }
@@ -725,8 +726,8 @@ int cw_audio_write(RECEIVER *rx, float sample) {
         //
         // buffer space available
         //
-        rx->local_audio_buffer[2*oldpt] = sample;
-        rx->local_audio_buffer[2*oldpt+1] = -sample;
+        rx->local_audio_buffer[2 * oldpt] = sample;
+        rx->local_audio_buffer[2 * oldpt + 1] = -sample;
         rx->local_audio_buffer_inpt = newpt;
       }
 
@@ -738,14 +739,14 @@ int cw_audio_write(RECEIVER *rx, float sample) {
       // insert two samples of silence. No check on "buffer full" necessary.
       //
       oldpt = rx->local_audio_buffer_inpt;
-      rx->local_audio_buffer[2*oldpt] = 0.0;
-      rx->local_audio_buffer[2*oldpt+1] = 0.0;
+      rx->local_audio_buffer[2 * oldpt] = 0.0;
+      rx->local_audio_buffer[2 * oldpt + 1] = 0.0;
       oldpt++;
 
       if (oldpt == MY_RING_BUFFER_SIZE) { oldpt = 0; }
 
-      rx->local_audio_buffer[2*oldpt] = 0.0;
-      rx->local_audio_buffer[2*oldpt+1] = 0.0;
+      rx->local_audio_buffer[2 * oldpt] = 0.0;
+      rx->local_audio_buffer[2 * oldpt + 1] = 0.0;
       oldpt++;
 
       if (oldpt == MY_RING_BUFFER_SIZE) { oldpt = 0; }

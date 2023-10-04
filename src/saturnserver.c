@@ -311,7 +311,7 @@ void* saturn_server(void *arg) {
 #endif
   MakeSocket(SocketData + VPORTDDCSPECIFIC, 0);          // create and bind a socket
 
-  if (pthread_create(&DDCSpecificThread, NULL, IncomingDDCSpecific, (void*)&SocketData[VPORTDDCSPECIFIC]) < 0) {
+  if (pthread_create(&DDCSpecificThread, NULL, IncomingDDCSpecific, (void * )&SocketData[VPORTDDCSPECIFIC]) < 0) {
     t_perror("pthread_create DDC specific");
     return NULL;
   }
@@ -319,7 +319,7 @@ void* saturn_server(void *arg) {
   pthread_detach(DDCSpecificThread);
   MakeSocket(SocketData + VPORTDUCSPECIFIC, 0);          // create and bind a socket
 
-  if (pthread_create(&DUCSpecificThread, NULL, IncomingDUCSpecific, (void*)&SocketData[VPORTDUCSPECIFIC]) < 0) {
+  if (pthread_create(&DUCSpecificThread, NULL, IncomingDUCSpecific, (void * )&SocketData[VPORTDUCSPECIFIC]) < 0) {
     t_perror("pthread_create DUC specific");
     return NULL;
   }
@@ -328,7 +328,7 @@ void* saturn_server(void *arg) {
   MakeSocket(SocketData + VPORTHIGHPRIORITYTOSDR, 0);          // create and bind a socket
 
   if (pthread_create(&HighPriorityToSDRThread, NULL, IncomingHighPriority,
-                     (void*)&SocketData[VPORTHIGHPRIORITYTOSDR]) < 0) {
+                     (void * )&SocketData[VPORTHIGHPRIORITYTOSDR]) < 0) {
     t_perror("pthread_create High priority to SDR");
     return NULL;
   }
@@ -337,7 +337,7 @@ void* saturn_server(void *arg) {
 #if 0
   MakeSocket(SocketData + VPORTSPKRAUDIO, 0);          // create and bind a socket
 
-  if (pthread_create(&SpkrAudioThread, NULL, IncomingSpkrAudio, (void*)&SocketData[VPORTSPKRAUDIO]) < 0) {
+  if (pthread_create(&SpkrAudioThread, NULL, IncomingSpkrAudio, (void * )&SocketData[VPORTSPKRAUDIO]) < 0) {
     t_perror("pthread_create speaker audio");
     return NULL;
   }
@@ -346,7 +346,7 @@ void* saturn_server(void *arg) {
 #endif
   MakeSocket(SocketData + VPORTDUCIQ, 0);          // create and bind a socket
 
-  if (pthread_create(&DUCIQThread, NULL, IncomingDUCIQ, (void*)&SocketData[VPORTDUCIQ]) < 0) {
+  if (pthread_create(&DUCIQThread, NULL, IncomingDUCIQ, (void * )&SocketData[VPORTDUCIQ]) < 0) {
     t_perror("pthread_create DUC I/Q");
     return NULL;
   }
@@ -361,7 +361,7 @@ void* saturn_server(void *arg) {
   memcpy(&SocketData[VPORTMICAUDIO].addr_cmddata, &SocketData[VPORTDUCSPECIFIC].addr_cmddata, sizeof(struct sockaddr_in));
 #if 0
 
-  if (pthread_create(&MicThread, NULL, OutgoingMicSamples, (void*)&SocketData[VPORTMICAUDIO]) < 0) {
+  if (pthread_create(&MicThread, NULL, OutgoingMicSamples, (void * )&SocketData[VPORTMICAUDIO]) < 0) {
     t_perror("pthread_create Mic");
     return NULL;
   }
@@ -379,7 +379,7 @@ void* saturn_server(void *arg) {
 #if 0
 
   if (pthread_create(&HighPriorityFromSDRThread, NULL, OutgoingHighPriority,
-                     (void*)&SocketData[VPORTHIGHPRIORITYFROMSDR]) < 0) {
+                     (void * )&SocketData[VPORTHIGHPRIORITYFROMSDR]) < 0) {
     t_perror("pthread_create outgoing hi priority");
     return NULL;
   }
@@ -684,6 +684,7 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
   unsigned char* SpkBasePtr;                // ptr to DMA location in spk memory
   int DMAWritefile_fd = -1;               // DMA read file device
   bool FIFOOverflow, FIFOUnderflow, FIFOOverThreshold;
+  unsigned int Current;
   //uint32_t RegVal = 0;                    // debug
   ThreadData = (struct ThreadSocketData *)arg;
   ThreadData->Active = true;
@@ -735,16 +736,18 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
     if (size == VSPEAKERAUDIOSIZE) {                        // we have received a packet!
       NewMessageReceived = true;
       //RegVal += 1;            //debug
-      int Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow); // read the FIFO free locations
+      int Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                         &Current); // read the FIFO free locations
       //t_print("speaker packet received; depth = %d\n", Depth);
 
       while (Depth < VMEMWORDSPERFRAME) {     // loop till space available
         usleep(1000);                                   // 1ms wait
-        Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow); // read the FIFO free locations
+        Depth = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                       &Current); // read the FIFO free locations
         //if(FIFOOverThreshold)
-        //  t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", Depth);
+        //  t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", Current);
         //if(FIFOUnderflow)
-        //  t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", Depth);
+        //  t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", Current);
       }
 
       // copy data from UDP Buffer & DMA write it

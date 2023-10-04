@@ -30,10 +30,10 @@ struct _PROPERTY {
 };
 
 extern void clearProperties(void);
-extern void loadProperties(char* filename);
-extern char* getProperty(char* name);
-extern void setProperty(char* name, char* value);
-extern void saveProperties(char* filename);
+extern void loadProperties(const char* filename);
+extern char* getProperty(const char* name);
+extern void setProperty(const char* name, const char* value);
+extern void saveProperties(const char* filename);
 
 //
 // Some macros to get/set properties. It is assumed that variables

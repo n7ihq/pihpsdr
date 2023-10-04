@@ -72,8 +72,6 @@ static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
 }
 
 void switch_menu(GtkWidget *parent) {
-  gint row;
-  gint col;
   GtkWidget *grid;
   GtkWidget *widget;
   dialog = gtk_dialog_new();
@@ -94,14 +92,16 @@ void switch_menu(GtkWidget *parent) {
   GtkWidget *default_b = gtk_button_new_with_label("Defaults");
   gtk_widget_set_name(default_b, "close_button"); // same looks as Close button
   g_signal_connect (default_b, "button-press-event", G_CALLBACK(default_cb), NULL);
+
   switch (controller) {
-    case CONTROLLER2_V1:
-    case CONTROLLER2_V2:
-      gtk_grid_attach(GTK_GRID(grid), default_b, 7, 0, 2, 1);
-      break;
-    case G2_FRONTPANEL:
-      gtk_grid_attach(GTK_GRID(grid), default_b, 6, 0, 3, 1);
-      break;
+  case CONTROLLER2_V1:
+  case CONTROLLER2_V2:
+    gtk_grid_attach(GTK_GRID(grid), default_b, 7, 0, 2, 1);
+    break;
+
+  case G2_FRONTPANEL:
+    gtk_grid_attach(GTK_GRID(grid), default_b, 6, 0, 3, 1);
+    break;
   }
 
   if (controller == CONTROLLER2_V1 || controller == CONTROLLER2_V2) {
@@ -120,15 +120,13 @@ void switch_menu(GtkWidget *parent) {
     widget = gtk_label_new("  ");
     gtk_widget_set_size_request(widget, 0, 10);
     gtk_grid_attach(GTK_GRID(grid), widget, 8, 7, 1, 1);
-
     // one switch in row 2, then pairs of switches in row 3-6
-    row = 2;
+    int row = 2;
     widget = gtk_button_new_with_label(ActionTable[switches[7].switch_function].str);
     gtk_widget_set_name(widget, "small_button_with_border");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(7));
     gtk_grid_attach(GTK_GRID(grid), widget, 8, row, 1, 1);
     row++;
-
     widget = gtk_button_new_with_label(ActionTable[switches[8].switch_function].str);
     gtk_widget_set_name(widget, "small_button_with_border");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(8));
@@ -138,7 +136,6 @@ void switch_menu(GtkWidget *parent) {
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(9));
     gtk_grid_attach(GTK_GRID(grid), widget, 8, row, 1, 1);
     row++;
-
     widget = gtk_button_new_with_label(ActionTable[switches[10].switch_function].str);
     gtk_widget_set_name(widget, "small_button_with_border");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(10));
@@ -148,7 +145,6 @@ void switch_menu(GtkWidget *parent) {
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(11));
     gtk_grid_attach(GTK_GRID(grid), widget, 8, row, 1, 1);
     row++;
-
     widget = gtk_button_new_with_label(ActionTable[switches[12].switch_function].str);
     gtk_widget_set_name(widget, "small_button_with_border");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(12));
@@ -158,7 +154,6 @@ void switch_menu(GtkWidget *parent) {
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(13));
     gtk_grid_attach(GTK_GRID(grid), widget, 8, row, 1, 1);
     row++;
-
     widget = gtk_button_new_with_label(ActionTable[switches[14].switch_function].str);
     gtk_widget_set_name(widget, "small_button_with_border");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(14));
@@ -178,8 +173,9 @@ void switch_menu(GtkWidget *parent) {
     widget = gtk_label_new("  ");
     gtk_widget_set_size_request(widget, 0, 20);
     gtk_grid_attach(GTK_GRID(grid), widget, 8, 6, 1, 1);
+
     // horizontal padding in columns 1-5
-    for (int i=1; i<6; i++) {
+    for (int i = 1; i < 6; i++) {
       widget = gtk_label_new("  ");
       gtk_grid_attach(GTK_GRID(grid), widget, i, 1, 1, 1);
     }
@@ -192,8 +188,7 @@ void switch_menu(GtkWidget *parent) {
     gtk_widget_set_name(widget, "small_button_with_border");
     g_signal_connect(widget, "button-press-event", G_CALLBACK(switch_cb), GINT_TO_POINTER(13));
     gtk_grid_attach(GTK_GRID(grid), widget, 0, 5, 1, 1);
-
-    col = 6;
+    int col = 6;
 
     for (int i = 10; i > 7; i--) {
       widget = gtk_button_new_with_label(ActionTable[switches[i].switch_function].str);

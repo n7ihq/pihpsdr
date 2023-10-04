@@ -701,15 +701,19 @@ void gpio_default_encoder_actions(int ctrlr) {
   default:
     default_encoders = NULL;
     break;
+
   case CONTROLLER1:
     default_encoders = encoders_controller1;
     break;
+
   case CONTROLLER2_V1:
     default_encoders = encoders_controller2_v1;
     break;
+
   case CONTROLLER2_V2:
     default_encoders = encoders_controller2_v2;
     break;
+
   case G2_FRONTPANEL:
     default_encoders = encoders_g2_frontpanel;
     break;
@@ -725,7 +729,6 @@ void gpio_default_encoder_actions(int ctrlr) {
       my_encoders[i].switch_function         = default_encoders[i].switch_function;
     }
   }
-
 }
 
 void gpio_default_switch_actions(int ctrlr) {
@@ -738,12 +741,15 @@ void gpio_default_switch_actions(int ctrlr) {
     default_switches = NULL;
     // my_switches remains 'empty', since the toolbar table is used
     break;
+
   case CONTROLLER2_V1:
     default_switches = switches_controller2_v1;
     break;
+
   case CONTROLLER2_V2:
     default_switches = switches_controller2_v2;
     break;
+
   case G2_FRONTPANEL:
     default_switches = switches_g2_frontpanel;
     break;

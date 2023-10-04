@@ -496,52 +496,113 @@ void filter_cut_changed(int id, int action, int increment) {
       case modeLSB:
       case modeDIGL:
         filter->low -= increment * 25;
+
+        if (filter->low > 0) { filter->low = 0; }
+
+        if (filter->low > filter->high) { filter->low = filter->high; }
+
         set_filter_cut_high(id, -filter->low);
         break;
+
       case modeCWL:
         filter->low -= increment * 5;
+
+        if (filter->low > 0) { filter->low = 0; }
+
+        if (filter->low > filter->high) { filter->low = filter->high; }
+
         set_filter_cut_high(id, -filter->low);
         break;
+
       case  modeCWU:
         filter->high += increment * 5;
+
+        if (filter->high < 0) { filter->high = 0; }
+
+        if (filter->high < filter->low) { filter->high = filter->low; }
+
         set_filter_cut_high(id, filter->high);
         break;
+
       case modeUSB:
       case modeDIGU:
         filter->high += increment * 25;
+
+        if (filter->high < 0) { filter->high = 0; }
+
+        if (filter->high < filter->low) { filter->high = filter->low; }
+
         set_filter_cut_high(id, filter->high);
         break;
+
       default:
         filter->high += increment * 50;
+
+        if (filter->high < 0) { filter->high = 0; }
+
+        if (filter->high < filter->low) { filter->high = filter->low; }
+
         set_filter_cut_high(id, filter->high);
         break;
       }
+
       break;
+
     case FILTER_CUT_LOW:
       switch (mode) {
       case modeLSB:
       case modeDIGL:
         filter->high -= increment * 25;
+
+        if (filter->high > 0) { filter->high = 0; }
+
+        if (filter->high < filter->low) { filter->high = filter->low; }
+
         set_filter_cut_low(id, -filter->high);
         break;
+
       case modeCWL:
         filter->high -= increment * 5;
+
+        if (filter->high < 0) { filter->high = 0; }
+
+        if (filter->high < filter->low) { filter->high = filter->low; }
+
         set_filter_cut_low(id, -filter->high);
         break;
+
       case modeCWU:
         filter->low += increment * 5;
+
+        if (filter->low > 0) { filter->low = 0; }
+
+        if (filter->low > filter->high) { filter->low = filter->high; }
+
         set_filter_cut_low(id, filter->low);
         break;
+
       case modeUSB:
       case modeDIGU:
-        filter->low -= increment * 25;
-        set_filter_cut_low(id, -filter->low);
+        filter->low += increment * 25;
+
+        if (filter->low < 0) { filter->low = 0; }
+
+        if (filter->low > filter->high) { filter->low = filter->high; }
+
+        set_filter_cut_low(id, filter->low);
         break;
+
       default:
-        filter->low -= increment * 50;
-        set_filter_cut_low(id, -filter->low);
+        filter->low += increment * 50;
+
+        if (filter->low > 0) { filter->low = 0; }
+
+        if (filter->low > filter->high) { filter->low = filter->high; }
+
+        set_filter_cut_low(id, filter->low);
         break;
       }
+
       break;
 
     default:
@@ -556,6 +617,7 @@ void filter_cut_changed(int id, int action, int increment) {
 //
 // This function is a no-op unless the vfo referenced uses a Var1 or Var2 filter
 // Note the changed width affects the low/high cut depending on the mode
+// For USB/LSB only the high-audio-frequency cut is affected.
 //
 void filter_width_changed(int id, int increment) {
   int mode = vfo[id].mode;
@@ -568,25 +630,66 @@ void filter_width_changed(int id, int increment) {
 
   if (f == filterVar1 || f == filterVar2) {
     switch (mode) {
-    case modeLSB:
     case modeDIGL:
+      if (filter->high < -500) {
+        filter->low -= increment * 13;
+        filter->high += increment * 12;
+
+        if (filter->low > filter->high) { filter->low = filter->high; }
+
+        break;
+      }
+
+    // else fall through: only change high-audio-cut
+    case modeLSB:
       filter->low -= increment * 25;
+
+      if (filter->low > filter->high) { filter->low = filter->high; }
+
       break;
 
-    case modeUSB:
     case modeDIGU:
+      if (filter->low > 500) {
+        filter->low -= increment * 12;
+        filter->high += increment * 13;
+
+        if (filter->high < filter->low) { filter->high = filter->low; }
+
+        break;
+      }
+
+    // else fall through: only change high-audio-cut
+
+    case modeUSB:
       filter->high += increment * 25;
+
+      if (filter->high < filter->low) { filter->high = filter->low; }
+
       break;
 
     case modeCWL:
     case modeCWU:
       filter->low  -= increment * 5;
       filter->high += increment * 5;
+
+      if (filter->low > filter->high) {
+        int mid = (filter->low + filter->high) / 2;
+        filter->low = mid;
+        filter->high = mid;
+      }
+
       break;
 
     default:
       filter->low  -= increment * 50;
       filter->high += increment * 50;
+
+      if (filter->low > filter->high) {
+        int mid = (filter->low + filter->high) / 2;
+        filter->low = mid;
+        filter->high = mid;
+      }
+
       break;
     }
 
@@ -615,7 +718,7 @@ void filter_shift_changed(int id, int increment) {
 
   if (f == filterVar1 || f == filterVar2) {
     FILTER *filter = &(filters[mode][f]);
-    int step;
+    int fac;
     int ref;
     int mid = (filter->high + filter->low) / 2;
     int wid = (filter->high - filter->low);
@@ -625,35 +728,39 @@ void filter_shift_changed(int id, int increment) {
     switch (mode) {
     case modeLSB:
     case modeDIGL:
-      step = 25;
+      fac  = 25;
       ref  = -1500;
       sgn  = -1;
       break;
+
     case modeUSB:
     case modeDIGU:
-      step = 25;
+      fac  = 25;
       ref  = 1500;
       break;
+
     case modeCWL:
-      step = 5;
+      fac  = 5;
       ref  = 0;
       sgn  = -1;
       break;
+
     case modeCWU:
-      step = 5;
+      fac  = 5;
       ref = 0;
       break;
+
     default:
-      step = 50;
+      fac  = 50;
       ref = 0;
       break;
     }
+
     shft = mid - ref;
-    shft += increment * step * sgn;
+    shft += increment * fac * sgn;
     filter->low =  ref + shft - wid / 2;
     filter->high = ref + shft + wid / 2;
-    set_filter_shift(id, sgn*shft);
-
+    set_filter_shift(id, sgn * shft);
     vfo_filter_changed(f);
     g_idle_add(ext_vfo_update, NULL);
   }

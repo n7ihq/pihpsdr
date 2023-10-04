@@ -663,6 +663,7 @@ void *duc_specific_thread(void *data) {
       } else {
         printf("TX: Saturn Mic jack\n");
       }
+
       printf("---------------------------------------------------\n");
     }
 
@@ -1032,7 +1033,6 @@ void *rx_thread(void *data) {
   clock_gettime(CLOCK_MONOTONIC, &delay);
   printf("RX thread %d, enabled=%d\n", myddc, ddcenable[myddc]);
   rxptr = NEWRTXLEN / 2 - 8192;
-
   divptr = 0;
 
   while (run) {
@@ -1121,6 +1121,7 @@ void *rx_thread(void *data) {
     if (txptr < 0) {
       rxptr = NEWRTXLEN / 2 - 8192;
     }
+
     for (i = 0; i < size; i++) {
       //
       // produce noise depending on the ADC
@@ -1256,7 +1257,7 @@ void *rx_thread(void *data) {
 
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &delay, NULL);
 
-    if (sendto(sock, buffer, 1444, 0, (struct sockaddr*)&addr_new, sizeof(addr_new)) < 0) {
+    if (sendto(sock, buffer, 1444, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
       perror("***** ERROR: RX thread sendto");
       break;
     }
@@ -1336,6 +1337,7 @@ void *tx_thread(void * data) {
     if (txptr < 0) {
       txptr = NEWRTXLEN / 2;
     }
+
     for (i = 0; i < 240; i++) {
       // process 240 TX iq samples
       sample  = (int)((signed char) (*p++)) << 16;
@@ -1432,7 +1434,7 @@ void *send_highprio_thread(void *data) {
     *p++ = (rc     ) & 0xFF;
     buffer[49] = 63; // about 13 volts supply
 
-    if (sendto(sock, buffer, 60, 0, (struct sockaddr*)&addr_new, sizeof(addr_new)) < 0) {
+    if (sendto(sock, buffer, 60, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
       perror("***** ERROR: HP send thread sendto");
       break;
     }
@@ -1565,7 +1567,7 @@ void *mic_thread(void *data) {
 
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &delay, NULL);
 
-    if (sendto(sock, buffer, 132, 0, (struct sockaddr*)&addr_new, sizeof(addr_new)) < 0) {
+    if (sendto(sock, buffer, 132, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
       perror("***** ERROR: Mic thread sendto");
       break;
     }

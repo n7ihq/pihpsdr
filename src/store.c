@@ -101,7 +101,6 @@ void recall_memory_slot(int index) {
   vfo_set_frequency(active_receiver->id, new_freq);
   vfo_mode_changed(mem[index].mode);
   vfo_filter_changed(mem[index].filter);
-  
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -119,10 +118,12 @@ void store_memory_slot(int index) {
 
   mem[index].mode = vfo[id].mode;
   mem[index].filter = vfo[id].filter;
+
   if (can_transmit) {
     mem[index].ctcss_enabled = transmitter->ctcss_enabled;
     mem[index].ctcss = transmitter->ctcss;
   }
+
   //memSaveState();
 }
 

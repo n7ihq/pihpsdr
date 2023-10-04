@@ -464,7 +464,9 @@ static void *server_client_thread(void *arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = spectrum_command.id;
+      // cppcheck-suppress uninitvar
       int state = spectrum_command.start_stop;
       t_print("server_client_thread: CMD_RESP_SPECTRUM rx=%d state=%d timer_id=%d\n", rx, state,
               client->spectrum_update_timer_id);
@@ -1906,7 +1908,7 @@ static void *listen_thread(void *arg) {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(listen_port);
 
-    if (bind(listen_socket, (struct sockaddr*)&address, sizeof(address)) < 0) {
+    if (bind(listen_socket, (struct sockaddr * )&address, sizeof(address)) < 0) {
       t_print("listen_thread: bind failed\n");
       return NULL;
     }
@@ -1923,7 +1925,7 @@ static void *listen_thread(void *arg) {
     client->running = TRUE;
     t_print("hpsdr_server: accept\n");
 
-    if ((client->socket = accept(listen_socket, (struct sockaddr*)&client->address, &client->address_length)) < 0) {
+    if ((client->socket = accept(listen_socket, (struct sockaddr * )&client->address, &client->address_length)) < 0) {
       t_print("listen_thread: accept failed\n");
       g_free(client);
       continue;
@@ -2049,6 +2051,7 @@ static void *client_thread(void* arg) {
       }
 
 #endif
+      // cppcheck-suppress uninitvar
       display_filled = radio_data.display_filled;
       locked = radio_data.locked;
       receivers = ntohs(radio_data.receivers);
@@ -2084,11 +2087,13 @@ static void *client_thread(void* arg) {
       }
 
       t_print("INFO_ADC: %d\n", bytes_read);
+      // cppcheck-suppress uninitStructMember
       int i = adc_data.adc;
       adc[i].filters = ntohs(adc_data.filters);
       adc[i].hpf = ntohs(adc_data.hpf);
       adc[i].lpf = ntohs(adc_data.lpf);
       adc[i].antenna = ntohs(adc_data.antenna);
+      // cppcheck-suppress uninitvar
       adc[i].dither = adc_data.dither;
       adc[i].random = adc_data.random;
       adc[i].preamp = adc_data.preamp;
@@ -2111,12 +2116,14 @@ static void *client_thread(void* arg) {
       }
 
       t_print("INFO_RECEIVER: %d\n", bytes_read);
+      // cppcheck-suppress uninitStructMember
       int rx = receiver_data.rx;
       receiver[rx] = g_new(RECEIVER, 1);
       receiver[rx]->id = rx;
       receiver[rx]->adc = ntohs(receiver_data.adc);;
       long long rate = ntohll(receiver_data.sample_rate);
       receiver[rx]->sample_rate = (int)rate;
+      // cppcheck-suppress uninitvar
       receiver[rx]->displaying = receiver_data.displaying;
       receiver[rx]->display_panadapter = receiver_data.display_panadapter;
       receiver[rx]->display_waterfall = receiver_data.display_waterfall;
@@ -2188,12 +2195,14 @@ static void *client_thread(void* arg) {
       }
 
       t_print("INFO_VFO: %d\n", bytes_read);
+      // cppcheck-suppress uninitStructMember
       int v = vfo_data.vfo;
       vfo[v].band = ntohs(vfo_data.band);
       vfo[v].bandstack = ntohs(vfo_data.bandstack);
       vfo[v].frequency = ntohll(vfo_data.frequency);
       vfo[v].mode = ntohs(vfo_data.mode);
       vfo[v].filter = ntohs(vfo_data.filter);
+      // cppcheck-suppress uninitvar
       vfo[v].ctun = vfo_data.ctun;
       vfo[v].ctun_frequency = ntohll(vfo_data.ctun_frequency);
       vfo[v].rit_enabled = vfo_data.rit_enabled;
@@ -2223,6 +2232,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int r = spectrum_data.rx;
       long long frequency_a = ntohll(spectrum_data.vfo_a_freq);
       long long frequency_b = ntohll(spectrum_data.vfo_b_freq);
@@ -2269,6 +2279,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       RECEIVER *rx = receiver[adata.rx];
       int samples = ntohs(adata.samples);
 
@@ -2293,6 +2304,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = zoom_cmd.id;
       short zoom = ntohs(zoom_cmd.zoom);
       t_print("CMD_RESP_RX_ZOOM: zoom=%d rx[%d]->zoom=%d\n", zoom, rx, receiver[rx]->zoom);
@@ -2317,6 +2329,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = pan_cmd.id;
       short pan = ntohs(pan_cmd.pan);
       t_print("CMD_RESP_RX_PAN: pan=%d rx[%d]->pan=%d\n", pan, rx, receiver[rx]->pan);
@@ -2335,6 +2348,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = volume_cmd.id;
       double volume = ntohd(volume_cmd.volume);
       t_print("CMD_RESP_RX_VOLUME: volume=%f rx[%d]->volume=%f\n", volume, rx, receiver[rx]->volume);
@@ -2353,6 +2367,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = agc_cmd.id;
       short a = ntohs(agc_cmd.agc);
       t_print("AGC_COMMAND: rx=%d agc=%d\n", rx, a);
@@ -2372,6 +2387,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = agc_gain_cmd.id;
       receiver[rx]->agc_gain = ntohd(agc_gain_cmd.gain);
       receiver[rx]->agc_hang = ntohd(agc_gain_cmd.hang);
@@ -2391,6 +2407,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = command.id;
       double gain = ntohd(command.gain);
       t_print("CMD_RESP_RX_GAIN: new=%f rx=%d old=%f\n", gain, rx, adc[receiver[rx]->adc].gain);
@@ -2409,6 +2426,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = attenuation_cmd.id;
       short attenuation = ntohs(attenuation_cmd.attenuation);
       t_print("CMD_RESP_RX_ATTENUATION: attenuation=%d attenuation[rx[%d]->adc]=%d\n", attenuation, rx,
@@ -2428,7 +2446,9 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       RECEIVER *rx = receiver[noise_command.id];
+      // cppcheck-suppress uninitvar
       rx->nb = noise_command.nb;
       mode_settings[vfo[rx->id].mode].nb = rx->nb;
       rx->nr = noise_command.nr;
@@ -2452,6 +2472,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = mode_cmd.id;
       short m = ntohs(mode_cmd.mode);
       vfo[rx].mode = m;
@@ -2470,6 +2491,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = filter_cmd.id;
       short low = ntohs(filter_cmd.filter_low);
       short high = ntohs(filter_cmd.filter_high);
@@ -2490,6 +2512,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       split = split_cmd.split;
     }
 
@@ -2507,6 +2530,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       sat_mode = sat_cmd.sat;
     }
 
@@ -2524,6 +2548,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       duplex = dup_cmd.dup;
     }
 
@@ -2541,6 +2566,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       locked = lock_cmd.lock;
     }
 
@@ -2558,7 +2584,9 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = fps_cmd.id;
+      // cppcheck-suppress uninitvar
       receiver[rx]->fps = (int)fps_cmd.fps;
     }
 
@@ -2576,6 +2604,7 @@ static void *client_thread(void* arg) {
         return NULL;
       }
 
+      // cppcheck-suppress uninitStructMember
       int rx = rx_select_cmd.id;
       active_receiver = receiver[rx];
     }

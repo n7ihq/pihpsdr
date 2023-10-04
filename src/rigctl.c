@@ -705,7 +705,7 @@ static gpointer rigctl_server(gpointer data) {
   server_address.sin_addr.s_addr = INADDR_ANY;
   server_address.sin_port = htons(port);
 
-  if (bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
+  if (bind(server_socket, (struct sockaddr * )&server_address, sizeof(server_address)) < 0) {
     t_perror("rigctl_server: listen socket bind failed");
     close(server_socket);
     return NULL;
@@ -1687,10 +1687,10 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int d = atoi(&command[4]);
-
         // TODO: should we check for the mode being FMN?
         vfo[VFO_A].deviation = d ? 5000 : 2500;
         set_filter(receiver[0]);
+
         if (can_transmit) {
           tx_set_filter(transmitter);
         }
@@ -2501,7 +2501,6 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       break;
 
     case 'D': //ZZRD
-
       if (command[4] == ';') {
         // decrement RIT frequency
         if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
@@ -2578,7 +2577,6 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         } else {
           vfo_rit_incr(VFO_A, rit_increment);
         }
-
       } else if (command[9] == ';') {
         vfo_rit_value(VFO_A,  atoi(&command[4]));
       }
@@ -3048,7 +3046,6 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
   case 'X': //ZZXx
     switch (command[3]) {
     case 'C': //ZZXC
-
       // clear transmitter XIT
       schedule_action(XIT_CLEAR, PRESSED, 0);
       break;
@@ -3163,9 +3160,11 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         vfo[get_tx_vfo()].xit_enabled = atoi(&command[4]);
+
         if (protocol == NEW_PROTOCOL) {
           schedule_high_priority();
         }
+
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -3182,6 +3181,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         int status = 0;
 
         if (vfo[VFO_A].rit_enabled) {
+          // cppcheck-suppress badBitmaskCheck
           status = status | 0x01;
         }
 
@@ -3354,11 +3354,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           case 60: // XIT
             if (vfo[get_tx_vfo()].xit_enabled) {
               vfo_xit_incr((v == 0) ? rit_increment : -rit_increment);
+
               if (!vfo[get_tx_vfo()].xit_enabled) {
                 sprintf(reply, "ZZZI090;");
                 send_resp(client->fd, reply);
               }
             }
+
             break;
 
           case 61: // Mic Gain
@@ -4110,12 +4112,14 @@ int parse_cmd(void *data) {
             filter->high = 8000;
             vfo[VFO_A].deviation = 5000;
           }
+
           set_filter(receiver[0]);
+
           if (can_transmit) {
             tx_set_filter(transmitter);
           }
-          g_idle_add(ext_vfo_update, NULL);
 
+          g_idle_add(ext_vfo_update, NULL);
           break;
 
         case modeAM:
@@ -5457,13 +5461,14 @@ int set_interface_attribs (int fd, int speed, int parity) {
 void set_blocking (int fd, int should_block) {
   struct termios tty;
   memset (&tty, 0, sizeof tty);
-
   int flags = fcntl(fd, F_GETFL, 0);
+
   if (should_block) {
     flags &= ~O_NONBLOCK;
   } else {
     flags |= O_NONBLOCK;
   }
+
   fcntl(fd, F_SETFL, flags);
 
   if (tcgetattr (fd, &tty) != 0) {
@@ -5489,7 +5494,6 @@ static gpointer serial_server(gpointer data) {
   int i;
   fd_set fds;
   struct timeval tv;
-
   t_print("%s: Entering Thread\n", __FUNCTION__);
   g_mutex_lock(&mutex_a->m);
   cat_control++;
@@ -5527,17 +5531,19 @@ static gpointer serial_server(gpointer data) {
     client->done = 0;
 
     if (!client->running) { break; }
+
     //
     // Blocking I/O with a time-out
     //
     FD_ZERO(&fds);
     FD_SET(client->fd, &fds);
-    tv.tv_usec=250000; // 250 msec
-    tv.tv_sec=0;
+    tv.tv_usec = 250000; // 250 msec
+    tv.tv_sec = 0;
 
-    if (select(client->fd+1, &fds, NULL, NULL, &tv) <= 0) {
+    if (select(client->fd + 1, &fds, NULL, NULL, &tv) <= 0) {
       continue;
     }
+
     int numbytes = read (client->fd, cmd_input, sizeof cmd_input);
 
     //
@@ -5650,6 +5656,7 @@ gboolean andromeda_handler(gpointer data) {
 
   if (can_transmit) {
     int new_xit = vfo[get_tx_vfo()].xit_enabled;
+
     if (last_xit != new_xit) {
       sprintf(reply, "ZZZI09%d;", new_xit);
       send_resp(client->fd, reply);

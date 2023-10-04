@@ -111,9 +111,9 @@ static void updateDescription();
 static void load_store(void);
 
 static char *Event2String(enum MIDIevent event);
-static enum MIDIevent String2Event(char *str);
+static enum MIDIevent String2Event(const char *str);
 static char *Type2String(enum ACTIONtype type);
-static enum ACTIONtype String2Type(char *str);
+static enum ACTIONtype String2Type(const char *str);
 
 static void cleanup() {
   if (dialog != NULL) {
@@ -172,7 +172,7 @@ static void update_wheelparams(gpointer user_data) {
 
 static void type_changed_cb(GtkWidget *widget, gpointer data) {
   // update actions available for the type
-  gchar *type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
+  const gchar *type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
 
   if (type == NULL) {
     //
@@ -1381,7 +1381,7 @@ static char *Event2String(enum MIDIevent event) {
   }
 }
 
-static enum MIDIevent String2Event(char *str) {
+static enum MIDIevent String2Event(const char *str) {
   if (!strcmp(str, "NOTE"))  { return MIDI_NOTE;  }
 
   if (!strcmp(str, "CTRL"))  { return MIDI_CTRL;  }
@@ -1413,7 +1413,7 @@ static char *Type2String(enum ACTIONtype type) {
   }
 }
 
-static enum ACTIONtype String2Type(char *str) {
+static enum ACTIONtype String2Type(const char *str) {
   if (!strcmp(str, "KEY"        )) { return MIDI_KEY;   }
 
   if (!strcmp(str, "KNOB/SLIDER")) { return MIDI_KNOB;  }

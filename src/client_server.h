@@ -247,7 +247,7 @@ typedef struct __attribute__((__packed__)) _audio_data {
 
 typedef struct __attribute__((__packed__)) _spectrum_command {
   HEADER header;
-  int8_t id;
+  uint8_t id;
   uint8_t start_stop;
 } SPECTRUM_COMMAND;
 

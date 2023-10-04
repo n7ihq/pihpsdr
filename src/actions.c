@@ -1175,7 +1175,7 @@ int process_action(void *data) {
     break;
 
   case RIT:
-    vfo_rit_incr(active_receiver->id, rit_increment*a->val);
+    vfo_rit_incr(active_receiver->id, rit_increment * a->val);
     break;
 
   case RIT_CLEAR:
@@ -1225,11 +1225,11 @@ int process_action(void *data) {
     break;
 
   case RIT_RX1:
-    vfo_rit_incr(0, rit_increment*a->val);
+    vfo_rit_incr(0, rit_increment * a->val);
     break;
 
   case RIT_RX2:
-    vfo_rit_incr(1, rit_increment*a->val);
+    vfo_rit_incr(1, rit_increment * a->val);
     break;
 
   case RIT_STEP:
@@ -1248,14 +1248,14 @@ int process_action(void *data) {
     }
 
     break;
-    
+
   case RX2:
     if (a->mode == PRESSED && receivers == 2) {
       receiver_set_active(receiver[1]);
     }
 
     break;
-    
+
   case RSAT:
     if (a->mode == PRESSED) {
       if (sat_mode == RSAT_MODE) {
@@ -1448,13 +1448,14 @@ int process_action(void *data) {
     break;
 
   case XIT:
-    vfo_xit_incr(rit_increment*a->val);
+    vfo_xit_incr(rit_increment * a->val);
     break;
 
   case XIT_CLEAR:
     if (a->mode == PRESSED) {
       vfo_xit_value(0);
     }
+
     break;
 
   case XIT_ENABLE:
@@ -1466,13 +1467,13 @@ int process_action(void *data) {
 
   case XIT_MINUS:
     if (a->mode == PRESSED) {
-      vfo_xit_incr(-rit_increment);         
-  
-      if (timer == 0) { 
+      vfo_xit_incr(-rit_increment);
+
+      if (timer == 0) {
         timer = g_timeout_add(250, timeout_cb, a);
-        timer_released = FALSE;                 
+        timer_released = FALSE;
       }
-  
+
       free_action = FALSE;
     } else {
       timer_released = TRUE;
@@ -1482,7 +1483,7 @@ int process_action(void *data) {
 
   case XIT_PLUS:
     if (a->mode == PRESSED) {
-      vfo_xit_incr(rit_increment);                     
+      vfo_xit_incr(rit_increment);
 
       if (timer == 0) {
         timer = g_timeout_add(250, timeout_cb, a);

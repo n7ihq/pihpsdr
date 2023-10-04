@@ -63,8 +63,6 @@
 int register_fd;                             // device identifier
 
 
-
-
 //
 // open connection to the XDMA device driver for register and DMA access
 //
@@ -85,22 +83,22 @@ int OpenXDMADriver(void) {
 // close connection to the XDMA device driver for register and DMA access
 //
 int CloseXDMADriver(void) {
-  return close(register_fd);
+  int ret = close(register_fd);
+  register_fd = 0;
+  return ret;
 }
 
 
 //
 // function call to get firmware ID and version
 //
-unsigned int GetFirmwareVersion(ESoftwareID* ID)
-{
-	unsigned int Version = 0;
-	uint32_t SoftwareInformation;			// swid & version
-
-	SoftwareInformation = RegisterRead(VADDRSWVERSIONREG);
-	Version = (SoftwareInformation >> 4) & 0xFFFF;			// 16 bit sw version
-	*ID = (ESoftwareID)(SoftwareInformation >> 20);						// 12 bit software ID
-	return Version;
+unsigned int GetFirmwareVersion(ESoftwareID* ID) {
+  unsigned int Version = 0;
+  uint32_t SoftwareInformation;     // swid & version
+  SoftwareInformation = RegisterRead(VADDRSWVERSIONREG);
+  Version = (SoftwareInformation >> 4) & 0xFFFF;      // 16 bit sw version
+  *ID = (ESoftwareID)(SoftwareInformation >> 20);           // 12 bit software ID
+  return Version;
 }
 
 
@@ -173,9 +171,13 @@ int DMAReadFromFPGA(int fd, unsigned char*DestData, uint32_t Length, uint32_t AX
 //
 uint32_t RegisterRead(uint32_t Address) {
   uint32_t result = 0;
-  ssize_t nread = pread(register_fd, &result, sizeof(result), (off_t) Address);
+  ssize_t nread;
 
-  if (nread != sizeof(result)) {
+  if (register_fd == 0) {
+    return result;
+  }
+
+  if ((nread = pread(register_fd, &result, sizeof(result), (off_t) Address)) != sizeof(result)) {
     t_print("ERROR: register read: addr=0x%08X   error=%s\n", Address, strerror(errno));
   }
 
@@ -186,9 +188,13 @@ uint32_t RegisterRead(uint32_t Address) {
 // 32 bit register write over the AXILite bus
 //
 void RegisterWrite(uint32_t Address, uint32_t Data) {
-  ssize_t nsent = pwrite(register_fd, &Data, sizeof(Data), (off_t) Address);
+  ssize_t nsent;
 
-  if (nsent != sizeof(Data)) {
+  if (register_fd == 0) {
+    return;
+  }
+
+  if ((nsent = pwrite(register_fd, &Data, sizeof(Data), (off_t) Address)) != sizeof(Data)) {
     t_print("ERROR: Write: addr=0x%08X   error=%s\n", Address, strerror(errno));
   }
 }
@@ -224,11 +230,11 @@ void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt) {
   uint32_t Address;             // register address
   uint32_t Data;                // register content
 
-  if (!GFIFOSizesInitialised)
-  {
-    InitialiseFIFOSizes();				// load FIFO size table, if not already done
+  if (!GFIFOSizesInitialised) {
+    InitialiseFIFOSizes();        // load FIFO size table, if not already done
     GFIFOSizesInitialised = true;
   }
+
   Address = VADDRFIFOMONBASE + 4 * Channel + 0x10;      // config register address
   Data = DMAFIFODepths[(int)Channel];             // memory depth
 
@@ -249,33 +255,37 @@ void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt) {
 // for a write FIFO: returns the number of free locations available to write
 //   Channel:     IP core channel number (enum)
 //   Overflowed:    true if an overflow has occurred. Reading clears the overflow bit.
-//   OverThreshold:		true if overflow occurred  measures by threshold. Cleared by read.
+//   OverThreshold:   true if overflow occurred  measures by threshold. Cleared by read.
 //   Underflowed:       true if underflow has occurred. Cleared by read.
+//   Current:           number of locations occupied (in either FIFO type)
 //
-uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool* OverThreshold, bool* Underflowed) {
+uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool* OverThreshold, bool* Underflowed,
+                                unsigned int* Current) {
   uint32_t Address;             // register address
   uint32_t Data = 0;              // register content
   bool Overflow = false;
   bool OverThresh = false;
   bool Underflow = false;
-
   Address = VADDRFIFOMONBASE + 4 * (uint32_t)Channel;     // status register address
   Data = RegisterRead(Address);
 
   if (Data & 0x80000000) {                  // if top bit set, declare overflow
     Overflow = true;
   }
+
   if (Data & 0x40000000) {                  // if bit 30 set, declare over threshold
     OverThresh = true;
   }
+
   if (Data & 0x20000000) {                  // if bit 29 set, declare underflow
     Underflow = true;
   }
 
   Data = Data & 0xFFFF;                   // strip to 16 bits
+  *Current = Data;
   *Overflowed = Overflow;                   // send out overflow result
-  *OverThreshold = OverThresh;								// send out over threshold result
-  *Underflowed = Underflow;									// send out underflow result
+  *OverThreshold = OverThresh;                // send out over threshold result
+  *Underflowed = Underflow;                 // send out underflow result
 
   if ((Channel == eTXDUCDMA) || (Channel == eSpkCodecDMA)) { // if a write channel
     Data = DMAFIFODepths[Channel] - Data;  // calculate free locations
@@ -291,20 +301,18 @@ uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool
 // InitialiseFIFOSizes(void)
 // initialise the FIFO size table, which is FPGA version dependent
 //
-void InitialiseFIFOSizes(void)
-{
-    ESoftwareID ID;
-    unsigned int Version = 0;
+void InitialiseFIFOSizes(void) {
+  ESoftwareID ID;
+  unsigned int Version = 0;
+  Version = GetFirmwareVersion(&ID);
 
-    Version = GetFirmwareVersion(&ID);
-    if(Version >= 10)
-    {
-        t_print("loading new FIFO sizes for updated firmware version:%d\n", Version);
-        DMAFIFODepths[0] = 16384;       //  eRXDDCDMA,		selects RX
-        DMAFIFODepths[1] = 2048;        //  eTXDUCDMA,		selects TX
-        DMAFIFODepths[2] = 256;         //  eMicCodecDMA,	selects mic samples
-        DMAFIFODepths[3] = 1024;        //  eSpkCodecDMA	selects speaker samples
-    }
+  if (Version >= 10) {
+    t_print("loading new FIFO sizes for updated firmware version:%d\n", Version);
+    DMAFIFODepths[0] = 16384;       //  eRXDDCDMA,    selects RX
+    DMAFIFODepths[1] = 2048;        //  eTXDUCDMA,    selects TX
+    DMAFIFODepths[2] = 256;         //  eMicCodecDMA, selects mic samples
+    DMAFIFODepths[3] = 1024;        //  eSpkCodecDMA  selects speaker samples
+  }
 }
 
 

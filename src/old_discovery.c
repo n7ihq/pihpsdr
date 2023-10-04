@@ -90,7 +90,7 @@ static void discover(struct ifaddrs* iface, int discflag) {
     interface_addr.sin_addr.s_addr = sa->sin_addr.s_addr;
     interface_addr.sin_port = htons(0); // system assigned port
 
-    if (bind(discovery_socket, (struct sockaddr*)&interface_addr, sizeof(interface_addr)) < 0) {
+    if (bind(discovery_socket, (struct sockaddr * )&interface_addr, sizeof(interface_addr)) < 0) {
       t_perror("discover: bind socket failed for discovery_socket:");
       close (discovery_socket);
       return;
@@ -257,7 +257,7 @@ static void discover(struct ifaddrs* iface, int discflag) {
     buffer[i] = 0x00;
   }
 
-  if (sendto(discovery_socket, buffer, len, 0, (struct sockaddr*)&to_addr, sizeof(to_addr)) < 0) {
+  if (sendto(discovery_socket, buffer, len, 0, (struct sockaddr * )&to_addr, sizeof(to_addr)) < 0) {
     t_perror("discover: sendto socket failed for discovery_socket:");
     close (discovery_socket);
     return;

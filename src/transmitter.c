@@ -883,7 +883,6 @@ void tx_set_filter(TRANSMITTER *tx) {
   int high = tx_filter_high;  // 0 < low < high
   int txvfo = get_tx_vfo();
   int rxvfo = active_receiver->id;
-
   tx->deviation = vfo[txvfo].deviation;
 
   if (tx->use_rx_filter) {

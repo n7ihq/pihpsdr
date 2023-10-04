@@ -143,11 +143,13 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
   // (useful for split operation)
   //
   case  GDK_KEY_U:
-    vfo_id_step(1-active_receiver->id, 10);
+    vfo_id_step(1 - active_receiver->id, 10);
     break;
+
   case  GDK_KEY_D:
-    vfo_id_step(1-active_receiver->id, -10);
+    vfo_id_step(1 - active_receiver->id, -10);
     break;
+
   //
   // This is a contribution of Ron, it uses a keypad for
   // entering a frequency

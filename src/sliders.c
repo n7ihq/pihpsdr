@@ -120,6 +120,7 @@ void show_popup_slider(enum ACTION action, int rx, double min, double max, doubl
   if (scale_status == NO_ACTION) {
     //
     // b) if a pop-up slider for THIS action is not on display, create one
+    //    (only in this case input parameters min and max will be used)
     //
     scale_status = action;
     scale_rx = rx;
@@ -142,16 +143,19 @@ void show_popup_slider(enum ACTION action, int rx, double min, double max, doubl
     // c) if a pop-up slider for THIS action is still on display, adjust value and reset timeout
     //
     g_source_remove(scale_timer);
+
     if (value > scale_min + 1.01 * scale_wid) {
       scale_min = scale_min + 0.5 * scale_wid;
       scale_max = scale_max + 0.5 * scale_wid;
       gtk_range_set_range(GTK_RANGE(popup_scale), scale_min, scale_max);
     }
+
     if (value < scale_max - 1.01 * scale_wid) {
       scale_min = scale_min - 0.5 * scale_wid;
       scale_max = scale_max - 0.5 * scale_wid;
       gtk_range_set_range(GTK_RANGE(popup_scale), scale_min, scale_max);
     }
+
     gtk_range_set_value (GTK_RANGE(popup_scale), value),
                         scale_timer = g_timeout_add(2000, scale_timeout_cb, NULL);
   }
@@ -502,21 +506,33 @@ void set_rf_gain(int rx, double value) {
 void set_filter_width(int rx, int width) {
   //t_print("%s width=%d\n",__FUNCTION__, width);
   char title[64];
+  int min, max;
   sprintf(title, "Filter Width RX %d (Hz)", rx);
-  int min = width - 1000;
-  int max = width + 1000;
-  if (min < 0) {
-    min = 0;
+  min = 0;
+  max = 2 * width;
+
+  if (max < 200) { max = 200; }
+
+  if (width > 1000) {
+    max = width + 1000;
+    min = width - 1000;
   }
+
+  if (width > 3000) {
+    max = width + 2000;
+    min = width - 2000;
+  }
+
   show_popup_slider(IF_WIDTH, rx, (double)(min), (double)(max), 1.0, (double) width, title);
 }
 
 void set_filter_shift(int rx, int shift) {
   //t_print("%s shift=%d\n",__FUNCTION__, shift);
   char title[64];
+  int min, max;
   sprintf(title, "Filter SHIFT RX %d (Hz)", rx);
-  int min = shift - 1000;
-  int max = shift + 1000;
+  min = shift - 500;
+  max = shift + 500;
   show_popup_slider(IF_SHIFT, rx,  (double)(min), (double) (max), 1.0, (double) shift, title);
 }
 
@@ -591,24 +607,55 @@ static void drive_value_changed_cb(GtkWidget *widget, gpointer data) {
 void set_filter_cut_high(int rx, int var) {
   //t_print("%s var=%d\n",__FUNCTION__,var);
   char title[64];
+  int min, max;
   sprintf(title, "Filter Cut High RX %d (Hz)", rx);
-  int min = var - 1000;
-  int max = var + 1000;
-  if (min < 0) {
-    min = 0;
+  //
+  // The hi-cut is always non-negative
+  //
+  min = 0;
+  max = 2 * var;
+
+  if (max <  200) { max = 200; }
+
+  if (var > 1000) {
+    max = var + 1000;
+    min = var - 1000;
   }
+
   show_popup_slider(FILTER_CUT_HIGH, rx, (double)(min), (double)(max), 1.00, (double) var, title);
 }
 
 void set_filter_cut_low(int rx, int var) {
-  //t_print("%s var=%d\n",__FUNCTION__,var);
+  t_print("%s var=%d\n", __FUNCTION__, var);
   char title[64];
+  int min, max;
   sprintf(title, "Filter Cut Low RX %d (Hz)", rx);
-  int min = var - 1000;
-  int max = var + 1000;
-  if (min < 0) {
-    min = 0;
+  //
+  // The low-cut is either always positive, or always negative for a given mode
+  //
+  min = 0;
+
+  if (var > 0) {
+    max = 2 * var;
+
+    if (max <  200) { max = 200; }
+
+    if (var > 1000) {
+      max = var + 1000;
+      min = var - 1000;
+    }
+  } else {
+    max = 0;
+    min = 2 * var;
+
+    if (min >  -200) { min = -200; }
+
+    if (var < -1000) {
+      max = var + 1000;
+      min = var - 1000;
+    }
   }
+
   show_popup_slider(FILTER_CUT_LOW, rx, (double)(min), (double)(max), 1.00, (double) var, title);
 }
 
@@ -688,7 +735,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_widget_show(af_gain_label);
   gtk_grid_attach(GTK_GRID(sliders), af_gain_label, 0, 0, 3, 1);
   af_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -40.0, 0.0, 1.00);
-  gtk_widget_set_size_request(af_gain_scale, 0, height/2);
+  gtk_widget_set_size_request(af_gain_scale, 0, height / 2);
   gtk_widget_set_valign(af_gain_scale, GTK_ALIGN_CENTER);
   gtk_range_set_increments (GTK_RANGE(af_gain_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(af_gain_scale), active_receiver->volume);
@@ -701,7 +748,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_widget_show(agc_gain_label);
   gtk_grid_attach(GTK_GRID(sliders), agc_gain_label, 9, 0, 3, 1);
   agc_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -20.0, 120.0, 1.0);
-  gtk_widget_set_size_request(agc_scale, 0, height/2);
+  gtk_widget_set_size_request(agc_scale, 0, height / 2);
   gtk_widget_set_valign(agc_scale, GTK_ALIGN_CENTER);
   gtk_range_set_increments (GTK_RANGE(agc_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(agc_scale), active_receiver->agc_gain);
@@ -715,12 +762,13 @@ GtkWidget *sliders_init(int my_width, int my_height) {
     } else {
       rf_gain_label = gtk_label_new("RF:");
     }
+
     gtk_widget_set_name(rf_gain_label, "boldlabel");
     gtk_widget_set_halign(rf_gain_label, GTK_ALIGN_END);
     gtk_widget_show(rf_gain_label);
     gtk_grid_attach(GTK_GRID(sliders), rf_gain_label, 18, 0, 3, 1);
     rf_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, adc[0].min_gain, adc[0].max_gain, 1.0);
-    gtk_widget_set_size_request(rf_gain_scale, 0, height/2);
+    gtk_widget_set_size_request(rf_gain_scale, 0, height / 2);
     gtk_widget_set_valign(rf_gain_scale, GTK_ALIGN_CENTER);
     gtk_range_set_value (GTK_RANGE(rf_gain_scale), adc[0].gain);
     gtk_range_set_increments (GTK_RANGE(rf_gain_scale), 1.0, 1.0);
@@ -744,7 +792,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
     gtk_widget_show(attenuation_label);
     gtk_grid_attach(GTK_GRID(sliders), attenuation_label, 18, 0, 3, 1);
     attenuation_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 31.0, 1.0);
-    gtk_widget_set_size_request(attenuation_scale, 0, height/2);
+    gtk_widget_set_size_request(attenuation_scale, 0, height / 2);
     gtk_widget_set_valign(attenuation_scale, GTK_ALIGN_CENTER);
     gtk_range_set_value (GTK_RANGE(attenuation_scale), adc[active_receiver->adc].attenuation);
     gtk_range_set_increments (GTK_RANGE(attenuation_scale), 1.0, 1.0);
@@ -796,14 +844,14 @@ GtkWidget *sliders_init(int my_width, int my_height) {
     gtk_widget_set_halign(linein_label, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(sliders), linein_label, 0, 1, 3, 1);
     mic_gain_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -12.0, 50.0, 1.0);
-    gtk_widget_set_size_request(mic_gain_scale, 0, height/2);
+    gtk_widget_set_size_request(mic_gain_scale, 0, height / 2);
     gtk_widget_set_valign(mic_gain_scale, GTK_ALIGN_CENTER);
     gtk_range_set_increments (GTK_RANGE(mic_gain_scale), 1.0, 1.0);
     gtk_grid_attach(GTK_GRID(sliders), mic_gain_scale, 3, 1, 6, 1);
     gtk_range_set_value (GTK_RANGE(mic_gain_scale), mic_gain);
     g_signal_connect(G_OBJECT(mic_gain_scale), "value_changed", G_CALLBACK(micgain_value_changed_cb), NULL);
     linein_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -34.0, 12.0, 1.0);
-    gtk_widget_set_size_request(linein_scale, 0, height/2);
+    gtk_widget_set_size_request(linein_scale, 0, height / 2);
     gtk_widget_set_valign(linein_scale, GTK_ALIGN_CENTER);
     gtk_range_set_increments (GTK_RANGE(linein_scale), 1.0, 1.0);
     gtk_grid_attach(GTK_GRID(sliders), linein_scale, 3, 1, 6, 1);
@@ -814,7 +862,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
     gtk_widget_set_halign(drive_label, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(sliders), drive_label, 9, 1, 3, 1);
     drive_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, drive_max, 1.00);
-    gtk_widget_set_size_request(drive_scale, 0, height/2);
+    gtk_widget_set_size_request(drive_scale, 0, height / 2);
     gtk_widget_set_valign(drive_scale, GTK_ALIGN_CENTER);
     gtk_range_set_increments (GTK_RANGE(drive_scale), 1.0, 1.0);
     gtk_range_set_value (GTK_RANGE(drive_scale), getDrive());
@@ -839,7 +887,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   gtk_widget_show(squelch_label);
   gtk_grid_attach(GTK_GRID(sliders), squelch_label, 18, 1, 3, 1);
   squelch_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
-  gtk_widget_set_size_request(squelch_scale, 0, height/2);
+  gtk_widget_set_size_request(squelch_scale, 0, height / 2);
   gtk_widget_set_valign(squelch_scale, GTK_ALIGN_CENTER);
   gtk_range_set_increments (GTK_RANGE(squelch_scale), 1.0, 1.0);
   gtk_range_set_value (GTK_RANGE(squelch_scale), active_receiver->squelch);

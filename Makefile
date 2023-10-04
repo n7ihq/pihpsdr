@@ -568,7 +568,7 @@ prebuild:
 # since there we have new newest version (2.11), while on RaspPi we still have 2.3.
 #
 
-CPPOPTIONS= --enable=all --suppress=constParameterCallback --suppress=missingIncludeSystem
+CPPOPTIONS= --inline-suppr --enable=all --suppress=constParameterCallback --suppress=missingIncludeSystem
 CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 
 ifeq ($(UNAME_S), Darwin)

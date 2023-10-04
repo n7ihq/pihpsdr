@@ -407,10 +407,12 @@ void discovery() {
       case STATE_AVAILABLE:
         gtk_button_set_label(GTK_BUTTON(start_button), "Start");
         break;
+
       case STATE_SENDING:
         gtk_button_set_label(GTK_BUTTON(start_button), "In Use");
         gtk_widget_set_sensitive(start_button, FALSE);
         break;
+
       case STATE_INCOMPATIBLE:
         gtk_button_set_label(GTK_BUTTON(start_button), "Incompatible");
         gtk_widget_set_sensitive(start_button, FALSE);

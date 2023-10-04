@@ -36,6 +36,7 @@
 
 void saturn_discovery();
 void saturn_init();
+void saturn_register_init();
 void saturn_handle_speaker_audio(uint8_t *UDPInBuffer);
 void saturn_handle_high_priority(bool FromNetwork, unsigned char *high_priority_buffer_to_radio);
 void saturn_handle_general_packet(bool FromNetwork, uint8_t *PacketBuffer);

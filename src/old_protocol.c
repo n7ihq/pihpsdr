@@ -229,20 +229,23 @@ static unsigned int txring_outptr = 0; // pointer updated when reading from the 
 static unsigned int txring_flag = 0;   // 0: RX, 1: TX
 
 static gpointer old_protocol_txiq_thread(gpointer data) {
-  int avail;
   int timer = 9999;
+
   //
   // Ideally, an output METIS buffer with 126 samples is sent every 2625 usec.
   // We thus wait until we have 126 samples, and then send a packet.
   // After sending the packet, wait 2000 usecs before sending the next one.
   //
   for (;;) {
-    avail = txring_inptr - txring_outptr;
+    int avail = txring_inptr - txring_outptr;
+
     if (avail < 0) { avail += TXRINGBUFLEN; }
 
     if (avail < 1008) {
       usleep (500);
-      if (timer < 9999) timer += 500;
+
+      if (timer < 9999) { timer += 500; }
+
       continue;
     }
 
@@ -260,6 +263,7 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
       if (timer < 2000) {
         usleep(2000 - timer);
       }
+
       for (int j = 0; j < 2; j++) {
         unsigned char *p = output_buffer + 8;
 
@@ -278,10 +282,12 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
 
         ozy_send_buffer();
       }
+
       timer = 0;
       pthread_mutex_unlock(&send_ozy_mutex);
     }
   }
+
   return NULL;
 }
 
@@ -542,7 +548,7 @@ static void open_udp_socket() {
   t_print("binding UDP socket to %s:%d\n", inet_ntoa(radio->info.network.interface_address.sin_addr),
           ntohs(radio->info.network.interface_address.sin_port));
 
-  if (bind(tmp, (struct sockaddr*)&radio->info.network.interface_address, radio->info.network.interface_length) < 0) {
+  if (bind(tmp, (struct sockaddr * )&radio->info.network.interface_address, radio->info.network.interface_length) < 0) {
     t_perror("old_protocol: bind socket failed for data_socket\n");
     exit(-1);
   }

@@ -2225,7 +2225,7 @@ The feedback level reported by the PS calibration algorithm is further reported 
 is green if calibration was successful and PS correction takes place, and the string is
 red if no good calibration could be made.
 
-\begin{figure}[ht]
+\begin{figure}[t!]
 \center
 \includegraphics[width=12cm]{PSmon.png}
 \caption{PS: TwoTone with MON}
@@ -2245,6 +2245,13 @@ by the calibration algorithm in the GetPk field. The  value
 chosen by piHPSDR can be incorrect if you use a highly experimental firmware on your
 HPSDR board with modified TX DAC filters, but this should normally not happen.
 
+\begin{figure}[t!]
+\center
+\includegraphics[width=12cm]{PSoff.png}
+\caption{PS: after hitting OFF}
+\label{fig:PSoff}
+\end{figure}
+
 To demonstrate what happens, I show an example. Checking both \rett{Enable PS} and
 \rett{Auto Attenuation}, and hitting the \rett{Two Tone} button, it need few
 seconds to stabilize and then Fig. \ref{fig:PSnomon} resulted, where the TX
@@ -2258,12 +2265,7 @@ out of this. If one wants to see what one is actually transmitting, one must
 push the \rett{MON} button such that it is highlighted. Then one sees that
 the feedback signal that shows what is going on at the antenna (Fig. \ref{fig:PSmon}):
 
-\begin{figure}
-\center
-\includegraphics[width=12cm]{PSoff.png}
-\caption{PS: after hitting OFF}
-\label{fig:PSoff}
-\end{figure}
+
 
 Here one sees that the antenna emits a clean two-tone signal (no satellites can be seen,
 the IM3 value is better than 50 dBc). To demonstrate how effective the PS algorithm is,
@@ -2483,6 +2485,13 @@ The connector used for low-power TX output can also be used for receiving.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{OC} (OpenCollector) Menu}
 
+\begin{figure}[ht]
+\center
+\includegraphics[width=12cm]{OCMenu.png}
+\caption{The OC (open collector) menu.}
+\label{fig:OCMenu}
+\end{figure}
+
 Standard HPSDR radios have seven individually programmable outputs wired as
 open collector output. In the \bltt{OC} menu, you can specify, separately
 for each band, and separately for receive and transmit, which output should
@@ -2504,12 +2513,13 @@ after the memory tune delay, which can also be specified in this menu.
 This can be used to send short tuning pulsed of varying length to the
 external automatic tuner at the beginning of the tuning.
 
-\begin{figure}[ht]
-\center
-\includegraphics[width=12cm]{OCMenu.png}
-\caption{The OC (open collector) menu.}
-\label{fig:OCMenu}
-\end{figure}
+
+
+Note that if you have chosen the \texttt{N2ADR} filter board (see the \bltt{Radio} menu,
+this is usually the
+case if you are working with a HermesLite-II radio), then the necessary \bltt{OC}
+settings for this filter board are enforced upon program start. The same applies if
+you enable the \texttt{N2ADR} filter board in the \bltt{Radio} menu.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -4419,7 +4429,9 @@ and then start piHPSDR. With the STEMLAB option, this can all be done by piHPSDR
 
 \rett{ALSA}. This option is only effective for LINUX systems including the Raspberry Pi. If this
 option is active, local audio output is done via the standard LINUX ALSA library, otherwise
-pulseaudio is used. On MacOS, this option has no effect since the portaudio library is used
+pulseaudio is used. Note that sending audio to HDMI monitors is not (yet) supported
+with the ALSA option (with pulseaudio, this is no problem).
+On MacOS, this option has no effect since the portaudio library is used
 in any case.
 
 \rett{EXTNR}. There is a special version of the WDSP library that contains additional noise
@@ -4473,11 +4485,10 @@ properties:
 
 \begin{itemize}
 \item{It runs on a 32-bit Raspberry Pi OS, currently the "bullseye" version.}
-\item{It has the GPIO, MIDI, SATURN, and ALSA options built in, so it does not use pulseaudio. See
+\item{It has the GPIO, MIDI, SATURN, and ALSA options built in, so it does not use pulseaudio
+which means you cannot (yet) send RX audio to HDMI monitors. See
 Appendix \ref{sec:compiletime} for a detailed description of the compile time options. If you want
 another set of options, you have to compile from the sources.}
-\item{It can be down-loaded using a web browser, and then only two commands have to be 
-entered in a terminal window.}
 \end{itemize}
 
 The following \textit{caveat} applies both to the binary installation and the compilation from
@@ -4493,15 +4504,13 @@ must be enabled, as described in Appendix \ref{sec:i2c}.
 \end{center}
 Very often, RealVNC is used to display the RaspPi
 desktop onto the screen of the main computer one is using. One has to be aware that this is not
-only consuming a lot of CPU power (on both sides), but also puts a high load on the network
+only consuming a lot of CPU power, but also puts some load on the network
 connection. While using VNC is perfectly OK for compiling and installing software, it is
-{\color{red} highly recommended} to shut down RealVNC on the RaspPi when connecting to a radio.
-Many users have reported audio cracks and other signs of failures in the data stream between the
-radio and the RapsPi when using RealVNC. An indication of network or CPU congestion is, if
-the audio problems get worse when the sample rate changes, say, from 48k to 96k to 192k.
-It has also been reported that when using VNC, the situation gets worse then the piHPSDR window
-is made larger, which is also an indication that problems are rooted in the resources
-consumed by the VNC connection.
+recommended (if RealVNC is not needed for radio operation) to shut down RealVNC on the
+RaspPi when connecting to a radio.
+Some users have reported audio cracks, sequence erros and other signs of
+overload when using RealVNC. An indication that VNC may be the origin
+of the problem is, if it gets worse when increasing the piHPDSR window size.
 }
 }
 \end{center}
@@ -4516,6 +4525,20 @@ the installation more complicated. So the decision was to offer a binary install
  (explained in Appendix \ref{sec:installsources})
 for every feature beyond.
 
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} ----- Administrator privileges on RaspPi systems -----}
+\end{center}
+ The installation procedure depends on that you can execute ,,sudo'' commands
+ in a terminal window. 
+On a RaspBerry Pi this should not be a problem, since
+the user account that you created during installation
+will have administrator privileges by default.
+}
+}
+\end{center}
 Probably the easiest way do download the binary installation file \texttt{pihpsdr.tar} is to clone
 the complete repository (as you would also do it for an installation from source code) since the
 binary installation file is contained therein. So open a terminal window. If you do so, you get
@@ -4593,15 +4616,13 @@ must be enabled, as described in Appendix \ref{sec:i2c}.
 \end{center}
 Very often, RealVNC is used to display the RaspPi
 desktop onto the screen of the main computer one is using. One has to be aware that this is not
-only consuming a lot of CPU power (on both sides), but also puts a high load on the network
+only consuming a lot of CPU power, but also puts some load on the network
 connection. While using VNC is perfectly OK for compiling and installing software, it is
-{\color{red} highly recommended} to shut down RealVNC on the RaspPi when connecting to a radio.
-Many users have reported audio cracks and other signs of failures in the data stream between the
-radio and the RapsPi when using RealVNC. An indication of network or CPU congestion is, if
-the audio problems get worse when the sample rate changes, say, from 48k to 96k to 192k.
-It has also been reported that when using VNC, the situation gets worse then the piHPSDR window
-is made larger, which is also an indication that problems are rooted in the resources
-consumed by the VNC connection.
+recommended (if RealVNC is not needed for radio operation) to shut down RealVNC on the
+RaspPi when connecting to a radio.
+Some users have reported audio cracks, sequence erros and other signs of
+overload when using RealVNC. An indication that VNC may be the origin
+of the problem is, if it gets worse when increasing the piHPDSR window size.
 }
 }
 \end{center}
@@ -4613,16 +4634,16 @@ consumed by the VNC connection.
 \textbf{\color{red} ----- Administrator privileges on Linux systems -----}
 \end{center}
  The whole installation procedure depends on that your user account is an administrator account,
-such that you can execute ,,sudo'' commands in the terminal window. 
-Some Linux distros maintain a ,,sudoers'' file where users that are allowed to execute
+such that you can execute ,,sudo'' commands in a terminal window. 
+Some Linux distributions maintain a ,,sudoers'' file where users that are allowed to execute
 administrative task via the \grtt{sudo} program are listed.
  In normal cases
 (you own the computer and/or have installed the Linux operating system)
  you should have administrator privileges.
  
 On a RaspBerry Pi, the user account that you created during installation
-will have administrator privileges by default, and no password is asked when
-executing \grtt{sudo} commands.
+will have administrator privileges by default, so you can
+execute \grtt{sudo} commands without being askes a password.
 }
 }
 \end{center}

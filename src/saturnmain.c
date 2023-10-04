@@ -100,7 +100,7 @@ extern bool MOXAsserted;
 #define VMICPACKETSIZE 132
 
 // uncomment to display debug printouts for FPGA data over/under flows
-#define DISPLAY_OVER_UNDER_FLOWS 1
+//#define DISPLAY_OVER_UNDER_FLOWS 1
 
 static gpointer saturn_rx_thread(gpointer arg);
 static GThread *saturn_rx_thread_id;
@@ -244,7 +244,6 @@ void saturn_register_init() {
   //
   // setup Saturn hardware
   //
-  OpenXDMADriver();
   CodecInitialise();
   InitialiseDACAttenROMs();
   InitialiseCWKeyerRamp(true, 5000);
@@ -257,11 +256,10 @@ void saturn_register_init() {
   SetTXAmplitudeScaling(VCONSTTXAMPLSCALEFACTOR);
   EnableAlexManualFilterSelect(true);
   SetBalancedMicInput(false);
-  //RRK disable DDCs here?
 }
 
 // is there already a pihpsdr running and using xdma?
-int is_already_running() {
+bool is_already_running() {
   FILE *fp;
   char path[1035];
   fp = popen("lsof /dev/xdma0_user | grep pihpsdr", "r");
@@ -274,7 +272,7 @@ int is_already_running() {
   while (fgets(path, sizeof(path), fp) != NULL) {}
 
   pclose(fp);
-  return (strstr(path, "pihpsdr") == NULL) ? 0 : 1;
+  return (strstr(path, "pihpsdr") == NULL) ? false : true;
 }
 
 #define SATURNMINFPGAVERSION 10                         // Minimum version of gateware this pihpsdr works with
@@ -283,66 +281,60 @@ int is_already_running() {
 #define SATURNPRIMARYCONFIGID 4                         // "primary" configuration id
 #define VADDRPRODVERSIONREG 0XC004
 
-//
-// Check for a valid configuration
-// returns true if valid
-//
-bool is_valid_config(void)
-{
-        bool Result = true;
-        uint32_t SoftwareInformation;                   // swid & version
-        uint32_t ProductInformation;                    // product id & version
-
-        uint32_t Version;                               // s/w version
-        uint32_t SWID;                                  // s/w id
-        uint32_t ProdID;                                // product version and id
-        uint32_t ClockInfo;                             // clock status
-
-        OpenXDMADriver();
-
-        //
-        // read the raw data from registers
-        //
-        SoftwareInformation = RegisterRead(VADDRSWVERSIONREG);
-        ProductInformation = RegisterRead(VADDRPRODVERSIONREG);
-
-        ClockInfo = (SoftwareInformation & 0xF);                        // 4 clock bits
-	Version = (SoftwareInformation >> 4) & 0xFFFF;                  // 16 bit sw version
-        SWID = SoftwareInformation >> 20;                               // 12 bit software ID
-
-        ProdID = ProductInformation >> 16;                              // 16 bit product ID
-
-        if (Version < SATURNMINFPGAVERSION) {
-          discovered[devices].status = STATE_INCOMPATIBLE;
-          t_print("Incompatible Saturn FPGA gateware version %d, "
-            "need %d or greater\n", Version, SATURNMINFPGAVERSION);
-        }
-
-        if (ProdID != SATURNPRODUCTID)
-          Result = false;
-
-        if (SWID != SATURNGOLDENCONFIGID && SWID != SATURNPRIMARYCONFIGID)
-          Result = false;
-
-        if (ClockInfo != 0xF)
-          Result = false; // not all clocks are present
-
-        CloseXDMADriver();
-
-        return Result;
-}
-
 void saturn_discovery() {
   if (devices < MAX_DEVICES) {
+    uint32_t SoftwareInformation;                   // swid & version
+    uint32_t ProductInformation;                    // product id & version
+    uint32_t Version;                               // s/w version
+    uint32_t SWID;                                  // s/w id
+    uint32_t ProdID;                                // product version and id
+    uint32_t ClockInfo;                             // clock status
     struct stat sb;
     uint8_t *mac = discovered[devices].info.network.mac_address;
+    bool goodConfig = true;
 
-    discovered[devices].status = 0;
-    if (stat("/dev/xdma0_user", &sb) == 0 && S_ISCHR(sb.st_mode) && is_valid_config()) {
+    if (stat("/dev/xdma0_user", &sb) == 0 && S_ISCHR(sb.st_mode)) {
       char buf[256];
-      if (discovered[devices].status == 0)
-        discovered[devices].status = (is_already_running()) ? STATE_SENDING : STATE_AVAILABLE;
+      bool running = is_already_running();
+
+      if (OpenXDMADriver() == 0) {
+        return;
+      }
+
       saturn_register_init();
+      //
+      // read the raw data from registers
+      //
+      SoftwareInformation = RegisterRead(VADDRSWVERSIONREG);
+      ProductInformation = RegisterRead(VADDRPRODVERSIONREG);
+      ClockInfo = (SoftwareInformation & 0xF);                        // 4 clock bits
+      Version = (SoftwareInformation >> 4) & 0xFFFF;                  // 16 bit sw version
+      SWID = SoftwareInformation >> 20;                               // 12 bit software ID
+      ProdID = ProductInformation >> 16;                              // 16 bit product ID
+
+      if (ProdID != SATURNPRODUCTID) {
+        goodConfig = false;
+      }
+
+      if (SWID != SATURNGOLDENCONFIGID && SWID != SATURNPRIMARYCONFIGID) {
+        goodConfig = false;
+      }
+
+      if (ClockInfo != 0xF) {
+        goodConfig = false;  // not all clocks are present
+      }
+
+      if (Version < SATURNMINFPGAVERSION) {
+        t_print("Incompatible Saturn FPGA gateware version %d, "
+                "need %d or greater\n", Version, SATURNMINFPGAVERSION);
+        discovered[devices].status = STATE_INCOMPATIBLE;
+        goodConfig = false;
+      }
+
+      if (goodConfig) {
+        discovered[devices].status = (running) ? STATE_SENDING : STATE_AVAILABLE;
+      }
+
       discovered[devices].protocol = NEW_PROTOCOL;
       discovered[devices].device = NEW_DEVICE_SATURN;
       discovered[devices].software_version = (RegisterRead(VADDRSWVERSIONREG) >> 4) & 0xFFFF;
@@ -434,6 +426,7 @@ void saturn_handle_duc_iq(bool FromNetwork, uint8_t *UDPInBuffer) {
   uint8_t* SrcPtr;                                        // pointer to data from Thetis
   uint8_t* DestPtr;                                       // pointer to DMA buffer data
   uint32_t DepthDUC = 0;
+  unsigned int Current;                                   // current occupied locations in FIFO
   bool FIFODUCOverflow, FIFODUCUnderflow, FIFODUCOverThreshold;
 
   //t_print("DUC I/Q %sbuffer received, TXActive=%d\n", (FromNetwork)?"network ":"", TXActive);
@@ -443,22 +436,34 @@ void saturn_handle_duc_iq(bool FromNetwork, uint8_t *UDPInBuffer) {
     if (TXActive == 2) { return; }
   }
 
-  DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFODUCOverflow, &FIFODUCOverThreshold, &FIFODUCUnderflow);  // read the FIFO free locations
+  DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFODUCOverflow, &FIFODUCOverThreshold, &FIFODUCUnderflow,
+                                    &Current);  // read the FIFO free locations
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-    if(FIFODUCOverThreshold)
-      t_print("TX DUC FIFO Overthreshold, depth now = %d\n", DepthDUC);
-    if(FIFODUCUnderflow)
-      t_print("TX DUC FIFO Underflowed, depth now = %d\n", DepthDUC);
+
+  if (FIFODUCOverThreshold) {
+    t_print("TX DUC FIFO Overthreshold, depth now = %d\n", Current);
+  }
+
+  if (FIFODUCUnderflow) {
+    t_print("TX DUC FIFO Underflowed, depth now = %d\n", Current);
+  }
+
 #endif
 
   while (DepthDUC < VMEMDUCWORDSPERFRAME) {     // loop till space available
     usleep(500);                                    // 0.5ms wait
-    DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFODUCOverflow, &FIFODUCOverThreshold, &FIFODUCUnderflow); // read the FIFO free locations
+    DepthDUC = ReadFIFOMonitorChannel(eTXDUCDMA, &FIFODUCOverflow, &FIFODUCOverThreshold, &FIFODUCUnderflow,
+                                      &Current); // read the FIFO free locations
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-    if(FIFODUCOverThreshold)
-      t_print("TX DUC FIFO Overthreshold, depth now = %d\n", DepthDUC);
-    if(FIFODUCUnderflow)
-      t_print("TX DUC FIFO Underflowed, depth now = %d\n", DepthDUC);
+
+    if (FIFODUCOverThreshold) {
+      t_print("TX DUC FIFO Overthreshold, depth now = %d\n", Current);
+    }
+
+    if (FIFODUCUnderflow) {
+      t_print("TX DUC FIFO Underflowed, depth now = %d\n", Current);
+    }
+
 #endif
   }
 
@@ -526,24 +531,37 @@ void saturn_handle_speaker_audio(uint8_t *UDPInBuffer) {
   //uint32_t RegVal = 0;    //debug
   bool FIFOSpkOverflow, FIFOSpkUnderflow, FIFOSpkOverThreshold;;
   uint32_t DepthSpk = 0;
+  unsigned int Current;     // current occupied locations in FIFO
   //RegVal += 1;            //debug
-  DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow, &FIFOSpkOverThreshold, &FIFOSpkUnderflow);  // read the FIFO free locations
+  DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow, &FIFOSpkOverThreshold, &FIFOSpkUnderflow,
+                                    &Current);  // read the FIFO free locations
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-    if(FIFOSpkOverThreshold)
-      t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", DepthSpk);
-    if(FIFOSpkUnderflow)
-      t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", DepthSpk);
+
+  if (FIFOSpkOverThreshold) {
+    t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", Current);
+  }
+
+  if (FIFOSpkUnderflow) {
+    t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", Current);
+  }
+
 #endif
 
   //t_print("speaker data received; depth = %d\n", DepthSpk);
   while (DepthSpk < VMEMWORDSPERFRAME) {     // loop till space available
     usleep(1000);                                   // 1ms wait
-    DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow, &FIFOSpkOverThreshold, &FIFOSpkUnderflow); // read the FIFO free locations
+    DepthSpk = ReadFIFOMonitorChannel(eSpkCodecDMA, &FIFOSpkOverflow, &FIFOSpkOverThreshold, &FIFOSpkUnderflow,
+                                      &Current); // read the FIFO free locations
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-    if(FIFOSpkOverThreshold)
-      t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", DepthSpk);
-    if(FIFOSpkUnderflow)
-      t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", DepthSpk);
+
+    if (FIFOSpkOverThreshold) {
+      t_print("Codec speaker FIFO Overthreshold, depth now = %d\n", Current);
+    }
+
+    if (FIFOSpkUnderflow) {
+      t_print("Codec Speaker FIFO Underflowed, depth now = %d\n", Current);
+    }
+
 #endif
   }
 
@@ -720,6 +738,7 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   int DMAReadfile_fd = -1;                  // DMA read file device
   uint32_t RegisterValue;
   bool FIFOOverflow, FIFOUnderflow, FIFOOverThreshold;
+  unsigned int Current;                     // current occupied locations in FIFO
   uint8_t UDPBuffer[VMICPACKETSIZE];
   int Error;
   //
@@ -757,7 +776,8 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
   //
   SetupFIFOMonitorChannel(eMicCodecDMA, false);
   ResetDMAStreamFIFO(eMicCodecDMA);
-  RegisterValue = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+  RegisterValue = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                         &Current);  // read the FIFO Depth register
   t_print("%s: mic FIFO Depth register = %08x (should be ~0)\n", __FUNCTION__, RegisterValue);
 
   //
@@ -788,22 +808,30 @@ static gpointer saturn_micaudio_thread(gpointer arg) {
       //
       // now wait until there is data, then DMA it
       //
-      Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);	// read the FIFO Depth register. 4 mic words per 64 bit word.
+      Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                     &Current);  // read the FIFO Depth register. 4 mic words per 64 bit word.
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-        if(FIFOOverThreshold)
-          t_print("Codec Mic FIFO Overthreshold, depth now = %d\n", Depth);
-        // note this would often generate a message because we deliberately read it down to zero.
-        // this isn't a problem as we can send the data on without the code becoming blocked.
-        //if(FIFOUnderflow)
-        //  t_print("Codec Mic FIFO Underflowed, depth now = %d\n", Depth);
+
+      if (FIFOOverThreshold) {
+        t_print("Codec Mic FIFO Overthreshold, depth now = %d\n", Current);
+      }
+
+      // note this would often generate a message because we deliberately read it down to zero.
+      // this isn't a problem as we can send the data on without the code becoming blocked.
+      //if(FIFOUnderflow)
+      //  t_print("Codec Mic FIFO Underflowed, depth now = %d\n", Depth);
 #endif
 
       while (Depth < (VMICSAMPLESPERFRAME / 4)) {         // 16 locations = 64 samples
         usleep(1000);                       // 1ms wait
-        Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+        Depth = ReadFIFOMonitorChannel(eMicCodecDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                       &Current);  // read the FIFO Depth register
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-        if(FIFOOverThreshold)
-          t_print("Codec Mic FIFO Overthreshold, depth now = %d\n", Depth);
+
+        if (FIFOOverThreshold) {
+          t_print("Codec Mic FIFO Overthreshold, depth now = %d\n", Current);
+        }
+
         // note this would often generate a message because we deliberately read it down to zero.
         // this isn't a problem as we can send the data on without the code becoming blocked.
         //if(FIFOUnderflow)
@@ -899,6 +927,7 @@ static gpointer saturn_rx_thread(gpointer arg) {
   uint32_t Cntr;                                              // sample word counter
   bool HeaderFound;
   uint32_t DecodeByteCount;                                   // bytes to decode
+  unsigned int Current;                                       // current occupied locations in FIFO
   //
   // initialise. Create memory buffers and open DMA file devices
   //
@@ -931,7 +960,8 @@ static gpointer saturn_rx_thread(gpointer arg) {
   usleep(1000);                           // give FIFO time to stop recording
   SetupFIFOMonitorChannel(eRXDDCDMA, false);
   ResetDMAStreamFIFO(eRXDDCDMA);
-  RegisterValue = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);	// read the FIFO Depth register
+  RegisterValue = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                         &Current); // read the FIFO Depth register
   t_print("%s: DDC FIFO Depth register = %08x (should be ~0)\n", __FUNCTION__, RegisterValue);
   SetByteSwapping(true);                                            // h/w to generate network byte order
   //
@@ -1038,29 +1068,37 @@ static gpointer saturn_rx_thread(gpointer arg) {
       // and copy it like we do with IQ data so the next readout begins at a new frame
       // the latter approach seems easier!
       //
-      Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+      Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                     &Current);  // read the FIFO Depth register
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-         if(FIFOOverThreshold)
-           t_print("RX DDC FIFO Overthreshold, depth now = %d\n", Depth);
-         // note this could often generate a message at low sample rate because we deliberately read it down to zero.
-         // this isn't a problem as we can send the data on without the code becoming blocked. so not a useful trap.
-         //if(FIFOUnderflow)
-         //  t_print("RX DDC FIFO Underflowed, depth now = %d\n", Depth);
-         //  t_print("read: depth = %d\n", Depth);
+
+      if (FIFOOverThreshold) {
+        t_print("RX DDC FIFO Overthreshold, depth now = %d\n", Current);
+      }
+
+      // note this could often generate a message at low sample rate because we deliberately read it down to zero.
+      // this isn't a problem as we can send the data on without the code becoming blocked. so not a useful trap.
+      //if(FIFOUnderflow)
+      //  t_print("RX DDC FIFO Underflowed, depth now = %d\n", Current);
+      //  t_print("read: depth = %d\n", Depth);
 #endif
 
       //    t_print("read: depth = %d\n", Depth);
       while (Depth < (DMATransferSize / 8U)) { // 8 bytes per location
         usleep(500);               // 1ms wait
-        Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow);  // read the FIFO Depth register
+        Depth = ReadFIFOMonitorChannel(eRXDDCDMA, &FIFOOverflow, &FIFOOverThreshold, &FIFOUnderflow,
+                                       &Current);  // read the FIFO Depth register
 #ifdef DISPLAY_OVER_UNDER_FLOWS
-         if(FIFOOverThreshold)
-           t_print("RX DDC FIFO Overthreshold, depth now = %d\n", Depth);
-         // note this could often generate a message at low sample rate because we deliberately read it down to zero.
-         // this isn't a problem as we can send the data on without the code becoming blocked. so not a useful trap.
-         //if(FIFOUnderflow)
-         //  t_print("RX DDC FIFO Underflowed, depth now = %d\n", Depth);
-         //  t_print("read: depth = %d\n", Depth);
+
+        if (FIFOOverThreshold) {
+          t_print("RX DDC FIFO Overthreshold, depth now = %d\n", Current);
+        }
+
+        // note this could often generate a message at low sample rate because we deliberately read it down to zero.
+        // this isn't a problem as we can send the data on without the code becoming blocked. so not a useful trap.
+        //if(FIFOUnderflow)
+        //  t_print("RX DDC FIFO Underflowed, depth now = %d\n", Current);
+        //  t_print("read: depth = %d\n", Depth);
 #endif
       }
 

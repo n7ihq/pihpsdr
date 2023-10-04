@@ -56,17 +56,19 @@ static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpoin
   store_memory_slot(ind);
   int mode = mem[ind].mode;
   int filter = mem[ind].filter;
+
   if (mode == modeFMN) {
     sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
-          (double) mem[ind].frequency * 1E-6,
-          mode_string[mode],
-          mem[ind].deviation == 2500 ? "11k" : "16k");
+            (double) mem[ind].frequency * 1E-6,
+            mode_string[mode],
+            mem[ind].deviation == 2500 ? "11k" : "16k");
   } else {
     sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
-          (double) mem[ind].frequency * 1E-6,
-          mode_string[mode],
-          filters[mode][filter].title);
+            (double) mem[ind].frequency * 1E-6,
+            mode_string[mode],
+            filters[mode][filter].title);
   }
+
   gtk_button_set_label(GTK_BUTTON(store_button[ind]), label_str);
   return FALSE;
 }
@@ -104,17 +106,19 @@ void store_menu(GtkWidget *parent) {
     b = gtk_button_new_with_label(label_str);
     g_signal_connect(b, "button-press-event", G_CALLBACK(store_select_cb), GINT_TO_POINTER(ind));
     gtk_grid_attach(GTK_GRID(grid), b, 0, ind + 1, 1, 1);
+
     if (mode == modeFMN) {
       sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
-            (double) mem[ind].frequency * 1E-6,
-            mode_string[mode],
-            mem[ind].deviation == 2500 ? "11k" : "16k");
+              (double) mem[ind].frequency * 1E-6,
+              mode_string[mode],
+              mem[ind].deviation == 2500 ? "11k" : "16k");
     } else {
       sprintf(label_str, "M%d=%8.3f MHz (%s, %s)", ind,
-            (double) mem[ind].frequency * 1E-6,
-            mode_string[mode],
-            filters[mode][filter].title);
+              (double) mem[ind].frequency * 1E-6,
+              mode_string[mode],
+              filters[mode][filter].title);
     }
+
     b = gtk_button_new_with_label(label_str);
     store_button[ind] = b;
     g_signal_connect(b, "button-press-event", G_CALLBACK(recall_select_cb), GINT_TO_POINTER(ind));

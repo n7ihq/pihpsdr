@@ -592,12 +592,12 @@ void set_filter(RECEIVER *rx) {
     break;
 
   case  modeFMN:
-
     //
     // FM filter settings are ignored, instead, the filter
     // size is calculated from the deviation
     //
     rx->deviation = vfo[id].deviation;
+
     if (rx->deviation == 2500) {
       rx->filter_low = -5500;
       rx->filter_high = 5500;

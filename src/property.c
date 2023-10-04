@@ -49,7 +49,7 @@ void clearProperties() {
 *
 * @param filename
 */
-void loadProperties(char* filename) {
+void loadProperties(const char* filename) {
   FILE* f = fopen(filename, "r");
   PROPERTY* property;
   t_print("loadProperties: %s\n", filename);
@@ -97,7 +97,7 @@ void loadProperties(char* filename) {
 *
 * @param filename
 */
-void saveProperties(char* filename) {
+void saveProperties(const char* filename) {
   PROPERTY* property;
   FILE* f = fopen(filename, "w+");
   char line[512];
@@ -129,7 +129,7 @@ void saveProperties(char* filename) {
 *
 * @return
 */
-char* getProperty(char* name) {
+char* getProperty(const char* name) {
   char* value = NULL;
   PROPERTY* property = properties;
 
@@ -152,7 +152,7 @@ char* getProperty(char* name) {
 * @param name
 * @param value
 */
-void setProperty(char* name, char* value) {
+void setProperty(const char* name, const char* value) {
   PROPERTY* property = properties;
 
   while (property) {

@@ -83,7 +83,7 @@ static void alex_att_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
-  char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
+  const char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
   int samplerate;
 
   //
@@ -184,7 +184,6 @@ static void audio_channel_cb(GtkWidget *widget, gpointer data) {
     active_receiver->audio_channel = RIGHT;
     break;
   }
-
 }
 
 void rx_menu(GtkWidget *parent) {

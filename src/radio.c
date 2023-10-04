@@ -525,8 +525,6 @@ void reconfigure_screen() {
     //
     full_screen_timeout = g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(1));
   }
-
-  last_fullscreen = my_fullscreen;
 }
 
 void reconfigure_radio() {
@@ -560,9 +558,11 @@ void reconfigure_radio() {
       rx->width = my_width / receivers;
       receiver_update_zoom(rx);
       reconfigure_receiver(rx, rx_height);
+
       if (!isTransmitting() || duplex) {
         gtk_fixed_move(GTK_FIXED(fixed), rx->panel, x, y);
       }
+
       rx->x = x;
       rx->y = y;
       x = x + my_width / receivers;
@@ -575,9 +575,11 @@ void reconfigure_radio() {
       rx->width = my_width;
       receiver_update_zoom(rx);
       reconfigure_receiver(rx, rx_height / receivers);
+
       if (!isTransmitting() || duplex) {
         gtk_fixed_move(GTK_FIXED(fixed), rx->panel, 0, y);
       }
+
       rx->x = 0;
       rx->y = y;
       y += rx_height / receivers;
@@ -792,12 +794,11 @@ static void create_visual() {
     //t_print("Create transmitter\n");
     transmitter = NULL;
     can_transmit = 0;
-
-//
-//  do not set can_transmit before transmitter exists, because we assume
-//  if (can_transmit) is equivalent to if (transmitter)
-//
-    int radio_has_transmitter=0;
+    //
+    //  do not set can_transmit before transmitter exists, because we assume
+    //  if (can_transmit) is equivalent to if (transmitter)
+    //
+    int radio_has_transmitter = 0;
 
     switch (protocol) {
     case ORIGINAL_PROTOCOL:
@@ -818,8 +819,8 @@ static void create_visual() {
       } else {
         transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width, rx_height);
       }
-      can_transmit = 1;
 
+      can_transmit = 1;
       transmitter->x = 0;
       transmitter->y = VFO_HEIGHT;
       calcDriveLevel();
@@ -982,7 +983,6 @@ void start_radio() {
   }
 
 #endif
-
   //t_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_WATCH));
   //
@@ -2814,8 +2814,9 @@ void radio_change_region(int r) {
 }
 
 #ifdef CLIENT_SERVER
+// cppcheck-suppress constParameterPointer
 int remote_start(void *data) {
-  char *server = (char *)data;
+  const char *server = (const char *)data;
   sprintf(property_path, "%s@%s.props", radio->name, server);
   radio_is_remote = TRUE;
   optimize_for_touchscreen = 1;

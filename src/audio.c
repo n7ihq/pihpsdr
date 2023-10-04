@@ -76,6 +76,12 @@ static GThread *mic_read_thread_id = NULL;
 
 static int running = FALSE;
 
+//
+// TODO: include SND_PCM_FORMAT_IEC958_SUBFRAME_LE, such that ALSA
+//       can directly play on HDMI monitors. Implementation is not
+//       super-easy since this case must then also be considered in
+//       audio_write.
+//
 #define FORMATS 3
 static snd_pcm_format_t formats[3] = {
   SND_PCM_FORMAT_FLOAT_LE,

@@ -528,6 +528,7 @@ void new_menu() {
     row++;
 #endif
 
+    // cppcheck-suppress knownConditionTrueFalse
     if (row > maxrow) { maxrow = row; }
 
     row = 2;
@@ -552,6 +553,7 @@ void new_menu() {
     g_signal_connect (store_b, "button-press-event", G_CALLBACK(store_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), store_b, col, row++, 1, 1);
 
+    // cppcheck-suppress knownConditionTrueFalse
     if (row > maxrow) { maxrow = row; }
 
     row = 2;
@@ -690,6 +692,7 @@ void new_menu() {
     }
 
 #endif
+    // cppcheck-suppress redundantAssignment
     row = maxrow;
     //
     // Insert small separation between the "many buttons" and the bottom row

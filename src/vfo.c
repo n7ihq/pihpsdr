@@ -86,6 +86,7 @@ static void vfoSaveBandstack() {
   entry->ctun = vfo[0].ctun;
   entry->ctun_frequency = vfo[0].ctun_frequency;
   entry->deviation = vfo[0].deviation;
+
   if (can_transmit) {
     entry->ctcss_enabled = transmitter->ctcss_enabled;
     entry->ctcss = transmitter->ctcss;
@@ -248,7 +249,6 @@ void vfoRestoreState() {
     vfo[i].xit               = 0;
     vfo[i].ctun              = 0;
     vfo[i].deviation         = 2500;
-
     GetPropI1("vfo.%d.band", i,             vfo[i].band);
     GetPropI1("vfo.%d.frequency", i,        vfo[i].frequency);
     GetPropI1("vfo.%d.ctun", i,             vfo[i].ctun);
@@ -468,6 +468,7 @@ void vfo_bandstack_changed(int b) {
   if (can_transmit) {
     transmitter_set_ctcss(transmitter, entry->ctcss_enabled, entry->ctcss);
   }
+
   if (id == 0) {
     bandstack->current_entry = vfo[id].bandstack;
   }
@@ -484,7 +485,7 @@ void vfo_bandstack_changed(int b) {
 
 void vfo_mode_changed(int m) {
   int id = active_receiver->id;
-   vfo_id_mode_changed(id, m);
+  vfo_id_mode_changed(id, m);
 }
 
 void vfo_id_mode_changed(int id, int m) {
@@ -676,13 +677,13 @@ void vfo_step(int steps) {
 
 void vfo_id_step(int id, int steps) {
 #ifdef CLIENT_SERVER
-  
+
   if (radio_is_remote) {
     update_vfo_step(id, steps);
     return;
   }
-                                        
-#endif                                  
+
+#endif
 
   if (!locked) {
     long long delta;
@@ -691,11 +692,13 @@ void vfo_id_step(int id, int steps) {
       // CTUN offset is limited by half the sample rate
       // if "id" does not refer to a running RX, take the active receiver
       RECEIVER *myrx;
+
       if (id < receivers) {
         myrx = receiver[id];
       } else {
         myrx = active_receiver;
       }
+
       long long frequency = vfo[id].frequency;
       long long rx_low = ROUND(vfo[id].ctun_frequency, steps) + myrx->filter_low;
       long long rx_high = ROUND(vfo[id].ctun_frequency, steps) + myrx->filter_high;
@@ -791,11 +794,13 @@ void vfo_id_move(int id, long long hz, int round) {
     if (vfo[id].ctun) {
       // don't let ctun go beyond end of passband
       RECEIVER *myrx;
+
       if (id < receivers) {
         myrx = receiver[id];
       } else {
         myrx = active_receiver;
       }
+
       long long frequency = vfo[id].frequency;
       long long rx_low = vfo[id].ctun_frequency + hz + myrx->filter_low;
       long long rx_high = vfo[id].ctun_frequency + hz + myrx->filter_high;
@@ -877,7 +882,7 @@ void vfo_move(long long hz, int round) {
 }
 
 void vfo_move_to(long long hz) {
-  int id=active_receiver->id;
+  int id = active_receiver->id;
   vfo_id_move_to(id, hz);
 }
 
@@ -892,24 +897,16 @@ void vfo_id_move_to(int id, long long hz) {
 #endif
   // hz is the offset from the min displayed frequency
   RECEIVER *myrx;
+
   if (id < receivers) {
     myrx = receiver[id];
   } else {
     myrx = active_receiver;
   }
+
   long long offset = hz;
   long long half = (long long)(myrx->sample_rate / 2);
   long long f;
-  long long delta;
-  int sid;
-#ifdef CLIENT_SERVER
-
-  if (radio_is_remote) {
-    send_vfo_move_to(client_socket, id, hz);
-    return;
-  }
-
-#endif
 
   if (vfo[id].mode != modeCWL && vfo[id].mode != modeCWU) {
     offset = ROUND(hz, 0);
@@ -918,6 +915,9 @@ void vfo_id_move_to(int id, long long hz) {
   f = (vfo[id].frequency - half) + offset + ((double)myrx->pan * myrx->hz_per_pixel);
 
   if (!locked) {
+    long long delta;
+    int sid;
+
     if (vfo[id].ctun) {
       delta = vfo[id].ctun_frequency;
       vfo[id].ctun_frequency = f;
@@ -1114,38 +1114,37 @@ void vfo_update() {
   //
   // -----------------------------------------------------------
   if (vfl->mode_x != 0) {
-
     switch (vfo[id].mode) {
-    case modeFMN:
-      {
+    case modeFMN: {
       int dev;
       const char *wid;
       //
       // filter edges are +/- 5500 if deviation==2500,
       //              and +/- 8000 if deviation==5000
       dev = vfo[id].deviation;
+
       switch (dev) {
-        case 2500:
-          wid = "11k";
-          break;
-        case 5000:
-          wid = "16k";
-          break;
-        default:
-          wid = "???";
-          break;
+      case 2500:
+        wid = "11k";
+        break;
+
+      case 5000:
+        wid = "16k";
+        break;
+
+      default:
+        wid = "???";
+        break;
       }
 
       if (can_transmit ? transmitter->ctcss_enabled : 0) {
-        sprintf(temp_text, "%s %s C=%0.1f", mode_string[vfo[id].mode],wid,
-             ctcss_frequencies[transmitter->ctcss]);
+        sprintf(temp_text, "%s %s C=%0.1f", mode_string[vfo[id].mode], wid,
+                ctcss_frequencies[transmitter->ctcss]);
       } else {
         sprintf(temp_text, "%s %s", mode_string[vfo[id].mode], wid);
       }
-
-      }
-
-      break;
+    }
+    break;
 
     case modeCWL:
     case modeCWU:
@@ -1838,22 +1837,26 @@ long long get_tx_freq() {
 
 void vfo_xit_value(long long value ) {
   CLIENT_MISSING;
-  int id=get_tx_vfo();
+  int id = get_tx_vfo();
   vfo[id].xit = value;
   vfo[id].xit_enabled = value ? 1 : 0;
+
   if (protocol == NEW_PROTOCOL) {
     schedule_high_priority();
   }
+
   g_idle_add(ext_vfo_update, NULL);
 }
 
 void vfo_xit_toggle() {
   CLIENT_MISSING;
-  int id=get_tx_vfo();
+  int id = get_tx_vfo();
   TOGGLE(vfo[id].xit_enabled);
+
   if (protocol == NEW_PROTOCOL) {
     schedule_high_priority();
   }
+
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -1873,6 +1876,7 @@ void vfo_rit_value(int id, long long value) {
   CLIENT_MISSING;
   vfo[id].rit = value;
   vfo[id].rit_enabled = value ? 1 : 0;
+
   if (id < receivers) {
     receiver_frequency_changed(receiver[id]);
   }
@@ -1893,18 +1897,19 @@ void vfo_rit_onoff(int id, int enable) {
 
 void vfo_xit_onoff(int enable) {
   CLIENT_MISSING;
-  int id=get_tx_vfo();
+  int id = get_tx_vfo();
   vfo[id].xit_enabled = SET(enable);
 
   if (protocol == NEW_PROTOCOL) {
     schedule_high_priority();
   }
+
   g_idle_add(ext_vfo_update, NULL);
 }
 
 void vfo_xit_incr(int incr) {
   CLIENT_MISSING;
-  int id=get_tx_vfo();
+  int id = get_tx_vfo();
   long long value = vfo[id].xit + incr;
 
   if (value < -9999) {
@@ -1919,6 +1924,7 @@ void vfo_xit_incr(int incr) {
   if (protocol == NEW_PROTOCOL) {
     schedule_high_priority();
   }
+
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -1953,7 +1959,6 @@ void vfo_rit_incr(int id, int incr) {
 //
 void vfo_set_frequency(int v, long long f) {
   CLIENT_MISSING;
-
   int b = get_band_from_frequency(f);
 
   if (b != vfo[v].band) {
@@ -1990,6 +1995,7 @@ void vfo_set_frequency(int v, long long f) {
 //
 void vfo_ctun_update(int id, int state) {
   CLIENT_MISSING;
+
   //
   // Note: if this VFO does not control a (running) receiver,
   //       receiver_set_frequency is *not* called therefore

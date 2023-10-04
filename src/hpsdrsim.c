@@ -679,6 +679,7 @@ int main(int argc, char *argv[]) {
         if (txptr < 0) {
           txptr = OLDRTXLEN / 2;
         }
+
         // Put TX IQ samples into the ring buffer
         // In the old protocol, samples come in groups of 8 bytes L1 L0 R1 R0 I1 I0 Q1 Q0
         // Here, L1/L0 and R1/R0 are audio samples, and I1/I0 and Q1/Q0 are the TX iq samples
@@ -1562,8 +1563,9 @@ void *handler_ep6(void *arg) {
       // Let rxptr start running only if the TX has begun
       //
       if (txptr < 0) {
-        rxptr = OLDRTXLEN/2 - 4096;
+        rxptr = OLDRTXLEN / 2 - 4096;
       }
+
       for (j = 0; j < n; j++) {
         // ADC1: noise + weak tone on RX, feedback sig. on TX (except STEMlab)
         if (ptt && (OLDDEVICE != ODEV_C25)) {

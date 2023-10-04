@@ -130,17 +130,20 @@ void encoder_menu(GtkWidget *parent) {
   GtkWidget *default_b = gtk_button_new_with_label("Defaults");
   gtk_widget_set_name(default_b, "close_button"); // same looks as Close button
   g_signal_connect (default_b, "button-press-event", G_CALLBACK(default_cb), NULL);
+
   switch (controller) {
-    case CONTROLLER1:
-      gtk_grid_attach(GTK_GRID(grid), default_b, 5, 0, 1, 1);
-      break;
-    case CONTROLLER2_V1:
-    case CONTROLLER2_V2:
-      gtk_grid_attach(GTK_GRID(grid), default_b, 6, 0, 2, 1);
-      break;
-    case G2_FRONTPANEL:
-      gtk_grid_attach(GTK_GRID(grid), default_b, 3, 0, 2, 1);
-      break;
+  case CONTROLLER1:
+    gtk_grid_attach(GTK_GRID(grid), default_b, 5, 0, 1, 1);
+    break;
+
+  case CONTROLLER2_V1:
+  case CONTROLLER2_V2:
+    gtk_grid_attach(GTK_GRID(grid), default_b, 6, 0, 2, 1);
+    break;
+
+  case G2_FRONTPANEL:
+    gtk_grid_attach(GTK_GRID(grid), default_b, 3, 0, 2, 1);
+    break;
   }
 
   switch (controller) {
@@ -149,9 +152,9 @@ void encoder_menu(GtkWidget *parent) {
     break;
 
   case CONTROLLER1:
-
     // 3 vertical single encoders with switches plus VFO
-    row=1;
+    row = 1;
+
     for (int i = 0; i < 3; i++) {
       // vertical padding
       widget = gtk_label_new("  ");
@@ -185,7 +188,6 @@ void encoder_menu(GtkWidget *parent) {
     widget = gtk_label_new("  ");
     gtk_widget_set_size_request(widget, 0, 10);
     gtk_grid_attach(GTK_GRID(grid), widget, 0, 1, 1, 1);
-
     // 3 horizontal single encoders with switches
     col = 0;
 

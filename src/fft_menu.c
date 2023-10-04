@@ -48,7 +48,7 @@ static gboolean close_cb () {
 
 static void binaural_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
-  RECEIVER *rx=receiver[id];
+  RECEIVER *rx = receiver[id];
   rx->binaural = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
   SetRXAPanelBinaural(rx->id, rx->binaural);
 }
@@ -78,7 +78,7 @@ static void filter_type_cb(GtkToggleButton *widget, gpointer data) {
 
 static void filter_size_cb(GtkWidget *widget, gpointer data) {
   int channel = GPOINTER_TO_INT(data);
-  char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
+  const char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
   int size;
 
   // Get size from string in the combobox
@@ -194,11 +194,12 @@ void fft_menu(GtkWidget *parent) {
     g_signal_connect(w, "changed", G_CALLBACK(filter_size_cb), GINT_TO_POINTER(chan));
 
     if (i < receivers) {
-      w=gtk_check_button_new();
+      w = gtk_check_button_new();
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), receiver[i]->binaural);
       gtk_grid_attach(GTK_GRID(grid), w, col, 4, 1, 1);
       g_signal_connect(w, "toggled", G_CALLBACK(binaural_cb), GINT_TO_POINTER(chan));
     }
+
     col++;
   }
 

@@ -95,7 +95,7 @@ gboolean band_select_cb (GtkWidget *widget, gpointer data) {
     // of a transverter band has a grossly wrong frequency such that the effective
     // radio frequency falls outside the hardware frequency range of the radio.
     // In this case, the band button to the band that is effective must be highlighted.
-    // 
+    //
     //
     g_print("BM: choice=%d band=%d\n", vfo[id].band, choice->info);
     g_signal_handler_block(G_OBJECT(choice->button), choice->signal);
@@ -103,13 +103,14 @@ gboolean band_select_cb (GtkWidget *widget, gpointer data) {
     g_signal_handler_unblock(G_OBJECT(choice->button), choice->signal);
     return FALSE;
   }
+
   if (current) {
     g_signal_handler_block(G_OBJECT(current->button), current->signal);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(current->button), current == choice);
     g_signal_handler_unblock(G_OBJECT(current->button), current->signal);
   }
-  current = choice;
 
+  current = choice;
   return FALSE;
 }
 

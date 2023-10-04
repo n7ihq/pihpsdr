@@ -304,7 +304,7 @@ static void mic_input_cb(GtkWidget *widget, gpointer data) {
   }
 }
 static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
-  char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
+  const char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
   int samplerate;
 
   //
@@ -618,6 +618,7 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect(vfo_divisor, "value_changed", G_CALLBACK(vfo_divisor_value_changed_cb), NULL);
   row++;
 
+  // cppcheck-suppress knownConditionTrueFalse
   if (row > max_row) { max_row = row; }
 
   //
@@ -837,6 +838,7 @@ void radio_menu(GtkWidget *parent) {
 
 #endif
   row++;
+  // cppcheck-suppress redundantAssignment
   col = 0;
   GtkWidget *calibration_label = gtk_label_new("Frequency\nCalibration (Hz):");
   gtk_widget_set_name(calibration_label, "boldlabel");
