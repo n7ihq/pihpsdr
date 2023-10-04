@@ -30,7 +30,7 @@ SATURN_INCLUDE=SATURN
 #STEMLAB_DISCOVERY=STEMLAB
 
 # uncomment to get ALSA audio module on Linux (if not, use pulseaudio)
-AUDIO_MODULE=ALSA
+#AUDIO_MODULE=ALSA
 
 # un-comment if you link with an extended WDSP library containing new "external"
 # noise reduction capabilities ("rnnoise" and "libspecbleach")
