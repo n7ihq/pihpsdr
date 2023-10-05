@@ -4377,7 +4377,18 @@ In piHPSDR, simply choose RXcable and local RX output in the \bltt{RX} menu,
 and a local microphone with device TXcable in the \bltt{TX} menu. In WSJTX,
 simply choose RXcable as the input and TXcable as the output device.
 
-CAT connection in MacOS is the same as described for Linux above.
+As an additional bonus, loopback can also mix output devices. For example, one can create
+an additional loopback device with, say, name RX2, which can also be connected to
+the headphone output as shown for RXcable. If piHPSDR is running two receivers,
+one can use the \bltt{RX} menu to send the audio output of the first receiver to RXcable
+and the audio output of the second receiver to RX2. Additionally one can activate only
+the left channel for the first and only the right channel for the second receiver
+(see the \bltt{RX} menu). With this setup,
+one gets the audio output of the first receiver on the left ear and the audio output of
+the second receiver on the right ear. This can be very convenient for hunting DX in split mode,
+because one then hears the hounds and the fox on different ears. 
+
+Transceiver control (CAT connection) in MacOS is the same as described for Linux.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

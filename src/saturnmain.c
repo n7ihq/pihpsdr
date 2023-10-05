@@ -275,7 +275,7 @@ bool is_already_running() {
   return (strstr(path, "pihpsdr") == NULL) ? false : true;
 }
 
-#define SATURNMINFPGAVERSION 10                         // Minimum version of gateware this pihpsdr works with
+#define SATURNMINFPGAVERSION 8                          // Minimum version of gateware this pihpsdr works with
 #define SATURNPRODUCTID 1                               // Saturn, any version
 #define SATURNGOLDENCONFIGID 3                          // "golden" configuration id
 #define SATURNPRIMARYCONFIGID 4                         // "primary" configuration id

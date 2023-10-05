@@ -8,7 +8,7 @@ GNUmakefile
 pihpsdr
 pihpsdr.app
 hpsdrsim
-wdspWisdom00
+wdspWisdom*
 *.props
 ip.addr
 hpsdr.png
@@ -18,4 +18,5 @@ LINUX/SoapySDR
 LINUX/SoapyPlutoSDR
 LINUX/SoapyRTLSDR
 MacOS/wdsp
+release/LatexManual/piHPSDR-Manual.pdf
 @*
