@@ -18,7 +18,11 @@
 
 #include <gtk/gtk.h>
 #include <pulse/pulseaudio.h>
-#include <pulse/glib-mainloop.h>
+#ifdef __APPLE__
+#include <pulse/thread-mainloop.h>
+#else
+#include <pulse/thread-mainloop.h>
+#endif
 #include <pulse/simple.h>
 
 #include "radio.h"
@@ -31,10 +35,8 @@
 
 //
 // Used fixed buffer sizes.
-// The extremely large standard RX buffer size (2048)
-// does no good when combined with pulseaudio's internal
-// buffering
 //
+
 static const int out_buffer_size = 512;
 static const int mic_buffer_size = 512;
 
@@ -53,14 +55,18 @@ static float  *mic_ring_buffer = NULL;
 static int     mic_ring_read_pt = 0;
 static int     mic_ring_write_pt = 0;
 
+#ifdef __APPLE__
+static pa_threaded_mainloop *main_loop;
+#else
 static pa_glib_mainloop *main_loop;
+#endif
 static pa_mainloop_api *main_loop_api;
 static pa_operation *op;
 static pa_context *pa_ctx;
 static pa_simple* microphone_stream;
 static gint local_microphone_buffer_offset;
 static float *local_microphone_buffer = NULL;
-static GThread *mic_read_thread_id = 0;
+static pthread_t mic_read_thread_id = 0;
 static gboolean running;
 
 GMutex audio_mutex;
@@ -144,8 +150,14 @@ static void state_cb(pa_context *c, void *userdata) {
 void audio_get_cards() {
   g_mutex_init(&audio_mutex);
   g_mutex_lock(&audio_mutex);
+#ifdef __APPLE__
+  main_loop = pa_threaded_mainloop_new();
+  pa_threaded_mainloop_start(main_loop);
+  main_loop_api = pa_threaded_mainloop_get_api(main_loop);
+#else
   main_loop = pa_glib_mainloop_new(NULL);
   main_loop_api = pa_glib_mainloop_get_api(main_loop);
+#endif
   pa_ctx = pa_context_new(main_loop_api, "piHPSDR");
   pa_context_connect(pa_ctx, NULL, 0, NULL);
   pa_context_set_state_callback(pa_ctx, state_cb, NULL);
@@ -191,6 +203,21 @@ int audio_open_output(RECEIVER *rx) {
 
   return result;
 }
+
+static void mic_signal_handler(int sig) {
+  //
+  // On MacOS PulseAudio, pa_simple_read() blocks infinitely
+  // on a monitor device not used for playback. This prevents
+  // mic_read_thread from exiting. Therefore, after waiting
+  // for 50 msec, a SIGUSR1 signal is sent to the thread.
+  // Nothing happens if the thread has been regularly
+  // terminated.
+  //
+  if ((sig == SIGUSR1) && (mic_read_thread_id == pthread_self())) {
+    t_print("mic read thread cancelled by signal\n");
+    pthread_exit(NULL);
+  }
+}  
 
 static void *mic_read_thread(gpointer arg) {
   int err;
@@ -279,17 +306,17 @@ int audio_open_input() {
       return -1;
     }
 
+    signal(SIGUSR1, mic_signal_handler);
     running = TRUE;
     t_print("%s: PULSEAUDIO mic_read_thread\n", __FUNCTION__);
-    mic_read_thread_id = g_thread_new("mic_thread", mic_read_thread, NULL);
-
-    if (!mic_read_thread_id ) {
-      t_print("%s: g_thread_new failed on mic_read_thread\n", __FUNCTION__);
+    if (pthread_create(&mic_read_thread_id, NULL, mic_read_thread, NULL) < 0) {
+      t_print("%s: failed to create mic_read_thread\n", __FUNCTION__);
       g_free(local_microphone_buffer);
       local_microphone_buffer = NULL;
       running = FALSE;
       result = -1;
     }
+    pthread_detach(mic_read_thread_id);
   } else {
     result = -1;
   }
@@ -318,20 +345,26 @@ void audio_close_input() {
   running = FALSE;
   g_mutex_lock(&audio_mutex);
 
-  if (mic_read_thread_id != NULL) {
+  if (mic_read_thread_id != 0) {
     t_print("%s: wait for mic thread to complete\n", __FUNCTION__);
     //
     // wait for the mic read thread to terminate,
     // then destroy the stream and the buffers
     // This way, the buffers cannot "vanish" in the mic read thread
     //
-    g_thread_join(mic_read_thread_id);
-    mic_read_thread_id = NULL;
+    // Wait a little, then
+    // send a signal so that if the thread is still blocking
+    // on pa_read_simple, it will terminate
+    //
+    usleep(50000);
+    pthread_kill(mic_read_thread_id, SIGUSR1);
+    pthread_join(mic_read_thread_id, NULL);
+    usleep(50000);
+    mic_read_thread_id = 0;
   }
 
   if (microphone_stream != NULL) {
     pa_simple_free(microphone_stream);
-    microphone_stream = NULL;
   }
 
   if (local_microphone_buffer != NULL) {
