@@ -13,7 +13,7 @@ SOAPYSDR=
 STEMLAB=
 EXTENDED_NR=
 SERVER=
-AUDIO=PULSE
+AUDIO=
 
 #
 # Explanation of compile time options
