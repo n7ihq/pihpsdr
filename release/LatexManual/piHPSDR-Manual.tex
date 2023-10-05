@@ -17,7 +17,8 @@
 \begin{document}
 \frontmatter
 \title{
-piHPSDR User's Manual
+piHPSDR User's Manual \\
+\small{For development version 2.3}
 }
 \author{
 Christoph van W\"ullen, DL1YCF \\
@@ -4154,7 +4155,7 @@ ALSA is active. If compiling from the sources you get the PulseAudio module if y
 do not change the Makefile (see Appendix \ref{sec:compiletime}).
 
 
-\textbf{\color{red}Virtual audio cables. Linux ALSA case.} \\
+\textbf{\color{red}Virtual audio cables. ALSA case (Linux only).} \\
 The command for creating the two virtual cables (put everything in one line) is
 
 \texttt{sudo modprobe snd-aloop index=5,6 id=RXcable,TXcable\\
@@ -4251,7 +4252,7 @@ takes care WSJTX switches piHPSDR to DIGU mode, and using \rett{Fake It} for the
 Operation method is just my personal preference.
 
 \clearpage
-\textbf{\color{red}Virtual audio cables, PulseAudio case.}\\
+\textbf{\color{red}Virtual audio cables, PulseAudio case (Linux or MacOS).}\\
 There are no explicit loopback devices with PulseAudio since they are not needed.
 For \textit{every} PulseAudio output device, there is a corresponding ,,Monitor'' device
 which can be used for sound input, and where the data sent to the primary (output) device
@@ -4340,9 +4341,11 @@ create an additional null-sink device with name, say, RXcable, to be used instea
 The CAT connection between WSJTX and piHPSDR is the same as in the ALSA case.
 
 \textbf{\color{red}Using ,,loopback'' in MacOS}\\
-In MacOS, the easist, most flexible, and (from my side) most recommended option is
+The standard audio option for MacOS is PORTAUDIO which has no built-in virtual
+audio cables. In this case
+the easist, most flexible, and (from my side) most recommended option is
 to buy a third-party product,  ,,loopback'' from RogueAmoeba
-(\texttt{https://rogueamoeba.com/loopback/}) .
+(\texttt{https://rogueamoeba.com/loopback/}).
 Note I have no connections with that company, I am just using this product and
 can recommend it. It can not only be used to create loopback devices, but you get
 a patch panel so you can, for example, send the RX audio both to a headphone device
@@ -4394,15 +4397,15 @@ This ,,trick'' takes care the further compilations use the file \texttt{GNUmakef
 \texttt{Makefile},
 and changing the compile time options is accomplished by changing the file \texttt{GNUmakefile} with a text 
 editor.
-In the \texttt{GNUmakefile} in the first 50 lines, you will find a lot of assignments of the form
+In the \texttt{Makefile} or \texttt{GNUmakefile} at the beginning, you will find a lot of assignments of the form
 
-\texttt{\#AAAAAA=BBBBB}\\
-\texttt{XXXXXX=YYYYY}
+\texttt{OPTION=VALUE}
 
-together with some comments what they are good for. The first form, with a number sign in the first column, 
-means that option BBBBB is not active, the second form, without a number sign, means that option YYYYY
-\textit{is} active. Here we give a list of available options. For each of these, we note if it
-is enabled or disabled in the \texttt{Makefile} of the standard repository.
+(\texttt{VALUE} may be empty). This assigns a value to an option. In most cases, if the value equals
+\texttt{ON} this activates the compile time option. If the value is empty, or different from \texttt{ON},
+the option is not activated. The exception is the \texttt{AUDIO} option, which may take various values
+(see below).
+
 
 \rett{GPIO}. (default: enabled) 
 This option is needed on a RaspberryPi if you want to use GPIO input/output lines from
@@ -4435,19 +4438,18 @@ If you have a RedPitay and no autostart of the SDR application there, and not co
 with the STEMLAB option, you can open a web browser, start the SDR application on the RedPitaya,
 and then start piHPSDR. With the STEMLAB option, this can all be done by piHPSDR.
 
-\rett{ALSA}. (default: disabled)
-This option is only effective for LINUX systems including the Raspberry Pi. If this
-option is active, local audio output is done via the standard LINUX ALSA library, otherwise
-PulseAudio is used. Note that sending audio to HDMI monitors is not (yet) supported
-with the ALSA option (with PulseAudio, this is no problem).
-On MacOS, this option has no effect since the portaudio library is used
-in any case.
+\rett{AUDIO}. (default value is empty)
+On Linux systems (including the Raspberry PI, setting the value to \texttt{ALSA} local audio 
+output and local microphone input is done via the standard Linux ALSA sound library, in all other cases
+PulseAudio is used. On MacOS, setting the value to \texttt{PULSE} lets piHPSDR use
+PulseAudio for local audio output and local microphone input, in all other cases
+the PortAudio library is used.
 
-\rett{EXTNR}. (default: disabled)
+\rett{EXTENDED\_NR}. (default: disabled)
 There is a special version of the WDSP library that contains additional noise
-reduction facilities \texttt{rnnnoise} and \texttt{libspecbleach}, see \\
- \texttt{github.com/vu3rdd/wdsp}. If you have such a version of WDSP installed, these 
- extended noise reduction facilities can be used with piHPSDR if the EXTNR option is active.
+reduction facilities which are based on  \texttt{rnnnoise} and \texttt{libspecbleach}, see
+ \texttt{https://github.com/vu3rdd/wdsp}. If you have such a version of WDSP installed, these 
+ extended noise reduction facilities can be used with piHPSDR if this option is \texttt{ON}.
  
  \rett{SERVER}. (default: disabled)
  This is not yet completed but is mentioned here anyway. There are plans to have
@@ -4894,7 +4896,11 @@ installed, which you can safely ignore. Then, the
  password, tells you what it wants to do and requires hitting \texttt{Enter} to proceed.
  On Apple Silicon Macs, you will be asked the administrator password another three times,
  since here we have to create three symbolic links in \texttt{/usr/local} (see the end of this section),
- each of which requires administrator privileges.
+ each of which requires administrator privileges. Since one can compile piHPSDR on MacOS with
+ the option \texttt{AUDIO=PULSE} (see Appendix \ref{sec:compiletime}), the libinstall script
+ also installs pulseaudio and starts the pulseaudio service. Note that using  PulseAudio
+ module is not the default for piHPSDR on MacOS, but just in case you want to use it, it is
+ installed.
  
 Do not worry if \texttt{HomeBrew} was already installed on your computer, the installation
 procedure works in this case as well and does no harm. In addition to

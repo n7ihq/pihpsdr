@@ -70,6 +70,10 @@ $BREW install pkg-config
 $BREW install portaudio
 $BREW install fftw
 $BREW install libusb
+#
+# This is needed if compiled with AUDIO=PULSE
+#
+$BREW install pulseaudio
 
 #
 # This is for the SoapySDR universe
@@ -98,6 +102,11 @@ $BREW install pothosware/pothos/soapyrtlsdr
 # This is for PrivacyProtection
 #
 $BREW analytics off
+
+#
+# Start the pulseaudio daemon so we can use pulseaudio
+#
+$BREW services start pulseaudio
 
 ################################################################
 #
