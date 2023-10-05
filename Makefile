@@ -593,7 +593,6 @@ clean:
 release: $(PROGRAM)
 	make -C release/LatexManual
 	cp $(PROGRAM) release/pihpsdr
-	cp release/piHPSDR-Manual.pdf release/pihpsdr
 	cp /usr/local/lib/libwdsp.so release/pihpsdr
 	cd release; tar cvf pihpsdr.tar pihpsdr
 	cd release; tar cvf pihpsdr-$(GIT_VERSION).tar pihpsdr
