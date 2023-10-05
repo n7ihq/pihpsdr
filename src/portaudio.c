@@ -82,7 +82,7 @@ int n_output_devices = 0;
 // If the sidetone volume is zero, the audio buffers are left unchanged
 //
 
-#define MY_AUDIO_BUFFER_SIZE 256     // Unused if paFramesPerBufferUnspecified is taken
+#define MY_AUDIO_BUFFER_SIZE 256
 #define MY_RING_BUFFER_SIZE  9600
 #define MY_RING_LOW_WATER    1000
 #define MY_RING_HIGH_WATER   8600
@@ -222,7 +222,7 @@ int audio_open_input() {
   inputParameters.sampleFormat = paFloat32;
   inputParameters.suggestedLatency = Pa_GetDeviceInfo(padev)->defaultLowInputLatency ;
   inputParameters.hostApiSpecificStreamInfo = NULL; //See you specific host's API docs for info on using this field
-  err = Pa_OpenStream(&record_handle, &inputParameters, NULL, 48000.0, paFramesPerBufferUnspecified,
+  err = Pa_OpenStream(&record_handle, &inputParameters, NULL, 48000.0, MY_AUDIO_BUFFER_SIZE,
                       paNoFlag, pa_mic_cb, NULL);
 
   if (err != paNoError) {
@@ -456,7 +456,7 @@ int audio_open_output(RECEIVER *rx) {
   // use a zero for the latency to get the minimum value
   outputParameters.suggestedLatency = 0.0; //Pa_GetDeviceInfo(padev)->defaultLowOutputLatency ;
   outputParameters.hostApiSpecificStreamInfo = NULL; //See you specific host's API docs for info on using this field
-  err = Pa_OpenStream(&(rx->playstream), NULL, &outputParameters, 48000.0, paFramesPerBufferUnspecified,
+  err = Pa_OpenStream(&(rx->playstream), NULL, &outputParameters, 48000.0, MY_AUDIO_BUFFER_SIZE,
                       paNoFlag, pa_out_cb, rx);
 
   if (err != paNoError) {
@@ -538,7 +538,7 @@ void audio_close_input() {
 // shut down the stream connected with audio from one of the RX
 //
 void audio_close_output(RECEIVER *rx) {
-  t_print("%s: device=%sn", __FUNCTION__, rx->audio_name);
+  t_print("%s: device=%s\n", __FUNCTION__, rx->audio_name);
   g_mutex_lock(&rx->local_audio_mutex);
 
   if (rx->local_audio_buffer != NULL) {
