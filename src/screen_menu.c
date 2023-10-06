@@ -31,13 +31,17 @@ static GtkWidget *wide_b = NULL;
 static GtkWidget *height_b = NULL;
 static GtkWidget *full_b = NULL;
 static GtkWidget *vfo_b = NULL;
+static gulong vfo_signal_id;
 
 static void apply() {
   reconfigure_screen();
   //
   // VFO layout may have been re-adjusted so update combo-box
+  // (without letting it emit a signal)
   //
+  g_signal_handler_block(G_OBJECT(vfo_b), vfo_signal_id);
   gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), vfo_layout);
+  g_signal_handler_unblock(G_OBJECT(vfo_b), vfo_signal_id);
 }
 
 static void cleanup() {
@@ -71,15 +75,31 @@ static void vfo_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void width_cb(GtkWidget *widget, gpointer data) {
+  //
+  // It has been reported (thanks Bill) that changing the width
+  // with several (fast) clicks leads to a crash of the program.
+  // This could be verified but without getting a clue why it
+  // happens. Therefore, we make the spin button "deaf" while
+  // changing the width.
+  //
+  gtk_widget_set_sensitive(widget, FALSE);
   display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 
   if (!full_screen) { apply(); }
+  gtk_widget_set_sensitive(widget, TRUE);
 }
 
 static void height_cb(GtkWidget *widget, gpointer data) {
+  //
+  // see width_cb. I have never found that I can crash piHPSDR by
+  // fast repititive changes of the height, but I shall do the same
+  // here as for the width callback
+  //
+  gtk_widget_set_sensitive(widget, FALSE);
   display_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 
   if (!full_screen) { apply(); }
+  gtk_widget_set_sensitive(widget, TRUE);
 }
 
 static void horizontal_cb(GtkWidget *widget, gpointer data) {
@@ -154,7 +174,7 @@ void screen_menu(GtkWidget *parent) {
 
   // This combo-box spans three columns so the text may be really long
   gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
-  g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
+  vfo_signal_id=g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
   row++;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
   gtk_widget_set_name(button, "boldlabel");
