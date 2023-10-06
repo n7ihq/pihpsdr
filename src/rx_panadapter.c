@@ -417,13 +417,11 @@ void rx_panadapter_update(RECEIVER *rx) {
   // signal
   double s1, s2;
   int pan = rx->pan;
-#ifdef CLIENT_SERVER
 
   if (radio_is_remote) {
     pan = 0;
   }
 
-#endif
   samples[pan] = -200.0;
   samples[mywidth - 1 + pan] = -200.0;
   //
@@ -532,27 +530,28 @@ void rx_panadapter_update(RECEIVER *rx) {
   #endif
   */
 
-  if (display_sequence_errors) {
-    if (sequence_errors != 0) {
-      cairo_move_to(cr, 100.0, 50.0);
-      cairo_set_source_rgba(cr, COLOUR_ALARM);
-      cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-      cairo_show_text(cr, "Sequence Error");
-      sequence_error_count++;
+  //
+  // Sequence errors, PA temperature and PA current are only
+  // displayed on the local computer, and only on the RX1 interface
+  //
+  if (rx->id == 0 && !radio_is_remote) {
+    if (display_sequence_errors) {
+      if (sequence_errors != 0) {
+        cairo_move_to(cr, 100.0, 50.0);
+        cairo_set_source_rgba(cr, COLOUR_ALARM);
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
+        cairo_show_text(cr, "Sequence Error");
+        sequence_error_count++;
 
-      // show for 2 second
-      if (sequence_error_count == 2 * rx->fps) {
-        sequence_errors = 0;
-        sequence_error_count = 0;
+        // show for 2 second
+        if (sequence_error_count == 2 * rx->fps) {
+          sequence_errors = 0;
+          sequence_error_count = 0;
+        }
       }
     }
-  }
 
-  if (rx->id == 0 && device == DEVICE_HERMES_LITE2) {
-#ifdef CLIENT_SERVER
-
-    if (!radio_is_remote) {
-#endif
+    if (device == DEVICE_HERMES_LITE2) {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
       double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
@@ -566,11 +565,7 @@ void rx_panadapter_update(RECEIVER *rx) {
         cairo_move_to(cr, 160.0, 30.0);
         cairo_show_text(cr, text);
       }
-
-#ifdef CLIENT_SERVER
     }
-
-#endif
   }
 
   //
