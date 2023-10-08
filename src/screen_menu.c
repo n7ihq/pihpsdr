@@ -32,16 +32,53 @@ static GtkWidget *height_b = NULL;
 static GtkWidget *full_b = NULL;
 static GtkWidget *vfo_b = NULL;
 static gulong vfo_signal_id;
+static guint apply_timeout = 0;
 
-static void apply() {
+//
+// local copies of global variables
+//
+static int my_display_width;
+static int my_display_height;
+static int my_full_screen;
+static int my_vfo_layout;
+static int my_rx_stack_horizontal;
+
+//
+// It has been reported (and I could reproduce)
+// that hitting the width or heigth
+// button in fast succession leads to internal GTK crashes
+// Therefore, we delegate the GTK screen change operations to
+// a timeout handler that is at most called every 500 msec
+//
+static int apply(gpointer data) {
+  apply_timeout=0;
+
+  display_width       = my_display_width;
+  display_height      = my_display_height;
+  full_screen         = my_full_screen;
+  vfo_layout          = my_vfo_layout;
+  rx_stack_horizontal = my_rx_stack_horizontal;
+
   reconfigure_screen();
   //
   // VFO layout may have been re-adjusted so update combo-box
   // (without letting it emit a signal)
   //
-  g_signal_handler_block(G_OBJECT(vfo_b), vfo_signal_id);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), vfo_layout);
-  g_signal_handler_unblock(G_OBJECT(vfo_b), vfo_signal_id);
+  if (vfo_layout != my_vfo_layout) {
+    my_vfo_layout = vfo_layout;
+    g_signal_handler_block(G_OBJECT(vfo_b), vfo_signal_id);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), my_vfo_layout);
+    g_signal_handler_unblock(G_OBJECT(vfo_b), vfo_signal_id);
+  }
+
+  return G_SOURCE_REMOVE;
+}
+
+static void schedule_apply() {
+  if (apply_timeout > 0) {
+    g_source_remove(apply_timeout);
+  }
+  apply_timeout=g_timeout_add(500, apply, NULL);
 }
 
 static void cleanup() {
@@ -60,61 +97,52 @@ static gboolean close_cb () {
 }
 
 static void vfo_cb(GtkWidget *widget, gpointer data) {
-  vfo_layout = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
-  VFO_HEIGHT = vfo_layout_list[vfo_layout].height;
-  int needed = vfo_layout_list[vfo_layout].width + METER_WIDTH + MENU_WIDTH;
+  my_vfo_layout = gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
+  VFO_HEIGHT = vfo_layout_list[my_vfo_layout].height;
+  int needed = vfo_layout_list[my_vfo_layout].width + METER_WIDTH + MENU_WIDTH;
 
   if (needed % 32 != 0) { needed = 32 * (needed / 32 + 1); }
 
-  if (needed > display_width && wide_b && needed < screen_width) {
-    display_width = needed;
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) needed);
+  if (needed > screen_width) { needed = screen_width; }
+
+  if (needed > my_display_width && wide_b) {
+    my_display_width = needed;
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) my_display_width);
   }
 
-  apply();
+  schedule_apply();
 }
 
 static void width_cb(GtkWidget *widget, gpointer data) {
-  //
-  // It has been reported (thanks Bill) that changing the width
-  // with several (fast) clicks leads to a crash of the program.
-  // This could be verified but without getting a clue why it
-  // happens. Therefore, we make the spin button "deaf" while
-  // changing the width.
-  //
-  gtk_widget_set_sensitive(widget, FALSE);
-  display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-
-  if (!full_screen) { apply(); }
-  gtk_widget_set_sensitive(widget, TRUE);
+  my_display_width = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  schedule_apply();
 }
 
 static void height_cb(GtkWidget *widget, gpointer data) {
-  //
-  // see width_cb. I have never found that I can crash piHPSDR by
-  // fast repititive changes of the height, but I shall do the same
-  // here as for the width callback
-  //
-  gtk_widget_set_sensitive(widget, FALSE);
-  display_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-
-  if (!full_screen) { apply(); }
-  gtk_widget_set_sensitive(widget, TRUE);
+  my_display_height = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  schedule_apply();
 }
 
 static void horizontal_cb(GtkWidget *widget, gpointer data) {
-  rx_stack_horizontal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  apply();
+  my_rx_stack_horizontal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_apply();
 }
 
 static void full_cb(GtkWidget *widget, gpointer data) {
-  full_screen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  apply();
+  my_full_screen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_apply();
 }
 
 void screen_menu(GtkWidget *parent) {
   GtkWidget *label;
   GtkWidget *button;
+
+  my_display_width       = display_width;
+  my_display_height      = display_height;
+  my_full_screen         = full_screen;
+  my_vfo_layout          = vfo_layout;
+  my_rx_stack_horizontal = rx_stack_horizontal;
+
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog), "piHPSDR - Screen Layout");
@@ -139,7 +167,7 @@ void screen_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
   wide_b = gtk_spin_button_new_with_range(640.0, (double) screen_width, 32.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) display_width);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(wide_b), (double) my_display_width);
   gtk_grid_attach(GTK_GRID(grid), wide_b, col, row, 1, 1);
   g_signal_connect(wide_b, "value-changed", G_CALLBACK(width_cb), NULL);
   col++;
@@ -149,7 +177,7 @@ void screen_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
   height_b = gtk_spin_button_new_with_range(400.0, (double) screen_height, 16.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_b), (double) display_height);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(height_b), (double) my_display_height);
   gtk_grid_attach(GTK_GRID(grid), height_b, col, row, 1, 1);
   g_signal_connect(height_b, "value-changed", G_CALLBACK(height_cb), NULL);
   row++;
@@ -166,24 +194,21 @@ void screen_menu(GtkWidget *parent) {
     if (vfl->width < 0) { break; }
 
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(vfo_b), NULL, vfl->description);
-
-    if (vfl - vfo_layout_list == vfo_layout) { gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), vfo_layout); }
-
     vfl++;
   }
-
+  gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), my_vfo_layout);
   // This combo-box spans three columns so the text may be really long
   gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
   vfo_signal_id=g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
   row++;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
   gtk_widget_set_name(button, "boldlabel");
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), rx_stack_horizontal);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), my_rx_stack_horizontal);
   gtk_grid_attach(GTK_GRID(grid), button, 0, row, 2, 1);
   g_signal_connect(button, "toggled", G_CALLBACK(horizontal_cb), NULL);
   full_b = gtk_check_button_new_with_label("Full Screen Mode");
   gtk_widget_set_name(full_b, "boldlabel");
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), full_screen);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), my_full_screen);
   gtk_grid_attach(GTK_GRID(grid), full_b, 2, row, 2, 1);
   g_signal_connect(full_b, "toggled", G_CALLBACK(full_cb), NULL);
   gtk_container_add(GTK_CONTAINER(content), grid);
