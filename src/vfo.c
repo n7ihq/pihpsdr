@@ -1816,11 +1816,7 @@ int get_tx_mode() {
 
   if (split) { txvfo = 1 - txvfo; }
 
-  if (can_transmit) {
-    return vfo[txvfo].mode;
-  } else {
-    return modeUSB;
-  }
+  return vfo[txvfo].mode;
 }
 
 long long get_tx_freq() {
