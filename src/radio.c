@@ -402,11 +402,11 @@ static void choose_vfo_layout() {
 static guint full_screen_timeout = 0;
 
 static int set_full_screen(gpointer data) {
+  full_screen_timeout = 0;
   int flag = GPOINTER_TO_INT(data);
   //
   // Put the top window in full-screen mode, if full_screen is set
   //
-  full_screen_timeout = 0;
 
   if (flag) {
     //
@@ -415,7 +415,7 @@ static int set_full_screen(gpointer data) {
     gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
   } else {
     //
-    // FullScreen to window transition
+    // FullScreen to window transition. Place window in the center of the screen
     //
     gtk_window_move(GTK_WINDOW(top_window),
                     (screen_width - display_width) / 2,
@@ -516,7 +516,6 @@ void reconfigure_screen() {
   // This re-creates all the panels and the Toolbar/Slider/Zoom area
   //
   reconfigure_radio();
-  g_idle_add(ext_vfo_update, NULL);
 
   if (last_fullscreen != my_fullscreen && my_fullscreen) {
     //
@@ -525,6 +524,7 @@ void reconfigure_screen() {
     //
     full_screen_timeout = g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(1));
   }
+  g_idle_add(ext_vfo_update, NULL);
 }
 
 void reconfigure_radio() {
