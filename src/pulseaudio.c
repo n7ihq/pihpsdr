@@ -21,7 +21,7 @@
 #ifdef __APPLE__
 #include <pulse/thread-mainloop.h>
 #else
-#include <pulse/thread-mainloop.h>
+#include <pulse/glib-mainloop.h>
 #endif
 #include <pulse/simple.h>
 
@@ -211,14 +211,33 @@ static void mic_signal_handler(int sig) {
   // mic_read_thread from exiting. Therefore, after waiting
   // for 50 msec, a SIGUSR1 signal is sent to the thread.
   // Nothing happens if the thread has been regularly
-  // terminated.
+  // terminated, if it is not SIGUSR1, or if the handler is
+  // not running inside the mic sample thread.
+  //
+  // The side effect is that everything else in piHPDSR will ignore
+  // a SIGUSR1 signal.
+  //
   //
   if ((sig == SIGUSR1) && (mic_read_thread_id == pthread_self())) {
     t_print("mic read thread cancelled by signal\n");
+    //
+    // Do not re-install signal handler, this will be done in
+    // audio_open_input().
+    //
     pthread_exit(NULL);
   }
+  //
+  // In the unlikely case that a SIGUSR1 signal is caught somewhere else,
+  // do nothing but re-install the handler.
+  //
+  signal(SIGUSR1, mic_signal_handler);
 }  
 
+//
+// This is now a pthread rather than a glib thread, because
+// we need to send it a signal which is possible via pthread_kill()
+// but not with g_threads.
+//
 static void *mic_read_thread(gpointer arg) {
   int err;
   t_print("%s: running=%d\n", __FUNCTION__, running);
@@ -352,19 +371,24 @@ void audio_close_input() {
     // then destroy the stream and the buffers
     // This way, the buffers cannot "vanish" in the mic read thread
     //
-    // Wait a little, then
+    // Wait a little (50 msec), then
     // send a signal so that if the thread is still blocking
     // on pa_read_simple, it will terminate
     //
     usleep(50000);
     pthread_kill(mic_read_thread_id, SIGUSR1);
     pthread_join(mic_read_thread_id, NULL);
-    usleep(50000);
     mic_read_thread_id = 0;
+    //
+    // Wait another 50 msec, so PulseAudio can recover from the
+    // pa_simple_read() being aborted, so it is safe to free the stream.
+    //
+    usleep(50000);
   }
 
   if (microphone_stream != NULL) {
     pa_simple_free(microphone_stream);
+    microphone_stream = NULL;
   }
 
   if (local_microphone_buffer != NULL) {
