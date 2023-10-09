@@ -231,7 +231,7 @@ static void mic_signal_handler(int sig) {
   // do nothing but re-install the handler.
   //
   signal(SIGUSR1, mic_signal_handler);
-}  
+}
 
 //
 // This is now a pthread rather than a glib thread, because
