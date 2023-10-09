@@ -1,3 +1,40 @@
+#######################################################################################
+#
+# Compile-time options, to be modified by end user.
+# To activate an option, just change to XXXX=ON except for the AUDIO option,
+# which reads AUDIO=YYYY with YYYY=ALSA or YYYY=PULSE.
+#
+#######################################################################################
+GPIO=ON
+MIDI=ON
+SATURN=ON
+USBOZY=
+SOAPYSDR=
+STEMLAB=
+EXTENDED_NR=
+SERVER=
+AUDIO=
+
+#
+# Explanation of compile time options
+#
+# GPIO         | If ON, compile with GPIO support (RaspPi only)
+# MIDI         | If ON, compile with MIDI support
+# SATURN       | If ON, compile with native SATURN/G2 XDMA support
+# USBOZY       | If ON, piHPSDR can talk to legacy USB OZY radios
+# SOAPYSDR     | If ON, piHPSDR can talk to radios via SoapySDR library
+# STEMLAB      | If ON, piHPSDR can start SDR app on RedPitay via Web interface
+# EXTENDED_NR  | If ON, piHPSDR can use extended noise reduction (VU3RDD WDSP version)
+# SERVER       | If ON, include client/server code (still far from being complete)
+# AUDIO        | If AUDIO=ALSA, use ALSA rather than PulseAudio on Linux
+#              | If AUDIO=PULSE, use PulseAudio rather than PortAudio on MacOS
+
+#######################################################################################
+#
+# No end-user changes below this line!
+#
+#######################################################################################
+
 # get the OS Name
 UNAME_S := $(shell uname -s)
 
@@ -5,52 +42,9 @@ UNAME_S := $(shell uname -s)
 GIT_DATE := $(firstword $(shell git --no-pager show --date=short --format="%ai" --name-only))
 GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 
-# uncomment the line below to include GPIO (needs libgpiod)
-# For support of:
-#    CONTROLLER1 (Original Controller)
-#    CONTROLLER2_V1 single encoders with MCP23017 switches
-#    CONTROLLER2_V2 dual encoders with MCP23017 switches
-#    G2_FRONTPANEL dual encoders with MCP23017 switches
-#
-GPIO_INCLUDE=GPIO
-
-# uncomment the line below to include MIDI support (needs MIDI support)
-MIDI_INCLUDE=MIDI
-
-# uncomment the line below to include SATURN native xdma support
-SATURN_INCLUDE=SATURN
-
-# uncomment the line below to include USB Ozy support (needs libusb)
-#USBOZY_INCLUDE=USBOZY
-
-# uncomment the line below for SoapySDR (needs SOAPY libs)
-#SOAPYSDR_INCLUDE=SOAPYSDR
-
-# uncomment the line below to include support for STEMlab discovery (needs libcurl)
-#STEMLAB_DISCOVERY=STEMLAB
-
-# uncomment to get ALSA audio module on Linux (if not, use pulseaudio)
-#AUDIO_MODULE=ALSA
-
-# un-comment if you link with an extended WDSP library containing new "external"
-# noise reduction capabilities ("rnnoise" and "libspecbleach")
-# (see: github.com/vu3rdd/wdsp). To use this, an extended version of WDSP has
-# to be installed that contains calls to the "rnnoise" and "libspecbleach"
-# libraries. The new features are called "NR3" (rnnoise) and "NR4" (libspecbleach),
-# and the noise menu allows to speficy the NR4 parameters.
-#EXTENDED_NOISE_REDUCTION=EXTNR
-
-# very early code not included yet
-#SERVER_INCLUDE=SERVER
-
-###############################################################################
-#
-# NO COMPILE TIME OPTION MODIFICATIONS BELOW THIS LINE
-#
-###############################################################################
-
 CFLAGS?= -O3 -Wno-deprecated-declarations -Wall
 LINK?=   $(CC)
+
 #
 # The "official" way to compile+link with pthreads is now to use the -pthread option
 # *both* for the compile and the link step.
@@ -70,15 +64,15 @@ PKG_CONFIG = pkg-config
 # disable GPIO and SATURN for MacOS, simply because it is not there
 #
 ifeq ($(UNAME_S), Darwin)
-GPIO_INCLUDE=
-SATURN_INCLUDE=
+GPIO=
+SATURN=
 endif
 
 #
 # Add modules for MIDI if requested.
 # Note these are different for Linux/MacOS
 #
-ifeq ($(MIDI_INCLUDE),MIDI)
+ifeq ($(MIDI),ON)
 MIDI_OPTIONS=-D MIDI
 MIDI_HEADERS= midi.h midi_menu.h alsa_midi.h
 ifeq ($(UNAME_S), Darwin)
@@ -96,7 +90,7 @@ endif
 #
 # Add libraries for Saturn support, if requested
 #
-ifeq ($(SATURN_INCLUDE),SATURN)
+ifeq ($(SATURN),ON)
 SATURN_OPTIONS=-D SATURN
 SATURN_SOURCES= \
 src/saturndrivers.c \
@@ -121,7 +115,7 @@ endif
 #
 # Add libraries for USB OZY support, if requested
 #
-ifeq ($(USBOZY_INCLUDE),USBOZY)
+ifeq ($(USBOZY),ON)
 USBOZY_OPTIONS=-D USBOZY
 USBOZY_LIBS=-lusb-1.0
 USBOZY_SOURCES= \
@@ -135,7 +129,7 @@ endif
 #
 # Add libraries for SoapySDR support, if requested
 #
-ifeq ($(SOAPYSDR_INCLUDE),SOAPYSDR)
+ifeq ($(SOAPYSDR),ON)
 SOAPYSDR_OPTIONS=-D SOAPYSDR
 SOAPYSDRLIBS=-lSoapySDR
 SOAPYSDR_SOURCES= \
@@ -152,14 +146,14 @@ endif
 #
 # Add support for extended noise reduction, if requested
 #
-ifeq ($(EXTENDED_NOISE_REDUCTION), EXTNR)
+ifeq ($(EXTENDED_NN), ON)
 EXTNR_OPTIONS=-DEXTNR
 endif
 
 #
 # Add libraries for GPIO support, if requested
 #
-ifeq ($(GPIO_INCLUDE),GPIO)
+ifeq ($(GPIO),ON)
 GPIO_OPTIONS=-D GPIO
 GPIOD_VERSION=$(shell pkg-config --modversion libgpiod)
 ifeq ($(GPIOD_VERSION),1.2)
@@ -175,7 +169,7 @@ endif
 # If the RedPitaya auto-starts the SDR application upon system start,
 # this option is not needed!
 #
-ifeq ($(STEMLAB_DISCOVERY), STEMLAB)
+ifeq ($(STEMLAB), ON)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
 STEMLAB_SOURCES=src/stemlab_discovery.c
@@ -191,7 +185,7 @@ endif
 # and the other talking to the radio, and both computers
 # may be connected by a long-distance internet connection.
 #
-ifeq ($(SERVER_INCLUDE), SERVER)
+ifeq ($(SERVER), ON)
 SERVER_OPTIONS=-D CLIENT_SERVER
 SERVER_SOURCES= \
 src/client_server.c src/server_menu.c
@@ -207,22 +201,27 @@ endif
 #  - Linux: either PULSEAUDIO (default) or ALSA (upon request)
 #
 ifeq ($(UNAME_S), Darwin)
-    AUDIO_MODULE=PORTAUDIO
+  ifneq ($(AUDIO), PULSE)
+    AUDIO=PORTAUDIO
+  endif
 endif
 ifeq ($(UNAME_S), Linux)
-  ifeq ($(AUDIO_MODULE) , ALSA)
-    AUDIO_MODULE=ALSA
-  else
-    AUDIO_MODULE=PULSEAUDIO
+  ifneq ($(AUDIO) , ALSA)
+    AUDIO=PULSE
   endif
 endif
 
 #
 # Add libraries for using PulseAudio, if requested
 #
-ifeq ($(AUDIO_MODULE), PULSEAUDIO)
+ifeq ($(AUDIO), PULSE)
 AUDIO_OPTIONS=-DPULSEAUDIO
-AUDIO_LIBS=-lpulse-simple -lpulse -lpulse-mainloop-glib
+ifeq ($(UNAME_S), Linux)
+  AUDIO_LIBS=-lpulse-simple -lpulse -lpulse-mainloop-glib
+endif
+ifeq ($(UNAME_S), Darwin)
+  AUDIO_LIBS=-lpulse-simple -lpulse
+endif
 AUDIO_SOURCES=src/pulseaudio.c
 AUDIO_OBJS=src/pulseaudio.o
 endif
@@ -230,7 +229,7 @@ endif
 #
 # Add libraries for using ALSA, if requested
 #
-ifeq ($(AUDIO_MODULE), ALSA)
+ifeq ($(AUDIO), ALSA)
 AUDIO_OPTIONS=-DALSA
 AUDIO_LIBS=-lasound
 AUDIO_SOURCES=src/audio.c
@@ -240,7 +239,7 @@ endif
 #
 # Add libraries for using PortAudio, if requested
 #
-ifeq ($(AUDIO_MODULE), PORTAUDIO)
+ifeq ($(AUDIO), PORTAUDIO)
 AUDIO_OPTIONS=-DPORTAUDIO `$(PKG_CONFIG) --cflags portaudio-2.0`
 AUDIO_LIBS=`$(PKG_CONFIG) --libs portaudio-2.0`
 AUDIO_SOURCES=src/portaudio.c
