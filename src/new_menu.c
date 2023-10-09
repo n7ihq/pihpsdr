@@ -457,7 +457,10 @@ void new_menu() {
   if (main_menu == NULL) {
     main_menu = gtk_dialog_new();
     gtk_window_set_transient_for(GTK_WINDOW(main_menu), GTK_WINDOW(top_window));
-    gtk_window_set_title(GTK_WINDOW(main_menu), "piHPSDR - Menu");
+    GtkWidget *headerbar = gtk_header_bar_new();
+    gtk_window_set_titlebar(GTK_WINDOW(main_menu), headerbar);
+    gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);
+    gtk_header_bar_set_title(GTK_HEADER_BAR(headerbar), "piHPSDR - Menu");
     g_signal_connect (main_menu, "delete_event", G_CALLBACK (close_cb), NULL);
     g_signal_connect (main_menu, "destroy", G_CALLBACK (close_cb), NULL);
     GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(main_menu));

@@ -146,6 +146,7 @@ char *css =
   "  radiobutton radio {\n"
   "    border: 1px solid rgb(50%, 50%, 50%);\n"
   "    }\n"
+  "  headerbar { min-height: 0px; padding: 0px; margin: 0px; font-size: 15px; font-family: Sans; }\n"
   ;
 
 void load_css() {
