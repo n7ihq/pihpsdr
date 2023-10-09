@@ -628,9 +628,10 @@ void midi_menu(GtkWidget *parent) {
   thisEvent = EVENT_NONE;
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-  char title[64];
-  sprintf(title, "piHPSDR - MIDI");
-  gtk_window_set_title(GTK_WINDOW(dialog), title);
+  GtkWidget *headerbar = gtk_header_bar_new();
+  gtk_window_set_titlebar(GTK_WINDOW(dialog), headerbar);
+  gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);
+  gtk_header_bar_set_title(GTK_HEADER_BAR(headerbar), "piHPSDR - MIDI");
   g_signal_connect (dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   g_signal_connect (dialog, "destroy", G_CALLBACK (close_cb), NULL);
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
