@@ -590,7 +590,7 @@ clean:
 
 .PHONY:	release
 release: $(PROGRAM)
-	make -C release/LatexManual
+	make -C release/LatexManual release
 	cp $(PROGRAM) release/pihpsdr
 	cp /usr/local/lib/libwdsp.so release/pihpsdr
 	cd release; tar cvf pihpsdr.tar pihpsdr
