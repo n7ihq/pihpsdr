@@ -141,7 +141,9 @@ static unsigned char output_buffer[OZY_BUFFER_SIZE];
 static int command = 1;
 
 static gpointer receive_thread(gpointer arg);
-static void process_ozy_input_buffer(unsigned const char  *buffer);
+static gpointer process_ozy_input_buffer_thread(gpointer arg);
+
+static void queue_ozy_input_buffer(unsigned const char  *buffer);
 void ozy_send_buffer(void);
 
 static unsigned char metis_buffer[1032];
@@ -227,6 +229,23 @@ static unsigned char TXRINGBUF[TXRINGBUFLEN];
 static unsigned int txring_inptr = 0;  // pointer updated when writing into the ring buffer
 static unsigned int txring_outptr = 0; // pointer updated when reading from the ring buffer
 static unsigned int txring_flag = 0;   // 0: RX, 1: TX
+
+//
+// At high sample rates and when using PS, this buffer must
+// be VERY long. For an Orion-II doing PS, there are only
+// 15 RX IQ samples per buffer, so that 26 buffers 
+// (13 KByte) per millisecond arrive at the highest sample rate.
+// We want to "survive" holes of 25 msec so we need at least
+// 325 kByte. We round up to 512 kByte this should be fine.
+//
+// A test run with some statistics debug output showed that it
+// happens from time to time that the buffer goes above half-filling,
+// and that this is then emptied.
+//
+#define RXRINGBUFLEN 524288  // must be multiple of 512
+static unsigned char RXRINGBUF[RXRINGBUFLEN];
+static unsigned int rxring_inptr = 0;
+static unsigned int rxring_outptr = 0;
 
 static gpointer old_protocol_txiq_thread(gpointer data) {
   int timer = 9999;
@@ -363,6 +382,7 @@ void old_protocol_init(int rx, int pixels, int rate) {
     }
   }
 
+  g_thread_new("P1 input thread", process_ozy_input_buffer_thread, NULL);
   //
   // if we have a USB interfaced Ozy device:
   //
@@ -434,10 +454,10 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
     } else
       // process the received data normally
     {
-      process_ozy_input_buffer(&ep6_inbuffer[0]);
-      process_ozy_input_buffer(&ep6_inbuffer[512]);
-      process_ozy_input_buffer(&ep6_inbuffer[1024]);
-      process_ozy_input_buffer(&ep6_inbuffer[1024 + 512]);
+      queue_ozy_input_buffer(&ep6_inbuffer[0]);
+      queue_ozy_input_buffer(&ep6_inbuffer[512]);
+      queue_ozy_input_buffer(&ep6_inbuffer[1024]);
+      queue_ozy_input_buffer(&ep6_inbuffer[1536]);
     }
   }
 
@@ -746,8 +766,8 @@ static gpointer receive_thread(gpointer arg) {
           switch (ep) {
           case 6: // EP6
             // process the data
-            process_ozy_input_buffer(&buffer[8]);
-            process_ozy_input_buffer(&buffer[520]);
+            queue_ozy_input_buffer(&buffer[8]);
+            queue_ozy_input_buffer(&buffer[520]);
             break;
 
           case 4: // EP4
@@ -1383,17 +1403,49 @@ static void process_ozy_byte(int b) {
   }
 }
 
-static void process_ozy_input_buffer(unsigned const char  *buffer) {
-  int i;
-  st_num_hpsdr_receivers = how_many_receivers();
-  st_rxfdbk = rx_feedback_channel();
-  st_txfdbk = tx_feedback_channel();
-  st_rx1channel = first_receiver_channel();
-  st_rx2channel = second_receiver_channel();
+static void queue_ozy_input_buffer(unsigned const char *buffer) {
+   //
+   // To achieve minimum overhead in the RX thread, the data is
+   // simply put into a large ring buffer
+   //
+   memcpy(&RXRINGBUF[rxring_inptr], buffer, 512);
+   rxring_inptr += 512;
+   if (rxring_inptr >= RXRINGBUFLEN) { rxring_inptr -= RXRINGBUFLEN; }
+}
 
-  for (i = 0; i < 512; i++) {
-    process_ozy_byte(buffer[i] & 0xFF);
+static gpointer process_ozy_input_buffer_thread(gpointer arg) {
+  //
+  // This thread constantly monitors the input ring buffer and
+  // processes the data whenever a bunch is available. Note this
+  // thread does all the fexchange() with WDSP, since it calls
+  // (via process_ozy_byte)
+  //
+  // add_iq_samples   ==> RX engine(s)
+  // add_mic_sample   ==> TX engine
+  //
+  for (;;) {	
+    int avail = rxring_inptr - rxring_outptr;
+    if (avail < 0) { avail += RXRINGBUFLEN; }
+    if (avail < 512) {
+      usleep(1000);
+      continue;
+    }      
+    //
+    // This data can change while processing one buffer
+    //
+    st_num_hpsdr_receivers = how_many_receivers();
+    st_rxfdbk = rx_feedback_channel();
+    st_txfdbk = tx_feedback_channel();
+    st_rx1channel = first_receiver_channel();
+    st_rx2channel = second_receiver_channel();
+
+    for (int i = 0; i < 512; i++) {
+      process_ozy_byte(RXRINGBUF[rxring_outptr+i] & 0xFF);
+    }
+    rxring_outptr += 512;
+    if (rxring_outptr >= RXRINGBUFLEN) { rxring_outptr -= RXRINGBUFLEN; }
   }
+  return NULL;
 }
 
 void old_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short right_audio_sample) {
