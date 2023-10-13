@@ -87,7 +87,6 @@ extern char property_path[];
 extern int region;
 
 extern int RECEIVERS;
-extern int MAX_DDC;
 extern int PS_TX_FEEDBACK;
 extern int PS_RX_FEEDBACK;
 
@@ -155,7 +154,6 @@ extern int display_gradient;
 extern int display_detector_mode;
 extern int display_average_mode;
 extern double display_average_time;
-
 
 extern int display_zoompan;
 extern int display_sliders;
@@ -334,7 +332,6 @@ extern void radio_change_region(int region);
 
 extern void disable_rigctl(void);
 
-
 #ifdef CLIENT_SERVER
   extern int remote_start(void *data);
 #endif
@@ -350,4 +347,10 @@ extern void protocol_restart(void);
 // Macro to flag an unimplemented client/server feature
 //
 #define CLIENT_MISSING if (radio_is_remote) { t_print("%s: TODO: CLIENT/SERVER\n", __FUNCTION__); return; }
+
+//
+// Macro for a memory barrier, preventing changing the execution order
+// or memory accesses (used for ring buffers)
+//
+#define MEMORY_BARRIER asm volatile ("" ::: "memory")
 #endif

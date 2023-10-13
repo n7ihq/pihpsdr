@@ -19,7 +19,6 @@
 // Rewrite to use gpiod rather than wiringPi
 // Note that all pin numbers are now the Broadcom GPIO
 
-
 #include <gtk/gtk.h>
 
 #include <stdio.h>

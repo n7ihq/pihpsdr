@@ -37,7 +37,6 @@
 #include "i2c.h"
 #include "message.h"
 
-
 #ifdef GPIO
 
 static GtkWidget *i2c_sw_text[16];
@@ -306,4 +305,3 @@ void configure_gpio(GtkWidget *parent) {
   gtk_dialog_run(GTK_DIALOG(dialog));
 }
 #endif
-

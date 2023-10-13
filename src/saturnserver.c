@@ -33,7 +33,6 @@
 //
 //////////////////////////////////////////////////////////////
 
-
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -99,7 +98,6 @@ struct ThreadSocketData SocketData[VPORTTABLESIZE] = {
   {0, 0, 1028, "Wideband 1", false, {}, 0, 0}               // Wideband 1 (outgoing) thread
 };
 
-
 //
 // default port numbers, used if incoming port number = 0
 //
@@ -109,7 +107,6 @@ uint16_t DefaultPorts[VPORTTABLESIZE] = {
   1037, 1038, 1039, 1040, 1041,
   1042, 1043, 1044, 1027, 1028
 };
-
 
 pthread_t saturn_server_thread;
 pthread_t DDCSpecificThread;
@@ -121,7 +118,6 @@ pthread_t DDCIQThread[VNUMDDC];               // array, but not sure how many
 pthread_t MicThread;
 pthread_t HighPriorityFromSDRThread;
 pthread_t CheckForNoActivityThread;           // thread looks for inactvity
-
 
 //
 // set the port for a given thread. If 0, set the default according to HPSDR spec.
@@ -141,8 +137,6 @@ void SetPort(uint32_t ThreadNum, uint16_t PortNum) {
     SocketData[ThreadNum].Cmdid |= VBITCHANGEPORT;
   }
 }
-
-
 
 //
 // function to make an incoming or outgoing socket, bound to the specified port in the structure
@@ -193,7 +187,6 @@ int MakeSocket(struct ThreadSocketData* Ptr, int DDCid) {
   return 0;
 }
 
-
 //
 // this runs as its own thread to see if messages have stopped being received.
 // if nomessages in a second, goes back to "inactive" state.
@@ -233,7 +226,6 @@ void shutdown_saturn_server() {
   ExitRequested = true;
   t_print("Shutdown COMPLETE\n");
 }
-
 
 void start_saturn_server() {
   ExitRequested = false;
@@ -506,7 +498,6 @@ void* saturn_server(void *arg) {
   return NULL;
 }
 
-
 //
 // listener thread for incoming high priority packets
 //
@@ -558,7 +549,6 @@ void *IncomingHighPriority(void *arg) {                 // listener thread
   return NULL;
 }
 
-
 //
 // listener thread for incoming DDC specific packets
 //
@@ -605,7 +595,6 @@ void *IncomingDDCSpecific(void *arg) {                  // listener thread
   ThreadData->Active = false;                   // indicate it is closed
   return NULL;
 }
-
 
 //
 // listener thread for incoming DUC specific packets
@@ -654,7 +643,6 @@ void *IncomingDUCSpecific(void *arg) {                  // listener thread
   return NULL;
 }
 
-
 #define VSPKSAMPLESPERFRAME 64                      // samples per UDP frame
 #define VMEMWORDSPERFRAME 32                        // 8 byte writes per UDP msg
 #define VSPKSAMPLESPERMEMWORD 2                     // 2 samples (each 4 bytres) per 8 byte word
@@ -662,7 +650,6 @@ void *IncomingDUCSpecific(void *arg) {                  // listener thread
 #define VALIGNMENT 4096                             // buffer alignment
 #define VBASE 0x1000                // DMA start at 4K into buffer
 #define VDMATRANSFERSIZE 256                        // write 1 message at a time
-
 
 //
 // listener thread for incoming DDC (speaker) audio packets
@@ -767,7 +754,6 @@ void *IncomingSpkrAudio(void *arg) {                    // listener thread
   return NULL;
 }
 
-
 #define VIQSAMPLESPERFRAME 240                      // samples per UDP frame
 #define VMEMDUCWORDSPERFRAME 180                       // memory writes per UDP frame
 #define VBYTESPERSAMPLE 6             // 24 bit + 24 bit samples
@@ -823,7 +809,6 @@ void *IncomingDUCIQ(void *arg) {                        // listener thread
   ThreadData->Active = false;                   // indicate it is closed
   return NULL;
 }
-
 
 //
 // HandlerCheckDDCSettings()

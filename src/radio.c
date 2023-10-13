@@ -85,7 +85,6 @@
   #include "saturnserver.h"
 #endif
 
-
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
@@ -135,11 +134,8 @@ RECEIVER *active_receiver;
 TRANSMITTER *transmitter;
 
 int RECEIVERS;
-int MAX_DDC;  // only used in new_protocol.c
 int PS_TX_FEEDBACK;
 int PS_RX_FEEDBACK;
-
-
 
 int atlas_penelope = 0; // 0: no TX, 1: Penelope TX, 2: PennyLane TX
 int atlas_clock_source_10mhz = 0;
@@ -187,7 +183,6 @@ int display_gradient = 1;
 int display_detector_mode = DETECTOR_MODE_AVERAGE;
 int display_average_mode = AVERAGE_MODE_LOG_RECURSIVE;
 double display_average_time = 120.0;
-
 
 int waterfall_high = -100;
 int waterfall_low = -150;
@@ -524,6 +519,7 @@ void reconfigure_screen() {
     //
     full_screen_timeout = g_timeout_add(1000, set_full_screen, GINT_TO_POINTER(1));
   }
+
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -1447,7 +1443,6 @@ void start_radio() {
     RECEIVERS = 1;
     PS_TX_FEEDBACK = 1;
     PS_RX_FEEDBACK = 2;
-    MAX_DDC = 1; // unused in SOAPY protocol
     break;
 
   default:
@@ -1455,7 +1450,6 @@ void start_radio() {
     RECEIVERS = 2;
     PS_TX_FEEDBACK = (RECEIVERS);
     PS_RX_FEEDBACK = (RECEIVERS + 1);
-    MAX_DDC = (RECEIVERS + 2);
     break;
   }
 
@@ -1563,7 +1557,6 @@ void disable_rigctl() {
   t_print("RIGCTL: disable_rigctl()\n");
   close_rigctl_ports();
 }
-
 
 void radio_change_receivers(int r) {
   t_print("radio_change_receivers: from %d to %d\n", receivers, r);

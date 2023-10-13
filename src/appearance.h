@@ -128,7 +128,6 @@
 #define PAN_LINE_THICK 1.0
 #define PAN_LINE_EXTRA 2.0  // used for really important things such as band edges
 
-
 struct _VFO_BAR_LAYOUT {
   const char *description; // Text appearing in the screen menu combobox
   int width;               // overall width required
@@ -167,4 +166,3 @@ struct _VFO_BAR_LAYOUT {
 typedef struct _VFO_BAR_LAYOUT VFO_BAR_LAYOUT;
 extern const VFO_BAR_LAYOUT vfo_layout_list[];
 extern int vfo_layout;
-

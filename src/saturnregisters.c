@@ -30,7 +30,6 @@
 //
 //////////////////////////////////////////////////////////////
 
-
 #include "saturnregisters.h"
 #include "message.h"
 #include <stdlib.h>                     // for function min()
@@ -67,7 +66,6 @@ void CodecRegisterWrite(uint32_t Address, uint32_t Data) {
 //
 unsigned int DACCurrentROM[256];                    // used for residual attenuation
 unsigned int DACStepAttenROM[256];                  // provides most atten setting
-
 
 //
 // local copies of values written to registers
@@ -155,13 +153,11 @@ unsigned int DACCurrentROM[256];                    // used for residual attenua
 unsigned int DACStepAttenROM[256];                  // provides most atten setting
 unsigned int GNumADCs;                              // count of ADCs available
 
-
 //
 // local copies of Codec registers
 //
 unsigned int GCodecLineGain;                        // value written in Codec left line in gain register
 unsigned int GCodecAnaloguePath;                    // value written in Codec analogue path register
-
 
 //
 // mic, bias & PTT bits in GPIO register:
@@ -171,7 +167,6 @@ unsigned int GCodecAnaloguePath;                    // value written in Codec an
 #define VMICSIGNALSELECTBIT 2                       // GPIO bit definition
 #define VMICBIASSELECTBIT 3                         // GPIO bit definition
 #define VDATAENDIAN 26                              // GPIO bit definition
-
 
 //
 // define Codec registers
@@ -187,11 +182,6 @@ unsigned int GCodecAnaloguePath;                    // value written in Codec an
 #define VCODECSAMPLERATEREG 8                       // sample rate control
 #define VCODECACTIVATIONREG 9                       // digital interface activation register
 #define VCODECRESETREG 15                           // reset register
-
-
-
-
-
 
 //
 // addresses of the DDC frequency registers
@@ -209,16 +199,11 @@ uint32_t DDCRegisters[VNUMDDC] = {
   VADDRDDC9REG
 };
 
-
-
-
-
 //
 // ALEX SPI registers
 //
 #define VOFFSETALEXTXREG 0                              // offset addr in IP core
 #define VOFFSETALEXRXREG 4                              // offset addr in IP core
-
 
 //
 // bit addresses in status and GPIO registers
@@ -257,7 +242,6 @@ uint32_t DDCRegisters[VNUMDDC] = {
 #define VCWKEYDOWN 11                   // keyer output
 #define VEXTTXENABLEBIT 31
 
-
 //
 // Keyer setup register defines
 //
@@ -295,8 +279,6 @@ uint32_t DDCRegisters[VNUMDDC] = {
 #define VTXCONFIGIQDEINTERLEAVEBIT 30
 #define VTXCONFIGIQSTREAMENABLED 31
 
-
-
 //
 // initialise the DAC Atten ROMs
 // these set the step attenuator and DAC drive level
@@ -327,7 +309,6 @@ void InitialiseDACAttenROMs(void) {
     DACStepAttenROM[Level] = StepValue;
   }
 }
-
 
 //
 // SetByteSwapping(bool)
@@ -369,7 +350,6 @@ void ActivateCWKeyer(bool Keyer) {
   }
 }
 
-
 //
 // SetMOX(bool Mox)
 // sets or clears TX state
@@ -403,7 +383,6 @@ void SetMOX(bool Mox) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetTXEnable(bool Enabled)
 // sets or clears TX enable bit
@@ -425,7 +404,6 @@ void SetTXEnable(bool Enabled) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetATUTune(bool TuneEnabled)
 // drives the ATU tune output to selected state.
@@ -446,7 +424,6 @@ void SetATUTune(bool TuneEnabled) {
   RegisterWrite(VADDRRFGPIOREG, Register);        // and write to it
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
-
 
 //
 // SetP1SampleRate(ESampleRate Rate, unsigned int Count)
@@ -480,7 +457,6 @@ void SetP1SampleRate(ESampleRate Rate, unsigned int DDCCount) {
     //        RegisterWrite(VADDRDDCRATES, RegisterValue);        // and write to h/w register
   }
 }
-
 
 //
 // SetP2SampleRate(unsigned int DDC, bool Enabled, unsigned int SampleRate, bool InterleaveWithNext)
@@ -531,7 +507,6 @@ void SetP2SampleRate(unsigned int DDC, bool Enabled, unsigned int SampleRate, bo
   DDCRateReg = RegisterValue;                     // don't save to hardware
 }
 
-
 //
 // bool WriteP2DDCRateRegister(void)
 // writes the DDCRateRegister, once all settings have been made
@@ -552,8 +527,6 @@ bool WriteP2DDCRateRegister(void) {
   return Result;
 }
 
-
-
 //
 // uint32_t GetDDCEnables(void)
 // get enable bits for each DDC; 1 bit per DDC
@@ -563,7 +536,6 @@ uint32_t GetDDCEnables(void) {
   return GDDCEnabled;
 }
 
-
 //
 // SetClassEPA(bool IsClassE)
 // enables non linear PA mode
@@ -572,7 +544,6 @@ uint32_t GetDDCEnables(void) {
 void SetClassEPA(bool IsClassE) {
   GClassESetting = IsClassE;
 }
-
 
 //
 // SetOpenCollectorOutputs(unsigned int bits)
@@ -591,7 +562,6 @@ void SetOpenCollectorOutputs(unsigned int bits) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetADCCount(unsigned int ADCCount)
 // sets the number of ADCs available in the hardware.
@@ -599,8 +569,6 @@ void SetOpenCollectorOutputs(unsigned int bits) {
 void SetADCCount(unsigned int ADCCount) {
   GNumADCs = ADCCount;                            // just save the value
 }
-
-
 
 //
 // SetADCOptions(EADCSelect ADC, bool Dither, bool Random);
@@ -673,7 +641,6 @@ void SetDDCFrequency(uint32_t DDC, uint32_t Value, bool IsDeltaPhase) {
   }
 }
 
-
 //
 // SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase)
 // sets a test source frequency.
@@ -698,7 +665,6 @@ void SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase) {
   }
 }
 
-
 //
 // SetDUCFrequency(unsigned int Value, bool IsDeltaPhase)
 // sets a DUC frequency. (Currently only 1 DUC, therefore DUC must be 0)
@@ -718,9 +684,6 @@ void SetDUCFrequency(unsigned int Value, bool IsDeltaPhase) { // only accepts DU
   DUCDeltaPhase = DeltaPhase;             // store this delta phase
   RegisterWrite(VADDRTXDUCREG, DeltaPhase);  // and write to it
 }
-
-
-
 
 //
 //////////////////////////////////////////////////////////////////////////////////
@@ -779,8 +742,6 @@ void SetDUCFrequency(unsigned int Value, bool IsDeltaPhase) { // only accepts DU
 //  Bit 30 - N/A            U13 - QG      0
 //  Bit 31 - RED LED 2        U13 - QH      0
 
-
-
 //
 // SetAlexRXAnt(unsigned int Bits)
 // P1: set the Alex RX antenna bits.
@@ -816,7 +777,6 @@ void SetAlexRXAnt(unsigned int Bits) {
   }
 }
 
-
 //
 // SetAlexRXOut(bool Enable)
 // P1: sets the Alex RX output relay
@@ -825,7 +785,6 @@ void SetAlexRXAnt(unsigned int Bits) {
 void SetAlexRXOut(bool Enable) {
   GAlexRXOut = Enable;
 }
-
 
 //
 // SetAlexTXAnt(unsigned int Bits)
@@ -860,7 +819,6 @@ void SetAlexTXAnt(unsigned int Bits) {
   }
 }
 
-
 //
 // SetAlexCoarseAttenuator(unsigned int Bits)
 // P1: set the 0/10/20/30dB attenuator bits. NOT used for for 7000RF board.
@@ -870,7 +828,6 @@ void SetAlexTXAnt(unsigned int Bits) {
 void SetAlexCoarseAttenuator(unsigned int Bits) {
   GAlexCoarseAttenuatorBits = Bits;
 }
-
 
 //
 // SetAlexRXFilters(bool IsRX1, unsigned int Bits)
@@ -907,7 +864,6 @@ void SetAlexRXFilters(bool IsRX1, unsigned int Bits) {
   }
 }
 
-
 //
 // SetRX2GroundDuringTX(bool IsGrounded)
 //
@@ -934,7 +890,6 @@ void SetAlexTXFilters(unsigned int Bits) {
   }
 }
 
-
 //
 // EnableAlexManualFilterSelect(bool IsManual)
 // used to select between automatic selection of filters, and remotely commanded settings.
@@ -943,7 +898,6 @@ void SetAlexTXFilters(unsigned int Bits) {
 void EnableAlexManualFilterSelect(bool IsManual) {
   GAlexManualFilterSelect = IsManual;                 // just store the bit
 }
-
 
 //
 // AlexManualRXFilters(unsigned int Bits, int RX)
@@ -971,7 +925,6 @@ void AlexManualRXFilters(unsigned int Bits, int RX) {
   }
 }
 
-
 //
 // DisableAlexTRRelay(bool IsDisabled)
 // if parameter true, the TX RX relay is disabled and left in RX
@@ -979,7 +932,6 @@ void AlexManualRXFilters(unsigned int Bits, int RX) {
 void DisableAlexTRRelay(bool IsDisabled) {
   GEnableAlexTXRXRelay = !IsDisabled;                     // enable TXRX - opposite sense to stored bit
 }
-
 
 //
 // AlexManualTXFilters(unsigned int Bits)
@@ -998,7 +950,6 @@ void AlexManualTXFilters(unsigned int Bits) {
   }
 }
 
-
 //
 // SetApolloBits(bool EnableFilter, bool EnableATU, bool StartAutoTune)
 // sets the control bits for Apollo. No support for these in Saturn at present.
@@ -1009,7 +960,6 @@ void SetApolloBits(bool EnableFilter, bool EnableATU, bool StartAutoTune) {
   GStartApolloAutoTune = StartAutoTune;
 }
 
-
 //
 // SetApolloEnabled(bool EnableFilter)
 // sets the enabled bit for Apollo. No support for these in Saturn at present.
@@ -1017,8 +967,6 @@ void SetApolloBits(bool EnableFilter, bool EnableATU, bool StartAutoTune) {
 void SetApolloEnabled(bool EnableFilter) {
   GEnableApolloFilter = EnableFilter;
 }
-
-
 
 //
 // SelectFilterBoard(bool IsApollo)
@@ -1028,7 +976,6 @@ void SelectFilterBoard(bool IsApollo) {
   GIsApollo = IsApollo;
 }
 
-
 //
 // EnablePPSStamp(bool Enabled)
 // enables a "pulse per second" timestamp
@@ -1036,7 +983,6 @@ void SelectFilterBoard(bool IsApollo) {
 void EnablePPSStamp(bool Enabled) {
   GPPSEnabled = Enabled;
 }
-
 
 //
 // SetTXDriveLevel(unsigned int Level)
@@ -1059,7 +1005,6 @@ void SetTXDriveLevel(unsigned int Level) {
   RegisterWrite(VADDRDACCTRLREG, RegisterValue);  // and write to it
 }
 
-
 //
 // SetMicBoost(bool EnableBoost)
 // enables 20dB mic boost amplifier in the CODEC
@@ -1080,7 +1025,6 @@ void SetMicBoost(bool EnableBoost) {
   }
 }
 
-
 //
 // SetMicLineInput(bool IsLineIn)
 // chooses between microphone and Line input to Codec
@@ -1100,8 +1044,6 @@ void SetMicLineInput(bool IsLineIn) {
     CodecRegisterWrite(VCODECANALOGUEPATHREG, Register);
   }
 }
-
-
 
 //
 // SetOrionMicOptions(bool MicRing, bool EnableBias, bool EnablePTT)
@@ -1138,7 +1080,6 @@ void SetOrionMicOptions(bool MicRing, bool EnableBias, bool EnablePTT) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetBalancedMicInput(bool Balanced)
 // selects the balanced microphone input, not supported by current protocol code.
@@ -1159,7 +1100,6 @@ void SetBalancedMicInput(bool Balanced) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetCodecLineInGain(unsigned int Gain)
 // sets the line input level register in the Codec (4 bits)
@@ -1177,7 +1117,6 @@ void SetCodecLineInGain(unsigned int Gain) {
   }
 }
 
-
 //
 // EnablePureSignal(bool Enabled)
 // enables PureSignal operation. Enables DDC5 to be feedback (P1)
@@ -1185,7 +1124,6 @@ void SetCodecLineInGain(unsigned int Gain) {
 void EnablePureSignal(bool Enabled) {
   GPureSignalEnabled = Enabled;
 }
-
 
 //
 // SetADCAttenuator(EADCSelect ADC, unsigned int Atten, bool Enabled, bool RXAtten)
@@ -1283,7 +1221,6 @@ void SetCWIambicKeyer(uint8_t Speed, uint8_t Weight, bool ReverseKeys, bool Mode
   }
 }
 
-
 //
 // void SetCWXBits(bool CWXEnabled, bool CWXDash, bool CWXDot)
 // setup CWX (host generated dot and dash)
@@ -1314,8 +1251,6 @@ void SetCWXBits(bool CWXEnabled, bool CWXDash, bool CWXDot) {
   }
 }
 
-
-
 //
 // SetDDCADC(int DDC, EADCSelect ADC)
 // sets the ADC to be used for each DDC
@@ -1341,8 +1276,6 @@ void SetDDCADC(int DDC, EADCSelect ADC) {
   RegisterWrite(VADDRDDCINSEL, RegisterValue);    // and write to it
   sem_post(&DDCInSelMutex);
 }
-
-
 
 //
 // void SetRXDDCEnabled(bool IsEnabled);
@@ -1431,8 +1364,6 @@ void InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us) {
   RegisterWrite(VADDRKEYERCONFIGREG, Register);  // and write to it
 }
 
-
-
 //
 // EnableCW (bool Enabled, bool Breakin)
 // enables or disables CW mode; selects CW as modulation source.
@@ -1456,7 +1387,6 @@ void EnableCW (bool Enabled, bool Breakin) {
   ActivateCWKeyer(GBreakinEnabled && GCWEnabled);
 }
 
-
 //
 // SetCWSidetoneEnabled(bool Enabled)
 // enables or disables sidetone. If disabled, the volume is set to zero in codec config reg
@@ -1477,7 +1407,6 @@ void SetCWSidetoneEnabled(bool Enabled) {
   }
 }
 
-
 //
 // SetCWSidetoneVol(uint8_t Volume)
 // sets the sidetone volume level (7 bits, unsigned)
@@ -1497,7 +1426,6 @@ void SetCWSidetoneVol(uint8_t Volume) {
   }
 }
 
-
 //
 // SetCWPTTDelay(unsigned int Delay)
 //  sets the delay (ms) before TX commences (8 bit delay value)
@@ -1513,7 +1441,6 @@ void SetCWPTTDelay(unsigned int Delay) {
     RegisterWrite(VADDRKEYERCONFIGREG, Register);   // and write to it
   }
 }
-
 
 //
 // SetCWHangTime(unsigned int HangTime)
@@ -1555,7 +1482,6 @@ void SetCWSidetoneFrequency(unsigned int Frequency) {
   }
 }
 
-
 //
 // SetMinPWMWidth(unsigned int Width)
 // set class E min PWM width (not yet implemented)
@@ -1564,7 +1490,6 @@ void SetMinPWMWidth(unsigned int Width) {
   GClassEPWMMin = Width;                                      // just store for now
 }
 
-
 //
 // SetMaxPWMWidth(unsigned int Width)
 // set class E min PWM width (not yet implemented)
@@ -1572,7 +1497,6 @@ void SetMinPWMWidth(unsigned int Width) {
 void SetMaxPWMWidth(unsigned int Width) {
   GClassEPWMMax = Width;                                      // just store for now
 }
-
 
 //
 // SetXvtrEnable(bool Enabled)
@@ -1593,7 +1517,6 @@ void SetXvtrEnable(bool Enabled) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetWidebandEnable(EADCSelect ADC, bool Enabled)
 // enables wideband sample collection from an ADC.
@@ -1607,7 +1530,6 @@ void SetWidebandEnable(EADCSelect ADC, bool Enabled) {
   }
 }
 
-
 //
 // SetWidebandSampleCount(unsigned int Samples)
 // sets the wideband data collected count
@@ -1616,7 +1538,6 @@ void SetWidebandEnable(EADCSelect ADC, bool Enabled) {
 void SetWidebandSampleCount(unsigned int Samples) {
   GWidebandSampleCount = Samples;
 }
-
 
 //
 // SetWidebandSampleSize(unsigned int Bits)
@@ -1627,7 +1548,6 @@ void SetWidebandSampleSize(unsigned int Bits) {
   GWidebandSamplesPerPacket = Bits;
 }
 
-
 //
 // SetWidebandUpdateRate(unsigned int Period_ms)
 // sets the period (ms) between collections of wideband data
@@ -1636,7 +1556,6 @@ void SetWidebandSampleSize(unsigned int Bits) {
 void SetWidebandUpdateRate(unsigned int Period_ms) {
   GWidebandUpdateRate = Period_ms;
 }
-
 
 //
 // SetWidebandPacketsPerFrame(unsigned int Count)
@@ -1647,7 +1566,6 @@ void SetWidebandPacketsPerFrame(unsigned int Count) {
   GWidebandPacketsPerFrame = Count;
 }
 
-
 //
 // EnableTimeStamp(bool Enabled)
 // enables a timestamp for RX packets
@@ -1655,7 +1573,6 @@ void SetWidebandPacketsPerFrame(unsigned int Count) {
 void EnableTimeStamp(bool Enabled) {
   GEnableTimeStamping = Enabled;                          // P2. true if enabled. NOT SUPPORTED YET
 }
-
 
 //
 // EnableVITA49(bool Enabled)
@@ -1665,7 +1582,6 @@ void EnableVITA49(bool Enabled) {
   GEnableVITA49 = Enabled;                                // P2. true if enabled. NOT SUPPORTED YET
 }
 
-
 //
 // SetAlexEnabled(unsigned int Alex)
 // 8 bit parameter enables up to 8 Alex units.
@@ -1673,7 +1589,6 @@ void EnableVITA49(bool Enabled) {
 void SetAlexEnabled(unsigned int Alex) {
   GAlexEnabledBits = Alex;                                // just save for now.
 }
-
 
 //
 // SetPAEnabled(bool Enabled)
@@ -1696,7 +1611,6 @@ void SetPAEnabled(bool Enabled) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetTXDACCount(unsigned int Count)
 // sets the number of TX DACs, Currently unused.
@@ -1704,7 +1618,6 @@ void SetPAEnabled(bool Enabled) {
 void SetTXDACCount(unsigned int Count) {
   GTXDACCount = Count;                                    // just save for now.
 }
-
 
 //
 // SetDUCSampleRate(ESampleRate Rate)
@@ -1715,7 +1628,6 @@ void SetDUCSampleRate(ESampleRate Rate) {
   GDUCSampleRate = Rate;                                  // just save for now.
 }
 
-
 //
 // SetDUCSampleSize(unsigned int Bits)
 // sets the number of bits per sample.
@@ -1725,7 +1637,6 @@ void SetDUCSampleSize(unsigned int Bits) {
   GDUCSampleSize = Bits;                                  // just save for now
 }
 
-
 //
 // SetDUCPhaseShift(unsigned int Value)
 // sets a phase shift onto the TX output. Currently unimplemented.
@@ -1733,9 +1644,6 @@ void SetDUCSampleSize(unsigned int Bits) {
 void SetDUCPhaseShift(unsigned int Value) {
   GDUCPhaseShift = Value;                                 // just save for now.
 }
-
-
-
 
 //
 // SetSpkrMute(bool IsMuted)
@@ -1758,7 +1666,6 @@ void SetSpkrMute(bool IsMuted) {
   sem_post(&RFGPIOMutex);                         // clear protected access
 }
 
-
 //
 // SetUserOutputBits(unsigned int Bits)
 // sets the user I/O bits
@@ -1766,7 +1673,6 @@ void SetSpkrMute(bool IsMuted) {
 void SetUserOutputBits(unsigned int Bits) {
   GUserOutputBits = Bits;                         // just save for now
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////
 // read settings from FPGA
@@ -1795,7 +1701,6 @@ bool GetPTTInput(void) {
   return Result;
 }
 
-
 //
 // GetKeyerDashInput(void)
 // return true if keyer dash input is pressed.
@@ -1806,8 +1711,6 @@ bool GetKeyerDashInput(void) {
   Result = (bool)((GStatusRegister >> VKEYINB) & 1);                       // get PTT bit
   return Result;
 }
-
-
 
 //
 // GetKeyerDotInput(void)
@@ -1830,7 +1733,6 @@ bool GetCWKeyDown(void) {
   Result = (bool)((GStatusRegister >> VCWKEYDOWN) & 1);                       // get PTT bit
   return Result;
 }
-
 
 //
 // GetP2PTTKeyInputs(void)
@@ -1876,8 +1778,6 @@ unsigned int GetP2PTTKeyInputs(void) {
   return Result;
 }
 
-
-
 //
 // GetADCOverflow(void)
 // return true if ADC amplitude overflow has occurred since last read.
@@ -1890,8 +1790,6 @@ unsigned int GetADCOverflow(void) {
   return (Result & 0x3);
 }
 
-
-
 //
 // GetUserIOBits(void)
 // return the user input bits
@@ -1902,8 +1800,6 @@ unsigned int GetUserIOBits(void) {
   Result = ((GStatusRegister >> VUSERIO4) & 0b1111);                       // get usder input 4/5/6/8
   return Result;
 }
-
-
 
 //
 // unsigned int GetAnalogueIn(unsigned int AnalogueSelect)
@@ -1917,14 +1813,10 @@ unsigned int GetAnalogueIn(unsigned int AnalogueSelect) {
   return Result;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 // internal App register settings
 // these are things not accessible from external SDR applications, including debug
 //
-
-
-
 
 //
 // CodecInitialise(void)
@@ -1952,7 +1844,6 @@ void CodecInitialise(void) {
   usleep(100);
 }
 
-
 //
 // SetTXAmplitudeScaling (unsigned int Amplitude)
 // sets the overall TX amplitude. This is normally set to a constant determined during development.
@@ -1967,8 +1858,6 @@ void SetTXAmplitudeScaling (unsigned int Amplitude) {
   RegisterWrite(VADDRTXCONFIGREG, Register);                  // and write to it
 }
 
-
-
 //
 // SetTXProtocol (bool Protocol)
 // sets whether TX configured for P1 (48KHz) or P2 (192KHz)
@@ -1982,7 +1871,6 @@ void SetTXProtocol (bool Protocol) {
   TXConfigRegValue = Register;                    // store it back
   RegisterWrite(VADDRTXCONFIGREG, Register);  // and write to it
 }
-
 
 //
 // void ResetDUCMux(void)
@@ -1999,8 +1887,6 @@ void ResetDUCMux(void) {
   Register &= ~BitMask;                               // remove old bit
   RegisterWrite(VADDRTXCONFIGREG, Register);          // and write to it
 }
-
-
 
 //
 // void SetTXOutputGate(bool AlwaysOn)
@@ -2023,7 +1909,6 @@ void SetTXOutputGate(bool AlwaysOn) {
   TXConfigRegValue = Register;                    // store it back
   RegisterWrite(VADDRTXCONFIGREG, Register);  // and write to it
 }
-
 
 //
 // void SetTXIQDeinterleave(bool Interleaved)
@@ -2050,7 +1935,6 @@ void SetTXIQDeinterleaved(bool Interleaved) {
   RegisterWrite(VADDRTXCONFIGREG, Register);    // and write to it
 }
 
-
 //
 // void EnableDUCMux(bool Enabled)
 // enabled the multiplexer to take samples from FIFO and hand on to DUC
@@ -2073,9 +1957,6 @@ void EnableDUCMux(bool Enabled) {
   RegisterWrite(VADDRTXCONFIGREG, Register);    // and write to it
 }
 
-
-
-
 //
 // SetTXModulationTestSourceFrequency (unsigned int Freq)
 // sets the TX modulation DDS source frequency. Only used for development.
@@ -2089,7 +1970,6 @@ void SetTXModulationTestSourceFrequency (unsigned int Freq) {
     RegisterWrite(VADDRTXMODTESTREG, Register);  // and write to it
   }
 }
-
 
 //
 // SetTXModulationSource(ETXModulationSource Source)
@@ -2106,18 +1986,12 @@ void SetTXModulationSource(ETXModulationSource Source) {
   RegisterWrite(VADDRTXCONFIGREG, Register);  // and write to it
 }
 
-
-
-
-
-
 //
 // SetDuplex(bool Enabled)
 // if Enabled, the RX signal is transferred back during TX; else TX drive signal
 //
 void SetDuplex(bool Enabled) {
 }
-
 
 //
 // SetOperateMode(bool IsRunMode)
@@ -2126,7 +2000,6 @@ void SetDuplex(bool Enabled) {
 void SetOperateMode(bool IsRunMode) {
 }
 
-
 //
 // SetFreqPhaseWord(bool IsPhase)
 // for protocol 2, sets whether DDC/DUC frequency is phase word or frequency in Hz.
@@ -2134,14 +2007,11 @@ void SetOperateMode(bool IsRunMode) {
 void SetFreqPhaseWord(bool IsPhase) {
 }
 
-
-
 // SetDDCSampleSize(unsigned int DDC, unsgned int Size)
 // set sample resolution for DDC (only 24 bits supported, so ignore)
 //
 void SetDDCSampleSize(unsigned int DDC, unsigned int Size) {
 }
-
 
 //
 // UseTestDDSSource(void)

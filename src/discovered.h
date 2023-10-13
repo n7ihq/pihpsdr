@@ -26,7 +26,6 @@
 
 #define MAX_DEVICES 16
 
-
 // ANAN 7000DLE and 8000DLE uses 10 as the device type in old protocol
 // Newer STEMlab hpsdr emulators use 100 instead of 1
 // HermesLite V2 uses V1 board ID and software version >= 40
@@ -86,7 +85,6 @@
 #define STEMLAB_RP_TRX     4    // found: stemlab_sdr_transceiver_hpsdr
 #define HAMLAB_RP_TRX      8    // found: hamlab_sdr_transceiver_hpsdr
 #define BARE_REDPITAYA    16    // barebone RedPitaya (no STEMlab)
-
 
 struct _DISCOVERED {
   int protocol;

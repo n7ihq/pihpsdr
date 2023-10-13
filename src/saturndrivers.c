@@ -29,7 +29,6 @@
 //
 //////////////////////////////////////////////////////////////
 
-
 #define _DEFAULT_SOURCE
 #define _XOPEN_SOURCE 500
 #include <stdlib.h>                     // for function min()
@@ -62,7 +61,6 @@
 //
 int register_fd;                             // device identifier
 
-
 //
 // open connection to the XDMA device driver for register and DMA access
 //
@@ -88,7 +86,6 @@ int CloseXDMADriver(void) {
   return ret;
 }
 
-
 //
 // function call to get firmware ID and version
 //
@@ -100,7 +97,6 @@ unsigned int GetFirmwareVersion(ESoftwareID* ID) {
   *ID = (ESoftwareID)(SoftwareInformation >> 20);           // 12 bit software ID
   return Version;
 }
-
 
 //
 // initiate a DMA to the FPGA with specified parameters
@@ -200,7 +196,6 @@ void RegisterWrite(uint32_t Address, uint32_t Data) {
 }
 // END hwaccess.c
 
-
 sem_t DDCResetFIFOMutex;
 
 bool GFIFOSizesInitialised = false;
@@ -216,7 +211,6 @@ uint32_t DMAFIFODepths[VNUMDMAFIFO] = {
   256,              //  eMicCodecDMA, selects mic samples
   256               //  eSpkCodecDMA  selects speaker samples
 };
-
 
 //
 // void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt);
@@ -244,8 +238,6 @@ void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt) {
 
   RegisterWrite(Address, Data);
 }
-
-
 
 //
 // uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed);
@@ -294,9 +286,6 @@ uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool
   return Data;                        // return 16 bit FIFO count
 }
 
-
-
-
 //
 // InitialiseFIFOSizes(void)
 // initialise the FIFO size table, which is FPGA version dependent
@@ -314,8 +303,6 @@ void InitialiseFIFOSizes(void) {
     DMAFIFODepths[3] = 1024;        //  eSpkCodecDMA  selects speaker samples
   }
 }
-
-
 
 //
 // reset a stream FIFO
@@ -351,8 +338,6 @@ void ResetDMAStreamFIFO(EDMAStreamSelect DDCNum) {
   sem_post(&DDCResetFIFOMutex);                       // release protected access
 }
 
-
-
 //
 // SetTXAmplitudeEER (bool EEREnabled)
 // enables amplitude restoratino mode. Generates envelope output alongside I/Q samples.
@@ -362,7 +347,6 @@ void SetTXAmplitudeEER(bool EEREnabled) {
   //GEEREnabled = EEREnabled;               // save value
   //HandlerSetEERMode(EEREnabled);              // I/Q send handler
 }
-
 
 //
 // number of samples to read for each DDC setting

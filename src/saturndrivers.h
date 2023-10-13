@@ -29,13 +29,11 @@
 //
 //////////////////////////////////////////////////////////////
 
-
 #ifndef __saturndrivers_h
 #define __saturndrivers_h
 
 #include <stdint.h>
 #include "saturnregisters.h"
-
 
 //
 // enum type for FIFO monitor and DMA channel selection
@@ -68,7 +66,6 @@ typedef enum {
   eFullFunction
 } ESoftwareID;
 
-
 //
 // void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt);
 //
@@ -77,8 +74,6 @@ typedef enum {
 //   EnableInterrupt: true if interrupt generation enabled for overflows
 //
 void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt);
-
-
 
 //
 // uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool* OverThreshold, bool* Underflowed, unsigned int* Current);
@@ -95,13 +90,11 @@ void SetupFIFOMonitorChannel(EDMAStreamSelect Channel, bool EnableInterrupt);
 uint32_t ReadFIFOMonitorChannel(EDMAStreamSelect Channel, bool* Overflowed, bool* OverThreshold, bool* Underflowed,
                                 unsigned int* Current);
 
-
 //
 // reset a stream FIFO
 // clears the FIFOs directly read ori written by the FPGA
 //
 void ResetDMAStreamFIFO(EDMAStreamSelect DDCNum);
-
 
 //
 // SetTXAmplitudeEER (bool EEREnabled)
@@ -109,7 +102,6 @@ void ResetDMAStreamFIFO(EDMAStreamSelect DDCNum);
 // NOTE hardware does not properly support this yet!
 //
 void SetTXAmplitudeEER(bool EEREnabled);
-
 
 //
 // uint32_t AnalyseDDCHeader(unit32_t Header, unit32_t** DDCCounts)
@@ -119,6 +111,5 @@ void SetTXAmplitudeEER(bool EEREnabled);
 // returns the number of words per frame, which helps set the DMA transfer size
 //
 uint32_t AnalyseDDCHeader(uint32_t Header, uint32_t* DDCCounts);
-
 
 #endif

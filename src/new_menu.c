@@ -70,8 +70,6 @@
   #include "saturn_menu.h"
 #endif
 
-
-
 GtkWidget *main_menu = NULL;
 GtkWidget *sub_menu = NULL;
 

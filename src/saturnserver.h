@@ -29,10 +29,8 @@
 //
 //////////////////////////////////////////////////////////////
 
-
 #ifndef __saturnserver_h
 #define __saturnserver_h
-
 
 #include <stdint.h>
 #include <netinet/in.h>
@@ -65,7 +63,6 @@
 #define VPORTWIDEBAND0 18
 #define VPORTWIDEBAND1 19
 
-
 //
 // a type to hold data for each incoming or outgoing data thread
 //
@@ -79,7 +76,6 @@ struct ThreadSocketData {
   uint32_t Cmdid;                               // command from app to thread - bits set for each command
   uint32_t DDCSampleRate;                       // DDC sample rate
 };
-
 
 extern struct ThreadSocketData SocketData[];        // data for each thread
 extern struct sockaddr_in reply_addr;               // destination address for outgoing data
@@ -109,7 +105,6 @@ void* saturn_server(void *arg);
 //
 void SetPort(uint32_t ThreadNum, uint16_t PortNum);
 
-
 //
 // function to make an incoming or outgoing socket, bound to the specified port in the structure
 // 1st parameter is a link into the socket data table
@@ -117,7 +112,6 @@ void SetPort(uint32_t ThreadNum, uint16_t PortNum);
 int MakeSocket(struct ThreadSocketData* Ptr, int DDCid);
 
 // END threaddata.h
-
 
 // START generalpacket.h
 //
@@ -129,10 +123,8 @@ int MakeSocket(struct ThreadSocketData* Ptr, int DDCid);
 int HandleGeneralPacket(uint8_t *PacketBuffer);
 // END generalpacket.h
 
-
 // START IncomingDDCSpecific.h
 #define VDDCSPECIFICSIZE 1444           // DDC specific packet size in bytes
-
 
 //
 // protocol 2 handler for incoming DDC specific Packet to SDR
@@ -140,10 +132,8 @@ int HandleGeneralPacket(uint8_t *PacketBuffer);
 void *IncomingDDCSpecific(void *arg);           // listener thread
 // END IncomingDDCSpecific.h
 
-
 // START IncomingDUCSpecific.h
 #define VDUCSPECIFICSIZE 60             // DUC specific packet
-
 
 //
 // protocol 2 handler for incoming DUC specific Packet to SDR
@@ -151,10 +141,8 @@ void *IncomingDDCSpecific(void *arg);           // listener thread
 void *IncomingDUCSpecific(void *arg);           // listener thread
 // END IncomingDUCSpecific.h
 
-
 // START InHighPriority.h
 #define VHIGHPRIOTIYTOSDRSIZE 1444      // high priority packet to SDR
-
 
 //
 // protocol 2 handler for incoming high priority Packet to SDR
@@ -162,10 +150,8 @@ void *IncomingDUCSpecific(void *arg);           // listener thread
 void *IncomingHighPriority(void *arg);          // listener thread
 // END InHighPriority.h
 
-
 // START InDUCIQ.h
 #define VDUCIQSIZE 1444                 // TX DUC I/Q data packet
-
 
 //
 // protocol 2 handler for incoming DUC I/Q data Packet to SDR
@@ -183,7 +169,6 @@ void HandlerSetEERMode(bool EEREnabled);
 
 // START InSpkrAudio.h
 #define VSPEAKERAUDIOSIZE 260           // speaker audio packet
-
 
 //
 // protocol 2 handler for incoming speaker audio data Packet to SDR

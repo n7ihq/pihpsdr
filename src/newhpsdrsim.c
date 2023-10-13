@@ -1006,7 +1006,8 @@ void *rx_thread(void *data) {
 
   if (myddc < 0 || myddc >= NUMRECEIVERS) { return NULL; }
 
-  seqnum = 0;
+  // for debug purposes, it is nice to tell the DDC from the seq no
+  seqnum = 1000000 * myddc;
   // unique seed value for random number generator
   seed = ((uintptr_t) &seed) & 0xffffff;
   sock = socket(AF_INET, SOCK_DGRAM, 0);

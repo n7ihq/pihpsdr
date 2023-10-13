@@ -471,7 +471,6 @@ extern gint start_spectrum(void *data);
 extern void start_vfo_timer(void);
 extern gboolean remote_started;
 
-
 extern REMOTE_CLIENT *clients;
 
 extern gint listen_port;
@@ -523,7 +522,6 @@ extern void send_filter_board(int s, int filter_board);
 extern void send_swap_iq(int s, int swap_iq);
 extern void send_region(int s, int region);
 extern void send_mute_rx(int s, int mute);
-
 
 extern void remote_audio(const RECEIVER *rx, short left_sample, short right_sample);
 

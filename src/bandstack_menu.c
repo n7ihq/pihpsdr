@@ -42,7 +42,6 @@ struct _CHOICE {
 
 typedef struct _CHOICE CHOICE;
 
-
 static struct _CHOICE *first = NULL;
 static struct _CHOICE *current = NULL;
 

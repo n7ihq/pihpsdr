@@ -16,7 +16,6 @@
 *
 */
 
-
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <math.h>
@@ -29,7 +28,6 @@
 #ifdef CLIENT_SERVER
   #include "client_server.h"
 #endif
-
 
 static int colorLowR = 0; // black
 static int colorLowG = 0;

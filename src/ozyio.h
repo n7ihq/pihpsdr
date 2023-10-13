@@ -29,7 +29,6 @@
 * modified further Laurence Barker G8NJJ to add USB functionality to pihpsdr
 */
 
-
 /*
  * code modified from that in Ozy_Metis_RPI_Gateway
  * Laurence Barker, G8NJJ December 2016
@@ -62,8 +61,6 @@ int ozy_load_firmware(char *fnamep);
 int ozy_initialise(void);
 int ozy_discover(void);      // returns 1 if a device found on USB
 void ozy_i2c_readpwr(int addr); // sets local variables
-
-
 
 // Ozy I2C commands for polling firmware versions, power levels, ADC overload.
 #define I2C_MERC1_FW  0x10 // Mercury1 firmware version      (read 2 bytes)

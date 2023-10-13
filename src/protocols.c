@@ -30,7 +30,6 @@
 #include "protocols.h"
 #include "property.h"
 
-
 static GtkWidget *dialog;
 
 gboolean enable_protocol_1;
@@ -197,4 +196,3 @@ void configure_protocols(GtkWidget *parent) {
   gtk_widget_show_all(dialog);
   gtk_dialog_run(GTK_DIALOG(dialog));
 }
-

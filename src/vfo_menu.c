@@ -140,8 +140,6 @@ static void split_cb(GtkWidget *widget, gpointer data) {
   g_idle_add(ext_vfo_update, NULL);
 }
 
-
-
 static void set_btn_state() {
   int i;
 

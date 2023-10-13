@@ -338,7 +338,6 @@ int main(int argc, char **argv) {
   }
 }
 
-
 void sendRawCommand(pcap_t *handle, unsigned char dst[6], unsigned char command, unsigned char *data, int datalen) {
   unsigned char buffer[62];
   int i;

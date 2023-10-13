@@ -19,9 +19,9 @@
 #include <gtk/gtk.h>
 #include <pulse/pulseaudio.h>
 #ifdef __APPLE__
-#include <pulse/thread-mainloop.h>
+  #include <pulse/thread-mainloop.h>
 #else
-#include <pulse/glib-mainloop.h>
+  #include <pulse/glib-mainloop.h>
 #endif
 #include <pulse/simple.h>
 
@@ -56,9 +56,9 @@ static int     mic_ring_read_pt = 0;
 static int     mic_ring_write_pt = 0;
 
 #ifdef __APPLE__
-static pa_threaded_mainloop *main_loop;
+  static pa_threaded_mainloop *main_loop;
 #else
-static pa_glib_mainloop *main_loop;
+  static pa_glib_mainloop *main_loop;
 #endif
 static pa_mainloop_api *main_loop_api;
 static pa_operation *op;
@@ -226,6 +226,7 @@ static void mic_signal_handler(int sig) {
     //
     pthread_exit(NULL);
   }
+
   //
   // In the unlikely case that a SIGUSR1 signal is caught somewhere else,
   // do nothing but re-install the handler.
@@ -328,6 +329,7 @@ int audio_open_input() {
     signal(SIGUSR1, mic_signal_handler);
     running = TRUE;
     t_print("%s: PULSEAUDIO mic_read_thread\n", __FUNCTION__);
+
     if (pthread_create(&mic_read_thread_id, NULL, mic_read_thread, NULL) < 0) {
       t_print("%s: failed to create mic_read_thread\n", __FUNCTION__);
       g_free(local_microphone_buffer);
@@ -335,6 +337,7 @@ int audio_open_input() {
       running = FALSE;
       result = -1;
     }
+
     pthread_detach(mic_read_thread_id);
   } else {
     result = -1;
@@ -500,4 +503,3 @@ int audio_write(RECEIVER *rx, float left_sample, float right_sample) {
   g_mutex_unlock(&rx->local_audio_mutex);
   return result;
 }
-

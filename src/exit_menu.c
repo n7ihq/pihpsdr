@@ -92,7 +92,6 @@ static gboolean shutdown_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
   _exit(0);
 }
 
-
 void exit_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
@@ -131,4 +130,3 @@ void exit_menu(GtkWidget *parent) {
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }
-

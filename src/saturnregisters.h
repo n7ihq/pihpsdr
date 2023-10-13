@@ -41,7 +41,6 @@
 //START OutDDCIQ.h
 #define VDDCPACKETSIZE 1444             // each DDC I/Qpacket
 
-
 //
 // protocol 2 handler for outgoing DDC I/Q data Packet from SDR
 //
@@ -50,7 +49,6 @@ void *OutgoingDDCIQ(void *arg);
 //
 // interface calls to get commands from PC settings
 //
-
 
 //
 // HandlerCheckDDCSettings()
@@ -90,8 +88,6 @@ int CloseXDMADriver(void);
 //
 int DMAWriteToFPGA(int fd, unsigned char*SrcData, uint32_t Length, uint32_t AXIAddr);
 
-
-
 //
 // initiate a DMA from the FPGA with specified parameters
 // returns 1 if success, else 0
@@ -102,12 +98,10 @@ int DMAWriteToFPGA(int fd, unsigned char*SrcData, uint32_t Length, uint32_t AXIA
 //
 int DMAReadFromFPGA(int fd, unsigned char*DestData, uint32_t Length, uint32_t AXIAddr);
 
-
 //
 // single 32 bit register read, from AXI-Lite bus
 //
 uint32_t RegisterRead(uint32_t Address);
-
 
 //
 // single 32 bit register write, to AXI-Lite bus
@@ -140,7 +134,6 @@ typedef enum {
   eTXSamples                    // (for Puresignal)
 } EADCSelect;
 
-
 //
 // enum for TX modulation source
 //
@@ -151,8 +144,6 @@ typedef enum {
   eCWKeyer
 } ETXModulationSource;
 
-
-
 //
 // DMA channel allocations
 //
@@ -160,7 +151,6 @@ typedef enum {
 #define VDDCDMADEVICE "/dev/xdma0_c2h_0"
 #define VSPKDMADEVICE "/dev/xdma0_h2c_1"
 #define VDUCDMADEVICE "/dev/xdma0_h2c_0"
-
 
 //
 // FPGA register map
@@ -232,9 +222,7 @@ typedef enum {
 //
 //extern uint32_t DDCConfigRegs[VNUMDDC];
 
-
 //extern bool GEEREnabled;                                   // P2. true if EER is enabled
-
 
 // InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us)
 // calculates an "S" shape ramp curve and loads into RAM
@@ -242,8 +230,6 @@ typedef enum {
 // parameter is length in microseconds; typically 1000-5000
 //
 void InitialiseCWKeyerRamp(bool Protocol2, uint32_t Length_us);
-
-
 
 //
 // initialise the DAC Atten ROMs
@@ -258,20 +244,17 @@ void InitialiseDACAttenROMs(void);
 //
 void InitialiseFIFOSizes(void);
 
-
 //
 // SetByteSwap(bool)
 // set whether byte swapping is enabled. True if yes, to get data in network byte order.
 //
 void SetByteSwapping(bool IsSwapped);
 
-
 //
 // SetMOX(bool Mox)
 // sets or clears TX state
 //
 void SetMOX(bool Mox);
-
 
 //
 // SetTXEnable(bool Enabled)
@@ -294,7 +277,6 @@ void SetATUTune(bool TuneEnabled);
 //
 void SetP1SampleRate(ESampleRate Rate, unsigned int Count);
 
-
 //
 // SetP2SampleRate(unsigned int DDC, bool Enabled, unsigned int SampleRate, bool InterleaveWithNext)
 // sets the sample rate for a single DDC (used in protocol 2)
@@ -303,7 +285,6 @@ void SetP1SampleRate(ESampleRate Rate, unsigned int Count);
 // The WriteP2DDCRateRegister() call must be made after setting values for all DDCs
 //
 void SetP2SampleRate(unsigned int DDC, bool Enabled, unsigned int SampleRate, bool InterleaveWithNext);
-
 
 //
 // bool WriteP2DDCRateRegister(void)
@@ -314,7 +295,6 @@ void SetP2SampleRate(unsigned int DDC, bool Enabled, unsigned int SampleRate, bo
 //
 bool WriteP2DDCRateRegister(void);
 
-
 //
 // uint32_t GetDDCEnables(void)
 // get enable bits for each DDC; 1 bit per DDC
@@ -322,21 +302,17 @@ bool WriteP2DDCRateRegister(void);
 //
 uint32_t GetDDCEnables(void);
 
-
 //
 // SetClassEPA(bool IsClassE)
 // enables non linear PA mode
 //
 void SetClassEPA(bool IsClassE);
 
-
 //
 // SetOpenCollectorOutputs(unsigned int bits)
 // sets the 7 open collector output bits
 //
 void SetOpenCollectorOutputs(unsigned int bits);
-
-
 
 //
 // SetADCCount(unsigned int ADCCount)
@@ -350,8 +326,6 @@ void SetADCCount(unsigned int ADCCount);
 //
 void SetADCOptions(EADCSelect ADC, bool PGA, bool Dither, bool Random);
 
-
-
 //
 // SetDDCFrequency(unsigned int DDC, unsigned int Value, bool IsDeltaPhase)
 // sets a DDC frequency.
@@ -360,7 +334,6 @@ void SetADCOptions(EADCSelect ADC, bool PGA, bool Dither, bool Random);
 // IsDeltaPhase: true if a delta phase value, false if a frequency value (P1)
 //
 void SetDDCFrequency(uint32_t DDC, uint32_t Value, bool IsDeltaPhase);
-
 
 //
 // SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase)
@@ -372,7 +345,6 @@ void SetDDCFrequency(uint32_t DDC, uint32_t Value, bool IsDeltaPhase);
 //
 void SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase);
 
-
 //
 // SetDUCFrequency(unsigned int Value, bool IsDeltaPhase)
 // sets a DUC frequency. (Currently only 1 DUC, therefore DUC must be 0)
@@ -381,7 +353,6 @@ void SetTestDDSFrequency(uint32_t Value, bool IsDeltaPhase);
 //
 void SetDUCFrequency(unsigned int Value, bool IsDeltaPhase);    // only accepts DUC=0
 
-
 //
 // SetAlexRXAnt(unsigned int Bits)
 // P1: set the Alex RX antenna bits.
@@ -389,13 +360,11 @@ void SetDUCFrequency(unsigned int Value, bool IsDeltaPhase);    // only accepts 
 //
 void SetAlexRXAnt(unsigned int Bits);
 
-
 //
 // SetAlexRXOut(bool Enable)
 // P1: sets the Alex RX output relay
 //
 void SetAlexRXOut(bool Enable);
-
 
 //
 // SetAlexTXAnt(unsigned int Bits)
@@ -426,14 +395,12 @@ void SetAlexRXFilters(bool IsRX1, unsigned int Bits);
 //
 void SetAlexTXFilters(unsigned int Bits);
 
-
 //
 // EnableAlexManualFilterSelect(bool IsManual)
 // used to select between automatic selection of filters, and remotely commanded settings.
 // if Auto, the RX and TX filters are calculated when a frequency change occurs
 //
 void EnableAlexManualFilterSelect(bool IsManual);
-
 
 //
 // AlexManualRXFilters(unsigned int Bits, int RX)
@@ -443,19 +410,16 @@ void EnableAlexManualFilterSelect(bool IsManual);
 //
 void AlexManualRXFilters(unsigned int Bits, int RX);
 
-
 //
 // SetRX2GroundDuringTX(bool IsGrounded)
 //
 void SetRX2GroundDuringTX(bool IsGrounded);
-
 
 //
 // DisableAlexTRRelay(bool IsDisabled)
 // if parameter true, the TX RX relay is disabled and left in RX
 //
 void DisableAlexTRRelay(bool IsDisabled);
-
 
 //
 // AlexManualTXFilters(unsigned int Bits)
@@ -464,13 +428,11 @@ void DisableAlexTRRelay(bool IsDisabled);
 //
 void AlexManualTXFilters(unsigned int Bits);
 
-
 //
 // SetApolloBits(bool EnableFilter, bool EnableATU, bool StartAutoTune)
 // sets the control bits for Apollo. No support for these in Saturn at present.
 //
 void SetApolloBits(bool EnableFilter, bool EnableATU, bool StartAutoTune);
-
 
 //
 // SetApolloEnabled(bool EnableFilter)
@@ -478,20 +440,17 @@ void SetApolloBits(bool EnableFilter, bool EnableATU, bool StartAutoTune);
 //
 void SetApolloEnabled(bool EnableFilter);
 
-
 //
 // SelectFilterBoard(bool IsApollo)
 // Selects between Apollo and Alex controls. Currently ignored & hw supports only Alex.
 //
 void SelectFilterBoard(bool IsApollo);
 
-
 //
 // EnablePPSStamp(bool Enabled)
 // enables a "pulse per second" timestamp
 //
 void EnablePPSStamp(bool Enabled);
-
 
 //
 // SetTXDriveLevel(unsigned int Level)
@@ -500,13 +459,11 @@ void EnablePPSStamp(bool Enabled);
 //
 void SetTXDriveLevel(unsigned int Level);
 
-
 //
 // SetMicBoost(bool EnableBoost)
 //  enables 20dB mic boost amplifier in the CODEC
 //
 void SetMicBoost(bool EnableBoost);
-
 
 //
 // SetMicLineInput(bool IsLineIn)
@@ -514,13 +471,11 @@ void SetMicBoost(bool EnableBoost);
 //
 void SetMicLineInput(bool IsLineIn);
 
-
 //
 // SetOrionMicOptions(bool MicRing, bool EnableBias, bool EnablePTT)
 // sets the microphone control inputs
 //
 void SetOrionMicOptions(bool MicRing, bool EnableBias, bool EnablePTT);
-
 
 //
 // SetBalancedMicInput(bool Balanced)
@@ -528,20 +483,17 @@ void SetOrionMicOptions(bool MicRing, bool EnableBias, bool EnablePTT);
 //
 void SetBalancedMicInput(bool Balanced);
 
-
 //
 // SetCodecLineInGain(unsigned int Gain)
 // sets the line input level register in the Codec (4 bits)
 //
 void SetCodecLineInGain(unsigned int Gain);
 
-
 //
 // EnablePureSignal(bool Enabled)
 // enables PureSignal operation. Enables DDC5 to be feedback (P1)
 //
 void EnablePureSignal(bool Enabled);
-
 
 //
 // SetADCAttenuator(EADCSelect ADC, unsigned int Atten, bool Enabled, bool RXAtten)
@@ -572,16 +524,12 @@ void SetCWIambicKeyer(uint8_t Speed, uint8_t Weight, bool ReverseKeys, bool Mode
 //
 void SetCWXBits(bool CWXEnabled, bool CWXDash, bool CWXDot);
 
-
-
-
 //
 // SetDDCADC(int DDC, EADCSelect ADC)
 // sets the ADC to be used for each DDC
 // DDC = 0 to 9
 //
 void SetDDCADC(int DDC, EADCSelect ADC);
-
 
 //
 // void SetDDCInterleaved(uint32_t DDCNum, bool Interleaved)
@@ -593,13 +541,11 @@ void SetDDCADC(int DDC, EADCSelect ADC);
 //
 void SetDDCInterleaved(uint32_t DDCNum, bool Interleaved);
 
-
 //
 // void SetRXDDCEnabled(bool IsEnabled);
 // sets enable bit so DDC operates normally. Resets input FIFO when starting.
 //
 void SetRXDDCEnabled(bool IsEnabled);
-
 
 //
 // EnableCW (bool Enabled, bool Breakin)
@@ -609,20 +555,17 @@ void SetRXDDCEnabled(bool IsEnabled);
 //
 void EnableCW (bool Enabled, bool Breakin);
 
-
 //
 // SetCWSidetoneVol(uint8_t Volume)
 // sets the sidetone volume level (7 bits, unsigned)
 //
 void SetCWSidetoneVol(uint8_t Volume);
 
-
 //
 // SetCWPTTDelay(unsigned int Delay)
 //  sets the delay (ms) before TX commences (8 bit delay value)
 //
 void SetCWPTTDelay(unsigned int Delay);
-
 
 //
 // SetCWHangTime(unsigned int HangTime)
@@ -631,7 +574,6 @@ void SetCWPTTDelay(unsigned int Delay);
 //
 void SetCWHangTime(unsigned int HangTime);
 
-
 //
 // SetCWSidetoneFrequency(unsigned int Frequency)
 // sets the CW audio sidetone frequency, in Hz
@@ -639,13 +581,11 @@ void SetCWHangTime(unsigned int HangTime);
 //
 void SetCWSidetoneFrequency(unsigned int Frequency);
 
-
 //
 // SetCWSidetoneEnabled(bool Enabled)
 // enables or disables sidetone. If disabled, the volume is set to zero
 //
 void SetCWSidetoneEnabled(bool Enabled);
-
 
 //
 // SetMinPWMWidth(unsigned int Width)
@@ -653,13 +593,11 @@ void SetCWSidetoneEnabled(bool Enabled);
 //
 void SetMinPWMWidth(unsigned int Width);
 
-
 //
 // SetMaxPWMWidth(unsigned int Width)
 // set class E min PWM width (not yet implemented)
 //
 void SetMaxPWMWidth(unsigned int Width);
-
 
 //
 // SetXvtrEnable(bool Enabled)
@@ -667,13 +605,11 @@ void SetMaxPWMWidth(unsigned int Width);
 //
 void SetXvtrEnable(bool Enabled);
 
-
 //
 // SetWidebandEnable(EADCSelect ADC, bool Enabled)
 // enables wideband sample collection from an ADC.
 //
 void SetWidebandEnable(EADCSelect ADC, bool Enabled);
-
 
 //
 // SetWidebandSampleCount(unsigned int Samples)
@@ -681,13 +617,11 @@ void SetWidebandEnable(EADCSelect ADC, bool Enabled);
 //
 void SetWidebandSampleCount(unsigned int Samples);
 
-
 //
 // SetWidebandSampleSize(unsigned int Bits)
 // sets the sample size per packet used for wideband data transfers
 //
 void SetWidebandSampleSize(unsigned int Bits);
-
 
 //
 // SetWidebandUpdateRate(unsigned int Period_ms)
@@ -695,13 +629,11 @@ void SetWidebandSampleSize(unsigned int Bits);
 //
 void SetWidebandUpdateRate(unsigned int Period_ms);
 
-
 //
 // SetWidebandPacketsPerFrame(unsigned int Count)
 // sets the number of packets to be transferred per wideband data frame
 //
 void SetWidebandPacketsPerFrame(unsigned int Count);
-
 
 //
 // EnableTimeStamp(bool Enabled)
@@ -709,13 +641,11 @@ void SetWidebandPacketsPerFrame(unsigned int Count);
 //
 void EnableTimeStamp(bool Enabled);
 
-
 //
 // EnableVITA49(bool Enabled)
 // enables VITA49 mode
 //
 void EnableVITA49(bool Enabled);
-
 
 //
 // SetAlexEnabled(unsigned int Alex)
@@ -724,20 +654,17 @@ void EnableVITA49(bool Enabled);
 //
 void SetAlexEnabled(unsigned int Alex);
 
-
 //
 // SetPAEnabled(bool Enabled)
 // true if PA is enabled.
 //
 void SetPAEnabled(bool Enabled);
 
-
 //
 // SetTXDACCount(unsigned int Count)
 // sets the number of TX DACs, Currently unused.
 //
 void SetTXDACCount(unsigned int Count);
-
 
 //
 // SetDUCSampleRate(ESampleRate Rate)
@@ -746,7 +673,6 @@ void SetTXDACCount(unsigned int Count);
 //
 void SetDUCSampleRate(ESampleRate Rate);
 
-
 //
 // SetDUCSampleSize(unsigned int Bits)
 // sets the number of bits per sample.
@@ -754,13 +680,11 @@ void SetDUCSampleRate(ESampleRate Rate);
 //
 void SetDUCSampleSize(unsigned int Bits);
 
-
 //
 // SetDUCPhaseShift(unsigned int Value)
 // sets a phase shift onto the TX output. Currently unimplemented.
 //
 void SetDUCPhaseShift(unsigned int Value);
-
 
 //
 // SetSpkrMute(bool IsMuted)
@@ -768,18 +692,15 @@ void SetDUCPhaseShift(unsigned int Value);
 //
 void SetSpkrMute(bool IsMuted);
 
-
 //
 // SetUserOutputBits(unsigned int Bits)
 // sets the user I/O bits
 //
 void SetUserOutputBits(unsigned int Bits);
 
-
 /////////////////////////////////////////////////////////////////////////////////
 // read settings from FPGA
 //
-
 
 //
 // ReadStatusRegister(void)
@@ -789,20 +710,17 @@ void SetUserOutputBits(unsigned int Bits);
 //
 void ReadStatusRegister(void);
 
-
 //
 // GetPTTInput(void)
 // return true if PTT input is pressed.
 //
 bool GetPTTInput(void);
 
-
 //
 // GetKeyerDashInput(void)
 // return true if keyer dash input is pressed.
 //
 bool GetKeyerDashInput(void);
-
 
 //
 // GetKeyerDotInput(void)
@@ -817,7 +735,6 @@ bool GetKeyerDotInput(void);
 //
 bool GetCWKeyDown(void);
 
-
 //
 // GetP2PTTKeyInputs(void)
 // return several bits from Saturn status register:
@@ -828,8 +745,6 @@ bool GetCWKeyDown(void);
 //
 unsigned int GetP2PTTKeyInputs(void);
 
-
-
 //
 // GetADCOverflow(void)
 // return true if ADC overflow has occurred since last read.
@@ -838,13 +753,11 @@ unsigned int GetP2PTTKeyInputs(void);
 //
 unsigned int GetADCOverflow(void);
 
-
 //
 // GetUserIOBits(void)
 // return the user input bits
 //
 unsigned int GetUserIOBits(void);
-
 
 //
 // unsigned int GetAnalogueIn(unsigned int AnalogueSelect)
@@ -853,12 +766,10 @@ unsigned int GetUserIOBits(void);
 //
 unsigned int GetAnalogueIn(unsigned int AnalogueSelect);
 
-
 //////////////////////////////////////////////////////////////////////////////////
 // internal App register settings
 // these are things not accessible from external SDR applications, including debug
 //
-
 
 //
 // CodecInitialise(void)
@@ -866,20 +777,17 @@ unsigned int GetAnalogueIn(unsigned int AnalogueSelect);
 //
 void CodecInitialise(void);
 
-
 //
 // SetTXAmplitudeScaling (unsigned int Amplitude)
 // sets the overall TX amplitude. This is normally set to a constant determined during development.
 //
 void SetTXAmplitudeScaling (unsigned int Amplitude);
 
-
 //
 // SetTXModulationTestSourceFrequency (unsigned int Freq)
 // sets the TX modulation DDS source frequency. Only used for development.
 //
 void SetTXModulationTestSourceFrequency (unsigned int Freq);
-
 
 //
 // SetTXModulationSource(ETXModulationSource Source)
@@ -888,19 +796,16 @@ void SetTXModulationTestSourceFrequency (unsigned int Freq);
 //
 void SetTXModulationSource(ETXModulationSource Source);
 
-
 //
 // SetTXProtocol (bool Protocol)
 // sets whether TX configured for P1 (48KHz) or P2 (192KHz)
 //
 void SetTXProtocol (bool Protocol);
 
-
 //
 // void ResetDUCMux(void)
 //
 void ResetDUCMux(void);
-
 
 //
 // void SetTXOutputGate(bool AlwaysOn)
@@ -909,7 +814,6 @@ void ResetDUCMux(void);
 //
 void SetTXOutputGate(bool AlwaysOn);
 
-
 //
 // void SetTXIQDeinterleaved(bool Interleaved)
 // if true, put DUC hardware in EER mode
@@ -917,7 +821,6 @@ void SetTXOutputGate(bool AlwaysOn);
 // as it needs ot reset the DUC mux at the same time
 //
 void SetTXIQDeinterleaved(bool Interleaved);
-
 
 //
 // void EnableDUCMux(bool Enabled)
@@ -930,13 +833,11 @@ void EnableDUCMux(bool Enabled);
 // control the data transfer app
 //
 
-
 //
 // SetDuplex(bool Enabled)
 // if Enabled, the RX signal is transferred back during TX; else TX drive signal
 //
 void SetDuplex(bool Enabled);
-
 
 //
 // SetOperateMode(bool IsRunMode)
@@ -944,13 +845,11 @@ void SetDuplex(bool Enabled);
 //
 void SetOperateMode(bool IsRunMode);
 
-
 //
 // SetFreqPhaseWord(bool IsPhase)
 // for protocol 2, sets whether DDC/DUC frequency is phase word or frequency in Hz.
 //
 void SetFreqPhaseWord(bool IsPhase);
-
 
 //
 // SetDDCSampleSize(unsigned int DDC, unsgned int Size)
@@ -963,9 +862,5 @@ void SetDDCSampleSize(unsigned int DDC, unsigned int Size);
 // override ADC1 and ADC2 selection; use test source instead.
 //
 void UseTestDDSSource(void);
-
-
-
-
 
 #endif

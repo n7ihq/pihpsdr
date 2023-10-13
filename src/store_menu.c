@@ -73,7 +73,6 @@ static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpoin
   return FALSE;
 }
 
-
 static gboolean recall_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int ind = GPOINTER_TO_INT(data);
   recall_memory_slot(ind);

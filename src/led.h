@@ -16,7 +16,5 @@
 *
 */
 
-
 extern GtkWidget *create_led(int width, int height, GdkRGBA *color);
 extern void led_set_color(GtkWidget *led);
-

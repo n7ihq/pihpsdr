@@ -116,7 +116,6 @@ void sendRawData(pcap_t *handle, unsigned char hw[6], unsigned char *data, off_t
 #define STATE_WAIT      5  // Wait for response from radio
 #define STATE_DONE      6  // All done.
 
-
 int main(int argc, char **argv) {
   int i;
   char *dev = NULL;

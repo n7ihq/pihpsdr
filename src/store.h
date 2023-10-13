@@ -22,7 +22,6 @@
 #include <gtk/gtk.h>
 #include "bandstack.h"
 
-
 /* --------------------------------------------------------------------------*/
 /**
 * @brief Band definition

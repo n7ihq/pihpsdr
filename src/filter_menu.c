@@ -45,16 +45,13 @@ struct _CHOICE {
 
 typedef struct _CHOICE CHOICE;
 
-
 static struct _CHOICE *first = NULL;
 static struct _CHOICE *current = NULL;
-
 
 static GtkWidget *var1_spin_low;
 static GtkWidget *var1_spin_high;
 static GtkWidget *var2_spin_low;
 static GtkWidget *var2_spin_high;
-
 
 static void cleanup() {
   if (dialog != NULL) {

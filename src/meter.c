@@ -89,7 +89,6 @@ meter_press_event_cb (GtkWidget *widget,
   return TRUE;
 }
 
-
 GtkWidget* meter_init(int width, int height) {
   t_print("meter_init: width=%d height=%d\n", width, height);
   meter = gtk_drawing_area_new ();
@@ -106,7 +105,6 @@ GtkWidget* meter_init(int width, int height) {
                          | GDK_BUTTON_PRESS_MASK);
   return meter;
 }
-
 
 void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, double exciter, double alc, double swr) {
   double rxlvl;   // only used for RX input level, clones "value"
