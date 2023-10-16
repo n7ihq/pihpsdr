@@ -184,8 +184,8 @@ typedef struct _receiver {
   gchar *audio_name;
 #ifdef PORTAUDIO
   PaStream *playstream;
-  gint local_audio_buffer_inpt;    // pointer in audio ring-buffer
-  gint local_audio_buffer_outpt;   // pointer in audio ring-buffer
+  gint volatile local_audio_buffer_inpt;    // pointer in audio ring-buffer
+  gint volatile local_audio_buffer_outpt;   // pointer in audio ring-buffer
   float *local_audio_buffer;
 #endif
 #ifdef ALSA

@@ -8,14 +8,14 @@
 # to be installed.
 #
 
-.PHONY: manual
-manual:			piHPSDR-Manual.pdf
-	cp piHPSDR-Manual.pdf ..
-	
 piHPSDR-Manual.pdf:	piHPSDR-Manual.tex
 	pdflatex piHPSDR-Manual.tex
 	pdflatex piHPSDR-Manual.tex
 	pdflatex piHPSDR-Manual.tex
+
+.PHONY: release
+release:                       piHPSDR-Manual.pdf
+	cp piHPSDR-Manual.pdf ..
 
 .PHONY: clean
 clean:

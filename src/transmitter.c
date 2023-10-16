@@ -627,7 +627,7 @@ void create_dialog(TRANSMITTER *tx) {
   gtk_window_set_transient_for(GTK_WINDOW(tx->dialog), GTK_WINDOW(top_window));
   GtkWidget *headerbar = gtk_header_bar_new();
   gtk_window_set_titlebar(GTK_WINDOW(tx->dialog), headerbar);
-  gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);
+  gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), FALSE);
   gtk_header_bar_set_title(GTK_HEADER_BAR(headerbar), "TX");
   g_signal_connect (tx->dialog, "delete_event", G_CALLBACK (close_cb), NULL);
   g_signal_connect (tx->dialog, "destroy", G_CALLBACK (close_cb), NULL);
@@ -1204,8 +1204,14 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     }
   } else {   // isTransmitting()
     if (txflag == 1 && protocol == NEW_PROTOCOL) {
-      // We arrive here ONCE after a TX/RX transition
-      new_protocol_flush_iq_samples();
+      //
+      // We arrive here ONCE after a TX -> RX transition
+      // and send 240 zero samples to make sure everything
+      // will be sent out (some silence may remain but just
+      // adds to the silence sent in the next RX->TX transition
+      for (j = 0; j < 240; j++) {
+        new_protocol_iq_samples(0, 0);
+      }
     }
 
     txflag = 0;

@@ -336,6 +336,14 @@ void receiverRestoreState(RECEIVER *rx) {
   GetPropI1("receiver.%d.low_latency", rx->id,                  rx->low_latency);
   GetPropI1("receiver.%d.fft_size", rx->id,                     rx->fft_size);
   GetPropI1("receiver.%d.sample_rate", rx->id,                  rx->sample_rate);
+  //
+  // This may happen if the firmware was down-graded from P2 to P1
+  //
+
+  if (protocol == ORIGINAL_PROTOCOL && rx->sample_rate > 384000) {
+    rx->sample_rate = 384000;
+  }
+
   GetPropI1("receiver.%d.filter_low", rx->id,                   rx->filter_low);
   GetPropI1("receiver.%d.filter_high", rx->id,                  rx->filter_high);
   GetPropI1("receiver.%d.fps", rx->id,                          rx->fps);
@@ -1386,40 +1394,45 @@ static void process_rx_buffer(RECEIVER *rx) {
 
 void full_rx_buffer(RECEIVER *rx) {
   int error;
+
   //t_print("%s: rx=%p\n",__FUNCTION__,rx);
-  g_mutex_lock(&rx->mutex);
-
   //
-  // noise blanker works on original IQ samples with input sample rate
+  // rx->mutex is locked if a sample rate change is currently going on,
+  // in this case we should not block the receiver thread
   //
-  switch (rx->nb) {
-  case 1:
-    xanbEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
-    break;
+  if (g_mutex_trylock(&rx->mutex)) {
+    //
+    // noise blanker works on original IQ samples with input sample rate
+    //
+    switch (rx->nb) {
+    case 1:
+      xanbEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
+      break;
 
-  case 2:
-    xnobEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
-    break;
+    case 2:
+      xnobEXT (rx->id, rx->iq_input_buffer, rx->iq_input_buffer);
+      break;
 
-  default:
-    // do nothing
-    break;
+    default:
+      // do nothing
+      break;
+    }
+
+    fexchange0(rx->id, rx->iq_input_buffer, rx->audio_output_buffer, &error);
+
+    if (error != 0) {
+      t_print("%s: id=%d fexchange0: error=%d\n", __FUNCTION__, rx->id, error);
+    }
+
+    if (rx->displaying) {
+      g_mutex_lock(&rx->display_mutex);
+      Spectrum0(1, rx->id, 0, 0, rx->iq_input_buffer);
+      g_mutex_unlock(&rx->display_mutex);
+    }
+
+    process_rx_buffer(rx);
+    g_mutex_unlock(&rx->mutex);
   }
-
-  fexchange0(rx->id, rx->iq_input_buffer, rx->audio_output_buffer, &error);
-
-  if (error != 0) {
-    t_print("%s: id=%d fexchange0: error=%d\n", __FUNCTION__, rx->id, error);
-  }
-
-  if (rx->displaying) {
-    g_mutex_lock(&rx->display_mutex);
-    Spectrum0(1, rx->id, 0, 0, rx->iq_input_buffer);
-    g_mutex_unlock(&rx->display_mutex);
-  }
-
-  process_rx_buffer(rx);
-  g_mutex_unlock(&rx->mutex);
 }
 
 void add_iq_samples(RECEIVER *rx, double i_sample, double q_sample) {

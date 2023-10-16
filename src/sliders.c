@@ -633,9 +633,9 @@ void set_filter_cut_low(int rx, int var) {
   //
   // The low-cut is either always positive, or always negative for a given mode
   //
-  min = 0;
 
   if (var > 0) {
+    min = 0;
     max = 2 * var;
 
     if (max <  200) { max = 200; }

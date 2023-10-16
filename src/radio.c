@@ -135,7 +135,6 @@ RECEIVER *active_receiver;
 TRANSMITTER *transmitter;
 
 int RECEIVERS;
-int MAX_DDC;  // only used in new_protocol.c
 int PS_TX_FEEDBACK;
 int PS_RX_FEEDBACK;
 
@@ -1447,7 +1446,6 @@ void start_radio() {
     RECEIVERS = 1;
     PS_TX_FEEDBACK = 1;
     PS_RX_FEEDBACK = 2;
-    MAX_DDC = 1; // unused in SOAPY protocol
     break;
 
   default:
@@ -1455,7 +1453,6 @@ void start_radio() {
     RECEIVERS = 2;
     PS_TX_FEEDBACK = (RECEIVERS);
     PS_RX_FEEDBACK = (RECEIVERS + 1);
-    MAX_DDC = (RECEIVERS + 2);
     break;
   }
 
@@ -3004,3 +3001,44 @@ void protocol_restart() {
   usleep(200000);
   protocol_run();
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// MacOS semaphores
+//
+// Since MacOS only supports named semaphores, we have to be careful to
+// allow serveral instances of this program to run at the same time on the
+// same machine
+//
+/////////////////////////////////////////////////////////////////////////////
+#ifdef __APPLE__
+sem_t *apple_sem(int initial_value) {
+  sem_t *sem;
+  static long semcount = 0;
+  char sname[20];
+
+  for (;;) {
+    sprintf(sname, "P2_%08ld", semcount++);
+    sem = sem_open(sname, O_CREAT | O_EXCL, 0700, initial_value);
+
+    //
+    // This can happen if a semaphore of that name is already in use,
+    // for example by another SDR program running on the same machine
+    //
+    if (sem == SEM_FAILED && errno == EEXIST) { continue; }
+
+    break;
+  }
+
+  if (sem == SEM_FAILED) {
+    t_perror("NewProtocol:SemOpen");
+    exit (-1);
+  }
+
+  // we can unlink the semaphore NOW. It will remain functional
+  // until sem_close() has been called by all threads using that
+  // semaphore.
+  sem_unlink(sname);
+  return sem;
+}
+#endif

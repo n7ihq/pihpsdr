@@ -95,9 +95,9 @@ int n_output_devices = 0;
 // NOTE: lead large buffer for some "loopback" devices which produce
 //       samples in large chunks if fed from digimode programs.
 //
-float  *mic_ring_buffer = NULL;
-int     mic_ring_outpt = 0;
-int     mic_ring_inpt = 0;
+static          float  *mic_ring_buffer = NULL;
+static volatile int     mic_ring_outpt = 0;
+static volatile int     mic_ring_inpt = 0;
 
 //
 // AUDIO_GET_CARDS
@@ -298,6 +298,7 @@ int pa_out_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
 
         if (newpt >= MY_RING_BUFFER_SIZE) { newpt = 0; }
 
+        MEMORY_BARRIER;
         rx->local_audio_buffer_outpt = newpt;
       }
     }
@@ -365,8 +366,10 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
       if (newpt == MY_RING_BUFFER_SIZE) { newpt = 0; }
 
       if (newpt != mic_ring_outpt) {
+        MEMORY_BARRIER;
         // buffer space available, do the write
         mic_ring_buffer[mic_ring_inpt] = in[i];
+        MEMORY_BARRIER;
         // atomic update of mic_ring_inpt
         mic_ring_inpt = newpt;
       }
@@ -401,8 +404,10 @@ float audio_get_next_mic_sample() {
 
     if (newpt == MY_RING_BUFFER_SIZE) { newpt = 0; }
 
+    MEMORY_BARRIER;
     sample = mic_ring_buffer[mic_ring_outpt];
     // atomic update of read pointer
+    MEMORY_BARRIER;
     mic_ring_outpt = newpt;
   }
 
@@ -623,6 +628,7 @@ int audio_write (RECEIVER *rx, float left, float right) {
         if (oldpt >= MY_RING_BUFFER_SIZE) { oldpt = 0; }
       }
 
+      MEMORY_BARRIER;
       rx->local_audio_buffer_inpt = oldpt;
       //t_print("%s: buffer was nearly empty, inserted silence.\n", __FUNCTION__);
     }
@@ -656,8 +662,10 @@ int audio_write (RECEIVER *rx, float left, float right) {
       //
       // buffer space available
       //
+      MEMORY_BARRIER;
       buffer[2 * oldpt] = left;
       buffer[2 * oldpt + 1] = right;
+      MEMORY_BARRIER;
       rx->local_audio_buffer_inpt = newpt;
     }
   }
@@ -692,7 +700,9 @@ int cw_audio_write(RECEIVER *rx, float sample) {
       // empty audio buffer and insert *a little bit of* silence
       //
       bzero(rx->local_audio_buffer, 2 * MY_CW_MID_WATER * sizeof(float));
+      MEMORY_BARRIER;
       rx->local_audio_buffer_inpt = MY_CW_MID_WATER;
+      MEMORY_BARRIER;
       rx->local_audio_buffer_outpt = 0;
       avail = MY_CW_MID_WATER;
       count = 0;
@@ -726,8 +736,10 @@ int cw_audio_write(RECEIVER *rx, float sample) {
         //
         // buffer space available
         //
+        MEMORY_BARRIER;
         rx->local_audio_buffer[2 * oldpt] = sample;
         rx->local_audio_buffer[2 * oldpt + 1] = -sample;
+        MEMORY_BARRIER;
         rx->local_audio_buffer_inpt = newpt;
       }
 
@@ -751,6 +763,7 @@ int cw_audio_write(RECEIVER *rx, float sample) {
 
       if (oldpt == MY_RING_BUFFER_SIZE) { oldpt = 0; }
 
+      MEMORY_BARRIER;
       rx->local_audio_buffer_inpt = oldpt;
       break;
 

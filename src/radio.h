@@ -87,7 +87,6 @@ extern char property_path[];
 extern int region;
 
 extern int RECEIVERS;
-extern int MAX_DDC;
 extern int PS_TX_FEEDBACK;
 extern int PS_RX_FEEDBACK;
 
@@ -350,4 +349,16 @@ extern void protocol_restart(void);
 // Macro to flag an unimplemented client/server feature
 //
 #define CLIENT_MISSING if (radio_is_remote) { t_print("%s: TODO: CLIENT/SERVER\n", __FUNCTION__); return; }
+
+
+//
+// Macro for a memory barrier, preventing changing the execution order
+// or memory accesses (used for ring buffers)
+//
+#define MEMORY_BARRIER asm volatile ("" ::: "memory")
+
+#ifdef __APPLE__
+#include <semaphore.h>
+sem_t *apple_sem(int initial_value);
+#endif
 #endif

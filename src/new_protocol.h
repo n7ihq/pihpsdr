@@ -22,6 +22,8 @@
 #include <semaphore.h>
 #include "receiver.h"
 
+#define MAX_DDC 4
+
 // port definitions from host
 #define GENERAL_REGISTERS_FROM_HOST_PORT 1024
 #define PROGRAMMING_FROM_HOST_PORT 1024
@@ -32,7 +34,7 @@
 #define TX_IQ_FROM_HOST_PORT 1029
 
 // port definitions to host
-#define COMMAND_RESPONCE_TO_HOST_PORT 1024
+#define COMMAND_RESPONSE_TO_HOST_PORT 1024
 #define HIGH_PRIORITY_TO_HOST_PORT 1025
 #define MIC_LINE_TO_HOST_PORT 1026
 #define WIDE_BAND_TO_HOST_PORT 1027
@@ -46,7 +48,10 @@
 #define RX_IQ_TO_HOST_PORT_7 1042
 
 // Network buffers
-#define NET_BUFFER_SIZE 2048 // max length of a buffer from the radio
+// Maximum length is 1444 so the value used before (2048) is far too big
+
+#define NET_BUFFER_SIZE  1500
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -95,9 +100,7 @@ extern void new_protocol_cw_audio_samples(short l, short r);
 
 extern void new_protocol_menu_start(void);
 extern void new_protocol_menu_stop(void);
-#ifdef SATURN
-  void saturn_post_iq_data(int ddc, mybuffer *buffer);
-  void saturn_post_micaudio(int bytes, mybuffer *buffer);
-  void saturn_post_high_priority(mybuffer *buffer);
-#endif
+extern void saturn_post_iq_data(int ddc, mybuffer *buffer);
+extern void saturn_post_micaudio(int bytes, mybuffer *buffer);
+extern void saturn_post_high_priority(mybuffer *buffer);
 #endif
