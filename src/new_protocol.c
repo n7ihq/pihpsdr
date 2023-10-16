@@ -1459,7 +1459,6 @@ static void new_protocol_start() {
   new_protocol_transmit_specific();
   new_protocol_receive_specific();
   new_protocol_timer_thread_id = g_thread_new( "P2 task", new_protocol_timer_thread, NULL);
-  t_print( "new_protocol_timer_thread: id=%p\n", new_protocol_timer_thread_id);
 }
 
 void new_protocol_stop() {

@@ -104,8 +104,9 @@ to the version of piHPSDR that can be found on my github account \texttt{https:/
 
 Because piHPSDR can be used on many different types of computers, and because operating systems change
 rather quickly over time, I generally do not recommend to do a ,,binary installation'' although such
-a bundle is provided in the repository (for the RapsberryPi only) and the process is decribed in Appendix \ref{sec:installbinary}.
- Instead, my personal recommendation is to build piHPSDR
+a bundle is provided in the repository (for the RapsberryPi only) and the process is decribed in Appendix
+\ref{sec:installbinary}.
+Instead, my personal recommendation is to build piHPSDR
 from the sources, only this procedure guarantees compatibility of the final program with your
 operating system. Shell scripts for a semi-automatic installation have been provided,
 and the procedure is described in Appendix \ref{sec:installsources} for Linux (including RaspPi)
@@ -117,7 +118,8 @@ a menu of within the VFO bar. piHPSDR menus and commands are indicated through a
 printed in blue. The author hopes that this improves readability. In some cases, if the name of a command
 or  menu is written on the screen, you may find the same string both typed in red and blue in the
 description, depending on whether the text refers to the command in an abstract sense or to the string as it
-can be found on the screen. This may be confusing upon first reading, but I shall try to follow the coloring convention as laid out here.
+can be found on the screen. This may be confusing upon first reading, but I shall try to follow the coloring
+convention as laid out here.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Starting piHPSDR for the first time}
@@ -1696,6 +1698,17 @@ In the example shown, checking the Local Audio box would send the RX audio
 samples to the HDMI monitor attached to the RaspPi, but one could equally
 well choose the headphone output or a virtual cable, if one wants to use
 digital modes.
+
+If you are running two receivers, it depends on the audio output module whether
+it is possible to use the \textit{same} audio output device as local audio output
+for both receivers. With PulseAudio, this is possible which gives you an additional
+bonus:
+Choose the same output device for RX1 and RX2 and activate only
+the left channel for the first and only the right channel for the second receiver.
+ With this setup,
+one gets the audio output of the first receiver on the left ear and the audio output of
+the second receiver on the right ear. This can be very convenient for hunting DX in split mode,
+because one then hears the hounds and the fox on different ears.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Filter} menu}
@@ -4156,7 +4169,7 @@ ALSA is active. If compiling from the sources you get the PulseAudio module if y
 do not change the Makefile (see Appendix \ref{sec:compiletime}).
 
 
-\textbf{\color{red}Virtual audio cables. Linux ALSA case.} \\
+\textbf{\color{red}Virtual audio cables. Linux ALSA case (Linux only).} \\
 The command for creating the two virtual cables (put everything in one line) is
 
 \texttt{sudo modprobe snd-aloop index=5,6 id=RXcable,TXcable\\
@@ -4253,7 +4266,7 @@ takes care WSJTX switches piHPSDR to DIGU mode, and using \rett{Fake It} for the
 Operation method is just my personal preference.
 
 \clearpage
-\textbf{\color{red}Virtual audio cables, PulseAudio case.}\\
+\textbf{\color{red}Virtual audio cables, PulseAudio case (Linux only).}\\
 There are no explicit loopback devices with PulseAudio since they are not needed.
 For \textit{every} PulseAudio output device, there is a corresponding ,,Monitor'' device
 which can be used for sound input, and where the data sent to the primary (output) device
@@ -4341,8 +4354,11 @@ If you do not want to use the headphone output for RX audio, it should be clear 
 create an additional null-sink device with name, say, RXcable, to be used instead.
 The CAT connection between WSJTX and piHPSDR is the same as in the ALSA case.
 
+
 \textbf{\color{red}Using ,,loopback'' in MacOS}\\
-In MacOS, the easist, most flexible, and (from my side) most recommended option is
+The standard audio option for MacOS is PORTAUDIO which has no built-in virtual
+audio cables. In this case
+the easist, most flexible, and (from my side) most recommended option is
 to buy a third-party product,  ,,loopback'' from RogueAmoeba
 (\texttt{https://rogueamoeba.com/loopback/}) .
 Note I have no connections with that company, I am just using this product and
@@ -4376,8 +4392,18 @@ In piHPSDR, simply choose RXcable and local RX output in the \bltt{RX} menu,
 and a local microphone with device TXcable in the \bltt{TX} menu. In WSJTX,
 simply choose RXcable as the input and TXcable as the output device.
 
-CAT connection in MacOS is the same as described for Linux above.
+As an additional bonus, loopback can also mix output devices. For example, one can create
+an additional loopback device with, say, name RX2, which can also be connected to
+the headphone output as shown for RXcable. If piHPSDR is running two receivers,
+one can use the \bltt{RX} menu to send the audio output of the first receiver to RXcable
+and the audio output of the second receiver to RX2. Additionally one can activate only
+the left channel for the first and only the right channel for the second receiver
+(see the \bltt{RX} menu). With this setup,
+one gets the audio output of the first receiver on the left ear and the audio output of
+the second receiver on the right ear. This can be very convenient for hunting DX in split mode,
+because one then hears the hounds and the fox on different ears.
 
+Transceiver control (CAT connection) in MacOS is the same as described for Linux.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Compile-time options}
