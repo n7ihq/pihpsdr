@@ -209,7 +209,7 @@ void transmitterSaveState(const TRANSMITTER *tx) {
   SetPropF1("transmitter.%d.drive_iscal",       tx->id,               tx->drive_iscal);
   SetPropI1("transmitter.%d.do_scale",          tx->id,               tx->do_scale);
   SetPropI1("transmitter.%d.compressor",        tx->id,               tx->compressor);
-  SetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor);
+  SetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor_level);
   SetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
   SetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
 }
@@ -248,7 +248,7 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
   GetPropF1("transmitter.%d.drive_iscal",       tx->id,               tx->drive_iscal);
   GetPropI1("transmitter.%d.do_scale",          tx->id,               tx->do_scale);
   GetPropI1("transmitter.%d.compressor",        tx->id,               tx->compressor);
-  GetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor);
+  GetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor_level);
   GetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
   GetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
 }
