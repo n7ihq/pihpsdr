@@ -2606,7 +2606,7 @@ static void *client_thread(void* arg) {
 
       // cppcheck-suppress uninitStructMember
       int rx = rx_select_cmd.id;
-      active_receiver = receiver[rx];
+      receiver_set_active(receiver[rx]);
     }
 
     g_idle_add(ext_vfo_update, (gpointer)NULL);

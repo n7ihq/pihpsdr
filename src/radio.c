@@ -1610,7 +1610,7 @@ void radio_change_receivers(int r) {
   }
 
   reconfigure_screen();
-  active_receiver = receiver[0];
+  receiver_set_active(receiver[0]);
 #ifdef CLIENT_SERVER
 
   if (!radio_is_remote) {

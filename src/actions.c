@@ -1330,10 +1330,7 @@ int process_action(void *data) {
   case SWAP_RX:
     if (a->mode == PRESSED) {
       if (receivers == 2) {
-        active_receiver = receiver[active_receiver->id == 1 ? 0 : 1];
-        g_idle_add(menu_active_receiver_changed, NULL);
-        g_idle_add(ext_vfo_update, NULL);
-        g_idle_add(sliders_active_receiver_changed, NULL);
+        receiver_set_active(receiver[active_receiver->id == 1 ? 0 : 1]);
       }
     }
 
