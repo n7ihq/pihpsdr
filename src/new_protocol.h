@@ -99,9 +99,7 @@ extern void new_protocol_cw_audio_samples(short l, short r);
 
 extern void new_protocol_menu_start(void);
 extern void new_protocol_menu_stop(void);
-#ifdef SATURN
-  void saturn_post_iq_data(int ddc, mybuffer *buffer);
-  void saturn_post_micaudio(int bytes, mybuffer *buffer);
-  void saturn_post_high_priority(mybuffer *buffer);
-#endif
+extern  void saturn_post_iq_data(int ddc, mybuffer *buffer);
+extern  void saturn_post_micaudio(int bytes, mybuffer *buffer);
+extern  void saturn_post_high_priority(mybuffer *buffer);
 #endif
