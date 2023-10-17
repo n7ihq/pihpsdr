@@ -40,7 +40,8 @@ UNAME_S := $(shell uname -s)
 
 # Get git commit version and date
 GIT_DATE := $(firstword $(shell git --no-pager show --date=short --format="%ai" --name-only))
-GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
+GIT_VERSION := $(shell git describe --abbrev=0 --tags --always --dirty)
+GIT_COMMIT := $(shell git log --pretty=format:"%h"  -1)
 
 CFLAGS?= -O3 -Wno-deprecated-declarations -Wall
 LINK?=   $(CC)
@@ -279,7 +280,7 @@ OPTIONS=$(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
 	$(STEMLAB_OPTIONS) \
 	$(SERVER_OPTIONS) \
 	$(AUDIO_OPTIONS) $(EXTNR_OPTIONS)\
-	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' $(DEBUG_OPTION)
+	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' -D GIT_COMMIT='"$(GIT_COMMIT)"'
 
 INCLUDES=$(GTKINCLUDES)
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)

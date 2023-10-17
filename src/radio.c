@@ -118,8 +118,6 @@ gint sat_mode;
 
 int region = REGION_OTHER;
 
-int echo = 0;
-
 int radio_sample_rate;   // alias for radio->info.soapy.sample_rate
 gboolean iqswap;
 
@@ -1606,7 +1604,7 @@ void radio_change_receivers(int r) {
   }
 
   reconfigure_screen();
-  active_receiver = receiver[0];
+  receiver_set_active(receiver[0]);
 #ifdef CLIENT_SERVER
 
   if (!radio_is_remote) {

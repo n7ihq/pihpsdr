@@ -206,6 +206,18 @@ static mybuffer *get_my_buffer(int numlist) {
   return buflist[numlist];
 }
 
+void saturn_free_buffers() {
+  mybuffer *mybuf;
+
+  for (int i = 0; i < MAXMYBUF; i++) {
+    mybuf = buflist[i];
+    while (mybuf) {
+      mybuf->free = 1;
+      mybuf = mybuf->next;
+    }
+  }
+}
+
 bool CreateDynamicMemory(void) {                            // return true if error
   uint32_t DDC;
   bool Result = false;

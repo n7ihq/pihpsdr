@@ -94,7 +94,7 @@ int n_output_devices = 0;
 // NOTE: lead large buffer for some "loopback" devices which produce
 //       samples in large chunks if fed from digimode programs.
 //
-static volatile float  *mic_ring_buffer = NULL;
+static          float  *mic_ring_buffer = NULL;
 static volatile int     mic_ring_outpt = 0;
 static volatile int     mic_ring_inpt = 0;
 
@@ -244,7 +244,7 @@ int audio_open_input() {
     t_print("%s: start stream error %s\n", __FUNCTION__, Pa_GetErrorText(err));
     Pa_CloseStream(record_handle);
     record_handle = NULL;
-    g_free((float *)mic_ring_buffer);
+    g_free(mic_ring_buffer);
     mic_ring_buffer = NULL;
     g_mutex_unlock(&audio_mutex);
     return -1;
@@ -346,7 +346,7 @@ int pa_mic_cb(const void *inputBuffer, void *outputBuffer, unsigned long framesP
         last_was_tx = 0;
         mic_ring_outpt = 0;
         mic_ring_inpt  = 960;
-        bzero((float *)mic_ring_buffer, 960 * sizeof(float));
+        bzero(mic_ring_buffer, 960 * sizeof(float));
       }
     } else {
       last_was_tx = 1;
@@ -487,7 +487,7 @@ int audio_open_output(RECEIVER *rx) {
     t_print("%s: error starting stream:%s\n", __FUNCTION__, Pa_GetErrorText(err));
     Pa_CloseStream(rx->playstream);
     rx->playstream = NULL;
-    g_free((float *)rx->local_audio_buffer);
+    g_free(rx->local_audio_buffer);
     rx->local_audio_buffer = NULL;
     g_mutex_unlock(&rx->local_audio_mutex);
     return -1;
@@ -526,7 +526,7 @@ void audio_close_input() {
   }
 
   if (mic_ring_buffer != NULL) {
-    g_free((float *)mic_ring_buffer);
+    g_free(mic_ring_buffer);
   }
 
   g_mutex_unlock(&audio_mutex);
@@ -542,7 +542,7 @@ void audio_close_output(RECEIVER *rx) {
   g_mutex_lock(&rx->local_audio_mutex);
 
   if (rx->local_audio_buffer != NULL) {
-    g_free((float *)rx->local_audio_buffer);
+    g_free(rx->local_audio_buffer);
     rx->local_audio_buffer = NULL;
   }
 
@@ -581,7 +581,7 @@ void audio_close_output(RECEIVER *rx) {
 //
 int audio_write (RECEIVER *rx, float left, float right) {
   int txmode = get_tx_mode();
-  volatile float *buffer = rx->local_audio_buffer;
+  float *buffer = rx->local_audio_buffer;
 
   if (rx == active_receiver && isTransmitting() && (txmode == modeCWU || txmode == modeCWL)
       && cw_keyer_sidetone_volume > 0) {
@@ -694,7 +694,7 @@ int cw_audio_write(RECEIVER *rx, float sample) {
       // First time producing CW audio after RX/TX transition:
       // empty audio buffer and insert *a little bit of* silence
       //
-      bzero((float *)rx->local_audio_buffer, 2 * MY_CW_MID_WATER * sizeof(float));
+      bzero(rx->local_audio_buffer, 2 * MY_CW_MID_WATER * sizeof(float));
       MEMORY_BARRIER;
       rx->local_audio_buffer_inpt = MY_CW_MID_WATER;
       MEMORY_BARRIER;

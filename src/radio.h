@@ -119,8 +119,6 @@ enum {
 
 extern gint sat_mode;
 
-extern int echo;
-
 extern int radio_sample_rate;
 extern gboolean iqswap;
 

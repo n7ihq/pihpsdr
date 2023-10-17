@@ -36,6 +36,9 @@
   #include "gpio.h"
 #endif
 #include "message.h"
+#ifdef SATURN
+#include "saturnmain.h"
+#endif
 
 static GtkWidget *dialog = NULL;
 
@@ -52,6 +55,11 @@ void stop_program() {
     t_print("%s: protocol stopped\n", __FUNCTION__);
     radio_stop();
     t_print("%s: radio stopped\n", __FUNCTION__);
+    if (have_saturn_xdma) {
+#ifdef SATURN
+      saturn_exit();
+#endif
+    }
 #ifdef CLIENT_SERVER
   }
 

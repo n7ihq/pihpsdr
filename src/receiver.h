@@ -186,7 +186,7 @@ typedef struct _receiver {
   PaStream *playstream;
   volatile gint local_audio_buffer_inpt;    // pointer in audio ring-buffer
   volatile gint local_audio_buffer_outpt;   // pointer in audio ring-buffer
-  volatile float *local_audio_buffer;
+  float *local_audio_buffer;
 #endif
 #ifdef ALSA
   snd_pcm_t *playback_handle;

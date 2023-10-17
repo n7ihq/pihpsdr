@@ -18,6 +18,7 @@
 
 char build_date[] = GIT_DATE;
 char build_version[] = GIT_VERSION;
+char build_commit[] = GIT_COMMIT;
 
 char version[] =
 #ifdef GPIO

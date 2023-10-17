@@ -79,7 +79,7 @@ static int rxid[MAX_DDC];
 
 int data_socket = -1;
 
-static int running;
+static volatile int running;
 
 static int dash = 0;
 static int dot = 0;
@@ -124,10 +124,19 @@ static long micsamples_sequence = 0;
 #ifdef __APPLE__
   static sem_t *high_priority_sem_ready;
   static sem_t *high_priority_sem_buffer;
+  static sem_t *mic_line_sem;
+  static sem_t *iq_sem[MAX_DDC];
+  static sem_t *txiq_sem;
+  static sem_t *rxaudio_sem;
 #else
   static sem_t high_priority_sem_ready;
   static sem_t high_priority_sem_buffer;
+  static sem_t mic_line_sem;
+  static sem_t iq_sem[MAX_DDC];
+  static sem_t txiq_sem;
+  static sem_t rxaudio_sem;
 #endif
+
 static GThread *high_priority_thread_id;
 static GThread *mic_line_thread_id;
 static GThread *iq_thread_id[MAX_DDC];
@@ -151,69 +160,31 @@ static socklen_t length = sizeof(addr);
 // a large ring buffer (about 4k samples), and send them to the
 // radio following the pace of incoming mic samples.
 //
-// TXIQRINGBUF must contain a multiple of 6 bytes (1 sample = 6 bytes,
-// since there are two 24-bit IQ numbers). RXAUDIORINGBUF must
-// contain a multiple of 4 bytes (1 sample = 4 bytes, L+R with
-// 16 bits each).
+// TXIQRINGBUF must contain a multiple of 1440 bytes (240 samples).
+// RXAUDIORINGBUF must contain a multiple of 256 bytes (64 samples).
 //
 // The ring buffers must be thread-safe.
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define TXIQRINGBUFLEN    98304  // 16k TX IQ samples     (85 msec)
-#define RXAUDIORINGBUFLEN 16384  //  4k RX audio samples  (85 msec)
+#define TXIQRINGBUFLEN    97920  // (85 msec)
+#define RXAUDIORINGBUFLEN 16384  // (85 msec)
 
-static volatile unsigned char RXAUDIORINGBUF[RXAUDIORINGBUFLEN];
-static volatile unsigned char TXIQRINGBUF[TXIQRINGBUFLEN];
+static unsigned char *RXAUDIORINGBUF = NULL;
+static unsigned char *TXIQRINGBUF = NULL;
 
 static volatile int txiq_inptr        = 0;  // pointer updated when writing into the ring buffer
 static volatile int txiq_outptr       = 0;  // pointer updated when reading from the ring buffer
+static volatile int txiq_count        = 0;  // number of samples queued since last sem_post
 
 static volatile int rxaudio_inptr     = 0;  // pointer updated when writing into the ring buffer
 static volatile int rxaudio_outptr    = 0;  // pointer updated when reading from the ring buffer
+static volatile int rxaudio_count     = 0;  // number of samples queued since last sem_post
+static volatile int rxaudio_drain     = 0;  // a flag for draining the RX audio buffer
+static volatile int rxaudio_flag      = 0;  // 0: RX, 1: TX
 
 static pthread_mutex_t send_rxaudio_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// MacOS semaphores
-//
-// Since MacOS only supports named semaphores, we have to be careful to
-// allow serveral instances of this program to run at the same time on the
-// same machine
-//
-/////////////////////////////////////////////////////////////////////////////
-#ifdef __APPLE__
-sem_t *apple_sem(int initial_value) {
-  sem_t *sem;
-  static long semcount = 0;
-  char sname[20];
-
-  for (;;) {
-    sprintf(sname, "P2_%08ld", semcount++);
-    sem = sem_open(sname, O_CREAT | O_EXCL, 0700, initial_value);
-
-    //
-    // This can happen if a semaphore of that name is already in use,
-    // for example by another SDR program running on the same machine
-    //
-    if (sem == SEM_FAILED && errno == EEXIST) { continue; }
-
-    break;
-  }
-
-  if (sem == SEM_FAILED) {
-    t_perror("NewProtocol:SemOpen");
-    exit (-1);
-  }
-
-  // we can unlink the semaphore NOW. It will remain functional
-  // until sem_close() has been called by all threads using that
-  // semaphore.
-  sem_unlink(sname);
-  return sem;
-}
-#endif
 /////////////////////////////////////////////////////////////////////////////
 //
 // PEDESTRIAN BUFFER MANAGEMENT
@@ -249,6 +220,7 @@ static mybuffer *buflist = NULL;
 static volatile mybuffer *iq_buffer[MAX_DDC][RXIQRINGBUFLEN];
 static volatile int iq_inptr[MAX_DDC] = { 0 };
 static volatile int iq_outptr[MAX_DDC] = { 0 };
+static volatile int iq_count[MAX_DDC] = { 0 };
 
 static mybuffer *high_priority_buffer;
 
@@ -256,6 +228,7 @@ static mybuffer *high_priority_buffer;
 static volatile mybuffer *mic_line_buffer[MICRINGBUFLEN];
 static volatile int mic_inptr = 0;
 static volatile int mic_outptr = 0;
+static volatile int mic_count = 0;
 
 static unsigned char general_buffer[60];
 static unsigned char high_priority_buffer_to_radio[1444];
@@ -450,6 +423,17 @@ void update_action_table() {
 
 void new_protocol_init(int pixels) {
   int i;
+
+  //
+  // This is allocated once and forever
+  //
+  if (TXIQRINGBUF == NULL) {
+    TXIQRINGBUF = g_new(unsigned char, TXIQRINGBUFLEN);
+  }
+  if (RXAUDIORINGBUF == NULL) {
+    RXAUDIORINGBUF = g_new(unsigned char, RXAUDIORINGBUFLEN);
+  }
+
   memset(rxcase, 0, sizeof(rxcase));
   memset(rxid, 0, sizeof(rxid));
   memset(ddc_sequence, 0, sizeof(ddc_sequence));
@@ -462,33 +446,55 @@ void new_protocol_init(int pixels) {
     }
   }
 
+//
+// Initialize semaphores for the never-finishing threads
+// (HighPrio, Mic, rxIQ)
+// and spawn the threads.
+//
 #ifdef __APPLE__
   high_priority_sem_ready = apple_sem(0);
   high_priority_sem_buffer = apple_sem(0);
+  mic_line_sem = apple_sem(0);
+  for (i = 0; i < MAX_DDC; i++) {
+    iq_sem[i] = apple_sem(0);
+  }
 #else
   (void)sem_init(&high_priority_sem_ready, 0, 0); // check return value!
   (void)sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
+  (void)sem_init(&mic_line_sem, 0, 0); // check return value!
+  for (i = 0; i < MAX_DDC; i++) {
+    (void)sem_init(&iq_sem[i], 0, 0); // check return value!
+  }
 #endif
-  high_priority_thread_id = g_thread_new( "P2 HP", high_priority_thread, NULL);
-  t_print( "high_priority_thread: id=%p\n", high_priority_thread_id);
-  mic_line_thread_id = g_thread_new( "P2 MIC", mic_line_thread, NULL);
-  t_print( "mic_line_thread: id=%p\n", mic_line_thread_id);
 
-  //
-  //  Spawn off one IQ reading thread for each DDC to be used
-  //  Note that IQ reading threads are associated with DDCs and
-  //  not with RECEIVERs.
-  //
+  running = 1;
+
+  high_priority_thread_id = g_thread_new( "P2 HP", high_priority_thread, NULL);
+  mic_line_thread_id = g_thread_new( "P2 MIC", mic_line_thread, NULL);
+
   for (i = 0; i < MAX_DDC; i++) {
     char text[16];
     snprintf(text, 16, "P2 DDC%d", i);
     iq_thread_id[i] = g_thread_new(text, iq_thread, GINT_TO_POINTER(i));
   }
 
+  //
+  // start RX audio and TXIQ sending threads
+  //
+#ifdef __APPLE__
+  txiq_sem = apple_sem(0);
+  rxaudio_sem = apple_sem(0);
+#else
+  (void)sem_init(&txiq_sem, 0, 0); // check return value!
+  (void)sem_init(&rxaudio_sem, 0, 0); // check return value!
+#endif
+
+  new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
+  new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
+
   if (have_saturn_xdma) {
 #ifdef SATURN
     saturn_init();
-    running = 1;
 #endif
   } else {
     data_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -600,26 +606,9 @@ void new_protocol_init(int pixels) {
       data_addr[i].sin_port = htons(RX_IQ_TO_HOST_PORT_0 + i);
     }
 
-    // running is set to 1 at the top of new_protocol_thread,
-    // but this may lead to race conditions. So out of paranoia,
-    // set it to 1 here as well such that we are *absolutely* sure
-    // is is set before starting the timer thread sending the HP packet.
-    running = 1;
     new_protocol_thread_id = g_thread_new( "P2 main", new_protocol_thread, NULL);
-    t_print( "new_protocol_thread: id=%p\n", new_protocol_thread_id);
   }
 
-  //
-  // start RX audio and TXIQ sending threads
-  //
-  txiq_inptr = 0;
-  txiq_outptr = 0;
-  rxaudio_inptr = 0;
-  rxaudio_outptr = 0;
-  new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
-  t_print( "new_protocol_rxaudio_thread: id=%p\n", new_protocol_rxaudio_thread_id);
-  new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
-  t_print( "new_protocol_txiq_thread: id=%p\n", new_protocol_txiq_thread_id);
   new_protocol_general();
   new_protocol_start();
   new_protocol_high_priority();
@@ -1466,22 +1455,6 @@ static void new_protocol_start() {
   new_protocol_transmit_specific();
   new_protocol_receive_specific();
   new_protocol_timer_thread_id = g_thread_new( "P2 task", new_protocol_timer_thread, NULL);
-  t_print( "new_protocol_timer_thread: id=%p\n", new_protocol_timer_thread_id);
-}
-
-void new_protocol_stop() {
-  running = 0;
-  new_protocol_high_priority();
-  usleep(100000); // 100 ms
-
-  if (have_saturn_xdma) {
-#ifdef SATURN
-    saturn_exit();
-#endif
-  } else {
-    close (data_socket);
-    data_socket = -1;
-  }
 }
 
 //
@@ -1491,43 +1464,55 @@ void new_protocol_menu_stop() {
   fd_set fds;
   struct timeval tv;
   char *buffer;
-  //
-  // halt the protocol, wait 200 msec, and re-start it
-  // the data socket is drained but kept open
-  //
+
   running = 0;
-
-  if (have_saturn_xdma) {
-    g_thread_join(new_protocol_timer_thread_id);
-    g_thread_join(new_protocol_rxaudio_thread_id);
-    g_thread_join(new_protocol_txiq_thread_id);
-    new_protocol_high_priority();
-    usleep(200000); // 200 ms
-    return;
+  //
+  // Wait 50 msec so we know that the TX IQ and RX audio
+  // threads block on the semaphore. Then, post the semaphores
+  // such that the threads can check "running" and terminate
+  //
+  usleep(50000);
+#ifdef __APPLE__
+  sem_post(txiq_sem);
+  sem_post(rxaudio_sem);
+#else
+  sem_post(&txiq_sem);
+  sem_post(&rxaudio_sem);
+#endif
+  g_thread_join(new_protocol_rxaudio_thread_id);
+  g_thread_join(new_protocol_txiq_thread_id);
+#ifdef __APPLE__
+  sem_close(txiq_sem);
+  sem_close(rxaudio_sem);
+#else
+  sem_destroy(&txiq_sem);
+  sem_destroy(&rxaudio_sem);
+#endif
+  if (!have_saturn_xdma) {
+    g_thread_join(new_protocol_thread_id);
   }
-
-  // wait until the thread that receives from the radio has terminated
-  g_thread_join(new_protocol_thread_id);
   g_thread_join(new_protocol_timer_thread_id);
-  // send HP packet ==> stop radio
   new_protocol_high_priority();
   // let the FPGA rest a while
   usleep(200000); // 200 ms
-  //
-  // drain all data that might still wait in the data_socket.
-  // (use select() and read until nothing is left)
-  //
-  FD_ZERO(&fds);
-  FD_SET(data_socket, &fds);
-  tv.tv_usec = 50000;
-  tv.tv_sec = 0;
-  buffer = malloc(NET_BUFFER_SIZE);
 
-  while (select(data_socket + 1, &fds, NULL, NULL, &tv) > 0) {
-    recvfrom(data_socket, buffer, NET_BUFFER_SIZE, 0, (struct sockaddr*)&addr, &length);
+  if (!have_saturn_xdma) {
+    //
+    // drain all data that might still wait in the data_socket.
+    // (use select() and read until nothing is left)
+    //
+    FD_ZERO(&fds);
+    FD_SET(data_socket, &fds);
+    tv.tv_usec = 50000;
+    tv.tv_sec = 0;
+    buffer = malloc(NET_BUFFER_SIZE);
+
+    while (select(data_socket + 1, &fds, NULL, NULL, &tv) > 0) {
+      recvfrom(data_socket, buffer, NET_BUFFER_SIZE, 0, (struct sockaddr*)&addr, &length);
+    }
+
+    free(buffer);
   }
-
-  free(buffer);
 }
 
 //
@@ -1548,46 +1533,47 @@ void new_protocol_menu_start() {
   memset(rxid, 0, sizeof(rxid));
   memset(ddc_sequence, 0, sizeof(ddc_sequence));
   update_action_table();
+
   //
   // Mark all buffers free.
   //
-  mybuffer *mybuf = buflist;
+  if (have_saturn_xdma) {
+#ifdef SATURN
+    saturn_free_buffers();
+#endif
+  } else {
+    mybuffer *mybuf = buflist;
 
-  while (mybuf) {
-    mybuf->free = 1;
-    mybuf = mybuf->next;
+    while (mybuf) {
+      mybuf->free = 1;
+      mybuf = mybuf->next;
+    }
   }
 
-  //
-  // Reset IQ input, mic sample, tx IQ output, and audio output queues
-  // TODO: how to do this thread-safe for the IQ and mic pointers
-  //
-  txiq_inptr = 0;
-  txiq_outptr = 0;
-  rxaudio_inptr = 0;
-  rxaudio_outptr = 0;
-  // running is set to 1 at the top of new_protocol_thread,
-  // but this may lead to race conditions. So out of paranoia,
-  // set it to 1 here as well such that we are *absolutely* sure
-  // is is set before starting the timer thread sending the HP packet.
   running = 1;
+
+#ifdef __APPLE__
+  txiq_sem = apple_sem(0);
+  rxaudio_sem = apple_sem(0);
+#else
+  (void)sem_init(&txiq_sem, 0, 0); // check return value!
+  (void)sem_init(&rxaudio_sem, 0, 0); // check return value!
+#endif
+
+  new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
+  new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
 
   if (!have_saturn_xdma) {
     new_protocol_thread_id = g_thread_new( "P2 main", new_protocol_thread, NULL);
   }
 
-  new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
-  new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
-  // start the protocol
   new_protocol_general();
   new_protocol_start();
   new_protocol_high_priority();
 }
 
 static gpointer new_protocol_rxaudio_thread(gpointer data) {
-  int avail, optr, nptr;
-  int audioindex;
-  int timer = 9999;
+  int nptr;
   unsigned char audiobuffer[260];
 
   //
@@ -1598,59 +1584,40 @@ static gpointer new_protocol_rxaudio_thread(gpointer data) {
   // attempting to send the next one.
   //
   while (running) {
-    optr = rxaudio_outptr;
-    avail = rxaudio_inptr - optr;
-
-    if (avail < 0) { avail += RXAUDIORINGBUFLEN; }
-
-    while (avail < 256) {
-      usleep(500);
-
-      if (timer < 9999) { timer += 250; }
-
-      avail = rxaudio_inptr - optr;
-
-      if (avail < 0) { avail += RXAUDIORINGBUFLEN; }
-    }
-
-    if (avail <= 272) { usleep(50); }
+#ifdef __APPLE__
+    sem_wait(rxaudio_sem);
+#else
+    sem_wait(&rxaudio_sem);
+#endif
+    if (!running || rxaudio_drain) { continue; }
 
     audiobuffer[0] = audio_sequence >> 24;
     audiobuffer[1] = audio_sequence >> 16;
     audiobuffer[2] = audio_sequence >> 8;
     audiobuffer[3] = audio_sequence;
-    audioindex = 4;
 
-    for (int i = 0; i < 64; i++) {
-      nptr = optr + 4;
+    audio_sequence++;
 
-      if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+    nptr = rxaudio_outptr + 256;
 
-      MEMORY_BARRIER;
-      audiobuffer[audioindex++] = RXAUDIORINGBUF[optr++];
-      audiobuffer[audioindex++] = RXAUDIORINGBUF[optr++];
-      audiobuffer[audioindex++] = RXAUDIORINGBUF[optr++];
-      audiobuffer[audioindex++] = RXAUDIORINGBUF[optr++];
-      MEMORY_BARRIER;
-      rxaudio_outptr = nptr;
-    }
+    if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+
+    memcpy(&audiobuffer[4], &RXAUDIORINGBUF[rxaudio_outptr], 256);
+    MEMORY_BARRIER;
+    rxaudio_outptr = nptr;
 
     if (have_saturn_xdma) {
 #ifdef SATURN
       saturn_handle_speaker_audio(audiobuffer);
 #endif
     } else {
-      if (timer < 1000) {
-        usleep(1000 - timer);
-      }
-
       int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
 
       if (rc != sizeof(audiobuffer)) {
         t_print("sendto socket failed for %ld bytes of audio: %d\n", (long)sizeof(audiobuffer), rc);
       }
 
-      timer = 0;
+      usleep(1000);
     }
   }
 
@@ -1658,9 +1625,7 @@ static gpointer new_protocol_rxaudio_thread(gpointer data) {
 }
 
 static gpointer new_protocol_txiq_thread(gpointer data) {
-  int avail, nptr;
-  int iqindex;
-  int timer = 9999;
+  int nptr;
   unsigned char iqbuffer[1444];
 
   //
@@ -1672,59 +1637,36 @@ static gpointer new_protocol_txiq_thread(gpointer data) {
   // sending the next one.
   //
   while (running) {
-    avail = txiq_inptr - txiq_outptr;
-
-    if (avail < 0) { avail += TXIQRINGBUFLEN; }
-
-    while (avail < 1440) {
-      usleep(500);
-
-      if (timer < 9999) { timer += 250; }
-
-      avail = txiq_inptr - txiq_outptr;
-
-      if (avail < 0) { avail += TXIQRINGBUFLEN; }
-    }
-
-    if (avail <= 1464) { usleep(50); }
+#ifdef __APPLE__
+    sem_wait(txiq_sem);
+#else
+    sem_wait(&txiq_sem);
+#endif
+    if (!running) { break; }
 
     iqbuffer[0] = tx_iq_sequence >> 24;
     iqbuffer[1] = tx_iq_sequence >> 16;
     iqbuffer[2] = tx_iq_sequence >> 8;
     iqbuffer[3] = tx_iq_sequence;
-    iqindex = 4;
 
-    for (int i = 0; i < 240; i++) {
-      nptr = txiq_outptr + 6;
+    tx_iq_sequence++;
 
-      if (nptr >= TXIQRINGBUFLEN) { nptr = 0; }
-
-      MEMORY_BARRIER;
-      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr  ];
-      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr + 1];
-      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr + 2];
-      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr + 3];
-      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr + 4];
-      iqbuffer[iqindex++] = TXIQRINGBUF[txiq_outptr + 5];
-      MEMORY_BARRIER;
-      txiq_outptr = nptr;
-    }
+    nptr = txiq_outptr + 1440;
+    if (nptr >= TXIQRINGBUFLEN) { nptr = 0; }
+    memcpy(&iqbuffer[4], &TXIQRINGBUF[txiq_outptr], 1440);
+    MEMORY_BARRIER;
+    txiq_outptr = nptr;
 
     if (have_saturn_xdma) {
 #ifdef SATURN
       saturn_handle_duc_iq(false, iqbuffer);
 #endif
     } else {
-      if (timer < 1000) {
-        usleep(1000 - timer);
-      }
-
       if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr * )&iq_addr, iq_addr_length) < 0) {
         t_perror("sendto socket failed for iq:");
         exit(1);
       }
-
-      timer = 0;
+      usleep(1000);
     }
   }
 
@@ -1738,7 +1680,6 @@ static gpointer new_protocol_thread(gpointer data) {
   int bytesread;
   mybuffer *mybuf;
   t_print("new_protocol_thread\n");
-  running = 1;
 
   //
   // This thread should do as little work as possible and avoid any blocking.
@@ -1833,33 +1774,23 @@ static gpointer high_priority_thread(gpointer data) {
 static gpointer mic_line_thread(gpointer data) {
   t_print("mic_line_thread\n");
   mybuffer *mybuf;
-  int avail, nptr, optr;
+  int nptr;
 
   //
   // Ideally, a mic sample buffer with 64 samples arrives
   // every 1333 usec, but they may come in bursts
   //
   while (1) {
-    optr = mic_outptr;
-    avail = mic_inptr - optr;
-
-    if (avail < 0) { avail += MICRINGBUFLEN; }
-
-    while (avail < 1) {
-      usleep(500);
-      avail = mic_inptr - optr;
-
-      if (avail < 0) { avail += MICRINGBUFLEN; }
-    }
-
-    if (avail <= 4) { usleep(50); }
-
-    nptr = optr + 1;
+#ifdef __APPLE__
+    sem_wait(mic_line_sem);
+#else
+    sem_wait(&mic_line_sem);
+#endif
+    nptr = mic_outptr + 1;
 
     if (nptr >= MICRINGBUFLEN) { nptr = 0; }
 
-    MEMORY_BARRIER;
-    mybuf = (mybuffer *) mic_line_buffer[optr];
+    mybuf = (mybuffer *) mic_line_buffer[mic_outptr];
     MEMORY_BARRIER;
     mic_outptr = nptr;
 
@@ -1895,18 +1826,33 @@ void saturn_post_high_priority(mybuffer *buffer) {
 }
 
 void saturn_post_micaudio(int bytesread, mybuffer *mybuf) {
+  if (!running) {
+    mybuf->free = 1;
+    return;
+  }
+  if (mic_count < 0) {
+    mic_count++;
+    mybuf->free = 1;
+    return;
+  }
   int nptr = mic_inptr + 1;
 
   if (nptr >= MICRINGBUFLEN) { nptr = 0; }
 
   if (nptr != mic_outptr) {
-    MEMORY_BARRIER;
     mic_line_buffer[mic_inptr] = mybuf;
     MEMORY_BARRIER;
+#ifdef __APPLE__
+    sem_post(mic_line_sem);
+#else
+    sem_post(&mic_line_sem);
+#endif
     mic_inptr = nptr;
   } else {
     t_print("%s: buffer overflow.\n", __FUNCTION__);
     mybuf->free = 1;
+    // skip 16 mic buffers (21 msec)
+    mic_count = -16;
   }
 }
 
@@ -1916,7 +1862,15 @@ void saturn_post_iq_data(int ddc, mybuffer *mybuf) {
     mybuf->free = 1;
     return;
   }
-
+  if (!running) {
+    mybuf->free = 1;
+    return;
+  }
+  if (iq_count[ddc] < 0) {
+    iq_count[ddc]++;
+    mybuf->free = 1;
+    return;
+  }
   //
   // Check sequence HERE
   //
@@ -1936,13 +1890,19 @@ void saturn_post_iq_data(int ddc, mybuffer *mybuf) {
   if (nptr >= RXIQRINGBUFLEN) { nptr = 0; }
 
   if (nptr != iq_outptr[ddc]) {
-    MEMORY_BARRIER;
     iq_buffer[ddc][iptr] = mybuf;
     MEMORY_BARRIER;
     iq_inptr[ddc] = nptr;
+#ifdef __APPLE__
+    sem_post(iq_sem[ddc]);
+#else
+    sem_post(&iq_sem[ddc]);
+#endif
   } else {
     t_print("%s: DDC(%d) buffer overflow.\n", __FUNCTION__, ddc);
     mybuf->free = 1;
+    // skip 128 incoming buffers
+    iq_count[ddc] = -128;
   }
 }
 
@@ -1951,7 +1911,7 @@ static gpointer iq_thread(gpointer data) {
   //
   // TEMPORARY: additional sequence check here
   //
-  int avail, nptr, optr;
+  int nptr, optr;
   long sequence;
   long expected_sequence = 0;
   volatile mybuffer *mybuf;
@@ -1966,25 +1926,16 @@ static gpointer iq_thread(gpointer data) {
   // channel.
   //
   while (1) {
+#ifdef __APPLE__
+        sem_wait(iq_sem[ddc]);
+#else
+        sem_wait(&iq_sem[ddc]);
+#endif
     optr = iq_outptr[ddc];
-    avail = iq_inptr[ddc] - optr;
-
-    if (avail < 0) { avail += RXIQRINGBUFLEN; }
-
-    while (avail < 1) {
-      usleep(500);
-      avail = iq_inptr[ddc] - optr;
-
-      if (avail < 0) { avail += RXIQRINGBUFLEN; }
-    }
-
-    if (avail <= 4) { usleep(50); }
-
     nptr = optr + 1;
 
     if (nptr >= RXIQRINGBUFLEN) { nptr = 0; }
 
-    MEMORY_BARRIER;
     mybuf = iq_buffer[ddc][optr];
     MEMORY_BARRIER;
     iq_outptr[ddc] = nptr;
@@ -2273,32 +2224,57 @@ static void process_mic_data(unsigned char *buffer) {
 
 void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sample) {
   int txmode = get_tx_mode();
-  int nptr;
 
   if (isTransmitting() && (txmode == modeCWU || txmode == modeCWL)) {
     //
     // Only process samples if transmitting in CW
     //
     pthread_mutex_lock(&send_rxaudio_mutex);
-    nptr = rxaudio_inptr + 4;
+    if (rxaudio_count < 0) {
+      rxaudio_count++;
+      pthread_mutex_unlock(&send_rxaudio_mutex);
+      return;
+    }
 
-    if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+    if (!rxaudio_flag) {
+      //
+      // First time we arrive here after a RX->TX(CW) transition:
+      // set the "drain" flag, wait 10 msec, clear it
+      // This should drain the audio ring buffer, to achieve
+      // minimum latency for the CW side tone.
+      //
+      rxaudio_drain = 1;
+      usleep(10000);
+      rxaudio_drain = 0;
+      rxaudio_flag = 1;
+    }
 
-    if (nptr != rxaudio_outptr) {
-      MEMORY_BARRIER;
-      RXAUDIORINGBUF[rxaudio_inptr  ] = left_audio_sample >> 8;
-      RXAUDIORINGBUF[rxaudio_inptr + 1] = left_audio_sample;
-      RXAUDIORINGBUF[rxaudio_inptr + 2] = right_audio_sample >> 8;
-      RXAUDIORINGBUF[rxaudio_inptr + 3] = right_audio_sample;
-      MEMORY_BARRIER;
-      rxaudio_inptr = nptr;
-    } else {
-      t_print("%s: buffer overflow\n", __FUNCTION__);
-      nptr = nptr - RXAUDIORINGBUFLEN / 2;
+    int iptr = rxaudio_inptr + 4*rxaudio_count;
 
-      if (nptr < 0) { nptr += RXAUDIORINGBUFLEN; }
+    RXAUDIORINGBUF[iptr++] = left_audio_sample >> 8;
+    RXAUDIORINGBUF[iptr++] = left_audio_sample;
+    RXAUDIORINGBUF[iptr++] = right_audio_sample >> 8;
+    RXAUDIORINGBUF[iptr++] = right_audio_sample;
 
-      rxaudio_inptr = nptr;
+    rxaudio_count++;
+
+    if (rxaudio_count >= 64) {
+      int nptr = rxaudio_inptr + 256;
+      if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+
+      if (nptr != rxaudio_outptr) {
+        rxaudio_inptr = nptr;
+#ifdef __APPLE__
+        sem_post(rxaudio_sem);
+#else
+        sem_post(&rxaudio_sem);
+#endif
+        rxaudio_count = 0;
+      } else {
+        t_print("%s: buffer overflow\n", __FUNCTION__);
+        // skip some audio samples
+        rxaudio_count = -4096;
+      }
     }
 
     pthread_mutex_unlock(&send_rxaudio_mutex);
@@ -2307,7 +2283,6 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
 
 void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short right_audio_sample) {
   int txmode = get_tx_mode();
-  int nptr;
 
   //
   // Only process samples if NOT transmitting in CW
@@ -2315,52 +2290,88 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
   if (isTransmitting() && (txmode == modeCWU || txmode == modeCWL)) { return; }
 
   pthread_mutex_lock(&send_rxaudio_mutex);
-  nptr = rxaudio_inptr + 4;
+  if (rxaudio_count < 0) {
+    rxaudio_count++;
+    pthread_mutex_unlock(&send_rxaudio_mutex);
+    return;
+  }
 
-  if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+  if (rxaudio_flag) {
+    //
+    // First time we arrive here after a TX(CW)->RX transition:
+    // set the "drain" flag, wait 10 msec, clear it
+    // This should drain the audio ring buffer.
+    //
+    rxaudio_drain = 1;
+    usleep(10000);
+    rxaudio_drain = 0;
+    rxaudio_flag = 0;
+  }
 
-  if (nptr != rxaudio_outptr) {
-    MEMORY_BARRIER;
-    RXAUDIORINGBUF[rxaudio_inptr  ] = left_audio_sample >> 8;
-    RXAUDIORINGBUF[rxaudio_inptr + 1] = left_audio_sample;
-    RXAUDIORINGBUF[rxaudio_inptr + 2] = right_audio_sample >> 8;
-    RXAUDIORINGBUF[rxaudio_inptr + 3] = right_audio_sample;
-    MEMORY_BARRIER;
-    rxaudio_inptr = nptr;
-  } else {
-    t_print("%s: buffer overflow.\n", __FUNCTION__);
-    nptr = nptr - RXAUDIORINGBUFLEN / 2;
+  int iptr = rxaudio_inptr + 4*rxaudio_count;
 
-    if (nptr < 0) { nptr += RXAUDIORINGBUFLEN; }
+  RXAUDIORINGBUF[iptr++] = left_audio_sample >> 8;
+  RXAUDIORINGBUF[iptr++] = left_audio_sample;
+  RXAUDIORINGBUF[iptr++] = right_audio_sample >> 8;
+  RXAUDIORINGBUF[iptr++] = right_audio_sample;
 
-    rxaudio_inptr = nptr;
+  rxaudio_count++;
+
+  if (rxaudio_count >= 64) {
+    int nptr = rxaudio_inptr + 256;
+    if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+
+    if (nptr != rxaudio_outptr) {
+      rxaudio_inptr = nptr;
+#ifdef __APPLE__
+      sem_post(rxaudio_sem);
+#else
+      sem_post(&rxaudio_sem);
+#endif
+      rxaudio_count = 0;
+    } else {
+      t_print("%s: buffer overflow\n", __FUNCTION__);
+      // skip some audio samples
+      rxaudio_count = -4096;
+    }
   }
 
   pthread_mutex_unlock(&send_rxaudio_mutex);
 }
 
 void new_protocol_iq_samples(int isample, int qsample) {
-  int nptr = txiq_inptr + 6;
+  if (txiq_count < 0) {
+    txiq_count++;
+    return;
+  }
 
-  if (nptr >= TXIQRINGBUFLEN) { nptr = 0; }
+  int iptr = txiq_inptr + 6*txiq_count;
 
-  if (nptr != txiq_outptr) {
-    MEMORY_BARRIER;
-    TXIQRINGBUF[txiq_inptr  ] = isample >> 16;
-    TXIQRINGBUF[txiq_inptr + 1] = isample >> 8;
-    TXIQRINGBUF[txiq_inptr + 2] = isample;
-    TXIQRINGBUF[txiq_inptr + 3] = qsample >> 16;
-    TXIQRINGBUF[txiq_inptr + 4] = qsample >> 8;
-    TXIQRINGBUF[txiq_inptr + 5] = qsample;
-    MEMORY_BARRIER;
-    txiq_inptr = nptr;
-  } else {
-    t_print("%s: buffer overflow\n", __FUNCTION__);
-    nptr = nptr - TXIQRINGBUFLEN / 2;
+  TXIQRINGBUF[iptr++] = isample >> 16;
+  TXIQRINGBUF[iptr++] = isample >> 8;
+  TXIQRINGBUF[iptr++] = isample;
+  TXIQRINGBUF[iptr++] = qsample >> 16;
+  TXIQRINGBUF[iptr++] = qsample >> 8;
+  TXIQRINGBUF[iptr++] = qsample;
 
-    if (nptr < 0) { nptr += TXIQRINGBUFLEN; }
+  txiq_count++;
 
-    txiq_inptr = nptr;
+  if (txiq_count >= 240) {
+    int nptr = txiq_inptr + 1440;
+    if (nptr >= TXIQRINGBUFLEN) { nptr = 0; }
+    if (nptr != txiq_outptr) {
+      txiq_inptr = nptr;
+      txiq_count = 0;
+#ifdef __APPLE__
+      sem_post(txiq_sem);
+#else
+      sem_post(&txiq_sem);
+#endif
+    } else {
+      t_print("%s: output buffer overflow\n", __FUNCTION__);
+      // skip 4800 samples ( 25 msec @ 192k )
+      txiq_count = -4800;
+    }
   }
 }
 
