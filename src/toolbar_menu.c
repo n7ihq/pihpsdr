@@ -84,7 +84,7 @@ void toolbar_menu(GtkWidget *parent) {
         // Rightmost switch is hardwired to FUNCTION
         sw[i].switch_function = FUNCTION;
         gchar text[16];
-        sprintf(text, "FNC(%d)", lfunction);
+        snprintf(text, 16, "FNC(%d)", lfunction);
         widget = gtk_button_new_with_label(text);
         gtk_grid_attach(GTK_GRID(grid), widget, i, lfunction + 1, 1, 1);
       } else {

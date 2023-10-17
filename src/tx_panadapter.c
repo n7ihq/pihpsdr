@@ -149,7 +149,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
           cairo_set_source_rgba(cr, COLOUR_PAN_LINE_WEAK);
           cairo_move_to(cr, 0.0, y);
           cairo_line_to(cr, (double)my_width, y);
-          sprintf(v, "%d dBm", i);
+          snprintf(v, 32, "%d dBm", i);
           cairo_move_to(cr, 1, y);
           cairo_show_text(cr, v);
           cairo_stroke(cr);
@@ -229,9 +229,9 @@ void tx_panadapter_update(TRANSMITTER *tx) {
           // display all digits here
           //
           if (f > 10000000000LL) {
-            sprintf(v, "...%03lld.%03lld", (f / 1000000) % 1000, (f % 1000000) / 1000);
+            snprintf(v, 32, "...%03lld.%03lld", (f / 1000000) % 1000, (f % 1000000) / 1000);
           } else {
-            sprintf(v, "%0lld.%03lld", f / 1000000, (f % 1000000) / 1000);
+            snprintf(v, 32, "%0lld.%03lld", f / 1000000, (f % 1000000) / 1000);
           }
 
           cairo_text_extents(cr, v, &extents);
@@ -316,19 +316,19 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
         if(ENABLE_E2_ENCODER) {
           cairo_move_to(cr, my_width-200,70);
-          sprintf(text,"%s (%s)",encoder_string[e2_encoder_action],sw_string[e2_sw_action]);
+          snprintf(text, 64, "%s (%s)",encoder_string[e2_encoder_action],sw_string[e2_sw_action]);
           cairo_show_text(cr, text);
         }
 
         if(ENABLE_E3_ENCODER) {
           cairo_move_to(cr, my_width-200,90);
-          sprintf(text,"%s (%s)",encoder_string[e3_encoder_action],sw_string[e3_sw_action]);
+          snprintf(text, 64, "%s (%s)",encoder_string[e3_encoder_action],sw_string[e3_sw_action]);
           cairo_show_text(cr, text);
         }
 
         if(ENABLE_E4_ENCODER) {
           cairo_move_to(cr, my_width-200,110);
-          sprintf(text,"%s (%s)",encoder_string[e4_encoder_action],sw_string[e4_sw_action]);
+          snprintf(text, 64, "%s (%s)",encoder_string[e4_encoder_action],sw_string[e4_sw_action]);
           cairo_show_text(cr, text);
         }
       }
@@ -376,7 +376,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         // Power values not available for SoapySDR
         //
         if (transmitter->fwd < 0.0001 || band->disablePA || !pa_enabled) {
-          sprintf(text, "FWD %0.3f W", transmitter->exciter);
+          snprintf(text, 64, "FWD %0.3f W", transmitter->exciter);
         } else {
           static int max_count = 0;
           static double max_level = 0.0;
@@ -387,7 +387,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
           }
 
           max_count++;
-          sprintf(text, "FWD %0.1f W", max_level);
+          snprintf(text, 64, "FWD %0.1f W", max_level);
         }
 
         row += 15;
@@ -397,14 +397,14 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         // Since colour is already red, no special
         // action for "high SWR" warning
         //
-        sprintf(text, "SWR 1:%1.1f", transmitter->swr);
+        snprintf(text, 64, "SWR 1:%1.1f", transmitter->swr);
         row += 15;
         cairo_move_to(cr, 10, row);
         cairo_show_text(cr, text);
       }
 
       row += 15;
-      sprintf(text, "ALC %2.1f dB", transmitter->alc);
+      snprintf(text, 64, "ALC %2.1f dB", transmitter->alc);
       cairo_move_to(cr, 10, row);
       cairo_show_text(cr, text);
     }
@@ -417,7 +417,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
       cairo_set_source_rgba(cr, COLOUR_ALARM);
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
       cairo_move_to(cr, 260.0, 30.0);
-      sprintf(text, "! High SWR > %2.1f", tx->swr_alarm);
+      snprintf(text, 64, "! High SWR > %2.1f", tx->swr_alarm);
       cairo_show_text(cr, text);
       cairo_move_to(cr, 260.0, 50.0);
       cairo_show_text(cr, "! Drive set to zero");
@@ -434,11 +434,11 @@ void tx_panadapter_update(TRANSMITTER *tx) {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
       double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
-      sprintf(text, "%0.1fC", t);
+      snprintf(text, 64, "%0.1fC", t);
       cairo_move_to(cr, 100.0, 30.0);
       cairo_show_text(cr, text);
       double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
-      sprintf(text, "%0.0fmA", c);
+      snprintf(text, 64, "%0.0fmA", c);
       cairo_move_to(cr, 160.0, 30.0);
       cairo_show_text(cr, text);
 

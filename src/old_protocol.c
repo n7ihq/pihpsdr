@@ -36,6 +36,7 @@
 #include <signal.h>
 #include <wdsp.h>
 
+#include "MacOS.h"
 #include "audio.h"
 #include "band.h"
 #include "discovered.h"

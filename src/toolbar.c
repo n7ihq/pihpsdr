@@ -81,7 +81,7 @@ void update_toolbar_labels() {
 
     if (toolbar_switches[7].switch_function == FUNCTION) {
       char lbl[16];
-      sprintf(lbl, "FNC(%d)", function);
+      snprintf(lbl, 16, "FNC(%d)", function);
       gtk_button_set_label(GTK_BUTTON(sim_s7), lbl);
     } else {
       gtk_button_set_label(GTK_BUTTON(sim_s7), ActionTable[toolbar_switches[7].switch_function].button_str);
@@ -219,7 +219,7 @@ GtkWidget *toolbar_init(int my_width, int my_height) {
   //
   if (toolbar_switches[7].switch_function == FUNCTION) {
     char lbl[16];
-    sprintf(lbl, "FNC(%d)", function);
+    snprintf(lbl, 16, "FNC(%d)", function);
     sim_s7 = gtk_button_new_with_label(lbl);
   } else {
     sim_s7 = gtk_button_new_with_label(ActionTable[toolbar_switches[7].switch_function].button_str);

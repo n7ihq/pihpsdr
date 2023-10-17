@@ -1004,7 +1004,7 @@ void start_radio() {
     SerialPorts[id].enable = 0;
     SerialPorts[id].andromeda = 0;
     SerialPorts[id].baud = 0;
-    sprintf(SerialPorts[id].port, "/dev/ttyACM%d", id);
+    snprintf(SerialPorts[id].port, sizeof(SerialPorts[id].port), "/dev/ttyACM%d", id);
   }
 
   protocol = radio->protocol;
@@ -1159,43 +1159,43 @@ void start_radio() {
 
   switch (protocol) {
   case ORIGINAL_PROTOCOL:
-    strcpy(p, "Protocol 1");
-    sprintf(version, "v%d.%d)",
-            radio->software_version / 10,
-            radio->software_version % 10);
-    sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-            radio->info.network.mac_address[0],
-            radio->info.network.mac_address[1],
-            radio->info.network.mac_address[2],
-            radio->info.network.mac_address[3],
-            radio->info.network.mac_address[4],
-            radio->info.network.mac_address[5]);
-    sprintf(ip, "%s", inet_ntoa(radio->info.network.address.sin_addr));
-    sprintf(iface, "%s", radio->info.network.interface_name);
+    strlcpy(p, "Protocol 1", 32);
+    snprintf(version, 32, "v%d.%d)",
+             radio->software_version / 10,
+             radio->software_version % 10);
+    snprintf(mac, 32, "%02X:%02X:%02X:%02X:%02X:%02X",
+             radio->info.network.mac_address[0],
+             radio->info.network.mac_address[1],
+             radio->info.network.mac_address[2],
+             radio->info.network.mac_address[3],
+             radio->info.network.mac_address[4],
+             radio->info.network.mac_address[5]);
+    snprintf(ip, 32, "%s", inet_ntoa(radio->info.network.address.sin_addr));
+    snprintf(iface, 64, "%s", radio->info.network.interface_name);
     break;
 
   case NEW_PROTOCOL:
-    strcpy(p, "Protocol 2");
-    sprintf(version, "v%d.%d)",
-            radio->software_version / 10,
-            radio->software_version % 10);
-    sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-            radio->info.network.mac_address[0],
-            radio->info.network.mac_address[1],
-            radio->info.network.mac_address[2],
-            radio->info.network.mac_address[3],
-            radio->info.network.mac_address[4],
-            radio->info.network.mac_address[5]);
-    sprintf(ip, "%s", inet_ntoa(radio->info.network.address.sin_addr));
-    sprintf(iface, "%s", radio->info.network.interface_name);
+    strlcpy(p, "Protocol 2", 32);
+    snprintf(version, 32, "v%d.%d)",
+             radio->software_version / 10,
+             radio->software_version % 10);
+    snprintf(mac, 32, "%02X:%02X:%02X:%02X:%02X:%02X",
+             radio->info.network.mac_address[0],
+             radio->info.network.mac_address[1],
+             radio->info.network.mac_address[2],
+             radio->info.network.mac_address[3],
+             radio->info.network.mac_address[4],
+             radio->info.network.mac_address[5]);
+    snprintf(ip, 32, "%s", inet_ntoa(radio->info.network.address.sin_addr));
+    snprintf(iface, 64, "%s", radio->info.network.interface_name);
     break;
 
   case SOAPYSDR_PROTOCOL:
-    strcpy(p, "SoapySDR");
-    sprintf(version, "v%d.%d.%d)",
-            radio->software_version / 100,
-            (radio->software_version % 100) / 10,
-            radio->software_version % 10);
+    strlcpy(p, "SoapySDR", 32);
+    snprintf(version, 32, "v%d.%d.%d)",
+             radio->software_version / 100,
+             (radio->software_version % 100) / 10,
+             radio->software_version % 10);
     break;
   }
 
@@ -1206,9 +1206,9 @@ void start_radio() {
   case ORIGINAL_PROTOCOL:
   case NEW_PROTOCOL:
     if (device == DEVICE_OZY) {
-      sprintf(text, "%s (%s) on USB /dev/ozy\n", radio->name, p);
+      snprintf(text, 1024, "%s (%s) on USB /dev/ozy\n", radio->name, p);
     } else {
-      sprintf(text, "Starting %s (%s %s)",
+      snprintf(text, 1024, "Starting %s (%s %s)",
               radio->name,
               p,
               version);
@@ -1217,7 +1217,7 @@ void start_radio() {
     break;
 
   case SOAPYSDR_PROTOCOL:
-    sprintf(text, "Starting %s (%s %s)",
+    snprintf(text, 1024, "Starting %s (%s %s)",
             radio->name,
             "SoapySDR",
             version);
@@ -1233,13 +1233,13 @@ void start_radio() {
   case ORIGINAL_PROTOCOL:
   case NEW_PROTOCOL:
     if (have_saturn_xdma) {
-      sprintf(text, "piHPSDR: %s (%s v%d) on %s",
+      snprintf(text, 1024, "piHPSDR: %s (%s v%d) on %s",
               radio->name,
               p,
               radio->software_version,
               iface);
     } else {
-      sprintf(text, "piHPSDR: %s (%s %s) %s (%s) on %s",
+      snprintf(text, 1024, "piHPSDR: %s (%s %s) %s (%s) on %s",
               radio->name,
               p,
               version,
@@ -1251,7 +1251,7 @@ void start_radio() {
     break;
 
   case SOAPYSDR_PROTOCOL:
-    sprintf(text, "piHPSDR: %s (%s %s)",
+    snprintf(text, 1024, "piHPSDR: %s (%s %s)",
             radio->name,
             p,
             version);
@@ -1265,15 +1265,15 @@ void start_radio() {
   //
   switch (device) {
   case DEVICE_OZY:
-    sprintf(property_path, "ozy.props");
+    snprintf(property_path, sizeof(property_path), "ozy.props");
     break;
 
   case SOAPYSDR_USB_DEVICE:
-    sprintf(property_path, "%s.props", radio->name);
+    snprintf(property_path, sizeof(property_path), "%s.props", radio->name);
     break;
 
   default:
-    sprintf(property_path, "%02X-%02X-%02X-%02X-%02X-%02X.props",
+    snprintf(property_path, sizeof(property_path), "%02X-%02X-%02X-%02X-%02X-%02X.props",
             radio->info.network.mac_address[0],
             radio->info.network.mac_address[1],
             radio->info.network.mac_address[2],
@@ -2810,7 +2810,7 @@ void radio_change_region(int r) {
 // cppcheck-suppress constParameterPointer
 int remote_start(void *data) {
   const char *server = (const char *)data;
-  sprintf(property_path, "%s@%s.props", radio->name, server);
+  snprintf(property_path, sizeof(property_path), "%s@%s.props", radio->name, server);
   radio_is_remote = TRUE;
   optimize_for_touchscreen = 1;
 

@@ -122,7 +122,7 @@ void set_zoom(int rx, double value) {
     gtk_range_set_value (GTK_RANGE(zoom_scale), receiver[rx]->zoom);
   } else {
     char title[64];
-    sprintf(title, "Zoom RX %d", rx);
+    snprintf(title, 64, "Zoom RX %d", rx);
     show_popup_slider(ZOOM, rx, 1.0, MAX_ZOOM, 1.0, receiver[rx]->zoom, title);
   }
 
@@ -183,7 +183,7 @@ void set_pan(int rx, double value) {
     gtk_range_set_value (GTK_RANGE(pan_scale), receiver[rx]->pan);
   } else {
     char title[64];
-    sprintf(title, "Pan RX %d", rx);
+    snprintf(title, 64, "Pan RX %d", rx);
     show_popup_slider(PAN, rx, 0.0, receiver[rx]->pixels - receiver[rx]->width, 1.00, receiver[rx]->pan, title);
   }
 }

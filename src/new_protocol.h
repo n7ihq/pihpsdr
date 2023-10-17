@@ -19,7 +19,7 @@
 #ifndef _NEW_PROTOCOL_H
 #define _NEW_PROTOCOL_H
 
-#include <semaphore.h>
+#include "MacOS.h"   // for semaphores
 #include "receiver.h"
 
 #define MAX_DDC 4

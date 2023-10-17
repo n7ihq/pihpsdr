@@ -476,7 +476,7 @@ void tx_menu(GtkWidget *parent) {
   GtkWidget *ctcss_frequency_b = gtk_combo_box_text_new();
 
   for (i = 0; i < CTCSS_FREQUENCIES; i++) {
-    sprintf(temp, "%0.1f", ctcss_frequencies[i]);
+    snprintf(temp, 32, "%0.1f", ctcss_frequencies[i]);
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ctcss_frequency_b), NULL, temp);
   }
 

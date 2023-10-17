@@ -621,29 +621,12 @@ int keyer_init() {
   int rc;
   t_print(".... starting keyer thread.\n");
 #ifdef __APPLE__
-  //
-  // Enable several instances of this program running on the same
-  // machine
-  //
-  static long semcount = 0;
-  char sname[20];
-
-  for (;;) {
-    sprintf(sname, "CW%08ld", semcount++);
-    cw_event = sem_open(sname, O_CREAT | O_EXCL, 0700, 0);
-
-    if (cw_event == SEM_FAILED && errno == EEXIST) { continue; }
-
-    break;
-  }
-
-  sem_unlink(sname);
-  rc = (cw_event == SEM_FAILED);
+  cw_event = apple_sem(0);
 #else
-  rc = sem_init(&cw_event, 0, 0);
+   sem_init(&cw_event, 0, 0);
 #endif
   running = 1;
-  rc |= pthread_create(&keyer_thread_id, NULL, keyer_thread, NULL);
+  rc = pthread_create(&keyer_thread_id, NULL, keyer_thread, NULL);
 
   if (rc < 0) {
     t_print("pthread_create for keyer_thread failed %d\n", rc);

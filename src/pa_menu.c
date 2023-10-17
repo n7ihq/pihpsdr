@@ -133,15 +133,15 @@ static void show_W(int watts, gboolean reset) {
   for (i = 1; i < 11; i++) {
     switch (units) {
     case 0:
-      sprintf(text, "%0.3fW", i * increment);
+      snprintf(text, 16, "%0.3fW", i * increment);
       break;
 
     case 1:
-      sprintf(text, "%0.1fW", i * increment);
+      snprintf(text, 16, "%0.1fW", i * increment);
       break;
 
     case 2:
-      sprintf(text, "%dW", (int) (i * increment));
+      snprintf(text, 16, "%dW", (int) (i * increment));
       break;
     }
 

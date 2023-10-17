@@ -44,21 +44,21 @@ static void get_info(char *driver) {
   char** tx_antennas;
   char** tx_gains;
   t_print("soapy_discovery: get_info: %s\n", driver);
-  strcpy(fw_version, "");
-  strcpy(gw_version, "");
-  strcpy(hw_version, "");
-  strcpy(p_version, "");
+  strlcpy(fw_version, "", 16);
+  strlcpy(gw_version, "", 16);
+  strlcpy(hw_version, "", 16);
+  strlcpy(p_version, "", 16);
   SoapySDRKwargs_set(&args, "driver", driver);
 
   if (strcmp(driver, "rtlsdr") == 0) {
     char count[16];
-    sprintf(count, "%d", rtlsdr_count);
+    snprintf(count, 16, "%d", rtlsdr_count);
     SoapySDRKwargs_set(&args, "rtl", count);
     rtlsdr_val = rtlsdr_count;
     rtlsdr_count++;
   } else if (strcmp(driver, "sdrplay") == 0) {
     char label[16];
-    sprintf(label, "SDRplay Dev%d", sdrplay_count);
+    snprintf(label, 16, "SDRplay Dev%d", sdrplay_count);
     SoapySDRKwargs_set(&args, "label", label);
     sdrplay_val = sdrplay_count;
     sdrplay_count++;
@@ -82,20 +82,20 @@ static void get_info(char *driver) {
     t_print("soapy_discovery: hardware info key=%s val=%s\n", info.keys[i], info.vals[i]);
 
     if (strcmp(info.keys[i], "firmwareVersion") == 0) {
-      strcpy(fw_version, info.vals[i]);
+      strlcpy(fw_version, info.vals[i], 16);
     }
 
     if (strcmp(info.keys[i], "gatewareVersion") == 0) {
-      strcpy(gw_version, info.vals[i]);
+      strlcpy(gw_version, info.vals[i], 16);
       software_version = (int)(atof(info.vals[i]) * 100.0);
     }
 
     if (strcmp(info.keys[i], "hardwareVersion") == 0) {
-      strcpy(hw_version, info.vals[i]);
+      strlcpy(hw_version, info.vals[i], 16);
     }
 
     if (strcmp(info.keys[i], "protocolVersion") == 0) {
-      strcpy(p_version, info.vals[i]);
+      strlcpy(p_version, info.vals[i] ,16);
     }
   }
 
@@ -213,7 +213,7 @@ static void get_info(char *driver) {
   if (devices < MAX_DEVICES) {
     discovered[devices].device = SOAPYSDR_USB_DEVICE;
     discovered[devices].protocol = SOAPYSDR_PROTOCOL;
-    strcpy(discovered[devices].name, driver);
+    strlcpy(discovered[devices].name, driver, sizeof(discovered[devices].name));
     discovered[devices].supported_receivers = rx_channels;
     discovered[devices].supported_transmitters = tx_channels;
     discovered[devices].adcs = rx_channels;
@@ -222,8 +222,8 @@ static void get_info(char *driver) {
     discovered[devices].software_version = software_version;
     discovered[devices].frequency_min = ranges[0].minimum;
     discovered[devices].frequency_max = ranges[0].maximum;
-    strcpy(discovered[devices].info.soapy.driver_key, driverkey);
-    strcpy(discovered[devices].info.soapy.hardware_key, hardwarekey);
+    strlcpy(discovered[devices].info.soapy.driver_key, driverkey, sizeof(discovered[devices].info.soapy.driver_key));
+    strlcpy(discovered[devices].info.soapy.hardware_key, hardwarekey, sizeof(discovered[devices].info.soapy.hardware_key));
     discovered[devices].info.soapy.sample_rate = sample_rate;
 
     if (strcmp(driver, "rtlsdr") == 0) {
@@ -238,12 +238,14 @@ static void get_info(char *driver) {
     }
 
     if (strcmp(driver, "lime") == 0) {
-      sprintf(discovered[devices].info.soapy.version, "fw=%s gw=%s hw=%s p=%s", fw_version, gw_version, hw_version,
+      snprintf(discovered[devices].info.soapy.version, sizeof(discovered[devices].info.soapy.version),
+              "fw=%s gw=%s hw=%s p=%s", fw_version, gw_version, hw_version,
               p_version);
     } else if (strcmp(driver, "radioberry") == 0) {
-      sprintf(discovered[devices].info.soapy.version, "fw=%s gw=%s", fw_version, gw_version);
+      snprintf(discovered[devices].info.soapy.version, sizeof(discovered[devices].info.soapy.version),
+              "fw=%s gw=%s", fw_version, gw_version);
     } else {
-      strcpy(discovered[devices].info.soapy.version, "");
+      strlcpy(discovered[devices].info.soapy.version, "", sizeof(discovered[devices].info.soapy.version));
     }
 
     discovered[devices].info.soapy.rx_channels = rx_channels;
@@ -285,9 +287,9 @@ static void get_info(char *driver) {
     discovered[devices].info.soapy.has_temp = has_temp;
 
     if (address != NULL) {
-      strcpy(discovered[devices].info.soapy.address, address);
+      strlcpy(discovered[devices].info.soapy.address, address, sizeof(discovered[devices].info.soapy.address));
     } else {
-      strcpy(discovered[devices].info.soapy.address, "USB");
+      strlcpy(discovered[devices].info.soapy.address, "USB", sizeof(discovered[devices].info.soapy.address));
     }
 
     t_print("soapy_discovery: name=%s min=%0.3f MHz max=%0.3f Mhz\n", discovered[devices].name,

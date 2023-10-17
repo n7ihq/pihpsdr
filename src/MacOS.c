@@ -23,6 +23,7 @@
  * It contains some functions only needed there:
  *
  * MaOSstartup(char *path)      : create working dir in "$HOME/Library/Application Support" etc.
+ * apple_sem(int init)          : return a pointer to a semaphore
  *
  * where *path is argv[0], the file name of the running executable
  *
@@ -99,8 +100,8 @@ void MacOSstartup(const char *path) {
 
   if (strlen(homedir) + strlen(AppSupport) > 1020) { return; }
 
-  strcpy(workdir, homedir);
-  strcat(workdir, AppSupport);
+  strlcpy(workdir, homedir, 1024);
+  strlcat(workdir, AppSupport, 1024);
 
   //
   //  Check if working dir exists, otherwise try to create it
@@ -146,7 +147,7 @@ void MacOSstartup(const char *path) {
     //
     char *c;
     char source[1024];
-    strcpy(source, path);
+    strlcpy(source, path, 1024);
     c = rindex(source, '/');
 
     if (c) {
@@ -155,7 +156,7 @@ void MacOSstartup(const char *path) {
 
       if ((strlen(source) + strlen(IconInApp) < 1024)) {
         int fdin, fdout;
-        strcat(source,  IconInApp);
+        strlcat(source,  IconInApp, 1024);
         //
         // Now copy the file from "source" to "workdir"
         //
@@ -180,4 +181,46 @@ void MacOSstartup(const char *path) {
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//  
+// MacOS semaphores
+//  
+// Since MacOS only supports named semaphores, we have to be careful to
+// allow serveral instances of this program to run at the same time on the
+// same machine
+//
+/////////////////////////////////////////////////////////////////////////////
+#include <semaphore.h>
+#include <errno.h>
+#include <message.h>
+
+sem_t *apple_sem(int initial_value) {
+  sem_t *sem;
+  static long semcount = 0;
+  char sname[20];
+
+  for (;;) {
+    snprintf(sname, 20, "PI_%08ld", semcount++);
+    sem = sem_open(sname, O_CREAT | O_EXCL, 0700, initial_value);
+
+    //
+    // This can happen if a semaphore of that name is already in use,
+    // for example by another SDR program running on the same machine
+    //
+    if (sem == SEM_FAILED && errno == EEXIST) { continue; }
+
+    break;
+  }
+
+  if (sem == SEM_FAILED) {
+    t_perror("NewProtocol:SemOpen");
+    exit (-1);
+  }
+
+  // we can unlink the semaphore NOW. It will remain functional
+  // until sem_close() has been called by all threads using that
+  // semaphore.
+  sem_unlink(sname);
+  return sem;
+} 
 #endif

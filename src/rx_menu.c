@@ -191,7 +191,7 @@ void rx_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  sprintf(title, "piHPSDR - Receive (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
+  snprintf(title, 64, "piHPSDR - Receive (RX %d VFO %s)", active_receiver->id, active_receiver->id == 0 ? "A" : "B");
   GtkWidget *headerbar = gtk_header_bar_new();
   gtk_window_set_titlebar(GTK_WINDOW(dialog), headerbar);
   gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);
@@ -290,7 +290,7 @@ void rx_menu(GtkWidget *parent) {
 
       for (i = 0; i < n_adc; i++) {
         char label[32];
-        sprintf(label, "ADC-%d", i);
+        snprintf(label, 32, "ADC-%d", i);
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(adc_combo_box), NULL, label);
       }
 
