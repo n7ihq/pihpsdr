@@ -1576,11 +1576,11 @@ int process_action(void *data) {
 // Function to convert an internal action number to a unique string
 // This is used to specify actions in the props files.
 //
-void Action2String(int id, char *str) {
+void Action2String(int id, char *str, size_t len) {
   if (id < 0 || id >= ACTIONS) {
-    strcpy(str, "NONE");
+    strlcpy(str, "NONE", len);
   } else {
-    strcpy(str, ActionTable[id].button_str);
+    strlcpy(str, ActionTable[id].button_str, len);
   }
 }
 

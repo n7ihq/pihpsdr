@@ -138,9 +138,7 @@ void audio_get_cards() {
         // we copy the device name to local storage. This is referenced both
         // by the name and description element.
         //
-        input_devices[n_input_devices].name = input_devices[n_input_devices].description = g_new0(char,
-                                              strlen(deviceInfo->name) + 1);
-        strcpy(input_devices[n_input_devices].name, deviceInfo->name);
+        input_devices[n_input_devices].name = g_strdup(deviceInfo->name);
         input_devices[n_input_devices].index = i;
         n_input_devices++;
       }
@@ -156,9 +154,7 @@ void audio_get_cards() {
 
     if (Pa_IsFormatSupported(NULL, &outputParameters, 48000.0) == paFormatIsSupported) {
       if (n_output_devices < MAX_AUDIO_DEVICES) {
-        output_devices[n_output_devices].name = output_devices[n_output_devices].description = g_new0(char,
-                                                strlen(deviceInfo->name) + 1);
-        strcpy(output_devices[n_output_devices].name, deviceInfo->name);
+        output_devices[n_output_devices].name = g_strdup(deviceInfo->name);
         output_devices[n_output_devices].index = i;
         n_output_devices++;
       }

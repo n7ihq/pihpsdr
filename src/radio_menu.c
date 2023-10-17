@@ -484,7 +484,7 @@ void radio_menu(GtkWidget *parent) {
     int pos = 0;
 
     while (rate >= 48000) {
-      sprintf(rate_string, "%d", rate);
+      snprintf(rate_string, 16, "%d", rate);
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box), NULL, rate_string);
 
       if (rate == active_receiver->sample_rate) {

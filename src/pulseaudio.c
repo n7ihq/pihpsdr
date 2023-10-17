@@ -90,7 +90,6 @@ static void sink_list_cb(pa_context *context, const pa_sink_info *s, int eol, vo
   } else if (n_output_devices < MAX_AUDIO_DEVICES) {
     output_devices[n_output_devices].name = g_strdup(s->name);
     output_devices[n_output_devices].description = g_strdup(s->description);
-    strcpy(output_devices[n_output_devices].description, s->description);
     output_devices[n_output_devices].index = s->index;
     n_output_devices++;
   }
@@ -164,7 +163,7 @@ int audio_open_output(RECEIVER *rx) {
     sample_spec.channels = 2;
     sample_spec.format = PA_SAMPLE_FLOAT32NE;
     char stream_id[16];
-    sprintf(stream_id, "RX-%d", rx->id);
+    snprintf(stream_id, 16, "RX-%d", rx->id);
     rx->playstream = pa_simple_new(NULL, // Use the default server.
                                    "piHPSDR",          // Our application's name.
                                    PA_STREAM_PLAYBACK,

@@ -68,10 +68,8 @@ void loadProperties(const char* filename) {
         // Beware of "illegal" lines in corrupted files
         if (name != NULL && value != NULL) {
           property = malloc(sizeof(PROPERTY));
-          property->name = malloc(strlen(name) + 1);
-          strcpy(property->name, name);
-          property->value = malloc(strlen(value) + 1);
-          strcpy(property->value, value);
+          property->name = g_strdup(name);
+          property->value = g_strdup(value);
           property->next_property = properties;
           properties = property;
 
@@ -108,12 +106,12 @@ void saveProperties(const char* filename) {
     return;
   }
 
-  sprintf(line, "%0.2f", PROPERTY_VERSION);
+  snprintf(line, 512, "%0.2f", PROPERTY_VERSION);
   setProperty("property_version", line);
   property = properties;
 
   while (property) {
-    sprintf(line, "%s=%s\n", property->name, property->value);
+    snprintf(line, 512, "%s=%s\n", property->name, property->value);
     fwrite(line, 1, strlen(line), f);
     property = property->next_property;
   }
@@ -166,15 +164,12 @@ void setProperty(const char* name, const char* value) {
   if (property) {
     // just update
     free(property->value);
-    property->value = malloc(strlen(value) + 1);
-    strcpy(property->value, value);
+    property->value = g_strdup(value);
   } else {
     // new property
     property = malloc(sizeof(PROPERTY));
-    property->name = malloc(strlen(name) + 1);
-    strcpy(property->name, name);
-    property->value = malloc(strlen(value) + 1);
-    strcpy(property->value, value);
+    property->name = g_strdup(name);
+    property->value = g_strdup(value);
     property->next_property = properties;
     properties = property;
   }

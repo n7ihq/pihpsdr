@@ -89,7 +89,7 @@ static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
 static void serial_port_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
   const char *cp = gtk_entry_get_text(GTK_ENTRY(widget));
-  strcpy(SerialPorts[id].port, cp);
+  strlcpy(SerialPorts[id].port, cp, sizeof(SerialPorts[id].port));
 }
 
 static void andromeda_cb(GtkWidget *widget, gpointer data) {
@@ -232,7 +232,7 @@ void rigctl_menu(GtkWidget *parent) {
   for (int i = 0; i < MAX_SERIAL; i++) {
     char str[64];
     int row = i + 2;
-    sprintf (str, "Serial Port%d:", i);
+    snprintf (str, 64, "Serial Port%d:", i);
     GtkWidget *serial_text_label = gtk_label_new(str);
     gtk_widget_set_name(serial_text_label, "boldlabel");
     gtk_widget_set_halign(serial_text_label, GTK_ALIGN_END);

@@ -59,10 +59,10 @@ void t_print(const gchar *format, ...) {
   if (now - starttime >= 999999.995) { starttime += 1000000.0; }
 
   //
-  // We have to use vsprintf to handle the varargs stuff
+  // We have to use vsnprintf to handle the varargs stuff
   // g_print() seems to be thread-safe but call it only ONCE.
   //
-  vsprintf(line, format, args);
+  vsnprintf(line, 1024, format, args);
   g_print("%10.3f %s", now - starttime, line);
 }
 

@@ -338,6 +338,7 @@ src/meter.c \
 src/meter_menu.c \
 src/mode.c \
 src/mode_menu.c \
+src/mystring.c \
 src/new_discovery.c \
 src/new_menu.c \
 src/new_protocol.c \
@@ -420,6 +421,7 @@ src/meter.h \
 src/meter_menu.h \
 src/mode.h \
 src/mode_menu.h \
+src/mystring.h \
 src/new_discovery.h \
 src/new_menu.h \
 src/new_protocol.h \
@@ -497,6 +499,7 @@ src/meter.o \
 src/meter_menu.o \
 src/mode.o \
 src/mode_menu.o \
+src/mystring.o \
 src/new_discovery.o \
 src/new_menu.o \
 src/new_protocol.o \

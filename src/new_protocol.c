@@ -295,7 +295,7 @@ static mybuffer *get_my_buffer() {
   // no free buffer found, allocate some extra ones
   // and add to the head of the list
   //
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 25; i++) {
     bp = malloc(sizeof(mybuffer));
     bp->free = 1;
     bp->next = buflist;
@@ -303,7 +303,7 @@ static mybuffer *get_my_buffer() {
     num_buf++;
   }
 
-  t_print("NewProtocol: number of buffer increased to %d\n", num_buf);
+  t_print("NewProtocol: number of buffers increased to %d\n", num_buf);
   // Mark the first buffer in list as used and return that one.
   buflist->free = 0;
   return buflist;
@@ -475,7 +475,7 @@ void new_protocol_init(int pixels) {
 
   for (i = 0; i < MAX_DDC; i++) {
     char text[16];
-    sprintf(text, "P2 DDC%d", i);
+    snprintf(text, 16, "P2 DDC%d", i);
     iq_thread_id[i] = g_thread_new(text, iq_thread, GINT_TO_POINTER(i));
   }
 

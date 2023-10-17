@@ -313,7 +313,7 @@ void get_midi_devices() {
 
   while (card >= 0) {
     //t_print("Found Sound Card=%d\n",card);
-    sprintf(portname, "hw:%d", card);
+    snprintf(portname, 64, "hw:%d", card);
 
     if ((ret = snd_ctl_open(&ctl, portname, 0)) < 0) {
       t_print("cannot open control for card %d: %s\n", card, snd_strerror(ret));
@@ -366,9 +366,9 @@ void get_midi_devices() {
         // devnam for comparison and make a portname of form "hw:x,y",
         // else we use subnam for comparison and make a portname of form "hw:x,y,z".
         if (sub == 0 && subnam[0] == '\0') {
-          sprintf(portname, "hw:%d,%d", card, device);
+          snprintf(portname, 64, "hw:%d,%d", card, device);
         } else {
-          sprintf(portname, "hw:%d,%d,%d", card, device, sub);
+          snprintf(portname, 64, "hw:%d,%d,%d", card, device, sub);
           devnam = subnam;
         }
 
@@ -381,27 +381,23 @@ void get_midi_devices() {
         int match = 1;
 
         if (midi_devices[n_midi_devices].name == NULL) {
-          midi_devices[n_midi_devices].name = g_new(gchar, strlen(devnam) + 1);
-          strcpy(midi_devices[n_midi_devices].name, devnam);
+          midi_devices[n_midi_devices].name = g_strdup(devnam);
           match = 0;
         } else {
           if (strcmp(devnam, midi_devices[n_midi_devices].name)) {
             g_free(midi_devices[n_midi_devices].name);
-            midi_devices[n_midi_devices].name = g_new(gchar, strlen(devnam) + 1);
-            strcpy(midi_devices[n_midi_devices].name, devnam);
+            midi_devices[n_midi_devices].name = g_strdup(devnam);
             match = 0;
           }
         }
 
         if (midi_port[n_midi_devices] == NULL) {
-          midi_port[n_midi_devices] = g_new(gchar, strlen(portname) + 1);
-          strcpy(midi_port[n_midi_devices], portname);
+          midi_port[n_midi_devices] = g_strdup(portname);
           match = 0;
         } else {
           if (strcmp(midi_port[n_midi_devices], portname)) {
             g_free(midi_port[n_midi_devices]);
-            midi_port[n_midi_devices] = g_new(gchar, strlen(portname) + 1);
-            strcpy(midi_port[n_midi_devices], portname);
+            midi_port[n_midi_devices] = g_strdup(portname);
             match = 0;
           }
         }

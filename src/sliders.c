@@ -219,7 +219,7 @@ void set_attenuation_value(double value) {
     gtk_range_set_value (GTK_RANGE(attenuation_scale), (double)adc[active_receiver->adc].attenuation);
   } else {
     char title[64];
-    sprintf(title, "Attenuation - ADC-%d (dB)", active_receiver->adc);
+    snprintf(title, 64, "Attenuation - ADC-%d (dB)", active_receiver->adc);
     show_popup_slider(ATTENUATION, active_receiver->adc, 0.0, 31.0, 1.0, (double)adc[active_receiver->adc].attenuation,
                       title);
   }
@@ -362,7 +362,7 @@ void update_c25_att() {
     }
 
     int att = -12 * active_receiver->alex_attenuation + 18 * active_receiver->dither + 18 * active_receiver->preamp;
-    sprintf(id, "%d", att);
+    snprintf(id, 16, "%d", att);
     gtk_combo_box_set_active_id(GTK_COMBO_BOX(c25_att_combobox), id);
   }
 }
@@ -394,7 +394,7 @@ void set_agc_gain(int rx, double value) {
     gtk_range_set_value (GTK_RANGE(agc_scale), receiver[rx]->agc_gain);
   } else {
     char title[64];
-    sprintf(title, "AGC Gain RX %d", rx);
+    snprintf(title, 64, "AGC Gain RX %d", rx);
     show_popup_slider(AGC_GAIN, rx, -20.0, 120.0, 1.0, receiver[rx]->agc_gain, title);
   }
 }
@@ -449,7 +449,7 @@ void set_af_gain(int rx, double value) {
     gtk_range_set_value (GTK_RANGE(af_gain_scale), value);
   } else {
     char title[64];
-    sprintf(title, "AF Gain RX %d", rx);
+    snprintf(title, 64, "AF Gain RX %d", rx);
     show_popup_slider(AF_GAIN, rx, -40.0, 0.0, 1.0, value, title);
   }
 }
@@ -498,7 +498,7 @@ void set_rf_gain(int rx, double value) {
     gtk_range_set_value (GTK_RANGE(rf_gain_scale), adc[rxadc].gain);
   } else {
     char title[64];
-    sprintf(title, "RF Gain ADC %d", rxadc);
+    snprintf(title, 64, "RF Gain ADC %d", rxadc);
     show_popup_slider(RF_GAIN, rxadc, adc[rxadc].min_gain, adc[rxadc].max_gain, 1.0, adc[rxadc].gain, title);
   }
 }
@@ -507,7 +507,7 @@ void set_filter_width(int rx, int width) {
   //t_print("%s width=%d\n",__FUNCTION__, width);
   char title[64];
   int min, max;
-  sprintf(title, "Filter Width RX %d (Hz)", rx);
+  snprintf(title, 64, "Filter Width RX %d (Hz)", rx);
   min = 0;
   max = 2 * width;
 
@@ -530,7 +530,7 @@ void set_filter_shift(int rx, int shift) {
   //t_print("%s shift=%d\n",__FUNCTION__, shift);
   char title[64];
   int min, max;
-  sprintf(title, "Filter SHIFT RX %d (Hz)", rx);
+  snprintf(title, 64, "Filter SHIFT RX %d (Hz)", rx);
   min = shift - 500;
   max = shift + 500;
   show_popup_slider(IF_SHIFT, rx,  (double)(min), (double) (max), 1.0, (double) shift, title);
@@ -608,7 +608,7 @@ void set_filter_cut_high(int rx, int var) {
   //t_print("%s var=%d\n",__FUNCTION__,var);
   char title[64];
   int min, max;
-  sprintf(title, "Filter Cut High RX %d (Hz)", rx);
+  snprintf(title, 64, "Filter Cut High RX %d (Hz)", rx);
   //
   // The hi-cut is always non-negative
   //
@@ -629,7 +629,7 @@ void set_filter_cut_low(int rx, int var) {
   t_print("%s var=%d\n", __FUNCTION__, var);
   char title[64];
   int min, max;
-  sprintf(title, "Filter Cut Low RX %d (Hz)", rx);
+  snprintf(title, 64, "Filter Cut Low RX %d (Hz)", rx);
   //
   // The low-cut is either always positive, or always negative for a given mode
   //
@@ -707,7 +707,7 @@ void set_squelch(RECEIVER *rx) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(squelch_enable), rx->squelch_enable);
   } else {
     char title[64];
-    sprintf(title, "Squelch RX %d (Hz)", rx->id);
+    snprintf(title, 64, "Squelch RX %d (Hz)", rx->id);
     show_popup_slider(SQUELCH, rx->id, 0.0, 100.0, 1.0, rx->squelch, title);
   }
 }

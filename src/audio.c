@@ -17,12 +17,6 @@
 */
 
 //
-// If PortAudio is used instead of ALSA (e.g. on MacOS),
-// this file is not used (and replaced by portaudio.c).
-
-#ifndef PORTAUDIO
-
-//
 // Some important parameters
 // Note that we keep the playback buffers at half-filling so
 // we can use a larger latency there.
@@ -793,10 +787,8 @@ void audio_get_cards() {
         snprintf(device_id, 128, "plughw:%d,%d %s", card, dev, snd_ctl_card_info_get_name(info));
 
         if (n_input_devices < MAX_AUDIO_DEVICES) {
-          input_devices[n_input_devices].name = g_new0(char, strlen(device_id) + 1);
-          strcpy(input_devices[n_input_devices].name, device_id);
-          input_devices[n_input_devices].description = g_new0(char, strlen(device_id) + 1);
-          strcpy(input_devices[n_input_devices].description, device_id);
+          input_devices[n_input_devices].name = g_strdup(device_id);
+          input_devices[n_input_devices].description = g_strdup(device_id);
           input_devices[n_input_devices].index = 0; // not used
           n_input_devices++;
           t_print("input_device: %s\n", device_id);
@@ -813,10 +805,8 @@ void audio_get_cards() {
         snprintf(device_id, 128, "plughw:%d,%d %s", card, dev, snd_ctl_card_info_get_name(info));
 
         if (n_output_devices < MAX_AUDIO_DEVICES) {
-          output_devices[n_output_devices].name = g_new0(char, strlen(device_id) + 1);
-          strcpy(output_devices[n_output_devices].name, device_id);
-          output_devices[n_output_devices].description = g_new0(char, strlen(device_id) + 1);
-          strcpy(output_devices[n_output_devices].description, device_id);
+          output_devices[n_output_devices].name = g_strdup(device_id);
+          output_devices[n_output_devices].description = g_strdup(device_id);
           input_devices[n_output_devices].index = 0; // not used
           n_output_devices++;
           t_print("output_device: %s\n", device_id);
@@ -846,43 +836,36 @@ void audio_get_cards() {
 
     if (strncmp("dmix:", name, 5) == 0) {
       if (n_output_devices < MAX_AUDIO_DEVICES) {
-        //if(strncmp("dmix:CARD=ALSA",name,14)!=0) {
-        output_devices[n_output_devices].name = g_new0(char, strlen(name) + 1);
-        strcpy(output_devices[n_output_devices].name, name);
-        output_devices[n_output_devices].description = g_new0(char, strlen(descr) + 1);
-        i = 0;
+        output_devices[n_output_devices].name = g_strdup(name);
+        output_devices[n_output_devices].description = g_strdup(descr);
 
-        while (i < strlen(descr) && descr[i] != '\n') {
-          output_devices[n_output_devices].description[i] = descr[i];
-          i++;
+        for (i = 0; i < strlen(descr); i++) {
+          if (output_devices[n_output_devices].description[i] == '\n') {
+            output_devices[n_output_devices].description[i] = '\0';
+            break;
+          }
         }
 
-        output_devices[n_output_devices].description[i] = '\0';
         input_devices[n_output_devices].index = 0; // not used
         n_output_devices++;
         t_print("output_device: name=%s descr=%s\n", name, descr);
-        //}
       }
 
 #ifdef INCLUDE_SNOOP
     } else if (strncmp("dsnoop:", name, 6) == 0) {
       if (n_input_devices < MAX_AUDIO_DEVICES) {
-        //if(strncmp("dmix:CARD=ALSA",name,14)!=0) {
-        input_devices[n_input_devices].name = g_new0(char, strlen(name) + 1);
-        strcpy(input_devices[n_input_devices].name, name);
-        input_devices[n_input_devices].description = g_new0(char, strlen(descr) + 1);
-        i = 0;
+        input_devices[n_input_devices].name = g_strdup(name);
 
-        while (i < strlen(descr) && descr[i] != '\n') {
-          input_devices[n_input_devices].description[i] = descr[i];
-          i++;
+        for (i = 0; i < strlen(descr); i++) {
+          if (input_devices[n_input_devices].description[i] == '\n') {
+            input_devices[n_input_devices].description[i] = '\0';
+            break;
+          }
         }
 
-        input_devices[n_input_devices].description[i] = '\0';
         input_devices[n_input_devices].index = 0; // not used
         n_input_devices++;
         t_print("input_device: name=%s descr=%s\n", name, descr);
-        //}
       }
 
 #endif
@@ -910,4 +893,3 @@ void audio_get_cards() {
 
   snd_device_name_free_hint(hints);
 }
-#endif

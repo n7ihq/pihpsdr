@@ -277,7 +277,7 @@ static int init(void *data) {
   // Depending on the WDSP version, the file is wdspWisdom or wdspWisdom00.
   //
   (void) getcwd(wisdom_directory, sizeof(wisdom_directory));
-  strcpy(&wisdom_directory[strlen(wisdom_directory)], "/");
+  strlcat(wisdom_directory, "/", 1024);
   t_print("Securing wisdom file in directory: %s\n", wisdom_directory);
   status_text("Checking FFTW Wisdom file ...");
   wisdom_running = 1;
@@ -293,7 +293,7 @@ static int init(void *data) {
     }
 
     char text[1024];
-    sprintf(text, "Please do not close this window until wisdom plans are completed ...\n\n... %s",
+    snprintf(text, 1024, "Please do not close this window until wisdom plans are completed ...\n\n... %s",
             wisdom_get_status());
     status_text(text);
   }
@@ -419,7 +419,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   t_print("add pi label to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), pi_label, 1, 0, 3, 1);
   t_print("create build label\n");
-  sprintf(text, "Built %s, Version %s\nIncludes %s", build_date, build_version, version);
+  snprintf(text, 256, "Built %s, Version %s\nIncludes %s", build_date, build_version, version);
   GtkWidget *build_date_label = gtk_label_new(text);
   gtk_widget_set_name(build_date_label, "med_txt");
   gtk_widget_set_halign(build_date_label, GTK_ALIGN_START);
@@ -444,7 +444,7 @@ int main(int argc, char **argv) {
   void MacOSstartup(const char *path);
   MacOSstartup(argv[0]);
 #endif
-  sprintf(name, "org.g0orx.pihpsdr.pid%d", getpid());
+  snprintf(name, 1024, "org.g0orx.pihpsdr.pid%d", getpid());
   //t_print("gtk_application_new: %s\n",name);
   pihpsdr = gtk_application_new(name, G_APPLICATION_FLAGS_NONE);
   g_signal_connect(pihpsdr, "activate", G_CALLBACK(activate_pihpsdr), NULL);

@@ -56,7 +56,7 @@ void about_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  sprintf(title, "piHPSDR - About");
+  snprintf(title, 64, "piHPSDR - About");
   GtkWidget *headerbar = gtk_header_bar_new();
   gtk_window_set_titlebar(GTK_WINDOW(dialog), headerbar);
   gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);
@@ -73,45 +73,45 @@ void about_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, row, 1, 1);
   row++;
-  sprintf(text, "piHPSDR by John Melton G0ORX/N6LYT");
-  strcat(text, "\n\nWith help from:");
-  strcat(text, "\n    Steve Wilson, KA6S: RIGCTL (CAT over TCP)");
-  strcat(text, "\n    Laurence Barker, G8NJJ: USB OZY Support");
-  strcat(text, "\n    Johan Maas, PA3GSB: RadioBerry support");
-  strcat(text, "\n    Ken Hopper, N9VV: Testing and Documentation");
-  strcat(text, "\n    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI ");
-  sprintf(line, "\n\nBuild date: %s", build_date);
-  strcat(text, line);
-  sprintf(line, "\nBuild version: %s", build_version);
-  strcat(text, line);
-  sprintf(line, "\nWDSP version: %d.%02d", GetWDSPVersion() / 100, GetWDSPVersion() % 100);
-  strcat(text, line);
-  sprintf(line, "\n\nDevice: %s Protocol %s v%d.%d", radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
+  snprintf(text, 1024 , "piHPSDR by John Melton G0ORX/N6LYT");
+  strlcat(text, "\n\nWith help from:", 1024);
+  strlcat(text, "\n    Steve Wilson, KA6S: RIGCTL (CAT over TCP)", 1024);
+  strlcat(text, "\n    Laurence Barker, G8NJJ: USB OZY Support", 1024);
+  strlcat(text, "\n    Johan Maas, PA3GSB: RadioBerry support", 1024);
+  strlcat(text, "\n    Ken Hopper, N9VV: Testing and Documentation", 1024);
+  strlcat(text, "\n    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI ", 1024);
+  snprintf(line, 256, "\n\nBuild date: %s", build_date);
+  strlcat(text, line, 1024);
+  snprintf(line, 256, "\nBuild version: %s", build_version);
+  strlcat(text, line, 1024);
+  snprintf(line, 256, "\nWDSP version: %d.%02d", GetWDSPVersion() / 100, GetWDSPVersion() % 100);
+  strlcat(text, line, 1024);
+  snprintf(line, 256, "\n\nDevice: %s Protocol %s v%d.%d", radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
           radio->software_version / 10, radio->software_version % 10);
-  strcat(text, line);
+  strlcat(text, line, 1024);
 
   switch (radio->protocol) {
   case ORIGINAL_PROTOCOL:
   case NEW_PROTOCOL:
     if (device == DEVICE_OZY) {
-      sprintf(line, "\nDevice OZY: USB /dev/ozy Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
+      snprintf(line, 256, "\nDevice OZY: USB /dev/ozy Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
               radio->software_version / 10, radio->software_version % 10);
-      strcat(text, line);
+      strlcat(text, line, 1024);
     } else {
       char interface_addr[64];
       char addr[64];
-      strcpy(addr, inet_ntoa(radio->info.network.address.sin_addr));
-      strcpy(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr));
-      sprintf(line, "\nDevice Mac Address: %02X:%02X:%02X:%02X:%02X:%02X",
+      strlcpy(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
+      strlcpy(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
+      snprintf(line, 256, "\nDevice Mac Address: %02X:%02X:%02X:%02X:%02X:%02X",
               radio->info.network.mac_address[0],
               radio->info.network.mac_address[1],
               radio->info.network.mac_address[2],
               radio->info.network.mac_address[3],
               radio->info.network.mac_address[4],
               radio->info.network.mac_address[5]);
-      strcat(text, line);
-      sprintf(line, "\nDevice IP Address: %s on %s (%s)", addr, radio->info.network.interface_name, interface_addr);
-      strcat(text, line);
+      strlcat(text, line, 1024);
+      snprintf(line, 256, "\nDevice IP Address: %s on %s (%s)", addr, radio->info.network.interface_name, interface_addr);
+      strlcat(text, line, 1024);
     }
 
     break;

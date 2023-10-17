@@ -604,11 +604,11 @@ static int file_exists (const char * fileName) {
 }
 
 #if defined(__linux__) || defined(__APPLE__)
-int filePath (char *sOut, const char *sIn) {
+int filePath (char *sOut, const char *sIn, size_t len) {
   int rc = 0;
 
   if ((rc = file_exists (sIn))) {
-    strcpy (sOut, sIn);
+    strlcpy (sOut, sIn, len);
     rc = 1;
   } else {
     char xPath [PATH_MAX] = {0};
@@ -622,25 +622,25 @@ int filePath (char *sOut, const char *sIn) {
       if ( (p = strrchr (xPath, '/')) ) { *(p + 1) = '\0'; }
 
       t_print( "%d, Path of executable: [%s]\n", rc, xPath);
-      strcpy (s, xPath);
-      strcat (s, sIn);
+      strlcpy (s, xPath, PATH_MAX);
+      strlcat (s, sIn, PATH_MAX);
 
       if ((rc = file_exists (s))) {
         // found in the same dir of executable
         t_print( "File: [%s]\n", s);
-        strcpy(sOut, s);
+        strlcpy(sOut, s, len);
       } else {
         char cwd[PATH_MAX];
 
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
           t_print( "Current working dir: %s\n", cwd);
-          strcpy (s, cwd);
-          strcat (s, "/");
-          strcat (s, sIn);
+          strlcpy (s, cwd, PATH_MAX);
+          strlcat (s, "/", PATH_MAX);
+          strlcat (s, sIn, PATH_MAX);
 
           if ((rc = file_exists (s))) {
             t_print( "File: [%s]\n", s);
-            strcpy(sOut, s);
+            strlcpy(sOut, s, len);
           }
         }
       }
@@ -662,9 +662,9 @@ int filePath (char *sOut, const char *sIn) {
 int ozy_initialise() {
   int rc;
 
-  if (strlen(ozy_firmware) == 0) { filePath (ozy_firmware, "ozyfw-sdr1k.hex"); }
+  if (strlen(ozy_firmware) == 0) { filePath (ozy_firmware, "ozyfw-sdr1k.hex", sizeof(ozy_firmware)); }
 
-  if (strlen(ozy_fpga) == 0) { filePath (ozy_fpga, "Ozy_Janus.rbf"); }
+  if (strlen(ozy_fpga) == 0) { filePath (ozy_fpga, "Ozy_Janus.rbf", sizeof(ozy_fpga)); }
 
   // open ozy
   rc = ozy_open();

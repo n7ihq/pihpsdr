@@ -694,6 +694,7 @@ void *highprio_thread(void *data) {
   int rc;
   unsigned long freq;
   int i;
+  int count = 0;
   int alex0_mod, alex1_mod, hp_mod;
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -705,7 +706,7 @@ void *highprio_thread(void *data) {
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
   setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (void *)&yes, sizeof(yes));
   tv.tv_sec = 0;
-  tv.tv_usec = 10000;
+  tv.tv_usec = 100000;
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv));
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
@@ -719,6 +720,10 @@ void *highprio_thread(void *data) {
   }
 
   while (1) {
+    //
+    // WATCHDOG: if no packet arrives in 10 seconds, 
+    //           treat this situation as if "run" is set to zero
+    //
     rc = recvfrom(sock, buffer, 1444, 0, (struct sockaddr *)&addr, &lenaddr);
 
     if (rc < 0 && errno != EAGAIN) {
@@ -726,13 +731,33 @@ void *highprio_thread(void *data) {
       break;
     }
 
-    if (rc < 0) { continue; }
+    count++;
+    if (count >= 50) {
+      // WATCHDOG code
+      printf("HP: Watchdog Reset\n");
+      run = 0;
+      pthread_join(ddc_specific_thread_id, NULL);
+      pthread_join(duc_specific_thread_id, NULL);
 
+      for (i = 0; i < NUMRECEIVERS; i++) {
+        pthread_join(rx_thread_id[i], NULL);
+      }
+
+      pthread_join(send_highprio_thread_id, NULL);
+      pthread_join(tx_thread_id, NULL);
+      pthread_join(mic_thread_id, NULL);
+      pthread_join(audio_thread_id, NULL);
+      break;
+    }
+    if (rc < 0 ) { continue; }
+
+    
     if (rc != 1444) {
       printf("Received HighPrio packet with incorrect length");
       break;
     }
 
+    count = 0;  // reset watchdog
     hp_mod = 0;
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
@@ -792,10 +817,7 @@ void *highprio_thread(void *data) {
         pthread_join(tx_thread_id, NULL);
         pthread_join(mic_thread_id, NULL);
         pthread_join(audio_thread_id, NULL);
-        highprio_thread_id = 0;
-        printf("HP thread terminated.\n");
-        close(sock);
-        return NULL;
+        break;
       }
     }
 
@@ -968,6 +990,8 @@ void *highprio_thread(void *data) {
     }
   }
 
+  printf("HP thread terminating.\n");
+  highprio_thread_id = 0;
   close(sock);
   return NULL;
 }

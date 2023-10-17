@@ -182,7 +182,7 @@ void fft_menu(GtkWidget *parent) {
       s = 2 * s;
 
       if (s >= dsize) {
-        sprintf(text, "%d", s);
+        snprintf(text, 32, "%d", s);
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, text);
 
         if (s == fsize) { gtk_combo_box_set_active(GTK_COMBO_BOX(w), j); }

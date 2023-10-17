@@ -261,172 +261,172 @@ void rigctl_send_cw_char(char cw_char) {
   switch (cw_char) {
   case 'a':
   case 'A':
-    strcpy(pattern, ".-");
+    strlcpy(pattern, ".-", 9);
     break;
 
   case 'b':
   case 'B':
-    strcpy(pattern, "-...");
+    strlcpy(pattern, "-...", 9);
     break;
 
   case 'c':
   case 'C':
-    strcpy(pattern, "-.-.");
+    strlcpy(pattern, "-.-.", 9);
     break;
 
   case 'd':
   case 'D':
-    strcpy(pattern, "-..");
+    strlcpy(pattern, "-..", 9);
     break;
 
   case 'e':
   case 'E':
-    strcpy(pattern, ".");
+    strlcpy(pattern, ".", 9);
     break;
 
   case 'f':
   case 'F':
-    strcpy(pattern, "..-.");
+    strlcpy(pattern, "..-.", 9);
     break;
 
   case 'g':
   case 'G':
-    strcpy(pattern, "--.");
+    strlcpy(pattern, "--.", 9);
     break;
 
   case 'h':
   case 'H':
-    strcpy(pattern, "....");
+    strlcpy(pattern, "....", 9);
     break;
 
   case 'i':
   case 'I':
-    strcpy(pattern, "..");
+    strlcpy(pattern, "..", 9);
     break;
 
   case 'j':
   case 'J':
-    strcpy(pattern, ".---");
+    strlcpy(pattern, ".---", 9);
     break;
 
   case 'k':
   case 'K':
-    strcpy(pattern, "-.-");
+    strlcpy(pattern, "-.-", 9);
     break;
 
   case 'l':
   case 'L':
-    strcpy(pattern, ".-..");
+    strlcpy(pattern, ".-..", 9);
     break;
 
   case 'm':
   case 'M':
-    strcpy(pattern, "--");
+    strlcpy(pattern, "--", 9);
     break;
 
   case 'n':
   case 'N':
-    strcpy(pattern, "-.");
+    strlcpy(pattern, "-.", 9);
     break;
 
   case 'o':
   case 'O':
-    strcpy(pattern, "---");
+    strlcpy(pattern, "---", 9);
     break;
 
   case 'p':
   case 'P':
-    strcpy(pattern, ".--.");
+    strlcpy(pattern, ".--.", 9);
     break;
 
   case 'q':
   case 'Q':
-    strcpy(pattern, "--.-");
+    strlcpy(pattern, "--.-", 9);
     break;
 
   case 'r':
   case 'R':
-    strcpy(pattern, ".-.");
+    strlcpy(pattern, ".-.", 9);
     break;
 
   case 's':
   case 'S':
-    strcpy(pattern, "...");
+    strlcpy(pattern, "...", 9);
     break;
 
   case 't':
   case 'T':
-    strcpy(pattern, "-");
+    strlcpy(pattern, "-", 9);
     break;
 
   case 'u':
   case 'U':
-    strcpy(pattern, "..-");
+    strlcpy(pattern, "..-", 9);
     break;
 
   case 'v':
   case 'V':
-    strcpy(pattern, "...-");
+    strlcpy(pattern, "...-", 9);
     break;
 
   case 'w':
   case 'W':
-    strcpy(pattern, ".--");
+    strlcpy(pattern, ".--", 9);
     break;
 
   case 'x':
   case 'X':
-    strcpy(pattern, "-..-");
+    strlcpy(pattern, "-..-", 9);
     break;
 
   case 'y':
   case 'Y':
-    strcpy(pattern, "-.--");
+    strlcpy(pattern, "-.--", 9);
     break;
 
   case 'z':
   case 'Z':
-    strcpy(pattern, "--..");
+    strlcpy(pattern, "--..", 9);
     break;
 
   case '0':
-    strcpy(pattern, "-----");
+    strlcpy(pattern, "-----", 9);
     break;
 
   case '1':
-    strcpy(pattern, ".----");
+    strlcpy(pattern, ".----", 9);
     break;
 
   case '2':
-    strcpy(pattern, "..---");
+    strlcpy(pattern, "..---", 9);
     break;
 
   case '3':
-    strcpy(pattern, "...--");
+    strlcpy(pattern, "...--", 9);
     break;
 
   case '4':
-    strcpy(pattern, "....-");
+    strlcpy(pattern, "....-", 9);
     break;
 
   case '5':
-    strcpy(pattern, ".....");
+    strlcpy(pattern, ".....", 9);
     break;
 
   case '6':
-    strcpy(pattern, "-....");
+    strlcpy(pattern, "-....", 9);
     break;
 
   case '7':
-    strcpy(pattern, "--...");
+    strlcpy(pattern, "--...", 9);
     break;
 
   case '8':
-    strcpy(pattern, "---..");
+    strlcpy(pattern, "---..", 9);
     break;
 
   case '9':
-    strcpy(pattern, "----.");
+    strlcpy(pattern, "----.", 9);
     break;
 
   //
@@ -437,66 +437,66 @@ void rigctl_send_cw_char(char cw_char) {
   //     in the order given there.
   //
   case '.':
-    strcpy(pattern, ".-.-.-");
+    strlcpy(pattern, ".-.-.-", 9);
     break;
 
   case ',':
-    strcpy(pattern, "--..--");
+    strlcpy(pattern, "--..--", 9);
     break;
 
   case ':':
-    strcpy(pattern, "---..");
+    strlcpy(pattern, "---..", 9);
     break;
 
   case '?':
-    strcpy(pattern, "..--..");
+    strlcpy(pattern, "..--..", 9);
     break;
 
   case '\'':
-    strcpy(pattern, ".----.");
+    strlcpy(pattern, ".----.", 9);
     break;
 
   case '-':
-    strcpy(pattern, "-....-");
+    strlcpy(pattern, "-....-", 9);
     break;
 
   case '/':
-    strcpy(pattern, "-..-.");
+    strlcpy(pattern, "-..-.", 9);
     break;
 
   case '(':
-    strcpy(pattern, "-.--.");
+    strlcpy(pattern, "-.--.", 9);
     break;
 
   case ')':
-    strcpy(pattern, "-.--.-");
+    strlcpy(pattern, "-.--.-", 9);
     break;
 
   case '"':
-    strcpy(pattern, ".-..-.");
+    strlcpy(pattern, ".-..-.", 9);
     break;
 
   case '=':
-    strcpy(pattern, "-...-");
+    strlcpy(pattern, "-...-", 9);
     break;
 
   case '+':
-    strcpy(pattern, ".-.-.");
+    strlcpy(pattern, ".-.-.", 9);
     break;
 
   case '@':
-    strcpy(pattern, ".--.-.");
+    strlcpy(pattern, ".--.-.", 9);
     break;
 
   //
   //     Often used, but not ITU: Ampersand for "wait"
   //
   case '&':
-    strcpy(pattern, ".-...");
+    strlcpy(pattern, ".-...", 9);
     break;
 
   default:
-    strcpy(pattern, "");
+    strlcpy(pattern, "", 9);
   }
 
   while (*ptr != '\0') {
@@ -920,7 +920,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // sets or reads the Step Size
       if (command[4] == ';') {
         // read the step size
-        sprintf(reply, "ZZAC%02d;", vfo_get_stepindex());
+        snprintf(reply, 256, "ZZAC%02d;", vfo_get_stepindex());
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';') {
         // set the step size
@@ -969,7 +969,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // read/set audio gain
       if (command[4] == ';') {
         // send reply back
-        sprintf(reply, "ZZAG%03d;", (int)(receiver[0]->volume * 100.0));
+        snprintf(reply, 256, "ZZAG%03d;", (int)(receiver[0]->volume * 100.0));
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
@@ -992,7 +992,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // read/set RX0 AGC Threshold
       if (command[4] == ';') {
         // send reply back
-        sprintf(reply, "ZZAR%+04d;", (int)(receiver[0]->agc_gain));
+        snprintf(reply, 256, "ZZAR%+04d;", (int)(receiver[0]->agc_gain));
         send_resp(client->fd, reply) ;
       } else {
         int threshold = atoi(&command[4]);
@@ -1007,7 +1007,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       if (receivers == 2) {
         if (command[4] == ';') {
           // send reply back
-          sprintf(reply, "ZZAS%+04d;", (int)(receiver[1]->agc_gain));
+          snprintf(reply, 256, "ZZAS%+04d;", (int)(receiver[1]->agc_gain));
           send_resp(client->fd, reply) ;
         } else {
           int threshold = atoi(&command[4]);
@@ -1207,7 +1207,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           break;
         }
 
-        sprintf(reply, "ZZBS%03d;", b);
+        snprintf(reply, 256, "ZZBS%03d;", b);
         send_resp(client->fd, reply) ;
       } else if (command[7] == ';') {
         int band = band20;
@@ -1350,7 +1350,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read VFO A CTUN
       if (command[4] == ';') {
         // return the CTUN status
-        sprintf(reply, "ZZCN%d;", vfo[VFO_A].ctun);
+        snprintf(reply, 256, "ZZCN%d;", vfo[VFO_A].ctun);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int state = atoi(&command[4]);
@@ -1365,7 +1365,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read VFO B CTUN
       if (command[4] == ';') {
         // return the CTUN status
-        sprintf(reply, "ZZCO%d;", vfo[VFO_B].ctun);
+        snprintf(reply, 256, "ZZCO%d;", vfo[VFO_B].ctun);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int state = atoi(&command[4]);
@@ -1379,7 +1379,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read compander
       if (command[4] == ';') {
-        sprintf(reply, "ZZCP%d;", 0);
+        snprintf(reply, 256, "ZZCP%d;", 0);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         // ignore
@@ -1415,7 +1415,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX Reference
       if (command[4] == ';') {
-        sprintf(reply, "ZZDB%d;", 0); // currently always 0
+        snprintf(reply, 256, "ZZDB%d;", 0); // currently always 0
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         // ignore
@@ -1427,7 +1427,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/get diversity gain
       if (command[4] == ';') {
-        sprintf(reply, "ZZDC%04d;", (int)div_gain);
+        snprintf(reply, 256, "ZZDC%04d;", (int)div_gain);
         send_resp(client->fd, reply) ;
       } else if (command[8] == ';') {
         // ignore
@@ -1439,7 +1439,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/get diversity phase
       if (command[4] == ';') {
-        sprintf(reply, "ZZDD%04d;", (int)div_phase);
+        snprintf(reply, 256, "ZZDD%04d;", (int)div_phase);
         send_resp(client->fd, reply) ;
       } else if (command[8] == ';') {
         // ignore
@@ -1465,7 +1465,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           v = 2;
         }
 
-        sprintf(reply, "ZZDM%d;", v);
+        snprintf(reply, 256, "ZZDM%d;", v);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1476,7 +1476,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read waterfall low
       if (command[4] == ';') {
-        sprintf(reply, "ZZDN%+4d;", receiver[0]->waterfall_low);
+        snprintf(reply, 256, "ZZDN%+4d;", receiver[0]->waterfall_low);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1487,7 +1487,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read waterfall high
       if (command[4] == ';') {
-        sprintf(reply, "ZZDO%+4d;", receiver[0]->waterfall_high);
+        snprintf(reply, 256, "ZZDO%+4d;", receiver[0]->waterfall_high);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1498,7 +1498,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read panadapter high
       if (command[4] == ';') {
-        sprintf(reply, "ZZDP%+4d;", receiver[0]->panadapter_high);
+        snprintf(reply, 256, "ZZDP%+4d;", receiver[0]->panadapter_high);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1509,7 +1509,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read panadapter low
       if (command[4] == ';') {
-        sprintf(reply, "ZZDQ%+4d;", receiver[0]->panadapter_low);
+        snprintf(reply, 256, "ZZDQ%+4d;", receiver[0]->panadapter_low);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1520,7 +1520,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read panadapter step
       if (command[4] == ';') {
-        sprintf(reply, "ZZDR%2d;", receiver[0]->panadapter_step);
+        snprintf(reply, 256, "ZZDR%2d;", receiver[0]->panadapter_step);
         send_resp(client->fd, reply) ;
       } else {
       }
@@ -1552,7 +1552,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read rx equalizer values
       if (command[4] == ';') {
-        sprintf(reply, "ZZEA%03d%03d%03d%03d%03d00000000000000000000;", 3, rx_equalizer[0], rx_equalizer[1], rx_equalizer[2],
+        snprintf(reply, 256, "ZZEA%03d%03d%03d%03d%03d00000000000000000000;", 3, rx_equalizer[0], rx_equalizer[1], rx_equalizer[2],
                 rx_equalizer[3]);
         send_resp(client->fd, reply) ;
       } else if (command[37] == ';') {
@@ -1579,7 +1579,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read tx equalizer values
       if (command[4] == ';') {
-        sprintf(reply, "ZZEB%03d%03d%03d%03d%03d00000000000000000000;", 3, tx_equalizer[0], tx_equalizer[1], tx_equalizer[2],
+        snprintf(reply, 256, "ZZEB%03d%03d%03d%03d%03d00000000000000000000;", 3, tx_equalizer[0], tx_equalizer[1], tx_equalizer[2],
                 tx_equalizer[3]);
         send_resp(client->fd, reply) ;
       } else if (command[37] == ';') {
@@ -1610,7 +1610,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read rx equalizer
       if (command[4] == ';') {
-        sprintf(reply, "ZZER%d;", enable_rx_equalizer);
+        snprintf(reply, 256, "ZZER%d;", enable_rx_equalizer);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         enable_rx_equalizer = atoi(&command[4]);
@@ -1623,7 +1623,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read tx equalizer
       if (command[4] == ';') {
-        sprintf(reply, "ZZET%d;", enable_tx_equalizer);
+        snprintf(reply, 256, "ZZET%d;", enable_tx_equalizer);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         enable_tx_equalizer = atoi(&command[4]);
@@ -1646,9 +1646,9 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read VFO-A frequency
       if (command[4] == ';') {
         if (vfo[VFO_A].ctun) {
-          sprintf(reply, "ZZFA%011lld;", vfo[VFO_A].ctun_frequency);
+          snprintf(reply, 256, "ZZFA%011lld;", vfo[VFO_A].ctun_frequency);
         } else {
-          sprintf(reply, "ZZFA%011lld;", vfo[VFO_A].frequency);
+          snprintf(reply, 256, "ZZFA%011lld;", vfo[VFO_A].frequency);
         }
 
         send_resp(client->fd, reply) ;
@@ -1665,9 +1665,9 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read VFO-B frequency
       if (command[4] == ';') {
         if (vfo[VFO_B].ctun) {
-          sprintf(reply, "ZZFB%011lld;", vfo[VFO_B].ctun_frequency);
+          snprintf(reply, 256, "ZZFB%011lld;", vfo[VFO_B].ctun_frequency);
         } else {
-          sprintf(reply, "ZZFB%011lld;", vfo[VFO_B].frequency);
+          snprintf(reply, 256, "ZZFB%011lld;", vfo[VFO_B].frequency);
         }
 
         send_resp(client->fd, reply) ;
@@ -1683,7 +1683,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read deviation
       if (command[4] == ';') {
-        sprintf(reply, "ZZFD%d;", vfo[VFO_A].deviation == 2500 ? 0 : 1);
+        snprintf(reply, 256, "ZZFD%d;", vfo[VFO_A].deviation == 2500 ? 0 : 1);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int d = atoi(&command[4]);
@@ -1704,7 +1704,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 filter high
       if (command[4] == ';') {
-        sprintf(reply, "ZZFH%05d;", receiver[0]->filter_high);
+        snprintf(reply, 256, "ZZFH%05d;", receiver[0]->filter_high);
         send_resp(client->fd, reply) ;
       } else if (command[9] == ';') {
         int fh = atoi(&command[4]);
@@ -1729,7 +1729,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 DSP receive filter
       if (command[4] == ';') {
-        sprintf(reply, "ZZFI%02d;", vfo[VFO_A].filter);
+        snprintf(reply, 256, "ZZFI%02d;", vfo[VFO_A].filter);
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';') {
         int filter = atoi(&command[4]);
@@ -1743,7 +1743,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX2 DSP receive filter
       if (command[4] == ';') {
-        sprintf(reply, "ZZFJ%02d;", vfo[VFO_B].filter);
+        snprintf(reply, 256, "ZZFJ%02d;", vfo[VFO_B].filter);
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';') {
         // update RX2 filter
@@ -1756,7 +1756,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 filter low
       if (command[4] == ';') {
-        sprintf(reply, "ZZFL%05d;", receiver[0]->filter_low);
+        snprintf(reply, 256, "ZZFL%05d;", receiver[0]->filter_low);
         send_resp(client->fd, reply) ;
       } else if (command[9] == ';') {
         int fl = atoi(&command[4]);
@@ -1826,7 +1826,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 AGC
       if (command[4] == ';') {
-        sprintf(reply, "ZZGT%d;", receiver[0]->agc);
+        snprintf(reply, 256, "ZZGT%d;", receiver[0]->agc);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int agc = atoi(&command[4]);
@@ -1842,7 +1842,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 AGC
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZGU%d;", receiver[1]->agc);
+          snprintf(reply, 256, "ZZGU%d;", receiver[1]->agc);
           send_resp(client->fd, reply) ;
         } else if (command[5] == ';') {
           int agc = atoi(&command[4]);
@@ -1903,7 +1903,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
   case 'I': //ZZIx
     switch (command[3]) {
     case 'D': //ZZID
-      strcpy(reply, "ZZID240;");
+      strlcpy(reply, "ZZID240;", 256);
       send_resp(client->fd, reply) ;
       break;
 
@@ -1966,7 +1966,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // read/set RX0 gain
       if (command[4] == ';') {
         // send reply back
-        sprintf(reply, "ZZLA%03d;", (int)(receiver[0]->volume * 100.0));
+        snprintf(reply, 256, "ZZLA%03d;", (int)(receiver[0]->volume * 100.0));
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
@@ -1986,7 +1986,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       if (receivers == 2) {
         if (command[4] == ';') {
           // send reply back
-          sprintf(reply, "ZZLC%03d;", (int)(receiver[1]->volume * 100.0));
+          snprintf(reply, 256, "ZZLC%03d;", (int)(receiver[1]->volume * 100.0));
           send_resp(client->fd, reply) ;
         } else {
           int gain = atoi(&command[4]);
@@ -2023,7 +2023,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       if (can_transmit) {
         if (command[4] == ';') {
           // send reply back
-          sprintf(reply, "ZZLI%d;", transmitter->puresignal);
+          snprintf(reply, 256, "ZZLI%d;", transmitter->puresignal);
           send_resp(client->fd, reply) ;
         } else {
           int ps = atoi(&command[4]);
@@ -2058,7 +2058,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 operating mode
       if (command[4] == ';') {
-        sprintf(reply, "ZZMD%02d;", vfo[VFO_A].mode);
+        snprintf(reply, 256, "ZZMD%02d;", vfo[VFO_A].mode);
         send_resp(client->fd, reply);
       } else if (command[6] == ';') {
         vfo_id_mode_changed(VFO_A, atoi(&command[4]));
@@ -2070,7 +2070,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX2 operating mode
       if (command[4] == ';') {
-        sprintf(reply, "ZZMD%02d;", vfo[VFO_B].mode);
+        snprintf(reply, 256, "ZZMD%02d;", vfo[VFO_B].mode);
         send_resp(client->fd, reply);
       } else if (command[6] == ';') {
         vfo_id_mode_changed(VFO_A, atoi(&command[4]));
@@ -2082,7 +2082,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read mic gain
       if (command[4] == ';') {
-        sprintf(reply, "ZZMG%03d;", (int)mic_gain);
+        snprintf(reply, 256, "ZZMG%03d;", (int)mic_gain);
         send_resp(client->fd, reply);
       } else if (command[7] == ';') {
         mic_gain = (double)atoi(&command[4]);
@@ -2094,7 +2094,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // read DSP modes and indexes
       if (command[4] == ';') {
-        sprintf(reply, "ZZML LSB00: USB01: DSB02: CWL03: CWU04: FMN05:  AM06:DIGU07:SPEC08:DIGL09: SAM10: DRM11;");
+        snprintf(reply, 256, "ZZML LSB00: USB01: DSB02: CWL03: CWU04: FMN05:  AM06:DIGU07:SPEC08:DIGL09: SAM10: DRM11;");
         send_resp(client->fd, reply);
       }
 
@@ -2106,15 +2106,15 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       if (command[6] == ';') {
         int mode = atoi(&command[4]) - 1;
         FILTER *f = filters[mode];
-        sprintf(reply, "ZZMN");
+        snprintf(reply, 256, "ZZMN");
         char temp[32];
 
         for (int i = 0; i < FILTERS; i++) {
-          sprintf(temp, "%5s%5d%5d", f[i].title, f[i].high, f[i].low);
-          strcat(reply, temp);
+          snprintf(temp, 32, "%5s%5d%5d", f[i].title, f[i].high, f[i].low);
+          strlcat(reply, temp, 256);
         }
 
-        strcat(reply, ";");
+        strlcat(reply, ";", 256);
         send_resp(client->fd, reply);
       }
 
@@ -2124,7 +2124,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read MON status
       if (command[4] == ';') {
-        sprintf(reply, "ZZMO%d;", 0);
+        snprintf(reply, 256, "ZZMO%d;", 0);
         send_resp(client->fd, reply);
       }
 
@@ -2134,7 +2134,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX Meter mode
       if (command[4] == ';') {
-        sprintf(reply, "ZZMR%d;", smeter + 1);
+        snprintf(reply, 256, "ZZMR%d;", smeter + 1);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         smeter = atoi(&command[4]) - 1;
@@ -2148,7 +2148,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
     case 'T': //ZZMT
       if (command[4] == ';') {
-        sprintf(reply, "ZZMT%02d;", 1); // forward power
+        snprintf(reply, 256, "ZZMT%02d;", 1); // forward power
         send_resp(client->fd, reply);
       } else {
       }
@@ -2192,7 +2192,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 NB1
       if (command[4] == ';') {
-        sprintf(reply, "ZZNA%d;", (receiver[0]->nb == 1));
+        snprintf(reply, 256, "ZZNA%d;", (receiver[0]->nb == 1));
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         if (atoi(&command[4])) { receiver[0]->nb = 1; }
@@ -2206,7 +2206,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 NB2
       if (command[4] == ';') {
-        sprintf(reply, "ZZNB%d;", (receiver[0]->nb == 2));
+        snprintf(reply, 256, "ZZNB%d;", (receiver[0]->nb == 2));
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         if (atoi(&command[4])) { receiver[0]->nb = 2; }
@@ -2221,7 +2221,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 NB1
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZNC%d;", (receiver[1]->nb == 1));
+          snprintf(reply, 256, "ZZNC%d;", (receiver[1]->nb == 1));
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           if (atoi(&command[4])) { receiver[1]->nb = 1; }
@@ -2239,7 +2239,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 NB2
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZND%d;", (receiver[1]->nb == 2));
+          snprintf(reply, 256, "ZZND%d;", (receiver[1]->nb == 2));
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           if (atoi(&command[4])) { receiver[1]->nb = 2; }
@@ -2266,7 +2266,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 SNB status
       if (command[4] == ';') {
-        sprintf(reply, "ZZNN%d;", receiver[0]->snb);
+        snprintf(reply, 256, "ZZNN%d;", receiver[0]->snb);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         receiver[0]->snb = atoi(&command[4]);
@@ -2280,7 +2280,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 SNB status
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZNO%d;", receiver[1]->snb);
+          snprintf(reply, 256, "ZZNO%d;", receiver[1]->snb);
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           receiver[1]->snb = atoi(&command[4]);
@@ -2297,7 +2297,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX1 NR
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZNR%d;", (receiver[0]->nr == 1));
+          snprintf(reply, 256, "ZZNR%d;", (receiver[0]->nr == 1));
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           if (atoi(&command[4])) { receiver[0]->nr = 1; }
@@ -2312,7 +2312,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 NR2
       if (command[4] == ';') {
-        sprintf(reply, "ZZNS%d;", (receiver[0]->nr == 2));
+        snprintf(reply, 256, "ZZNS%d;", (receiver[0]->nr == 2));
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         if (atoi(&command[4])) { receiver[0]->nr = 2; }
@@ -2326,7 +2326,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX1 ANF
       if (command[4] == ';') {
-        sprintf(reply, "ZZNT%d;", receiver[0]->anf);
+        snprintf(reply, 256, "ZZNT%d;", receiver[0]->anf);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         if (atoi(&command[4])) { receiver[0]->anf = 1; }
@@ -2341,7 +2341,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 ANF
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZNU%d;", receiver[1]->anf);
+          snprintf(reply, 256, "ZZNU%d;", receiver[1]->anf);
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           if (atoi(&command[4])) { receiver[1]->anf = 1; }
@@ -2359,7 +2359,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 NR
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZNV%d;", (receiver[1]->nr == 1));
+          snprintf(reply, 256, "ZZNV%d;", (receiver[1]->nr == 1));
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           if (atoi(&command[4])) { receiver[1]->nr = 1; }
@@ -2377,7 +2377,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // set/read RX2 NR2
       if (receivers == 2) {
         if (command[4] == ';') {
-          sprintf(reply, "ZZNW%d;", (receiver[1]->nr == 2));
+          snprintf(reply, 256, "ZZNW%d;", (receiver[1]->nr == 2));
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           if (atoi(&command[4])) { receiver[1]->nr = 2; }
@@ -2426,7 +2426,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           a = 3;
         }
 
-        sprintf(reply, "ZZPA%d;", a);
+        snprintf(reply, 256, "ZZPA%d;", a);
         send_resp(client->fd, reply);
       } else if (command[5] == ';' && have_rx_att) {
         int a = atoi(&command[4]);
@@ -2464,7 +2464,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read Zoom
       if (command[4] == ';') {
-        sprintf(reply, "ZZPY%d;", receiver[1]->zoom);
+        snprintf(reply, 256, "ZZPY%d;", receiver[1]->zoom);
         send_resp(client->fd, reply);
       } else if (command[7] == ';') {
         int zoom = atoi(&command[4]);
@@ -2519,7 +2519,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RIT frequency
       if (command[4] == ';') {
-        sprintf(reply, "ZZRF%+5lld;", vfo[VFO_A].rit);
+        snprintf(reply, 256, "ZZRF%+5lld;", vfo[VFO_A].rit);
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
         vfo_rit_value(VFO_A, atoi(&command[4]));
@@ -2532,7 +2532,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // read meter value. Ignore P1 value.
       if (command[5] == ';') {
-        sprintf(reply, "ZZRM%d%20d;", smeter, (int)receiver[0]->meter);
+        snprintf(reply, 256, "ZZRM%d%20d;", smeter, (int)receiver[0]->meter);
         send_resp(client->fd, reply);
       }
 
@@ -2542,7 +2542,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RX2 enable
       if (command[4] == ';') {
-        sprintf(reply, "ZZRS%d;", receivers == 2);
+        snprintf(reply, 256, "ZZRS%d;", receivers == 2);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         int state = atoi(&command[4]);
@@ -2560,7 +2560,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read RIT enable
       if (command[4] == ';') {
-        sprintf(reply, "ZZRT%d;", vfo[VFO_A].rit_enabled);
+        snprintf(reply, 256, "ZZRT%d;", vfo[VFO_A].rit_enabled);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         vfo_rit_onoff(VFO_A, SET(atoi(&command[4])));
@@ -2646,7 +2646,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           double m = receiver[v]->meter;
           m = fmax(-140.0, m);
           m = fmin(-10.0, m);
-          sprintf(reply, "ZZSM%d%03d;", v, (int)((m + 140.0) * 2));
+          snprintf(reply, 256, "ZZSM%d%03d;", v, (int)((m + 140.0) * 2));
           send_resp(client->fd, reply);
         } else {
           implemented = FALSE;
@@ -2663,7 +2663,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read split
       if (command[4] == ';') {
-        sprintf(reply, "ZZSP%d;", split);
+        snprintf(reply, 256, "ZZSP%d;", split);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int val = atoi(&command[4]);
@@ -2696,7 +2696,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read split
       if (command[4] == ';') {
-        sprintf(reply, "ZZSW%d;", split);
+        snprintf(reply, 256, "ZZSW%d;", split);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         int val = atoi(&command[4]);
@@ -2766,7 +2766,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // sets or reads TUN status
       if (command[4] == ';') {
-        sprintf(reply, "ZZTU%d;", tune);
+        snprintf(reply, 256, "ZZTU%d;", tune);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         tune_update(atoi(&command[4]));
@@ -2782,7 +2782,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // sets or reads MOX status
       if (command[4] == ';') {
-        sprintf(reply, "ZZTX%d;", mox);
+        snprintf(reply, 256, "ZZTX%d;", mox);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         mox_update(atoi(&command[4]));
@@ -3054,7 +3054,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read XIT
       if (command[4] == ';') {
-        sprintf(reply, "ZZXT%+05lld;", vfo[get_tx_vfo()].xit);
+        snprintf(reply, 256, "ZZXT%+05lld;", vfo[get_tx_vfo()].xit);
         send_resp(client->fd, reply) ;
       } else if (command[9] == ';') {
         vfo_xit_value(atoi(&command[4]));
@@ -3101,7 +3101,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
         if (receiver[0]->anf) { status |=  0x1000; }
 
-        sprintf(reply, "ZZXN%04d;", status);
+        snprintf(reply, 256, "ZZXN%04d;", status);
         send_resp(client->fd, reply);
       }
 
@@ -3143,7 +3143,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
           if (receiver[1]->anf) { status |=  0x1000; }
 
-          sprintf(reply, "ZZXO%04d;", status);
+          snprintf(reply, 256, "ZZXO%04d;", status);
           send_resp(client->fd, reply);
         }
       } else {
@@ -3156,7 +3156,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       /// set/read XIT enable
       if (command[4] == ';') {
-        sprintf(reply, "ZZXS%d;", vfo[get_tx_vfo()].xit_enabled);
+        snprintf(reply, 256, "ZZXS%d;", vfo[get_tx_vfo()].xit_enabled);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         vfo[get_tx_vfo()].xit_enabled = atoi(&command[4]);
@@ -3210,7 +3210,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           status = status | 0x80;
         }
 
-        sprintf(reply, "ZZXV%03d;", status);
+        snprintf(reply, 256, "ZZXV%03d;", status);
         send_resp(client->fd, reply);
       }
 
@@ -3344,7 +3344,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
               vfo_rit_incr(active_receiver->id, (v == 0) ? rit_increment : -rit_increment);
 
               if (!vfo[active_receiver->id].rit_enabled) {
-                sprintf(reply, "ZZZI080;");
+                snprintf(reply, 256, "ZZZI080;");
                 send_resp(client->fd, reply);
               }
             }
@@ -3356,7 +3356,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
               vfo_xit_incr((v == 0) ? rit_increment : -rit_increment);
 
               if (!vfo[get_tx_vfo()].xit_enabled) {
-                sprintf(reply, "ZZZI090;");
+                snprintf(reply, 256, "ZZZI090;");
                 send_resp(client->fd, reply);
               }
             }
@@ -3395,7 +3395,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           case 27:
           case 28:
             schedule_action(toolbar_switches[p - 21].switch_function, (v == 0) ? PRESSED : RELEASED, 0);
-            sprintf(reply, "ZZZI11%d;", locked);
+            snprintf(reply, 256, "ZZZI11%d;", locked);
             send_resp(client->fd, reply);
             break;
 
@@ -3495,7 +3495,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
               schedule_action(DIV, (v == 0) ? PRESSED : RELEASED, 0);
 
               if (v == 0) {
-                sprintf(reply, "ZZZI05%d;", diversity_enabled ^ 1);
+                snprintf(reply, 256, "ZZZI05%d;", diversity_enabled ^ 1);
                 send_resp(client->fd, reply);
               }
             }
@@ -3505,16 +3505,16 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           case 9: // RIT/XIT Clear
             schedule_action(RIT_CLEAR, (v == 0) ? PRESSED : RELEASED, 0);
             schedule_action(XIT_CLEAR, (v == 0) ? PRESSED : RELEASED, 0);
-            sprintf(reply, "ZZZI080;");
+            snprintf(reply, 256, "ZZZI080;");
             send_resp(client->fd, reply);
-            sprintf(reply, "ZZZI090;");
+            snprintf(reply, 256, "ZZZI090;");
             send_resp(client->fd, reply);
             break;
 
           case 29: // Shift
             if (v == 0) {
               shift ^= 1;
-              sprintf(reply, "ZZZI06%d;", shift);
+              snprintf(reply, 256, "ZZZI06%d;", shift);
               send_resp(client->fd, reply);
             }
 
@@ -3550,7 +3550,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
               vfo_band_changed(active_receiver->id ? VFO_B : VFO_A, band);
               shift = 0;
-              sprintf(reply, "ZZZI060;");
+              snprintf(reply, 256, "ZZZI060;");
               send_resp(client->fd, reply);
             } else if (v == 1) {
               if (p == 30) { start_tx(); }                                  // MODE DATA
@@ -3580,23 +3580,23 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
               if (!vfo[active_receiver->id].rit_enabled && !vfo[get_tx_vfo()].xit_enabled) {
                 // neither RIT nor XIT: ==> activate RIT
                 vfo_rit_onoff(active_receiver->id, 1);
-                sprintf(reply, "ZZZI081;");
+                snprintf(reply, 256, "ZZZI081;");
                 send_resp(client->fd, reply);
               } else if (vfo[active_receiver->id].rit_enabled && !vfo[get_tx_vfo()].xit_enabled) {
                 // RIT but no XIT: ==> de-activate RIT and activate XIT
                 vfo_rit_onoff(active_receiver->id, 0);
                 vfo_xit_onoff(1);
-                sprintf(reply, "ZZZI080;");
+                snprintf(reply, 256, "ZZZI080;");
                 send_resp(client->fd, reply);
-                sprintf(reply, "ZZZI091;");
+                snprintf(reply, 256, "ZZZI091;");
                 send_resp(client->fd, reply);
               } else {
                 // else deactivate both.
                 vfo_rit_onoff(active_receiver->id, 0);
                 vfo_xit_onoff(0);
-                sprintf(reply, "ZZZI080;");
+                snprintf(reply, 256, "ZZZI080;");
                 send_resp(client->fd, reply);
-                sprintf(reply, "ZZZI090;");
+                snprintf(reply, 256, "ZZZI090;");
                 send_resp(client->fd, reply);
               }
 
@@ -3610,18 +3610,18 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
               if (v == 0) {
                 if (active_receiver->id == 0) {
                   schedule_action(RX2, PRESSED, 0);
-                  sprintf(reply, "ZZZI07%d;", vfo[VFO_B].ctun);
+                  snprintf(reply, 256, "ZZZI07%d;", vfo[VFO_B].ctun);
                   send_resp(client->fd, reply);
-                  sprintf(reply, "ZZZI08%d;", vfo[VFO_B].rit_enabled);
+                  snprintf(reply, 256, "ZZZI08%d;", vfo[VFO_B].rit_enabled);
                   send_resp(client->fd, reply);
-                  sprintf(reply, "ZZZI100;");
+                  snprintf(reply, 256, "ZZZI100;");
                 } else {
                   schedule_action(RX1, PRESSED, 0);
-                  sprintf(reply, "ZZZI07%d;", vfo[VFO_A].ctun);
+                  snprintf(reply, 256, "ZZZI07%d;", vfo[VFO_A].ctun);
                   send_resp(client->fd, reply);
-                  sprintf(reply, "ZZZI08%d;", vfo[VFO_A].rit_enabled);
+                  snprintf(reply, 256, "ZZZI08%d;", vfo[VFO_A].rit_enabled);
                   send_resp(client->fd, reply);
-                  sprintf(reply, "ZZZI101;");
+                  snprintf(reply, 256, "ZZZI101;");
                 }
 
                 send_resp(client->fd, reply);
@@ -3634,7 +3634,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           case 45: // ctune
             if (v == 1) {
               schedule_action(CTUN, PRESSED, 0);
-              sprintf(reply, "ZZZI07%d;", vfo[active_receiver->id].ctun ^ 1);
+              snprintf(reply, 256, "ZZZI07%d;", vfo[active_receiver->id].ctun ^ 1);
               send_resp(client->fd, reply);
               g_idle_add(ext_vfo_update, NULL);
             }
@@ -3643,7 +3643,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
           case 47: // MOX
             if (v == 0) {
-              sprintf(reply, "ZZZI01%d;", mox);
+              snprintf(reply, 256, "ZZZI01%d;", mox);
               send_resp(client->fd, reply);
             } else {
               mox_update(mox ^ 1);
@@ -3653,7 +3653,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
           case 48: // TUNE
             if (v == 0) {
-              sprintf(reply, "ZZZI03%d;", tune);
+              snprintf(reply, 256, "ZZZI03%d;", tune);
               send_resp(client->fd, reply);
             } else {
               tune_update(tune ^ 1);
@@ -3672,7 +3672,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
               } else {
                 if (can_transmit) {
                   tx_set_ps(transmitter, transmitter->puresignal ^ 1);
-                  sprintf(reply, "ZZZI04%d;", transmitter->puresignal);
+                  snprintf(reply, 256, "ZZZI04%d;", transmitter->puresignal);
                   send_resp(client->fd, reply);
                 }
               }
@@ -3693,7 +3693,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
             } else {
               locked ^= 1;
               g_idle_add(ext_vfo_update, NULL);
-              sprintf(reply, "ZZZI11%d;", locked);
+              snprintf(reply, 256, "ZZZI11%d;", locked);
               send_resp(client->fd, reply);
             }
           }
@@ -3751,7 +3751,7 @@ int parse_cmd(void *data) {
   COMMAND *info = (COMMAND *)data;
   CLIENT *client = info->client;
   char *command = info->command;
-  char reply[80];
+  char reply[256];
   reply[0] = '\0';
   gboolean implemented = TRUE;
 
@@ -3779,7 +3779,7 @@ int parse_cmd(void *data) {
       // set/read AF Gain
       if (command[3] == ';' && command[2] == '0') { // query, main receiver
         // send reply back (covert from -40...0dB to 0..255)
-        sprintf(reply, "AG0%03d;", (int)(255.0 * pow(10.0, 0.05 * receiver[0]->volume)));
+        snprintf(reply, 256, "AG0%03d;", (int)(255.0 * pow(10.0, 0.05 * receiver[0]->volume)));
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';' && command[2] == '0') {
         int gain = atoi(&command[3]);
@@ -3892,7 +3892,7 @@ int parse_cmd(void *data) {
       // sets/reads CTCSS function (frequency)
       if (can_transmit) {
         if (command[3] == ';') {
-          sprintf(reply, "CN%02d;", transmitter->ctcss + 1);
+          snprintf(reply, 256, "CN%02d;", transmitter->ctcss + 1);
           send_resp(client->fd, reply) ;
         } else if (command[4] == ';') {
           int i = atoi(&command[2]) - 1;
@@ -3908,7 +3908,7 @@ int parse_cmd(void *data) {
       // sets/reads CTCSS status (on/off)
       if (can_transmit) {
         if (command[2] == ';') {
-          sprintf(reply, "CT%d;", transmitter->ctcss_enabled);
+          snprintf(reply, 256, "CT%d;", transmitter->ctcss_enabled);
           send_resp(client->fd, reply) ;
         } else if (command[3] == ';') {
           int state = atoi(&command[2]);
@@ -3971,9 +3971,9 @@ int parse_cmd(void *data) {
       // set/read VFO-A frequency
       if (command[2] == ';') {
         if (vfo[VFO_A].ctun) {
-          sprintf(reply, "FA%011lld;", vfo[VFO_A].ctun_frequency);
+          snprintf(reply, 256, "FA%011lld;", vfo[VFO_A].ctun_frequency);
         } else {
-          sprintf(reply, "FA%011lld;", vfo[VFO_A].frequency);
+          snprintf(reply, 256, "FA%011lld;", vfo[VFO_A].frequency);
         }
 
         send_resp(client->fd, reply) ;
@@ -3990,9 +3990,9 @@ int parse_cmd(void *data) {
       // set/read VFO-B frequency
       if (command[2] == ';') {
         if (vfo[VFO_B].ctun) {
-          sprintf(reply, "FB%011lld;", vfo[VFO_B].ctun_frequency);
+          snprintf(reply, 256, "FB%011lld;", vfo[VFO_B].ctun_frequency);
         } else {
-          sprintf(reply, "FB%011lld;", vfo[VFO_B].frequency);
+          snprintf(reply, 256, "FB%011lld;", vfo[VFO_B].frequency);
         }
 
         send_resp(client->fd, reply) ;
@@ -4018,7 +4018,7 @@ int parse_cmd(void *data) {
 
       // set/read transceiver receive VFO
       if (command[2] == ';') {
-        sprintf(reply, "FR%d;", active_receiver->id);
+        snprintf(reply, 256, "FR%d;", active_receiver->id);
         send_resp(client->fd, reply) ;
       } else if (command[3] == ';') {
         int id = atoi(&command[2]);
@@ -4043,7 +4043,7 @@ int parse_cmd(void *data) {
 
       // set/read transceiver transmit VFO
       if (command[2] == ';') {
-        sprintf(reply, "FT%d;", split);
+        snprintf(reply, 256, "FT%d;", split);
         send_resp(client->fd, reply) ;
       } else if (command[3] == ';') {
         int val = atoi(&command[2]);
@@ -4081,7 +4081,7 @@ int parse_cmd(void *data) {
         }
 
         if (implemented) {
-          sprintf(reply, "FW%04d;", val);
+          snprintf(reply, 256, "FW%04d;", val);
           send_resp(client->fd, reply) ;
         }
       } else if (command[6] == ';') {
@@ -4160,7 +4160,7 @@ int parse_cmd(void *data) {
 
       // set/read RX1 AGC
       if (command[2] == ';') {
-        sprintf(reply, "GT%03d;", receiver[0]->agc * 5);
+        snprintf(reply, 256, "GT%03d;", receiver[0]->agc * 5);
         send_resp(client->fd, reply) ;
       } else if (command[5] == ';') {
         // update RX1 AGC
@@ -4190,7 +4190,7 @@ int parse_cmd(void *data) {
     switch (command[1]) {
     case 'D': //ID
       // get ID
-      strcpy(reply, "ID019;"); // TS-2000
+      strlcpy(reply, "ID019;", 256); // TS-2000
       send_resp(client->fd, reply);
       break;
 
@@ -4206,7 +4206,7 @@ int parse_cmd(void *data) {
         tx_ctcss_en = transmitter->ctcss_enabled;
       }
 
-      sprintf(reply, "IF%011lld%04lld%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
+      snprintf(reply, 256, "IF%011lld%04lld%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
               vfo[VFO_A].ctun ? vfo[VFO_A].ctun_frequency : vfo[VFO_A].frequency,
               step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, tx_xit_en,
               0, 0, isTransmitting(), mode, 0, 0, split, tx_ctcss_en ? 2 : 0, tx_ctcss, 0);
@@ -4218,7 +4218,7 @@ int parse_cmd(void *data) {
 
       // set/read IF shift
       if (command[2] == ';') {
-        strcpy(reply, "IS 0000;");
+        strlcpy(reply, "IS 0000;", 256);
         send_resp(client->fd, reply);
       } else {
         implemented = FALSE;
@@ -4248,7 +4248,7 @@ int parse_cmd(void *data) {
 
       // set/read keying speed
       if (command[2] == ';') {
-        sprintf(reply, "KS%03d;", cw_keyer_speed);
+        snprintf(reply, 256, "KS%03d;", cw_keyer_speed);
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         int speed = atoi(&command[2]);
@@ -4276,9 +4276,9 @@ int parse_cmd(void *data) {
         if (avail < 0) { avail += CW_BUF_SIZE; }
 
         if (avail < CW_BUF_SIZE - 24) {
-          sprintf(reply, "KY0;");
+          snprintf(reply, 256, "KY0;");
         } else {
-          sprintf(reply, "KY1;");
+          snprintf(reply, 256, "KY1;");
         }
 
         send_resp(client->fd, reply);
@@ -4327,7 +4327,7 @@ int parse_cmd(void *data) {
 
       // set/read key lock
       if (command[2] == ';') {
-        sprintf(reply, "LK%d%d;", locked, locked);
+        snprintf(reply, 256, "LK%d%d;", locked, locked);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
         locked = atoi(&command[2]);
@@ -4365,7 +4365,7 @@ int parse_cmd(void *data) {
       // set/read operating mode
       if (command[2] == ';') {
         int mode = ts2000_mode(vfo[VFO_A].mode);
-        sprintf(reply, "MD%d;", mode);
+        snprintf(reply, 256, "MD%d;", mode);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         int mode = modeUSB;
@@ -4421,7 +4421,7 @@ int parse_cmd(void *data) {
 
       // set/read Menu Gain (-12..60 converts to 0..100)
       if (command[2] == ';') {
-        sprintf(reply, "MG%03d;", (int)(((mic_gain + 12.0) / 72.0) * 100.0));
+        snprintf(reply, 256, "MG%03d;", (int)(((mic_gain + 12.0) / 72.0) * 100.0));
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         double gain = (double)atoi(&command[2]);
@@ -4469,7 +4469,7 @@ int parse_cmd(void *data) {
 
       // set/read noise blanker
       if (command[2] == ';') {
-        sprintf(reply, "NB%d;", receiver[0]->nb);
+        snprintf(reply, 256, "NB%d;", receiver[0]->nb);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         receiver[0]->nb = atoi(&command[2]);
@@ -4487,7 +4487,7 @@ int parse_cmd(void *data) {
 
       // set/read noise reduction
       if (command[2] == ';') {
-        sprintf(reply, "NR%d;", receiver[0]->nr);
+        snprintf(reply, 256, "NR%d;", receiver[0]->nr);
         send_resp(client->fd, reply);
       } else if (command[3] == ';')  {
         receiver[0]->nr = atoi(&command[2]);
@@ -4500,7 +4500,7 @@ int parse_cmd(void *data) {
 
       // set/read ANF
       if (command[2] == ';') {
-        sprintf(reply, "NT%d;", receiver[0]->anf);
+        snprintf(reply, 256, "NT%d;", receiver[0]->anf);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         receiver[0]->anf = atoi(&command[2]);
@@ -4546,7 +4546,7 @@ int parse_cmd(void *data) {
 
       // set/read preamp function status
       if (command[2] == ';') {
-        sprintf(reply, "PA%d0;", receiver[0]->preamp);
+        snprintf(reply, 256, "PA%d0;", receiver[0]->preamp);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
         receiver[0]->preamp = command[2] == '1';
@@ -4564,7 +4564,7 @@ int parse_cmd(void *data) {
       // set/read PA Power
       if (can_transmit) {
         if (command[2] == ';') {
-          sprintf(reply, "PC%03d;", (int)transmitter->drive);
+          snprintf(reply, 256, "PC%03d;", (int)transmitter->drive);
           send_resp(client->fd, reply);
         } else if (command[5] == ';') {
           set_drive((double)atoi(&command[2]));
@@ -4588,7 +4588,7 @@ int parse_cmd(void *data) {
       // set/read speach processor input/output level
       if (can_transmit) {
         if (command[2] == ';') {
-          sprintf(reply, "PL%03d000;", (int)((transmitter->compressor_level / 20.0) * 100.0));
+          snprintf(reply, 256, "PL%03d000;", (int)((transmitter->compressor_level / 20.0) * 100.0));
           send_resp(client->fd, reply);
         } else if (command[8] == ';') {
           command[5] = '\0';
@@ -4615,7 +4615,7 @@ int parse_cmd(void *data) {
 
       // set/read Power (always ON)
       if (command[2] == ';') {
-        sprintf(reply, "PS1;");
+        snprintf(reply, 256, "PS1;");
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         // ignore set
@@ -4674,7 +4674,7 @@ int parse_cmd(void *data) {
           att = (int)(((double)att / 31.0) * 99.0);
         }
 
-        sprintf(reply, "RA%02d00;", att);
+        snprintf(reply, 256, "RA%02d00;", att);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
         int att = atoi(&command[2]);
@@ -4741,7 +4741,7 @@ int parse_cmd(void *data) {
 
       // set/read RIT enable
       if (command[2] == ';') {
-        sprintf(reply, "RT%d;", vfo[VFO_A].rit_enabled);
+        snprintf(reply, 256, "RT%d;", vfo[VFO_A].rit_enabled);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         vfo[VFO_A].rit_enabled = atoi(&command[2]);
@@ -4790,7 +4790,7 @@ int parse_cmd(void *data) {
 
       // set/read stallite mode status
       if (command[2] == ';') {
-        sprintf(reply, "SA%d%d%d%d%d%d%dSAT?    ;", (sat_mode == SAT_MODE) || (sat_mode == RSAT_MODE), 0, 0, 0,
+        snprintf(reply, 256, "SA%d%d%d%d%d%d%dSAT?    ;", (sat_mode == SAT_MODE) || (sat_mode == RSAT_MODE), 0, 0, 0,
                 sat_mode == SAT_MODE, sat_mode == RSAT_MODE, 0);
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
@@ -4827,7 +4827,7 @@ int parse_cmd(void *data) {
 
       // set/read CW break-in time delay
       if (command[2] == ';') {
-        sprintf(reply, "SD%04d;", (int)fmin(cw_keyer_hang_time, 1000));
+        snprintf(reply, 256, "SD%04d;", (int)fmin(cw_keyer_hang_time, 1000));
         send_resp(client->fd, reply);
       } else if (command[6] == ';') {
         int b = fmin(atoi(&command[2]), 1000);
@@ -4878,7 +4878,7 @@ int parse_cmd(void *data) {
           fh = 11;
         }
 
-        sprintf(reply, "SH%02d;", fh);
+        snprintf(reply, 256, "SH%02d;", fh);
         send_resp(client->fd, reply) ;
       } else if (command[4] == ';') {
         // make sure filter is filterVar1
@@ -5034,7 +5034,7 @@ int parse_cmd(void *data) {
           fl = 11;
         }
 
-        sprintf(reply, "SL%02d;", fl);
+        snprintf(reply, 256, "SL%02d;", fl);
         send_resp(client->fd, reply) ;
       } else if (command[4] == ';') {
         // make sure filter is filterVar1
@@ -5164,7 +5164,7 @@ int parse_cmd(void *data) {
 
           if (val < 0 ) { val = 0; }
 
-          sprintf(reply, "SM%d%04d;", id, val);
+          snprintf(reply, 256, "SM%d%04d;", id, val);
           send_resp(client->fd, reply);
         } else {
           implemented = FALSE;
@@ -5180,7 +5180,7 @@ int parse_cmd(void *data) {
         int p1 = atoi(&command[2]);
 
         if (p1 == 0) { // Main receiver
-          sprintf(reply, "SQ%d%03d;", p1, (int)((double)receiver[0]->squelch / 100.0 * 255.0 + 0.5));
+          snprintf(reply, 256, "SQ%d%03d;", p1, (int)((double)receiver[0]->squelch / 100.0 * 255.0 + 0.5));
           send_resp(client->fd, reply);
         }
       } else if (command[6] == ';') {
@@ -5314,7 +5314,7 @@ int parse_cmd(void *data) {
       // set/read VOX gain (0..9)
       if (command[2] == ';') {
         // convert 0.0..1.0 to 0..9
-        sprintf(reply, "VG%03d;", (int)((vox_threshold * 100.0) * 0.9));
+        snprintf(reply, 256, "VG%03d;", (int)((vox_threshold * 100.0) * 0.9));
         send_resp(client->fd, reply);
       } else if (command[5] == ';') {
         // convert 0..9 to 0.0..1.0
@@ -5333,7 +5333,7 @@ int parse_cmd(void *data) {
 
       // set/read VOX status
       if (command[2] == ';') {
-        sprintf(reply, "VX%d;", vox_enabled);
+        snprintf(reply, 256, "VX%d;", vox_enabled);
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         vox_enabled = atoi(&command[2]);
@@ -5365,7 +5365,7 @@ int parse_cmd(void *data) {
       // set/read XIT enable
       if (can_transmit) {
         if (command[2] == ';') {
-          sprintf(reply, "XT%d;", vfo[get_tx_vfo()].xit_enabled);
+          snprintf(reply, 256, "XT%d;", vfo[get_tx_vfo()].xit_enabled);
           send_resp(client->fd, reply);
         } else if (command[3] == ';') {
           vfo_xit_onoff(SET(atoi(&command[2])));
@@ -5606,50 +5606,50 @@ gboolean andromeda_handler(gpointer data) {
   //
   //
   const CLIENT *client = (CLIENT *)data;
-  char reply[64];
+  char reply[256];
 
   if (!client->running) { return FALSE; }
 
   if (last_vfoa != active_receiver->id) {
-    sprintf(reply, "ZZZI10%d;", active_receiver->id ^ 1);
+    snprintf(reply, 256, "ZZZI10%d;", active_receiver->id ^ 1);
     send_resp(client->fd, reply);
     last_vfoa = active_receiver->id;
   }
 
   if (last_div != diversity_enabled) {
-    sprintf(reply, "ZZZI05%d;", diversity_enabled);
+    snprintf(reply, 256, "ZZZI05%d;", diversity_enabled);
     send_resp(client->fd, reply);
     last_div = diversity_enabled;
   }
 
   if (last_mox != mox) {
-    sprintf(reply, "ZZZI01%d;", mox);
+    snprintf(reply, 256, "ZZZI01%d;", mox);
     send_resp(client->fd, reply);
     last_mox = mox;
   }
 
   if (last_tune != tune) {
-    sprintf(reply, "ZZZI03%d;", tune);
+    snprintf(reply, 256, "ZZZI03%d;", tune);
     send_resp(client->fd, reply);
     last_tune = tune;
   }
 
   if (can_transmit) {
     if (last_ps != transmitter->puresignal) {
-      sprintf(reply, "ZZZI04%d;", transmitter->puresignal);
+      snprintf(reply, 256, "ZZZI04%d;", transmitter->puresignal);
       send_resp(client->fd, reply);
       last_ps = transmitter->puresignal;
     }
   }
 
   if (last_ctun != vfo[active_receiver->id].ctun) {
-    sprintf(reply, "ZZZI07%d;", vfo[active_receiver->id].ctun);
+    snprintf(reply, 256, "ZZZI07%d;", vfo[active_receiver->id].ctun);
     send_resp(client->fd, reply);
     last_ctun = vfo[active_receiver->id].ctun;
   }
 
   if (last_rit != vfo[active_receiver->id].rit_enabled) {
-    sprintf(reply, "ZZZI08%d;", vfo[active_receiver->id].rit_enabled);
+    snprintf(reply, 256, "ZZZI08%d;", vfo[active_receiver->id].rit_enabled);
     send_resp(client->fd, reply);
     last_rit = vfo[active_receiver->id].rit_enabled;
   }
@@ -5658,14 +5658,14 @@ gboolean andromeda_handler(gpointer data) {
     int new_xit = vfo[get_tx_vfo()].xit_enabled;
 
     if (last_xit != new_xit) {
-      sprintf(reply, "ZZZI09%d;", new_xit);
+      snprintf(reply, 256, "ZZZI09%d;", new_xit);
       send_resp(client->fd, reply);
       last_xit = new_xit;
     }
   }
 
   if (last_lock != locked) {
-    sprintf(reply, "ZZZI11%d;", locked);
+    snprintf(reply, 256, "ZZZI11%d;", locked);
     send_resp(client->fd, reply);
     last_lock = locked;
   }

@@ -240,7 +240,7 @@ void rx_panadapter_update(RECEIVER *rx) {
       double y = (double)(rx->panadapter_high - i) * dbm_per_line;
       cairo_move_to(cr, 0.0, y);
       cairo_line_to(cr, mywidth, y);
-      sprintf(v, "%d dBm", i);
+      snprintf(v, 32, "%d dBm", i);
       cairo_move_to(cr, 1, y);
       cairo_show_text(cr, v);
     }
@@ -299,9 +299,9 @@ void rx_panadapter_update(RECEIVER *rx) {
       // and three "Mhz" digits
       //
       if (f > 10000000000LL && marker_distance < 80) {
-        sprintf(v, "...%03lld.%03lld", (f / 1000000) % 1000, (f % 1000000) / 1000);
+        snprintf(v, 32, "...%03lld.%03lld", (f / 1000000) % 1000, (f % 1000000) / 1000);
       } else {
-        sprintf(v, "%0lld.%03lld", f / 1000000, (f % 1000000) / 1000);
+        snprintf(v, 32, "%0lld.%03lld", f / 1000000, (f % 1000000) / 1000);
       }
 
       // center text at "x" position
@@ -511,19 +511,19 @@ void rx_panadapter_update(RECEIVER *rx) {
       cairo_set_font_size(cr,DISPLAY_FONT_SIZE3);
       if(ENABLE_E2_ENCODER) {
         cairo_move_to(cr, mywidth-200,70);
-        sprintf(text,"%s (%s)",encoder_string[e2_encoder_action],sw_string[e2_sw_action]);
+        snprintf(text,"%s (%s)",encoder_string[e2_encoder_action],sw_string[e2_sw_action]);
         cairo_show_text(cr, text);
       }
 
       if(ENABLE_E3_ENCODER) {
         cairo_move_to(cr, mywidth-200,90);
-        sprintf(text,"%s (%s)",encoder_string[e3_encoder_action],sw_string[e3_sw_action]);
+        snprintf(text, 64, "%s (%s)",encoder_string[e3_encoder_action],sw_string[e3_sw_action]);
         cairo_show_text(cr, text);
       }
 
       if(ENABLE_E4_ENCODER) {
         cairo_move_to(cr, mywidth-200,110);
-        sprintf(text,"%s (%s)",encoder_string[e4_encoder_action],sw_string[e4_sw_action]);
+        snprintf(text, 64, "%s (%s)",encoder_string[e4_encoder_action],sw_string[e4_sw_action]);
         cairo_show_text(cr, text);
       }
     }
@@ -555,13 +555,13 @@ void rx_panadapter_update(RECEIVER *rx) {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
       double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
-      sprintf(text, "%0.1fC", t);
+      snprintf(text, 64, "%0.1fC", t);
       cairo_move_to(cr, 100.0, 30.0);
       cairo_show_text(cr, text);
 
       if (isTransmitting()) {
         double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
-        sprintf(text, "%0.0fmA", c);
+        snprintf(text, 64, "%0.0fmA", c);
         cairo_move_to(cr, 160.0, 30.0);
         cairo_show_text(cr, text);
       }

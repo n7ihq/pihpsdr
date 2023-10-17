@@ -169,7 +169,7 @@ int alpine_start_app(const char * const app_id) {
   //
   // Copy IP addr and name of app to app_start_url
   //
-  sprintf(app_start_url, "http://%s/%s/",
+  snprintf(app_start_url, sizeof(app_start_url), "http://%s/%s/",
           inet_ntoa(radio->info.network.address.sin_addr),
           app_id);
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_URL, app_start_url);
@@ -219,7 +219,7 @@ int stemlab_start_app(const char * const app_id) {
   //
   // stop command
   //
-  sprintf(app_start_url, "http://%s/bazaar?stop=%s",
+  snprintf(app_start_url, sizeof(app_start_url), "http://%s/bazaar?stop=%s",
           inet_ntoa(radio->info.network.address.sin_addr),
           app_id);
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_URL, app_start_url);
@@ -231,7 +231,7 @@ int stemlab_start_app(const char * const app_id) {
   //
   // start command
   //
-  sprintf(app_start_url, "http://%s/bazaar?start=%s",
+  snprintf(app_start_url, sizeof(app_start_url), "http://%s/bazaar?start=%s",
           inet_ntoa(radio->info.network.address.sin_addr),
           app_id);
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_URL, app_start_url);
@@ -301,7 +301,7 @@ void stemlab_discovery() {
   }
 
   app_list = 0;
-  sprintf(txt, "http://%s", ipaddr_radio);
+  snprintf(txt, 150, "http://%s", ipaddr_radio);
   curl_easy_setopt(curl_handle, CURLOPT_URL, txt);
   curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, (long) 5);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, get_list_cb);
@@ -310,7 +310,7 @@ void stemlab_discovery() {
   curl_easy_cleanup(curl_handle);
 
   if (curl_error ==  CURLE_OPERATION_TIMEDOUT) {
-    sprintf(txt, "No response from web server at %s", ipaddr_radio);
+    snprintf(txt, 150, "No response from web server at %s", ipaddr_radio);
     status_text(txt);
     t_print("%s\n", txt);
   }
@@ -331,7 +331,7 @@ void stemlab_discovery() {
       return;
     }
 
-    sprintf(txt, "http://%s/bazaar?apps=", ipaddr_radio);
+    snprintf(txt, 150, "http://%s/bazaar?apps=", ipaddr_radio);
     curl_easy_setopt(curl_handle, CURLOPT_URL, txt);
     curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, (long) 20);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, app_list_cb);
@@ -367,7 +367,7 @@ void stemlab_discovery() {
   DISCOVERED *dev = &discovered[devices++];
   dev->protocol = STEMLAB_PROTOCOL;
   dev->device = DEVICE_METIS;                                     // not used
-  strcpy(dev->name, "STEMlab");
+  strlcpy(dev->name, "STEMlab", sizeof(dev->name));
   dev->software_version = app_list;                               // encodes list of SDR apps present
   dev->status = STATE_AVAILABLE;
   memset(dev->info.network.mac_address, 0, 6);                    // not used
@@ -378,5 +378,5 @@ void stemlab_discovery() {
   dev->info.network.interface_length = sizeof(struct sockaddr_in);
   dev->info.network.interface_address = ip_address;                // same as RedPitaya address
   dev->info.network.interface_netmask = netmask;                   // does not matter
-  strcpy(dev->info.network.interface_name, "");
+  strlcpy(dev->info.network.interface_name, "", sizeof(dev->info.network.interface_name));
 }

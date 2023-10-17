@@ -279,7 +279,7 @@ void get_midi_devices() {
   int n;
   int i;
   CFStringRef pname;   // MacOS name of the device
-  char name[100];      // C name of the device
+  char name[128];      // C name of the device
   OSStatus osret;
   static int first = 1;
 
@@ -326,7 +326,7 @@ void get_midi_devices() {
       // for some MIDI devices. In this case, we replace the name by
       // "NoPort<n>"
       //
-      if (strlen(name) == 0) { sprintf(name, "NoPort%d", n_midi_devices); }
+      if (strlen(name) == 0) { snprintf(name, 128, "NoPort%d", n_midi_devices); }
 
       t_print("%s: %s\n", __FUNCTION__, name);
 
@@ -341,8 +341,7 @@ void get_midi_devices() {
           }
 
           g_free(midi_devices[n_midi_devices].name);
-          midi_devices[n_midi_devices].name = g_new(gchar, strlen(name) + 1);
-          strcpy(midi_devices[n_midi_devices].name, name);
+          midi_devices[n_midi_devices].name = g_strdup(name);
         } else {
           //
           // This slot was occupied and the names match: do nothing!
@@ -354,8 +353,7 @@ void get_midi_devices() {
         //
         // This slot was unoccupied. Insert name and mark inactive
         //
-        midi_devices[n_midi_devices].name = g_new(gchar, strlen(name) + 1);
-        strcpy(midi_devices[n_midi_devices].name, name);
+        midi_devices[n_midi_devices].name = g_strdup(name);
         midi_devices[n_midi_devices].active = 0;
       }
 

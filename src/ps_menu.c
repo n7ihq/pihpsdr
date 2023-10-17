@@ -127,7 +127,7 @@ static void setpk_cb(GtkWidget *widget, gpointer data) {
   }
 
   // Display new value
-  sprintf(pk_text, "%6.3f", pk_val);
+  snprintf(pk_text, 16, "%6.3f", pk_val);
   gtk_entry_set_text(GTK_ENTRY(set_pk), pk_text);
 }
 
@@ -190,7 +190,7 @@ static int info_thread(gpointer arg) {
   for (int i = 0; i < INFO_SIZE; i++) {
     if (entry[i] == NULL) { continue; }
 
-    sprintf(label, "%d", info[i]);
+    snprintf(label, 20, "%d", info[i]);
 
     //
     // Translate PS state variable into human-readable string
@@ -198,43 +198,43 @@ static int info_thread(gpointer arg) {
     if (i == 15) {
       switch (info[15]) {
       case 0:
-        strcpy(label, "RESET");
+        strlcpy(label, "RESET", 20);
         break;
 
       case 1:
-        strcpy(label, "WAIT");
+        strlcpy(label, "WAIT", 20);
         break;
 
       case 2:
-        strcpy(label, "MOXDELAY");
+        strlcpy(label, "MOXDELAY", 20);
         break;
 
       case 3:
-        strcpy(label, "SETUP");
+        strlcpy(label, "SETUP", 20);
         break;
 
       case 4:
-        strcpy(label, "COLLECT");
+        strlcpy(label, "COLLECT", 20);
         break;
 
       case 5:
-        strcpy(label, "MOXCHECK");
+        strlcpy(label, "MOXCHECK", 20);
         break;
 
       case 6:
-        strcpy(label, "CALC");
+        strlcpy(label, "CALC", 20);
         break;
 
       case 7:
-        strcpy(label, "DELAY");
+        strlcpy(label, "DELAY", 20);
         break;
 
       case 8:
-        strcpy(label, "STAYON");
+        strlcpy(label, "STAYON", 20);
         break;
 
       case 9:
-        strcpy(label, "TURNON");
+        strlcpy(label, "TURNON", 20);
         break;
       }
     }
@@ -242,11 +242,11 @@ static int info_thread(gpointer arg) {
     gtk_entry_set_text(GTK_ENTRY(entry[i]), label);
   }
 
-  sprintf(label, "%d", transmitter->attenuation);
+  snprintf(label, 20, "%d", transmitter->attenuation);
   gtk_entry_set_text(GTK_ENTRY(tx_att), label);
   double pk;
   GetPSMaxTX(transmitter->id, &pk);
-  sprintf(label, "%6.3f", pk);
+  snprintf(label, 20, "%6.3f", pk);
   gtk_entry_set_text(GTK_ENTRY(get_pk), label);
 
   if (transmitter->auto_on) {
@@ -355,7 +355,7 @@ static void enable_cb(GtkWidget *widget, gpointer data) {
 
     if (val && transmitter->auto_on) {
       char label[16];
-      sprintf(label, "%d", transmitter->attenuation);
+      snprintf(label, 16, "%d", transmitter->attenuation);
       gtk_entry_set_text(GTK_ENTRY(tx_att), label);
       gtk_widget_show(tx_att);
       gtk_widget_hide(tx_att_spin);
@@ -377,7 +377,7 @@ static void auto_cb(GtkWidget *widget, gpointer data) {
     // show text field for automatic attenuation
     //
     char label[16];
-    sprintf(label, "%d", transmitter->attenuation);
+    snprintf(label, 16, "%d", transmitter->attenuation);
     gtk_entry_set_text(GTK_ENTRY(tx_att), label);
     gtk_widget_show(tx_att);
     gtk_widget_hide(tx_att_spin);
@@ -554,23 +554,23 @@ void ps_menu(GtkWidget *parent) {
 
     switch (i) {
     case 4:
-      strcpy(label, "feedbk");
+      strlcpy(label, "feedbk", 16);
       break;
 
     case 5:
-      strcpy(label, "cor.cnt");
+      strlcpy(label, "cor.cnt", 16);
       break;
 
     case 6:
-      strcpy(label, "sln.chk");
+      strlcpy(label, "sln.chk", 16);
       break;
 
     case 13:
-      strcpy(label, "dg.cnt");
+      strlcpy(label, "dg.cnt", 16);
       break;
 
     case 15:
-      strcpy(label, "status");
+      strlcpy(label, "status", 16);
       break;
 
     default:
@@ -613,7 +613,7 @@ void ps_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), lbl, col, row, 1, 1);
   col++;
   GetPSHWPeak(transmitter->id, &pk_val);
-  sprintf(pk_text, "%6.3f", pk_val);
+  snprintf(pk_text, 16, "%6.3f", pk_val);
   set_pk = gtk_entry_new();
   gtk_entry_set_text(GTK_ENTRY(set_pk), pk_text);
   gtk_grid_attach(GTK_GRID(grid), set_pk, col, row, 1, 1);
@@ -651,7 +651,7 @@ void ps_menu(GtkWidget *parent) {
   //
   if (transmitter->auto_on && transmitter->puresignal) {
     char label[16];
-    sprintf(label, "%d", transmitter->attenuation);
+    snprintf(label, 16, "%d", transmitter->attenuation);
     gtk_entry_set_text(GTK_ENTRY(tx_att), label);
     gtk_widget_show(tx_att);
     gtk_widget_hide(tx_att_spin);

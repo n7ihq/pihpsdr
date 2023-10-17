@@ -356,9 +356,4 @@ extern void protocol_restart(void);
 // or memory accesses (used for ring buffers)
 //
 #define MEMORY_BARRIER asm volatile ("" ::: "memory")
-
-#ifdef __APPLE__
-#include <semaphore.h>
-sem_t *apple_sem(int initial_value);
-#endif
 #endif

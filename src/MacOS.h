@@ -114,4 +114,6 @@ static inline int clock_nanosleep(clockid_t clock_id, int flags,
 }
 #endif  // !defined(TIMER_ABSTIME)
 
+#include <semaphore.h>
+sem_t *apple_sem(int init);
 #endif // __APPLE__

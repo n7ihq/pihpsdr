@@ -150,7 +150,7 @@ void oc_menu(GtkWidget *parent) {
 
   for (i = 1; i < 8; i++) {
     char oc_id[16];
-    sprintf(oc_id, "%d", i);
+    snprintf(oc_id, 16, "%d", i);
     GtkWidget *oc_rx_title = gtk_label_new(oc_id);
     gtk_widget_set_name(oc_rx_title, "boldlabel");
     gtk_widget_show(oc_rx_title);
@@ -214,7 +214,7 @@ void oc_menu(GtkWidget *parent) {
 
   for (j = 1; j < 8; j++) {
     char oc_id[8];
-    sprintf(oc_id, "%d", j);
+    snprintf(oc_id, 8, "%d", j);
     GtkWidget *oc_tune_title = gtk_label_new(oc_id);
     gtk_widget_set_name(oc_tune_title, "boldlabel");
     gtk_widget_show(oc_tune_title);

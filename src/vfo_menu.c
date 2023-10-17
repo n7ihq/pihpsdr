@@ -86,9 +86,9 @@ static gboolean num_pad_cb(GtkWidget *widget, GdkEventButton *event, gpointer da
   num_pad(btn_actions[val], v);
 
   if (vfo[v].entered_frequency[0]) {
-    sprintf(output, "<big><b>%s</b></big>", vfo[v].entered_frequency);
+    snprintf(output, 64, "<big><b>%s</b></big>", vfo[v].entered_frequency);
   } else {
-    sprintf(output, "<big><b>0</b></big>");
+    snprintf(output, 64, "<big><b>0</b></big>");
   }
 
   gtk_label_set_markup (GTK_LABEL (label), output);
@@ -162,7 +162,7 @@ void vfo_menu(GtkWidget *parent, int id) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  sprintf(title, "piHPSDR - VFO %s", id == 0 ? "A" : "B");
+  snprintf(title, 64, "piHPSDR - VFO %s", id == 0 ? "A" : "B");
   GtkWidget *headerbar = gtk_header_bar_new();
   gtk_window_set_titlebar(GTK_WINDOW(dialog), headerbar);
   gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);

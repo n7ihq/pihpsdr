@@ -62,7 +62,7 @@ extern void saveProperties(const char* filename);
 
 #define GetPropS0(a,b)  { \
   value=getProperty(a); \
-  if (value) { strcpy(b, value); } \
+  if (value) { strlcpy(b, value, sizeof(b)); } \
 }
 
 #define GetPropA0(a,b)  { \
@@ -71,72 +71,72 @@ extern void saveProperties(const char* filename);
 }
 
 #define GetPropI1(a,b,c) { \
-  sprintf(name, a, b); \
+  snprintf(name, sizeof(name), a, b); \
   value=getProperty(name); \
   if (value) { c = atoll(value); } \
 }
 
 #define GetPropF1(a,b,c) { \
-  sprintf(name, a, b); \
+  snprintf(name, sizeof(name), a, b); \
   value=getProperty(name); \
   if (value) { c = atof(value); } \
 }
 
 #define GetPropS1(a,b,c) { \
-  sprintf(name, a, b); \
+  snprintf(name, sizeof(name), a, b); \
   value=getProperty(name); \
-  if (value) { strcpy(c, value); } \
+  if (value) { strlcpy(c, value, sizeof(c)); } \
 }
 
 #define GetPropA1(a,b,c) { \
-  sprintf(name, a, b); \
+  snprintf(name, sizeof(name), a, b); \
   value=getProperty(name); \
   if (value) { c = String2Action(value); } \
 }
 
 #define GetPropI2(a,b,c,d) { \
-  sprintf(name, a, b, c); \
+  snprintf(name, sizeof(name), a, b, c); \
   value=getProperty(name); \
   if (value) { d = atoll(value); } \
 }
 
 #define GetPropS2(a,b,c,d) { \
-  sprintf(name, a, b, c); \
+  snprintf(name, sizeof(name), a, b, c); \
   value=getProperty(name); \
-  if (value) { strcpy(d, value); } \
+  if (value) { strlcpy(d, value, sizeof(d)); } \
 }
 
 #define GetPropA2(a,b,c,d) { \
-  sprintf(name, a, b, c); \
+  snprintf(name, sizeof(name), a, b, c); \
   value=getProperty(name); \
   if (value) { d = String2Action(value); } \
 }
 
 #define GetPropI3(a,b,c,d, e) { \
-  sprintf(name, a, b, c, d); \
+  snprintf(name, sizeof(name), a, b, c, d); \
   value=getProperty(name); \
   if (value) { e = atoll(value); } \
 }
 
 #define GetPropS3(a,b,c,d, e) { \
-  sprintf(name, a, b, c, d); \
+  snprintf(name, sizeof(name), a, b, c, d); \
   value=getProperty(name); \
-  if (value) { strcpy(e, value); } \
+  if (value) { strlcpy(e, value, sizeof(e)); } \
 }
 
 #define GetPropA3(a,b,c,d,e) { \
-  sprintf(name, a, b, c, d); \
+  snprintf(name, sizeof(name), a, b, c, d); \
   value=getProperty(name); \
   if (value) { e = String2Action(value); } \
 }
 
 #define SetPropI0(a,b) { \
-  sprintf(value,"%lld", (long long)(b)); \
+  snprintf(value, sizeof(value), "%lld", (long long)(b)); \
   setProperty(a, value); \
 }
 
 #define SetPropF0(a,b) { \
-  sprintf(value,"%f", (double) (b)); \
+  snprintf(value, sizeof(value), "%f", (double) (b)); \
   setProperty(a, value); \
 }
 
@@ -145,59 +145,59 @@ extern void saveProperties(const char* filename);
 }
 
 #define SetPropI1(a,b,c) { \
-  sprintf(name, a, b); \
-  sprintf(value, "%lld", (long long) (c)); \
+  snprintf(name, sizeof(name), a, b); \
+  snprintf(value, sizeof(value), "%lld", (long long) (c)); \
   setProperty(name, value); \
 }
 
 #define SetPropF1(a,b,c) { \
-  sprintf(name, a, b); \
-  sprintf(value, "%f", (double) (c)); \
+  snprintf(name, sizeof(name), a, b); \
+  snprintf(value, sizeof(value), "%f", (double) (c)); \
   setProperty(name, value); \
 }
 
 #define SetPropS1(a,b,c) { \
-  sprintf(name, a, b); \
+  snprintf(name, sizeof(name), a, b); \
   setProperty(name, c); \
 }
 
 #define SetPropA1(a,b,c) { \
-  sprintf(name, a, b); \
-  Action2String(c, value); \
+  snprintf(name, sizeof(name), a, b); \
+  Action2String(c, value, sizeof(value)); \
   setProperty(name, value); \
 }
 
 #define SetPropI2(a,b,c,d) { \
-  sprintf(name, a, b, c); \
-  sprintf(value, "%lld", (long long) (d)); \
+  snprintf(name, sizeof(name), a, b, c); \
+  snprintf(value, sizeof(value), "%lld", (long long) (d)); \
   setProperty(name, value); \
 }
 
 #define SetPropS2(a,b,c,d) { \
-  sprintf(name, a, b, c); \
+  snprintf(name, sizeof(name), a, b, c); \
   setProperty(name, d); \
 }
 
 #define SetPropA2(a,b,c,d) { \
-  sprintf(name, a, b, c); \
-  Action2String(d, value); \
+  snprintf(name, sizeof(name), a, b, c); \
+  Action2String(d, value, sizeof(value)); \
   setProperty(name, value); \
 }
 
 #define SetPropI3(a,b,c,d, e) { \
-  sprintf(name, a, b, c, d); \
-  sprintf(value, "%lld", (long long) (e)); \
+  snprintf(name, sizeof(name), a, b, c, d); \
+  snprintf(value, sizeof(value), "%lld", (long long) (e)); \
   setProperty(name, value); \
 }
 
 #define SetPropS3(a,b,c,d, e) { \
-  sprintf(name, a, b, c, d); \
+  snprintf(name, sizeof(name), a, b, c, d); \
   setProperty(name, e); \
 }
 
 #define SetPropA3(a,b,c,d,e) { \
-  sprintf(name, a, b, c, d); \
-  Action2String(e, value); \
+  snprintf(name, sizeof(name), a, b, c, d); \
+  Action2String(e, value, sizeof(value)); \
   setProperty(name, value); \
 }
 

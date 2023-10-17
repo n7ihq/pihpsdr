@@ -988,21 +988,21 @@ void gpioSaveActions() {
     }
   }
 
-  sprintf(value, "%d", function);
+  snprintf(value, 128, "%d", function);
   setProperty("switches.function", value);
 
   for (int f = 0; f < MAX_FUNCTIONS; f++) {
     for (int i = 0; i < MAX_SWITCHES; i++) {
-      sprintf(name, "switches[%d,%d].switch_function", f, i);
-      Action2String(switches_controller1[f][i].switch_function, value);
+      snprintf(name, 128, "switches[%d,%d].switch_function", f, i);
+      Action2String(switches_controller1[f][i].switch_function, value, 128);
       setProperty(name, value);
     }
   }
 
   if (controller == CONTROLLER2_V1 || controller == CONTROLLER2_V2 || controller == G2_FRONTPANEL) {
     for (int i = 0; i < MAX_SWITCHES; i++) {
-      sprintf(name, "switches[%d].switch_function", i);
-      Action2String(switches[i].switch_function, value);
+      snprintf(name, 128, "switches[%d].switch_function", i);
+      Action2String(switches[i].switch_function, value, 128);
       setProperty(name, value);
     }
   }

@@ -146,33 +146,51 @@ static mybuffer *buflist[MAXMYBUF];
 
 //
 // Obtain a free buffer. If no one is available allocate
-// 4 new ones. Note these buffer "live" as long as the
-// program lives. They are never released. Measurements show
-// that in typical runs, only a handful of buffers is ever
-// allocated.
+// new ones. Note these buffer "live" as long as the
+// program lives. They are never released.
 //
 static mybuffer *get_my_buffer(int numlist) {
-  int i, j = 4;
+  int i, j, first;
+  const char *desc;
   mybuffer *bp = buflist[numlist];
 
-  if (bp) {
-    while (bp) {
-      if (bp->free) {
-        // found free buffer. Mark as used and return that one.
-        bp->free = 0;
-        return bp;
-      }
-
-      bp = bp->next;
+  while (bp) {
+    if (bp->free) {
+      // found free buffer. Mark as used and return that one.
+      bp->free = 0;
+      return bp;
     }
-  } else {
-    j = 1;
+
+    bp = bp->next;
+  }
+  //
+  // No buffer free, or the first time we request a buffer:
+  // allocate (a) new one(s). Note we need very few 
+  // HighPrio buffers, a limited amount of MicSample buffers,
+  // and a possibly large amount of DDC IQ buffers.
+  //
+  first = (bp == NULL);
+
+  switch (numlist) {
+    case HPMYBUF:
+      j=1;
+      desc = "HP";
+      break;
+    case MICMYBUF:
+      j=5;
+      desc = "MIC";
+      break;
+    case DDCMYBUF:
+      j=25;
+      desc = "DDC";
+      break;
+    default:
+      // NOTREACHED
+      j=5;
+      desc = "UNKNOWN";
+      break;
   }
 
-  //
-  // allocate one buffer, else if no free buffer found (bp == NULL),
-  // allocate some extra ones and add to the head of the list
-  //
   for (i = 0; i < j; i++) {
     bp = malloc(sizeof(mybuffer));
     bp->free = 1;
@@ -181,8 +199,9 @@ static mybuffer *get_my_buffer(int numlist) {
     num_buf[numlist]++;
   }
 
-  t_print("saturnmain: number of buffer[%s] %s to %d\n", numlist == DDCMYBUF ? "DDC" : numlist == MICMYBUF ? "MIC" : "HP"
-          , (j > 1) ? "increased" : "set", num_buf[numlist]);
+  t_print("%s: number of buffer[%s] %s to %d\n", __FUNCTION__, desc,
+          first ? "set" : "increased", num_buf[numlist]);
+
   // Mark the first buffer in list as used and return that one.
   buflist[numlist]->free = 0;
   return buflist[numlist];
@@ -339,7 +358,7 @@ void saturn_discovery() {
       discovered[devices].device = NEW_DEVICE_SATURN;
       discovered[devices].software_version = (RegisterRead(VADDRSWVERSIONREG) >> 4) & 0xFFFF;
       discovered[devices].fpga_version = RegisterRead(VADDRUSERVERSIONREG);
-      strcpy(discovered[devices].name, "saturn");
+      strlcpy(discovered[devices].name, "saturn",  sizeof(discovered[devices].name));
       discovered[devices].frequency_min = 0.0;
       discovered[devices].frequency_max = 61440000.0;
       memset(buf, 0, 256);
@@ -359,7 +378,7 @@ void saturn_discovery() {
 
       discovered[devices].info.network.address_length = 0;
       discovered[devices].info.network.interface_length = 0;
-      strcpy(discovered[devices].info.network.interface_name, "XDMA");
+      strlcpy(discovered[devices].info.network.interface_name, "XDMA", sizeof(discovered[devices].info.network.interface_name));
       discovered[devices].use_tcp = 0;
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;

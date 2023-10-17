@@ -248,7 +248,7 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
           cairo_arc(cr, cx, cx, radius, radians, radians);
           cairo_line_to(cr, x, y);
           cairo_stroke(cr);
-          sprintf(sf, "%d", i);
+          snprintf(sf, 32, "%d", i);
           cairo_arc(cr, cx, cx, radius + 5, radians, radians);
           cairo_get_current_point(cr, &x, &y);
           cairo_new_path(cr);
@@ -274,7 +274,7 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
         cairo_arc(cr, cx, cx, radius, radians, radians);
         cairo_line_to(cr, x, y);
         cairo_stroke(cr);
-        sprintf(sf, "+%d", i);
+        snprintf(sf, 32, "+%d", i);
         cairo_arc(cr, cx, cx, radius + 5, radians, radians);
         cairo_get_current_point(cr, &x, &y);
         cairo_new_path(cr);
@@ -298,7 +298,7 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
       cairo_line_to(cr, cx, cx);
       cairo_stroke(cr);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      sprintf(sf, "%d dBm", (int)(max_rxlvl + 0.5));
+      snprintf(sf, 32, "%d dBm", (int)(max_rxlvl + 0.5));
       cairo_move_to(cr, 80, cx - radius + 30);
       cairo_show_text(cr, sf);
     }
@@ -338,11 +338,11 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
             switch (units) {
             case 0:
             case 1:
-              sprintf(sf, "%0.1f", 0.1 * interval * i);
+              snprintf(sf, 32, "%0.1f", 0.1 * interval * i);
               break;
 
             case 2:
-              sprintf(sf, "%d", (int) (0.1 * interval * i));
+              snprintf(sf, 32, "%d", (int) (0.1 * interval * i));
               break;
             }
 
@@ -372,16 +372,16 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
 
       switch (pa_power) {
       case PA_1W:
-        sprintf(sf, "%dmW", (int)(1000.0 * max_pwr + 0.5));
+        snprintf(sf, 32, "%dmW", (int)(1000.0 * max_pwr + 0.5));
         break;
 
       case PA_5W:
       case PA_10W:
-        sprintf(sf, "%0.1fW", max_pwr);
+        snprintf(sf, 32, "%0.1fW", max_pwr);
         break;
 
       default:
-        sprintf(sf, "%dW", (int)(max_pwr + 0.5));
+        snprintf(sf, 32, "%dW", (int)(max_pwr + 0.5));
         break;
       }
 
@@ -396,11 +396,11 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
         }
       }
 
-      sprintf(sf, "SWR: %1.1f:1", swr);
+      snprintf(sf, 32, "SWR: %1.1f:1", swr);
       cairo_move_to(cr, 60, cx - radius + 28);
       cairo_show_text(cr, sf);
       cairo_set_source_rgba(cr, COLOUR_METER);
-      sprintf(sf, "ALC: %2.1f dB", max_alc);
+      snprintf(sf, 32, "ALC: %2.1f dB", max_alc);
       cairo_move_to(cr, 60, cx - radius + 41);
       cairo_show_text(cr, sf);
     }
@@ -592,7 +592,7 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
       if (size >= 12) {
         cairo_set_source_rgba(cr, COLOUR_ATTN);
         cairo_set_font_size(cr, size);
-        sprintf(sf, "%d dBm", (int)(max_rxlvl + 0.5));
+        snprintf(sf, 32, "%d dBm", (int)(max_rxlvl + 0.5));
         cairo_move_to(cr, text_location, Y2);
         cairo_show_text(cr, sf);
       }
@@ -611,16 +611,16 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
         //
         switch (pa_power) {
         case PA_1W:
-          sprintf(sf, "FWD: %dmW", (int)(1000.0 * max_pwr + 0.5));
+          snprintf(sf, 32, "FWD: %dmW", (int)(1000.0 * max_pwr + 0.5));
           break;
 
         case PA_5W:
         case PA_10W:
-          sprintf(sf, "FWD: %0.1fW", max_pwr);
+          snprintf(sf, 32, "FWD: %0.1fW", max_pwr);
           break;
 
         default:
-          sprintf(sf, "FWD: %dW", (int)(max_pwr + 0.5));
+          snprintf(sf, 32, "FWD: %dW", (int)(max_pwr + 0.5));
           break;
         }
 
@@ -639,13 +639,13 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
                                CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_BOLD);
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-        sprintf(sf, "SWR: %1.1f:1", swr);
+        snprintf(sf, 32, "SWR: %1.1f:1", swr);
         cairo_move_to(cr, 10, Y4);
         cairo_show_text(cr, sf);
       }
 
       cairo_set_source_rgba(cr, COLOUR_METER);  // revert to white color
-      sprintf(sf, "ALC: %2.1f dB", max_alc);
+      snprintf(sf, 32, "ALC: %2.1f dB", max_alc);
       cairo_move_to(cr, METER_WIDTH / 2, Y2);
       cairo_show_text(cr, sf);
       break;

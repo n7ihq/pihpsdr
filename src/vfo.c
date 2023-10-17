@@ -1138,10 +1138,10 @@ void vfo_update() {
       }
 
       if (can_transmit ? transmitter->ctcss_enabled : 0) {
-        sprintf(temp_text, "%s %s C=%0.1f", mode_string[vfo[id].mode], wid,
+        snprintf(temp_text, 32, "%s %s C=%0.1f", mode_string[vfo[id].mode], wid,
                 ctcss_frequencies[transmitter->ctcss]);
       } else {
-        sprintf(temp_text, "%s %s", mode_string[vfo[id].mode], wid);
+        snprintf(temp_text, 32, "%s %s", mode_string[vfo[id].mode], wid);
       }
     }
     break;
@@ -1149,12 +1149,12 @@ void vfo_update() {
     case modeCWL:
     case modeCWU:
       if (vfo[id].cwAudioPeakFilter) {
-        sprintf(temp_text, "%s %sP %dwpm %dHz", mode_string[vfo[id].mode],
+        snprintf(temp_text, 32, "%s %sP %dwpm %dHz", mode_string[vfo[id].mode],
                 band_filter->title,
                 cw_keyer_speed,
                 cw_keyer_sidetone_frequency);
       } else {
-        sprintf(temp_text, "%s %s %d wpm %d Hz", mode_string[vfo[id].mode],
+        snprintf(temp_text, 32, "%s %s %d wpm %d Hz", mode_string[vfo[id].mode],
                 band_filter->title,
                 cw_keyer_speed,
                 cw_keyer_sidetone_frequency);
@@ -1166,11 +1166,11 @@ void vfo_update() {
     case modeUSB:
     case modeDSB:
     case modeAM:
-      sprintf(temp_text, "%s %s", mode_string[vfo[id].mode], band_filter->title);
+      snprintf(temp_text, 32, "%s %s", mode_string[vfo[id].mode], band_filter->title);
       break;
 
     default:
-      sprintf(temp_text, "%s %s", mode_string[vfo[id].mode], band_filter->title);
+      snprintf(temp_text, 32, "%s %s", mode_string[vfo[id].mode], band_filter->title);
       break;
     }
 
@@ -1276,10 +1276,10 @@ void vfo_update() {
       }
 
       cairo_restore(cr);
-      sprintf(temp_text, "%0d.%03d", f_m, f_k);
+      snprintf(temp_text, 32, "%0d.%03d", f_m, f_k);
       cairo_show_text(cr, temp_text);
       cairo_set_font_size(cr, vfl->size2);
-      sprintf(temp_text, "%03d", f_h);
+      snprintf(temp_text, 32, "%03d", f_h);
       cairo_show_text(cr, temp_text);
     }
   }
@@ -1335,10 +1335,10 @@ void vfo_update() {
       }
 
       cairo_restore(cr);
-      sprintf(temp_text, "%0d.%03d", f_m, f_k);
+      snprintf(temp_text, 32, "%0d.%03d", f_m, f_k);
       cairo_show_text(cr, temp_text);
       cairo_set_font_size(cr, vfl->size2);
-      sprintf(temp_text, "%03d", f_h);
+      snprintf(temp_text, 32, "%03d", f_h);
       cairo_show_text(cr, temp_text);
     }
   }
@@ -1362,7 +1362,7 @@ void vfo_update() {
       cairo_set_source_rgba(cr, COLOUR_SHADE);
     }
 
-    sprintf(temp_text, "Zoom %d", active_receiver->zoom);
+    snprintf(temp_text, 32, "Zoom %d", active_receiver->zoom);
     cairo_show_text(cr, temp_text);
   }
 
@@ -1395,7 +1395,7 @@ void vfo_update() {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
     }
 
-    sprintf(temp_text, "RIT %lldHz", vfo[id].rit);
+    snprintf(temp_text, 32, "RIT %lldHz", vfo[id].rit);
     cairo_move_to(cr, vfl->rit_x, vfl->rit_y);
     cairo_show_text(cr, temp_text);
   }
@@ -1412,7 +1412,7 @@ void vfo_update() {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
     }
 
-    sprintf(temp_text, "XIT %lldHz", vfo[txvfo].xit);
+    snprintf(temp_text, 32, "XIT %lldHz", vfo[txvfo].xit);
     cairo_move_to(cr, vfl->xit_x, vfl->xit_y);
     cairo_show_text(cr, temp_text);
   }
@@ -1560,7 +1560,7 @@ void vfo_update() {
     cairo_move_to(cr, vfl->cmpr_x, vfl->cmpr_y);
 
     if (transmitter->compressor) {
-      sprintf(temp_text, "CMPR %d", (int) transmitter->compressor_level);
+      snprintf(temp_text, 32, "CMPR %d", (int) transmitter->compressor_level);
       cairo_set_source_rgba(cr, COLOUR_ATTN);
       cairo_show_text(cr, temp_text);
     } else {
@@ -1620,7 +1620,7 @@ void vfo_update() {
 
     if (s >= STEPS) { s = 0; }
 
-    sprintf(temp_text, "Step %s", step_labels[s]);
+    snprintf(temp_text, 32, "Step %s", step_labels[s]);
     cairo_move_to(cr, vfl->step_x, vfl->step_y);
     cairo_set_source_rgba(cr, COLOUR_ATTN);
     cairo_show_text(cr, temp_text);
@@ -1744,7 +1744,7 @@ void vfo_update() {
       cairo_set_source_rgba(cr, COLOUR_SHADE);
     }
 
-    sprintf(temp_text, "DUP");
+    snprintf(temp_text, 32, "DUP");
     cairo_move_to(cr, vfl->dup_x, vfl->dup_y);
     cairo_show_text(cr, temp_text);
   }
