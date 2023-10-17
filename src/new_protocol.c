@@ -16,7 +16,6 @@
 *
 */
 
-
 #include <gtk/gtk.h>
 
 #include <errno.h>
@@ -60,7 +59,6 @@
 #ifdef SATURN
   #include "saturnmain.h"
 #endif
-
 
 #define min(x,y) (x<y?x:y)
 
@@ -309,7 +307,6 @@ static mybuffer *get_my_buffer() {
   return buflist;
 }
 
-
 void schedule_high_priority() {
   new_protocol_high_priority();
 }
@@ -470,6 +467,8 @@ void new_protocol_init(int pixels) {
   }
 #endif
 
+  running = 1;
+
   high_priority_thread_id = g_thread_new( "P2 HP", high_priority_thread, NULL);
   mic_line_thread_id = g_thread_new( "P2 MIC", mic_line_thread, NULL);
 
@@ -492,8 +491,6 @@ void new_protocol_init(int pixels) {
 
   new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
   new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
-
-  running = 1;
 
   if (have_saturn_xdma) {
 #ifdef SATURN
@@ -1237,7 +1234,6 @@ static void new_protocol_high_priority() {
   pthread_mutex_unlock(&hi_prio_mutex);
 }
 
-
 static void new_protocol_transmit_specific() {
   int txmode = get_tx_mode();
   pthread_mutex_lock(&tx_spec_mutex);
@@ -1461,21 +1457,6 @@ static void new_protocol_start() {
   new_protocol_timer_thread_id = g_thread_new( "P2 task", new_protocol_timer_thread, NULL);
 }
 
-void new_protocol_stop() {
-  running = 0;
-  new_protocol_high_priority();
-  usleep(100000); // 100 ms
-
-  if (have_saturn_xdma) {
-#ifdef SATURN
-    saturn_exit();
-#endif
-  } else {
-    close (data_socket);
-    data_socket = -1;
-  }
-}
-
 //
 // Function available to e.g. rigctl to stop the protocol
 //
@@ -1490,7 +1471,6 @@ void new_protocol_menu_stop() {
   // threads block on the semaphore. Then, post the semaphores
   // such that the threads can check "running" and terminate
   //
-
   usleep(50000);
 #ifdef __APPLE__
   sem_post(txiq_sem);
@@ -1511,7 +1491,6 @@ void new_protocol_menu_stop() {
   if (!have_saturn_xdma) {
     g_thread_join(new_protocol_thread_id);
   }
-
   g_thread_join(new_protocol_timer_thread_id);
   new_protocol_high_priority();
   // let the FPGA rest a while
@@ -1534,7 +1513,6 @@ void new_protocol_menu_stop() {
 
     free(buffer);
   }
-
 }
 
 //
@@ -1560,7 +1538,9 @@ void new_protocol_menu_start() {
   // Mark all buffers free.
   //
   if (have_saturn_xdma) {
-    //saturn_free_buffers();  UNIMPLEMENTED
+#ifdef SATURN
+    saturn_free_buffers();
+#endif
   } else {
     mybuffer *mybuf = buflist;
 
@@ -1631,7 +1611,6 @@ static gpointer new_protocol_rxaudio_thread(gpointer data) {
       saturn_handle_speaker_audio(audiobuffer);
 #endif
     } else {
-
       int rc = sendto(data_socket, audiobuffer, sizeof(audiobuffer), 0, (struct sockaddr*)&audio_addr, audio_addr_length);
 
       if (rc != sizeof(audiobuffer)) {
@@ -1683,12 +1662,10 @@ static gpointer new_protocol_txiq_thread(gpointer data) {
       saturn_handle_duc_iq(false, iqbuffer);
 #endif
     } else {
-
       if (sendto(data_socket, iqbuffer, sizeof(iqbuffer), 0, (struct sockaddr * )&iq_addr, iq_addr_length) < 0) {
         t_perror("sendto socket failed for iq:");
         exit(1);
       }
-
       usleep(1000);
     }
   }
@@ -1703,7 +1680,6 @@ static gpointer new_protocol_thread(gpointer data) {
   int bytesread;
   mybuffer *mybuf;
   t_print("new_protocol_thread\n");
-  running = 1;
 
   //
   // This thread should do as little work as possible and avoid any blocking.
@@ -1712,7 +1688,6 @@ static gpointer new_protocol_thread(gpointer data) {
   // DDC-IQ and Microphone packets since they eventually get stuck in WDSP
   // (fexchange calls).
   //
-
   while (running) {
     mybuf = get_my_buffer();
     buffer = mybuf->buffer;
@@ -1811,7 +1786,6 @@ static gpointer mic_line_thread(gpointer data) {
 #else
     sem_wait(&mic_line_sem);
 #endif
-
     nptr = mic_outptr + 1;
 
     if (nptr >= MICRINGBUFLEN) { nptr = 0; }
@@ -1827,8 +1801,8 @@ static gpointer mic_line_thread(gpointer data) {
     mybuf->free = 1;
   }
 
-   return NULL;
- }
+  return NULL;
+}
 
 //
 // Despite the name, these "saturn post" routines are
@@ -2290,7 +2264,6 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
 
       if (nptr != rxaudio_outptr) {
         rxaudio_inptr = nptr;
-        rxaudio_count++;
 #ifdef __APPLE__
         sem_post(rxaudio_sem);
 #else
@@ -2299,8 +2272,8 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
         rxaudio_count = 0;
       } else {
         t_print("%s: buffer overflow\n", __FUNCTION__);
-        // skip 1024 mic samples (21 msec)
-        rxaudio_count = -1024;
+        // skip some audio samples
+        rxaudio_count = -4096;
       }
     }
 
@@ -2350,7 +2323,6 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
 
     if (nptr != rxaudio_outptr) {
       rxaudio_inptr = nptr;
-      rxaudio_count++;
 #ifdef __APPLE__
       sem_post(rxaudio_sem);
 #else
@@ -2359,8 +2331,8 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
       rxaudio_count = 0;
     } else {
       t_print("%s: buffer overflow\n", __FUNCTION__);
-      // skip 1024 mic samples (21 msec)
-      rxaudio_count = -1024;
+      // skip some audio samples
+      rxaudio_count = -4096;
     }
   }
 

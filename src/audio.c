@@ -85,7 +85,6 @@ static snd_pcm_format_t formats[3] = {
 
 static void *mic_read_thread(void *arg);
 
-
 int n_input_devices;
 AUDIO_DEVICE input_devices[MAX_AUDIO_DEVICES];
 int n_output_devices;

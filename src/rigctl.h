@@ -54,5 +54,4 @@ extern int rigctl_busy;
 extern int rigctl_port_base;
 extern int rigctl_enable;
 
-
 #endif // RIGCTL_H

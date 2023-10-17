@@ -16,7 +16,6 @@
 *
 */
 
-
 #ifdef CLIENT_SERVER
   #include "client_server.h"
   extern int ext_remote_command(void *data);
@@ -55,4 +54,3 @@ extern int ext_set_duplex(void *data);      // is this necessary?
 // to avoid duplicate code
 //
 ///////////////////////////////////////////////////////////
-

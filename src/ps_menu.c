@@ -72,7 +72,6 @@ extern void SetPSPinMode (int channel, int pin);
 // Todo: create buttons to change these values
 //
 
-
 static int running = 0;
 static guint info_timer = 0;
 

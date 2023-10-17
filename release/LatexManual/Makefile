@@ -14,7 +14,7 @@ piHPSDR-Manual.pdf:	piHPSDR-Manual.tex
 	pdflatex piHPSDR-Manual.tex
 
 .PHONY: release
-release:                       piHPSDR-Manual.pdf
+release:			piHPSDR-Manual.pdf
 	cp piHPSDR-Manual.pdf ..
 
 .PHONY: clean

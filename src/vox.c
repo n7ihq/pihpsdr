@@ -40,7 +40,6 @@ static int vox_timeout_cb(gpointer data) {
   return FALSE;
 }
 
-
 double vox_get_peak() {
   double result = peak;
   return result;

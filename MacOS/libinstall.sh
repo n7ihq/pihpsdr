@@ -103,7 +103,6 @@ fi
 # All homebrew packages needed for pihpsdr
 #
 ################################################################
-
 $BREW install gtk+3
 $BREW install librsvg
 $BREW install pkg-config

@@ -199,8 +199,6 @@ static pthread_mutex_t send_audio_mutex   = PTHREAD_MUTEX_INITIALIZER;
 //
 static pthread_mutex_t send_ozy_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
-
-
 //
 // Ring buffer for outgoing samples.
 // Samples going to the radio are produced in big chunks.
@@ -226,7 +224,7 @@ static pthread_mutex_t send_ozy_mutex   = PTHREAD_MUTEX_INITIALIZER;
 // TXRINGBUFLEN must be a multiple of 1008 bytes (126 samples)
 //
 #define TXRINGBUFLEN 32256     // 80 msec
-static          unsigned char *TXRINGBUF = NULL;
+static unsigned char *TXRINGBUF = NULL;
 static volatile int txring_inptr  = 0;  // pointer updated when writing into the ring buffer
 static volatile int txring_outptr = 0;  // pointer updated when reading from the ring buffer
 static volatile int txring_flag   = 0;  // 0: RX, 1: TX
@@ -239,7 +237,7 @@ static volatile int txring_drain  = 0;  // a flag for draining the output buffer
 // 400 kByyte (2RX, 384k), so we use 512k
 //
 #define RXRINGBUFLEN 524288  // must be multiple of 1024 since we queue double-buffers
-static          unsigned char *RXRINGBUF = NULL;
+static unsigned char *RXRINGBUF = NULL;
 static volatile int rxring_inptr  = 0;  // pointer updated when writing into the ring buffer
 static volatile int rxring_outptr = 0;  // pointer updated when reading from the ring buffer
 static volatile int rxring_count  = 0;  // a sample counter
@@ -264,7 +262,6 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
       txring_outptr = nptr;
       continue;
     }
-
     if (pthread_mutex_trylock(&send_ozy_mutex)) {
       //
       // This can only happen if the GUI thread initiates
@@ -276,21 +273,20 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
       txring_outptr = nptr;
     } else {
 
-     memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr    ], 504);
-     ozy_send_buffer();
-     memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr+504], 504);
-     ozy_send_buffer();
-     
-     MEMORY_BARRIER;
-     txring_outptr = nptr;
-     usleep(2000);
-     pthread_mutex_unlock(&send_ozy_mutex);
+      memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr    ], 504);
+      ozy_send_buffer();
+      memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr+504], 504);
+      ozy_send_buffer();
+
+      MEMORY_BARRIER;
+      txring_outptr = nptr;
+      usleep(2000);
+      pthread_mutex_unlock(&send_ozy_mutex);
     }
   }
 
   return NULL;
 }
-
 
 // This function is used in debug code
 void dump_buffer(unsigned char *buffer, int length, const char *who) {

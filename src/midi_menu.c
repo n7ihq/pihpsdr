@@ -211,7 +211,6 @@ static void row_inserted_cb(GtkTreeModel *tree_model, GtkTreePath *path, GtkTree
   gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, NULL, FALSE);
 }
 
-
 static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data) {
   char *str_event;
   char *str_channel;
@@ -1393,7 +1392,6 @@ static enum MIDIevent String2Event(const char *str) {
 
   return EVENT_NONE;
 }
-
 
 static char *Type2String(enum ACTIONtype type) {
   switch (type) {

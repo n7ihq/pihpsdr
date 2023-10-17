@@ -35,7 +35,6 @@
 #include "zoompan.h"
 #include "equalizer_menu.h"
 
-
 //
 // The following calls functions can be called usig g_idle_add
 // Their return value is G_SOURCE_REMOVE so they will be called only
@@ -46,7 +45,6 @@ int ext_start_radio(void *data) {
   start_radio();
   return G_SOURCE_REMOVE;
 }
-
 
 //
 // ALL calls to vfo_update should go through g_idle_add(ext_vfo_update)

@@ -166,7 +166,6 @@ static void display_sliders_cb(GtkWidget *widget, gpointer data) {
   reconfigure_radio();
 }
 
-
 static void display_toolbar_cb(GtkWidget *widget, gpointer data) {
   display_toolbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   reconfigure_radio();
@@ -409,4 +408,3 @@ void display_menu(GtkWidget *parent) {
 
   gtk_widget_show_all(dialog);
 }
-

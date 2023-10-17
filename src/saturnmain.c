@@ -60,7 +60,6 @@
 #include "new_protocol.h"
 #include "message.h"
 
-
 extern sem_t DDCInSelMutex;                 // protect access to shared DDC input select register
 extern sem_t DDCResetFIFOMutex;             // protect access to FIFO reset register
 extern sem_t RFGPIOMutex;                   // protect access to RF GPIO register
@@ -207,6 +206,18 @@ static mybuffer *get_my_buffer(int numlist) {
   return buflist[numlist];
 }
 
+void saturn_free_buffers() {
+  mybuffer *mybuf;
+
+  for (int i = 0; i < MAXMYBUF; i++) {
+    mybuf = buflist[i];
+    while (mybuf) {
+      mybuf->free = 1;
+      mybuf = mybuf->next;
+    }
+  }
+}
+
 bool CreateDynamicMemory(void) {                            // return true if error
   uint32_t DDC;
   bool Result = false;
@@ -238,7 +249,6 @@ bool CreateDynamicMemory(void) {                            // return true if er
   memset(DMAReadBuffer, 0, DMABufferSize);
   return Result;
 }
-
 
 void FreeDynamicMemory(void) {
   uint32_t DDC;
@@ -591,7 +601,6 @@ void saturn_handle_speaker_audio(uint8_t *UDPInBuffer) {
   DMAWriteToFPGA(DMASpkWritefile_fd, SpkBasePtr, VDMASPKTRANSFERSIZE, VADDRSPKRSTREAMWRITE);
   return;
 }
-
 
 void saturn_exit() {
   //

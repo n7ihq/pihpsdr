@@ -36,6 +36,9 @@
   #include "gpio.h"
 #endif
 #include "message.h"
+#ifdef SATURN
+#include "saturnmain.h"
+#endif
 
 static GtkWidget *dialog = NULL;
 
@@ -52,6 +55,11 @@ void stop_program() {
     t_print("%s: protocol stopped\n", __FUNCTION__);
     radio_stop();
     t_print("%s: radio stopped\n", __FUNCTION__);
+    if (have_saturn_xdma) {
+#ifdef SATURN
+      saturn_exit();
+#endif
+    }
 #ifdef CLIENT_SERVER
   }
 
@@ -92,7 +100,6 @@ static gboolean shutdown_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
   _exit(0);
 }
 
-
 void exit_menu(GtkWidget *parent) {
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
@@ -131,4 +138,3 @@ void exit_menu(GtkWidget *parent) {
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }
-

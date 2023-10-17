@@ -119,8 +119,6 @@ enum {
 
 extern gint sat_mode;
 
-extern int echo;
-
 extern int radio_sample_rate;
 extern gboolean iqswap;
 
@@ -154,7 +152,6 @@ extern int display_gradient;
 extern int display_detector_mode;
 extern int display_average_mode;
 extern double display_average_time;
-
 
 extern int display_zoompan;
 extern int display_sliders;
@@ -333,7 +330,6 @@ extern void radio_change_region(int region);
 
 extern void disable_rigctl(void);
 
-
 #ifdef CLIENT_SERVER
   extern int remote_start(void *data);
 #endif
@@ -349,7 +345,6 @@ extern void protocol_restart(void);
 // Macro to flag an unimplemented client/server feature
 //
 #define CLIENT_MISSING if (radio_is_remote) { t_print("%s: TODO: CLIENT/SERVER\n", __FUNCTION__); return; }
-
 
 //
 // Macro for a memory barrier, preventing changing the execution order

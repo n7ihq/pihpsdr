@@ -303,8 +303,6 @@ BANDSTACK bandstack_xvtr_5 = {3, 0, bandstack_entries_xvtr_5};
 BANDSTACK bandstack_xvtr_6 = {3, 0, bandstack_entries_xvtr_6};
 BANDSTACK bandstack_xvtr_7 = {3, 0, bandstack_entries_xvtr_7};
 
-
-
 BAND bands[BANDS + XVTRS] = {
   {"136kHz", &bandstack136, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 135700LL, 137800LL, 0LL, 0LL, 0},
   {"472kHz", &bandstack472, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 472000LL, 479000LL, 0LL, 0LL, 0},
@@ -671,7 +669,6 @@ int TransmitAllowed() {
   return result;
 }
 
-
 void band_plus(int id) {
   long long frequency_min = radio->frequency_min;
   long long frequency_max = radio->frequency_max;
@@ -727,4 +724,3 @@ void band_minus(int id) {
     }
   }
 }
-

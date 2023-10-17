@@ -43,7 +43,6 @@ struct _CHOICE {
 
 typedef struct _CHOICE CHOICE;
 
-
 static struct _CHOICE *first = NULL;
 static struct _CHOICE *current = NULL;
 
@@ -69,7 +68,6 @@ static gboolean close_cb () {
   cleanup();
   return TRUE;
 }
-
 
 static gboolean mode_select_cb (GtkWidget *widget, gpointer data) {
   CHOICE *choice = (CHOICE *) data;

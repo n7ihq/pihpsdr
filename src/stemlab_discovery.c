@@ -20,7 +20,6 @@
 // This code uses libcurl, but not avahi
 //
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -40,7 +39,6 @@
 #include "discovery.h"
 #include "radio.h"
 #include "message.h"
-
 
 // As we only run in the GTK+ main event loop, which is single-threaded and
 // non-preemptive, we shouldn't need any additional synchronisation mechanisms.
@@ -269,7 +267,6 @@ void stemlab_cleanup() {
 // After starting the app in the main discover menu, we
 // have to re-discover to get full info and start the radio.
 //
-
 
 void stemlab_discovery() {
   char txt[150];

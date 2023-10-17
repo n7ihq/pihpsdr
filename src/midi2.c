@@ -196,7 +196,6 @@ typedef struct _old_mapping {
   const char *str;
 } OLD_MAPPING;
 
-
 static OLD_MAPPING OLD_Mapping[] = {
   { NO_ACTION,            "NONE"                  },
   { A_TO_B,               "A2B"                   },

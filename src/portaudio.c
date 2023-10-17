@@ -47,7 +47,6 @@
 
 static PaStream *record_handle = NULL;
 
-
 int n_input_devices;
 AUDIO_DEVICE input_devices[MAX_AUDIO_DEVICES];
 int n_output_devices;

@@ -167,7 +167,6 @@ static int              freq = -1;
 static int              rx2gnd = -1;
 static int              TXDAC = 1;
 
-
 struct hl2word {
   unsigned char c1;
   unsigned char c2;
@@ -201,7 +200,6 @@ static int active_thread = 0;
 
 static void process_ep2(uint8_t *frame);
 static void *handler_ep6(void *arg);
-
 
 static double  last_i_sample = 0.0;
 static double  last_q_sample = 0.0;

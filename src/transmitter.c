@@ -569,7 +569,6 @@ static gboolean update_display(gpointer data) {
   return FALSE; // no more timer events
 }
 
-
 static void init_analyzer(TRANSMITTER *tx) {
   int flp[] = {0};
   double keep_time = 0.1;

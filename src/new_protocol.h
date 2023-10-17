@@ -52,7 +52,6 @@
 
 #define NET_BUFFER_SIZE  1500
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // PEDESTRIAN BUFFER MANAGEMENT
@@ -82,7 +81,6 @@ extern void schedule_receive_specific(void);
 extern void schedule_transmit_specific(void);
 
 extern void new_protocol_init(int pixels);
-extern void new_protocol_stop(void);
 
 extern void filter_board_changed(void);
 extern void pa_changed(void);

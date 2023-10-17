@@ -898,7 +898,6 @@ static int ts2000_mode(int m) {
   return mode;
 }
 
-
 gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
   gboolean implemented = TRUE;
   char reply[256];

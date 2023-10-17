@@ -101,7 +101,6 @@ static unsigned int read_word_data(unsigned char reg) {
   return data & 0xFFFF;
 }
 
-
 void i2c_interrupt() {
   unsigned int flags;
   int i;

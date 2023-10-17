@@ -53,9 +53,7 @@
 #ifdef CLIENT_SERVER
   #include "client_server.h"
 #endif
-
 #include "message.h"
-
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
@@ -1375,12 +1373,10 @@ static void process_rx_buffer(RECEIVER *rx) {
         break;
 
       case NEW_PROTOCOL:
-        if (!(echo && isTransmitting())) {
-          if (rx->mute_radio) {
-            new_protocol_audio_samples(rx, (short)0, (short)0);
-          } else {
-            new_protocol_audio_samples(rx, left_audio_sample, right_audio_sample);
-          }
+        if (rx->mute_radio) {
+          new_protocol_audio_samples(rx, (short)0, (short)0);
+        } else {
+          new_protocol_audio_samples(rx, left_audio_sample, right_audio_sample);
         }
 
         break;

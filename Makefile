@@ -6,12 +6,6 @@ GIT_DATE := $(firstword $(shell git --no-pager show --date=short --format="%ai" 
 GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 
 # uncomment the line below to include GPIO (needs libgpiod)
-# For support of:
-#    CONTROLLER1 (Original Controller)
-#    CONTROLLER2_V1 single encoders with MCP23017 switches
-#    CONTROLLER2_V2 dual encoders with MCP23017 switches
-#    G2_FRONTPANEL dual encoders with MCP23017 switches
-#
 GPIO_INCLUDE=GPIO
 
 # uncomment the line below to include MIDI support (needs MIDI support)

@@ -997,7 +997,6 @@ vfo_scroll_event_cb (GtkWidget      *widget,
   return FALSE;
 }
 
-
 static gboolean vfo_configure_event_cb (GtkWidget         *widget,
                                         GdkEventConfigure *event,
                                         gpointer           data) {
@@ -1855,7 +1854,6 @@ void vfo_xit_toggle() {
 
   g_idle_add(ext_vfo_update, NULL);
 }
-
 
 void vfo_rit_toggle(int id) {
   CLIENT_MISSING;

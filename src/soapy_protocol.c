@@ -461,8 +461,6 @@ void soapy_protocol_iq_samples(float isample, float qsample) {
   }
 }
 
-
-
 void soapy_protocol_stop() {
   t_print("soapy_protocol_stop\n");
   running = FALSE;

@@ -559,7 +559,6 @@ void set_linein_gain(double value) {
   }
 }
 
-
 void set_mic_gain(double value) {
   //t_print("%s value=%f\n",__FUNCTION__, value);
   if (can_transmit) {
@@ -719,7 +718,6 @@ void show_diversity_gain() {
 void show_diversity_phase() {
   show_popup_slider(DIV_PHASE, 0, -180.0, 180.0, 0.1, div_phase, "Diversity Phase");
 }
-
 
 GtkWidget *sliders_init(int my_width, int my_height) {
   width = my_width;

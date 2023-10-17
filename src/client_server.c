@@ -1885,7 +1885,6 @@ void send_mute_rx(int s, int mute) {
   }
 }
 
-
 static void *listen_thread(void *arg) {
   struct sockaddr_in address;
   int on = 1;

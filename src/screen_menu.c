@@ -25,7 +25,6 @@
 #include "appearance.h"
 #include "message.h"
 
-
 static GtkWidget *dialog = NULL;
 static GtkWidget *wide_b = NULL;
 static GtkWidget *height_b = NULL;
@@ -51,8 +50,7 @@ static int my_rx_stack_horizontal;
 // a timeout handler that is at most called every 500 msec
 //
 static int apply(gpointer data) {
-  apply_timeout=0;
-
+  apply_timeout = 0;
   display_width       = my_display_width;
   display_height      = my_display_height;
   full_screen         = my_full_screen;
@@ -78,7 +76,8 @@ static void schedule_apply() {
   if (apply_timeout > 0) {
     g_source_remove(apply_timeout);
   }
-  apply_timeout=g_timeout_add(500, apply, NULL);
+
+  apply_timeout = g_timeout_add(500, apply, NULL);
 }
 
 static void cleanup() {
@@ -136,13 +135,11 @@ static void full_cb(GtkWidget *widget, gpointer data) {
 void screen_menu(GtkWidget *parent) {
   GtkWidget *label;
   GtkWidget *button;
-
   my_display_width       = display_width;
   my_display_height      = display_height;
   my_full_screen         = full_screen;
   my_vfo_layout          = vfo_layout;
   my_rx_stack_horizontal = rx_stack_horizontal;
-
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   GtkWidget *headerbar = gtk_header_bar_new();
@@ -199,10 +196,11 @@ void screen_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(vfo_b), NULL, vfl->description);
     vfl++;
   }
+
   gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), my_vfo_layout);
   // This combo-box spans three columns so the text may be really long
   gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
-  vfo_signal_id=g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
+  vfo_signal_id = g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
   row++;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
   gtk_widget_set_name(button, "boldlabel");

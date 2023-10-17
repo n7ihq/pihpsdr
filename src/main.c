@@ -51,6 +51,7 @@
 #include "ext.h"
 #include "vfo.h"
 #include "css.h"
+#include "exit_menu.h"
 #include "message.h"
 
 struct utsname unameData;
@@ -230,35 +231,7 @@ gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
 gboolean main_delete (GtkWidget *widget) {
   if (radio != NULL) {
-#ifdef GPIO
-    gpio_close();
-#endif
-#ifdef CLIENT_SERVER
-
-    if (!radio_is_remote) {
-#endif
-
-      switch (protocol) {
-      case ORIGINAL_PROTOCOL:
-        old_protocol_stop();
-        break;
-
-      case NEW_PROTOCOL:
-        new_protocol_stop();
-        break;
-#ifdef SOAPYSDR
-
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_stop();
-        break;
-#endif
-      }
-
-#ifdef CLIENT_SERVER
-    }
-
-#endif
-    radioSaveState();
+    stop_program();
   }
 
   _exit(0);

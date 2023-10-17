@@ -96,7 +96,6 @@
 // different meaning
 //
 
-
 //
 // ALEX bits for ANAN-7000 and ANAN-8000
 // Note that we here also have Alex1 bits which control the filters
