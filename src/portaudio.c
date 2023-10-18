@@ -138,6 +138,7 @@ void audio_get_cards() {
         // by the name and description element.
         //
         input_devices[n_input_devices].name = g_strdup(deviceInfo->name);
+        input_devices[n_input_devices].description = g_strdup(deviceInfo->name);
         input_devices[n_input_devices].index = i;
         n_input_devices++;
       }
@@ -154,6 +155,7 @@ void audio_get_cards() {
     if (Pa_IsFormatSupported(NULL, &outputParameters, 48000.0) == paFormatIsSupported) {
       if (n_output_devices < MAX_AUDIO_DEVICES) {
         output_devices[n_output_devices].name = g_strdup(deviceInfo->name);
+        output_devices[n_output_devices].description = g_strdup(deviceInfo->name);
         output_devices[n_output_devices].index = i;
         n_output_devices++;
       }
@@ -180,11 +182,6 @@ int audio_open_input() {
   int padev;
 
   if (!can_transmit) {
-    return -1;
-  }
-
-  if (transmitter->microphone_name == NULL) {
-    transmitter->local_microphone = 0;
     return -1;
   }
 
@@ -420,11 +417,6 @@ int audio_open_output(RECEIVER *rx) {
   PaStreamParameters outputParameters;
   int padev;
   int i;
-
-  if (rx->audio_name == NULL) {
-    rx->local_audio = 0;
-    return -1;
-  }
 
   //
   // Look up device name and determine device ID

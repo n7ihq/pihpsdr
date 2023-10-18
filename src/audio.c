@@ -106,11 +106,6 @@ int audio_open_output(RECEIVER *rx) {
   unsigned int channels = 2;
   int soft_resample = 1;
 
-  if (rx->audio_name == NULL) {
-    rx->local_audio = 0;
-    return -1;
-  }
-
   t_print("%s: rx=%d %s buffer_size=%d\n", __FUNCTION__, rx->id, rx->audio_name, out_buffer_size);
   int i;
   char hw[128];
@@ -198,11 +193,6 @@ int audio_open_input() {
   int i;
 
   if (!can_transmit) {
-    return -1;
-  }
-
-  if (transmitter->microphone_name == NULL) {
-    transmitter->local_microphone = 0;
     return -1;
   }
 

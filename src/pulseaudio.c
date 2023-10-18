@@ -155,38 +155,34 @@ int audio_open_output(RECEIVER *rx) {
   pa_sample_spec sample_spec;
   int err;
 
-  if (rx->audio_name == NULL) {
-    result = -1;
+  g_mutex_lock(&rx->local_audio_mutex);
+  sample_spec.rate = 48000;
+  sample_spec.channels = 2;
+  sample_spec.format = PA_SAMPLE_FLOAT32NE;
+  char stream_id[16];
+  snprintf(stream_id, 16, "RX-%d", rx->id);
+  rx->playstream = pa_simple_new(NULL, // Use the default server.
+                                 "piHPSDR",          // Our application's name.
+                                 PA_STREAM_PLAYBACK,
+                                 rx->audio_name,
+                                 stream_id,          // Description of our stream.
+                                 &sample_spec,       // Our sample format.
+                                 NULL,               // Use default channel map
+                                 NULL,               // Use default attributes
+                                 &err                // error code if returns NULL
+                                );
+
+  if (rx->playstream != NULL) {
+    rx->local_audio_buffer_offset = 0;
+    rx->local_audio_buffer = g_new0(float, 2 * out_buffer_size);
+    t_print("%s: allocated local_audio_buffer %p size %ld bytes\n", __FUNCTION__, rx->local_audio_buffer,
+            2 * out_buffer_size * sizeof(float));
   } else {
-    g_mutex_lock(&rx->local_audio_mutex);
-    sample_spec.rate = 48000;
-    sample_spec.channels = 2;
-    sample_spec.format = PA_SAMPLE_FLOAT32NE;
-    char stream_id[16];
-    snprintf(stream_id, 16, "RX-%d", rx->id);
-    rx->playstream = pa_simple_new(NULL, // Use the default server.
-                                   "piHPSDR",          // Our application's name.
-                                   PA_STREAM_PLAYBACK,
-                                   rx->audio_name,
-                                   stream_id,          // Description of our stream.
-                                   &sample_spec,       // Our sample format.
-                                   NULL,               // Use default channel map
-                                   NULL,               // Use default attributes
-                                   &err                // error code if returns NULL
-                                  );
-
-    if (rx->playstream != NULL) {
-      rx->local_audio_buffer_offset = 0;
-      rx->local_audio_buffer = g_new0(float, 2 * out_buffer_size);
-      t_print("%s: allocated local_audio_buffer %p size %ld bytes\n", __FUNCTION__, rx->local_audio_buffer,
-              2 * out_buffer_size * sizeof(float));
-    } else {
-      result = -1;
-      t_print("%s: pa-simple_new failed: err=%d\n", __FUNCTION__, err);
-    }
-
-    g_mutex_unlock(&rx->local_audio_mutex);
+    result = -1;
+    t_print("%s: pa-simple_new failed: err=%d\n", __FUNCTION__, err);
   }
+
+  g_mutex_unlock(&rx->local_audio_mutex);
 
   return result;
 }
@@ -237,10 +233,6 @@ int audio_open_input() {
   int result = 0;
 
   if (!can_transmit) {
-    return -1;
-  }
-
-  if (transmitter->microphone_name == NULL) {
     return -1;
   }
 

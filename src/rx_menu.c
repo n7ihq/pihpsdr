@@ -103,14 +103,6 @@ static void adc_cb(GtkToggleButton *widget, gpointer data) {
 static void local_audio_cb(GtkWidget *widget, gpointer data) {
   t_print("local_audio_cb: rx=%d\n", active_receiver->id);
 
-  if (active_receiver->audio_name != NULL) {
-    g_free(active_receiver->audio_name);
-    active_receiver->audio_name = NULL;
-  }
-
-  int i = gtk_combo_box_get_active(GTK_COMBO_BOX(output));
-  active_receiver->audio_name = g_strdup(output_devices[i].name);
-
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget))) {
     if (audio_open_output(active_receiver) == 0) {
       active_receiver->local_audio = 1;
@@ -148,14 +140,9 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
     audio_close_output(active_receiver);                     // audio_close with OLD device
   }
 
-  if (active_receiver->audio_name != NULL) {
-    g_free(active_receiver->audio_name);
-    active_receiver->audio_name = NULL;
-  }
-
   if (i >= 0) {
     t_print("local_output_changed rx=%d %s\n", active_receiver->id, output_devices[i].name);
-    active_receiver->audio_name = g_strdup(output_devices[i].name);
+    strlcpy(active_receiver->audio_name, output_devices[i].name, sizeof(active_receiver->audio_name));
   }
 
   if (active_receiver->local_audio) {
@@ -363,10 +350,8 @@ void rx_menu(GtkWidget *parent) {
     for (i = 0; i < n_output_devices; i++) {
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(output), NULL, output_devices[i].description);
 
-      if (active_receiver->audio_name != NULL) {
-        if (strcmp(active_receiver->audio_name, output_devices[i].name) == 0) {
-          gtk_combo_box_set_active(GTK_COMBO_BOX(output), i);
-        }
+      if (strcmp(active_receiver->audio_name, output_devices[i].name) == 0) {
+        gtk_combo_box_set_active(GTK_COMBO_BOX(output), i);
       }
     }
 
@@ -375,10 +360,7 @@ void rx_menu(GtkWidget *parent) {
     if (i < 0) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(output), 0);
 
-      if (active_receiver->audio_name != NULL) {
-        g_free(active_receiver->audio_name);
-        active_receiver->audio_name = g_strdup(output_devices[0].name);
-      }
+      strlcpy(active_receiver->audio_name, output_devices[0].name, sizeof(active_receiver->audio_name));
     }
 
     my_combo_attach(GTK_GRID(grid), output, 2, 2, 1, 1);

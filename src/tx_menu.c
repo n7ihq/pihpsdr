@@ -164,11 +164,6 @@ static void use_rx_filter_cb(GtkWidget *widget, gpointer data) {
 
 static void local_microphone_cb(GtkWidget *widget, gpointer data) {
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget))) {
-    if (transmitter->microphone_name == NULL) {
-      int i = gtk_combo_box_get_active(GTK_COMBO_BOX(input));
-      transmitter->microphone_name = g_strdup(input_devices[i].name);
-    }
-
     if (audio_open_input() == 0) {
       transmitter->local_microphone = 1;
     } else {
@@ -191,11 +186,7 @@ static void local_input_changed_cb(GtkWidget *widget, gpointer data) {
     audio_close_input();
   }
 
-  if (transmitter->microphone_name != NULL) {
-    g_free(transmitter->microphone_name);
-  }
-
-  transmitter->microphone_name = g_strdup(input_devices[i].name);
+  strlcpy(transmitter->microphone_name, input_devices[i].name, sizeof(transmitter->microphone_name));
 
   if (transmitter->local_microphone) {
     if (audio_open_input() < 0) {
@@ -247,10 +238,8 @@ void tx_menu(GtkWidget *parent) {
     for (i = 0; i < n_input_devices; i++) {
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(input), NULL, input_devices[i].description);
 
-      if (transmitter->microphone_name != NULL) {
-        if (strcmp(transmitter->microphone_name, input_devices[i].name) == 0) {
-          gtk_combo_box_set_active(GTK_COMBO_BOX(input), i);
-        }
+      if (strcmp(transmitter->microphone_name, input_devices[i].name) == 0) {
+        gtk_combo_box_set_active(GTK_COMBO_BOX(input), i);
       }
     }
 
@@ -263,11 +252,7 @@ void tx_menu(GtkWidget *parent) {
     if (i < 0) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(input), 0);
 
-      if (transmitter->microphone_name != NULL) {
-        g_free(transmitter->microphone_name);
-      }
-
-      transmitter->microphone_name = g_strdup(input_devices[0].name);
+      strlcpy(transmitter->microphone_name, input_devices[0].name, sizeof(transmitter->microphone_name));
     }
 
     my_combo_attach(GTK_GRID(grid), input, col, row, 4, 1);
