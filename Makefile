@@ -27,7 +27,6 @@ AUDIO=
 # EXTENDED_NR  | If ON, piHPSDR can use extended noise reduction (VU3RDD WDSP version)
 # SERVER       | If ON, include client/server code (still far from being complete)
 # AUDIO        | If AUDIO=ALSA, use ALSA rather than PulseAudio on Linux
-#              | If AUDIO=PULSE, use PulseAudio rather than PortAudio on MacOS
 
 #######################################################################################
 #
@@ -198,13 +197,11 @@ endif
 
 #
 # Options for audio module
-#  - MacOS: only PORTAUDIO tested (although PORTAUDIO might work)
+#  - MacOS: only PORTAUDIO
 #  - Linux: either PULSEAUDIO (default) or ALSA (upon request)
 #
 ifeq ($(UNAME_S), Darwin)
-  ifneq ($(AUDIO), PULSE)
-    AUDIO=PORTAUDIO
-  endif
+  AUDIO=PORTAUDIO
 endif
 ifeq ($(UNAME_S), Linux)
   ifneq ($(AUDIO) , ALSA)
