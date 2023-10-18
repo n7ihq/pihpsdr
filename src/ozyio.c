@@ -613,7 +613,7 @@ int filePath (char *sOut, const char *sIn, size_t len) {
       if ( (p = strrchr (xPath, '/')) ) { *(p + 1) = '\0'; }
 
       t_print( "%d, Path of executable: [%s]\n", rc, xPath);
-      snprintf(s, PATH_MAX, "%s%s", xPath, sIN);
+      snprintf(s, PATH_MAX, "%s%s", xPath, sIn);
 
       if ((rc = file_exists (s))) {
         // found in the same dir of executable
