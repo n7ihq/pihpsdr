@@ -749,8 +749,7 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   tx->compressor = 0;
   tx->compressor_level = 0.0;
   tx->local_microphone = 0;
-  tx->microphone_name = g_new(gchar, 128);
-  strlcpy(tx->microphone_name, "NO LOCAL MIC", 128);
+  tx->microphone_name = g_strdup("NO LOACL MIC");
   tx->dialog_x = -1;
   tx->dialog_y = -1;
   tx->swr = 1.0;

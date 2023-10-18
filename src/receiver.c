@@ -929,8 +929,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->local_audio = 0;
   g_mutex_init(&rx->local_audio_mutex);
   rx->local_audio_buffer = NULL;
-  rx->audio_name = g_new(gchar, 128);
-  strlcpy(rx->audio_name, "NO LOCAL AUDIO", 128);
+  rx->audio_name = g_strdup("NO LOCAL AUDIO");
   rx->mute_when_not_active = 0;
   rx->audio_channel = STEREO;
   rx->audio_device = -1;
