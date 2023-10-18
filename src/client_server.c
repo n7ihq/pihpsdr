@@ -2167,7 +2167,6 @@ static void *client_thread(void* arg) {
       receiver[rx]->local_audio_buffer = NULL;
       receiver[rx]->local_audio = 0;
       g_mutex_init(&receiver[rx]->local_audio_mutex);
-      receiver[rx]->audio_name = NULL;
       receiver[rx]->mute_when_not_active = 0;
       receiver[rx]->audio_channel = STEREO;
       receiver[rx]->audio_device = -1;

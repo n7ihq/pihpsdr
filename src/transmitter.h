@@ -68,7 +68,7 @@ typedef struct _transmitter {
   cairo_surface_t *panadapter_surface;
 
   int local_microphone;
-  gchar *microphone_name;
+  gchar microphone_name[128];
 
   int out_of_band;
   guint out_of_band_timer_id;
