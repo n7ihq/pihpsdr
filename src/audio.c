@@ -786,6 +786,7 @@ void audio_get_cards() {
         snprintf(device_id, 128, "plughw:%d,%d %s", card, dev, snd_ctl_card_info_get_name(info));
 
         if (n_input_devices < MAX_AUDIO_DEVICES) {
+          // the two allocated strings will never be free'd
           input_devices[n_input_devices].name = g_strdup(device_id);
           input_devices[n_input_devices].description = g_strdup(device_id);
           input_devices[n_input_devices].index = 0; // not used
@@ -804,6 +805,7 @@ void audio_get_cards() {
         snprintf(device_id, 128, "plughw:%d,%d %s", card, dev, snd_ctl_card_info_get_name(info));
 
         if (n_output_devices < MAX_AUDIO_DEVICES) {
+          // the two allocated strings will never be free'd
           output_devices[n_output_devices].name = g_strdup(device_id);
           output_devices[n_output_devices].description = g_strdup(device_id);
           input_devices[n_output_devices].index = 0; // not used
