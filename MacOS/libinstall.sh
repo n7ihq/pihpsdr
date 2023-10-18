@@ -109,10 +109,6 @@ $BREW install pkg-config
 $BREW install portaudio
 $BREW install fftw
 $BREW install libusb
-#
-# This is needed if compiled with AUDIO=PULSE
-#
-$BREW install pulseaudio
 
 ################################################################
 #
@@ -144,13 +140,6 @@ $BREW install pothosware/pothos/soapyrtlsdr
 #
 ################################################################
 $BREW analytics off
-
-################################################################
-#
-# Start the pulseaudio daemon so we can use pulseaudio
-#
-################################################################
-$BREW services start pulseaudio
 
 ################################################################
 #

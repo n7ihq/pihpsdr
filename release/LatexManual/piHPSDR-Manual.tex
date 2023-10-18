@@ -3874,7 +3874,7 @@ such that the PTT signal arrives about 150 msec earlier than the first key-down.
 K1EL WinKey keyers and Arduino clones thereof, which are the most abundant sort
 of keyers used, can easily be configured to do so. Depending on the audio subsystem,
 the latency of the side tone, when using the internal keyer, may be a problem.
-The ALSA audio (instead of PulseAudio) module takes special provisions to
+The ALSA audio module for Linux takes special provisions to
 keep this latency small.
 
 \textbf{MIDI}
@@ -4270,7 +4270,7 @@ takes care WSJTX switches piHPSDR to DIGU mode, and using \rett{Fake It} for the
 Operation method is just my personal preference.
 
 \clearpage
-\textbf{\color{red}Virtual audio cables, PulseAudio case (Linux or MacOS).}\\
+\textbf{\color{red}Virtual audio cables, PulseAudio case (Linux).}\\
 There are no explicit loopback devices with PulseAudio since they are not needed.
 For \textit{every} PulseAudio output device, there is a corresponding ,,Monitor'' device
 which can be used for sound input, and where the data sent to the primary (output) device
@@ -4471,9 +4471,8 @@ and then start piHPSDR. With the STEMLAB option, this can all be done by piHPSDR
 On Linux systems (including the Raspberry PI), if setting the value to \texttt{ALSA},
 the standard Linux ALSA sound library is used for local audio
 output and local microphone input. In all other cases
-PulseAudio is used. On MacOS, setting the value to \texttt{PULSE} lets piHPSDR use
-PulseAudio for local audio output and local microphone input, in all other cases
-the PortAudio library is used.
+PulseAudio is used. On MacOS, the \texttt{AUDIO} choice has no effect since only the
+PortAudio module works well.
 
 \rett{EXTENDED\_NR}. (default: disabled)
 There is a special version of the WDSP library that contains additional noise
@@ -4926,12 +4925,8 @@ installed, which you can safely ignore. Then, the
  password, tells you what it wants to do and requires hitting \texttt{Enter} to proceed.
  On Apple Silicon Macs, you will be asked the administrator password another three times,
  since here we have to create three symbolic links in \texttt{/usr/local} (see the end of this section),
- each of which requires administrator privileges. Since one can compile piHPSDR on MacOS with
- the option \texttt{AUDIO=PULSE} (see Appendix \ref{sec:compiletime}), the libinstall script
- also installs pulseaudio and starts the pulseaudio service. Note that using  PulseAudio
- module is not the default for piHPSDR on MacOS, but just in case you want to use it, it is
- installed.
-
+ each of which requires administrator privileges. 
+ 
 Do not worry if \texttt{HomeBrew} was already installed on your computer, the installation
 procedure works in this case as well and does no harm. In addition to
  the \texttt{HomeBrew} core, additional libraries that piHPSDR depends on (e.g. GTK+3), the SoapySDR
