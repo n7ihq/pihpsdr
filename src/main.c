@@ -392,7 +392,8 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   t_print("add pi label to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), pi_label, 1, 0, 3, 1);
   t_print("create build label\n");
-  snprintf(text, 256, "Built %s, Version %s\nIncludes %s", build_date, build_version, version);
+  snprintf(text, 256, "Built %s, Version %s\nOptions: %s\nAudio module: %s",
+       build_date, build_version, build_options, build_audio);
   GtkWidget *build_date_label = gtk_label_new(text);
   gtk_widget_set_name(build_date_label, "med_txt");
   gtk_widget_set_halign(build_date_label, GTK_ALIGN_START);

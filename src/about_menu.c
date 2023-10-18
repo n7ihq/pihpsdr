@@ -52,7 +52,7 @@ static gboolean close_cb () {
 
 void about_menu(GtkWidget *parent) {
   char text[2048];
-  char line[256];
+  char line[512];
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
@@ -73,28 +73,23 @@ void about_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, row, 1, 1);
   row++;
-  snprintf(text, 1024 , "piHPSDR by John Melton G0ORX/N6LYT");
-  strlcat(text, "\n\nWith help from:", 1024);
-  strlcat(text, "\n    Steve Wilson, KA6S: RIGCTL (CAT over TCP)", 1024);
-  strlcat(text, "\n    Laurence Barker, G8NJJ: USB OZY Support", 1024);
-  strlcat(text, "\n    Johan Maas, PA3GSB: RadioBerry support", 1024);
-  strlcat(text, "\n    Ken Hopper, N9VV: Testing and Documentation", 1024);
-  strlcat(text, "\n    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI ", 1024);
-  snprintf(line, 256, "\n\nBuild date: %s", build_date);
-  strlcat(text, line, 1024);
-  snprintf(line, 256, "\nBuild version: %s", build_version);
-  strlcat(text, line, 1024);
-  snprintf(line, 256, "\nWDSP version: %d.%02d", GetWDSPVersion() / 100, GetWDSPVersion() % 100);
-  strlcat(text, line, 1024);
-  snprintf(line, 256, "\n\nDevice: %s Protocol %s v%d.%d", radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
-          radio->software_version / 10, radio->software_version % 10);
-  strlcat(text, line, 1024);
+  snprintf(text, 1024 , "piHPSDR by John Melton G0ORX/N6LYT\n\n"
+                        "    With help from:\n"
+                        "    Steve Wilson, KA6S: RIGCTL (CAT over TCP)\n"
+                        "    Laurence Barker, G8NJJ: USB OZY Support\n"
+                        //"    Johan Maas, PA3GSB: RadioBerry support\n"
+                        "    Ken Hopper, N9VV: Testing and Documentation\n"
+                        "    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI \n\n"
+                        "Build date: %s (commit %s)\n"
+                        "Build version: %s\n"
+                        "WDSP version: %d.%02d\n\n",
+           build_date, build_commit, build_version, GetWDSPVersion() / 100, GetWDSPVersion() % 100);
 
   switch (radio->protocol) {
   case ORIGINAL_PROTOCOL:
   case NEW_PROTOCOL:
     if (device == DEVICE_OZY) {
-      snprintf(line, 256, "\nDevice OZY: USB /dev/ozy Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
+      snprintf(line, 512, "Device:  OZY (via USB)  Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
               radio->software_version / 10, radio->software_version % 10);
       strlcat(text, line, 1024);
     } else {
@@ -102,25 +97,38 @@ void about_menu(GtkWidget *parent) {
       char addr[64];
       strlcpy(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
       strlcpy(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
-      snprintf(line, 256, "\nDevice Mac Address: %02X:%02X:%02X:%02X:%02X:%02X",
+      snprintf(line, 512, "Device: %s, Protocol %s, v%d.%d\n"
+                          "    Mac Address: %02X:%02X:%02X:%02X:%02X:%02X\n"
+                          "    IP Address: %s on %s (%s)",
+              radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
+              radio->software_version / 10, radio->software_version % 10,
               radio->info.network.mac_address[0],
               radio->info.network.mac_address[1],
               radio->info.network.mac_address[2],
               radio->info.network.mac_address[3],
               radio->info.network.mac_address[4],
-              radio->info.network.mac_address[5]);
-      strlcat(text, line, 1024);
-      snprintf(line, 256, "\nDevice IP Address: %s on %s (%s)", addr, radio->info.network.interface_name, interface_addr);
+              radio->info.network.mac_address[5],
+              addr,
+              radio->info.network.interface_name,
+              interface_addr);
       strlcat(text, line, 1024);
     }
 
     break;
+#ifdef SOAPYSDR
+    case SOAPYSDR_PROTOCOL:
+      snprintf(line, 512, "Device: %s (via SoapySDR)\n"
+                          "    %s (%s)",
+        radio->name, radio->info.soapy.hardware_key, radio->info.soapy.driver_key);
+      strlcat(text, line, 1024);
+    break;
+#endif
   }
 
   label = gtk_label_new(text);
   gtk_widget_set_name(label, "small_button");
   gtk_widget_set_halign(label, GTK_ALIGN_START);
-  gtk_grid_attach(GTK_GRID(grid), label, 1, row, 4, 1);
+  gtk_grid_attach(GTK_GRID(grid), label, 1, row, 5, 1);
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

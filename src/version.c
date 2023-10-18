@@ -20,7 +20,7 @@ char build_date[] = GIT_DATE;
 char build_version[] = GIT_VERSION;
 char build_commit[] = GIT_COMMIT;
 
-char version[] =
+char build_options[] =
 #ifdef GPIO
   "GPIO "
 #endif
@@ -45,15 +45,17 @@ char version[] =
 #ifdef CLIENT_SERVER
   "SERVER "
 #endif
-  "\nAudio module: "
+   "";
+
+char build_audio[] =
 #ifdef ALSA
-  "ALSA.";
+  "ALSA";
 #endif
 #ifdef PULSEAUDIO
-  "PulseAudio.";
+  "PulseAudio";
 #endif
 #ifdef PORTAUDIO
-  "PortAudio.";
+  "PortAudio";
 #endif
 #if !defined(ALSA) && !defined(PORTAUDIO) && !defined(PULSEAUDIO)
   "(unkown)";

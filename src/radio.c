@@ -1188,39 +1188,26 @@ void start_radio() {
     snprintf(iface, 64, "%s", radio->info.network.interface_name);
     break;
 
+#ifdef SOAPYSDR
   case SOAPYSDR_PROTOCOL:
     strlcpy(p, "SoapySDR", 32);
-    snprintf(version, 32, "v%d.%d.%d)",
+    snprintf(version, 32, "%s v%d.%d.%d",
+             radio->info.soapy.driver_key,
              radio->software_version / 100,
              (radio->software_version % 100) / 10,
              radio->software_version % 10);
     break;
+#endif
   }
 
   //
   // "Starting" message in status text
+  // Note for OZY devices, the name is "Ozy USB"
   //
-  switch (protocol) {
-  case ORIGINAL_PROTOCOL:
-  case NEW_PROTOCOL:
-    if (device == DEVICE_OZY) {
-      snprintf(text, 1024, "%s (%s) on USB /dev/ozy\n", radio->name, p);
-    } else {
-      snprintf(text, 1024, "Starting %s (%s %s)",
-              radio->name,
-              p,
-              version);
-    }
-
-    break;
-
-  case SOAPYSDR_PROTOCOL:
-    snprintf(text, 1024, "Starting %s (%s %s)",
-            radio->name,
-            "SoapySDR",
-            version);
-    break;
-  }
+  snprintf(text, 1024, "Starting %s (%s %s)",
+           radio->name,
+           p,
+           version);
 
   status_text(text);
 
@@ -1231,11 +1218,18 @@ void start_radio() {
   case ORIGINAL_PROTOCOL:
   case NEW_PROTOCOL:
     if (have_saturn_xdma) {
+      // radio has no ip and MAC
       snprintf(text, 1024, "piHPSDR: %s (%s v%d) on %s",
               radio->name,
               p,
               radio->software_version,
               iface);
+    } else if (device == DEVICE_OZY) {
+      // radio has no ip, mac, and name is "Ozy USB"
+      snprintf(text, 1024, "piHPSDR: %s (%s %s)",
+              radio->name,
+              p,
+              version);
     } else {
       snprintf(text, 1024, "piHPSDR: %s (%s %s) %s (%s) on %s",
               radio->name,

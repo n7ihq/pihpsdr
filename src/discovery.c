@@ -365,7 +365,7 @@ void discovery() {
       case ORIGINAL_PROTOCOL:
       case NEW_PROTOCOL:
         if (d->device == DEVICE_OZY) {
-          snprintf(text, sizeof(text), "%s (%s) on USB /dev/ozy", d->name,
+          snprintf(text, sizeof(text), "%s (%s via USB)", d->name,
                    d->protocol == ORIGINAL_PROTOCOL ? "Protocol 1" : "Protocol 2");
         } else if (d->device == NEW_DEVICE_SATURN && strcmp(d->info.network.interface_name, "XDMA") == 0) {
           snprintf(text, sizeof(text), "%s (%s v%d) fpga:%x (%s) on /dev/xdma*", d->name,
