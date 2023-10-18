@@ -599,7 +599,7 @@ int filePath (char *sOut, const char *sIn, size_t len) {
   int rc = 0;
 
   if ((rc = file_exists (sIn))) {
-    strlcpy (sOut, sIn, len);
+    snprintf(sOut, len, "%s", sIn);
     rc = 1;
   } else {
     char xPath [PATH_MAX] = {0};
@@ -613,25 +613,22 @@ int filePath (char *sOut, const char *sIn, size_t len) {
       if ( (p = strrchr (xPath, '/')) ) { *(p + 1) = '\0'; }
 
       t_print( "%d, Path of executable: [%s]\n", rc, xPath);
-      strlcpy (s, xPath, PATH_MAX);
-      strlcat (s, sIn, PATH_MAX);
+      snprintf(s, PATH_MAX, "%s%s", xPath, sIN);
 
       if ((rc = file_exists (s))) {
         // found in the same dir of executable
         t_print( "File: [%s]\n", s);
-        strlcpy(sOut, s, len);
+        snprintf(sOut, len, "%s", s);
       } else {
         char cwd[PATH_MAX];
 
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
           t_print( "Current working dir: %s\n", cwd);
-          strlcpy (s, cwd, PATH_MAX);
-          strlcat (s, "/", PATH_MAX);
-          strlcat (s, sIn, PATH_MAX);
+          snprintf(s, PATH_MAX, "%s/%s", cwd, sIn);
 
           if ((rc = file_exists (s))) {
             t_print( "File: [%s]\n", s);
-            strlcpy(sOut, s, len);
+            snprintf(sOut, len, "%s", s);
           }
         }
       }
