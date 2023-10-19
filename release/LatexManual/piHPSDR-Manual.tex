@@ -4538,21 +4538,21 @@ must be enabled, as described in Appendix \ref{sec:i2c}.
 \fbox{
 \parbox{\textwidth - 1cm}{
 \begin{center}
-\textbf{\color{red} -------------- A Note on using RealVNC --------------}
+\textbf{\color{red} -------------- If the program does not start  --------------}
 \end{center}
-Very often, RealVNC is used to display the RaspPi
-desktop onto the screen of the main computer one is using. One has to be aware that this is not
-only consuming a lot of CPU power, but also puts some load on the network
-connection. While using VNC is perfectly OK for compiling and installing software, it is
-recommended (if RealVNC is not needed for radio operation) to shut down RealVNC on the
-RaspPi when connecting to a radio.
-Some users have reported audio cracks, sequence erros and other signs of
-overload when using RealVNC. An indication that VNC may be the origin
-of the problem is, if it gets worse when increasing the piHPDSR window size.
+Binary installation means that the exectuable program has been compiled and linked on my
+machine, while it is intended to run on your machine. Because Linux heavily uses so-called
+shared libraries, the program can only run if the shared libraries that the executable
+depends on are present (and can be found) on your machine, and that the version numbers
+of the libraries are compatible. If piHPSDR does not start, and instead you find in the
+log file (for binary installations: in the directory \texttt{pihpsdr.release}
+ in your home directory) a message
+stating a missing library, then you \textit{have to} jump to the next appendix and compile
+from the sources, simply because the operating system on your RaspPi is too different
+from the operation system on my machine at the time I produced the binary.
 }
 }
 \end{center}
-
 
 Before you shout at me, because your most-wanted compile time option is deactivated in the
 binary installation, let me explain that I want to satisfy the maximum number of people but
@@ -4665,25 +4665,6 @@ The following \textit{caveat} applies both to the binary installation and the co
 the source code: If you want to use the Controller2 or the G2 frontpanel controller,
  the Raspberry Pi I2C interface
 must be enabled, as described in Appendix \ref{sec:i2c}.
-
-\begin{center}
-\fbox{
-\parbox{\textwidth - 1cm}{
-\begin{center}
-\textbf{\color{red} -------------- A Note on using RealVNC --------------}
-\end{center}
-Very often, RealVNC is used to display the RaspPi
-desktop onto the screen of the main computer one is using. One has to be aware that this is not
-only consuming a lot of CPU power, but also puts some load on the network
-connection. While using VNC is perfectly OK for compiling and installing software, it is
-recommended (if RealVNC is not needed for radio operation) to shut down RealVNC on the
-RaspPi when connecting to a radio.
-Some users have reported audio cracks, sequence erros and other signs of
-overload when using RealVNC. An indication that VNC may be the origin
-of the problem is, if it gets worse when increasing the piHPDSR window size.
-}
-}
-\end{center}
 
 \begin{center}
 \fbox{
