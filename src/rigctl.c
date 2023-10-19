@@ -969,12 +969,16 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // read/set audio gain
       if (command[4] == ';') {
         // send reply back
-        snprintf(reply, 256, "ZZAG%03d;", (int)(receiver[0]->volume * 100.0));
+        snprintf(reply, 256, "ZZAG%03d;", (int)(100.0 * pow(10.0, 0.05 * receiver[0]->volume)));
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
-        receiver[0]->volume = (double)gain / 100.0;
-        update_af_gain();
+        if (gain < 2) {
+          receiver[0]->volume = -40.0;
+        } else {
+          receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
+        }
+        set_af_gain(0, receiver[0]->volume);
       }
 
       break;
@@ -1970,8 +1974,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
-        receiver[0]->volume = (double)gain / 100.0;
-        update_af_gain();
+        // gain is 0..100
+        if (gain < 2) {
+          receiver[0]->volume = -40.0;
+        } else { 
+          receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
+        } 
+        set_af_gain(0, receiver[0]->volume);
       }
 
       break;
@@ -1986,12 +1995,17 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       if (receivers == 2) {
         if (command[4] == ';') {
           // send reply back
-          snprintf(reply, 256, "ZZLC%03d;", (int)(receiver[1]->volume * 100.0));
+          snprintf(reply, 256, "ZZLC%03d;", (int)(255.0 * pow(10.0, 0.05 * receiver[1]->volume)));
           send_resp(client->fd, reply) ;
         } else {
           int gain = atoi(&command[4]);
-          receiver[1]->volume = (double)gain / 100.0;
-          update_af_gain();
+          // gain is 0..100
+          if (gain < 2) {
+            receiver[1]->volume = -40.0;
+          } else { 
+            receiver[1]->volume = 20.0 * log(0.01 * (double) gain);
+          } 
+          set_af_gain(1, receiver[1]->volume);
         }
       } else {
         implemented = FALSE;
@@ -3783,8 +3797,13 @@ int parse_cmd(void *data) {
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';' && command[2] == '0') {
         int gain = atoi(&command[3]);
-        receiver[0]->volume = 20 * log((double) gain / 255.0);
-        update_af_gain();
+        // gain is 0...255
+        if (gain < 3 ) {
+          receiver[0]->volume = -40.0;
+        } else {
+          receiver[0]->volume = 20.0 * log((double) gain / 255.0);
+        }
+        set_af_gain(0, receiver[0]->volume);
       }
 
       break;

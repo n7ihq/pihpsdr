@@ -422,10 +422,6 @@ static void afgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 #endif
 }
 
-void update_af_gain() {
-  set_af_gain(active_receiver->id, active_receiver->volume);
-}
-
 void set_af_gain(int rx, double value) {
   double amplitude;
 
@@ -445,7 +441,7 @@ void set_af_gain(int rx, double value) {
 
   SetRXAPanelGain1 (receiver[rx]->id, amplitude);
 
-  if (display_sliders) {
+  if (display_sliders && rx == active_receiver->id) {
     gtk_range_set_value (GTK_RANGE(af_gain_scale), value);
   } else {
     char title[64];
