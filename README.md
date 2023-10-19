@@ -4,9 +4,13 @@ supporting both the old (P1) and new (P2) HPSDR protocols, as well as the SoapyS
 
 It runs on Linux (including RaspPi 3/4) and MacOS (using the "Homebrew" working environment).
 
+**Consult the Manual (Appendices H, I, J) on how-to install and or compile piHPSDR
+on your machine (Raspberry PI binary installation, Raspberry PI compile from
+sources, and MacOS compile from sources).**
+
 Latest features:
 
-- in-depth (> 150 pages) manual (see release/LatexManual)
+- in-depth (about pages) manual (file release/piHPSDR-Manual.pdf)
 - automatic installation procedures, a binary-only installation for RaspPi only,
   and a "compile from sources" procedure for Linux (including RaspPi) and MacOS
   (see Appendices H, I, J of the manual)
@@ -18,11 +22,11 @@ Latest features:
 - Improved layout for nearly all menus
 - Option to make pop-down menus (combo boxes) "TouchScreen-Friendly" (Radio Menu)
 
-Full source code download using git into your HOME folder:
+Full source code download using git:
 git clone https://github.com/dl1ycf/pihpsdr.git
 
-Installation by compiling from the sources (see the Manual,
+**Installation by compiling from the sources (see the Manual,
 Appendix I for Linux and Appendix J for MacOS) is highly recommended,
 since the binary-only installation (see the Manual, Appendix H)
-is not much easier, and binaries may cease to work across OS upgrades.
+is not much easier, and binaries may cease to work across OS upgrades.**
 
