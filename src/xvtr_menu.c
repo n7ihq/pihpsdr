@@ -30,6 +30,7 @@
 #include "radio.h"
 #include "vfo.h"
 #include "message.h"
+#include "mystring.h"
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *title[BANDS + XVTRS];
@@ -49,7 +50,7 @@ static void save_xvtr () {
     BAND *xvtr = band_get_band(i);
     BANDSTACK *bandstack = xvtr->bandstack;
     const char *t = gtk_entry_get_text(GTK_ENTRY(title[i]));
-    strlcpy(xvtr->title, t, sizeof(xvtr->title));
+    STRLCPY(xvtr->title, t, sizeof(xvtr->title));
 
     if (strlen(t) != 0) {
       minf = gtk_entry_get_text(GTK_ENTRY(min_frequency[i]));

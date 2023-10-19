@@ -33,6 +33,7 @@
 #include "sliders.h"
 #include "new_protocol.h"
 #include "message.h"
+#include "mystring.h"
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *local_audio_b = NULL;
@@ -142,7 +143,7 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
 
   if (i >= 0) {
     t_print("local_output_changed rx=%d %s\n", active_receiver->id, output_devices[i].name);
-    strlcpy(active_receiver->audio_name, output_devices[i].name, sizeof(active_receiver->audio_name));
+    STRLCPY(active_receiver->audio_name, output_devices[i].name, sizeof(active_receiver->audio_name));
   }
 
   if (active_receiver->local_audio) {
@@ -360,7 +361,7 @@ void rx_menu(GtkWidget *parent) {
     if (i < 0) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(output), 0);
 
-      strlcpy(active_receiver->audio_name, output_devices[0].name, sizeof(active_receiver->audio_name));
+      STRLCPY(active_receiver->audio_name, output_devices[0].name, sizeof(active_receiver->audio_name));
     }
 
     my_combo_attach(GTK_GRID(grid), output, 2, 2, 1, 1);

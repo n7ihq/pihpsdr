@@ -52,6 +52,7 @@
 #include "radio_menu.h"
 #include "sliders.h"
 #include "message.h"
+#include "mystring.h"
 
 #define DISCOVERY_PORT 4992
 #define LISTEN_PORT 50000
@@ -259,7 +260,7 @@ void send_radio_data(const REMOTE_CLIENT *client) {
   radio_data.header.sync = REMOTE_SYNC;
   radio_data.header.data_type = htons(INFO_RADIO);
   radio_data.header.version = htonl(CLIENT_SERVER_VERSION);
-  strlcpy(radio_data.name, radio->name, sizeof(radio_data.name));
+  STRLCPY(radio_data.name, radio->name, sizeof(radio_data.name));
   radio_data.protocol = htons(protocol);
   radio_data.device = htons(device);
   uint64_t temp = (uint64_t)radio->frequency_min;
@@ -2032,7 +2033,7 @@ static void *client_thread(void* arg) {
       t_print("INFO_RADIO: %d\n", bytes_read);
       // build a radio (discovered) structure
       radio = g_new(DISCOVERED, 1);
-      strlcpy(radio->name, radio_data.name, sizeof(radio->name));
+      STRLCPY(radio->name, radio_data.name, sizeof(radio->name));
       // Note we use "protocol" and "device" througout the program
       protocol = radio->protocol = ntohs(radio_data.protocol);
       device = radio->device = ntohs(radio_data.device);

@@ -31,6 +31,7 @@
 #include "discovered.h"
 #include "radio.h"
 #include "version.h"
+#include "mystring.h"
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *label;
@@ -96,25 +97,35 @@ void about_menu(GtkWidget *parent) {
     if (device == DEVICE_OZY) {
       snprintf(line, 256, "\nDevice OZY: USB /dev/ozy Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
               radio->software_version / 10, radio->software_version % 10);
-      strlcat(text, line, 1024);
+      STRLCAT(text, line, 1024);
     } else {
       char interface_addr[64];
       char addr[64];
-      strlcpy(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
-      strlcpy(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
+      STRLCPY(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
+      STRLCPY(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
       snprintf(line, 256, "\nDevice Mac Address: %02X:%02X:%02X:%02X:%02X:%02X",
               radio->info.network.mac_address[0],
               radio->info.network.mac_address[1],
               radio->info.network.mac_address[2],
               radio->info.network.mac_address[3],
               radio->info.network.mac_address[4],
-              radio->info.network.mac_address[5]);
-      strlcat(text, line, 1024);
-      snprintf(line, 256, "\nDevice IP Address: %s on %s (%s)", addr, radio->info.network.interface_name, interface_addr);
-      strlcat(text, line, 1024);
+              radio->info.network.mac_address[5],
+              addr,
+              radio->info.network.interface_name,
+              interface_addr);
+      STRLCAT(text, line, 1024);
     }
 
     break;
+#ifdef SOAPYSDR
+    case SOAPYSDR_PROTOCOL:
+      snprintf(line, 512, "Device: %s (via SoapySDR)\n"
+                          "    %s (%s)",
+        radio->name, radio->info.soapy.hardware_key, radio->info.soapy.driver_key);
+      STRLCAT(text, line, 1024);
+    break;
+#endif
+>>>>>>> 20dc46b (To avoid possible name space conflicts, established implementations)
   }
 
   label = gtk_label_new(text);

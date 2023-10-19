@@ -31,6 +31,7 @@
 #include "vfo.h"
 #include "ext.h"
 #include "message.h"
+#include "mystring.h"
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *feedback_l;
@@ -197,43 +198,43 @@ static int info_thread(gpointer arg) {
     if (i == 15) {
       switch (info[15]) {
       case 0:
-        strlcpy(label, "RESET", 20);
+        STRLCPY(label, "RESET", 20);
         break;
 
       case 1:
-        strlcpy(label, "WAIT", 20);
+        STRLCPY(label, "WAIT", 20);
         break;
 
       case 2:
-        strlcpy(label, "MOXDELAY", 20);
+        STRLCPY(label, "MOXDELAY", 20);
         break;
 
       case 3:
-        strlcpy(label, "SETUP", 20);
+        STRLCPY(label, "SETUP", 20);
         break;
 
       case 4:
-        strlcpy(label, "COLLECT", 20);
+        STRLCPY(label, "COLLECT", 20);
         break;
 
       case 5:
-        strlcpy(label, "MOXCHECK", 20);
+        STRLCPY(label, "MOXCHECK", 20);
         break;
 
       case 6:
-        strlcpy(label, "CALC", 20);
+        STRLCPY(label, "CALC", 20);
         break;
 
       case 7:
-        strlcpy(label, "DELAY", 20);
+        STRLCPY(label, "DELAY", 20);
         break;
 
       case 8:
-        strlcpy(label, "STAYON", 20);
+        STRLCPY(label, "STAYON", 20);
         break;
 
       case 9:
-        strlcpy(label, "TURNON", 20);
+        STRLCPY(label, "TURNON", 20);
         break;
       }
     }
@@ -553,23 +554,23 @@ void ps_menu(GtkWidget *parent) {
 
     switch (i) {
     case 4:
-      strlcpy(label, "feedbk", 16);
+      STRLCPY(label, "feedbk", 16);
       break;
 
     case 5:
-      strlcpy(label, "cor.cnt", 16);
+      STRLCPY(label, "cor.cnt", 16);
       break;
 
     case 6:
-      strlcpy(label, "sln.chk", 16);
+      STRLCPY(label, "sln.chk", 16);
       break;
 
     case 13:
-      strlcpy(label, "dg.cnt", 16);
+      STRLCPY(label, "dg.cnt", 16);
       break;
 
     case 15:
-      strlcpy(label, "status", 16);
+      STRLCPY(label, "status", 16);
       break;
 
     default:

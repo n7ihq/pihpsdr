@@ -39,6 +39,7 @@
 #include "discovery.h"
 #include "radio.h"
 #include "message.h"
+#include "mystring.h"
 
 // As we only run in the GTK+ main event loop, which is single-threaded and
 // non-preemptive, we shouldn't need any additional synchronisation mechanisms.
@@ -364,7 +365,7 @@ void stemlab_discovery() {
   DISCOVERED *dev = &discovered[devices++];
   dev->protocol = STEMLAB_PROTOCOL;
   dev->device = DEVICE_METIS;                                     // not used
-  strlcpy(dev->name, "STEMlab", sizeof(dev->name));
+  STRLCPY(dev->name, "STEMlab", sizeof(dev->name));
   dev->software_version = app_list;                               // encodes list of SDR apps present
   dev->status = STATE_AVAILABLE;
   memset(dev->info.network.mac_address, 0, 6);                    // not used
@@ -375,5 +376,5 @@ void stemlab_discovery() {
   dev->info.network.interface_length = sizeof(struct sockaddr_in);
   dev->info.network.interface_address = ip_address;                // same as RedPitaya address
   dev->info.network.interface_netmask = netmask;                   // does not matter
-  strlcpy(dev->info.network.interface_name, "", sizeof(dev->info.network.interface_name));
+  STRLCPY(dev->info.network.interface_name, "", sizeof(dev->info.network.interface_name));
 }

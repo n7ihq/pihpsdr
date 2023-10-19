@@ -54,6 +54,7 @@
 #endif
 #include "property.h"
 #include "message.h"
+#include "mystring.h"
 
 static GtkWidget *discovery_dialog;
 static DISCOVERED *d;
@@ -254,7 +255,7 @@ void discovery() {
       discovered[devices].protocol = ORIGINAL_PROTOCOL;
       discovered[devices].device = DEVICE_OZY;
       discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
-      strlcpy(discovered[devices].name, "Ozy on USB", sizeof(discovered[devices].name));
+      STRLCPY(discovered[devices].name, "Ozy on USB", sizeof(discovered[devices].name));
       discovered[devices].frequency_min = 0.0;
       discovered[devices].frequency_max = 61440000.0;
 
@@ -265,7 +266,7 @@ void discovery() {
       discovered[devices].status = STATE_AVAILABLE;
       discovered[devices].info.network.address_length = 0;
       discovered[devices].info.network.interface_length = 0;
-      strlcpy(discovered[devices].info.network.interface_name, "USB", sizeof(discovered[devices].info.network.interface_name));
+      STRLCPY(discovered[devices].info.network.interface_name, "USB", sizeof(discovered[devices].info.network.interface_name));
       discovered[devices].use_tcp = 0;
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;

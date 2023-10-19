@@ -19,13 +19,16 @@
 //
 // strlcat and strlcpy are the "better replacements" for strncat and strncpy.
 // However, they are not in Linux glibc and not POSIX standardized.
-// Here we implement without a return value. On MacOS they are available
+// Therefore we include them with the name capitalized in this program.
 //
 
-#ifndef __APPLE__
 #ifndef _MYSTRING_H_
 #define _MYSTRING_H_
-void strlcat(char *dest, const char *src, size_t len);
-void strlcpy(char *dest, const char *src, size_t len);
-#endif
+
+#include <sys/types.h>
+#include <string.h>
+
+size_t STRLCAT(char *dst, const char *src, size_t dsize);
+size_t STRLCPY(char *dst, const char *src, size_t dsize);
+
 #endif

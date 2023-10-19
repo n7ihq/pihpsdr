@@ -59,6 +59,7 @@
 #include "discovered.h"
 #include "new_protocol.h"
 #include "message.h"
+#include "mystring.h"
 
 extern sem_t DDCInSelMutex;                 // protect access to shared DDC input select register
 extern sem_t DDCResetFIFOMutex;             // protect access to FIFO reset register
@@ -368,7 +369,7 @@ void saturn_discovery() {
       discovered[devices].device = NEW_DEVICE_SATURN;
       discovered[devices].software_version = (RegisterRead(VADDRSWVERSIONREG) >> 4) & 0xFFFF;
       discovered[devices].fpga_version = RegisterRead(VADDRUSERVERSIONREG);
-      strlcpy(discovered[devices].name, "saturn",  sizeof(discovered[devices].name));
+      STRLCPY(discovered[devices].name, "saturn",  sizeof(discovered[devices].name));
       discovered[devices].frequency_min = 0.0;
       discovered[devices].frequency_max = 61440000.0;
       memset(buf, 0, 256);
@@ -388,7 +389,7 @@ void saturn_discovery() {
 
       discovered[devices].info.network.address_length = 0;
       discovered[devices].info.network.interface_length = 0;
-      strlcpy(discovered[devices].info.network.interface_name, "XDMA", sizeof(discovered[devices].info.network.interface_name));
+      STRLCPY(discovered[devices].info.network.interface_name, "XDMA", sizeof(discovered[devices].info.network.interface_name));
       discovered[devices].use_tcp = 0;
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;

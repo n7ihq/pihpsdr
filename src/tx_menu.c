@@ -30,6 +30,7 @@
 #include "mode.h"
 #include "vfo.h"
 #include "message.h"
+#include "mystring.h"
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *input;
@@ -186,7 +187,7 @@ static void local_input_changed_cb(GtkWidget *widget, gpointer data) {
     audio_close_input();
   }
 
-  strlcpy(transmitter->microphone_name, input_devices[i].name, sizeof(transmitter->microphone_name));
+  STRLCPY(transmitter->microphone_name, input_devices[i].name, sizeof(transmitter->microphone_name));
 
   if (transmitter->local_microphone) {
     if (audio_open_input() < 0) {
@@ -252,7 +253,7 @@ void tx_menu(GtkWidget *parent) {
     if (i < 0) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(input), 0);
 
-      strlcpy(transmitter->microphone_name, input_devices[0].name, sizeof(transmitter->microphone_name));
+      STRLCPY(transmitter->microphone_name, input_devices[0].name, sizeof(transmitter->microphone_name));
     }
 
     my_combo_attach(GTK_GRID(grid), input, col, row, 4, 1);

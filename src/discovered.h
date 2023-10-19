@@ -148,9 +148,4 @@ extern int selected_device;
 extern int devices;
 extern DISCOVERED discovered[MAX_DEVICES];
 
-#ifndef __APPLE__
-extern void strlcpy(char *dst, const char *src, size_t len);
-extern void strlcat(char *dst, const char *src, size_t len);
-#endif
-
 #endif

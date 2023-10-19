@@ -48,6 +48,7 @@
 #include "toolbar.h"
 #include "iambic.h"
 #include "message.h"
+#include "mystring.h"
 
 //
 // The "short button text" (button_str) needs to be present in ALL cases, and must be different
@@ -1578,9 +1579,9 @@ int process_action(void *data) {
 //
 void Action2String(int id, char *str, size_t len) {
   if (id < 0 || id >= ACTIONS) {
-    strlcpy(str, "NONE", len);
+    STRLCPY(str, "NONE", len);
   } else {
-    strlcpy(str, ActionTable[id].button_str, len);
+    STRLCPY(str, ActionTable[id].button_str, len);
   }
 }
 

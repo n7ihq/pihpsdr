@@ -43,6 +43,8 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
 
+#include "mystring.h"
+
 void MacOSstartup(const char *path) {
   //
   // We used to do this from a wrapper shell script.
@@ -100,8 +102,8 @@ void MacOSstartup(const char *path) {
 
   if (strlen(homedir) + strlen(AppSupport) > 1020) { return; }
 
-  strlcpy(workdir, homedir, 1024);
-  strlcat(workdir, AppSupport, 1024);
+  STRLCPY(workdir, homedir, 1024);
+  STRLCAT(workdir, AppSupport, 1024);
 
   //
   //  Check if working dir exists, otherwise try to create it
@@ -147,7 +149,7 @@ void MacOSstartup(const char *path) {
     //
     char *c;
     char source[1024];
-    strlcpy(source, path, 1024);
+    STRLCPY(source, path, 1024);
     c = rindex(source, '/');
 
     if (c) {
@@ -156,7 +158,7 @@ void MacOSstartup(const char *path) {
 
       if ((strlen(source) + strlen(IconInApp) < 1024)) {
         int fdin, fdout;
-        strlcat(source,  IconInApp, 1024);
+        STRLCAT(source,  IconInApp, 1024);
         //
         // Now copy the file from "source" to "workdir"
         //

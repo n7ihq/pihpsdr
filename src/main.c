@@ -53,6 +53,7 @@
 #include "css.h"
 #include "exit_menu.h"
 #include "message.h"
+#include "mystring.h"
 
 struct utsname unameData;
 
@@ -250,7 +251,7 @@ static int init(void *data) {
   // Depending on the WDSP version, the file is wdspWisdom or wdspWisdom00.
   //
   (void) getcwd(wisdom_directory, sizeof(wisdom_directory));
-  strlcat(wisdom_directory, "/", 1024);
+  STRLCAT(wisdom_directory, "/", 1024);
   t_print("Securing wisdom file in directory: %s\n", wisdom_directory);
   status_text("Checking FFTW Wisdom file ...");
   wisdom_running = 1;
