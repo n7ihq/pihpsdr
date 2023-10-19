@@ -508,7 +508,7 @@ void new_protocol_init(int pixels) {
     socklen_t optlen = sizeof(optval);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
-#ifdef SET_SOCK_BUF_SIZE
+//#ifdef SET_SOCK_BUF_SIZE
     //
     // We need a receive buffer with a decent size, to be able to
     // store several incoming packets if they arrive in a burst.
@@ -554,7 +554,7 @@ void new_protocol_init(int pixels) {
       if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
     }
 
-#endif
+//#endif
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF

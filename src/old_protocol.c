@@ -484,7 +484,7 @@ static void open_udp_socket() {
     t_perror("data_socket: SO_REUSEPORT");
   }
 
-#ifdef SET_SOCK_BUF_SIZE
+//#ifdef SET_SOCK_BUF_SIZE
   //
   // We need a receive buffer with a decent size, to be able to
   // store several incoming packets if they arrive in a burst.
@@ -530,7 +530,7 @@ static void open_udp_socket() {
     if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
   }
 
-#endif
+//#endif
 #ifdef __APPLE__
   //optval = 0x10;  // IPTOS_LOWDELAY
   optval = 0xb8;  // DSCP EF
