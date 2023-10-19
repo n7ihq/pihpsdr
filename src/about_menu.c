@@ -75,21 +75,21 @@ void about_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, row, 1, 1);
   row++;
   snprintf(text, 1024 , "piHPSDR by John Melton G0ORX/N6LYT");
-  strlcat(text, "\n\nWith help from:", 1024);
-  strlcat(text, "\n    Steve Wilson, KA6S: RIGCTL (CAT over TCP)", 1024);
-  strlcat(text, "\n    Laurence Barker, G8NJJ: USB OZY Support", 1024);
-  strlcat(text, "\n    Johan Maas, PA3GSB: RadioBerry support", 1024);
-  strlcat(text, "\n    Ken Hopper, N9VV: Testing and Documentation", 1024);
-  strlcat(text, "\n    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI ", 1024);
+  STRLCAT(text, "\n\nWith help from:", 1024);
+  STRLCAT(text, "\n    Steve Wilson, KA6S: RIGCTL (CAT over TCP)", 1024);
+  STRLCAT(text, "\n    Laurence Barker, G8NJJ: USB OZY Support", 1024);
+  STRLCAT(text, "\n    Johan Maas, PA3GSB: RadioBerry support", 1024);
+  STRLCAT(text, "\n    Ken Hopper, N9VV: Testing and Documentation", 1024);
+  STRLCAT(text, "\n    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI ", 1024);
   snprintf(line, 256, "\n\nBuild date: %s", build_date);
-  strlcat(text, line, 1024);
+  STRLCAT(text, line, 1024);
   snprintf(line, 256, "\nBuild version: %s", build_version);
-  strlcat(text, line, 1024);
+  STRLCAT(text, line, 1024);
   snprintf(line, 256, "\nWDSP version: %d.%02d", GetWDSPVersion() / 100, GetWDSPVersion() % 100);
-  strlcat(text, line, 1024);
+  STRLCAT(text, line, 1024);
   snprintf(line, 256, "\n\nDevice: %s Protocol %s v%d.%d", radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
           radio->software_version / 10, radio->software_version % 10);
-  strlcat(text, line, 1024);
+  STRLCAT(text, line, 1024);
 
   switch (radio->protocol) {
   case ORIGINAL_PROTOCOL:
@@ -109,23 +109,13 @@ void about_menu(GtkWidget *parent) {
               radio->info.network.mac_address[2],
               radio->info.network.mac_address[3],
               radio->info.network.mac_address[4],
-              radio->info.network.mac_address[5],
-              addr,
-              radio->info.network.interface_name,
-              interface_addr);
+              radio->info.network.mac_address[5]);
+      STRLCAT(text, line, 1024);
+      snprintf(line, 256, "\nDevice IP Address: %s on %s (%s)", addr, radio->info.network.interface_name, interface_addr);
       STRLCAT(text, line, 1024);
     }
 
     break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      snprintf(line, 512, "Device: %s (via SoapySDR)\n"
-                          "    %s (%s)",
-        radio->name, radio->info.soapy.hardware_key, radio->info.soapy.driver_key);
-      STRLCAT(text, line, 1024);
-    break;
-#endif
->>>>>>> 20dc46b (To avoid possible name space conflicts, established implementations)
   }
 
   label = gtk_label_new(text);
