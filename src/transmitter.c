@@ -52,6 +52,7 @@
 #include "sliders.h"
 #include "sintab.h"
 #include "message.h"
+#include "mystring.h"
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
@@ -749,7 +750,7 @@ TRANSMITTER *create_transmitter(int id, int fps, int width, int height) {
   tx->compressor = 0;
   tx->compressor_level = 0.0;
   tx->local_microphone = 0;
-  strlcpy(tx->microphone_name, "NO MIC", 128);
+  STRLCPY(tx->microphone_name, "NO MIC", 128);
   tx->dialog_x = -1;
   tx->dialog_y = -1;
   tx->swr = 1.0;

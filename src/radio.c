@@ -84,6 +84,7 @@
   #include "saturnmain.h"
   #include "saturnserver.h"
 #endif
+#include "mystring.h"
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
@@ -1157,7 +1158,7 @@ void start_radio() {
 
   switch (protocol) {
   case ORIGINAL_PROTOCOL:
-    strlcpy(p, "Protocol 1", 32);
+    STRLCPY(p, "Protocol 1", 32);
     snprintf(version, 32, "v%d.%d)",
              radio->software_version / 10,
              radio->software_version % 10);
@@ -1173,7 +1174,7 @@ void start_radio() {
     break;
 
   case NEW_PROTOCOL:
-    strlcpy(p, "Protocol 2", 32);
+    STRLCPY(p, "Protocol 2", 32);
     snprintf(version, 32, "v%d.%d)",
              radio->software_version / 10,
              radio->software_version % 10);
@@ -1190,7 +1191,7 @@ void start_radio() {
 
 #ifdef SOAPYSDR
   case SOAPYSDR_PROTOCOL:
-    strlcpy(p, "SoapySDR", 32);
+    STRLCPY(p, "SoapySDR", 32);
     snprintf(version, 32, "%s v%d.%d.%d",
              radio->info.soapy.driver_key,
              radio->software_version / 100,

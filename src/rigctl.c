@@ -61,6 +61,7 @@
 #include "zoompan.h"
 #include "exit_menu.h"
 #include "message.h"
+#include "mystring.h"
 
 #include <math.h>
 
@@ -261,172 +262,172 @@ void rigctl_send_cw_char(char cw_char) {
   switch (cw_char) {
   case 'a':
   case 'A':
-    strlcpy(pattern, ".-", 9);
+    STRLCPY(pattern, ".-", 9);
     break;
 
   case 'b':
   case 'B':
-    strlcpy(pattern, "-...", 9);
+    STRLCPY(pattern, "-...", 9);
     break;
 
   case 'c':
   case 'C':
-    strlcpy(pattern, "-.-.", 9);
+    STRLCPY(pattern, "-.-.", 9);
     break;
 
   case 'd':
   case 'D':
-    strlcpy(pattern, "-..", 9);
+    STRLCPY(pattern, "-..", 9);
     break;
 
   case 'e':
   case 'E':
-    strlcpy(pattern, ".", 9);
+    STRLCPY(pattern, ".", 9);
     break;
 
   case 'f':
   case 'F':
-    strlcpy(pattern, "..-.", 9);
+    STRLCPY(pattern, "..-.", 9);
     break;
 
   case 'g':
   case 'G':
-    strlcpy(pattern, "--.", 9);
+    STRLCPY(pattern, "--.", 9);
     break;
 
   case 'h':
   case 'H':
-    strlcpy(pattern, "....", 9);
+    STRLCPY(pattern, "....", 9);
     break;
 
   case 'i':
   case 'I':
-    strlcpy(pattern, "..", 9);
+    STRLCPY(pattern, "..", 9);
     break;
 
   case 'j':
   case 'J':
-    strlcpy(pattern, ".---", 9);
+    STRLCPY(pattern, ".---", 9);
     break;
 
   case 'k':
   case 'K':
-    strlcpy(pattern, "-.-", 9);
+    STRLCPY(pattern, "-.-", 9);
     break;
 
   case 'l':
   case 'L':
-    strlcpy(pattern, ".-..", 9);
+    STRLCPY(pattern, ".-..", 9);
     break;
 
   case 'm':
   case 'M':
-    strlcpy(pattern, "--", 9);
+    STRLCPY(pattern, "--", 9);
     break;
 
   case 'n':
   case 'N':
-    strlcpy(pattern, "-.", 9);
+    STRLCPY(pattern, "-.", 9);
     break;
 
   case 'o':
   case 'O':
-    strlcpy(pattern, "---", 9);
+    STRLCPY(pattern, "---", 9);
     break;
 
   case 'p':
   case 'P':
-    strlcpy(pattern, ".--.", 9);
+    STRLCPY(pattern, ".--.", 9);
     break;
 
   case 'q':
   case 'Q':
-    strlcpy(pattern, "--.-", 9);
+    STRLCPY(pattern, "--.-", 9);
     break;
 
   case 'r':
   case 'R':
-    strlcpy(pattern, ".-.", 9);
+    STRLCPY(pattern, ".-.", 9);
     break;
 
   case 's':
   case 'S':
-    strlcpy(pattern, "...", 9);
+    STRLCPY(pattern, "...", 9);
     break;
 
   case 't':
   case 'T':
-    strlcpy(pattern, "-", 9);
+    STRLCPY(pattern, "-", 9);
     break;
 
   case 'u':
   case 'U':
-    strlcpy(pattern, "..-", 9);
+    STRLCPY(pattern, "..-", 9);
     break;
 
   case 'v':
   case 'V':
-    strlcpy(pattern, "...-", 9);
+    STRLCPY(pattern, "...-", 9);
     break;
 
   case 'w':
   case 'W':
-    strlcpy(pattern, ".--", 9);
+    STRLCPY(pattern, ".--", 9);
     break;
 
   case 'x':
   case 'X':
-    strlcpy(pattern, "-..-", 9);
+    STRLCPY(pattern, "-..-", 9);
     break;
 
   case 'y':
   case 'Y':
-    strlcpy(pattern, "-.--", 9);
+    STRLCPY(pattern, "-.--", 9);
     break;
 
   case 'z':
   case 'Z':
-    strlcpy(pattern, "--..", 9);
+    STRLCPY(pattern, "--..", 9);
     break;
 
   case '0':
-    strlcpy(pattern, "-----", 9);
+    STRLCPY(pattern, "-----", 9);
     break;
 
   case '1':
-    strlcpy(pattern, ".----", 9);
+    STRLCPY(pattern, ".----", 9);
     break;
 
   case '2':
-    strlcpy(pattern, "..---", 9);
+    STRLCPY(pattern, "..---", 9);
     break;
 
   case '3':
-    strlcpy(pattern, "...--", 9);
+    STRLCPY(pattern, "...--", 9);
     break;
 
   case '4':
-    strlcpy(pattern, "....-", 9);
+    STRLCPY(pattern, "....-", 9);
     break;
 
   case '5':
-    strlcpy(pattern, ".....", 9);
+    STRLCPY(pattern, ".....", 9);
     break;
 
   case '6':
-    strlcpy(pattern, "-....", 9);
+    STRLCPY(pattern, "-....", 9);
     break;
 
   case '7':
-    strlcpy(pattern, "--...", 9);
+    STRLCPY(pattern, "--...", 9);
     break;
 
   case '8':
-    strlcpy(pattern, "---..", 9);
+    STRLCPY(pattern, "---..", 9);
     break;
 
   case '9':
-    strlcpy(pattern, "----.", 9);
+    STRLCPY(pattern, "----.", 9);
     break;
 
   //
@@ -437,66 +438,66 @@ void rigctl_send_cw_char(char cw_char) {
   //     in the order given there.
   //
   case '.':
-    strlcpy(pattern, ".-.-.-", 9);
+    STRLCPY(pattern, ".-.-.-", 9);
     break;
 
   case ',':
-    strlcpy(pattern, "--..--", 9);
+    STRLCPY(pattern, "--..--", 9);
     break;
 
   case ':':
-    strlcpy(pattern, "---..", 9);
+    STRLCPY(pattern, "---..", 9);
     break;
 
   case '?':
-    strlcpy(pattern, "..--..", 9);
+    STRLCPY(pattern, "..--..", 9);
     break;
 
   case '\'':
-    strlcpy(pattern, ".----.", 9);
+    STRLCPY(pattern, ".----.", 9);
     break;
 
   case '-':
-    strlcpy(pattern, "-....-", 9);
+    STRLCPY(pattern, "-....-", 9);
     break;
 
   case '/':
-    strlcpy(pattern, "-..-.", 9);
+    STRLCPY(pattern, "-..-.", 9);
     break;
 
   case '(':
-    strlcpy(pattern, "-.--.", 9);
+    STRLCPY(pattern, "-.--.", 9);
     break;
 
   case ')':
-    strlcpy(pattern, "-.--.-", 9);
+    STRLCPY(pattern, "-.--.-", 9);
     break;
 
   case '"':
-    strlcpy(pattern, ".-..-.", 9);
+    STRLCPY(pattern, ".-..-.", 9);
     break;
 
   case '=':
-    strlcpy(pattern, "-...-", 9);
+    STRLCPY(pattern, "-...-", 9);
     break;
 
   case '+':
-    strlcpy(pattern, ".-.-.", 9);
+    STRLCPY(pattern, ".-.-.", 9);
     break;
 
   case '@':
-    strlcpy(pattern, ".--.-.", 9);
+    STRLCPY(pattern, ".--.-.", 9);
     break;
 
   //
   //     Often used, but not ITU: Ampersand for "wait"
   //
   case '&':
-    strlcpy(pattern, ".-...", 9);
+    STRLCPY(pattern, ".-...", 9);
     break;
 
   default:
-    strlcpy(pattern, "", 9);
+    STRLCPY(pattern, "", 9);
   }
 
   while (*ptr != '\0') {
@@ -1902,7 +1903,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
   case 'I': //ZZIx
     switch (command[3]) {
     case 'D': //ZZID
-      strlcpy(reply, "ZZID240;", 256);
+      STRLCPY(reply, "ZZID240;", 256);
       send_resp(client->fd, reply) ;
       break;
 
@@ -2110,10 +2111,10 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
         for (int i = 0; i < FILTERS; i++) {
           snprintf(temp, 32, "%5s%5d%5d", f[i].title, f[i].high, f[i].low);
-          strlcat(reply, temp, 256);
+          STRLCAT(reply, temp, 256);
         }
 
-        strlcat(reply, ";", 256);
+        STRLCAT(reply, ";", 256);
         send_resp(client->fd, reply);
       }
 
@@ -4189,7 +4190,7 @@ int parse_cmd(void *data) {
     switch (command[1]) {
     case 'D': //ID
       // get ID
-      strlcpy(reply, "ID019;", 256); // TS-2000
+      STRLCPY(reply, "ID019;", 256); // TS-2000
       send_resp(client->fd, reply);
       break;
 
@@ -4217,7 +4218,7 @@ int parse_cmd(void *data) {
 
       // set/read IF shift
       if (command[2] == ';') {
-        strlcpy(reply, "IS 0000;", 256);
+        STRLCPY(reply, "IS 0000;", 256);
         send_resp(client->fd, reply);
       } else {
         implemented = FALSE;

@@ -54,6 +54,7 @@
   #include "client_server.h"
 #endif
 #include "message.h"
+#include "mystring.h"
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
@@ -929,7 +930,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->local_audio = 0;
   g_mutex_init(&rx->local_audio_mutex);
   rx->local_audio_buffer = NULL;
-  strlcpy(rx->audio_name, "NO AUDIO", sizeof(rx->audio_name));
+  STRLCPY(rx->audio_name, "NO AUDIO", sizeof(rx->audio_name));
   rx->mute_when_not_active = 0;
   rx->audio_channel = STEREO;
   rx->audio_device = -1;

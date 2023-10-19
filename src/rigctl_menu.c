@@ -31,6 +31,7 @@
 #include "radio.h"
 #include "vfo.h"
 #include "message.h"
+#include "mystring.h"
 
 static GtkWidget *serial_enable_b[MAX_SERIAL];
 static GtkWidget *andromeda_b[MAX_SERIAL];
@@ -89,7 +90,7 @@ static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
 static void serial_port_cb(GtkWidget *widget, gpointer data) {
   int id = GPOINTER_TO_INT(data);
   const char *cp = gtk_entry_get_text(GTK_ENTRY(widget));
-  strlcpy(SerialPorts[id].port, cp, sizeof(SerialPorts[id].port));
+  STRLCPY(SerialPorts[id].port, cp, sizeof(SerialPorts[id].port));
 }
 
 static void andromeda_cb(GtkWidget *widget, gpointer data) {

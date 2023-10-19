@@ -31,6 +31,7 @@
 #include "discovered.h"
 #include "radio.h"
 #include "version.h"
+#include "mystring.h"
 
 static GtkWidget *dialog = NULL;
 static GtkWidget *label;
@@ -91,12 +92,12 @@ void about_menu(GtkWidget *parent) {
     if (device == DEVICE_OZY) {
       snprintf(line, 512, "Device:  OZY (via USB)  Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
               radio->software_version / 10, radio->software_version % 10);
-      strlcat(text, line, 1024);
+      STRLCAT(text, line, 1024);
     } else {
       char interface_addr[64];
       char addr[64];
-      strlcpy(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
-      strlcpy(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
+      STRLCPY(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
+      STRLCPY(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
       snprintf(line, 512, "Device: %s, Protocol %s, v%d.%d\n"
                           "    Mac Address: %02X:%02X:%02X:%02X:%02X:%02X\n"
                           "    IP Address: %s on %s (%s)",
@@ -111,7 +112,7 @@ void about_menu(GtkWidget *parent) {
               addr,
               radio->info.network.interface_name,
               interface_addr);
-      strlcat(text, line, 1024);
+      STRLCAT(text, line, 1024);
     }
 
     break;
@@ -120,7 +121,7 @@ void about_menu(GtkWidget *parent) {
       snprintf(line, 512, "Device: %s (via SoapySDR)\n"
                           "    %s (%s)",
         radio->name, radio->info.soapy.hardware_key, radio->info.soapy.driver_key);
-      strlcat(text, line, 1024);
+      STRLCAT(text, line, 1024);
     break;
 #endif
   }

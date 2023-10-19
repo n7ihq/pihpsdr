@@ -25,6 +25,7 @@
 #include "discovered.h"
 #include "soapy_discovery.h"
 #include "message.h"
+#include "mystring.h"
 
 static int rtlsdr_count = 0;
 static int sdrplay_count = 0;
@@ -44,10 +45,10 @@ static void get_info(char *driver) {
   char** tx_antennas;
   char** tx_gains;
   t_print("soapy_discovery: get_info: %s\n", driver);
-  strlcpy(fw_version, "", 16);
-  strlcpy(gw_version, "", 16);
-  strlcpy(hw_version, "", 16);
-  strlcpy(p_version, "", 16);
+  STRLCPY(fw_version, "", 16);
+  STRLCPY(gw_version, "", 16);
+  STRLCPY(hw_version, "", 16);
+  STRLCPY(p_version, "", 16);
   SoapySDRKwargs_set(&args, "driver", driver);
 
   if (strcmp(driver, "rtlsdr") == 0) {
@@ -82,20 +83,20 @@ static void get_info(char *driver) {
     t_print("soapy_discovery: hardware info key=%s val=%s\n", info.keys[i], info.vals[i]);
 
     if (strcmp(info.keys[i], "firmwareVersion") == 0) {
-      strlcpy(fw_version, info.vals[i], 16);
+      STRLCPY(fw_version, info.vals[i], 16);
     }
 
     if (strcmp(info.keys[i], "gatewareVersion") == 0) {
-      strlcpy(gw_version, info.vals[i], 16);
+      STRLCPY(gw_version, info.vals[i], 16);
       software_version = (int)(atof(info.vals[i]) * 100.0);
     }
 
     if (strcmp(info.keys[i], "hardwareVersion") == 0) {
-      strlcpy(hw_version, info.vals[i], 16);
+      STRLCPY(hw_version, info.vals[i], 16);
     }
 
     if (strcmp(info.keys[i], "protocolVersion") == 0) {
-      strlcpy(p_version, info.vals[i] ,16);
+      STRLCPY(p_version, info.vals[i] ,16);
     }
   }
 
@@ -213,7 +214,7 @@ static void get_info(char *driver) {
   if (devices < MAX_DEVICES) {
     discovered[devices].device = SOAPYSDR_USB_DEVICE;
     discovered[devices].protocol = SOAPYSDR_PROTOCOL;
-    strlcpy(discovered[devices].name, driver, sizeof(discovered[devices].name));
+    STRLCPY(discovered[devices].name, driver, sizeof(discovered[devices].name));
     discovered[devices].supported_receivers = rx_channels;
     discovered[devices].supported_transmitters = tx_channels;
     discovered[devices].adcs = rx_channels;
@@ -222,8 +223,8 @@ static void get_info(char *driver) {
     discovered[devices].software_version = software_version;
     discovered[devices].frequency_min = ranges[0].minimum;
     discovered[devices].frequency_max = ranges[0].maximum;
-    strlcpy(discovered[devices].info.soapy.driver_key, driverkey, sizeof(discovered[devices].info.soapy.driver_key));
-    strlcpy(discovered[devices].info.soapy.hardware_key, hardwarekey, sizeof(discovered[devices].info.soapy.hardware_key));
+    STRLCPY(discovered[devices].info.soapy.driver_key, driverkey, sizeof(discovered[devices].info.soapy.driver_key));
+    STRLCPY(discovered[devices].info.soapy.hardware_key, hardwarekey, sizeof(discovered[devices].info.soapy.hardware_key));
     discovered[devices].info.soapy.sample_rate = sample_rate;
 
     if (strcmp(driver, "rtlsdr") == 0) {
@@ -245,7 +246,7 @@ static void get_info(char *driver) {
       snprintf(discovered[devices].info.soapy.version, sizeof(discovered[devices].info.soapy.version),
               "fw=%s gw=%s", fw_version, gw_version);
     } else {
-      strlcpy(discovered[devices].info.soapy.version, "", sizeof(discovered[devices].info.soapy.version));
+      STRLCPY(discovered[devices].info.soapy.version, "", sizeof(discovered[devices].info.soapy.version));
     }
 
     discovered[devices].info.soapy.rx_channels = rx_channels;
@@ -287,9 +288,9 @@ static void get_info(char *driver) {
     discovered[devices].info.soapy.has_temp = has_temp;
 
     if (address != NULL) {
-      strlcpy(discovered[devices].info.soapy.address, address, sizeof(discovered[devices].info.soapy.address));
+      STRLCPY(discovered[devices].info.soapy.address, address, sizeof(discovered[devices].info.soapy.address));
     } else {
-      strlcpy(discovered[devices].info.soapy.address, "USB", sizeof(discovered[devices].info.soapy.address));
+      STRLCPY(discovered[devices].info.soapy.address, "USB", sizeof(discovered[devices].info.soapy.address));
     }
 
     t_print("soapy_discovery: name=%s min=%0.3f MHz max=%0.3f Mhz\n", discovered[devices].name,

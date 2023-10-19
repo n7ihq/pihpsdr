@@ -35,6 +35,7 @@
 #include "discovered.h"
 #include "discovery.h"
 #include "message.h"
+#include "mystring.h"
 
 static char interface_name[64];
 static struct sockaddr_in interface_addr = {0};
@@ -138,7 +139,7 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
     //
     // prepeare socket for sending an UDP broadcast packet to interface ifa
     //
-    strlcpy(interface_name, iface->ifa_name, sizeof(interface_name));
+    STRLCPY(interface_name, iface->ifa_name, sizeof(interface_name));
     t_print("new_discover: looking for HPSDR devices on %s\n", interface_name);
     // send a broadcast to locate metis boards on the network
     discovery_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -162,8 +163,8 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
       return;
     }
 
-    strlcpy(addr, inet_ntoa(sa->sin_addr), sizeof(addr));
-    strlcpy(net_mask, inet_ntoa(mask->sin_addr),sizeof(net_mask));
+    STRLCPY(addr, inet_ntoa(sa->sin_addr), sizeof(addr));
+    STRLCPY(net_mask, inet_ntoa(mask->sin_addr),sizeof(net_mask));
     t_print("new_discover: bound to %s %s %s\n", interface_name, addr, net_mask);
     // allow broadcast on the socket
     int on = 1;
@@ -251,7 +252,7 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
       //
       memcpy((void *)&discovered[rc].info.network.address, (void *)&to_addr, sizeof(to_addr));
       discovered[rc].info.network.address_length = sizeof(to_addr);
-      strlcpy(discovered[rc].info.network.interface_name, "UDP", sizeof(discovered[rc].info.network.interface_name));
+      STRLCPY(discovered[rc].info.network.interface_name, "UDP", sizeof(discovered[rc].info.network.interface_name));
       discovered[rc].use_routing = 1;
     }
 
@@ -303,52 +304,52 @@ gpointer new_discover_receive_thread(gpointer data) {
 
             switch (discovered[devices].device) {
             case NEW_DEVICE_ATLAS:
-              strlcpy(discovered[devices].name, "Atlas", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Atlas", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_HERMES:
-              strlcpy(discovered[devices].name, "Hermes", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Hermes", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_HERMES2:
-              strlcpy(discovered[devices].name, "Hermes2", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Hermes2", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_ANGELIA:
-              strlcpy(discovered[devices].name, "Angelia", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Angelia", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_ORION:
-              strlcpy(discovered[devices].name, "Orion", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Orion", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_ORION2:
-              strlcpy(discovered[devices].name, "Orion2", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Orion2", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_SATURN:
-              strlcpy(discovered[devices].name, "Saturn/G2", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Saturn/G2", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 61440000.0;
               break;
 
             case NEW_DEVICE_HERMES_LITE:
               if (discovered[devices].software_version < 40) {
-                strlcpy(discovered[devices].name, "Hermes Lite V1", sizeof(discovered[devices].name));
+                STRLCPY(discovered[devices].name, "Hermes Lite V1", sizeof(discovered[devices].name));
               } else {
-                strlcpy(discovered[devices].name, "Hermes Lite V2", sizeof(discovered[devices].name));
+                STRLCPY(discovered[devices].name, "Hermes Lite V2", sizeof(discovered[devices].name));
                 discovered[devices].device = NEW_DEVICE_HERMES_LITE2;
               }
 
@@ -357,7 +358,7 @@ gpointer new_discover_receive_thread(gpointer data) {
               break;
 
             default:
-              strlcpy(discovered[devices].name, "Unknown", sizeof(discovered[devices].name));
+              STRLCPY(discovered[devices].name, "Unknown", sizeof(discovered[devices].name));
               frequency_min = 0.0;
               frequency_max = 30720000.0;
               break;
@@ -373,7 +374,7 @@ gpointer new_discover_receive_thread(gpointer data) {
             memcpy((void*)&discovered[devices].info.network.interface_netmask, (void*)&interface_netmask,
                    sizeof(interface_netmask));
             discovered[devices].info.network.interface_length = sizeof(interface_addr);
-            strlcpy(discovered[devices].info.network.interface_name, interface_name, sizeof(discovered[devices].info.network.interface_name));
+            STRLCPY(discovered[devices].info.network.interface_name, interface_name, sizeof(discovered[devices].info.network.interface_name));
             discovered[devices].supported_receivers = 2;
             //
             // Info not yet made use of:

@@ -50,6 +50,8 @@ extern void saveProperties(const char* filename);
 //  n   = 0, 1, 2, 3  for scalars or quantities with 1...3 indices
 //
 
+#include "mystring.h"
+
 #define GetPropI0(a,b)  { \
   value=getProperty(a); \
   if (value) { b = atoll(value); } \
@@ -62,7 +64,7 @@ extern void saveProperties(const char* filename);
 
 #define GetPropS0(a,b)  { \
   value=getProperty(a); \
-  if (value) { strlcpy(b, value, sizeof(b)); } \
+  if (value) { STRLCPY(b, value, sizeof(b)); } \
 }
 
 #define GetPropA0(a,b)  { \
@@ -85,7 +87,7 @@ extern void saveProperties(const char* filename);
 #define GetPropS1(a,b,c) { \
   snprintf(name, sizeof(name), a, b); \
   value=getProperty(name); \
-  if (value) { strlcpy(c, value, sizeof(c)); } \
+  if (value) { STRLCPY(c, value, sizeof(c)); } \
 }
 
 #define GetPropA1(a,b,c) { \
@@ -103,7 +105,7 @@ extern void saveProperties(const char* filename);
 #define GetPropS2(a,b,c,d) { \
   snprintf(name, sizeof(name), a, b, c); \
   value=getProperty(name); \
-  if (value) { strlcpy(d, value, sizeof(d)); } \
+  if (value) { STRLCPY(d, value, sizeof(d)); } \
 }
 
 #define GetPropA2(a,b,c,d) { \
@@ -121,7 +123,7 @@ extern void saveProperties(const char* filename);
 #define GetPropS3(a,b,c,d, e) { \
   snprintf(name, sizeof(name), a, b, c, d); \
   value=getProperty(name); \
-  if (value) { strlcpy(e, value, sizeof(e)); } \
+  if (value) { STRLCPY(e, value, sizeof(e)); } \
 }
 
 #define GetPropA3(a,b,c,d,e) { \
