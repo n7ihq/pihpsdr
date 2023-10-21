@@ -165,7 +165,7 @@ static mybuffer *get_my_buffer(int numlist) {
   }
   //
   // No buffer free, or the first time we request a buffer:
-  // allocate (a) new one(s). Note we need very few 
+  // allocate (a) new one(s). Note we need very few
   // HighPrio buffers, a limited amount of MicSample buffers,
   // and a possibly large amount of DDC IQ buffers.
   //

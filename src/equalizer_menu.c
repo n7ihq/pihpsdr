@@ -50,6 +50,16 @@ static gboolean close_cb () {
 }
 
 void set_eq() {
+  //
+  // Note that WDSP implements a four-channel equalizer
+  // with frequencies 150, 400, 1500, and 6000 Hz.
+  // However, the 150 and 400 Hz setting share the value,
+  // so
+  // preamp slider --> eq[0] --> overall amplification
+  // low    slider --> eq[1] --> 150 *and* 400 Hz channel
+  // med    slider --> eq[2] --> 1500 Hz channel
+  // high   slider --> eq[3] --> 6000 Hz channel
+  //
   if (can_transmit) {
     SetTXAGrphEQ(transmitter->id, tx_equalizer);
     SetTXAEQRun(transmitter->id, enable_tx_equalizer);

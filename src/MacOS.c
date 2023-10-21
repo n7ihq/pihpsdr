@@ -184,9 +184,9 @@ void MacOSstartup(const char *path) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//  
+//
 // MacOS semaphores
-//  
+//
 // Since MacOS only supports named semaphores, we have to be careful to
 // allow serveral instances of this program to run at the same time on the
 // same machine
@@ -224,5 +224,5 @@ sem_t *apple_sem(int initial_value) {
   // semaphore.
   sem_unlink(sname);
   return sem;
-} 
+}
 #endif

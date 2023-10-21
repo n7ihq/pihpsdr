@@ -721,7 +721,7 @@ void *highprio_thread(void *data) {
 
   while (1) {
     //
-    // WATCHDOG: if no packet arrives in 10 seconds, 
+    // WATCHDOG: if no packet arrives in 10 seconds,
     //           treat this situation as if "run" is set to zero
     //
     rc = recvfrom(sock, buffer, 1444, 0, (struct sockaddr *)&addr, &lenaddr);
@@ -751,7 +751,6 @@ void *highprio_thread(void *data) {
     }
     if (rc < 0 ) { continue; }
 
-    
     if (rc != 1444) {
       printf("Received HighPrio packet with incorrect length");
       break;

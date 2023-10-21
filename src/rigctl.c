@@ -1977,9 +1977,9 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         // gain is 0..100
         if (gain < 2) {
           receiver[0]->volume = -40.0;
-        } else { 
+        } else {
           receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
-        } 
+        }
         set_af_gain(0, receiver[0]->volume);
       }
 
@@ -2002,9 +2002,9 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           // gain is 0..100
           if (gain < 2) {
             receiver[1]->volume = -40.0;
-          } else { 
+          } else {
             receiver[1]->volume = 20.0 * log(0.01 * (double) gain);
-          } 
+          }
           set_af_gain(1, receiver[1]->volume);
         }
       } else {

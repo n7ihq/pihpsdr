@@ -625,13 +625,13 @@ int main(int argc, char *argv[]) {
 
     if (count >= 5000 && active_thread) {
       printf( "WATCHDOG STOP the transmission via handler_ep6\n");
-      
+
       enable_thread = 0;
-    
+
       while (active_thread) { usleep(1000); }
 
       txptr = -1;
-      
+
       if (sock_TCP_Client > -1) {
         close(sock_TCP_Client);
         sock_TCP_Client = -1;
