@@ -358,16 +358,46 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
     gtk_window_fullscreen_on_monitor(GTK_WINDOW(top_window), screen, this_monitor);
   }
 
+  //
+  // For some binary installations, the piHPSDR working directory may be empty
+  // upon first start, and the hpsdr icon placed somewhere else.
+  // To help such "package" maintainers, look for a file hpsdr.png in the
+  // current working directory, then in /usr/share/pihpsdr, then in /usr/local/share/pihpsdr
+  //
   GError *error;
+  GtkWidget *image;
+  gboolean rc;
 
-  if (!gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "hpsdr.png", &error)) {
-    t_print("Warning: failed to set icon for top_window\n");
+  t_print("create image and icon\n");
 
-    if (error != NULL) {
+  rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "hpsdr.png", &error);
+  if (rc) {
+    image = gtk_image_new_from_file("hpsdr.png");
+  } else {
+    if (error) {
       t_print("%s\n", error->message);
+      g_free(error);
+    }
+    rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/share/pihpsdr/hpsdr.png", &error);
+  }
+  if (rc) {
+    image = gtk_image_new_from_file("/usr/share/pihpsdr/hpsdr.png");
+  } else {
+    if (error) {
+      t_print("%s\n", error->message);
+      g_free(error);
+    }
+    rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/local/share/pihpsdr/hpsdr.png", &error);
+  }
+  if (rc) {
+    image = gtk_image_new_from_file("/usr/local/share/pihpsdr/hpsdr.png");
+  } else {
+    if (error) {
+      t_print("%s\n", error->message);
+      g_free(error);
     }
   }
-
+  
   g_signal_connect (top_window, "delete-event", G_CALLBACK (main_delete), NULL);
   //
   // We want to use the space-bar as an alternative to go to TX
@@ -382,8 +412,6 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   gtk_grid_set_column_spacing (GTK_GRID(topgrid), 10);
   t_print("add grid\n");
   gtk_container_add (GTK_CONTAINER (top_window), topgrid);
-  t_print("create image\n");
-  GtkWidget  *image = gtk_image_new_from_file("hpsdr.png");
   t_print("add image to grid\n");
   gtk_grid_attach(GTK_GRID(topgrid), image, 0, 0, 1, 2);
   t_print("create pi label\n");
