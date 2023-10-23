@@ -2179,7 +2179,7 @@ void ozy_send_buffer() {
     case 7:
       output_buffer[C0] = 0x1E;
 
-      if ((txmode == modeCWU || txmode == modeCWL) && !tune && cw_keyer_internal && !transmitter->twotone) {
+      if ((txmode == modeCWU || txmode == modeCWL) && !tune && cw_keyer_internal && !transmitter->twotone && !CAT_cw_is_active) {
         output_buffer[C1] |= 0x01;
       }
 

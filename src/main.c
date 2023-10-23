@@ -376,7 +376,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   } else {
     if (error) {
       t_print("%s\n", error->message);
-      g_free(error);
+      //g_free(error);
     }
     rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/share/pihpsdr/hpsdr.png", &error);
   }
@@ -385,7 +385,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   } else {
     if (error) {
       t_print("%s\n", error->message);
-      g_free(error);
+      //g_free(error);
     }
     rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/local/share/pihpsdr/hpsdr.png", &error);
   }
@@ -394,7 +394,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   } else {
     if (error) {
       t_print("%s\n", error->message);
-      g_free(error);
+      //g_free(error);
     }
   }
   

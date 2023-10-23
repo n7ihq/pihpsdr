@@ -1534,12 +1534,18 @@ int process_action(void *data) {
     switch (a->mode) {
     case PRESSED:
       CAT_cw_is_active = 1;
+      if (protocol == NEW_PROTOCOL) {
+        schedule_transmit_specific();
+      }
       mox_update(1);
       break;
 
     case RELEASED:
       if (CAT_cw_is_active == 1) {
         CAT_cw_is_active = 0;
+        if (protocol == NEW_PROTOCOL) {
+          schedule_transmit_specific();
+        }
         mox_update(0);
       }
 

@@ -1245,7 +1245,7 @@ static void new_protocol_transmit_specific() {
   transmit_specific_buffer[4] = 1; // 1 DAC
   transmit_specific_buffer[5] = 0; //  default no CW
 
-  if ((txmode == modeCWU || txmode == modeCWL) && cw_keyer_internal) {
+  if ((txmode == modeCWU || txmode == modeCWL) && cw_keyer_internal && !CAT_cw_is_active) {
     //
     // Set this byte only if in CW, and if using the "internal" keyer
     //
