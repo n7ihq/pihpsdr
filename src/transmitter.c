@@ -984,6 +984,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   long isample;
   long qsample;
   double gain, sidevol, ramp;
+  const double cfir = 0.896;
   double *dp;
   int j;
   int error;
@@ -1147,11 +1148,16 @@ static void full_tx_buffer(TRANSMITTER *tx) {
         // tx->output_samples is four times tx->buffer_size
         // Take TX envelope from the 192kHz shape buffer
         //
-        isample = 0;
+        // In the P2 WDSP TXA chain, there is a compensating FIR filter at the very end
+        // that reduces the amplitude of a full-amplitude zero-frequency signal
+        // (e.g. that produced when TUNEing) to 0.896 (the value of cfir).
+        // So we have to apply this "filter" here to our manually generated RF pulse
+        //
+        qsample = 0;
 
         for (j = 0; j < tx->output_samples; j++) {
           ramp = cw_shape_buffer192[j];             // between 0.0 and 1.0
-          qsample = floor(gain * ramp + 0.5);               // always non-negative, isample is just the pulse envelope
+          isample = floor(cfir * gain * ramp + 0.5);               // always non-negative, isample is just the pulse envelope
           new_protocol_iq_samples(isample, qsample);
         }
 

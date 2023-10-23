@@ -1372,12 +1372,12 @@ void *tx_thread(void * data) {
       sample |= (int)((unsigned char)(*p++) & 0xFF);
       dq = (double) sample / 8388608.0;
       //
-      //      I don't know why (perhaps the CFFIR in the SDR program)
-      //      but somehow I must multiply the samples to get the correct
+      //      In P2, the output signal goes through a compensating
+      //      FIR filter at the end, that reduces the amplitudef
       //      strength
       //
-      di *= 1.117;
-      dq *= 1.117;
+      di *= 1.116;
+      dq *= 1.116;
       //
       //      put TX samples into ring buffer
       //
