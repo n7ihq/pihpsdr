@@ -370,6 +370,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
 
   t_print("create image and icon\n");
 
+  error = NULL;
   rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "hpsdr.png", &error);
   if (rc) {
     image = gtk_image_new_from_file("hpsdr.png");
@@ -378,23 +379,24 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
       t_print("%s\n", error->message);
       //g_free(error);
     }
+    error = NULL;
     rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/share/pihpsdr/hpsdr.png", &error);
-  }
-  if (rc) {
-    image = gtk_image_new_from_file("/usr/share/pihpsdr/hpsdr.png");
-  } else {
-    if (error) {
-      t_print("%s\n", error->message);
-      //g_free(error);
-    }
-    rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/local/share/pihpsdr/hpsdr.png", &error);
-  }
-  if (rc) {
-    image = gtk_image_new_from_file("/usr/local/share/pihpsdr/hpsdr.png");
-  } else {
-    if (error) {
-      t_print("%s\n", error->message);
-      //g_free(error);
+    if (rc) {
+      image = gtk_image_new_from_file("/usr/share/pihpsdr/hpsdr.png");
+    } else {
+      if (error) {
+        t_print("%s\n", error->message);
+        //g_free(error);
+      }
+      error = NULL;
+      rc = gtk_window_set_icon_from_file (GTK_WINDOW(top_window), "/usr/local/share/pihpsdr/hpsdr.png", &error);
+      image = gtk_image_new_from_file("/usr/local/share/pihpsdr/hpsdr.png");
+      if (!rc) {
+        if (error) {
+          t_print("%s\n", error->message);
+          //g_free(error);
+        }
+      }
     }
   }
   
