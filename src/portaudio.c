@@ -417,7 +417,6 @@ int audio_open_output(RECEIVER *rx) {
   PaStreamParameters outputParameters;
   int padev;
   int i;
-
   //
   // Look up device name and determine device ID
   //

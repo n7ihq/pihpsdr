@@ -182,11 +182,11 @@ static int how_many_receivers(void);
 static GMutex dump_mutex;
 
 #ifdef __APPLE__
-static sem_t *txring_sem;
-static sem_t *rxring_sem;
+  static sem_t *txring_sem;
+  static sem_t *rxring_sem;
 #else
-static sem_t txring_sem;
-static sem_t rxring_sem;
+  static sem_t txring_sem;
+  static sem_t rxring_sem;
 #endif
 //
 // probably not needed
@@ -244,6 +244,7 @@ static volatile int rxring_count  = 0;  // a sample counter
 
 static gpointer old_protocol_txiq_thread(gpointer data) {
   int nptr;
+
   //
   // Ideally, an output METIS buffer with 126 samples is sent every 2625 usec.
   // We thus wait until we have 126 samples, and then send a packet.
@@ -257,11 +258,14 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
     sem_wait(&txring_sem);
 #endif
     nptr = txring_outptr + 1008;
+
     if (nptr >= TXRINGBUFLEN) { nptr = 0; }
+
     if (!running || txring_drain) {
       txring_outptr = nptr;
       continue;
     }
+
     if (pthread_mutex_trylock(&send_ozy_mutex)) {
       //
       // This can only happen if the GUI thread initiates
@@ -272,12 +276,10 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
       //
       txring_outptr = nptr;
     } else {
-
       memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr    ], 504);
       ozy_send_buffer();
-      memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr+504], 504);
+      memcpy(output_buffer + 8, &TXRINGBUF[txring_outptr + 504], 504);
       ozy_send_buffer();
-
       MEMORY_BARRIER;
       txring_outptr = nptr;
       usleep(2000);
@@ -352,9 +354,11 @@ void old_protocol_init(int rx, int pixels, int rate) {
   if (TXRINGBUF == NULL) {
     TXRINGBUF = g_new(unsigned char, TXRINGBUFLEN);
   }
+
   if (RXRINGBUF == NULL) {
-     RXRINGBUF = g_new(unsigned char, RXRINGBUFLEN);
+    RXRINGBUF = g_new(unsigned char, RXRINGBUFLEN);
   }
+
 #ifdef __APPLE__
   txring_sem = apple_sem(0);
   rxring_sem = apple_sem(0);
@@ -362,7 +366,6 @@ void old_protocol_init(int rx, int pixels, int rate) {
   (void) sem_init(&txring_sem, 0, 0);
   (void) sem_init(&rxring_sem, 0, 0);
 #endif
-
   pthread_mutex_lock(&send_ozy_mutex);
   old_protocol_set_mic_sample_rate(rate);
   g_thread_new("P1 out", old_protocol_txiq_thread, NULL);
@@ -447,8 +450,8 @@ static gpointer ozy_ep6_rx_thread(gpointer arg) {
     } else
       // process the received data normally
     {
-      queue_two_ozy_input_buffers(&ep6_inbuffer[   0],&ep6_inbuffer[ 512]);
-      queue_two_ozy_input_buffers(&ep6_inbuffer[1024],&ep6_inbuffer[1536]);
+      queue_two_ozy_input_buffers(&ep6_inbuffer[   0], &ep6_inbuffer[ 512]);
+      queue_two_ozy_input_buffers(&ep6_inbuffer[1024], &ep6_inbuffer[1536]);
     }
   }
 
@@ -484,7 +487,7 @@ static void open_udp_socket() {
     t_perror("data_socket: SO_REUSEPORT");
   }
 
-//#ifdef SET_SOCK_BUF_SIZE
+  //#ifdef SET_SOCK_BUF_SIZE
   //
   // We need a receive buffer with a decent size, to be able to
   // store several incoming packets if they arrive in a burst.
@@ -530,7 +533,7 @@ static void open_udp_socket() {
     if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
   }
 
-//#endif
+  //#endif
 #ifdef __APPLE__
   //optval = 0x10;  // IPTOS_LOWDELAY
   optval = 0xb8;  // DSCP EF
@@ -757,7 +760,7 @@ static gpointer receive_thread(gpointer arg) {
           switch (ep) {
           case 6: // EP6
             // process the data
-            queue_two_ozy_input_buffers(&buffer[8],&buffer[520]);
+            queue_two_ozy_input_buffers(&buffer[8], &buffer[520]);
             break;
 
           case 4: // EP4
@@ -1401,17 +1404,18 @@ static void queue_two_ozy_input_buffers(unsigned const char *buf1,
   // in one shot since this halves the number of semamphore operations
   // at no cost (buffer fly in in pairs anyway)
   //
-  if(rxring_count < 0) {
+  if (rxring_count < 0) {
     rxring_count++;
     return;
   }
+
   int nptr = rxring_inptr + 1024;
 
   if (nptr >= RXRINGBUFLEN) { nptr = 0; }
 
   if (nptr != rxring_outptr) {
     memcpy((void *)(&RXRINGBUF[rxring_inptr    ]), buf1, 512);
-    memcpy((void *)(&RXRINGBUF[rxring_inptr+512]), buf2, 512);
+    memcpy((void *)(&RXRINGBUF[rxring_inptr + 512]), buf2, 512);
     MEMORY_BARRIER;
     rxring_inptr = nptr;
 #ifdef __APPLE__
@@ -1443,7 +1447,6 @@ static gpointer process_ozy_input_buffer_thread(gpointer arg) {
 #else
     sem_wait(&rxring_sem);
 #endif
-
     int nptr = rxring_outptr + 1024;
 
     if (nptr >= RXRINGBUFLEN) { nptr = 0; }
@@ -1460,6 +1463,7 @@ static gpointer process_ozy_input_buffer_thread(gpointer arg) {
     for (int i = 0; i < 1024; i++) {
       process_ozy_byte(RXRINGBUF[rxring_outptr + i] & 0xFF);
     }
+
     MEMORY_BARRIER;
     rxring_outptr = nptr;
   }
@@ -1470,6 +1474,7 @@ static gpointer process_ozy_input_buffer_thread(gpointer arg) {
 void old_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short right_audio_sample) {
   if (!isTransmitting()) {
     pthread_mutex_lock(&send_audio_mutex);
+
     if (txring_count < 0) {
       txring_count++;
       pthread_mutex_unlock(&send_audio_mutex);
@@ -1488,7 +1493,7 @@ void old_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
       txring_flag = 0;
     }
 
-    int iptr = txring_inptr + 8*txring_count;
+    int iptr = txring_inptr + 8 * txring_count;
 
     //
     // The HL2 makes no use of audio samples, but instead
@@ -1507,11 +1512,11 @@ void old_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
       TXRINGBUF[iptr++] = right_audio_sample >> 8;
       TXRINGBUF[iptr++] = right_audio_sample;
     }
-    TXRINGBUF[iptr++] = 0;
-    TXRINGBUF[iptr++] = 0;
-    TXRINGBUF[iptr++] = 0;
-    TXRINGBUF[iptr++] = 0;
 
+    TXRINGBUF[iptr++] = 0;
+    TXRINGBUF[iptr++] = 0;
+    TXRINGBUF[iptr++] = 0;
+    TXRINGBUF[iptr++] = 0;
     txring_count++;
 
     if (txring_count >= 126) {
@@ -1540,6 +1545,7 @@ void old_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
 void old_protocol_iq_samples(int isample, int qsample, int side) {
   if (isTransmitting()) {
     pthread_mutex_lock(&send_audio_mutex);
+
     if (txring_count < 0) {
       txring_count++;
       pthread_mutex_unlock(&send_audio_mutex);
@@ -1559,7 +1565,7 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
       txring_flag = 1;
     }
 
-    int iptr = txring_inptr + 8*txring_count;
+    int iptr = txring_inptr + 8 * txring_count;
 
     //
     // The HL2 makes no use of audio samples, but instead
@@ -1578,11 +1584,11 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
       TXRINGBUF[iptr++] = (-side) >> 8;
       TXRINGBUF[iptr++] = (-side);
     }
+
     TXRINGBUF[iptr++] = isample >> 8;
     TXRINGBUF[iptr++] = isample;
     TXRINGBUF[iptr++] = qsample >> 8;
     TXRINGBUF[iptr++] = qsample;
-
     txring_count++;
 
     if (txring_count >= 126) {
@@ -2179,7 +2185,8 @@ void ozy_send_buffer() {
     case 7:
       output_buffer[C0] = 0x1E;
 
-      if ((txmode == modeCWU || txmode == modeCWL) && !tune && cw_keyer_internal && !transmitter->twotone && !CAT_cw_is_active) {
+      if ((txmode == modeCWU || txmode == modeCWL) && !tune && cw_keyer_internal && !transmitter->twotone
+          && !CAT_cw_is_active) {
         output_buffer[C1] |= 0x01;
       }
 

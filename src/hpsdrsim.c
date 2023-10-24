@@ -540,7 +540,6 @@ int main(int argc, char *argv[]) {
     memcpy(buffer, id, 4);
     count++;
 
-
     if (sock_TCP_Client > -1) {
       // Using recvmmsg with a time-out should be used for a byte-stream protocol like TCP
       // (Each "packet" in the datagram may be incomplete). This is especially true if the
@@ -625,7 +624,6 @@ int main(int argc, char *argv[]) {
 
     if (count >= 5000 && active_thread) {
       printf( "WATCHDOG STOP the transmission via handler_ep6\n");
-
       enable_thread = 0;
 
       while (active_thread) { usleep(1000); }
@@ -636,8 +634,10 @@ int main(int argc, char *argv[]) {
         close(sock_TCP_Client);
         sock_TCP_Client = -1;
       }
+
       continue;
     }
+
     if (bytes_read <= 0) { continue; }
 
     count = 0;

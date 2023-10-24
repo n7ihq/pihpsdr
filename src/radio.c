@@ -1188,8 +1188,8 @@ void start_radio() {
     snprintf(ip, 32, "%s", inet_ntoa(radio->info.network.address.sin_addr));
     snprintf(iface, 64, "%s", radio->info.network.interface_name);
     break;
-
 #ifdef SOAPYSDR
+
   case SOAPYSDR_PROTOCOL:
     STRLCPY(p, "SoapySDR", 32);
     snprintf(version, 32, "%s v%d.%d.%d",
@@ -1209,7 +1209,6 @@ void start_radio() {
            radio->name,
            p,
            version);
-
   status_text(text);
 
   //
@@ -1221,33 +1220,33 @@ void start_radio() {
     if (have_saturn_xdma) {
       // radio has no ip and MAC
       snprintf(text, 1024, "piHPSDR: %s (%s v%d) on %s",
-              radio->name,
-              p,
-              radio->software_version,
-              iface);
+               radio->name,
+               p,
+               radio->software_version,
+               iface);
     } else if (device == DEVICE_OZY) {
       // radio has no ip, mac, and name is "Ozy USB"
       snprintf(text, 1024, "piHPSDR: %s (%s %s)",
-              radio->name,
-              p,
-              version);
+               radio->name,
+               p,
+               version);
     } else {
       snprintf(text, 1024, "piHPSDR: %s (%s %s) %s (%s) on %s",
-              radio->name,
-              p,
-              version,
-              ip,
-              mac,
-              iface);
+               radio->name,
+               p,
+               version,
+               ip,
+               mac,
+               iface);
     }
 
     break;
 
   case SOAPYSDR_PROTOCOL:
     snprintf(text, 1024, "piHPSDR: %s (%s %s)",
-            radio->name,
-            p,
-            version);
+             radio->name,
+             p,
+             version);
     break;
   }
 
@@ -1267,12 +1266,12 @@ void start_radio() {
 
   default:
     snprintf(property_path, sizeof(property_path), "%02X-%02X-%02X-%02X-%02X-%02X.props",
-            radio->info.network.mac_address[0],
-            radio->info.network.mac_address[1],
-            radio->info.network.mac_address[2],
-            radio->info.network.mac_address[3],
-            radio->info.network.mac_address[4],
-            radio->info.network.mac_address[5]);
+             radio->info.network.mac_address[0],
+             radio->info.network.mac_address[1],
+             radio->info.network.mac_address[2],
+             radio->info.network.mac_address[3],
+             radio->info.network.mac_address[4],
+             radio->info.network.mac_address[5]);
     break;
   }
 

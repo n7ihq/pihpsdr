@@ -45,7 +45,7 @@ char build_options[] =
 #ifdef CLIENT_SERVER
   "SERVER "
 #endif
-   "";
+  "";
 
 char build_audio[] =
 #ifdef ALSA

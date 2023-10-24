@@ -1146,6 +1146,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
         break;
 
       case NEW_PROTOCOL:
+
         //
         // tx->output_samples is four times tx->buffer_size
         // Take TX envelope from the 192kHz shape buffer
@@ -1158,10 +1159,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
         //
         // This is why we apply the factor 0.896 HERE.
         //
-
         for (j = 0; j < tx->output_samples; j++) {
-          ramp = cw_shape_buffer192[j];             // between 0.0 and 1.0
-          isample = floor(0.896 * gain * ramp + 0.5);               // always non-negative, isample is just the pulse envelope
+          ramp = cw_shape_buffer192[j];                    // between 0.0 and 1.0
+          isample = floor(0.896 * gain * ramp + 0.5);      // always non-negative, isample is just the pulse envelope
           new_protocol_iq_samples(isample, 0);
         }
 
@@ -1285,9 +1285,13 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
     // store the ramp value in cw_shape_buffer, but also use it for shaping the "local"
     // side tone
     double ramp = cwramp48[cw_shape];
-    float cwsample = 0.00197 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local,
+    float cwsample = 0.00196 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local,
                      cw_keyer_sidetone_frequency);
 
+    //
+    // For P1 and Soapy, cw_keyer_sidetone_volume is in the range 0...127 so cwsample is 0.00 ... 0.25
+    // For P2,           cw_keyer_sidetone_volume is in the range 0...255 so cwsample is 0.00 ... 0.50
+    //
     if (active_receiver->local_audio && cw_keyer_sidetone_volume > 0) { cw_audio_write(active_receiver, cwsample); }
 
     cw_shape_buffer48[tx->samples] = ramp;
@@ -1306,7 +1310,7 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
     if (protocol == NEW_PROTOCOL) {
       int s = 0;
 
-      // cwsample is in the range 0.0 - 0.25. For my Anan-7000, the following scaling
+      // cwsample is in the range 0.0 - 0.50. For my Anan-7000, the following scaling
       // produces the same volume as "internal CW".
       if (!cw_keyer_internal || CAT_cw_is_active) { s = (int) (cwsample * 65535.0); }
 

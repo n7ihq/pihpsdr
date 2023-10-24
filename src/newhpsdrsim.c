@@ -732,6 +732,7 @@ void *highprio_thread(void *data) {
     }
 
     count++;
+
     if (count >= 50) {
       // WATCHDOG code
       printf("HP: Watchdog Reset\n");
@@ -749,6 +750,7 @@ void *highprio_thread(void *data) {
       pthread_join(audio_thread_id, NULL);
       break;
     }
+
     if (rc < 0 ) { continue; }
 
     if (rc != 1444) {

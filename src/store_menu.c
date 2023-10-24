@@ -59,14 +59,14 @@ static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpoin
 
   if (mode == modeFMN) {
     snprintf(label_str, 40, "M%d=%8.3f MHz (%s, %s)", ind,
-            (double) mem[ind].frequency * 1E-6,
-            mode_string[mode],
-            mem[ind].deviation == 2500 ? "11k" : "16k");
+             (double) mem[ind].frequency * 1E-6,
+             mode_string[mode],
+             mem[ind].deviation == 2500 ? "11k" : "16k");
   } else {
     snprintf(label_str, 40, "M%d=%8.3f MHz (%s, %s)", ind,
-            (double) mem[ind].frequency * 1E-6,
-            mode_string[mode],
-            filters[mode][filter].title);
+             (double) mem[ind].frequency * 1E-6,
+             mode_string[mode],
+             filters[mode][filter].title);
   }
 
   gtk_button_set_label(GTK_BUTTON(store_button[ind]), label_str);
@@ -111,14 +111,14 @@ void store_menu(GtkWidget *parent) {
 
     if (mode == modeFMN) {
       snprintf(label_str, 50, "M%d=%8.3f MHz (%s, %s)", ind,
-              (double) mem[ind].frequency * 1E-6,
-              mode_string[mode],
-              mem[ind].deviation == 2500 ? "11k" : "16k");
+               (double) mem[ind].frequency * 1E-6,
+               mode_string[mode],
+               mem[ind].deviation == 2500 ? "11k" : "16k");
     } else {
       snprintf(label_str, 50, "M%d=%8.3f MHz (%s, %s)", ind,
-              (double) mem[ind].frequency * 1E-6,
-              mode_string[mode],
-              filters[mode][filter].title);
+               (double) mem[ind].frequency * 1E-6,
+               mode_string[mode],
+               filters[mode][filter].title);
     }
 
     b = gtk_button_new_with_label(label_str);

@@ -96,7 +96,7 @@ static void get_info(char *driver) {
     }
 
     if (strcmp(info.keys[i], "protocolVersion") == 0) {
-      STRLCPY(p_version, info.vals[i] ,16);
+      STRLCPY(p_version, info.vals[i], 16);
     }
   }
 
@@ -240,11 +240,11 @@ static void get_info(char *driver) {
 
     if (strcmp(driver, "lime") == 0) {
       snprintf(discovered[devices].info.soapy.version, sizeof(discovered[devices].info.soapy.version),
-              "fw=%s gw=%s hw=%s p=%s", fw_version, gw_version, hw_version,
-              p_version);
+               "fw=%s gw=%s hw=%s p=%s", fw_version, gw_version, hw_version,
+               p_version);
     } else if (strcmp(driver, "radioberry") == 0) {
       snprintf(discovered[devices].info.soapy.version, sizeof(discovered[devices].info.soapy.version),
-              "fw=%s gw=%s", fw_version, gw_version);
+               "fw=%s gw=%s", fw_version, gw_version);
     } else {
       STRLCPY(discovered[devices].info.soapy.version, "", sizeof(discovered[devices].info.soapy.version));
     }

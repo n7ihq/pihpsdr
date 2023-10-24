@@ -74,16 +74,16 @@ void about_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, row, 1, 1);
   row++;
-  snprintf(text, 1024 , "piHPSDR by John Melton G0ORX/N6LYT\n\n"
-                        "    With help from:\n"
-                        "    Steve Wilson, KA6S: RIGCTL (CAT over TCP)\n"
-                        "    Laurence Barker, G8NJJ: USB OZY Support\n"
-                        //"    Johan Maas, PA3GSB: RadioBerry support\n"
-                        "    Ken Hopper, N9VV: Testing and Documentation\n"
-                        "    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI \n\n"
-                        "Build date: %s (commit %s)\n"
-                        "Build version: %s\n"
-                        "WDSP version: %d.%02d\n\n",
+  snprintf(text, 1024, "piHPSDR by John Melton G0ORX/N6LYT\n\n"
+           "    With help from:\n"
+           "    Steve Wilson, KA6S: RIGCTL (CAT over TCP)\n"
+           "    Laurence Barker, G8NJJ: USB OZY Support\n"
+           //"    Johan Maas, PA3GSB: RadioBerry support\n"
+           "    Ken Hopper, N9VV: Testing and Documentation\n"
+           "    Christoph van Wüllen, DL1YCF: CW, PureSignal, Diversity, MIDI \n\n"
+           "Build date: %s (commit %s)\n"
+           "Build version: %s\n"
+           "WDSP version: %d.%02d\n\n",
            build_date, build_commit, build_version, GetWDSPVersion() / 100, GetWDSPVersion() % 100);
 
   switch (radio->protocol) {
@@ -91,7 +91,7 @@ void about_menu(GtkWidget *parent) {
   case NEW_PROTOCOL:
     if (device == DEVICE_OZY) {
       snprintf(line, 512, "Device:  OZY (via USB)  Protocol %s v%d.%d", radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
-              radio->software_version / 10, radio->software_version % 10);
+               radio->software_version / 10, radio->software_version % 10);
       STRLCAT(text, line, 1024);
     } else {
       char interface_addr[64];
@@ -99,29 +99,30 @@ void about_menu(GtkWidget *parent) {
       STRLCPY(addr, inet_ntoa(radio->info.network.address.sin_addr), 64);
       STRLCPY(interface_addr, inet_ntoa(radio->info.network.interface_address.sin_addr), 64);
       snprintf(line, 512, "Device: %s, Protocol %s, v%d.%d\n"
-                          "    Mac Address: %02X:%02X:%02X:%02X:%02X:%02X\n"
-                          "    IP Address: %s on %s (%s)",
-              radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
-              radio->software_version / 10, radio->software_version % 10,
-              radio->info.network.mac_address[0],
-              radio->info.network.mac_address[1],
-              radio->info.network.mac_address[2],
-              radio->info.network.mac_address[3],
-              radio->info.network.mac_address[4],
-              radio->info.network.mac_address[5],
-              addr,
-              radio->info.network.interface_name,
-              interface_addr);
+               "    Mac Address: %02X:%02X:%02X:%02X:%02X:%02X\n"
+               "    IP Address: %s on %s (%s)",
+               radio->name, radio->protocol == ORIGINAL_PROTOCOL ? "1" : "2",
+               radio->software_version / 10, radio->software_version % 10,
+               radio->info.network.mac_address[0],
+               radio->info.network.mac_address[1],
+               radio->info.network.mac_address[2],
+               radio->info.network.mac_address[3],
+               radio->info.network.mac_address[4],
+               radio->info.network.mac_address[5],
+               addr,
+               radio->info.network.interface_name,
+               interface_addr);
       STRLCAT(text, line, 1024);
     }
 
     break;
 #ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      snprintf(line, 512, "Device: %s (via SoapySDR)\n"
-                          "    %s (%s)",
-        radio->name, radio->info.soapy.hardware_key, radio->info.soapy.driver_key);
-      STRLCAT(text, line, 1024);
+
+  case SOAPYSDR_PROTOCOL:
+    snprintf(line, 512, "Device: %s (via SoapySDR)\n"
+             "    %s (%s)",
+             radio->name, radio->info.soapy.hardware_key, radio->info.soapy.driver_key);
+    STRLCAT(text, line, 1024);
     break;
 #endif
   }

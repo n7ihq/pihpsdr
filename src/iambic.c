@@ -623,7 +623,7 @@ int keyer_init() {
 #ifdef __APPLE__
   cw_event = apple_sem(0);
 #else
-   sem_init(&cw_event, 0, 0);
+  sem_init(&cw_event, 0, 0);
 #endif
   running = 1;
   rc = pthread_create(&keyer_thread_id, NULL, keyer_thread, NULL);

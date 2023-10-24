@@ -252,7 +252,6 @@ void tx_menu(GtkWidget *parent) {
 
     if (i < 0) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(input), 0);
-
       STRLCPY(transmitter->microphone_name, input_devices[0].name, sizeof(transmitter->microphone_name));
     }
 
