@@ -164,7 +164,7 @@ static void new_discover(struct ifaddrs* iface, int discflag) {
     }
 
     STRLCPY(addr, inet_ntoa(sa->sin_addr), sizeof(addr));
-    STRLCPY(net_mask, inet_ntoa(mask->sin_addr),sizeof(net_mask));
+    STRLCPY(net_mask, inet_ntoa(mask->sin_addr), sizeof(net_mask));
     t_print("new_discover: bound to %s %s %s\n", interface_name, addr, net_mask);
     // allow broadcast on the socket
     int on = 1;
@@ -374,7 +374,8 @@ gpointer new_discover_receive_thread(gpointer data) {
             memcpy((void*)&discovered[devices].info.network.interface_netmask, (void*)&interface_netmask,
                    sizeof(interface_netmask));
             discovered[devices].info.network.interface_length = sizeof(interface_addr);
-            STRLCPY(discovered[devices].info.network.interface_name, interface_name, sizeof(discovered[devices].info.network.interface_name));
+            STRLCPY(discovered[devices].info.network.interface_name, interface_name,
+                    sizeof(discovered[devices].info.network.interface_name));
             discovered[devices].supported_receivers = 2;
             //
             // Info not yet made use of:

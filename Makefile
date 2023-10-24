@@ -626,17 +626,17 @@ hpsdrsim:       src/hpsdrsim.o src/newhpsdrsim.o
 bootloader:	src/bootloader.c
 	$(CC) -o bootloader src/bootloader.c -lpcap
 
-debian:
-	mkdir -p pkg/pihpsdr/usr/local/bin
-	mkdir -p pkg/pihpsdr/usr/local/lib
-	mkdir -p pkg/pihpsdr/usr/share/pihpsdr
-	mkdir -p pkg/pihpsdr/usr/share/applications
-	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin
-	cp /usr/local/lib/libwdsp.so pkg/pihpsdr/usr/local/lib
-	cp release/pihpsdr/hpsdr.png pkg/pihpsdr/usr/share/pihpsdr
-	cp release/pihpsdr/hpsdr_icon.png pkg/pihpsdr/usr/share/pihpsdr
-	cp release/pihpsdr/pihpsdr.desktop pkg/pihpsdr/usr/share/applications
-	cd pkg; dpkg-deb --build pihpsdr
+#debian:
+#	mkdir -p pkg/pihpsdr/usr/local/bin
+#	mkdir -p pkg/pihpsdr/usr/local/lib
+#	mkdir -p pkg/pihpsdr/usr/share/pihpsdr
+#	mkdir -p pkg/pihpsdr/usr/share/applications
+#	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin
+#	cp /usr/local/lib/libwdsp.so pkg/pihpsdr/usr/local/lib
+#	cp release/pihpsdr/hpsdr.png pkg/pihpsdr/usr/share/pihpsdr
+#	cp release/pihpsdr/hpsdr_icon.png pkg/pihpsdr/usr/share/pihpsdr
+#	cp release/pihpsdr/pihpsdr.desktop pkg/pihpsdr/usr/share/applications
+#	cd pkg; dpkg-deb --build pihpsdr
 
 #############################################################################
 #

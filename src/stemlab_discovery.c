@@ -169,8 +169,8 @@ int alpine_start_app(const char * const app_id) {
   // Copy IP addr and name of app to app_start_url
   //
   snprintf(app_start_url, sizeof(app_start_url), "http://%s/%s/",
-          inet_ntoa(radio->info.network.address.sin_addr),
-          app_id);
+           inet_ntoa(radio->info.network.address.sin_addr),
+           app_id);
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_URL, app_start_url);
   check_curl("Failed setting cURL URL");
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, alpine_start_callback);
@@ -219,8 +219,8 @@ int stemlab_start_app(const char * const app_id) {
   // stop command
   //
   snprintf(app_start_url, sizeof(app_start_url), "http://%s/bazaar?stop=%s",
-          inet_ntoa(radio->info.network.address.sin_addr),
-          app_id);
+           inet_ntoa(radio->info.network.address.sin_addr),
+           app_id);
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_URL, app_start_url);
   check_curl("Failed setting cURL URL");
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, app_start_callback);
@@ -231,8 +231,8 @@ int stemlab_start_app(const char * const app_id) {
   // start command
   //
   snprintf(app_start_url, sizeof(app_start_url), "http://%s/bazaar?start=%s",
-          inet_ntoa(radio->info.network.address.sin_addr),
-          app_id);
+           inet_ntoa(radio->info.network.address.sin_addr),
+           app_id);
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_URL, app_start_url);
   check_curl("Failed setting cURL URL");
   curl_error = curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, app_start_callback);

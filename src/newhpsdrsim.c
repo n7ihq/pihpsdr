@@ -721,7 +721,7 @@ void *highprio_thread(void *data) {
 
   while (1) {
     //
-    // WATCHDOG: if no packet arrives in 10 seconds, 
+    // WATCHDOG: if no packet arrives in 10 seconds,
     //           treat this situation as if "run" is set to zero
     //
     rc = recvfrom(sock, buffer, 1444, 0, (struct sockaddr *)&addr, &lenaddr);
@@ -732,6 +732,7 @@ void *highprio_thread(void *data) {
     }
 
     count++;
+
     if (count >= 50) {
       // WATCHDOG code
       printf("HP: Watchdog Reset\n");
@@ -749,9 +750,9 @@ void *highprio_thread(void *data) {
       pthread_join(audio_thread_id, NULL);
       break;
     }
+
     if (rc < 0 ) { continue; }
 
-    
     if (rc != 1444) {
       printf("Received HighPrio packet with incorrect length");
       break;
@@ -1373,12 +1374,10 @@ void *tx_thread(void * data) {
       sample |= (int)((unsigned char)(*p++) & 0xFF);
       dq = (double) sample / 8388608.0;
       //
-      //      I don't know why (perhaps the CFFIR in the SDR program)
-      //      but somehow I must multiply the samples to get the correct
-      //      strength
+      //      correct for the "compensating FIR filter"
       //
-      di *= 1.117;
-      dq *= 1.117;
+      di *= 1.116;
+      dq *= 1.116;
       //
       //      put TX samples into ring buffer
       //

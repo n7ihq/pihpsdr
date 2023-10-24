@@ -430,6 +430,7 @@ void new_protocol_init(int pixels) {
   if (TXIQRINGBUF == NULL) {
     TXIQRINGBUF = g_new(unsigned char, TXIQRINGBUFLEN);
   }
+
   if (RXAUDIORINGBUF == NULL) {
     RXAUDIORINGBUF = g_new(unsigned char, RXAUDIORINGBUFLEN);
   }
@@ -446,29 +447,31 @@ void new_protocol_init(int pixels) {
     }
   }
 
-//
-// Initialize semaphores for the never-finishing threads
-// (HighPrio, Mic, rxIQ)
-// and spawn the threads.
-//
+  //
+  // Initialize semaphores for the never-finishing threads
+  // (HighPrio, Mic, rxIQ)
+  // and spawn the threads.
+  //
 #ifdef __APPLE__
   high_priority_sem_ready = apple_sem(0);
   high_priority_sem_buffer = apple_sem(0);
   mic_line_sem = apple_sem(0);
+
   for (i = 0; i < MAX_DDC; i++) {
     iq_sem[i] = apple_sem(0);
   }
+
 #else
   (void)sem_init(&high_priority_sem_ready, 0, 0); // check return value!
   (void)sem_init(&high_priority_sem_buffer, 0, 0); // check return value!
   (void)sem_init(&mic_line_sem, 0, 0); // check return value!
+
   for (i = 0; i < MAX_DDC; i++) {
     (void)sem_init(&iq_sem[i], 0, 0); // check return value!
   }
+
 #endif
-
   running = 1;
-
   high_priority_thread_id = g_thread_new( "P2 HP", high_priority_thread, NULL);
   mic_line_thread_id = g_thread_new( "P2 MIC", mic_line_thread, NULL);
 
@@ -488,7 +491,6 @@ void new_protocol_init(int pixels) {
   (void)sem_init(&txiq_sem, 0, 0); // check return value!
   (void)sem_init(&rxaudio_sem, 0, 0); // check return value!
 #endif
-
   new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
   new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
 
@@ -508,7 +510,7 @@ void new_protocol_init(int pixels) {
     socklen_t optlen = sizeof(optval);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
-//#ifdef SET_SOCK_BUF_SIZE
+    //#ifdef SET_SOCK_BUF_SIZE
     //
     // We need a receive buffer with a decent size, to be able to
     // store several incoming packets if they arrive in a burst.
@@ -554,7 +556,7 @@ void new_protocol_init(int pixels) {
       if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
     }
 
-//#endif
+    //#endif
 #ifdef __APPLE__
     //optval = 0x10;  // IPTOS_LOWDELAY
     optval = 0xb8;  // DSCP EF
@@ -1245,7 +1247,7 @@ static void new_protocol_transmit_specific() {
   transmit_specific_buffer[4] = 1; // 1 DAC
   transmit_specific_buffer[5] = 0; //  default no CW
 
-  if ((txmode == modeCWU || txmode == modeCWL) && cw_keyer_internal) {
+  if ((txmode == modeCWU || txmode == modeCWL) && cw_keyer_internal && !CAT_cw_is_active) {
     //
     // Set this byte only if in CW, and if using the "internal" keyer
     //
@@ -1464,7 +1466,6 @@ void new_protocol_menu_stop() {
   fd_set fds;
   struct timeval tv;
   char *buffer;
-
   running = 0;
   //
   // Wait 50 msec so we know that the TX IQ and RX audio
@@ -1488,9 +1489,11 @@ void new_protocol_menu_stop() {
   sem_destroy(&txiq_sem);
   sem_destroy(&rxaudio_sem);
 #endif
+
   if (!have_saturn_xdma) {
     g_thread_join(new_protocol_thread_id);
   }
+
   g_thread_join(new_protocol_timer_thread_id);
   new_protocol_high_priority();
   // let the FPGA rest a while
@@ -1551,7 +1554,6 @@ void new_protocol_menu_start() {
   }
 
   running = 1;
-
 #ifdef __APPLE__
   txiq_sem = apple_sem(0);
   rxaudio_sem = apple_sem(0);
@@ -1559,7 +1561,6 @@ void new_protocol_menu_start() {
   (void)sem_init(&txiq_sem, 0, 0); // check return value!
   (void)sem_init(&rxaudio_sem, 0, 0); // check return value!
 #endif
-
   new_protocol_rxaudio_thread_id = g_thread_new( "P2 SPKR", new_protocol_rxaudio_thread, NULL);
   new_protocol_txiq_thread_id = g_thread_new( "P2 TXIQ", new_protocol_txiq_thread, NULL);
 
@@ -1589,15 +1590,14 @@ static gpointer new_protocol_rxaudio_thread(gpointer data) {
 #else
     sem_wait(&rxaudio_sem);
 #endif
+
     if (!running || rxaudio_drain) { continue; }
 
     audiobuffer[0] = audio_sequence >> 24;
     audiobuffer[1] = audio_sequence >> 16;
     audiobuffer[2] = audio_sequence >> 8;
     audiobuffer[3] = audio_sequence;
-
     audio_sequence++;
-
     nptr = rxaudio_outptr + 256;
 
     if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
@@ -1642,17 +1642,18 @@ static gpointer new_protocol_txiq_thread(gpointer data) {
 #else
     sem_wait(&txiq_sem);
 #endif
+
     if (!running) { break; }
 
     iqbuffer[0] = tx_iq_sequence >> 24;
     iqbuffer[1] = tx_iq_sequence >> 16;
     iqbuffer[2] = tx_iq_sequence >> 8;
     iqbuffer[3] = tx_iq_sequence;
-
     tx_iq_sequence++;
-
     nptr = txiq_outptr + 1440;
+
     if (nptr >= TXIQRINGBUFLEN) { nptr = 0; }
+
     memcpy(&iqbuffer[4], &TXIQRINGBUF[txiq_outptr], 1440);
     MEMORY_BARRIER;
     txiq_outptr = nptr;
@@ -1666,6 +1667,7 @@ static gpointer new_protocol_txiq_thread(gpointer data) {
         t_perror("sendto socket failed for iq:");
         exit(1);
       }
+
       usleep(1000);
     }
   }
@@ -1830,11 +1832,13 @@ void saturn_post_micaudio(int bytesread, mybuffer *mybuf) {
     mybuf->free = 1;
     return;
   }
+
   if (mic_count < 0) {
     mic_count++;
     mybuf->free = 1;
     return;
   }
+
   int nptr = mic_inptr + 1;
 
   if (nptr >= MICRINGBUFLEN) { nptr = 0; }
@@ -1862,15 +1866,18 @@ void saturn_post_iq_data(int ddc, mybuffer *mybuf) {
     mybuf->free = 1;
     return;
   }
+
   if (!running) {
     mybuf->free = 1;
     return;
   }
+
   if (iq_count[ddc] < 0) {
     iq_count[ddc]++;
     mybuf->free = 1;
     return;
   }
+
   //
   // Check sequence HERE
   //
@@ -1927,9 +1934,9 @@ static gpointer iq_thread(gpointer data) {
   //
   while (1) {
 #ifdef __APPLE__
-        sem_wait(iq_sem[ddc]);
+    sem_wait(iq_sem[ddc]);
 #else
-        sem_wait(&iq_sem[ddc]);
+    sem_wait(&iq_sem[ddc]);
 #endif
     optr = iq_outptr[ddc];
     nptr = optr + 1;
@@ -2230,6 +2237,7 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
     // Only process samples if transmitting in CW
     //
     pthread_mutex_lock(&send_rxaudio_mutex);
+
     if (rxaudio_count < 0) {
       rxaudio_count++;
       pthread_mutex_unlock(&send_rxaudio_mutex);
@@ -2249,17 +2257,16 @@ void new_protocol_cw_audio_samples(short left_audio_sample, short right_audio_sa
       rxaudio_flag = 1;
     }
 
-    int iptr = rxaudio_inptr + 4*rxaudio_count;
-
+    int iptr = rxaudio_inptr + 4 * rxaudio_count;
     RXAUDIORINGBUF[iptr++] = left_audio_sample >> 8;
     RXAUDIORINGBUF[iptr++] = left_audio_sample;
     RXAUDIORINGBUF[iptr++] = right_audio_sample >> 8;
     RXAUDIORINGBUF[iptr++] = right_audio_sample;
-
     rxaudio_count++;
 
     if (rxaudio_count >= 64) {
       int nptr = rxaudio_inptr + 256;
+
       if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
 
       if (nptr != rxaudio_outptr) {
@@ -2290,6 +2297,7 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
   if (isTransmitting() && (txmode == modeCWU || txmode == modeCWL)) { return; }
 
   pthread_mutex_lock(&send_rxaudio_mutex);
+
   if (rxaudio_count < 0) {
     rxaudio_count++;
     pthread_mutex_unlock(&send_rxaudio_mutex);
@@ -2308,17 +2316,16 @@ void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short rig
     rxaudio_flag = 0;
   }
 
-  int iptr = rxaudio_inptr + 4*rxaudio_count;
-
+  int iptr = rxaudio_inptr + 4 * rxaudio_count;
   RXAUDIORINGBUF[iptr++] = left_audio_sample >> 8;
   RXAUDIORINGBUF[iptr++] = left_audio_sample;
   RXAUDIORINGBUF[iptr++] = right_audio_sample >> 8;
   RXAUDIORINGBUF[iptr++] = right_audio_sample;
-
   rxaudio_count++;
 
   if (rxaudio_count >= 64) {
     int nptr = rxaudio_inptr + 256;
+
     if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
 
     if (nptr != rxaudio_outptr) {
@@ -2345,20 +2352,20 @@ void new_protocol_iq_samples(int isample, int qsample) {
     return;
   }
 
-  int iptr = txiq_inptr + 6*txiq_count;
-
+  int iptr = txiq_inptr + 6 * txiq_count;
   TXIQRINGBUF[iptr++] = isample >> 16;
   TXIQRINGBUF[iptr++] = isample >> 8;
   TXIQRINGBUF[iptr++] = isample;
   TXIQRINGBUF[iptr++] = qsample >> 16;
   TXIQRINGBUF[iptr++] = qsample >> 8;
   TXIQRINGBUF[iptr++] = qsample;
-
   txiq_count++;
 
   if (txiq_count >= 240) {
     int nptr = txiq_inptr + 1440;
+
     if (nptr >= TXIQRINGBUFLEN) { nptr = 0; }
+
     if (nptr != txiq_outptr) {
       txiq_inptr = nptr;
       txiq_count = 0;

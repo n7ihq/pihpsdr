@@ -154,7 +154,6 @@ int audio_open_output(RECEIVER *rx) {
   int result = 0;
   pa_sample_spec sample_spec;
   int err;
-
   g_mutex_lock(&rx->local_audio_mutex);
   sample_spec.rate = 48000;
   sample_spec.channels = 2;
@@ -183,7 +182,6 @@ int audio_open_output(RECEIVER *rx) {
   }
 
   g_mutex_unlock(&rx->local_audio_mutex);
-
   return result;
 }
 
@@ -434,4 +432,3 @@ int audio_write(RECEIVER *rx, float left_sample, float right_sample) {
   g_mutex_unlock(&rx->local_audio_mutex);
   return result;
 }
-

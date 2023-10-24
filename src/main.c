@@ -268,7 +268,7 @@ static int init(void *data) {
 
     char text[1024];
     snprintf(text, 1024, "Please do not close this window until wisdom plans are completed ...\n\n... %s",
-            wisdom_get_status());
+             wisdom_get_status());
     status_text(text);
   }
 

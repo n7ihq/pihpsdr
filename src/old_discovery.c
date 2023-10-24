@@ -441,7 +441,8 @@ static gpointer discover_receive_thread(gpointer data) {
           memcpy((void*)&discovered[devices].info.network.interface_netmask, (void*)&interface_netmask,
                  sizeof(interface_netmask));
           discovered[devices].info.network.interface_length = sizeof(interface_addr);
-          STRLCPY(discovered[devices].info.network.interface_name, interface_name, sizeof(discovered[devices].info.network.interface_name));
+          STRLCPY(discovered[devices].info.network.interface_name, interface_name,
+                  sizeof(discovered[devices].info.network.interface_name));
           discovered[devices].use_tcp = 0;
           discovered[devices].use_routing = 0;
           discovered[devices].supported_receivers = 2;
@@ -546,4 +547,3 @@ void old_discovery() {
             discovered[i].info.network.interface_name);
   }
 }
-

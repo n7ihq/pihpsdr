@@ -360,7 +360,6 @@ void rx_menu(GtkWidget *parent) {
 
     if (i < 0) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(output), 0);
-
       STRLCPY(active_receiver->audio_name, output_devices[0].name, sizeof(active_receiver->audio_name));
     }
 
@@ -393,4 +392,3 @@ void rx_menu(GtkWidget *parent) {
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }
-

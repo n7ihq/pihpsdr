@@ -1208,18 +1208,18 @@ void start_radio() {
       snprintf(text, 1024, "%s (%s) on USB /dev/ozy\n", radio->name, p);
     } else {
       snprintf(text, 1024, "Starting %s (%s %s)",
-              radio->name,
-              p,
-              version);
+               radio->name,
+               p,
+               version);
     }
 
     break;
 
   case SOAPYSDR_PROTOCOL:
     snprintf(text, 1024, "Starting %s (%s %s)",
-            radio->name,
-            "SoapySDR",
-            version);
+             radio->name,
+             "SoapySDR",
+             version);
     break;
   }
 
@@ -1233,27 +1233,27 @@ void start_radio() {
   case NEW_PROTOCOL:
     if (have_saturn_xdma) {
       snprintf(text, 1024, "piHPSDR: %s (%s v%d) on %s",
-              radio->name,
-              p,
-              radio->software_version,
-              iface);
+               radio->name,
+               p,
+               radio->software_version,
+               iface);
     } else {
       snprintf(text, 1024, "piHPSDR: %s (%s %s) %s (%s) on %s",
-              radio->name,
-              p,
-              version,
-              ip,
-              mac,
-              iface);
+               radio->name,
+               p,
+               version,
+               ip,
+               mac,
+               iface);
     }
 
     break;
 
   case SOAPYSDR_PROTOCOL:
     snprintf(text, 1024, "piHPSDR: %s (%s %s)",
-            radio->name,
-            p,
-            version);
+             radio->name,
+             p,
+             version);
     break;
   }
 
@@ -1273,12 +1273,12 @@ void start_radio() {
 
   default:
     snprintf(property_path, sizeof(property_path), "%02X-%02X-%02X-%02X-%02X-%02X.props",
-            radio->info.network.mac_address[0],
-            radio->info.network.mac_address[1],
-            radio->info.network.mac_address[2],
-            radio->info.network.mac_address[3],
-            radio->info.network.mac_address[4],
-            radio->info.network.mac_address[5]);
+             radio->info.network.mac_address[0],
+             radio->info.network.mac_address[1],
+             radio->info.network.mac_address[2],
+             radio->info.network.mac_address[3],
+             radio->info.network.mac_address[4],
+             radio->info.network.mac_address[5]);
     break;
   }
 

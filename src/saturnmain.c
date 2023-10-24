@@ -163,32 +163,36 @@ static mybuffer *get_my_buffer(int numlist) {
 
     bp = bp->next;
   }
+
   //
   // No buffer free, or the first time we request a buffer:
-  // allocate (a) new one(s). Note we need very few 
+  // allocate (a) new one(s). Note we need very few
   // HighPrio buffers, a limited amount of MicSample buffers,
   // and a possibly large amount of DDC IQ buffers.
   //
   first = (bp == NULL);
 
   switch (numlist) {
-    case HPMYBUF:
-      j=1;
-      desc = "HP";
-      break;
-    case MICMYBUF:
-      j=5;
-      desc = "MIC";
-      break;
-    case DDCMYBUF:
-      j=25;
-      desc = "DDC";
-      break;
-    default:
-      // NOTREACHED
-      j=5;
-      desc = "UNKNOWN";
-      break;
+  case HPMYBUF:
+    j = 1;
+    desc = "HP";
+    break;
+
+  case MICMYBUF:
+    j = 5;
+    desc = "MIC";
+    break;
+
+  case DDCMYBUF:
+    j = 25;
+    desc = "DDC";
+    break;
+
+  default:
+    // NOTREACHED
+    j = 5;
+    desc = "UNKNOWN";
+    break;
   }
 
   for (i = 0; i < j; i++) {
@@ -201,7 +205,6 @@ static mybuffer *get_my_buffer(int numlist) {
 
   t_print("%s: number of buffer[%s] %s to %d\n", __FUNCTION__, desc,
           first ? "set" : "increased", num_buf[numlist]);
-
   // Mark the first buffer in list as used and return that one.
   buflist[numlist]->free = 0;
   return buflist[numlist];
@@ -212,6 +215,7 @@ void saturn_free_buffers() {
 
   for (int i = 0; i < MAXMYBUF; i++) {
     mybuf = buflist[i];
+
     while (mybuf) {
       mybuf->free = 1;
       mybuf = mybuf->next;
@@ -389,7 +393,8 @@ void saturn_discovery() {
 
       discovered[devices].info.network.address_length = 0;
       discovered[devices].info.network.interface_length = 0;
-      STRLCPY(discovered[devices].info.network.interface_name, "XDMA", sizeof(discovered[devices].info.network.interface_name));
+      STRLCPY(discovered[devices].info.network.interface_name, "XDMA",
+              sizeof(discovered[devices].info.network.interface_name));
       discovered[devices].use_tcp = 0;
       discovered[devices].use_routing = 0;
       discovered[devices].supported_receivers = 2;

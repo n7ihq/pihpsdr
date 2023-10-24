@@ -1138,7 +1138,7 @@ void vfo_update() {
 
       if (can_transmit ? transmitter->ctcss_enabled : 0) {
         snprintf(temp_text, 32, "%s %s C=%0.1f", mode_string[vfo[id].mode], wid,
-                ctcss_frequencies[transmitter->ctcss]);
+                 ctcss_frequencies[transmitter->ctcss]);
       } else {
         snprintf(temp_text, 32, "%s %s", mode_string[vfo[id].mode], wid);
       }
@@ -1149,14 +1149,14 @@ void vfo_update() {
     case modeCWU:
       if (vfo[id].cwAudioPeakFilter) {
         snprintf(temp_text, 32, "%s %sP %dwpm %dHz", mode_string[vfo[id].mode],
-                band_filter->title,
-                cw_keyer_speed,
-                cw_keyer_sidetone_frequency);
+                 band_filter->title,
+                 cw_keyer_speed,
+                 cw_keyer_sidetone_frequency);
       } else {
         snprintf(temp_text, 32, "%s %s %d wpm %d Hz", mode_string[vfo[id].mode],
-                band_filter->title,
-                cw_keyer_speed,
-                cw_keyer_sidetone_frequency);
+                 band_filter->title,
+                 cw_keyer_speed,
+                 cw_keyer_sidetone_frequency);
       }
 
       break;

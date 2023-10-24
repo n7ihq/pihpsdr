@@ -569,6 +569,10 @@ static gpointer rigctl_cw_thread(gpointer data) {
     dashsamples = (3456 * cw_keyer_weight) / cw_keyer_speed;
     CAT_cw_is_active = 1;
 
+    if (protocol == NEW_PROTOCOL) {
+      schedule_transmit_specific();
+    }
+
     if (!mox) {
       // activate PTT
       g_idle_add(ext_mox_update, GINT_TO_POINTER(1));
@@ -583,6 +587,11 @@ static gpointer rigctl_cw_thread(gpointer data) {
       // still no MOX? --> silently discard CW character and give up
       if (!mox) {
         CAT_cw_is_active = 0;
+
+        if (protocol == NEW_PROTOCOL) {
+          schedule_transmit_specific();
+        }
+
         continue;
       }
     }
@@ -594,6 +603,10 @@ static gpointer rigctl_cw_thread(gpointer data) {
       // removing MOX, changing the mode to non-CW, or because a CW key has been hit.
       // Do not remove PTT in the latter case
       CAT_cw_is_active = 0;
+
+      if (protocol == NEW_PROTOCOL) {
+        schedule_transmit_specific();
+      }
 
       // If a CW key has been hit, we continue in TX mode.
       // Otherwise, switch PTT off.
@@ -628,6 +641,10 @@ static gpointer rigctl_cw_thread(gpointer data) {
 
       CAT_cw_is_active = 0;
 
+      if (protocol == NEW_PROTOCOL) {
+        schedule_transmit_specific();
+      }
+
       if (!cw_key_hit) {
         g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
         // wait up to 500 msec for MOX having gone
@@ -648,6 +665,11 @@ static gpointer rigctl_cw_thread(gpointer data) {
   // of a transmission
   if (CAT_cw_is_active) {
     CAT_cw_is_active = 0;
+
+    if (protocol == NEW_PROTOCOL) {
+      schedule_transmit_specific();
+    }
+
     g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
   }
 
@@ -973,11 +995,13 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
+
         if (gain < 2) {
           receiver[0]->volume = -40.0;
         } else {
-          receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
+          receiver[0]->volume = 20.0 * log10(0.01 * (double) gain);
         }
+
         set_af_gain(0, receiver[0]->volume);
       }
 
@@ -1556,8 +1580,9 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read rx equalizer values
       if (command[4] == ';') {
-        snprintf(reply, 256, "ZZEA%03d%03d%03d%03d%03d00000000000000000000;", 3, rx_equalizer[0], rx_equalizer[1], rx_equalizer[2],
-                rx_equalizer[3]);
+        snprintf(reply, 256, "ZZEA%03d%03d%03d%03d%03d00000000000000000000;", 3, rx_equalizer[0], rx_equalizer[1],
+                 rx_equalizer[2],
+                 rx_equalizer[3]);
         send_resp(client->fd, reply) ;
       } else if (command[37] == ';') {
         char temp[4];
@@ -1583,8 +1608,9 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
 
       // set/read tx equalizer values
       if (command[4] == ';') {
-        snprintf(reply, 256, "ZZEB%03d%03d%03d%03d%03d00000000000000000000;", 3, tx_equalizer[0], tx_equalizer[1], tx_equalizer[2],
-                tx_equalizer[3]);
+        snprintf(reply, 256, "ZZEB%03d%03d%03d%03d%03d00000000000000000000;", 3, tx_equalizer[0], tx_equalizer[1],
+                 tx_equalizer[2],
+                 tx_equalizer[3]);
         send_resp(client->fd, reply) ;
       } else if (command[37] == ';') {
         char temp[4];
@@ -1974,12 +2000,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         send_resp(client->fd, reply) ;
       } else {
         int gain = atoi(&command[4]);
+
         // gain is 0..100
         if (gain < 2) {
           receiver[0]->volume = -40.0;
-        } else { 
-          receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
-        } 
+        } else {
+          receiver[0]->volume = 20.0 * log10(0.01 * (double) gain);
+        }
+
         set_af_gain(0, receiver[0]->volume);
       }
 
@@ -1999,12 +2027,14 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           send_resp(client->fd, reply) ;
         } else {
           int gain = atoi(&command[4]);
+
           // gain is 0..100
           if (gain < 2) {
             receiver[1]->volume = -40.0;
-          } else { 
-            receiver[1]->volume = 20.0 * log(0.01 * (double) gain);
-          } 
+          } else {
+            receiver[1]->volume = 20.0 * log10(0.01 * (double) gain);
+          }
+
           set_af_gain(1, receiver[1]->volume);
         }
       } else {
@@ -3797,12 +3827,14 @@ int parse_cmd(void *data) {
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';' && command[2] == '0') {
         int gain = atoi(&command[3]);
+
         // gain is 0...255
         if (gain < 3 ) {
           receiver[0]->volume = -40.0;
         } else {
-          receiver[0]->volume = 20.0 * log((double) gain / 255.0);
+          receiver[0]->volume = 20.0 * log10((double) gain / 255.0);
         }
+
         set_af_gain(0, receiver[0]->volume);
       }
 
@@ -4226,9 +4258,9 @@ int parse_cmd(void *data) {
       }
 
       snprintf(reply, 256, "IF%011lld%04lld%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
-              vfo[VFO_A].ctun ? vfo[VFO_A].ctun_frequency : vfo[VFO_A].frequency,
-              step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, tx_xit_en,
-              0, 0, isTransmitting(), mode, 0, 0, split, tx_ctcss_en ? 2 : 0, tx_ctcss, 0);
+               vfo[VFO_A].ctun ? vfo[VFO_A].ctun_frequency : vfo[VFO_A].frequency,
+               step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, tx_xit_en,
+               0, 0, isTransmitting(), mode, 0, 0, split, tx_ctcss_en ? 2 : 0, tx_ctcss, 0);
       send_resp(client->fd, reply);
     }
     break;
@@ -4638,6 +4670,7 @@ int parse_cmd(void *data) {
         send_resp(client->fd, reply);
       } else if (command[3] == ';') {
         int pwrc = atoi(&command[2]);
+
         if ( pwrc == 0 ) {
           // power-off command: note the reply will not be sent.
           snprintf(reply, 256, "PS0;");
@@ -4820,7 +4853,7 @@ int parse_cmd(void *data) {
       // set/read stallite mode status
       if (command[2] == ';') {
         snprintf(reply, 256, "SA%d%d%d%d%d%d%dSAT?    ;", (sat_mode == SAT_MODE) || (sat_mode == RSAT_MODE), 0, 0, 0,
-                sat_mode == SAT_MODE, sat_mode == RSAT_MODE, 0);
+                 sat_mode == SAT_MODE, sat_mode == RSAT_MODE, 0);
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
         if (command[2] == '0') {
