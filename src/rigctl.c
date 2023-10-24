@@ -991,7 +991,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         if (gain < 2) {
           receiver[0]->volume = -40.0;
         } else {
-          receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
+          receiver[0]->volume = 20.0 * log10(0.01 * (double) gain);
         }
         set_af_gain(0, receiver[0]->volume);
       }
@@ -1993,7 +1993,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         if (gain < 2) {
           receiver[0]->volume = -40.0;
         } else {
-          receiver[0]->volume = 20.0 * log(0.01 * (double) gain);
+          receiver[0]->volume = 20.0 * log10(0.01 * (double) gain);
         }
         set_af_gain(0, receiver[0]->volume);
       }
@@ -2018,7 +2018,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           if (gain < 2) {
             receiver[1]->volume = -40.0;
           } else {
-            receiver[1]->volume = 20.0 * log(0.01 * (double) gain);
+            receiver[1]->volume = 20.0 * log10(0.01 * (double) gain);
           }
           set_af_gain(1, receiver[1]->volume);
         }
@@ -3816,7 +3816,7 @@ int parse_cmd(void *data) {
         if (gain < 3 ) {
           receiver[0]->volume = -40.0;
         } else {
-          receiver[0]->volume = 20.0 * log((double) gain / 255.0);
+          receiver[0]->volume = 20.0 * log10((double) gain / 255.0);
         }
         set_af_gain(0, receiver[0]->volume);
       }
