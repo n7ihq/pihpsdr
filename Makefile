@@ -60,18 +60,24 @@ PKG_CONFIG = pkg-config
 #
 ##############################################################################
 
+##############################################################################
 #
 # disable GPIO and SATURN for MacOS, simply because it is not there
 #
+##############################################################################
+
 ifeq ($(UNAME_S), Darwin)
 GPIO=
 SATURN=
 endif
 
+##############################################################################
 #
 # Add modules for MIDI if requested.
 # Note these are different for Linux/MacOS
 #
+##############################################################################
+
 ifeq ($(MIDI),ON)
 MIDI_OPTIONS=-D MIDI
 MIDI_HEADERS= midi.h midi_menu.h alsa_midi.h
@@ -87,9 +93,12 @@ MIDI_LIBS= -lasound
 endif
 endif
 
+##############################################################################
 #
 # Add libraries for Saturn support, if requested
 #
+##############################################################################
+
 ifeq ($(SATURN),ON)
 SATURN_OPTIONS=-D SATURN
 SATURN_SOURCES= \
@@ -112,9 +121,12 @@ src/saturnmain.o \
 src/saturn_menu.o
 endif
 
+##############################################################################
 #
 # Add libraries for USB OZY support, if requested
 #
+##############################################################################
+
 ifeq ($(USBOZY),ON)
 USBOZY_OPTIONS=-D USBOZY
 USBOZY_LIBS=-lusb-1.0
@@ -126,9 +138,12 @@ USBOZY_OBJS= \
 src/ozyio.o
 endif
 
+##############################################################################
 #
 # Add libraries for SoapySDR support, if requested
 #
+##############################################################################
+
 ifeq ($(SOAPYSDR),ON)
 SOAPYSDR_OPTIONS=-D SOAPYSDR
 SOAPYSDRLIBS=-lSoapySDR
@@ -143,16 +158,22 @@ src/soapy_discovery.o \
 src/soapy_protocol.o
 endif
 
+##############################################################################
 #
 # Add support for extended noise reduction, if requested
 #
+##############################################################################
+
 ifeq ($(EXTENDED_NN), ON)
 EXTNR_OPTIONS=-DEXTNR
 endif
 
+##############################################################################
 #
 # Add libraries for GPIO support, if requested
 #
+##############################################################################
+
 ifeq ($(GPIO),ON)
 GPIO_OPTIONS=-D GPIO
 GPIOD_VERSION=$(shell pkg-config --modversion libgpiod)
@@ -162,6 +183,7 @@ endif
 GPIO_LIBS=-lgpiod -li2c
 endif
 
+##############################################################################
 #
 # Activate code for RedPitaya (Stemlab/Hamlab/plain vanilla), if requested
 # This code detects the RedPitaya by its WWW interface and starts the SDR
@@ -169,6 +191,8 @@ endif
 # If the RedPitaya auto-starts the SDR application upon system start,
 # this option is not needed!
 #
+##############################################################################
+
 ifeq ($(STEMLAB), ON)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs libcurl`
@@ -177,6 +201,7 @@ STEMLAB_HEADERS=src/stemlab_discovery.h
 STEMLAB_OBJS=src/stemlab_discovery.o
 endif
 
+##############################################################################
 #
 # Activate code for remote operation, if requested.
 # This feature is not yet finished. If finished, it
@@ -185,6 +210,8 @@ endif
 # and the other talking to the radio, and both computers
 # may be connected by a long-distance internet connection.
 #
+##############################################################################
+
 ifeq ($(SERVER), ON)
 SERVER_OPTIONS=-D CLIENT_SERVER
 SERVER_SOURCES= \
@@ -195,11 +222,14 @@ SERVER_OBJS= \
 src/client_server.o src/server_menu.o
 endif
 
+##############################################################################
 #
 # Options for audio module
 #  - MacOS: only PORTAUDIO
 #  - Linux: either PULSEAUDIO (default) or ALSA (upon request)
 #
+##############################################################################
+
 ifeq ($(UNAME_S), Darwin)
   AUDIO=PORTAUDIO
 endif
@@ -209,9 +239,12 @@ ifeq ($(UNAME_S), Linux)
   endif
 endif
 
+##############################################################################
 #
 # Add libraries for using PulseAudio, if requested
 #
+##############################################################################
+
 ifeq ($(AUDIO), PULSE)
 AUDIO_OPTIONS=-DPULSEAUDIO
 ifeq ($(UNAME_S), Linux)
@@ -224,9 +257,12 @@ AUDIO_SOURCES=src/pulseaudio.c
 AUDIO_OBJS=src/pulseaudio.o
 endif
 
+##############################################################################
 #
 # Add libraries for using ALSA, if requested
 #
+##############################################################################
+
 ifeq ($(AUDIO), ALSA)
 AUDIO_OPTIONS=-DALSA
 AUDIO_LIBS=-lasound
@@ -234,9 +270,12 @@ AUDIO_SOURCES=src/audio.c
 AUDIO_OBJS=src/audio.o
 endif
 
+##############################################################################
 #
 # Add libraries for using PortAudio, if requested
 #
+##############################################################################
+
 ifeq ($(AUDIO), PORTAUDIO)
 AUDIO_OPTIONS=-DPORTAUDIO `$(PKG_CONFIG) --cflags portaudio-2.0`
 AUDIO_LIBS=`$(PKG_CONFIG) --libs portaudio-2.0`
@@ -250,15 +289,21 @@ endif
 #
 ##############################################################################
 
+##############################################################################
 #
 # Includes and Libraries for the graphical user interface (GTK)
 #
+##############################################################################
+
 GTKINCLUDES=`$(PKG_CONFIG) --cflags gtk+-3.0`
 GTKLIBS=`$(PKG_CONFIG) --libs gtk+-3.0`
 
+##############################################################################
 #
 # Specify additional OS-dependent system libraries
 #
+##############################################################################
+
 ifeq ($(UNAME_S), Linux)
 SYSLIBS=-lrt
 endif
@@ -267,9 +312,12 @@ ifeq ($(UNAME_S), Darwin)
 SYSLIBS=-framework IOKit
 endif
 
+##############################################################################
 #
 # All the command-line options to compile the *.c files
 #
+##############################################################################
+
 OPTIONS=$(MIDI_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(SOAPYSDR_OPTIONS) \
 	$(ANDROMEDA_OPTIONS) \
@@ -285,20 +333,29 @@ COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
 .c.o:
 	$(COMPILE) -c -o $@ $<
 
+##############################################################################
 #
 # All the libraries we need to link with (including WDSP, libm, $(SYSLIBS))
 #
+##############################################################################
+
 LIBS=	$(LDFLAGS) $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(STEMLAB_LIBS) \
 	$(MIDI_LIBS) -lwdsp -lm $(SYSLIBS)
 
+##############################################################################
 #
 # The main target, the pihpsdr program
 #
+##############################################################################
+
 PROGRAM=pihpsdr
 
+##############################################################################
 #
 # The core *.c files in alphabetical order
 #
+##############################################################################
+
 SOURCES= \
 src/MacOS.c \
 src/about_menu.c \
@@ -374,9 +431,12 @@ src/waterfall.c \
 src/xvtr_menu.c \
 src/zoompan.c
 
+##############################################################################
 #
 # The core *.h (header) files in alphabetical order
 #
+##############################################################################
+
 HEADERS= \
 src/MacOS.h \
 src/about_menu.h \
@@ -457,9 +517,12 @@ src/waterfall.h \
 src/xvtr_menu.h \
 src/zoompan.h
 
+##############################################################################
 #
 # The core *.o (object) files in alphabetical order
 #
+##############################################################################
+
 OBJS= \
 src/MacOS.o \
 src/about_menu.o \
@@ -535,25 +598,19 @@ src/xvtr_menu.o \
 src/waterfall.o \
 src/zoompan.o
 
+##############################################################################
 #
 # How to link the program
 #
+##############################################################################
+
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(SATURN_OBJS)
 	$(COMPILE) -c -o src/version.o src/version.c
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(SATURN_OBJS) $(LIBS)
 
-.PHONY:	all
-all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
-	$(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) $(AUDIO_SOURCES) $(SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(SATURN_HEADERS) $(SATURN_SOURCES) \
-	$(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
-
-.PHONY:	prebuild
-prebuild:
-	rm -f src/version.o
-
+##############################################################################
 #
 # "make check" invokes the cppcheck program to do a source-code checking.
 #
@@ -568,6 +625,7 @@ prebuild:
 # warnings therefrom. Furthermore, we can use --check-level=exhaustive on MacOS
 # since there we have new newest version (2.11), while on RaspPi we still have 2.3.
 #
+##############################################################################
 
 CPPOPTIONS= --inline-suppr --enable=all --suppress=constParameterCallback --suppress=missingIncludeSystem
 CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
@@ -580,8 +638,9 @@ endif
 
 .PHONY:	cppcheck
 cppcheck:
-	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(USBOZY_SOURCES) \
-	$(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES) $(SATURN_SOURCES)
+	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) \
+	$(USBOZY_SOURCES)  $(SOAPYSDR_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) \
+	$(SERVER_SOURCES) $(SATURN_SOURCES)
 
 .PHONY:	clean
 clean:
@@ -589,6 +648,13 @@ clean:
 	-rm -f $(PROGRAM) hpsdrsim bootloader
 	-rm -rf $(PROGRAM).app
 	-make -C release/LatexManual clean
+
+#############################################################################
+#
+# "make release" is for maintainers and not for end-users.
+# If this results in an error for end users, this is a feature not a bug.
+#
+#############################################################################
 
 .PHONY:	release
 release: $(PROGRAM)
@@ -630,17 +696,25 @@ hpsdrsim:       src/hpsdrsim.o src/newhpsdrsim.o
 bootloader:	src/bootloader.c
 	$(CC) -o bootloader src/bootloader.c -lpcap
 
-debian:
-	mkdir -p pkg/pihpsdr/usr/local/bin
-	mkdir -p pkg/pihpsdr/usr/local/lib
-	mkdir -p pkg/pihpsdr/usr/share/pihpsdr
-	mkdir -p pkg/pihpsdr/usr/share/applications
-	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin
-	cp /usr/local/lib/libwdsp.so pkg/pihpsdr/usr/local/lib
-	cp release/pihpsdr/hpsdr.png pkg/pihpsdr/usr/share/pihpsdr
-	cp release/pihpsdr/hpsdr_icon.png pkg/pihpsdr/usr/share/pihpsdr
-	cp release/pihpsdr/pihpsdr.desktop pkg/pihpsdr/usr/share/applications
-	cd pkg; dpkg-deb --build pihpsdr
+#############################################################################
+#
+# We do not do package building because piHPSDR is preferably built from
+# the sources on the target machine. Take the following  lines as a hint
+# to package bundlers.
+#
+#############################################################################
+
+#debian:
+#	mkdir -p pkg/pihpsdr/usr/local/bin
+#	mkdir -p pkg/pihpsdr/usr/local/lib
+#	mkdir -p pkg/pihpsdr/usr/share/pihpsdr
+#	mkdir -p pkg/pihpsdr/usr/share/applications
+#	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin
+#	cp /usr/local/lib/libwdsp.so pkg/pihpsdr/usr/local/lib
+#	cp release/pihpsdr/hpsdr.png pkg/pihpsdr/usr/share/pihpsdr
+#	cp release/pihpsdr/hpsdr_icon.png pkg/pihpsdr/usr/share/pihpsdr
+#	cp release/pihpsdr/pihpsdr.desktop pkg/pihpsdr/usr/share/applications
+#	cd pkg; dpkg-deb --build pihpsdr
 
 #############################################################################
 #
