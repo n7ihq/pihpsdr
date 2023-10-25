@@ -54,6 +54,7 @@
 #include "exit_menu.h"
 #include "message.h"
 #include "mystring.h"
+#include "startup.h"
 
 struct utsname unameData;
 
@@ -376,7 +377,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   } else {
     if (error) {
       t_print("%s\n", error->message);
-      //g_free(error);
+      g_error_free(error);
     }
 
     error = NULL;
@@ -387,7 +388,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
     } else {
       if (error) {
         t_print("%s\n", error->message);
-        //g_free(error);
+        g_error_free(error);
       }
 
       error = NULL;
@@ -397,7 +398,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
       if (!rc) {
         if (error) {
           t_print("%s\n", error->message);
-          //g_free(error);
+          g_error_free(error);
         }
       }
     }
@@ -448,10 +449,7 @@ int main(int argc, char **argv) {
   GtkApplication *pihpsdr;
   int rc;
   char name[1024];
-#ifdef __APPLE__
-  void MacOSstartup(const char *path);
-  MacOSstartup(argv[0]);
-#endif
+  startup(argv[0]);
   snprintf(name, 1024, "org.g0orx.pihpsdr.pid%d", getpid());
   //t_print("gtk_application_new: %s\n",name);
   pihpsdr = gtk_application_new(name, G_APPLICATION_FLAGS_NONE);

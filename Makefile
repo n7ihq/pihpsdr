@@ -414,6 +414,7 @@ src/rx_panadapter.c \
 src/screen_menu.c \
 src/sintab.c \
 src/sliders.c \
+src/startup.c \
 src/store.c \
 src/store_menu.c \
 src/switch_menu.c \
@@ -500,6 +501,7 @@ src/rx_panadapter.h \
 src/screen_menu.h \
 src/sintab.h \
 src/sliders.h \
+src/startup.h \
 src/store.h \
 src/store_menu.h \
 src/switch_menu.h \
@@ -581,6 +583,7 @@ src/rx_panadapter.o \
 src/screen_menu.o \
 src/sintab.o \
 src/sliders.o \
+src/startup.o \
 src/store.o \
 src/store_menu.o \
 src/switch_menu.o \
