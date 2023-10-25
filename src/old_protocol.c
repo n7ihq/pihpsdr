@@ -28,6 +28,7 @@
 #include <netdb.h>
 #include <net/if_arp.h>
 #include <net/if.h>
+#include <netinet/ip.h>
 #include <ifaddrs.h>
 #include <semaphore.h>
 #include <string.h>
@@ -291,6 +292,7 @@ static gpointer old_protocol_txiq_thread(gpointer data) {
 }
 
 // This function is used in debug code
+// cppcheck-suppress unusedFunction
 void dump_buffer(unsigned char *buffer, int length, const char *who) {
   g_mutex_lock(&dump_mutex);
   t_print("%s: %s: %d\n", __FUNCTION__, who, length);
@@ -487,7 +489,6 @@ static void open_udp_socket() {
     t_perror("data_socket: SO_REUSEPORT");
   }
 
-  //#ifdef SET_SOCK_BUF_SIZE
   //
   // We need a receive buffer with a decent size, to be able to
   // store several incoming packets if they arrive in a burst.
@@ -533,17 +534,13 @@ static void open_udp_socket() {
     if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
   }
 
-  //#endif
-#ifdef __APPLE__
-  //optval = 0x10;  // IPTOS_LOWDELAY
-  optval = 0xb8;  // DSCP EF
   optlen = sizeof(optval);
+  optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;    
 
   if (setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen) < 0) {
     t_perror("data_socket: IP_TOS");
   }
 
-#endif
   //
   // set a timeout for receive
   // This is necessary because we might already "sit" in an UDP recvfrom() call while
@@ -613,7 +610,6 @@ static void open_tcp_socket() {
     t_perror("tcp_socket: connect");
   }
 
-#ifdef SET_SOCK_BUF_SIZE
   //
   // We need a receive buffer with a decent size, to be able to
   // store several incoming packets if they arrive in a burst.
@@ -659,17 +655,13 @@ static void open_tcp_socket() {
     if (optlen == sizeof(optval)) { t_print("TCP Socket SND buf size=%d\n", optval); }
   }
 
-#endif
-#ifdef __APPLE__
-  //optval = 0x10;  // IPTOS_LOWDELAY
-  optval = 0xb8;  // DSCP EF
   optlen = sizeof(optval);
+  optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;
 
   if (setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen) < 0) {
     t_perror("tcp_socket: IP_TOS");
   }
 
-#endif
   //
   // Set value of tcp_socket only after everything succeeded
   //

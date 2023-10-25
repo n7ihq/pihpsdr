@@ -195,7 +195,6 @@ void startup(const char *path) {
   if (stat("hpsdr.png", &statbuf) < 0)  {
     char *c;
     int fdin, fdout;
-    ssize_t bytesread;
     char source[PATH_MAX];
 
     STRLCPY(source, path, PATH_MAX);
@@ -217,6 +216,7 @@ void startup(const char *path) {
       //
       // Now do the copy, use "source" as I/O buffer
       //
+      ssize_t bytesread;
 
       t_print("%s: copying hpsdr.png to working dir\n", __FUNCTION__);
 

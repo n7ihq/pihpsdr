@@ -32,6 +32,7 @@
 #include <netdb.h>
 #include <net/if_arp.h>
 #include <net/if.h>
+#include <netinet/ip.h>
 #include <ifaddrs.h>
 #include <semaphore.h>
 #include <math.h>
@@ -266,7 +267,7 @@ static void  process_iq_data(unsigned char *buffer, RECEIVER *rx);
 static void  process_ps_iq_data(unsigned char *buffer);
 static void process_div_iq_data(unsigned char *buffer);
 static void  process_high_priority(void);
-static void  process_mic_data(unsigned char *buffer);
+static void  process_mic_data(const unsigned char *buffer);
 
 //
 // Obtain a free buffer. If no one is available allocate
@@ -510,7 +511,6 @@ void new_protocol_init(int pixels) {
     socklen_t optlen = sizeof(optval);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, optlen);
     setsockopt(data_socket, SOL_SOCKET, SO_REUSEPORT, &optval, optlen);
-    //#ifdef SET_SOCK_BUF_SIZE
     //
     // We need a receive buffer with a decent size, to be able to
     // store several incoming packets if they arrive in a burst.
@@ -556,16 +556,12 @@ void new_protocol_init(int pixels) {
       if (optlen == sizeof(optval)) { t_print("UDP Socket SND buf size=%d\n", optval); }
     }
 
-    //#endif
-#ifdef __APPLE__
-    //optval = 0x10;  // IPTOS_LOWDELAY
-    optval = 0xb8;  // DSCP EF
+    optlen = sizeof(optval);
+    optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;
 
-    if (setsockopt(data_socket, IPPROTO_IP, IP_TOS, &optval, sizeof(optval)) < 0) {
+    if (setsockopt(data_socket, IPPROTO_IP, IP_TOS, &optval, optlen) < 0) {
       t_perror("data_socket: IP_TOS");
     }
-
-#endif
 
     // bind to the interface
     if (bind(data_socket, (struct sockaddr * )&radio->info.network.interface_address,
@@ -1676,11 +1672,6 @@ static gpointer new_protocol_txiq_thread(gpointer data) {
 }
 
 static gpointer new_protocol_thread(gpointer data) {
-  int ddc;
-  short sourceport;
-  unsigned char *buffer;
-  int bytesread;
-  mybuffer *mybuf;
   t_print("new_protocol_thread\n");
 
   //
@@ -1691,6 +1682,12 @@ static gpointer new_protocol_thread(gpointer data) {
   // (fexchange calls).
   //
   while (running) {
+    int ddc;
+    short sourceport;
+    int bytesread;
+    mybuffer *mybuf;
+    unsigned char *buffer;
+
     mybuf = get_my_buffer();
     buffer = mybuf->buffer;
     bytesread = recvfrom(data_socket, buffer, NET_BUFFER_SIZE, 0, (struct sockaddr*)&addr, &length);
@@ -1881,7 +1878,7 @@ void saturn_post_iq_data(int ddc, mybuffer *mybuf) {
   //
   // Check sequence HERE
   //
-  unsigned char *buffer = mybuf->buffer;
+  unsigned const char *buffer = mybuf->buffer;
   long sequence = ((buffer[0] & 0xFF) << 24) + ((buffer[1] & 0xFF) << 16) + ((buffer[2] & 0xFF) << 8)
                   + (buffer[3] & 0xFF);
 
@@ -2194,7 +2191,7 @@ static void process_high_priority() {
   }
 }
 
-static void process_mic_data(unsigned char *buffer) {
+static void process_mic_data(const unsigned char *buffer) {
   long sequence;
   int b;
   int i;

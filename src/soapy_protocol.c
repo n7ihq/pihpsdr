@@ -63,6 +63,7 @@ static int max_tx_samples;
 static float *output_buffer;
 static int output_buffer_index;
 
+// cppcheck-suppress unusedFunction
 SoapySDRDevice *get_soapy_device() {
   return soapy_device;
 }
@@ -275,6 +276,7 @@ void soapy_protocol_stop_receiver(RECEIVER *rx) {
   }
 }
 
+// cppcheck-suppress unusedFunction
 void soapy_protocol_stop_transmitter(TRANSMITTER *tx) {
   int rc;
   t_print("soapy_protocol_stop_transmitter: deactivateStream\n");
@@ -461,6 +463,7 @@ void soapy_protocol_iq_samples(float isample, float qsample) {
   }
 }
 
+// cppcheck-suppress unusedFunction
 void soapy_protocol_stop() {
   t_print("soapy_protocol_stop\n");
   running = FALSE;
@@ -579,6 +582,7 @@ int soapy_protocol_get_tx_gain_element(TRANSMITTER *tx, char *name) {
   return (int)gain;
 }
 
+// cppcheck-suppress unusedFunction
 gboolean soapy_protocol_get_automatic_gain(RECEIVER *rx) {
   gboolean mode = SoapySDRDevice_getGainMode(soapy_device, SOAPY_SDR_RX, rx->adc);
   return mode;

@@ -415,7 +415,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_set_line_width(cr, PAN_LINE_THIN);
   cairo_stroke(cr);
   // signal
-  double s1, s2;
+  double s1;
   int pan = rx->pan;
 
   if (radio_is_remote) {
@@ -434,6 +434,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_move_to(cr, 0.0, s1);
 
   for (i = 1; i < mywidth; i++) {
+    double s2;
     s2 = (double)samples[i + pan] + soffset;
     s2 = floor((rx->panadapter_high - s2)
                * (double) myheight
