@@ -1289,8 +1289,7 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
                      cw_keyer_sidetone_frequency);
 
     //
-    // For P1 and Soapy, cw_keyer_sidetone_volume is in the range 0...127 so cwsample is 0.00 ... 0.25
-    // For P2,           cw_keyer_sidetone_volume is in the range 0...255 so cwsample is 0.00 ... 0.50
+    // cw_keyer_sidetone_volume is in the range 0...127 so cwsample is 0.00 ... 0.25
     //
     if (active_receiver->local_audio && cw_keyer_sidetone_volume > 0) { cw_audio_write(active_receiver, cwsample); }
 
@@ -1310,8 +1309,9 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
     if (protocol == NEW_PROTOCOL) {
       int s = 0;
 
-      // cwsample is in the range 0.0 - 0.50. For my Anan-7000, the following scaling
-      // produces the same volume as "internal CW".
+      //
+      // For my Anan-7000, the following scaling produces the same volume as "internal CW".
+      //
       if (!cw_keyer_internal || CAT_cw_is_active) { s = (int) (cwsample * 65535.0); }
 
       new_protocol_cw_audio_samples(s, -s);
