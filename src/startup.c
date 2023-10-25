@@ -93,7 +93,7 @@ void startup(const char *path) {
   // try to create a file with an unique file name
   //
   snprintf(filename, PATH_MAX, "piHPSDR.myFile.%ld", (long) getpid());
-  rc = open(filename, O_CREAT | O_WRONLY | O_TRUNC);
+  rc = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0700);
   if (rc >= 0) {
     writeable = 1;
     close (rc);
