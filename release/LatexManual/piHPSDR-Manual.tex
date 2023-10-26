@@ -4279,59 +4279,90 @@ in PulseAudio there are the so-called ,,null sink'' devices which are output dev
 that are just black holes that swallow all audio output sent to them. Their only purpose
 is that they also have a monitor device associated which you can then use.
 
+
+
+So we shall create two dummy ("null-sink") output devices which
+we shall call RXcable and TXcable. This is done by the commands (do not enter the line breaks)
+
+\texttt{pacmd load-module module-null-sink sink\_name=RXcable rate=48000 \\
+sink\_properties="device.description=RXcable"
+}
+
+\texttt{pacmd load-module module-null-sink sink\_name=TXcable rate=48000 \\
+sink\_properties="device.description=TXcable"
+}
+
+To control whether the output devices have been created correctly, we use the command
+\texttt{pacmd list-sinks}, which produces
+a very long output from which only the relevant parts are reported here:
+
+\begin{small}
+\begin{verbatim}
+
+...
+    index: 2
+	name: <RXcable>
+	driver: <module-null-sink.c>
+	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
+	state: IDLE
+...
+    index: 3
+	name: <TXcable>
+	driver: <module-null-sink.c>
+	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
+	state: IDLE
+...
+\end{verbatim}
+\end{small}
+
+Note the index numbers which are 2 for RXcable and 3 for TXcable, these index numbers my
+be different on your machine. The index number of TXcable (here: 3) is needed in the
+case of Fldigi and qSSTV (see note at the end of this section).
+The state may also be different from IDLE depending on whether
+you (already) make use of that device.
+
+Likewise, check the availability of the input devices using
+the command \texttt{pacmd list-sources}, from the output we quote
+
+\begin{small}
+\begin{verbatim}
+
+...
+    index: 2
+	name: <RXcable.monitor>
+	driver: <module-null-sink.c>
+	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
+	state: IDLE
+...
+    index: 3
+	name: <TXcable.monitor>
+	driver: <module-null-sink.c>
+	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
+	state: IDLE
+...
+\end{verbatim}
+\end{small}
+
+Again, note the index numbers, here they are 2 for the Monitor of RXcable and 3 for the Monitor
+of TXcable. The index nummber of RXcable.monitor (here: 2) is needed in the
+case of Fldigi and qSSTV (see note at the end of this section).
+The state may also be different from IDLE depending on whether
+you (already) make use of that device.
+
+Note that these devices are created once, the commands have to be repeated after rebooting
+the machine or restarting PulseAudio, the devices can be made permanent but you have to
+search the internet on how to do this.
+
+The necessary configuration for piHPSDR and WSJTX is not almost evident. The
+piHPSDR settings are shown in Fig. \ref{fig:rx_settings_pa_audio} (\bltt{RX} menu)
+and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
+
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{rx_settings_pa_audio.png}
 \caption{RX menu settings with PulseAudio}
 \label{fig:rx_settings_pa_audio}
 \end{figure}
-
-So the bottom line is: we need no RXcable, but we have to create a null-sink device which
-we shall call TXcable. This is done by the command (do not enter the line break)
-
-\texttt{pacmd load-module module-null-sink sink\_name=TXcable rate=48000 \\
-sink\_properties="device.description=TXcable"
-}
-
-The effect can be controlled with the commane \texttt{pacmd list sinks}, which produces
-a very long output from which only the relevant parts are reported here:
-
-\begin{small}
-\begin{verbatim}
-...
-3 sink(s) available.
-...
-    index: 2
-	name: <TXcable>
-	driver: <module-null-sink.c>
-	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
-	state: SUSPENDED
-	suspend cause: IDLE
-...
-3 source(s) available.
-...
-    index: 2
-	name: <TXcable.monitor>
-	driver: <module-null-sink.c>
-	flags: DECIBEL_VOLUME LATENCY DYNAMIC_LATENCY
-	state: SUSPENDED
-...
-\end{verbatim}
-\end{small}
-
-As you can see, an output device with name TXcable has been created, and the corresponding
-monitor device is also present. Note these null-sink devices only exist until you shut
-down the machine. They can be made permanent quite easily (by inserting commands into
-the \texttt{defaults.pa} file), but I recommend to have a startup script executed
-exactly once upon booting that includes the above command. The reason why I prefer a startup
-script is that you can have all your settings for various components (ethernet, audio,
-monitor, etc.) in one file.
-
-The necessary configuration for piHPSDR and WSJTX is not almost evident. The
-piHPSDR settings are shown in Fig. \ref{fig:rx_settings_pa_audio} (\bltt{RX} menu)
-and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
-
-
 
 \begin{figure}[ht]
 \center
@@ -4352,6 +4383,36 @@ In the WSJTX audio tab, the input/output assigments are just reversed:
 If you do not want to use the headphone output for RX audio, it should be clear how to
 create an additional null-sink device with name, say, RXcable, to be used instead.
 The CAT connection between WSJTX and piHPSDR is the same as in the ALSA case.
+
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} -------- Note on Fldigi and qSSTV --------}
+\end{center}
+Some popular programs, including Fldigi and qSSTV, can use PulseAudio but have
+not user interface to choose the PulseAudio device. This means, they will only
+use the default PulseAudio input and output device. So to use Fldigi and/or
+qSSTV, you have to make TXcable the default output device and the  monitor of
+RXcable the default input device. This means Fldigi/qSSTV will always read
+their audio input from the monitor of RXcable and put the audio they produce
+to TXcable. To achieve this, simply use the two commands
+
+\vspace{0.1cm}
+\texttt{pacmd set-default-sink <index of TXcable>}
+
+\vspace{0.1cm}
+\texttt{pacmd set-default-source <index of RXcable.monitor>}
+
+\vspace{0.1cm}
+where the indices (small integer numbers) are those mentioned above, and are
+take from the output of the \texttt{pacmd list-sinks} and the \texttt{pacmd list-sources}
+commands.
+}
+}
+\end{center}
+
+\clearpage
 
 \textbf{\color{red}Using ,,loopback'' in MacOS}\\
 The standard audio option for MacOS is PORTAUDIO which has no built-in virtual
