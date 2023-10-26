@@ -4271,18 +4271,12 @@ For \textit{every} PulseAudio output device, there is a corresponding ,,Monitor'
 which can be used for sound input, and where the data sent to the primary (output) device
 can be red. This means, you can send the RX audio to the headphone device as you would do
 for normal SSB operation, and can then use the Monitor of the headphone device as audio
-input in WSJTX. Then we need, however, a \textit{second} output device which we can use
-as audio  output in WSJTX, and the Monitor thereof can then be chosen, in the piHPSDR
-\bltt{TX} menu, as the local microphone. We could use any un-used audio output device for
-this purpose, but if we do not have one, we have to create one. This is easy, since
-in PulseAudio there are the so-called ,,null sink'' devices which are output devices
-that are just black holes that swallow all audio output sent to them. Their only purpose
-is that they also have a monitor device associated which you can then use.
-
-
-
-So we shall create two dummy ("null-sink") output devices which
-we shall call RXcable and TXcable. This is done by the commands (do not enter the line breaks)
+input in WSJTX. We describe a different setup where we create two dummy 
+ ("null-sink") output devices. It should be clear how to change this procedure if
+ you want to listen (with the headphone) to the digimode RX signal while it is processed
+ in the digimode program.  We call the two dummy output devices
+ RXcable and TXcable just to demonstrate how it works.
+  This is done by the commands (do not enter the line breaks)
 
 \texttt{pacmd load-module module-null-sink sink\_name=RXcable rate=48000 \\
 sink\_properties="device.description=RXcable"
@@ -4351,11 +4345,14 @@ you (already) make use of that device.
 
 Note that these devices are created once, the commands have to be repeated after rebooting
 the machine or restarting PulseAudio, the devices can be made permanent but you have to
-search the internet on how to do this.
+search the internet on how to do this. My recommendation is to include such command in a
+shell script that is automatically executed when you start the computer.
 
 The necessary configuration for piHPSDR and WSJTX is not almost evident. The
 piHPSDR settings are shown in Fig. \ref{fig:rx_settings_pa_audio} (\bltt{RX} menu)
-and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
+and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu): RXcable has been selected
+for local RX audio output, while the Monitor of TXcable is chosen as the local
+microphone.
 
 \begin{figure}[ht]
 \center
@@ -4371,7 +4368,9 @@ and in Fig. \ref{fig:tx_settings_pa_audio} (\bltt{TX} menu).
 \label{fig:tx_settings_pa_audio}
 \end{figure}
 
-In the WSJTX audio tab, the input/output assigments are just reversed:
+In the WSJTX audio tab, the input/output assigments are just reversed, as shown
+in Fig. \ref{fig:wstx_settings_pa_audio}. The CAT connection between WSJTX and piHPSDR is
+the same as in the ALSA case.
 
 \begin{figure}[ht]
 \center
@@ -4380,9 +4379,7 @@ In the WSJTX audio tab, the input/output assigments are just reversed:
 \label{fig:wstx_settings_pa_audio}
 \end{figure}
 
-If you do not want to use the headphone output for RX audio, it should be clear how to
-create an additional null-sink device with name, say, RXcable, to be used instead.
-The CAT connection between WSJTX and piHPSDR is the same as in the ALSA case.
+
 
 \begin{center}
 \fbox{
