@@ -1310,9 +1310,26 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
       int s = 0;
 
       //
-      // For my Anan-7000, the following scaling produces the same volume as "internal CW".
+      // The scaling should ensure that a piHPSDR-generated side tone
+      // has the same volume than a FGPA-generated one.
+      // Note cwsample = 0.00196 * level = 0.0 ... 0.25
       //
-      if (!cw_keyer_internal || CAT_cw_is_active) { s = (int) (cwsample * 65535.0); }
+      if (!cw_keyer_internal || CAT_cw_is_active) {
+        if (device == NEW_DEVICE_SATURN) {
+          //
+          // This comes from an analysis of the G2 sidetone
+          // data path:
+          // level 0...127 ==> amplitude 0...32767
+          //
+          s = (int) (cwsample * 131000.0);
+        } else {
+          //
+          // Match found experimentally on my ANAN-7000 and *implies*
+          // level 0...127 ==> amplitude 0...16300
+          //
+          s = (int) (cwsample * 65000.0);
+        }
+      }
 
       new_protocol_cw_audio_samples(s, -s);
       s = 4 * cw_shape;
