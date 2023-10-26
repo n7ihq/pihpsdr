@@ -373,7 +373,7 @@ int cw_audio_write(RECEIVER *rx, float sample) {
     // are finished here.
     //
     rx->local_audio_buffer[rx->local_audio_buffer_offset * 2] = sample;
-    rx->local_audio_buffer[(rx->local_audio_buffer_offset * 2) + 1] = -sample;
+    rx->local_audio_buffer[(rx->local_audio_buffer_offset * 2) + 1] = sample;
     rx->local_audio_buffer_offset++;
 
     if (rx->local_audio_buffer_offset >= out_buffer_size) {

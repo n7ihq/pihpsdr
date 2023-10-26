@@ -377,21 +377,21 @@ int cw_audio_write(RECEIVER *rx, float sample) {
     case SND_PCM_FORMAT_S16_LE: {
       gint16 *short_buffer = (gint16 *)rx->local_audio_buffer;
       short_buffer[rx->local_audio_buffer_offset * 2] = (gint16)(sample * 32767.0F);
-      short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = -(gint16)(sample * 32767.0F);
+      short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (gint16)(sample * 32767.0F);
     }
     break;
 
     case SND_PCM_FORMAT_S32_LE: {
       gint32 *long_buffer = (gint32 *)rx->local_audio_buffer;
       long_buffer[rx->local_audio_buffer_offset * 2] = (gint32)(sample * 4294967295.0F);
-      long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = -(gint32)(sample * 4294967295.0F);
+      long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (gint32)(sample * 4294967295.0F);
     }
     break;
 
     case SND_PCM_FORMAT_FLOAT_LE: {
       gfloat *float_buffer = (float *)rx->local_audio_buffer;
       float_buffer[rx->local_audio_buffer_offset * 2] = sample;
-      float_buffer[(rx->local_audio_buffer_offset * 2) + 1] = - sample;
+      float_buffer[(rx->local_audio_buffer_offset * 2) + 1] =  sample;
     }
     break;
 
