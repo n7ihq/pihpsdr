@@ -1331,7 +1331,7 @@ void add_mic_sample(TRANSMITTER *tx, float mic_sample) {
         }
       }
 
-      new_protocol_cw_audio_samples(s, -s);
+      new_protocol_cw_audio_samples(s, s);
       s = 4 * cw_shape;
       i = 4 * tx->samples;
 

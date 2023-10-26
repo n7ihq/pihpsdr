@@ -724,7 +724,7 @@ int cw_audio_write(RECEIVER *rx, float sample) {
         //
         MEMORY_BARRIER;
         rx->local_audio_buffer[2 * oldpt] = sample;
-        rx->local_audio_buffer[2 * oldpt + 1] = -sample;
+        rx->local_audio_buffer[2 * oldpt + 1] = sample;
         MEMORY_BARRIER;
         rx->local_audio_buffer_inpt = newpt;
       }
