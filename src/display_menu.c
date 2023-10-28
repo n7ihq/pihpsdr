@@ -322,7 +322,7 @@ void display_menu(GtkWidget *parent) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Time Window");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Log Recursive");
 
-  switch (display_detector_mode) {
+  switch (display_average_mode) {
   case AVERAGE_MODE_NONE:
     gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 0);
     break;
@@ -336,7 +336,7 @@ void display_menu(GtkWidget *parent) {
     break;
 
   case AVERAGE_MODE_LOG_RECURSIVE:
-    gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 2);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 3);
     break;
   }
 
