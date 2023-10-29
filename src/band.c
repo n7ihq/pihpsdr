@@ -626,11 +626,11 @@ int TransmitAllowed() {
 
   switch (txmode) {
   case modeCWU:
-    flow = fhigh = cw_is_on_vfo_freq ? txfreq : txfreq + cw_keyer_sidetone_frequency;
+    flow = fhigh = txfreq;
     break;
 
   case modeCWL:
-    flow = fhigh = cw_is_on_vfo_freq ? txfreq : txfreq - cw_keyer_sidetone_frequency;
+    flow = fhigh = txfreq;
     break;
 
   default:

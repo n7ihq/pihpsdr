@@ -174,16 +174,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
     double vfofreq = (double)my_width * 0.5;
 
-    if (!cw_is_on_vfo_freq) {
-      if (txmode == modeCWU) {
-        frequency += (long long)cw_keyer_sidetone_frequency;
-        vfofreq -=  (double) cw_keyer_sidetone_frequency / hz_per_pixel;
-      } else if (txmode == modeCWL) {
-        frequency -= (long long)cw_keyer_sidetone_frequency;
-        vfofreq +=  (double) cw_keyer_sidetone_frequency / hz_per_pixel;
-      }
-    }
-
     long long min_display = frequency - half;
     long long max_display = frequency + half;
 

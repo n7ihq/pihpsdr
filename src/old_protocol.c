@@ -943,13 +943,6 @@ static long long channel_freq(int chan) {
       freq += vfo[vfonum].xit;
     }
 
-    if (!cw_is_on_vfo_freq) {
-      if (vfo[vfonum].mode == modeCWU) {
-        freq += (long long)cw_keyer_sidetone_frequency;
-      } else if (vfo[vfonum].mode == modeCWL) {
-        freq -= (long long)cw_keyer_sidetone_frequency;
-      }
-    }
   } else {
     //
     // determine RX frequency associated with VFO #vfonum
@@ -961,12 +954,10 @@ static long long channel_freq(int chan) {
       freq += vfo[vfonum].rit;
     }
 
-    if (cw_is_on_vfo_freq) {
-      if (vfo[vfonum].mode == modeCWU) {
-        freq -= (long long)cw_keyer_sidetone_frequency;
-      } else if (vfo[vfonum].mode == modeCWL) {
-        freq += (long long)cw_keyer_sidetone_frequency;
-      }
+    if (vfo[vfonum].mode == modeCWU) {
+      freq -= (long long)cw_keyer_sidetone_frequency;
+    } else if (vfo[vfonum].mode == modeCWL) {
+      freq += (long long)cw_keyer_sidetone_frequency;
     }
   }
 

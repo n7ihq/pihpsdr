@@ -729,18 +729,16 @@ static void new_protocol_high_priority() {
     rx2Frequency += vfo[VFO_B].rit;
   }
 
-  if (cw_is_on_vfo_freq) {
-    if (vfo[VFO_A].mode == modeCWU) {
-      rx1Frequency -= (long long)cw_keyer_sidetone_frequency;
-    } else if (vfo[VFO_A].mode == modeCWL) {
-      rx1Frequency += (long long)cw_keyer_sidetone_frequency;
-    }
+  if (vfo[VFO_A].mode == modeCWU) {
+    rx1Frequency -= (long long)cw_keyer_sidetone_frequency;
+  } else if (vfo[VFO_A].mode == modeCWL) {
+    rx1Frequency += (long long)cw_keyer_sidetone_frequency;
+  }
 
-    if (vfo[VFO_B].mode == modeCWU) {
-      rx2Frequency -= (long long)cw_keyer_sidetone_frequency;
-    } else if (vfo[VFO_B].mode == modeCWL) {
-      rx2Frequency += (long long)cw_keyer_sidetone_frequency;
-    }
+  if (vfo[VFO_B].mode == modeCWU) {
+    rx2Frequency -= (long long)cw_keyer_sidetone_frequency;
+  } else if (vfo[VFO_B].mode == modeCWL) {
+    rx2Frequency += (long long)cw_keyer_sidetone_frequency;
   }
 
   rx1Frequency += frequency_calibration;
@@ -796,14 +794,6 @@ static void new_protocol_high_priority() {
 
   if (vfo[txvfo].xit_enabled) {
     txFrequency += vfo[txvfo].xit;
-  }
-
-  if (!cw_is_on_vfo_freq) {
-    if (txmode == modeCWU) {
-      txFrequency += (long long)cw_keyer_sidetone_frequency;
-    } else if (txmode == modeCWL) {
-      txFrequency -= (long long)cw_keyer_sidetone_frequency;
-    }
   }
 
   txFrequency += frequency_calibration;

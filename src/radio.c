@@ -209,9 +209,6 @@ int cw_keyer_hang_time = 500;          // ms
 int cw_keyer_sidetone_frequency = 800; // Hz
 int cw_breakin = 1;                    // 0=disabled 1=enabled
 
-int cw_is_on_vfo_freq = 1;             // 1= signal on VFO freq, 0= signal offset by side tone
-// shall hard-wire this to "1"
-
 int vfo_encoder_divisor = 15;
 
 int protocol;
