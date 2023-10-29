@@ -199,7 +199,7 @@ void screen_menu(GtkWidget *parent) {
 
   gtk_combo_box_set_active(GTK_COMBO_BOX(vfo_b), my_vfo_layout);
   // This combo-box spans three columns so the text may be really long
-  gtk_grid_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
+  my_combo_attach(GTK_GRID(grid), vfo_b, col, row, 3, 1);
   vfo_signal_id = g_signal_connect(vfo_b, "changed", G_CALLBACK(vfo_cb), NULL);
   row++;
   button = gtk_check_button_new_with_label("Stack receivers horizontally");
