@@ -132,6 +132,25 @@ static void full_cb(GtkWidget *widget, gpointer data) {
   schedule_apply();
 }
 
+static void display_zoompan_cb(GtkWidget *widget, gpointer data) {
+  display_zoompan = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_apply();
+}
+
+static void display_sliders_cb(GtkWidget *widget, gpointer data) {
+  display_sliders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_apply();
+}
+
+static void display_toolbar_cb(GtkWidget *widget, gpointer data) {
+  display_toolbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_apply();
+}
+
+static void display_sequence_errors_cb(GtkWidget *widget, gpointer data) {
+  display_sequence_errors = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 void screen_menu(GtkWidget *parent) {
   GtkWidget *label;
   GtkWidget *button;
@@ -212,6 +231,32 @@ void screen_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(full_b), my_full_screen);
   gtk_grid_attach(GTK_GRID(grid), full_b, 2, row, 2, 1);
   g_signal_connect(full_b, "toggled", G_CALLBACK(full_cb), NULL);
+  row++;
+  GtkWidget *b_display_zoompan = gtk_check_button_new_with_label("Display Zoom/Pan");
+  gtk_widget_set_name (b_display_zoompan, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_zoompan), display_zoompan);
+  gtk_widget_show(b_display_zoompan);
+  gtk_grid_attach(GTK_GRID(grid), b_display_zoompan, 0, row, 1, 1);
+  g_signal_connect(b_display_zoompan, "toggled", G_CALLBACK(display_zoompan_cb), (gpointer)NULL);
+  GtkWidget *b_display_sliders = gtk_check_button_new_with_label("Display Sliders");
+  gtk_widget_set_name (b_display_sliders, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sliders), display_sliders);
+  gtk_widget_show(b_display_sliders);
+  gtk_grid_attach(GTK_GRID(grid), b_display_sliders, 1, row, 1, 1);
+  g_signal_connect(b_display_sliders, "toggled", G_CALLBACK(display_sliders_cb), (gpointer)NULL);
+  GtkWidget *b_display_toolbar = gtk_check_button_new_with_label("Display Toolbar");
+  gtk_widget_set_name (b_display_toolbar, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_toolbar), display_toolbar);
+  gtk_widget_show(b_display_toolbar);
+  gtk_grid_attach(GTK_GRID(grid), b_display_toolbar, 2, row, 1, 1);
+  g_signal_connect(b_display_toolbar, "toggled", G_CALLBACK(display_toolbar_cb), (gpointer)NULL);
+  GtkWidget *b_display_sequence_errors = gtk_check_button_new_with_label("Display Seq Errs");
+  gtk_widget_set_name (b_display_sequence_errors, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sequence_errors), display_sequence_errors);
+  gtk_widget_show(b_display_sequence_errors);
+  gtk_grid_attach(GTK_GRID(grid), b_display_sequence_errors, 3, row, 1, 1);
+  g_signal_connect(b_display_sequence_errors, "toggled", G_CALLBACK(display_sequence_errors_cb), (gpointer)NULL);
+
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

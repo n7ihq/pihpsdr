@@ -663,8 +663,8 @@ TRANSMITTER *create_transmitter(int id, int width, int height) {
   TRANSMITTER *tx = g_new(TRANSMITTER, 1);
   tx->id = id;
   tx->dac = 0;
-  tx->fps = 10;             // TODO: UI for changing this value
-  tx->display_filled = 0;   // TODO: UI for changing this value
+  tx->fps = 10;
+  tx->display_filled = 0;
   tx->dsp_size = 2048;
   tx->low_latency = 0;
   tx->fft_size = 2048;
@@ -725,7 +725,7 @@ TRANSMITTER *create_transmitter(int id, int width, int height) {
   tx->displaying = 0;
   tx->alex_antenna = 0; // default: ANT1
   t_print("create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d width=%d height=%d\n",
-          tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples, 
+          tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,
           tx->width, tx->height);
   tx->filter_low = tx_filter_low;
   tx->filter_high = tx_filter_high;

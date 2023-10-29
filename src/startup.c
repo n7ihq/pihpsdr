@@ -99,11 +99,11 @@ void startup(const char *path) {
     close (rc);
     unlink(filename);
   }
-    
+
   //
   // Look for files hpsdr.png, protocols.props, and pihpsdr.sh
   //
-  
+
   rc = stat("hpsdr.png", &statbuf);
 
   if (rc == 0 && (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode))) { found = 1; }
@@ -172,7 +172,7 @@ void startup(const char *path) {
   //
   // At this point, the new working directory exists and the name
   // is in filename.
-  // 
+  //
   if (chdir(workdir) != 0) {
     // unrecoverable error, could not chdir to target
     t_print("%s: Could not chdir to working dir %s\n", __FUNCTION__, workdir);

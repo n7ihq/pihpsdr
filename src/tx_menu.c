@@ -52,6 +52,15 @@ static gboolean close_cb () {
   return TRUE;
 }
 
+static void frames_per_second_value_changed_cb(GtkWidget *widget, gpointer data) {
+  transmitter->fps = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  tx_set_displaying(transmitter, transmitter->displaying);
+}
+
+static void filled_cb(GtkWidget *widget, gpointer data) {
+  transmitter->display_filled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 static void comp_enable_cb(GtkWidget *widget, gpointer data) {
   transmitter_set_compressor(transmitter, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
   mode_settings[get_tx_mode()].compressor = transmitter->compressor;
@@ -482,7 +491,7 @@ void tx_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), am_carrier_level, col, row, 1, 1);
   g_signal_connect(am_carrier_level, "value_changed", G_CALLBACK(am_carrier_level_value_changed_cb), NULL);
   col++;
-  label = gtk_label_new("Max Drive level for DIGU/DIGL:");
+  label = gtk_label_new("Max Drive for digi:");
   gtk_widget_set_name(label, "boldlabel");
   gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_widget_show(label);
@@ -494,6 +503,24 @@ void tx_menu(GtkWidget *parent) {
   gtk_widget_show(digi_drive_b);
   gtk_grid_attach(GTK_GRID(grid), digi_drive_b, col, row, 1, 1);
   g_signal_connect(digi_drive_b, "value-changed", G_CALLBACK(digi_drive_cb), NULL);
+  row++;
+  col = 0;
+  label = gtk_label_new("Frames Per Second:");
+  gtk_widget_set_name(label, "boldlabel");
+  gtk_widget_set_halign(label, GTK_ALIGN_END);
+  gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
+  col++;
+  GtkWidget *fps_spin = gtk_spin_button_new_with_range(1.0, 100.0, 1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(fps_spin), (double)transmitter->fps);
+  gtk_grid_attach(GTK_GRID(grid), fps_spin, col, row, 1, 1);
+  g_signal_connect(fps_spin, "value-changed", G_CALLBACK(frames_per_second_value_changed_cb), NULL);
+  col++;
+  GtkWidget *filled_b = gtk_check_button_new_with_label("Fill Panadapter");
+  gtk_widget_set_name(filled_b, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), transmitter->display_filled);
+  gtk_grid_attach(GTK_GRID(grid), filled_b, col, row, 1, 1);
+  g_signal_connect(filled_b, "toggled", G_CALLBACK(filled_cb), NULL);
+
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

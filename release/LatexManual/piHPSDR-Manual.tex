@@ -1149,7 +1149,9 @@ the author.
 \section{The \texttt{Screen} Menu}
 
 The \bltt{Screen} menu lets you dynamically change the size of the piHPSDR main
-window, and choose between different VFO bar layouts. The possibility to adjust
+window, and choose between different VFO bar layouts. Furthermore, one
+can select whether the Zoom/Pan, the Sliders, or the Toolbar area are shown or hidden.
+The possibility to adjust
 the screen size has been the most frequent feature request in the last years,
 so I finally decided to implement it. The menu is opened
 via the main menu and the \bltt{Screen} button and is shown in Fig. \ref{fig:ScreenMenu}.
@@ -1223,11 +1225,41 @@ on which the piHPSDR window was opened upon program start is filled.
 If you leave full screen mode, the size of the piHPSDR window is again
 determined by the width and height chosen above.
 
+ \rett{Display Zoom/Pan} This option can be used to show/hide the Zoom and
+ Pan slider below the RX or TX panel. If you do not use Zoom, or control
+ Zoom via an external GPIO or MIDI controller, this can be used to save
+ some vertical space.
+
+ \rett{Display Sliders} This option can be used to show/hide the slider area
+ (that is where the AF gain and the Drive slider resides).
+ Hiding them makes little sense unless you
+ have a GPIO or MIDI controller. For temporarily gaining vertical space,
+ use the \rett{Hide} button at the top right of the main window.
+
+ \rett{Display Toolbar} This option can be used to show/hide the toolbar. This
+ only makes sense of using an external GPIO or MIDI controller. Note that
+ when using the piHPSDR Controller1, the toolbar should remain on display since
+ this then serves as an indication which function is associtated with each of
+ the 8 push buttone immediately below the screen.
+
+\rett{Display Seq Errs} All data packets from the radio to the PC contain
+a sequence number that is increased  for each packet sent. piHPSDR
+checks for each incoming data packet whether the sequence number is
+exactly larger by 1 than the number of the previous packet. If this is not
+the case, this is a \textit{sequence error}. Sequence errors may be caused
+by loosing packets on the way from the radio to the computer, or
+(this is what is usually the reason) packets lost within the computer due
+to the computer being busy with something else (e.g. writing to disk).
+ If the \rett{Display Seq Errs} is checked, a red
+,,Sequence error'' message appears in the panel of the active receiver for two seconds.
+Sequence errors during RX often cause cracks in the RX audio. Unless this
+happens regularly, it is no reason to worry.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Display} Menu}
 
 The \bltt{Display} menu is used to customize the overall layout of the piHPSDR
-window and the RX panadapters. Adjustments
+window and the panadapters of the active receiver. Adjustments
 for the TX panadapter must be done in the \bltt{TX} menu. The menu is shown
 in Fig. \ref{fig:DisplayMenu}.
 
@@ -1238,7 +1270,7 @@ in Fig. \ref{fig:DisplayMenu}.
 \label{fig:DisplayMenu}
 \end{figure}
 
-\rett{Frames Per Second:} This adjust how often the RX and TX (!) displays are re-drawn.
+\rett{Frames Per Second:} This adjust how often the RX display is re-drawn.
 10 frames per second (the default) is a good value.
 
 \rett{Panadapter High:} This value is the dBm value of the RX signal strength at the
@@ -1276,45 +1308,14 @@ Log Recursive. For the details, see the WDSP manual.
 constant involved in averaging can be set here.
 
 \rett{Fill Panadapter} This is used to enable/disable the ,,Filling'' option
-for the RX and TX spectrum scopes (see chapter \ref{sec:FillingGradient}).
+for the RX  spectrum scope (see chapter \ref{sec:FillingGradient}).
 
 \rett{Gradient} This is used to enable/disable the ,,Gradient'' option
 (color coding) for the RX spectrum scope (see chapter \ref{sec:FillingGradient}).
- Note color coding is not available for the TX panel.
 
  \rett{Display Waterfall} This option enables/disables the waterfall display
  of the RX panels. Note the spectrum scope is always shown (you cannot have the
  waterfall alone).
-
- \rett{Display Zoom/Pan} This option can be used to show/hide the Zoom and
- Pan slider below the RX or TX panel. If you do not use Zoom, or control
- Zoom via an external GPIO or MIDI controller, this can be used to save
- some vertical space.
-
- \rett{Display Sliders} This option can be used to show/hide the slider area
- (that is where the AF or TX Drive slider resides).
- Hiding them makes little sense unless you
- have a GPIO or MIDI controller. For temporarily gaining vertical space,
- use the \rett{Hide} button at the top right of the main window.
-
- \rett{Display Toolbar} This option can be used to show/hide the toolbar. This
- only makes sense of using an external GPIO or MIDI controller. Note that
- when using the piHPSDR Controller1, the toolbar should remain on display since
- this then serves as an indication which function is associtated with each of
- the 8 push buttone immediately below the screen.
-
-\rett{Display Seq Errs} All data packets from the radio to the PC contain
-a sequence number that is increased  for each packet sent. piHPSDR
-checks for each incoming data packet whether the sequence number is
-exactly larger by 1 than the number of the previous packet. If this is not
-the case, this is a \textit{sequence error}. Sequence errors may be caused
-by loosing packets on the way from the radio to the computer, or
-(this is what is usually the reason) packets lost within the computer due
-to the computer being busy with something else (e.g. writing to disk).
- If the \rett{Display Seq Errs} is checked, a red
-,,Sequence error'' message appears in the RX panel for two seconds.
-Sequence errors during RX often cause cracks in the RX audio. Unless this
-happens regularly, it is no reason to worry.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2017,11 +2018,18 @@ on the other side. The frequency itself can be chosen with the following menu po
 CTCSS is disabled.
 The frequency list includes 38 standard TIA/EIA-603-D CTCSS frequencies between 67.0 and 250.3 Hz.
 
-\rett{Mac Drive level for DIGU/DIGL} This spin button restricts the range of the drive slider from 0 to the
+\rett{Max Drive for digi} This spin button restricts the range of the drive slider from 0 to the
 chosen value
 for the DIGU and DIGL modes. If the value is 100, this has no effect. The primary use of this menu point is
 PA protection,
 since many digital modes (unlike SSB voice) are constantly transmitting at full power.
+
+\rett{Frames Per Second:} This spin button determines how many frames per second are drawn for the TX
+panadapter. The default value, 10, is a good choice.
+
+\rett{Fill Panadapter} This is used to enable/disable the ,,Filling'' option
+for the TX  spectrum scope (see chapter \ref{sec:FillingGradient}). No ,,gradient''
+option is available for the TX scope.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{PA} Menu}

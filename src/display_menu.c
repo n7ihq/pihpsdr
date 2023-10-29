@@ -120,7 +120,7 @@ static void gradient_cb(GtkWidget *widget, gpointer data) {
 static void frames_per_second_value_changed_cb(GtkWidget *widget, gpointer data) {
   active_receiver->fps = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   calculate_display_average(active_receiver);
-  set_displaying(active_receiver, 1);
+  set_displaying(active_receiver, active_receiver->displaying);
 }
 
 static void panadapter_high_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -153,25 +153,6 @@ static void waterfall_automatic_cb(GtkWidget *widget, gpointer data) {
 static void display_waterfall_cb(GtkWidget *widget, gpointer data) {
   active_receiver->display_waterfall = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   reconfigure_radio();
-}
-
-static void display_zoompan_cb(GtkWidget *widget, gpointer data) {
-  display_zoompan = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  reconfigure_radio();
-}
-
-static void display_sliders_cb(GtkWidget *widget, gpointer data) {
-  display_sliders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  reconfigure_radio();
-}
-
-static void display_toolbar_cb(GtkWidget *widget, gpointer data) {
-  display_toolbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  reconfigure_radio();
-}
-
-static void display_sequence_errors_cb(GtkWidget *widget, gpointer data) {
-  display_sequence_errors = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 void display_menu(GtkWidget *parent) {
@@ -371,32 +352,7 @@ void display_menu(GtkWidget *parent) {
   gtk_widget_show(b_display_waterfall);
   gtk_grid_attach(GTK_GRID(grid), b_display_waterfall, col, row, 1, 1);
   g_signal_connect(b_display_waterfall, "toggled", G_CALLBACK(display_waterfall_cb), (gpointer)NULL);
-  GtkWidget *b_display_zoompan = gtk_check_button_new_with_label("Display Zoom/Pan");
-  gtk_widget_set_name (b_display_zoompan, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_zoompan), display_zoompan);
-  gtk_widget_show(b_display_zoompan);
-  gtk_grid_attach(GTK_GRID(grid), b_display_zoompan, col + 1, row, 1, 1);
-  g_signal_connect(b_display_zoompan, "toggled", G_CALLBACK(display_zoompan_cb), (gpointer)NULL);
-  row++;
-  GtkWidget *b_display_sliders = gtk_check_button_new_with_label("Display Sliders");
-  gtk_widget_set_name (b_display_sliders, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sliders), display_sliders);
-  gtk_widget_show(b_display_sliders);
-  gtk_grid_attach(GTK_GRID(grid), b_display_sliders, col, row, 1, 1);
-  g_signal_connect(b_display_sliders, "toggled", G_CALLBACK(display_sliders_cb), (gpointer)NULL);
-  GtkWidget *b_display_toolbar = gtk_check_button_new_with_label("Display Toolbar");
-  gtk_widget_set_name (b_display_toolbar, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_toolbar), display_toolbar);
-  gtk_widget_show(b_display_toolbar);
-  gtk_grid_attach(GTK_GRID(grid), b_display_toolbar, col + 1, row, 1, 1);
-  g_signal_connect(b_display_toolbar, "toggled", G_CALLBACK(display_toolbar_cb), (gpointer)NULL);
-  row++;
-  GtkWidget *b_display_sequence_errors = gtk_check_button_new_with_label("Display Seq Errs");
-  gtk_widget_set_name (b_display_sequence_errors, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sequence_errors), display_sequence_errors);
-  gtk_widget_show(b_display_sequence_errors);
-  gtk_grid_attach(GTK_GRID(grid), b_display_sequence_errors, col, row, 1, 1);
-  g_signal_connect(b_display_sequence_errors, "toggled", G_CALLBACK(display_sequence_errors_cb), (gpointer)NULL);
+
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
 

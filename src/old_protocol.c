@@ -535,7 +535,7 @@ static void open_udp_socket() {
   }
 
   optlen = sizeof(optval);
-  optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;    
+  optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;
 
   if (setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen) < 0) {
     t_perror("data_socket: IP_TOS");
