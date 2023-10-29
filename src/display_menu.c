@@ -53,23 +53,23 @@ static void detector_cb(GtkToggleButton *widget, gpointer data) {
 
   switch (val) {
   case 0:
-    display_detector_mode = DETECTOR_MODE_PEAK;
+    active_receiver->display_detector_mode = DETECTOR_MODE_PEAK;
     break;
 
   case 1:
-    display_detector_mode = DETECTOR_MODE_ROSENFELL;
+    active_receiver->display_detector_mode = DETECTOR_MODE_ROSENFELL;
     break;
 
   case 2:
-    display_detector_mode = DETECTOR_MODE_AVERAGE;
+    active_receiver->display_detector_mode = DETECTOR_MODE_AVERAGE;
     break;
 
   case 3:
-    display_detector_mode = DETECTOR_MODE_SAMPLE;
+    active_receiver->display_detector_mode = DETECTOR_MODE_SAMPLE;
     break;
   }
 
-  SetDisplayDetectorMode(active_receiver->id, 0, display_detector_mode);
+  SetDisplayDetectorMode(active_receiver->id, 0, active_receiver->display_detector_mode);
 }
 
 static void average_cb(GtkToggleButton *widget, gpointer data) {
@@ -77,19 +77,19 @@ static void average_cb(GtkToggleButton *widget, gpointer data) {
 
   switch (val) {
   case 0:
-    display_average_mode = AVERAGE_MODE_NONE;
+    active_receiver->display_average_mode = AVERAGE_MODE_NONE;
     break;
 
   case 1:
-    display_average_mode = AVERAGE_MODE_RECURSIVE;
+    active_receiver->display_average_mode = AVERAGE_MODE_RECURSIVE;
     break;
 
   case 2:
-    display_average_mode = AVERAGE_MODE_TIME_WINDOW;
+    active_receiver->display_average_mode = AVERAGE_MODE_TIME_WINDOW;
     break;
 
   case 3:
-    display_average_mode = AVERAGE_MODE_LOG_RECURSIVE;
+    active_receiver->display_average_mode = AVERAGE_MODE_LOG_RECURSIVE;
     break;
   }
 
@@ -100,26 +100,25 @@ static void average_cb(GtkToggleButton *widget, gpointer data) {
   //
   SetDisplayAverageMode(active_receiver->id, 0, AVERAGE_MODE_NONE);
   usleep(50000);
-  SetDisplayAverageMode(active_receiver->id, 0, display_average_mode);
+  SetDisplayAverageMode(active_receiver->id, 0, active_receiver->display_average_mode);
   calculate_display_average(active_receiver);
 }
 
 static void time_value_changed_cb(GtkWidget *widget, gpointer data) {
-  display_average_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+  active_receiver->display_average_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
   calculate_display_average(active_receiver);
 }
 
 static void filled_cb(GtkWidget *widget, gpointer data) {
-  display_filled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  active_receiver->display_filled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void gradient_cb(GtkWidget *widget, gpointer data) {
-  display_gradient = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  active_receiver->display_gradient = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void frames_per_second_value_changed_cb(GtkWidget *widget, gpointer data) {
-  updates_per_second = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  active_receiver->fps = updates_per_second;
+  active_receiver->fps = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   calculate_display_average(active_receiver);
   set_displaying(active_receiver, 1);
 }
@@ -203,7 +202,7 @@ void display_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   col++;
   GtkWidget *frames_per_second_r = gtk_spin_button_new_with_range(1.0, 100.0, 1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(frames_per_second_r), (double)updates_per_second);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(frames_per_second_r), (double)active_receiver->fps);
   gtk_widget_show(frames_per_second_r);
   gtk_grid_attach(GTK_GRID(grid), frames_per_second_r, col, row, 1, 1);
   g_signal_connect(frames_per_second_r, "value_changed", G_CALLBACK(frames_per_second_value_changed_cb), NULL);
@@ -291,7 +290,7 @@ void display_menu(GtkWidget *parent) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(detector_combo), NULL, "Average");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(detector_combo), NULL, "Sample");
 
-  switch (display_detector_mode) {
+  switch (active_receiver->display_detector_mode) {
   case DETECTOR_MODE_PEAK:
     gtk_combo_box_set_active(GTK_COMBO_BOX(detector_combo), 0);
     break;
@@ -322,7 +321,7 @@ void display_menu(GtkWidget *parent) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Time Window");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(average_combo), NULL, "Log Recursive");
 
-  switch (display_average_mode) {
+  switch (active_receiver->display_average_mode) {
   case AVERAGE_MODE_NONE:
     gtk_combo_box_set_active(GTK_COMBO_BOX(average_combo), 0);
     break;
@@ -348,20 +347,20 @@ void display_menu(GtkWidget *parent) {
   gtk_widget_set_halign(label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), label, col, row, 1, 1);
   GtkWidget *time_r = gtk_spin_button_new_with_range(1.0, 9999.0, 1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(time_r), (double)display_average_time);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(time_r), (double)active_receiver->display_average_time);
   gtk_widget_show(time_r);
   gtk_grid_attach(GTK_GRID(grid), time_r, col + 1, row, 1, 1);
   g_signal_connect(time_r, "value_changed", G_CALLBACK(time_value_changed_cb), NULL);
   row++;
   GtkWidget *filled_b = gtk_check_button_new_with_label("Fill Panadapter");
   gtk_widget_set_name (filled_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), display_filled);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), active_receiver->display_filled);
   gtk_widget_show(filled_b);
   gtk_grid_attach(GTK_GRID(grid), filled_b, col, row, 1, 1);
   g_signal_connect(filled_b, "toggled", G_CALLBACK(filled_cb), NULL);
   GtkWidget *gradient_b = gtk_check_button_new_with_label("Gradient");
   gtk_widget_set_name (gradient_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gradient_b), display_gradient);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gradient_b), active_receiver->display_gradient);
   gtk_widget_show(gradient_b);
   gtk_grid_attach(GTK_GRID(grid), gradient_b, col + 1, row, 1, 1);
   g_signal_connect(gradient_b, "toggled", G_CALLBACK(gradient_cb), NULL);

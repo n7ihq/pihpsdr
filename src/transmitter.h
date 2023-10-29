@@ -114,9 +114,11 @@ typedef struct _transmitter {
   int dialog_x;
   int dialog_y;
 
+  int display_filled;
+
 } TRANSMITTER;
 
-extern TRANSMITTER *create_transmitter(int id, int fps, int width, int height);
+extern TRANSMITTER *create_transmitter(int id, int width, int height);
 
 void create_dialog(TRANSMITTER *tx);
 void reconfigure_transmitter(TRANSMITTER *tx, int width, int height);

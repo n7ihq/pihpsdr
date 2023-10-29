@@ -445,7 +445,7 @@ void rx_panadapter_update(RECEIVER *rx) {
   cairo_pattern_t *gradient;
   gradient = NULL;
 
-  if (display_gradient) {
+  if (rx->display_gradient) {
     gradient = cairo_pattern_create_linear(0.0, myheight, 0.0, 0.0);
     // calculate where S9 is
     double S9 = -73;
@@ -477,7 +477,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     // Different shades of white
     //
     if (active) {
-      if (!display_filled) {
+      if (!rx->display_filled) {
         cairo_set_source_rgba(cr, COLOUR_PAN_FILL3);
       } else {
         cairo_set_source_rgba(cr, COLOUR_PAN_FILL2);
@@ -487,7 +487,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     }
   }
 
-  if (display_filled) {
+  if (rx->display_filled) {
     cairo_close_path (cr);
     cairo_fill_preserve (cr);
     cairo_set_line_width(cr, PAN_LINE_THIN);

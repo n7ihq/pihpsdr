@@ -172,20 +172,6 @@ int pa_power = 0;
 const int pa_power_list[] = {1, 5, 10, 30, 50, 100, 200, 500, 1000};
 double pa_trim[11];
 
-int updates_per_second = 10;
-
-int panadapter_high = -40;
-int panadapter_low = -140;
-
-int display_filled = 1;
-int display_gradient = 1;
-int display_detector_mode = DETECTOR_MODE_AVERAGE;
-int display_average_mode = AVERAGE_MODE_LOG_RECURSIVE;
-double display_average_time = 120.0;
-
-int waterfall_high = -100;
-int waterfall_low = -150;
-
 int display_zoompan = 0;
 int display_sliders = 0;
 int display_toolbar = 0;
@@ -752,7 +738,7 @@ static void create_visual() {
       receiver_create_remote(receiver[i]);
     } else {
 #endif
-      receiver[i] = create_receiver(CHANNEL_RX0 + i, my_width, updates_per_second, my_width, rx_height / RECEIVERS);
+      receiver[i] = create_receiver(CHANNEL_RX0 + i, my_width, my_width, rx_height / RECEIVERS);
       setSquelch(receiver[i]);
 #ifdef CLIENT_SERVER
     }
@@ -810,9 +796,9 @@ static void create_visual() {
 
     if (radio_has_transmitter) {
       if (duplex) {
-        transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width / 4, my_height / 2);
+        transmitter = create_transmitter(CHANNEL_TX, my_width / 4, my_height / 2);
       } else {
-        transmitter = create_transmitter(CHANNEL_TX, updates_per_second, my_width, rx_height);
+        transmitter = create_transmitter(CHANNEL_TX, my_width, rx_height);
       }
 
       can_transmit = 1;
@@ -2371,8 +2357,6 @@ void radioRestoreState() {
   // but this is too much for the moment. TODO: initialize at least all
   // variables that are needed if the radio is remote
   //
-  GetPropI0("display_filled",                                display_filled);
-  GetPropI0("display_gradient",                              display_gradient);
   GetPropI0("display_zoompan",                               display_zoompan);
   GetPropI0("display_sliders",                               display_sliders);
   GetPropI0("display_toolbar",                               display_toolbar);
@@ -2421,14 +2405,6 @@ void radioRestoreState() {
   GetPropI0("filter_board",                                  filter_board);
   GetPropI0("pa_enabled",                                    pa_enabled);
   GetPropI0("pa_power",                                      pa_power);
-  GetPropI0("updates_per_second",                            updates_per_second);
-  GetPropI0("display_detector_mode",                         display_detector_mode);
-  GetPropI0("display_average_mode",                          display_average_mode);
-  GetPropF0("display_average_time",                          display_average_time);
-  GetPropI0("panadapter_high",                               panadapter_high);
-  GetPropI0("panadapter_low",                                panadapter_low);
-  GetPropI0("waterfall_high",                                waterfall_high);
-  GetPropI0("waterfall_low",                                 waterfall_low);
   GetPropF0("mic_gain",                                      mic_gain);
   GetPropI0("mic_boost",                                     mic_boost);
   GetPropI0("mic_linein",                                    mic_linein);
@@ -2596,8 +2572,6 @@ void radioSaveState() {
   // What comes now is essentially copied from radioRestoreState,
   // with "GetProp" replaced by "SetProp".
   //
-  SetPropI0("display_filled",                                display_filled);
-  SetPropI0("display_gradient",                              display_gradient);
   //
   // Use the "saved" Zoompan/Slider/Toolbar display status
   // if they are currently hidden via the "Hide" button
@@ -2641,14 +2615,6 @@ void radioSaveState() {
   SetPropI0("filter_board",                                  filter_board);
   SetPropI0("pa_enabled",                                    pa_enabled);
   SetPropI0("pa_power",                                      pa_power);
-  SetPropI0("updates_per_second",                            updates_per_second);
-  SetPropI0("display_detector_mode",                         display_detector_mode);
-  SetPropI0("display_average_mode",                          display_average_mode);
-  SetPropF0("display_average_time",                          display_average_time);
-  SetPropI0("panadapter_high",                               panadapter_high);
-  SetPropI0("panadapter_low",                                panadapter_low);
-  SetPropI0("waterfall_high",                                waterfall_high);
-  SetPropI0("waterfall_low",                                 waterfall_low);
   SetPropF0("mic_gain",                                      mic_gain);
   SetPropI0("mic_boost",                                     mic_boost);
   SetPropI0("mic_linein",                                    mic_linein);
@@ -2761,7 +2727,7 @@ void radioSaveState() {
 void calculate_display_average(RECEIVER *rx) {
   double display_avb;
   int display_average;
-  double t = 0.001 * display_average_time;
+  double t = 0.001 * rx->display_average_time;
   display_avb = exp(-1.0 / ((double)rx->fps * t));
   display_average = max(2, (int)fmin(60, (double)rx->fps * t));
   SetDisplayAvBackmult(rx->id, 0, display_avb);

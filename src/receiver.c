@@ -256,6 +256,11 @@ void receiverSaveState(RECEIVER *rx) {
   SetPropI1("receiver.%d.panadapter_high", rx->id,              rx->panadapter_high);
   SetPropI1("receiver.%d.panadapter_step", rx->id,              rx->panadapter_step);
   SetPropI1("receiver.%d.display_waterfall", rx->id,            rx->display_waterfall);
+  SetPropI1("receiver.%d.display_filled", rx->id,               rx->display_filled);
+  SetPropI1("receiver.%d.display_gradient", rx->id,             rx->display_gradient);
+  SetPropI1("receiver.%d.display_detector_mode", rx->id,        rx->display_detector_mode);
+  SetPropI1("receiver.%d.display_average_mode", rx->id,         rx->display_average_mode);
+  SetPropF1("receiver.%d.display_average_time", rx->id,         rx->display_average_time);
   SetPropI1("receiver.%d.waterfall_low", rx->id,                rx->waterfall_low);
   SetPropI1("receiver.%d.waterfall_high", rx->id,               rx->waterfall_high);
   SetPropI1("receiver.%d.waterfall_automatic", rx->id,          rx->waterfall_automatic);
@@ -350,6 +355,11 @@ void receiverRestoreState(RECEIVER *rx) {
   GetPropI1("receiver.%d.panadapter_high", rx->id,              rx->panadapter_high);
   GetPropI1("receiver.%d.panadapter_step", rx->id,              rx->panadapter_step);
   GetPropI1("receiver.%d.display_waterfall", rx->id,            rx->display_waterfall);
+  GetPropI1("receiver.%d.display_filled", rx->id,               rx->display_filled);
+  GetPropI1("receiver.%d.display_gradient", rx->id,             rx->display_gradient);
+  GetPropI1("receiver.%d.display_detector_mode", rx->id,        rx->display_detector_mode);
+  GetPropI1("receiver.%d.display_average_mode", rx->id,         rx->display_average_mode);
+  GetPropF1("receiver.%d.display_average_time", rx->id,         rx->display_average_time);
   GetPropI1("receiver.%d.waterfall_low", rx->id,                rx->waterfall_low);
   GetPropI1("receiver.%d.waterfall_high", rx->id,               rx->waterfall_high);
   GetPropI1("receiver.%d.waterfall_automatic", rx->id,          rx->waterfall_automatic);
@@ -813,8 +823,8 @@ RECEIVER *create_pure_signal_receiver(int id, int sample_rate, int width) {
   return rx;
 }
 
-RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
-  t_print("%s: RXid=%d pixels=%d fps=%d width=%d height=%d\n", __FUNCTION__, id, pixels, fps, width, height);
+RECEIVER *create_receiver(int id, int pixels, int width, int height) {
+  t_print("%s: RXid=%d pixels=%d width=%d height=%d\n", __FUNCTION__, id, pixels, width, height);
   RECEIVER *rx = malloc(sizeof(RECEIVER));
   double amplitude;
   rx->id = id;
@@ -865,7 +875,7 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->dsp_size = 2048;
   rx->fft_size = 2048;
   rx->low_latency = 0;
-  rx->fps = fps;
+  rx->fps = 10;
   rx->update_timer_id = 0;
   rx->width = width;
   rx->height = height;
@@ -879,6 +889,11 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
   rx->waterfall_high = -40;
   rx->waterfall_low = -140;
   rx->waterfall_automatic = 1;
+  rx->display_filled = 1;
+  rx->display_gradient = 1;
+  rx->display_detector_mode = DETECTOR_MODE_AVERAGE;
+  rx->display_average_mode = AVERAGE_MODE_LOG_RECURSIVE;
+  rx->display_average_time = 120.0;
   rx->volume = -20.0;
   rx->dither = 0;
   rx->random = 0;
@@ -1078,8 +1093,8 @@ RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height) {
     init_analyzer(rx);
   }
 
-  SetDisplayDetectorMode(rx->id, 0, display_detector_mode);
-  SetDisplayAverageMode(rx->id, 0,  display_average_mode);
+  SetDisplayDetectorMode(rx->id, 0, rx->display_detector_mode);
+  SetDisplayAverageMode(rx->id, 0,  rx->display_average_mode);
   calculate_display_average(rx);
   create_visual(rx);
   t_print("%s: rx=%p id=%d local_audio=%d\n", __FUNCTION__, rx, rx->id, rx->local_audio);

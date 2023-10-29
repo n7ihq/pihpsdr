@@ -233,10 +233,18 @@ typedef struct _receiver {
   //
   guint txrxcount;
   guint txrxmax;
+
+
+  int display_gradient;
+  int display_filled;
+  int display_detector_mode;
+  int display_average_mode;
+  double display_average_time;
+
 } RECEIVER;
 
 extern RECEIVER *create_pure_signal_receiver(int id, int sample_rate, int pixels);
-extern RECEIVER *create_receiver(int id, int pixels, int fps, int width, int height);
+extern RECEIVER *create_receiver(int id, int pixels, int width, int height);
 extern void receiver_change_sample_rate(RECEIVER *rx, int sample_rate);
 extern void receiver_change_adc(RECEIVER *rx, int adc);
 extern void receiver_set_frequency(RECEIVER *rx, long long frequency);

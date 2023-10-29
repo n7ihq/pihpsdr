@@ -295,7 +295,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
       cairo_line_to(cr, (double)i, s2);
     }
 
-    if (display_filled) {
+    if (tx->display_filled) {
       cairo_set_source_rgba(cr, COLOUR_PAN_FILL2);
       cairo_close_path (cr);
       cairo_fill_preserve (cr);
