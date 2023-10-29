@@ -1862,6 +1862,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
         int agc = atoi(&command[4]);
         // update RX1 AGC
         receiver[0]->agc = agc;
+        set_agc(receiver[0], agc);
         g_idle_add(ext_vfo_update, NULL);
       }
 
@@ -1878,6 +1879,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
           int agc = atoi(&command[4]);
           // update RX2 AGC
           receiver[1]->agc = agc;
+          set_agc(receiver[1], agc);
           g_idle_add(ext_vfo_update, NULL);
         }
       } else {
@@ -4216,6 +4218,7 @@ int parse_cmd(void *data) {
       } else if (command[5] == ';') {
         // update RX1 AGC
         receiver[0]->agc = atoi(&command[2]) / 5;
+        set_agc(receiver[0], agc);
         g_idle_add(ext_vfo_update, NULL);
       }
 
