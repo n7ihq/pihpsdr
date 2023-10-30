@@ -161,11 +161,12 @@ endif
 ##############################################################################
 #
 # Add support for extended noise reduction, if requested
+# Note: I added -DNEW_NR_ALGORITHM until the vu3rdd wdsp.h is corrected.
 #
 ##############################################################################
 
 ifeq ($(EXTENDED_NN), ON)
-EXTNR_OPTIONS=-DEXTNR
+EXTNR_OPTIONS=-DEXTNR -DNEW_NR_ALGORITHMS
 endif
 
 ##############################################################################
