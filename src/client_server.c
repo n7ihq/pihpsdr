@@ -269,7 +269,6 @@ void send_radio_data(const REMOTE_CLIENT *client) {
   radio_data.frequency_max = htonll(temp);
   long long rate = (long long)radio_sample_rate;
   radio_data.sample_rate = htonll(rate);
-  radio_data.display_filled = display_filled;
   radio_data.locked = locked;
   radio_data.supported_receivers = htons(radio->supported_receivers);
   radio_data.receivers = htons(receivers);
@@ -355,6 +354,11 @@ void send_receiver_data(const REMOTE_CLIENT *client, int rx) {
   receiver_data.y = htons(receiver[rx]->y);
   receiver_data.volume = htond(receiver[rx]->volume);
   receiver_data.agc_gain = htond(receiver[rx]->agc_gain);
+  receiver_data.display_gradient = receiver[rx]->display_gradient;
+  receiver_data.display_filled = receiver[rx]->display_filled;
+  receiver_data.display_detector_mode = receiver[rx]->display_detector_mode;
+  receiver_data.display_average_mode = receiver[rx]->display_average_mode;
+  receiver_data.display_average_time = htons((int)receiver[rx]->display_average_time);
   int bytes_sent = send_bytes(client->socket, (char *)&receiver_data, sizeof(receiver_data));
 
   if (bytes_sent < 0) {
@@ -2052,7 +2056,6 @@ static void *client_thread(void* arg) {
 
 #endif
       // cppcheck-suppress uninitvar
-      display_filled = radio_data.display_filled;
       locked = radio_data.locked;
       receivers = ntohs(radio_data.receivers);
       //can_transmit=radio_data.can_transmit;
@@ -2172,6 +2175,11 @@ static void *client_thread(void* arg) {
       receiver[rx]->audio_channel = STEREO;
       receiver[rx]->audio_device = -1;
       receiver[rx]->mute_radio = 0;
+      receiver[rx]->display_gradient = receiver_data.display_gradient;
+      receiver[rx]->display_filled = receiver_data.display_filled;
+      receiver[rx]->display_detector_mode = receiver_data.display_detector_mode;
+      receiver[rx]->display_average_mode = receiver_data.display_average_mode;
+      receiver[rx]->display_average_time = (double) ntohs(receiver_data.display_average_time);
       t_print("rx=%d width=%d sample_rate=%d hz_per_pixel=%f pan=%d zoom=%d\n", rx, receiver[rx]->width,
               receiver[rx]->sample_rate, receiver[rx]->hz_per_pixel, receiver[rx]->pan, receiver[rx]->zoom);
     }

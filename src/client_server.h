@@ -142,7 +142,6 @@ typedef struct __attribute__((__packed__)) _radio_data {
   uint64_t sample_rate;
   uint64_t frequency_min;
   uint64_t frequency_max;
-  uint8_t display_filled;
   uint8_t locked;
   uint16_t supported_receivers;
   uint16_t receivers;
@@ -189,6 +188,11 @@ typedef struct __attribute__((__packed__)) _receiver_data {
   uint8_t nr;
   uint8_t anf;
   uint8_t snb;
+  uint8_t display_gradient;
+  uint8_t display_filled;
+  uint8_t display_detector_mode;
+  uint8_t display_average_mode;
+  uint16_t display_average_time;
   uint16_t filter_low;
   uint16_t filter_high;
   uint16_t panadapter_low;
