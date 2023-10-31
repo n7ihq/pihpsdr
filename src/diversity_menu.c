@@ -77,10 +77,8 @@ static void diversity_cb(GtkWidget *widget, gpointer data) {
     old_protocol_run();
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-    schedule_receive_specific();
-  }
+  schedule_high_priority();
+  schedule_receive_specific();
 
   g_idle_add(ext_vfo_update, NULL);
 }

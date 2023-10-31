@@ -63,9 +63,7 @@ static void oc_rx_cb(GtkWidget *widget, gpointer data) {
     band->OCrx &= ~mask;
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 }
 
 static void oc_tx_cb(GtkWidget *widget, gpointer data) {
@@ -82,9 +80,7 @@ static void oc_tx_cb(GtkWidget *widget, gpointer data) {
     band->OCtx &= ~mask;
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 }
 
 static void oc_tune_cb(GtkWidget *widget, gpointer data) {

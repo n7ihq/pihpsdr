@@ -113,6 +113,7 @@ static gboolean close_cb () {
 
 static void att_spin_cb(GtkWidget *widget, gpointer data) {
   transmitter->attenuation = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+  schedule_high_priority();
 }
 
 static void setpk_cb(GtkWidget *widget, gpointer data) {
@@ -295,11 +296,7 @@ static int info_thread(gpointer arg) {
         if (transmitter->attenuation != new_att) {
           SetPSControl(transmitter->id, 1, 0, 0, 0);
           transmitter->attenuation = new_att;
-
-          if (protocol == NEW_PROTOCOL) {
-            schedule_transmit_specific();
-          }
-
+          schedule_transmit_specific();
           state = 1;
         }
       }
@@ -343,9 +340,7 @@ static void ps_ant_cb(GtkWidget *widget, gpointer data) {
     break;
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 }
 
 static void enable_cb(GtkWidget *widget, gpointer data) {

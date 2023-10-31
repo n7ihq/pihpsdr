@@ -29,6 +29,7 @@
 #include "filter.h"
 #include "mode.h"
 #include "vfo.h"
+#include "new_protocol.h"
 #include "message.h"
 #include "mystring.h"
 
@@ -103,6 +104,7 @@ static void mic_in_cb(GtkWidget *widget, gpointer data) {
     break;
   }
 
+  schedule_transmit_specific();
   g_idle_add(ext_sliders_update, NULL);
 }
 

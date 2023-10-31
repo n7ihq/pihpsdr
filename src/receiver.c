@@ -1114,11 +1114,14 @@ RECEIVER *create_receiver(int id, int pixels, int width, int height) {
 
 void receiver_change_adc(RECEIVER *rx, int adc) {
   rx->adc = adc;
+  schedule_high_priority();
+  schedule_receive_specific();
 }
 
 void receiver_change_sample_rate(RECEIVER *rx, int sample_rate) {
   g_mutex_lock(&rx->mutex);
   rx->sample_rate = sample_rate;
+  schedule_receive_specific();
   int scale = rx->sample_rate / 48000;
   rx->output_samples = rx->buffer_size / scale;
   rx->hz_per_pixel = (double)rx->sample_rate / (double)rx->width;

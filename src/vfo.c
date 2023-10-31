@@ -306,10 +306,8 @@ void vfo_xvtr_changed() {
     }
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_general();        // for disablePA
-    schedule_high_priority();  // for Frequencies
-  }
+  schedule_general();        // for disablePA
+  schedule_high_priority();  // for Frequencies
 
   g_idle_add(ext_vfo_update, NULL);
 }
@@ -513,10 +511,8 @@ void vfo_id_mode_changed(int id, int m) {
   // changing modes may change BFO frequency
   // and SDR need to be informed about "CW or not CW"
   //
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();       // update frequencies
-    schedule_transmit_specific();   // update "CW" flag
-  }
+  schedule_high_priority();       // update frequencies
+  schedule_transmit_specific();   // update "CW" flag
 
   g_idle_add(ext_vfo_update, NULL);
 }
@@ -1836,9 +1832,7 @@ void vfo_xit_value(long long value ) {
   vfo[id].xit = value;
   vfo[id].xit_enabled = value ? 1 : 0;
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 
   g_idle_add(ext_vfo_update, NULL);
 }
@@ -1848,9 +1842,7 @@ void vfo_xit_toggle() {
   int id = get_tx_vfo();
   TOGGLE(vfo[id].xit_enabled);
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 
   g_idle_add(ext_vfo_update, NULL);
 }
@@ -1894,9 +1886,7 @@ void vfo_xit_onoff(int enable) {
   int id = get_tx_vfo();
   vfo[id].xit_enabled = SET(enable);
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 
   g_idle_add(ext_vfo_update, NULL);
 }
@@ -1915,9 +1905,7 @@ void vfo_xit_incr(int incr) {
   vfo[id].xit = value;
   vfo[id].xit_enabled = (value != 0);
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 
   g_idle_add(ext_vfo_update, NULL);
 }

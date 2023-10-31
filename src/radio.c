@@ -1461,9 +1461,7 @@ void start_radio() {
     }
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 
 #ifdef SOAPYSDR
 
@@ -1587,9 +1585,7 @@ void radio_change_receivers(int r) {
   if (!radio_is_remote) {
 #endif
 
-    if (protocol == NEW_PROTOCOL) {
-      schedule_high_priority();
-    }
+    schedule_high_priority();
 
     if (protocol == ORIGINAL_PROTOCOL) {
       old_protocol_run();
@@ -1831,10 +1827,8 @@ void vox_changed(int state) {
 
   vox = state;
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-    schedule_receive_specific();
-  }
+  schedule_high_priority();
+  schedule_receive_specific();
 }
 
 void setTune(int state) {
@@ -1889,10 +1883,8 @@ void setTune(int state) {
       }
     }
 
-    if (protocol == NEW_PROTOCOL) {
-      schedule_high_priority();
-      //schedule_general();
-    }
+    schedule_high_priority();
+    //schedule_general();
 
     if (state) {
       if (!duplex) {
@@ -1904,10 +1896,7 @@ void setTune(int state) {
           // their slew-down before going TX.
           SetChannelState(receiver[i]->id, 0, 1);
           set_displaying(receiver[i], 0);
-
-          if (protocol == NEW_PROTOCOL) {
-            schedule_high_priority();
-          }
+          schedule_high_priority();
         }
       }
 
@@ -1988,10 +1977,9 @@ void setTune(int state) {
     }
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-    schedule_receive_specific();
-  }
+  schedule_high_priority();
+  schedule_transmit_specific();
+  schedule_receive_specific();
 }
 
 int getTune() {
@@ -2133,9 +2121,7 @@ void calcDriveLevel() {
   //  t_print("%s: Level=%d\n", __FUNCTION__, transmitter->drive_level);
   //}
 
-  if (isTransmitting()  && protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 }
 
 void setDrive(double value) {
@@ -2276,10 +2262,8 @@ void set_alex_antennas() {
     }
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();         // possibly update RX/TX antennas
-    schedule_general();               // possibly update PA disable
-  }
+  schedule_high_priority();         // possibly update RX/TX antennas
+  schedule_general();               // possibly update PA disable
 }
 
 void tx_vfo_changed() {
@@ -2298,10 +2282,9 @@ void tx_vfo_changed() {
     calcDriveLevel();
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();         // possibly update RX/TX antennas
-    schedule_general();               // possibly update PA disable
-  }
+  schedule_high_priority();         // possibly update RX/TX antennas
+  schedule_transmit_specific();     // possibly un-set "CW mode"
+  schedule_general();               // possibly update PA disable
 }
 
 void set_alex_attenuation(int v) {
@@ -2320,9 +2303,7 @@ void set_alex_attenuation(int v) {
     receiver[0]->alex_attenuation = v;
   }
 
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 }
 
 void radio_split_toggle() {

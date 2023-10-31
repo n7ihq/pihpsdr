@@ -113,22 +113,26 @@ static void vfo_divisor_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 static void ptt_cb(GtkWidget *widget, gpointer data) {
   mic_ptt_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_transmit_specific();
 }
 
 static void ptt_ring_cb(GtkWidget *widget, gpointer data) {
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     mic_ptt_tip_bias_ring = 0;
   }
+  schedule_transmit_specific();
 }
 
 static void ptt_tip_cb(GtkWidget *widget, gpointer data) {
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     mic_ptt_tip_bias_ring = 1;
   }
+  schedule_transmit_specific();
 }
 
 static void bias_cb(GtkWidget *widget, gpointer data) {
   mic_bias_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_transmit_specific();
 }
 
 static void touchscreen_cb(GtkWidget *widget, gpointer data) {
@@ -176,10 +180,7 @@ void setDuplex() {
 
 static void PA_enable_cb(GtkWidget *widget, gpointer data) {
   pa_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-
-  if (protocol == NEW_PROTOCOL) {
-    schedule_general();
-  }
+  schedule_general();
 }
 
 static void duplex_cb(GtkWidget *widget, gpointer data) {
@@ -227,10 +228,7 @@ void n2adr_oc_settings() {
   band->OCrx = band->OCtx = 96;
   band = band_get_band(band10);
   band->OCrx = band->OCtx = 96;
-
-  if (protocol == NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
+  schedule_high_priority();
 }
 
 void load_filters() {
@@ -302,6 +300,7 @@ static void mic_input_cb(GtkWidget *widget, gpointer data) {
     mic_input_xlr = MICXLR;
     break;
   }
+  schedule_transmit_specific();
 }
 static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
   const char *p = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));

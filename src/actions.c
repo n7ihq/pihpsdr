@@ -668,12 +668,8 @@ int process_action(void *data) {
   case DIV:
     if (a->mode == PRESSED) {
       TOGGLE(diversity_enabled);
-
-      if (protocol == NEW_PROTOCOL) {
-        schedule_high_priority();
-        schedule_receive_specific();
-      }
-
+      schedule_high_priority();
+      schedule_receive_specific();
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -1534,22 +1530,14 @@ int process_action(void *data) {
     switch (a->mode) {
     case PRESSED:
       CAT_cw_is_active = 1;
-
-      if (protocol == NEW_PROTOCOL) {
-        schedule_transmit_specific();
-      }
-
+      schedule_transmit_specific();
       mox_update(1);
       break;
 
     case RELEASED:
       if (CAT_cw_is_active == 1) {
         CAT_cw_is_active = 0;
-
-        if (protocol == NEW_PROTOCOL) {
-          schedule_transmit_specific();
-        }
-
+        schedule_transmit_specific();
         mox_update(0);
       }
 
