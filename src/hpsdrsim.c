@@ -235,6 +235,11 @@ int main(int argc, char *argv[]) {
   int bytes_read, bytes_left;
   uint32_t *code0 = (uint32_t *) buffer;  // fast access to code of first buffer
   double run, off, off2, inc;
+
+  struct timeval tvzero={0, 0};
+  fd_set fds;
+  struct termios tios;
+
   /*
    *      Examples for METIS:     ATLAS bus with Mercury/Penelope boards
    *      Examples for HERMES:    ANAN10, ANAN100 (Note ANAN-10E/100B behave like METIS)
@@ -244,6 +249,20 @@ int main(int argc, char *argv[]) {
    *
    *      Examples for C25:       RedPitaya based boards with fixed ADC connections
    */
+
+  //
+  // put stdin into raw mode
+  //
+  tcgetattr(0, &tios);
+  tios.c_lflag &= ~ICANON;
+  tios.c_lflag &= ~ECHO;
+
+  tcsetattr(0, TCSANOW, &tios);
+
+  radio_ptt = 0;
+  radio_dash = 0;
+  radio_dot = 0;
+
   // seed value for random number generator
   seed = ((uintptr_t) &seed) & 0xffffff;
   tonearg = 0.0;
@@ -310,17 +329,17 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    printf("Unknown option: %s\n", argv[i]);
-    printf("Valid options are: -atlas | -metis  | -hermes     | -griffin     | -angelia |\n");
-    printf("                   -orion | -orion2 | -hermeslite | -hermeslite2 | -c25     |\n");
-    printf("                   -diversity | -P1 | -P2                                   |\n");
-    printf("                   -nb <num> <width>\n");
+    t_print("Unknown option: %s\n", argv[i]);
+    t_print("Valid options are: -atlas | -metis  | -hermes     | -griffin     | -angelia |\n");
+    t_print("                   -orion | -orion2 | -hermeslite | -hermeslite2 | -c25     |\n");
+    t_print("                   -diversity | -P1 | -P2                                   |\n");
+    t_print("                   -nb <num> <width>\n");
     exit(8);
   }
 
   switch (NEWDEVICE) {
   case   NDEV_ATLAS:
-    printf("DEVICE is ATLAS/METIS\n");
+    t_print("DEVICE is ATLAS/METIS\n");
     c1 = 3.3;
     c2 = 0.090;
     TXDAC = 1;
@@ -328,14 +347,14 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_HERMES:
-    printf("DEVICE is HERMES\n");
+    t_print("DEVICE is HERMES\n");
     c1 = 3.3;
     c2 = 0.095;
     maxpwr = 200.0;
 
     if (anan10e) {
       TXDAC = 1;
-      printf("Anan10E/Anan100B simulation\n");
+      t_print("Anan10E/Anan100B simulation\n");
       maxpwr = 20.0;
     } else {
       TXDAC = 3;
@@ -344,7 +363,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_HERMES2:
-    printf("DEVICE is HERMES2/GRIFFIN\n");
+    t_print("DEVICE is HERMES2/GRIFFIN\n");
     c1 = 3.3;
     c2 = 0.095;
     TXDAC = 3;
@@ -352,7 +371,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_ANGELIA:
-    printf("DEVICE is ANGELIA\n");
+    t_print("DEVICE is ANGELIA\n");
     c1 = 3.3;
     c2 = 0.095;
     TXDAC = 4;
@@ -360,7 +379,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_HERMES_LITE:
-    printf("DEVICE is HermesLite V1\n");
+    t_print("DEVICE is HermesLite V1\n");
     c1 = 3.3;
     c2 = 1.5;
     TXDAC = 1;
@@ -368,7 +387,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_HERMES_LITE2:
-    printf("DEVICE is HermesLite V2\n");
+    t_print("DEVICE is HermesLite V2\n");
     c1 = 3.3;
     c2 = 1.5;
     TXDAC = 3;
@@ -376,7 +395,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_ORION:
-    printf("DEVICE is ORION\n");
+    t_print("DEVICE is ORION\n");
     c1 = 5.0;
     c2 = 0.108;
     TXDAC = 4;
@@ -384,7 +403,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_ORION2:
-    printf("DEVICE is ORION MkII\n");
+    t_print("DEVICE is ORION MkII\n");
     c1 = 5.0;
     c2 = 0.12;
     TXDAC = 4;
@@ -392,7 +411,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_SATURN:
-    printf("DEVICE is SATURN/G2\n");
+    t_print("DEVICE is SATURN/G2\n");
     c1 = 5.0;
     c2 = 0.12;
     TXDAC = 4;
@@ -400,7 +419,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case   NDEV_C25:
-    printf("DEVICE is STEMlab/C25\n");
+    t_print("DEVICE is STEMlab/C25\n");
     c1 = 3.3;
     c2 = 0.090;
     TXDAC = 3;
@@ -411,7 +430,7 @@ int main(int argc, char *argv[]) {
   //
   //      Initialize the data in the sample tables
   //
-  printf(".... producing random noise\n");
+  t_print(".... producing random noise\n");
   // Produce some noise
   j = RAND_MAX / 2;
 
@@ -434,8 +453,8 @@ int main(int argc, char *argv[]) {
     // The diversity signal is a "comb" with a lot
     // of equally spaces cosines
     //
-    printf("DIVERSITY testing activated!\n");
-    printf(".... producing some man-made noise\n");
+    t_print("DIVERSITY testing activated!\n");
+    t_print(".... producing some man-made noise\n");
     memset(divtab, 0, LENDIV * sizeof(double));
 
     for (j = 1; j <= 200; j++) {
@@ -459,7 +478,7 @@ int main(int argc, char *argv[]) {
     }
 
     off = 1.0 / off;
-    printf("(normalizing with %f)\n", off);
+    t_print("(normalizing with %f)\n", off);
 
     for (i = 0; i < LENDIV; i++) {
       divtab[i] = divtab[i] * off;
@@ -475,7 +494,7 @@ int main(int argc, char *argv[]) {
     //
     off = sqrt(0.05 / (nb_pulse * nb_width));
     memset(divtab, 0, LENDIV * sizeof(double));
-    printf("NOISE BLANKER test activated: %d pulses of width %d within %d samples\n",
+    t_print("NOISE BLANKER test activated: %d pulses of width %d within %d samples\n",
            nb_pulse, nb_width, LENDIV);
 
     for (i = 0; i < nb_pulse; i++) {
@@ -491,7 +510,7 @@ int main(int argc, char *argv[]) {
   memset (qsample, 0, OLDRTXLEN * sizeof(double));
 
   if ((sock_udp = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-    perror("socket");
+    t_perror("socket");
     return EXIT_FAILURE;
   }
 
@@ -506,12 +525,12 @@ int main(int argc, char *argv[]) {
   addr_udp.sin_port = htons(1024);
 
   if (bind(sock_udp, (struct sockaddr *)&addr_udp, sizeof(addr_udp)) < 0) {
-    perror("bind");
+    t_perror("bind");
     return EXIT_FAILURE;
   }
 
   if ((sock_TCP_Server = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    perror("socket tcp");
+    t_perror("socket tcp");
     return EXIT_FAILURE;
   }
 
@@ -527,12 +546,12 @@ int main(int argc, char *argv[]) {
   setsockopt(sock_TCP_Server, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv));
 
   if (bind(sock_TCP_Server, (struct sockaddr *)&addr_udp, sizeof(addr_udp)) < 0) {
-    perror("bind tcp");
+    t_perror("bind tcp");
     return EXIT_FAILURE;
   }
 
   listen(sock_TCP_Server, 1024);
-  printf( "Listening for TCP client connection request\n");
+  t_print( "Listening for TCP client connection request\n");
   int flags = fcntl(sock_TCP_Server, F_GETFL, 0);
   fcntl(sock_TCP_Server, F_SETFL, flags | O_NONBLOCK);
 
@@ -540,6 +559,31 @@ int main(int argc, char *argv[]) {
     memcpy(buffer, id, 4);
     count++;
 
+    //
+    // If the keyboard has been hit, read character and consume it
+    //
+    FD_ZERO(&fds);
+    FD_SET(0, &fds);   // 0 is stdin
+    if (select(1, &fds, NULL, NULL, &tvzero) > 0) {
+      unsigned char c;
+      int rc=read(0, &c, sizeof(c));
+      if (rc > 0) {
+        switch (c) {
+        case 'l':
+          radio_dot = !radio_dot;
+          t_print("RADIO DOT=%d\n", radio_dot);
+          break;
+        case 'r':
+          radio_dash = !radio_dash;
+          t_print("RADIO DASH=%d\n", radio_dash);
+          break;
+        case 'p':
+          radio_ptt = !radio_ptt;
+          t_print("RADIO PTT=%d\n", radio_ptt);
+          break;
+        }
+      }
+    }
     if (sock_TCP_Client > -1) {
       // Using recvmmsg with a time-out should be used for a byte-stream protocol like TCP
       // (Each "packet" in the datagram may be incomplete). This is especially true if the
@@ -563,7 +607,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef PACKETLIST
       clock_gettime(CLOCK_MONOTONIC, &ts);
-      printf("TCP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec / 1000000L));
+      t_print("TCP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec / 1000000L));
 #endif
       bytes_read = size;
 
@@ -599,7 +643,7 @@ int main(int argc, char *argv[]) {
         udp_retries = 0;
 #ifdef PACKETLIST
         clock_gettime(CLOCK_MONOTONIC, &ts);
-        printf("UDP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec / 1000000L));
+        t_print("UDP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec / 1000000L));
 #endif
       } else {
         udp_retries++;
@@ -607,7 +651,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (bytes_read < 0 && errno != EAGAIN) {
-      perror("recvfrom");
+      t_perror("recvfrom");
       return EXIT_FAILURE;
     }
 
@@ -615,7 +659,7 @@ int main(int argc, char *argv[]) {
     // "for some time" means 10 subsequent un-successful UDP rcvmmsg() calls
     if (sock_TCP_Client < 0 && udp_retries > 10) {
       if ((sock_TCP_Client = accept(sock_TCP_Server, NULL, NULL)) > -1) {
-        printf("sock_TCP_Client: %d connected to sock_TCP_Server: %d\n", sock_TCP_Client, sock_TCP_Server);
+        t_print("sock_TCP_Client: %d connected to sock_TCP_Server: %d\n", sock_TCP_Client, sock_TCP_Server);
       }
 
       // This avoids firing accept() too often if it constantly fails
@@ -623,7 +667,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (count >= 5000 && active_thread) {
-      printf( "WATCHDOG STOP the transmission via handler_ep6\n");
+      t_print( "WATCHDOG STOP the transmission via handler_ep6\n");
       enable_thread = 0;
 
       while (active_thread) { usleep(1000); }
@@ -649,7 +693,7 @@ int main(int argc, char *argv[]) {
 
       // processing an invalid packet is too dangerous -- skip it!
       if (bytes_read != 1032) {
-        printf("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, (int)bytes_read);
+        t_print("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, (int)bytes_read);
         break;
       }
 
@@ -657,7 +701,7 @@ int main(int argc, char *argv[]) {
       seqnum = ((buffer[4] & 0xFF) << 24) + ((buffer[5] & 0xFF) << 16) + ((buffer[6] & 0xFF) << 8) + (buffer[7] & 0xFF);
 
       if (seqnum != last_seqnum + 1) {
-        printf("SEQ ERROR: last %ld, recvd %ld\n", (long)last_seqnum, (long)seqnum);
+        t_print("SEQ ERROR: last %ld, recvd %ld\n", (long)last_seqnum, (long)seqnum);
       }
 
       last_seqnum = seqnum;
@@ -787,15 +831,15 @@ int main(int argc, char *argv[]) {
     // respond to an incoming Metis detection request
     case 0x0002feef:
       if (oldnew == 2) {
-        printf("OldProtocol detection request IGNORED.\n");
+        t_print("OldProtocol detection request IGNORED.\n");
         break;  // Swallow P1 detection requests
       }
 
-      printf( "Respond to an incoming Metis detection request / code: 0x%08x\n", code);
+      t_print( "Respond to an incoming Metis detection request / code: 0x%08x\n", code);
 
       // processing an invalid packet is too dangerous -- skip it!
       if (bytes_read != 63) {
-        printf("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, (int)bytes_read);
+        t_print("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, (int)bytes_read);
         break;
       }
 
@@ -831,7 +875,7 @@ int main(int argc, char *argv[]) {
         // We simply suppress the response in this (very unlikely) case.
         if (!active_thread) {
           if (send(sock_TCP_Client, buffer, 60, 0) < 0) {
-            printf( "TCP send error occurred when responding to an incoming Metis detection request!\n");
+            t_print( "TCP send error occurred when responding to an incoming Metis detection request!\n");
           }
 
           // close the TCP socket which was only used for the detection
@@ -846,11 +890,11 @@ int main(int argc, char *argv[]) {
 
     // stop the SDR to PC transmission via handler_ep6
     case 0x0004feef:
-      printf( "STOP the transmission via handler_ep6 / code: 0x%08x\n", code);
+      t_print( "STOP the transmission via handler_ep6 / code: 0x%08x\n", code);
 
       // processing an invalid packet is too dangerous -- skip it!
       if (bytes_read != 64) {
-        printf("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, bytes_read);
+        t_print("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, bytes_read);
         break;
       }
 
@@ -871,17 +915,17 @@ int main(int argc, char *argv[]) {
     case 0x0204feef:
     case 0x0304feef:
       if (new_protocol_running()) {
-        printf("OldProtocol START command received but NewProtocol radio already running!\n");
+        t_print("OldProtocol START command received but NewProtocol radio already running!\n");
         break;
       }
 
       // processing an invalid packet is too dangerous -- skip it!
       if (bytes_read != 64) {
-        printf("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, bytes_read);
+        t_print("InvalidLength: RvcMsg Code=0x%08x Len=%d\n", code, bytes_read);
         break;
       }
 
-      printf( "START the PC-to-SDR handler thread / code: 0x%08x\n", code);
+      t_print( "START the PC-to-SDR handler thread / code: 0x%08x\n", code);
       enable_thread = 0;
 
       while (active_thread) { usleep(1000); }
@@ -896,7 +940,7 @@ int main(int argc, char *argv[]) {
       active_thread = 1;
 
       if (pthread_create(&thread, NULL, handler_ep6, NULL) < 0) {
-        perror("create old protocol thread");
+        t_perror("create old protocol thread");
         return EXIT_FAILURE;
       }
 
@@ -920,7 +964,7 @@ int main(int argc, char *argv[]) {
       if (bytes_read == 264 && buffer[0] == 0xEF && buffer[1] == 0xFE && buffer[2] == 0x03 && buffer[3] == 0x01) {
         static long cnt = 0;
         unsigned long blks = (buffer[4] << 24) + (buffer[5] << 16) + (buffer[6] << 8) + buffer[7];
-        printf("OldProtocol Program blks=%lu count=%ld\r", blks, ++cnt);
+        t_print("OldProtocol Program blks=%lu count=%ld\r", blks, ++cnt);
         usleep(1000);
         memset(buffer, 0, 60);
         buffer[0] = 0xEF;
@@ -934,13 +978,13 @@ int main(int argc, char *argv[]) {
         buffer[8] = MAC6; // encodes old protocol
         sendto(sock_udp, buffer, 60, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
 
-        if (blks == cnt) { printf("\n\n Programming Done!\n"); }
+        if (blks == cnt) { t_print("\n\n Programming Done!\n"); }
 
         break;
       }
 
       if (bytes_read == 64 && buffer[0] == 0xEF && buffer[1] == 0xFE && buffer[2] == 0x03 && buffer[3] == 0x02) {
-        printf("OldProtocol Erase packet received:\n");
+        t_print("OldProtocol Erase packet received:\n");
         sleep(1);
         memset(buffer, 0, 60);
         buffer[0] = 0xEF;
@@ -957,10 +1001,10 @@ int main(int argc, char *argv[]) {
       }
 
       if (bytes_read == 63 && buffer[0] == 0xEF && buffer[1] == 0xFE && buffer[2] == 0x03) {
-        printf("OldProtocol SetIP packet received:\n");
-        printf("MAC address is %02x:%02x:%02x:%02x:%02x:%02x\n", buffer[3], buffer[4], buffer[5], buffer[6], buffer[7],
+        t_print("OldProtocol SetIP packet received:\n");
+        t_print("MAC address is %02x:%02x:%02x:%02x:%02x:%02x\n", buffer[3], buffer[4], buffer[5], buffer[6], buffer[7],
                buffer[8]);
-        printf("IP  address is %03d:%03d:%03d:%03d\n", buffer[9], buffer[10], buffer[11], buffer[12]);
+        t_print("IP  address is %03d:%03d:%03d:%03d\n", buffer[9], buffer[10], buffer[11], buffer[12]);
         buffer[2] = 0x02;
         memset(buffer + 9, 0, 54);
         sendto(sock_udp, buffer, 63, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
@@ -969,11 +1013,11 @@ int main(int argc, char *argv[]) {
 
       if (code == 0 && buffer[4] == 0x02) {
         if (oldnew == 1) {
-          printf("NewProtocol discovery packet IGNORED.\n");
+          t_print("NewProtocol discovery packet IGNORED.\n");
           break;
         }
 
-        printf("NewProtocol discovery packet received\n");
+        t_print("NewProtocol discovery packet received\n");
         // prepeare response
         memset(buffer, 0, 60);
         buffer [4] = 0x02 + new_protocol_running();
@@ -1001,11 +1045,11 @@ int main(int argc, char *argv[]) {
 
       if (code == 0 && buffer[4] == 0x04) {
         if (oldnew == 1) {
-          printf("NewProtocol erase packet IGNORED.\n");
+          t_print("NewProtocol erase packet IGNORED.\n");
           break;
         }
 
-        printf("NewProtocol erase packet received\n");
+        t_print("NewProtocol erase packet received\n");
         memset(buffer, 0, 60);
         buffer [4] = 0x02 + active_thread;
         buffer [5] = MAC1;
@@ -1028,14 +1072,14 @@ int main(int argc, char *argv[]) {
 
       if (bytes_read == 265 && buffer[4] == 0x05) {
         if (oldnew == 1) {
-          printf("NewProtocol program packet IGNORED.\n");
+          t_print("NewProtocol program packet IGNORED.\n");
           break;
         }
 
         unsigned long seq, blk;
         seq = (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
         blk = (buffer[5] << 24) + (buffer[6] << 16) + (buffer[7] << 8) + buffer[8];
-        printf("NewProtocol Program packet received: seq=%lu blk=%lu\r", seq, blk);
+        t_print("NewProtocol Program packet received: seq=%lu blk=%lu\r", seq, blk);
 
         if (seq == 0) { checksum = 0; }
 
@@ -1055,18 +1099,18 @@ int main(int argc, char *argv[]) {
         buffer[14] = (checksum     ) & 0xFF;
         sendto(sock_udp, buffer, 60, 0, (struct sockaddr *)&addr_from, sizeof(addr_from));
 
-        if (seq + 1 == blk) { printf("\n\nProgramming Done!\n"); }
+        if (seq + 1 == blk) { t_print("\n\nProgramming Done!\n"); }
 
         break;
       }
 
       if (bytes_read == 60 && code == 0 && buffer[4] == 0x06) {
         if (oldnew == 1) {
-          printf("NewProtocol SetIP packet IGNORED.\n");
+          t_print("NewProtocol SetIP packet IGNORED.\n");
           break;
         }
 
-        printf("NewProtocol SetIP packet received for MAC %2x:%2x:%2x:%2x%2x:%2x IP=%d:%d:%d:%d\n",
+        t_print("NewProtocol SetIP packet received for MAC %2x:%2x:%2x:%2x%2x:%2x IP=%d:%d:%d:%d\n",
                buffer[5], buffer[6], buffer[7], buffer[8], buffer[9], buffer[10],
                buffer[11], buffer[12], buffer[13], buffer[14]);
 
@@ -1103,7 +1147,7 @@ int main(int argc, char *argv[]) {
 
       if (bytes_read == 60 && buffer[4] == 0x00) {
         if (oldnew == 1) {
-          printf("NewProtocol General packet IGNORED.\n");
+          t_print("NewProtocol General packet IGNORED.\n");
           break;
         }
 
@@ -1115,7 +1159,7 @@ int main(int argc, char *argv[]) {
         new_protocol_general_packet(buffer);
         break;
       } else {
-        printf("Invalid packet (len=%d) detected: ", bytes_read);
+        t_print("Invalid packet (len=%d) detected: ", bytes_read);
 
         for (i = 0; i < 16; i++) { printf("%02x ", buffer[i]); }
 
@@ -1139,7 +1183,7 @@ int main(int argc, char *argv[]) {
   return EXIT_SUCCESS;
 }
 
-#define chk_data(a,b,c) if ((a) != b) { b = (a); printf("%20s= %08lx (%10ld)\n", c, (long) b, (long) b ); }
+#define chk_data(a,b,c) if ((a) != b) { b = (a); t_print("%20s= %08lx (%10ld)\n", c, (long) b, (long) b ); }
 
 void process_ep2(uint8_t *frame) {
   int rc;
@@ -1196,7 +1240,7 @@ void process_ep2(uint8_t *frame) {
       LTrandom = rc;
     }
 
-    if (mod) { printf("AlexAtt=%d Preamp=%d Dither=%d Random=%d\n", AlexAtt, preamp, LTdither, LTrandom); }
+    if (mod) { t_print("AlexAtt=%d Preamp=%d Dither=%d Random=%d\n", AlexAtt, preamp, LTdither, LTrandom); }
 
     mod = 0;
     rc = (frame[3] & 0x60) >> 5;
@@ -1227,7 +1271,7 @@ void process_ep2(uint8_t *frame) {
       duplex = rc;
     }
 
-    if (mod) { printf("RXout=%d RXant=%d TXrel=%d Duplex=%d\n", alexRXout, alexRXant, AlexTXrel, duplex); }
+    if (mod) { t_print("RXout=%d RXant=%d TXrel=%d Duplex=%d\n", alexRXout, alexRXant, AlexTXrel, duplex); }
 
     if (OLDDEVICE == ODEV_C25) {
       // Charly25: has two 18-dB preamps that are switched with "preamp" and "dither"
@@ -1446,7 +1490,7 @@ void process_ep2(uint8_t *frame) {
 
     if (hl2addr[rc].c1 != frame[1] || hl2addr[rc].c2 != frame[2] ||
         hl2addr[rc].c3 != frame[3] || hl2addr[rc].c4 != frame[4]) {
-      printf("        HL2 AHL2 DDR=0x%2x C1=0x%2x C2=0x%2x C3=0x%2x C4=0x%2x\n",
+      t_print("        HL2 AHL2 DDR=0x%2x C1=0x%2x C2=0x%2x C3=0x%2x C4=0x%2x\n",
              rc, frame[1], frame[2], frame[3], frame[4]);
       hl2addr[rc].c1 = frame[1];
       hl2addr[rc].c2 = frame[2];
@@ -1461,6 +1505,7 @@ void *handler_ep6(void *arg) {
   int header_offset;
   uint32_t counter;
   uint8_t buffer[1032];
+  uint8_t C0;
   uint8_t *pointer;
   uint8_t id[4] = { 0xef, 0xfe, 1, 6 };
   uint8_t header[40] = {
@@ -1511,6 +1556,13 @@ void *handler_ep6(void *arg) {
       pointer = buffer + i * 516 - i % 2 * 4 + 8;
       memcpy(pointer, header + header_offset, 8);
 
+      // C0, C1, C2, C3, C4 are *(pointer+3) ... *(pointer+7)
+      C0 = header_offset;
+      if (radio_ptt)  { C0 |= 1; }
+      if (radio_dash) { C0 |= 2; }
+      if (radio_dot ) { C0 |= 4; }
+      *(pointer+3) = C0;
+
       switch (header_offset) {
       case 0:
         if (OLDDEVICE == ODEV_HERMES_LITE2) {
@@ -1556,6 +1608,8 @@ void *handler_ep6(void *arg) {
         break;
 
       case 32:
+        // ADC overflow anhd Mercury software version
+        // for up  to four Mercury cards
         header_offset = 0;
         break;
       }
@@ -1715,7 +1769,7 @@ void *handler_ep6(void *arg) {
 
     if (sock_TCP_Client > -1) {
       if (sendto(sock_TCP_Client, buffer, 1032, 0, (struct sockaddr *)&addr_old, sizeof(addr_old)) < 0) {
-        printf( "TCP sendmsg error occurred at sequence number: %u !\n", counter);
+        t_print( "TCP sendmsg error occurred at sequence number: %u !\n", counter);
       }
     } else {
       sendto(sock_udp, buffer, 1032, 0, (struct sockaddr *)&addr_old, sizeof(addr_old));
@@ -1725,3 +1779,37 @@ void *handler_ep6(void *arg) {
   active_thread = 0;
   return NULL;
 }
+
+void t_print(const char *format, ...) {
+  va_list(args);
+  va_start(args, format);
+  struct timespec ts;
+  double now;
+  static double starttime;
+  static int first = 1;
+  char line[1024];
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  now = ts.tv_sec + 1E-9 * ts.tv_nsec;
+
+  if (first) {
+    first = 0;
+    starttime = now;
+  }
+
+  //
+  // After 11 days, the time reaches 999999.999 so we simply wrap around
+  //
+  if (now - starttime >= 999999.995) { starttime += 1000000.0; }
+
+  //
+  // We have to use vsnt_print to handle the varargs stuff
+  // g_print() seems to be thread-safe but call it only ONCE.
+  //
+  vsnprintf(line, 1024, format, args);
+  printf("%10.6f %s", now - starttime, line);
+}
+
+void t_perror(const char *string) {
+  t_print("%s: %s\n", string, strerror(errno));
+}
+

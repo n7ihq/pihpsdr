@@ -128,6 +128,8 @@ static pthread_t audio_thread_id;
 static pthread_t highprio_thread_id = 0;
 static pthread_t send_highprio_thread_id;
 
+static int watchdog = 0;
+
 void   *ddc_specific_thread(void*);
 void   *duc_specific_thread(void*);
 void   *highprio_thread(void*);
@@ -152,8 +154,11 @@ void new_protocol_general_packet(unsigned char *buffer) {
   seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
   if (seqnum != 0 && seqnum != seqold + 1 ) {
-    printf("GP: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
+    t_print("GP: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
   }
+#ifdef PACKETLIST
+  t_print("GP rcvd, seq=%lu\n", seqnum);
+#endif
 
   rc = (buffer[5] << 8) + buffer[6];
 
@@ -161,7 +166,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != ddc_port || !run) {
     ddc_port = rc;
-    printf("GP: RX specific rcv        port is  %4d\n", rc);
+    t_print("GP: RX specific rcv        port is  %4d\n", rc);
   }
 
   rc = (buffer[7] << 8) + buffer[8];
@@ -170,7 +175,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != duc_port || !run) {
     duc_port = rc;
-    printf("GP: TX specific rcv        port is  %4d\n", rc);
+    t_print("GP: TX specific rcv        port is  %4d\n", rc);
   }
 
   rc = (buffer[9] << 8) + buffer[10];
@@ -179,7 +184,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != hp_port || !run) {
     hp_port = rc;
-    printf("GP: HighPrio Port rcv      port is  %4d\n", rc);
+    t_print("GP: HighPrio Port rcv      port is  %4d\n", rc);
   }
 
   rc = (buffer[11] << 8) + buffer[12];
@@ -188,7 +193,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != shp_port || !run) {
     shp_port = rc;
-    printf("GP: HighPrio Port snd      port is  %4d\n", rc);
+    t_print("GP: HighPrio Port snd      port is  %4d\n", rc);
   }
 
   rc = (buffer[13] << 8) + buffer[14];
@@ -197,7 +202,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != audio_port || !run) {
     audio_port = rc;
-    printf("GP: Audio rcv              port is  %4d\n", rc);
+    t_print("GP: Audio rcv              port is  %4d\n", rc);
   }
 
   rc = (buffer[15] << 8) + buffer[16];
@@ -206,7 +211,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != duc0_port || !run) {
     duc0_port = rc;
-    printf("GP: TX data rcv base       port is  %4d\n", rc);
+    t_print("GP: TX data rcv base       port is  %4d\n", rc);
   }
 
   rc = (buffer[17] << 8) + buffer[18];
@@ -215,7 +220,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != ddc0_port || !run) {
     ddc0_port = rc;
-    printf("GP: RX data snd base       port is  %4d\n", rc);
+    t_print("GP: RX data snd base       port is  %4d\n", rc);
   }
 
   rc = (buffer[19] << 8) + buffer[20];
@@ -224,7 +229,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != mic_port || !run) {
     mic_port = rc;
-    printf("GP: Microphone data snd    port is  %4d\n", rc);
+    t_print("GP: Microphone data snd    port is  %4d\n", rc);
   }
 
   rc = (buffer[21] << 8) + buffer[22];
@@ -233,14 +238,14 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != wide_port || !run) {
     wide_port = rc;
-    printf("GP: Wideband data snd       port is  %4d\n", rc);
+    t_print("GP: Wideband data snd       port is  %4d\n", rc);
   }
 
   rc = buffer[23];
 
   if (rc != wide_enable || !run) {
     wide_enable = rc;
-    printf("GP: Wideband Enable Flag is %d\n", rc);
+    t_print("GP: Wideband Enable Flag is %d\n", rc);
   }
 
   rc = (buffer[24] << 8) + buffer[25];
@@ -249,7 +254,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != wide_len || !run) {
     wide_len = rc;
-    printf("GP: WideBand Length is %d\n", rc);
+    t_print("GP: WideBand Length is %d\n", rc);
   }
 
   rc = buffer[26];
@@ -258,90 +263,90 @@ void new_protocol_general_packet(unsigned char *buffer) {
 
   if (rc != wide_size || !run) {
     wide_size = rc;
-    printf("GP: Wideband sample size is %d\n", rc);
+    t_print("GP: Wideband sample size is %d\n", rc);
   }
 
   rc = buffer[27];
 
   if (rc != wide_rate || !run) {
     wide_rate = rc;
-    printf("GP: Wideband sample rate is %d\n", rc);
+    t_print("GP: Wideband sample rate is %d\n", rc);
   }
 
   rc = buffer[28];
 
   if (rc != wide_ppf || !run) {
     wide_ppf = rc;
-    printf("GP: Wideband PPF is %d\n", rc);
+    t_print("GP: Wideband PPF is %d\n", rc);
   }
 
   rc = (buffer[29] << 8) + buffer[30];
 
   if (rc != port_mm || !run) {
     port_mm = rc;
-    printf("MemMapped Registers rcv port is %d\n", rc);
+    t_print("GP: MemMapped Registers rcv port is %d\n", rc);
   }
 
   rc = (buffer[31] << 8) + buffer[32];
 
   if (rc != port_smm || !run) {
     port_smm = rc;
-    printf("MemMapped Registers snd port is %d\n", rc);
+    t_print("GP: MemMapped Registers snd port is %d\n", rc);
   }
 
   rc = (buffer[33] << 8) + buffer[34];
 
   if (rc != pwm_min || !run) {
     pwm_min = rc;
-    printf("GP: PWM Min value is %d\n", rc);
+    t_print("GP: PWM Min value is %d\n", rc);
   }
 
   rc = (buffer[35] << 8) + buffer[36];
 
   if (rc != pwm_max || !run) {
     pwm_max = rc;
-    printf("GP: PWM Max value is %d\n", rc);
+    t_print("GP: PWM Max value is %d\n", rc);
   }
 
   rc = buffer[37];
 
   if (rc != bits || !run) {
     bits = rc;
-    printf("GP: ModeBits=x%02x\n", rc);
+    t_print("GP: ModeBits=x%02x\n", rc);
   }
 
   rc = buffer[38];
 
   if (rc != hwtim || !run) {
     hwtim = rc;
-    printf("GP: Hardware Watchdog enabled=%d\n", rc);
+    t_print("GP: Hardware Watchdog enabled=%d\n", rc);
   }
 
   iqform = buffer[39];
 
   if (iqform == 0) { iqform = 3; }
 
-  if (iqform != 3) { printf("GP: Wrong IQ Format requested: %d\n", iqform); }
+  if (iqform != 3) { t_print("GP: Wrong IQ Format requested: %d\n", iqform); }
 
   rc = (buffer[58] & 0x01);
 
   if (rc != pa_enable || !run) {
     pa_enable = rc;
-    printf("GP: PA enabled=%d\n", rc);
+    t_print("GP: PA enabled=%d\n", rc);
   }
 
   rc = buffer[59] & 0x01;
 
   if (rc != alex0_enable || !run) {
     alex0_enable = rc;
-    printf("GP: ALEX0 register enable=%d\n", rc);
+    t_print("GP: ALEX0 register enable=%d\n", rc);
   }
 
   rc = (buffer[59] & 0x02) >> 1;
 
   if (rc != alex1_enable || !run) {
     alex1_enable = rc;
-    printf("GP: ALEX1 register enable=%d\n", rc);
+    t_print("GP: ALEX1 register enable=%d\n", rc);
   }
 
   //
@@ -350,7 +355,7 @@ void new_protocol_general_packet(unsigned char *buffer) {
   //
   if (!highprio_thread_id) {
     if (pthread_create(&highprio_thread_id, NULL, highprio_thread, NULL) < 0) {
-      perror("***** ERROR: Create HighPrio thread");
+      t_perror("***** ERROR: Create HighPrio thread");
     }
 
     pthread_detach(highprio_thread_id);
@@ -381,7 +386,7 @@ void *ddc_specific_thread(void *data) {
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: RX specific: socket");
+    t_perror("***** ERROR: RX specific: socket");
     return NULL;
   }
 
@@ -396,7 +401,7 @@ void *ddc_specific_thread(void *data) {
   addr.sin_port = htons(ddc_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: RX specific: bind");
+    t_perror("***** ERROR: RX specific: bind");
     close(sock);
     return NULL;
   }
@@ -407,27 +412,31 @@ void *ddc_specific_thread(void *data) {
     rc = recvfrom(sock, buffer, 1444, 0, (struct sockaddr *)&addr, &lenaddr);
 
     if (rc < 0 && errno != EAGAIN) {
-      perror("***** ERROR: DDC specific thread: recvmsg");
+      t_perror("***** ERROR: DDC specific thread: recvmsg");
       break;
     }
 
     if (rc < 0) { continue; }
 
     if (rc != 1444) {
-      printf("RXspec: Received DDC specific packet with incorrect length");
+      t_print("RXspec: Received DDC specific packet with incorrect length");
       break;
     }
 
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
+#ifdef PACKETLIST
+    t_print("DDC SPEC rcvd seq=%lu\n", seqnum);
+#endif
+
     if (seqnum != 0 && seqnum != seqold + 1 ) {
-      printf("RXspec: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
+      t_print("RXspec: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
     }
 
     if (n_adc != buffer[4]) {
       n_adc = buffer[4];
-      printf("RX: Number of ADCs: %d\n", n_adc);
+      t_print("RX: Number of ADCs: %d\n", n_adc);
     }
 
     for (i = 0; i < n_adc; i++) {
@@ -435,7 +444,7 @@ void *ddc_specific_thread(void *data) {
 
       if (rc != adcdither[i]) {
         adcdither[i] = rc;
-        printf("RX: ADC%d dither=%d\n", i, rc);
+        t_print("RX: ADC%d dither=%d\n", i, rc);
       }
     }
 
@@ -444,7 +453,7 @@ void *ddc_specific_thread(void *data) {
 
       if (rc != adcrandom[i]) {
         adcrandom[i] = rc;
-        printf("RX: ADC%d random=%d\n", i, rc);
+        t_print("RX: ADC%d random=%d\n", i, rc);
       }
     }
 
@@ -478,7 +487,7 @@ void *ddc_specific_thread(void *data) {
       }
 
       if (modified) {
-        printf("RX: DDC%d Enable=%d ADC%d Rate=%d SyncMap=%02x\n",
+        t_print("RX: DDC%d Enable=%d ADC%d Rate=%d SyncMap=%02x\n",
                i, ddcenable[i], adcmap[i], rxrate[i], syncddc[i]);
         rc = 0;
 
@@ -487,15 +496,15 @@ void *ddc_specific_thread(void *data) {
         }
 
         if (rc > 1) {
-          printf("WARNING:\n");
-          printf("WARNING:\n");
-          printf("WARNING:\n");
-          printf("WARNING: more than two DDC sync'ed\n");
-          printf("WARNING: this simulator is not prepeared to handle this case\n");
-          printf("WARNING: so are most of SDRs around!\n");
-          printf("WARNING:\n");
-          printf("WARNING:\n");
-          printf("WARNING:\n");
+          t_print("WARNING:\n");
+          t_print("WARNING:\n");
+          t_print("WARNING:\n");
+          t_print("WARNING: more than two DDC sync'ed\n");
+          t_print("WARNING: this simulator is not prepeared to handle this case\n");
+          t_print("WARNING: so are most of SDRs around!\n");
+          t_print("WARNING:\n");
+          t_print("WARNING:\n");
+          t_print("WARNING:\n");
         }
       }
     }
@@ -517,7 +526,7 @@ void *duc_specific_thread(void *data) {
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: TX specific: socket");
+    t_perror("***** ERROR: TX specific: socket");
     return NULL;
   }
 
@@ -532,7 +541,7 @@ void *duc_specific_thread(void *data) {
   addr.sin_port = htons(duc_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: TXspec: bind");
+    t_perror("***** ERROR: TXspec: bind");
     close(sock);
     return NULL;
   }
@@ -543,139 +552,143 @@ void *duc_specific_thread(void *data) {
     rc = recvfrom(sock, buffer, 60, 0, (struct sockaddr *)&addr, &lenaddr);
 
     if (rc < 0 && errno != EAGAIN) {
-      perror("***** ERROR: TXspec: recvmsg");
+      t_perror("***** ERROR: TXspec: recvmsg");
       break;
     }
 
     if (rc < 0) { continue; }
 
     if (rc != 60) {
-      printf("TX: wrong length\n");
+      t_print("TX: wrong length\n");
       break;
     }
 
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
+#ifdef PACKETLIST
+    t_print("DUC SPEC rcvd seq=%lu\n",seqnum);
+#endif
+
     if (seqnum != 0 && seqnum != seqold + 1 ) {
-      printf("TX: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
+      t_print("TX: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
     }
 
     if (dac != buffer[4]) {
       dac = buffer[4];
-      printf("TX: Number of DACs: %d\n", dac);
+      t_print("TX: Number of DACs: %d\n", dac);
     }
 
     if (cwmode != buffer[5]) {
       cwmode = buffer[5];
-      printf("TX: CW mode bits = %x\n", cwmode);
+      t_print("TX: CW mode bits = %x\n", cwmode);
     }
 
     if (sidelevel != buffer[6]) {
       sidelevel = buffer[6];
-      printf("TX: CW side tone level: %d\n", sidelevel);
+      t_print("TX: CW side tone level: %d\n", sidelevel);
     }
 
     rc = (buffer[7] << 8) + buffer[8];
 
     if (rc != sidefreq) {
       sidefreq = rc;
-      printf("TX: CW sidetone freq: %d\n", sidefreq);
+      t_print("TX: CW sidetone freq: %d\n", sidefreq);
     }
 
     if (speed != buffer[9]) {
       speed = buffer[9];
-      printf("TX: CW keyer speed: %d wpm\n", speed);
+      t_print("TX: CW keyer speed: %d wpm\n", speed);
     }
 
     if (weight != buffer[10]) {
       weight = buffer[10];
-      printf("TX: CW weight: %d\n", weight);
+      t_print("TX: CW weight: %d\n", weight);
     }
 
     rc = (buffer[11] << 8) + buffer[12];
 
     if (hang != rc) {
       hang = rc;
-      printf("TX: CW hang time: %d msec\n", hang);
+      t_print("TX: CW hang time: %d msec\n", hang);
     }
 
     if (delay != buffer[13]) {
       delay = buffer[13];
-      printf("TX: RF delay: %d msec\n", delay);
+      t_print("TX: RF delay: %d msec\n", delay);
     }
 
     rc = (buffer[14] << 8) + buffer[15];
 
     if (txrate != rc) {
       txrate = rc;
-      printf("TX: DUC sample rate: %d\n", rc);
+      t_print("TX: DUC sample rate: %d\n", rc);
     }
 
     if (ducbits != buffer[16]) {
       ducbits = buffer[16];
-      printf("TX: DUC sample width: %d bits\n", ducbits);
+      t_print("TX: DUC sample width: %d bits\n", ducbits);
     }
 
     if (orion != buffer[50]) {
-      printf("---------------------------------------------------\n");
+      t_print("---------------------------------------------------\n");
       orion = buffer[50];
 
       // Bit 0:  0=LineIn, 1=No LineIn (Mic)
       if (orion & 0x01) {
         gain = buffer[51];
-        printf("TX: ORION Line-In selected\n");
+        t_print("TX: ORION Line-In selected\n");
       } else {
-        printf("TX: ORION Microphone selected\n");
+        t_print("TX: ORION Microphone selected\n");
       }
 
       // Bit 1: MicBoost 0=Off 1=On
       if (orion & 0x02) {
-        printf("TX: ORION Microphone 20dB boost selected\n");
+        t_print("TX: ORION Microphone 20dB boost selected\n");
       } else {
-        printf("TX: ORION Microphone 20dB boost NOT selected\n");
+        t_print("TX: ORION Microphone 20dB boost NOT selected\n");
       }
 
       // Bit 2: PTT 0=Enabled 1=Disabled
       if (orion & 0x04) {
-        printf("TX: ORION MicPtt disabled\n");
+        t_print("TX: ORION MicPtt disabled\n");
       } else {
-        printf("TX: ORION MicPtt enabled\n");
+        t_print("TX: ORION MicPtt enabled\n");
       }
 
       // Bit 3: TIP connection 0=Mic  1=PTT
       if (orion & 0x08) {
-        printf("TX: ORION TIP <-- Mic\n");
+        t_print("TX: ORION TIP <-- Mic\n");
       } else {
-        printf("TX: ORION TIP <--- PTT\n");
+        t_print("TX: ORION TIP <--- PTT\n");
       }
 
       // Bit 4: BIAS 0=off 1=on
       if (orion & 0x10)  {
-        printf("TX: MicBias enabled\n");
+        t_print("TX: MicBias enabled\n");
       } else {
-        printf("TX: MicBias disabled\n");
+        t_print("TX: MicBias disabled\n");
       }
 
       // Bit 5: Saturn Mic: 0=Mic 1=XLR
       if (orion & 0x20)  {
-        printf("TX: Saturn XLR jack\n");
+        t_print("TX: Saturn XLR jack\n");
       } else {
-        printf("TX: Saturn Mic jack\n");
+        t_print("TX: Saturn Mic jack\n");
       }
 
-      printf("---------------------------------------------------\n");
+      t_print("---------------------------------------------------\n");
     }
 
     if (gain != buffer[51]) {
       gain = buffer[51];
-      printf("TX: LineIn Gain (dB): %f\n", -34.0 + 1.5 * gain);
+      t_print("TX: LineIn Gain (dB): %f\n", -34.0 + 1.5 * gain);
     }
 
     if (txatt != buffer[59]) {
       txatt = buffer[59];
       txatt_dbl = pow(10.0, -0.05 * txatt);
-      printf("TX: ATT DUC0/ADC0: %d\n", txatt);
+      t_print("TX: ATT DUC0/ADC0: %d\n", txatt);
     }
   }
 
@@ -694,19 +707,18 @@ void *highprio_thread(void *data) {
   int rc;
   unsigned long freq;
   int i;
-  int count = 0;
   int alex0_mod, alex1_mod, hp_mod;
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: HP: socket");
+    t_perror("***** ERROR: HP: socket");
     return NULL;
   }
 
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
   setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (void *)&yes, sizeof(yes));
   tv.tv_sec = 0;
-  tv.tv_usec = 100000;
+  tv.tv_usec = 10000;
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv));
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
@@ -714,57 +726,42 @@ void *highprio_thread(void *data) {
   addr.sin_port = htons(hp_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: HP: bind");
+    t_perror("***** ERROR: HP: bind");
     close(sock);
     return NULL;
   }
 
   while (1) {
     //
-    // WATCHDOG: if no packet arrives in 10 seconds,
-    //           treat this situation as if "run" is set to zero
-    //
     rc = recvfrom(sock, buffer, 1444, 0, (struct sockaddr *)&addr, &lenaddr);
 
+    if (watchdog) {
+      t_print("HP: watchdog barked\n");
+      break;
+    }
+
     if (rc < 0 && errno != EAGAIN) {
-      perror("***** ERROR: HighPrio thread: recvmsg");
+      t_perror("***** ERROR: HighPrio thread: recvmsg");
       break;
     }
 
-    count++;
-
-    if (count >= 50) {
-      // WATCHDOG code
-      printf("HP: Watchdog Reset\n");
-      run = 0;
-      pthread_join(ddc_specific_thread_id, NULL);
-      pthread_join(duc_specific_thread_id, NULL);
-
-      for (i = 0; i < NUMRECEIVERS; i++) {
-        pthread_join(rx_thread_id[i], NULL);
-      }
-
-      pthread_join(send_highprio_thread_id, NULL);
-      pthread_join(tx_thread_id, NULL);
-      pthread_join(mic_thread_id, NULL);
-      pthread_join(audio_thread_id, NULL);
-      break;
-    }
-
-    if (rc < 0 ) { continue; }
+    if (rc < 0) { continue; }
 
     if (rc != 1444) {
-      printf("Received HighPrio packet with incorrect length");
+      t_print("Received HighPrio packet with incorrect length %d\n", rc);
       break;
     }
 
-    count = 0;  // reset watchdog
     hp_mod = 0;
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
+#ifdef PACKETLIST
+    t_print("HP rcvd seq=%lu\n", seqnum);
+#endif
+
     if (seqnum != 0 && seqnum != seqold + 1 ) {
-      printf("HP: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
+      t_print("HP: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
     }
 
     rc = (buffer[4] >> 0) & 0x01;
@@ -773,51 +770,41 @@ void *highprio_thread(void *data) {
       run = rc;
       hp_mod = 1;
       txptr = -1;
-      printf("HP: Run=%d\n", rc);
+      t_print("HP: Run=%d\n", rc);
 
       // if run=0, wait for threads to complete, otherwise spawn them off
       if (run) {
         if (pthread_create(&ddc_specific_thread_id, NULL, ddc_specific_thread, NULL) < 0) {
-          perror("***** ERROR: Create DDC specific thread");
+          t_perror("***** ERROR: Create DDC specific thread");
         }
 
         if (pthread_create(&duc_specific_thread_id, NULL, duc_specific_thread, NULL) < 0) {
-          perror("***** ERROR: Create DUC specific thread");
+          t_perror("***** ERROR: Create DUC specific thread");
         }
 
         for (i = 0; i < NUMRECEIVERS; i++) {
           if (pthread_create(&rx_thread_id[i], NULL, rx_thread, (void *) (uintptr_t) i) < 0) {
-            perror("***** ERROR: Create RX thread");
+            t_perror("***** ERROR: Create RX thread");
           }
         }
 
         if (pthread_create(&tx_thread_id, NULL, tx_thread, NULL) < 0) {
-          perror("***** ERROR: Create TX thread");
+          t_perror("***** ERROR: Create TX thread");
         }
 
         if (pthread_create(&send_highprio_thread_id, NULL, send_highprio_thread, NULL) < 0) {
-          perror("***** ERROR: Create SendHighPrio thread");
+          t_perror("***** ERROR: Create SendHighPrio thread");
         }
 
         if (pthread_create(&mic_thread_id, NULL, mic_thread, NULL) < 0) {
-          perror("***** ERROR: Create Mic thread");
+          t_perror("***** ERROR: Create Mic thread");
         }
 
         if (pthread_create(&audio_thread_id, NULL, audio_thread, NULL) < 0) {
-          perror("***** ERROR: Create Audio thread");
+          t_perror("***** ERROR: Create Audio thread");
         }
       } else {
-        pthread_join(ddc_specific_thread_id, NULL);
-        pthread_join(duc_specific_thread_id, NULL);
-
-        for (i = 0; i < NUMRECEIVERS; i++) {
-          pthread_join(rx_thread_id[i], NULL);
-        }
-
-        pthread_join(send_highprio_thread_id, NULL);
-        pthread_join(tx_thread_id, NULL);
-        pthread_join(mic_thread_id, NULL);
-        pthread_join(audio_thread_id, NULL);
+        // Clean-Up done below
         break;
       }
     }
@@ -827,7 +814,7 @@ void *highprio_thread(void *data) {
     if (rc != ptt) {
       ptt = rc;
       hp_mod = 1;
-      printf("HP: PTT=%d\n", rc);
+      t_print("HP: PTT=%d\n", rc);
 
       if (ptt == 0) {
         txptr = -1;
@@ -841,7 +828,7 @@ void *highprio_thread(void *data) {
     if (rc != cwx) {
       hp_mod = 1;
       cwx = rc;
-      printf("HP: CWX=%d\n", rc);
+      t_print("HP: CWX=%d\n", rc);
     }
 
     rc = (buffer[5] >> 1) & 0x01;
@@ -849,7 +836,7 @@ void *highprio_thread(void *data) {
     if (rc != dot) {
       hp_mod = 1;
       dot = rc;
-      printf("HP: DOT=%d\n", rc);
+      t_print("HP: DOT=%d\n", rc);
     }
 
     rc = (buffer[5] >> 2) & 0x01;
@@ -857,7 +844,7 @@ void *highprio_thread(void *data) {
     if (rc != dash) {
       hp_mod = 1;
       dash = rc;
-      printf("HP: DASH=%d\n", rc);
+      t_print("HP: DASH=%d\n", rc);
     }
 
     for (i = 0; i < NUMRECEIVERS; i++) {
@@ -869,7 +856,7 @@ void *highprio_thread(void *data) {
 
       if (freq != rxfreq[i]) {
         rxfreq[i] = freq;
-        printf("HP: DDC%d freq: %lu\n", i, freq);
+        t_print("HP: DDC%d freq: %lu\n", i, freq);
       }
     }
 
@@ -881,7 +868,7 @@ void *highprio_thread(void *data) {
 
     if (freq != txfreq) {
       txfreq = freq;
-      printf("HP: DUC freq: %lu\n", freq);
+      t_print("HP: DUC freq: %lu\n", freq);
     }
 
     rc = buffer[345];
@@ -890,7 +877,7 @@ void *highprio_thread(void *data) {
       txdrive = rc;
       hp_mod = 1;
       txdrv_dbl = (double) txdrive * 0.003921568627;
-      printf("HP: TX drive= %d (%f)\n", txdrive, txdrv_dbl);
+      t_print("HP: TX drive= %d (%f)\n", txdrive, txdrv_dbl);
     }
 
     rc = buffer[1400];
@@ -898,7 +885,7 @@ void *highprio_thread(void *data) {
     if (rc != w1400) {
       w1400 = rc;
       hp_mod = 1;
-      printf("HP: Xvtr/Audio enable=%x\n", rc);
+      t_print("HP: Xvtr/Audio enable=%x\n", rc);
     }
 
     rc = buffer[1401];
@@ -906,7 +893,7 @@ void *highprio_thread(void *data) {
     if (rc != ocout) {
       hp_mod = 1;
       ocout = rc;
-      printf("HP: OC outputs=%x\n", rc);
+      t_print("HP: OC outputs=%x\n", rc);
     }
 
     rc = buffer[1402];
@@ -914,7 +901,7 @@ void *highprio_thread(void *data) {
     if (rc != db9) {
       hp_mod = 1;
       db9 = rc;
-      printf("HP: Outputs DB9=%x\n", rc);
+      t_print("HP: Outputs DB9=%x\n", rc);
     }
 
     rc = buffer[1403];
@@ -922,7 +909,7 @@ void *highprio_thread(void *data) {
     if (rc != mercury_atts) {
       hp_mod = 1;
       mercury_atts = rc;
-      printf("HP: MercuryAtts=%x\n", rc);
+      t_print("HP: MercuryAtts=%x\n", rc);
     }
 
     // Store Alex0 and Alex1 bits in separate ints
@@ -936,12 +923,12 @@ void *highprio_thread(void *data) {
         alex1[i] = rc;
         alex1_mod = 1;
         hp_mod = 1;
-        printf("HP: ALEX1 bit%d set to %d\n", i, rc);
+        t_print("HP: ALEX1 bit%d set to %d\n", i, rc);
       }
     }
 
     if (alex1_mod) {
-      printf("HP: ALEX1 bits=0x%08lx\n", freq);
+      t_print("HP: ALEX1 bits=0x%08lx\n", freq);
     }
 
     freq = (buffer[1432] << 24) + (buffer[1433] << 16) + (buffer[1434] << 8) + buffer[1435];
@@ -953,12 +940,12 @@ void *highprio_thread(void *data) {
         alex0[i] = rc;
         alex0_mod = 1;
         hp_mod = 1;
-        printf("HP: ALEX0 bit%d set to %d\n", i, rc);
+        t_print("HP: ALEX0 bit%d set to %d\n", i, rc);
       }
     }
 
     if (alex0_mod) {
-      printf("HP: ALEX0 bits=0x%08lx\n", freq);
+      t_print("HP: ALEX0 bits=0x%08lx\n", freq);
     }
 
     rc = buffer[1442];
@@ -967,7 +954,7 @@ void *highprio_thread(void *data) {
       hp_mod = 1;
       stepatt1 = rc;
       rxatt1_dbl = pow(10.0, -0.05 * stepatt1);
-      printf("HP: StepAtt1 = %d\n", rc);
+      t_print("HP: StepAtt1 = %d\n", rc);
     }
 
     rc = buffer[1443];
@@ -975,7 +962,7 @@ void *highprio_thread(void *data) {
     if (rc != stepatt0) {
       hp_mod = 1;
       stepatt0 = rc;
-      printf("HP: StepAtt0 = %d\n", stepatt0);
+      t_print("HP: StepAtt0 = %d\n", stepatt0);
     }
 
     // rxatt0 depends both on ALEX att and Step Att, so re-calc. it each time
@@ -987,11 +974,25 @@ void *highprio_thread(void *data) {
     }
 
     if (hp_mod) {
-      printf("HP-----------------------------------HP\n");
+      t_print("HP-----------------------------------HP\n");
     }
   }
 
-  printf("HP thread terminating.\n");
+  run = 0;
+  pthread_join(ddc_specific_thread_id, NULL);
+  pthread_join(duc_specific_thread_id, NULL);
+        
+  for (i = 0; i < NUMRECEIVERS; i++) {
+    pthread_join(rx_thread_id[i], NULL);
+  }
+        
+  pthread_join(send_highprio_thread_id, NULL);
+  pthread_join(tx_thread_id, NULL);
+  pthread_join(mic_thread_id, NULL);
+  pthread_join(audio_thread_id, NULL);
+
+  t_print("HP thread terminating.\n");
+  watchdog = 0;
   highprio_thread_id = 0;
   close(sock);
   return NULL;
@@ -1037,7 +1038,7 @@ void *rx_thread(void *data) {
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: RXthread: socket");
+    t_perror("***** ERROR: RXthread: socket");
     return NULL;
   }
 
@@ -1049,14 +1050,13 @@ void *rx_thread(void *data) {
   addr.sin_port = htons(ddc0_port + myddc);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: RXthread: bind");
+    t_perror("***** ERROR: RXthread: bind");
     close(sock);
     return NULL;
   }
 
   noisept = 0;
   clock_gettime(CLOCK_MONOTONIC, &delay);
-  printf("RX thread %d, enabled=%d\n", myddc, ddcenable[myddc]);
   rxptr = NEWRTXLEN / 2 - 8192;
   divptr = 0;
 
@@ -1283,7 +1283,7 @@ void *rx_thread(void *data) {
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &delay, NULL);
 
     if (sendto(sock, buffer, 1444, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
-      perror("***** ERROR: RX thread sendto");
+      t_perror("***** ERROR: RX thread sendto");
       break;
     }
   }
@@ -1308,18 +1308,21 @@ void *tx_thread(void * data) {
   int sample;
   double di, dq;
   double sum;
+#ifdef PACKETLIST
+  long lsum;
+#endif
   struct timeval tv;
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: TX: socket");
+    t_perror("***** ERROR: TX: socket");
     return NULL;
   }
 
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
   setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (void *)&yes, sizeof(yes));
   tv.tv_sec = 0;
-  tv.tv_usec = 10000;
+  tv.tv_usec = 1000;
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv));
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
@@ -1327,7 +1330,7 @@ void *tx_thread(void * data) {
   addr.sin_port = htons(duc0_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: TX: bind");
+    t_perror("***** ERROR: TX: bind");
     close(sock);
     return NULL;
   }
@@ -1338,14 +1341,14 @@ void *tx_thread(void * data) {
     rc = recvfrom(sock, buffer, 1444, 0, (struct sockaddr *)&addr, &lenaddr);
 
     if (rc < 0 && errno != EAGAIN) {
-      perror("***** ERROR: TX thread: recvmsg");
+      t_perror("***** ERROR: TX thread: recvmsg");
       break;
     }
 
     if (rc < 0) { continue; }
 
     if (rc != 1444) {
-      printf("Received TX packet with incorrect length");
+      t_print("Received TX packet with incorrect length");
       break;
     }
 
@@ -1353,7 +1356,7 @@ void *tx_thread(void * data) {
     seqnum = (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
     if (seqnum != 0 && seqnum != seqold + 1 ) {
-      printf("TXthread: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
+      t_print("TXthread: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
     }
 
     p = buffer + 4;
@@ -1363,15 +1366,24 @@ void *tx_thread(void * data) {
       txptr = NEWRTXLEN / 2;
     }
 
+#ifdef PACKETLIST
+    lsum = 0;
+#endif
     for (i = 0; i < 240; i++) {
       // process 240 TX iq samples
       sample  = (int)((signed char) (*p++)) << 16;
       sample |= (int)((((unsigned char)(*p++)) << 8) & 0xFF00);
       sample |= (int)((unsigned char)(*p++) & 0xFF);
       di = (double) sample / 8388608.0;
+#ifdef PACKETLIST
+      lsum = lsum + labs(sample);
+#endif
       sample  = (int)((signed char) (*p++)) << 16;
       sample |= (int)((((unsigned char)(*p++)) << 8) & 0xFF00);
       sample |= (int)((unsigned char)(*p++) & 0xFF);
+#ifdef PACKETLIST
+      lsum = lsum + labs(sample);
+#endif
       dq = (double) sample / 8388608.0;
       //
       //      In P2, the output signal goes through a compensating
@@ -1399,6 +1411,9 @@ void *tx_thread(void * data) {
     // and thus txlevel = txdrv_dbl^2
     //
     txlevel = sum * txdrv_dbl * txdrv_dbl * 0.0041667;
+#ifdef PACKET_LIST
+    t_print("TXIQ-SUM=%ld\n", lsum);
+#endif
   }
 
   close(sock);
@@ -1410,6 +1425,7 @@ void *send_highprio_thread(void *data) {
   struct sockaddr_in addr;
   unsigned long seqnum;
   unsigned char buffer[60];
+  unsigned char uc;
   int yes = 1;
   int rc;
   unsigned char *p;
@@ -1417,7 +1433,7 @@ void *send_highprio_thread(void *data) {
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: SendHighPrio thread: socket");
+    t_perror("***** ERROR: SendHighPrio thread: socket");
     return NULL;
   }
 
@@ -1429,7 +1445,7 @@ void *send_highprio_thread(void *data) {
   addr.sin_port = htons(shp_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: SendHighPrio thread: bind");
+    t_perror("***** ERROR: SendHighPrio thread: bind");
     close(sock);
     return NULL;
   }
@@ -1449,7 +1465,13 @@ void *send_highprio_thread(void *data) {
     *p++ = (seqnum >> 16) & 0xFF;
     *p++ = (seqnum >>  8) & 0xFF;
     *p++ = (seqnum >>  0) & 0xFF;
-    *p++ = 0;    // no PTT and CW attached
+
+    uc = 0;
+    if (radio_ptt)  { uc |= 1; }
+    if (radio_dot ) { uc |= 2; }
+    if (radio_dash) { uc |= 4; }
+
+    *p++ = uc;   // CW states
     *p++ = 0;    // no ADC overload
     *p++ = 0;
     *p++ = txdrive;
@@ -1460,7 +1482,7 @@ void *send_highprio_thread(void *data) {
     buffer[49] = 63; // about 13 volts supply
 
     if (sendto(sock, buffer, 60, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
-      perror("***** ERROR: HP send thread sendto");
+      t_perror("***** ERROR: HP send thread sendto");
       break;
     }
 
@@ -1481,20 +1503,24 @@ void *audio_thread(void *data) {
   socklen_t lenaddr = sizeof(addr);
   unsigned long seqnum, seqold;
   unsigned char buffer[260];
+#ifdef PACKETLIST
+  long lsum;
+#endif
+  int count = 0;
   int yes = 1;
   int rc;
   struct timeval tv;
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: Audio: socket");
+    t_perror("***** ERROR: Audio: socket");
     return NULL;
   }
 
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
   setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (void *)&yes, sizeof(yes));
   tv.tv_sec = 0;
-  tv.tv_usec = 10000;
+  tv.tv_usec = 1000;
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv));
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
@@ -1502,7 +1528,7 @@ void *audio_thread(void *data) {
   addr.sin_port = htons(audio_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: Audio: bind");
+    t_perror("***** ERROR: Audio: bind");
     close(sock);
     return NULL;
   }
@@ -1512,26 +1538,40 @@ void *audio_thread(void *data) {
   while (run) {
     rc = recvfrom(sock, buffer, 260, 0, (struct sockaddr *)&addr, &lenaddr);
 
+    if (count++ > 5000) {
+      watchdog = 1;
+      break;
+    }
+
     if (rc < 0 && errno != EAGAIN) {
-      perror("***** ERROR: Audio thread: recvmsg");
+      t_perror("***** ERROR: Audio thread: recvmsg");
       break;
     }
 
     if (rc < 0) { continue; }
 
     if (rc != 260) {
-      printf("Received Audio packet with incorrect length");
+      t_print("Received Audio packet with incorrect length");
       break;
     }
+
+    count = 0;
 
     seqold = seqnum;
     seqnum = (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
     if (seqnum != 0 && seqnum != seqold + 1 ) {
-      printf("Audio thread: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
+      t_print("Audio thread: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
     }
 
     // just skip the audio samples
+#ifdef PACKET_LIST
+    lsum = 0;
+    for (int  i=4; i<260; i++) {
+      lsum = lsum + buffer[i]*buffer[i];
+    }
+    t_print("AUDIO sum=%ld\n", lsum);
+#endif
   }
 
   close (sock);
@@ -1553,7 +1593,7 @@ void *mic_thread(void *data) {
   sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0) {
-    perror("***** ERROR: Mic thread: socket");
+    t_perror("***** ERROR: Mic thread: socket");
     return NULL;
   }
 
@@ -1565,7 +1605,7 @@ void *mic_thread(void *data) {
   addr.sin_port = htons(mic_port);
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("***** ERROR: Mic thread: bind");
+    t_perror("***** ERROR: Mic thread: bind");
     close(sock);
     return NULL;
   }
@@ -1593,7 +1633,7 @@ void *mic_thread(void *data) {
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &delay, NULL);
 
     if (sendto(sock, buffer, 132, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
-      perror("***** ERROR: Mic thread sendto");
+      t_perror("***** ERROR: Mic thread sendto");
       break;
     }
   }
