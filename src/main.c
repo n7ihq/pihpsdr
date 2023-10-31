@@ -24,6 +24,7 @@
 #include <semaphore.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <wdsp.h>
@@ -449,6 +450,17 @@ int main(int argc, char **argv) {
   GtkApplication *pihpsdr;
   int rc;
   char name[1024];
+  //
+  // The following call will most likely fail (until this program
+  // has the privileges to reduce the nice value). But if the
+  // privilege is there, it may help to run piHPSDR at a lower nice
+  // value.
+  //
+  rc = getpriority(PRIO_PROCESS, 0);
+  t_print("Base priority on startup: %d\n", rc);
+  setpriority(PRIO_PROCESS, 0, -10);
+  rc = getpriority(PRIO_PROCESS, 0);
+  t_print("Base priority after adjustment: %d\n", rc);
   startup(argv[0]);
   snprintf(name, 1024, "org.g0orx.pihpsdr.pid%d", getpid());
   //t_print("gtk_application_new: %s\n",name);

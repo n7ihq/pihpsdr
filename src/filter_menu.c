@@ -221,7 +221,7 @@ static void var_spin_low_cb (GtkWidget *widget, gpointer data) {
     break;
   }
 
-  t_print("%s: new values=(%d:%d)\n", __FUNCTION__, filter->low, filter->high);
+  //t_print("%s: new values=(%d:%d)\n", __FUNCTION__, filter->low, filter->high);
 
   //
   // Change all receivers that use *this* variable filter
@@ -286,7 +286,7 @@ static void var_spin_high_cb (GtkWidget *widget, gpointer data) {
     break;
   }
 
-  t_print("%s: new values=(%d:%d)\n", __FUNCTION__, filter->low, filter->high);
+  //t_print("%s: new values=(%d:%d)\n", __FUNCTION__, filter->low, filter->high);
 
   //
   // Change all receivers that use *this* variable filter

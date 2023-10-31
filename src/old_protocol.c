@@ -535,7 +535,17 @@ static void open_udp_socket() {
   }
 
   optlen = sizeof(optval);
-  optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;
+
+#ifdef IPTOS_DSCP_EF
+  optval = IPTOS_DSCP_EF;
+#else
+  //
+  // On MacOS, IPTOS_DSCP_EF is not defined since the header files
+  // reflect the 1999 standard. Hopefully, these bits (0xB8) are
+  // directly written to the IP header
+  //
+  optval = 0xB8;
+#endif
 
   if (setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen) < 0) {
     t_perror("data_socket: IP_TOS");
@@ -656,7 +666,17 @@ static void open_tcp_socket() {
   }
 
   optlen = sizeof(optval);
-  optval = IPTOS_PREC_CRITIC_ECP | IPTOS_LOWDELAY;
+
+#ifdef IPTOS_DSCP_EF
+  optval = IPTOS_DSCP_EF;
+#else
+  //
+  // On MacOS, IPTOS_DSCP_EF is not defined since the header files
+  // reflect the 1999 standard. Hopefully, these bits (0xB8) are
+  // directly written to the IP header
+  //
+  optval = 0xB8;
+#endif
 
   if (setsockopt(tmp, IPPROTO_IP, IP_TOS, &optval, optlen) < 0) {
     t_perror("tcp_socket: IP_TOS");
