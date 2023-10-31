@@ -1278,6 +1278,15 @@ static void new_protocol_transmit_specific() {
     }
   }
 
+  //
+  // This is a quirk working around a bug in the
+  // FPGA iambic keyer
+  //
+  uint8_t rfdelay = cw_keyer_ptt_delay;
+  uint8_t rfmax = 900 / cw_keyer_speed;
+
+  if (rfdelay > rfmax) { rfdelay = rfmax; }
+
   transmit_specific_buffer[6] = cw_keyer_sidetone_volume & 0x7F;
   transmit_specific_buffer[7] = cw_keyer_sidetone_frequency >> 8;
   transmit_specific_buffer[8] = cw_keyer_sidetone_frequency;
@@ -1285,7 +1294,7 @@ static void new_protocol_transmit_specific() {
   transmit_specific_buffer[10] = cw_keyer_weight;
   transmit_specific_buffer[11] = cw_keyer_hang_time >> 8;
   transmit_specific_buffer[12] = cw_keyer_hang_time;
-  transmit_specific_buffer[13] = cw_keyer_ptt_delay;
+  transmit_specific_buffer[13] = rfdelay;
   transmit_specific_buffer[50] = 0;
 
   if (mic_linein) {

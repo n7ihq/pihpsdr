@@ -2191,8 +2191,17 @@ void ozy_send_buffer() {
         output_buffer[C1] |= 0x01;
       }
 
+      //
+      // This is a quirk working around a bug in the
+      // FPGA iambic keyer
+      //
+      uint8_t rfdelay = cw_keyer_ptt_delay;
+      uint8_t rfmax = 900 / cw_keyer_speed;
+  
+      if (rfdelay > rfmax) { rfdelay = rfmax; }
+
       output_buffer[C2] = cw_keyer_sidetone_volume;
-      output_buffer[C3] = cw_keyer_ptt_delay;
+      output_buffer[C3] = rfdelay;
       command = 8;
       break;
 
