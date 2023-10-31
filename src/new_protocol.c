@@ -1600,17 +1600,22 @@ static gpointer new_protocol_rxaudio_thread(gpointer data) {
     sem_wait(&rxaudio_sem);
 #endif
 
-    if (!running || rxaudio_drain) { continue; }
+    if (!running) { break; }
+
+    nptr = rxaudio_outptr + 256;
+
+    if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
+
+    if (rxaudio_drain) {
+      rxaudio_outptr = nptr;
+      continue;
+    }
 
     audiobuffer[0] = audio_sequence >> 24;
     audiobuffer[1] = audio_sequence >> 16;
     audiobuffer[2] = audio_sequence >> 8;
     audiobuffer[3] = audio_sequence;
     audio_sequence++;
-    nptr = rxaudio_outptr + 256;
-
-    if (nptr >= RXAUDIORINGBUFLEN) { nptr = 0; }
-
     memcpy(&audiobuffer[4], &RXAUDIORINGBUF[rxaudio_outptr], 256);
     MEMORY_BARRIER;
     rxaudio_outptr = nptr;
