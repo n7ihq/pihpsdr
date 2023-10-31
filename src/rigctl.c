@@ -4218,7 +4218,7 @@ int parse_cmd(void *data) {
       } else if (command[5] == ';') {
         // update RX1 AGC
         receiver[0]->agc = atoi(&command[2]) / 5;
-        set_agc(receiver[0], agc);
+        set_agc(receiver[0], receiver[0]->agc);
         g_idle_add(ext_vfo_update, NULL);
       }
 
