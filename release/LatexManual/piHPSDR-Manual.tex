@@ -4511,6 +4511,10 @@ attached or want to use GPIO lines for CW or PTT. \textbf{It is important to dea
 if you compile for a Desktop PC running LINUX!}. This is so because Desktop PCs/Laptops do not
 have GPIO lines. For MacOS, this option is automatically disabled.
 
+If you do not plan to let piHPSDR control any of the GPIO I/O lines you better compile without this option.
+This is especially true if you plan to attach some third-pary hardware (such as sound card ,,hats'')
+to the GPIO.
+
 \rett{MIDI}. (default: enabled)
 This option activates the possiblity to control piHPSDR via MIDI devices. It should normally be
 activated, unless you port piHPSDR to some other operating system without MIDI support.
