@@ -122,7 +122,7 @@ guchar encoder_state_table[7][4] = {
   {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW},
   // R_CCW_NEXT
   {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
-
+};
 #else
 //
 // encoder state table reworked
