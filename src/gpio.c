@@ -91,6 +91,12 @@ enum {
   B
 };
 
+#define DIR_NONE 0x0
+// Clockwise step.
+#define DIR_CW 0x10
+// Anti-clockwise step.
+#define DIR_CCW 0x20
+
 #if 1
 // encoder state table
 #define R_START 0x0
@@ -100,12 +106,6 @@ enum {
 #define R_CCW_BEGIN 0x4
 #define R_CCW_FINAL 0x5
 #define R_CCW_NEXT 0x6
-
-#define DIR_NONE 0x0
-// Clockwise step.
-#define DIR_CW 0x10
-// Anti-clockwise step.
-#define DIR_CCW 0x20
 
 guchar encoder_state_table[7][4] = {
   // R_START
