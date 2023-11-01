@@ -91,6 +91,7 @@ enum {
   B
 };
 
+#if 1
 // encoder state table
 #define R_START 0x0
 #define R_CW_FINAL 0x1
@@ -121,7 +122,50 @@ guchar encoder_state_table[7][4] = {
   {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW},
   // R_CCW_NEXT
   {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
+
+#else
+//
+// encoder state table reworked
+//
+#define R_START     0
+#define R_CW_FINAL  1
+#define R_CW_BEGIN  2
+#define R_CW_NEXT   3
+#define R_CCW_BEGIN 4
+#define R_CCW_FINAL 5
+#define R_CCW_NEXT  6
+#define R_INVALID   7
+
+#define R_STCW  R_START | DIR_CW
+#define R_STCCW R_START | DIR_CCW
+//
+// A clockwise tick has the sequence LL(start) --> HL(cw begin) --> HH(cw next) --> LH(cw final) --> LL(start)
+// A ccw       tick has the sequence LL(start) --> LH(ccw beg)  --> HH(ccw next)--> HL(ccw final)--> LL(start)
+//
+// The tick is generated when returning to the "start" state.
+//
+// A simultaneous change of both the A and B line reaches the "invalid" state from
+// which the only recovery is to reach the start state via a LL signal.
+//
+// If A=L and B=L, the machine advanves to the start state
+// 
+// If and interrupt occurs but the A and B lines are not changed, the state does not change.
+//
+// If there is bouncing, the machine oscillates between two states but does not
+// generate multiple ticks.
+//
+guchar encoder_state_table[8][4] = {
+  /*             Old    |   LL           HL           LH           HH    */
+  /* R_START     (LL) */ {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_INVALID},
+  /* R_CW_FINAL  (LH) */ {R_STCW,     R_INVALID,   R_CW_FINAL,  R_CW_NEXT},
+  /* R_CW_BEGIN  (HL) */ {R_START,    R_CW_BEGIN,  R_INVALID,   R_CW_NEXT},
+  /* R_CW_NEXT   (HH) */ {R_START,    R_CW_BEGIN,  R_CW_FINAL,  R_CW_NEXT},
+  /* R_CCW_BEGIN (LH) */ {R_START,    R_INVALID,   R_CCW_BEGIN, R_CCW_NEXT},
+  /* R_CCW_FINAL (HL) */ {R_STCCW,    R_CCW_FINAL, R_INVALID,   R_CCW_NEXT},
+  /* R_CCW_NEXT  (HH) */ {R_START,    R_CCW_FINAL, R_CCW_BEGIN, R_CCW_NEXT},
+  /* R_INVALID   (XX) */ {R_START,    R_INVALID,   R_INVALID,   R_INVALID},
 };
+#endif
 
 #ifdef GPIO
   char *consumer = "pihpsdr";
