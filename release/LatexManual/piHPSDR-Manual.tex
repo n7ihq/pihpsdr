@@ -250,7 +250,8 @@ when you first start piHPSDR.}
 of this manual.}
 \item[Controller2 V1]{This option is valid for some early prototypes of the "version 2" controller with
 single encoders. This special case is not covered in this manual.}
-\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encocders.
+\item[Controller2 V2]{Choose this if you have a "version 2" piHPSDR controller with double encoders
+on a single shaft.
 This controller is denoted Controller2 in the rest of this manual.}
 \item[G2 Front Panel]{Choose this if you have an ANAN G2 radio with a built-in controller.}
 \end{itemize}
@@ -394,8 +395,9 @@ on the signal strength (red colour is reached for S9). The above
 picture demonstrates the four possible combinations, and in
 the \bltt{Display} menu, you can make your choice. This setting
 refers to both receivers when there are two. Note that the TX
-spectrum can be a filled one or a line spectrum, but that the
-gradient option does not apply.
+spectrum can be a filled one or a line spectrum (to be specified
+in the \bltt{TX} menu), but that there
+is nov gradient option.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Zoom and Pan}
@@ -436,6 +438,11 @@ RX scope, and marked with a thin red line. On the picture
 above, the dial frequency (14.100 MHz) is found in the RX
 panel close to the left edge, and this has been done
 by moving the \rett{Pan} slider.
+
+Note that the TX spectrum scope always has a fixed spectral
+width, namely 24 kHz in non-duplex mode when the TX spectrum
+scope is shown in the main window, and 6 kHz in duplex mode
+when the TX spectrum is shown in a small separate window.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Hide} button}
@@ -909,7 +916,8 @@ program but no re-boot or shutdown takes place, due to missing administrator pri
 \caption{The \bltt{About} menu.}
 \end{figure}
 
-The about menu gives you some information about piHPSDR, first the original author
+The about menu gives you some information about piHPSDR, first the original author,
+John Melton,
 and an (incomplete) list
 of persons who contributed to the code, and then a statement which version of piHPSDR
 is working here, and when it has been compiled. Here you also find the version number of the WDSP
@@ -917,7 +925,7 @@ is working here, and when it has been compiled. Here you also find the version n
 running under the hood, and which does nearly all of the signal processing. If you file a bug report,
 this is very important information so you should always include a screen shot of the \bltt{About}
 menu when reporting problems. Of particular importance is the so-called \rett{commit},
-this hexadecimal number (here: 1eeb375) identifies the exact status of the source code files
+this hexadecimal number (here: 8339957) identifies the exact status of the source code files
 when the program has been compiled. If a string \texttt{-dirty} is appended to the version number
 (here: 2.3-DL1YCF, that is, not dirty) this means that one or more files have been locally  modified
 and do not match the commit, and problem reports from a ,,dirty'' version are difficult to handle.
@@ -1286,11 +1294,15 @@ the spectrum scope. Lines are drawn at dBm values that are multiples of the step
 size.
 
 \rett{Waterfall High:} This is the RX dBm value that will lead to the brightest
-color (yellow) in the waterfall.
+color (yellow) in the waterfall. If the \rett{Waterfall Automatic:} box is checked
+(see below), this spin button is grayed out and inactive.
 
 \rett{Waterfall Low:} This is the RX dBm value below which the waterfall will be black.
+If the \rett{Waterfall Automatic:} box is checked
+(see below), this spin button is grayed out and inactive.
 
-\rett{Waterfall Automatic:} If this box is checked, the \rett{Waterfall High} and
+\rett{Waterfall Automatic:} If this box is checked (as is the case in
+Fig. \ref{fig:DisplayMenu}), the \rett{Waterfall High} and
 \rett{Waterfall Low} controls are inactive and the values are not used. Instead,
 the lowest and highest signal strength in the RX spectrum are automaticall determined
 in each update of the waterfall, and these min/max values
