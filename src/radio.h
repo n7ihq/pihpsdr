@@ -163,7 +163,6 @@ extern DAC dac[2];
 
 extern int locked;
 
-extern long long step;
 extern int rit_increment;
 
 extern gboolean duplex;

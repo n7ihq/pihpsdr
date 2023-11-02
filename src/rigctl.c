@@ -927,12 +927,12 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // sets or reads the Step Size
       if (command[4] == ';') {
         // read the step size
-        snprintf(reply, 256, "ZZAC%02d;", vfo_get_stepindex());
+        snprintf(reply, 256, "ZZAC%02d;", vfo_get_stepindex(VFO_A));
         send_resp(client->fd, reply) ;
       } else if (command[6] == ';') {
         // set the step size
         int i = atoi(&command[4]) ;
-        vfo_set_step_from_index(i);
+        vfo_set_step_from_index(VFO_A, i);
         g_idle_add(ext_vfo_update, NULL);
       } else {
       }
@@ -4241,9 +4241,9 @@ int parse_cmd(void *data) {
         tx_ctcss_en = transmitter->ctcss_enabled;
       }
 
-      snprintf(reply, 256, "IF%011lld%04lld%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
+      snprintf(reply, 256, "IF%011lld%04d%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
                vfo[VFO_A].ctun ? vfo[VFO_A].ctun_frequency : vfo[VFO_A].frequency,
-               step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, tx_xit_en,
+               vfo[VFO_A].step, vfo[VFO_A].rit, vfo[VFO_A].rit_enabled, tx_xit_en,
                0, 0, isTransmitting(), mode, 0, 0, split, tx_ctcss_en ? 2 : 0, tx_ctcss, 0);
       send_resp(client->fd, reply);
     }

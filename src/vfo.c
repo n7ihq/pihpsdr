@@ -66,13 +66,23 @@ static GtkWidget *vfo_panel;
 static cairo_surface_t *vfo_surface = NULL;
 
 int steps[] = {1, 10, 25, 50, 100, 250, 500, 1000, 5000, 9000, 10000, 100000, 250000, 500000, 1000000};
-char *step_labels[] = {"1Hz", "10Hz", "25Hz", "50Hz", "100Hz", "250Hz", "500Hz", "1kHz", "5kHz", "9kHz", "10kHz", "100kHz", "250kHz", "500kHz", "1MHz"};
+char *step_labels[] = {"1Hz", "10Hz", "25Hz", "50Hz", "100Hz", "250Hz", "500Hz", "1kHz", 
+                       "5kHz", "9kHz", "10kHz", "100kHz", "250kHz", "500kHz", "1MHz"};
 
-//
-// Move frequency f by n steps, adjust to multiple of step size
-// This should replace *all* divisions by the step size
-//
-#define ROUND(f,n)  (((f+step/2)/step + n)*step)
+inline long long ROUND(long long freq, int nsteps, int step) {
+  //
+  // Move frequency f by n steps, adjust to multiple of step size
+  // This should replace *all* divisions by the step size
+  // If nsteps is zero, this is simply rounding.
+  //
+  long  long f;
+
+  f = (freq + step/2)/step;
+  f = f + nsteps;
+  f = f * step;
+
+  return f;
+}
 
 struct _vfo vfo[MAX_VFOS];
 struct _mode_settings mode_settings[MODES];
@@ -210,6 +220,7 @@ void vfoSaveState() {
     SetPropI1("vfo.%d.filter", i,           vfo[i].filter);
     SetPropI1("vfo.%d.cw_apf", i,           vfo[i].cwAudioPeakFilter);
     SetPropI1("vfo.%d.deviation", i,        vfo[i].deviation);
+    SetPropI1("vfo.%d.step", i,             vfo[i].step);
   }
 
   modesettingsSaveState();
@@ -249,6 +260,7 @@ void vfoRestoreState() {
     vfo[i].xit               = 0;
     vfo[i].ctun              = 0;
     vfo[i].deviation         = 2500;
+    vfo[i].step              = 100;
     GetPropI1("vfo.%d.band", i,             vfo[i].band);
     GetPropI1("vfo.%d.frequency", i,        vfo[i].frequency);
     GetPropI1("vfo.%d.ctun", i,             vfo[i].ctun);
@@ -263,6 +275,7 @@ void vfoRestoreState() {
     GetPropI1("vfo.%d.filter", i,           vfo[i].filter);
     GetPropI1("vfo.%d.cw_apf", i,           vfo[i].cwAudioPeakFilter);
     GetPropI1("vfo.%d.deviation", i,        vfo[i].deviation);
+    GetPropI1("vfo.%d.step", i,             vfo[i].step);
 
     // Sanity check: if !ctun, offset must be zero
     if (!vfo[i].ctun) {
@@ -326,7 +339,7 @@ void vfo_apply_mode_settings(RECEIVER *rx) {
   rx_equalizer[1]      = mode_settings[m].rxeq[1];
   rx_equalizer[2]      = mode_settings[m].rxeq[2];
   rx_equalizer[3]      = mode_settings[m].rxeq[3];
-  step                 = mode_settings[m].step;
+  vfo[id].step         = mode_settings[m].step;
 
   //
   // Transmitter-specific settings are only changed if this VFO
@@ -623,11 +636,12 @@ int vfo_get_step_from_index(int index) {
   return steps[index];
 }
 
-int vfo_get_stepindex() {
+int vfo_get_stepindex(int id) {
   //
   // return index of current step size in steps[] array
   //
   int i;
+  int step = vfo[id].step;
 
   for (i = 0; i < STEPS; i++) {
     if (steps[i] == step) { break; }
@@ -643,7 +657,8 @@ int vfo_get_stepindex() {
   return i;
 }
 
-void vfo_set_step_from_index(int index) {
+void vfo_set_step_from_index(int id, int index) {
+  CLIENT_MISSING;
   //
   // Set VFO step size to steps[index], with range checking
   //
@@ -651,19 +666,10 @@ void vfo_set_step_from_index(int index) {
 
   if (index >= STEPS) { index = STEPS - 1; }
 
-  vfo_set_stepsize(steps[index]);
-}
-
-void vfo_set_stepsize(int newstep) {
-  CLIENT_MISSING;
-  //
-  // Set current VFO step size.
-  // and store the value in mode_settings of the current mode
-  //
-  int id = active_receiver->id;
+  int step = steps[index];
   int m = vfo[id].mode;
-  step = newstep;
-  mode_settings[m].step = newstep;
+  vfo[id].step = step;
+  mode_settings[m].step = step;
 }
 
 void vfo_step(int steps) {
@@ -696,8 +702,8 @@ void vfo_id_step(int id, int steps) {
       }
 
       long long frequency = vfo[id].frequency;
-      long long rx_low = ROUND(vfo[id].ctun_frequency, steps) + myrx->filter_low;
-      long long rx_high = ROUND(vfo[id].ctun_frequency, steps) + myrx->filter_high;
+      long long rx_low = ROUND(vfo[id].ctun_frequency, steps, vfo[id].step) + myrx->filter_low;
+      long long rx_high = ROUND(vfo[id].ctun_frequency, steps, vfo[id].step) + myrx->filter_high;
       long long half = (long long)myrx->sample_rate / 2LL;
       long long min_freq = frequency - half;
       long long max_freq = frequency + half;
@@ -709,11 +715,11 @@ void vfo_id_step(int id, int steps) {
       }
 
       delta = vfo[id].ctun_frequency;
-      vfo[id].ctun_frequency = ROUND(vfo[id].ctun_frequency, steps);
+      vfo[id].ctun_frequency = ROUND(vfo[id].ctun_frequency, steps, vfo[id].step);
       delta = vfo[id].ctun_frequency - delta;
     } else {
       delta = vfo[id].frequency;
-      vfo[id].frequency = ROUND(vfo[id].frequency, steps);
+      vfo[id].frequency = ROUND(vfo[id].frequency, steps, vfo[id].step);
       delta = vfo[id].frequency - delta;
     }
 
@@ -815,7 +821,7 @@ void vfo_id_move(int id, long long hz, int round) {
       vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
 
       if (round && (vfo[id].mode != modeCWL && vfo[id].mode != modeCWU)) {
-        vfo[id].ctun_frequency = ROUND(vfo[id].ctun_frequency, 0);
+        vfo[id].ctun_frequency = ROUND(vfo[id].ctun_frequency, 0, vfo[id].step);
       }
 
       delta = vfo[id].ctun_frequency - delta;
@@ -825,7 +831,7 @@ void vfo_id_move(int id, long long hz, int round) {
       vfo[id].frequency = vfo[id].frequency - hz;
 
       if (round && (vfo[id].mode != modeCWL && vfo[id].mode != modeCWU)) {
-        vfo[id].frequency = ROUND(vfo[id].frequency, 0);
+        vfo[id].frequency = ROUND(vfo[id].frequency, 0, vfo[id].step);
       }
 
       delta = vfo[id].frequency - delta;
@@ -905,7 +911,7 @@ void vfo_id_move_to(int id, long long hz) {
   long long f;
 
   if (vfo[id].mode != modeCWL && vfo[id].mode != modeCWU) {
-    offset = ROUND(hz, 0);
+    offset = ROUND(hz, 0, vfo[id].step);
   }
 
   f = (vfo[id].frequency - half) + offset + ((double)myrx->pan * myrx->hz_per_pixel);
@@ -1610,7 +1616,7 @@ void vfo_update() {
     int s;
 
     for (s = 0; s < STEPS; s++) {
-      if (steps[s] == step) { break; }
+      if (steps[s] == vfo[id].step) { break; }
     }
 
     if (s >= STEPS) { s = 0; }

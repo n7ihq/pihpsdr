@@ -193,8 +193,6 @@ DAC dac[2];                            // only first entry used
 
 int locked = 0;
 
-long long step = 100;
-
 int rit_increment = 10;
 
 int cw_keys_reversed = 0;              // 0=disabled 1=enabled
@@ -2393,7 +2391,6 @@ void radioRestoreState() {
   GetPropI0("mic_input_xlr",                                 mic_input_xlr);
   GetPropI0("tx_filter_low",                                 tx_filter_low);
   GetPropI0("tx_filter_high",                                tx_filter_high);
-  GetPropI0("step",                                          step);
   GetPropI0("cw_keys_reversed",                              cw_keys_reversed);
   GetPropI0("cw_keyer_speed",                                cw_keyer_speed);
   GetPropI0("cw_keyer_mode",                                 cw_keyer_mode);
@@ -2603,7 +2600,6 @@ void radioSaveState() {
   SetPropI0("mic_input_xlr",                                 mic_input_xlr);
   SetPropI0("tx_filter_low",                                 tx_filter_low);
   SetPropI0("tx_filter_high",                                tx_filter_high);
-  SetPropI0("step",                                          step);
   SetPropI0("cw_keys_reversed",                              cw_keys_reversed);
   SetPropI0("cw_keyer_speed",                                cw_keyer_speed);
   SetPropI0("cw_keyer_mode",                                 cw_keyer_mode);

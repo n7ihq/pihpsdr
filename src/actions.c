@@ -1389,8 +1389,8 @@ int process_action(void *data) {
 
   case VFO_STEP_MINUS:
     if (a->mode == PRESSED) {
-      i = vfo_get_stepindex();
-      vfo_set_step_from_index(--i);
+      i = vfo_get_stepindex(active_receiver->id);
+      vfo_set_step_from_index(active_receiver->id, --i);
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -1398,8 +1398,8 @@ int process_action(void *data) {
 
   case VFO_STEP_PLUS:
     if (a->mode == PRESSED) {
-      i = vfo_get_stepindex();
-      vfo_set_step_from_index(++i);
+      i = vfo_get_stepindex(active_receiver->id);
+      vfo_set_step_from_index(active_receiver->id, ++i);
       g_idle_add(ext_vfo_update, NULL);
     }
 

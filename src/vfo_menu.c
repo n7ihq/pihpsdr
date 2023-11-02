@@ -37,7 +37,7 @@
 #include "ext.h"
 #include "radio_menu.h"
 
-static gint v;  //  VFO the menu is referring to
+static gint myvfo;  //  VFO the menu is referring to
 static GtkWidget *dialog = NULL;
 static GtkWidget *label;
 
@@ -71,7 +71,7 @@ static void cleanup() {
     gtk_widget_destroy(tmp);
     sub_menu = NULL;
     active_menu  = NO_MENU;
-    num_pad(-1, v);
+    num_pad(-1, myvfo);
   }
 }
 
@@ -83,10 +83,10 @@ static gboolean close_cb () {
 static gboolean num_pad_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int val = GPOINTER_TO_INT(data);
   char output[64];
-  num_pad(btn_actions[val], v);
+  num_pad(btn_actions[val], myvfo);
 
-  if (vfo[v].entered_frequency[0]) {
-    snprintf(output, 64, "<big><b>%s</b></big>", vfo[v].entered_frequency);
+  if (vfo[myvfo].entered_frequency[0]) {
+    snprintf(output, 64, "<big><b>%s</b></big>", vfo[myvfo].entered_frequency);
   } else {
     snprintf(output, 64, "<big><b>0</b></big>");
   }
@@ -114,7 +114,7 @@ static void rit_cb(GtkComboBox *widget, gpointer data) {
 }
 
 static void vfo_cb(GtkComboBox *widget, gpointer data) {
-  vfo_set_step_from_index(gtk_combo_box_get_active(widget));
+  vfo_set_step_from_index(myvfo, gtk_combo_box_get_active(widget));
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -130,7 +130,7 @@ static void duplex_cb(GtkWidget *widget, gpointer data) {
 
 static void ctun_cb(GtkWidget *widget, gpointer data) {
   int state = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
-  vfo_ctun_update(v, state);
+  vfo_ctun_update(myvfo, state);
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -156,11 +156,11 @@ static void lock_cb(GtkWidget *widget, gpointer data) {
 
 void vfo_menu(GtkWidget *parent, int id) {
   int i, row;
-  v = id; // store this for cleanup()
+  myvfo = id; // store this for cleanup()
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
   char title[64];
-  snprintf(title, 64, "piHPSDR - VFO %s", id == 0 ? "A" : "B");
+  snprintf(title, 64, "piHPSDR - VFO %s", myvfo == 0 ? "A" : "B");
   GtkWidget *headerbar = gtk_header_bar_new();
   gtk_window_set_titlebar(GTK_WINDOW(dialog), headerbar);
   gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(headerbar), TRUE);
@@ -228,7 +228,7 @@ void vfo_menu(GtkWidget *parent, int id) {
   gtk_widget_set_halign(vfo_label, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), vfo_label, 3, 3, 1, 1);
   GtkWidget *vfo_b = gtk_combo_box_text_new();
-  int ind = vfo_get_stepindex();
+  int ind = vfo_get_stepindex(myvfo);
 
   for (i = 0; i < STEPS; i++) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(vfo_b), NULL, step_labels[i]);
@@ -255,7 +255,7 @@ void vfo_menu(GtkWidget *parent, int id) {
   row++;
   GtkWidget *ctun_b = gtk_check_button_new_with_label("CTUN");
   gtk_widget_set_name(ctun_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctun_b), vfo[id].ctun);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctun_b), vfo[myvfo].ctun);
   gtk_grid_attach(GTK_GRID(grid), ctun_b, 3, row, 2, 1);
   g_signal_connect(ctun_b, "toggled", G_CALLBACK(ctun_cb), NULL);
   row++;
