@@ -316,17 +316,19 @@ void rx_menu(GtkWidget *parent) {
     }
   }
 
+  if (row < 4) { row = 4;}
+
   GtkWidget *mute_audio_b = gtk_check_button_new_with_label("Mute when not active");
   gtk_widget_set_name(mute_audio_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_audio_b), active_receiver->mute_when_not_active);
   gtk_widget_show(mute_audio_b);
-  gtk_grid_attach(GTK_GRID(grid), mute_audio_b, 0, row++, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), mute_audio_b, 0, row, 2, 1);
   g_signal_connect(mute_audio_b, "toggled", G_CALLBACK(mute_audio_cb), NULL);
-  GtkWidget *mute_radio_b = gtk_check_button_new_with_label("Mute audio");
+  GtkWidget *mute_radio_b = gtk_check_button_new_with_label("Mute Audio to Radio");
   gtk_widget_set_name(mute_radio_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_radio_b), active_receiver->mute_radio);
   gtk_widget_show(mute_radio_b);
-  gtk_grid_attach(GTK_GRID(grid), mute_radio_b, 0, row++, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), mute_radio_b, 2, row, 1, 1);
   g_signal_connect(mute_radio_b, "toggled", G_CALLBACK(mute_radio_cb), NULL);
 
   if (n_output_devices > 0) {
@@ -360,9 +362,9 @@ void rx_menu(GtkWidget *parent) {
     my_combo_attach(GTK_GRID(grid), output, 2, 2, 1, 1);
     g_signal_connect(output, "changed", G_CALLBACK(local_output_changed_cb), NULL);
     GtkWidget *channel = gtk_combo_box_text_new();
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(channel), NULL, "STEREO");
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(channel), NULL, "LEFT");
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(channel), NULL, "RIGHT");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(channel), NULL, "Stereo");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(channel), NULL, "Left");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(channel), NULL, "Right");
 
     switch (active_receiver->audio_channel) {
     case STEREO:

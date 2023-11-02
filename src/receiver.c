@@ -1341,16 +1341,7 @@ static void process_rx_buffer(RECEIVER *rx) {
     }
 
     if (rx->local_audio) {
-      //
-      // I received many comments on the "expected" function of the
-      // "Mute audio to radio" checkbox in the RX menu.
-      //
-      // 1    vote  was :  mute_radio should *only* mute the samples sent to the radio
-      // Many votes were: mute_radio should *also* mute the samples sent to local audio
-      //
-      // So this is now reverted to the original situation, respecting the "majority"
-      //
-      if ((rx != active_receiver && rx->mute_when_not_active) || rx->mute_radio) {
+      if (rx != active_receiver && rx->mute_when_not_active) {
         left_sample = 0.0;
         right_sample = 0.0;
       } else {
@@ -1380,6 +1371,11 @@ static void process_rx_buffer(RECEIVER *rx) {
 #endif
 
     if (rx == active_receiver) {
+      //
+      // Note the "Mute Radio" checkbox in the RX menu mutes the
+      // audio in the HPSDR data stream *only*, local audio is
+      // not affected.
+      //
       switch (protocol) {
       case ORIGINAL_PROTOCOL:
         if (rx->mute_radio) {
