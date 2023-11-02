@@ -97,75 +97,90 @@ enum {
 // Anti-clockwise step.
 #define DIR_CCW 0x20
 
-#if 1
-// encoder state table
-#define R_START 0x0
-#define R_CW_FINAL 0x1
-#define R_CW_BEGIN 0x2
-#define R_CW_NEXT 0x3
-#define R_CCW_BEGIN 0x4
-#define R_CCW_FINAL 0x5
-#define R_CCW_NEXT 0x6
+//
+// Encoder states for a "full cycle"
+//
+#define R_START     0x00
+#define R_CW_FINAL  0x01
+#define R_CW_BEGIN  0x02
+#define R_CW_NEXT   0x03
+#define R_CCW_BEGIN 0x04
+#define R_CCW_FINAL 0x05
+#define R_CCW_NEXT  0x06
 
-guchar encoder_state_table[7][4] = {
-  // R_START
-  {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},
-  // R_CW_FINAL
-  {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | DIR_CW},
-  // R_CW_BEGIN
-  {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},
-  // R_CW_NEXT
-  {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},
-  // R_CCW_BEGIN
-  {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},
-  // R_CCW_FINAL
-  {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW},
-  // R_CCW_NEXT
-  {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
-};
-#else
 //
-// encoder state table reworked
+// Encoder states for a "half cycle"
 //
-#define R_START     0
-#define R_CW_FINAL  1
-#define R_CW_BEGIN  2
-#define R_CW_NEXT   3
-#define R_CCW_BEGIN 4
-#define R_CCW_FINAL 5
-#define R_CCW_NEXT  6
-#define R_INVALID   7
+#define R_START1    0x07
+#define R_START0    0x08
+#define R_CW_BEG1   0x09
+#define R_CW_BEG0   0x0A
+#define R_CCW_BEG1  0x0B
+#define R_CCW_BEG0  0x0C
 
-#define R_STCW  R_START | DIR_CW
-#define R_STCCW R_START | DIR_CCW
 //
-// A clockwise tick has the sequence LL(start) --> HL(cw begin) --> HH(cw next) --> LH(cw final) --> LL(start)
-// A ccw       tick has the sequence LL(start) --> LH(ccw beg)  --> HH(ccw next)--> HL(ccw final)--> LL(start)
+// Few general remarks on the state machine:
+// - if the levels do not change, the machinestate does not change
+// - if there is bouncing on one input line, the machine oscillates
+//   between two "adjacent" states but generates at most one tick
+// - if both input lines change level, move to a suitable new
+//   starting point but do not generate a tick
+// - if one or both of the AB lines are inverted, the same cycles
+//   are passed but with a different starting point. Therefore,
+//   it still works.
 //
-// The tick is generated when returning to the "start" state.
-//
-// A simultaneous change of both the A and B line reaches the "invalid" state from
-// which the only recovery is to reach the start state via a LL signal.
-//
-// If A=L and B=L, the machine advanves to the start state
-// 
-// If and interrupt occurs but the A and B lines are not changed, the state does not change.
-//
-// If there is bouncing, the machine oscillates between two states but does not
-// generate multiple ticks.
-//
-guchar encoder_state_table[8][4] = {
-  /*             Old    |   LL           HL           LH           HH    */
-  /* R_START     (LL) */ {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_INVALID},
-  /* R_CW_FINAL  (LH) */ {R_STCW,     R_INVALID,   R_CW_FINAL,  R_CW_NEXT},
-  /* R_CW_BEGIN  (HL) */ {R_START,    R_CW_BEGIN,  R_INVALID,   R_CW_NEXT},
-  /* R_CW_NEXT   (HH) */ {R_START,    R_CW_BEGIN,  R_CW_FINAL,  R_CW_NEXT},
-  /* R_CCW_BEGIN (LH) */ {R_START,    R_INVALID,   R_CCW_BEGIN, R_CCW_NEXT},
-  /* R_CCW_FINAL (HL) */ {R_STCCW,    R_CCW_FINAL, R_INVALID,   R_CCW_NEXT},
-  /* R_CCW_NEXT  (HH) */ {R_START,    R_CCW_FINAL, R_CCW_BEGIN, R_CCW_NEXT},
-  /* R_INVALID   (XX) */ {R_START,    R_INVALID,   R_INVALID,   R_INVALID},
+guchar encoder_state_table[13][4] = {
+  //
+  // A "full cycle" has the following state changes
+  // (first line: line levels AB, 1=pressed, 0=released,
+  //  2nd   line: state names
+  //
+  // clockwise:  11   -->   10   -->    00    -->    01     -->  11
+  //            Start --> CWbeg  -->  CWnext  -->  CWfinal  --> Start
+  //
+  // ccw:        11   -->   01    -->   00     -->   10      -->  11
+  //            Start --> CCWbeg  --> CCWnext  --> CCWfinal  --> Start
+  //
+  // Emit the "tick" when moving from "final" to "start".
+  //
+  //                   00           10           01          11
+  // -----------------------------------------------------------------------------
+  /* R_START     */ {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},
+  /* R_CW_FINAL  */ {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | DIR_CW},
+  /* R_CW_BEGIN  */ {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},
+  /* R_CW_NEXT   */ {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},
+  /* R_CCW_BEGIN */ {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},
+  /* R_CCW_FINAL */ {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW},
+  /* R_CCW_NEXT  */ {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
+  //
+  // The same sequence can be interpreted as two "half cycles"
+  //
+  // clockwise1:   11    -->   10   -->   00
+  //             Start1  --> CWbeg1 --> Start0
+  //
+  // clockwise2:   00    -->   01   -->   11
+  //             Start0  --> CWbeg0 --> Start1
+  //
+  // ccw1:         11    -->   01    -->   00
+  //             Start1  --> CCWbeg1 --> Start0
+  //
+  // ccw2:         00    -->   10    -->   11
+  //             Start0  --> CCWbeg0 --> Start1
+  //
+  // If both lines change, this is interpreted as a two-step move
+  // without changing the orientation and without emitting a "tick".
+  //
+  // Emit the "tick" each time when moving from "beg" to "start".
+  //
+  //                   00                    10          01         11
+  // -----------------------------------------------------------------------------
+  /* R_START1    */ {R_START0,           R_CW_BEG1,  R_CCW_BEG1, R_START1},
+  /* R_START0    */ {R_START0,           R_CCW_BEG0, R_CW_BEG0,  R_START1},
+  /* R_CW_BEG1   */ {R_START0 | DIR_CW,  R_CW_BEG1,  R_CW_BEG0,  R_START1},
+  /* R_CW_BEG0   */ {R_START0,           R_CW_BEG1,  R_CW_BEG0,  R_START1 | DIR_CW},
+  /* R_CCW_BEG1  */ {R_START0 | DIR_CCW, R_CCW_BEG0, R_CCW_BEG1, R_START1},
+  /* R_CCW_BEG0  */ {R_START0,           R_CCW_BEG0, R_CCW_BEG1, R_START1 | DIR_CCW},
 };
-#endif
 
 #ifdef GPIO
   char *consumer = "pihpsdr";
@@ -223,18 +238,18 @@ static const ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
 };
 
 static const ENCODER encoders_controller2_v2[MAX_ENCODERS] = {
-  {TRUE, TRUE,  5, 1,  6, 1, 0, AGC_GAIN_RX1, R_START, TRUE,  TRUE, 26, 1, 20, 1, 0, AF_GAIN_RX1, R_START, TRUE,  TRUE, 22, RX1,            0L}, //ENC2
-  {TRUE, TRUE,  9, 1,  7, 1, 0, AGC_GAIN_RX2, R_START, TRUE,  TRUE, 21, 1,  4, 1, 0, AF_GAIN_RX2, R_START, TRUE,  TRUE, 27, RX2,            0L}, //ENC3
-  {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN,     R_START, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE,   R_START, TRUE,  TRUE, 23, DIV,            0L}, //ENC4
-  {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,          R_START, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,         R_START, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
+  {TRUE, TRUE,  5, 1,  6, 1, 0, AGC_GAIN_RX1, R_START1, TRUE,  TRUE, 26, 1, 20, 1, 0, AF_GAIN_RX1, R_START1, TRUE,  TRUE, 22, RX1,            0L}, //ENC2
+  {TRUE, TRUE,  9, 1,  7, 1, 0, AGC_GAIN_RX2, R_START1, TRUE,  TRUE, 21, 1,  4, 1, 0, AF_GAIN_RX2, R_START1, TRUE,  TRUE, 27, RX2,            0L}, //ENC3
+  {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN,     R_START1, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE,   R_START1, TRUE,  TRUE, 23, DIV,            0L}, //ENC4
+  {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,          R_START1, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,         R_START1, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
   {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,          R_START, FALSE, TRUE,  0, 0,  0, 0, 0, NONE,        R_START, FALSE, TRUE,  0, NONE,           0L}, //ENC1/VFO
 };
 
 static const ENCODER encoders_g2_frontpanel[MAX_ENCODERS] = {
-  {TRUE, TRUE,  5, 1,  6, 1, 0, DRIVE,    R_START, TRUE,  TRUE, 26, 1, 20, 1, 0, MIC_GAIN,  R_START, TRUE,  TRUE, 22, PS,             0L}, //ENC1
-  {TRUE, TRUE,  9, 1,  7, 1, 0, AGC_GAIN, R_START, TRUE,  TRUE, 21, 1,  4, 1, 0, AF_GAIN,   R_START, TRUE,  TRUE, 27, MUTE,           0L}, //ENC3
-  {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN, R_START, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE, R_START, TRUE,  TRUE, 23, DIV,            0L}, //ENC7
-  {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,      R_START, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,       R_START, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
+  {TRUE, TRUE,  5, 1,  6, 1, 0, DRIVE,    R_START1, TRUE,  TRUE, 26, 1, 20, 1, 0, MIC_GAIN,  R_START1, TRUE,  TRUE, 22, PS,             0L}, //ENC1
+  {TRUE, TRUE,  9, 1,  7, 1, 0, AGC_GAIN, R_START1, TRUE,  TRUE, 21, 1,  4, 1, 0, AF_GAIN,   R_START1, TRUE,  TRUE, 27, MUTE,           0L}, //ENC3
+  {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN, R_START1, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE, R_START1, TRUE,  TRUE, 23, DIV,            0L}, //ENC7
+  {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,      R_START1, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,       R_START1, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
   {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE,  0, 0,  0, 0, 0, 0,         R_START, FALSE, TRUE,  0, NONE,           0L}, //VFO
 };
 
