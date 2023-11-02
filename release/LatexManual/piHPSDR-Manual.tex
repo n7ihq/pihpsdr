@@ -2494,6 +2494,41 @@ such as a beverage antenna which often has a better signal-to-noise
 switchable low-power TX output. This is enabled if \rett{Xvtr} is selected as the RX antenna of RX1.
 The connector used for low-power TX output can also be used for receiving.
 
+\begin{center}
+\fbox{
+\parbox{\textwidth - 1cm}{
+\begin{center}
+\textbf{\color{red} -------- Attention, potential damage! --------}
+\end{center}
+A problem that may potentially damage your external hardware occurs if
+you use one of the antennas Ant1/2/3 for receive and another for transmit.
+This is especially true if you have sensitive hardware (such as an
+active RX antenna) connected to
+the Ant jack used for RX and operate CW with the Key attached to the radio
+with the \rett{CW handled in Radio} box checked in the \bltt{CW} menu.
+
+In this case, starting CW transmission lets the FPGA (processing unit
+inside the radio) put the radio put the
+radio into TX mode, start forming the first RF pulse, and informs the
+host computer running piHPSDR that a RX/TX transition has been made.
+
+Only then, piHPSDR can start telling the radio to switch the relays that
+connect the Ant jacks with the TX circuitry.
+
+As as result, a small part (few milli-secs) of the first RF pulse (dot or dash)
+may appear at the Ant jack used for RX only. If, say, an active antenna is
+connected there, this may well destroy the active antenna.
+
+Even if not using CW this way, it cannot excluded that Ant relay switching
+is so slow that such ,,RF spikes'' appear at an Ant jack intended for RX
+only.
+
+\vspace{0.5cm}
+If possible, use the Ext1/Ext2/Xvtr jacks for connecting active RX antennas.
+
+}
+}
+\end{center}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
