@@ -83,8 +83,6 @@
   #include "MacOS.h"  // emulate clock_gettime on old MacOS systems
 #endif
 
-//#define PACKETLIST  // indicate incoming packets with time-stamp
-
 #define EXTERN
 #include "hpsdrsim.h"
 
@@ -606,8 +604,7 @@ int main(int argc, char *argv[]) {
       }
 
 #ifdef PACKETLIST
-      clock_gettime(CLOCK_MONOTONIC, &ts);
-      t_print("TCP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec / 1000000L));
+      t_print("TCP received\n");
 #endif
       bytes_read = size;
 
@@ -642,8 +639,7 @@ int main(int argc, char *argv[]) {
       if (bytes_read > 0) {
         udp_retries = 0;
 #ifdef PACKETLIST
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        t_print("UDP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec / 1000000L));
+        t_print("UDP received\n");
 #endif
       } else {
         udp_retries++;

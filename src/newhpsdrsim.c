@@ -1411,7 +1411,7 @@ void *tx_thread(void * data) {
     // and thus txlevel = txdrv_dbl^2
     //
     txlevel = sum * txdrv_dbl * txdrv_dbl * 0.0041667;
-#ifdef PACKET_LIST
+#ifdef PACKETLIST
     t_print("TXIQ-SUM=%ld\n", lsum);
 #endif
   }
@@ -1565,7 +1565,7 @@ void *audio_thread(void *data) {
     }
 
     // just skip the audio samples
-#ifdef PACKET_LIST
+#ifdef PACKETLIST
     lsum = 0;
     for (int  i=4; i<260; i++) {
       lsum = lsum + buffer[i]*buffer[i];

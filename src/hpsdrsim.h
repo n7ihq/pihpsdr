@@ -149,3 +149,7 @@ EXTERN int radio_dot;
 EXTERN void t_print(const char *format, ...);
 EXTERN void t_perror(const char *string);
 
+//
+// define PACKETLIST to get info about every packet received
+//
+//#define PACKETLIST
