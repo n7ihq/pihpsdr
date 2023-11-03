@@ -124,7 +124,7 @@ static gboolean minimize_cb(GtkWidget *widget, GdkEventButton *event, gpointer d
   return TRUE;
 }
 
-#ifdef SATURNTEST
+#ifdef SATURN
 static gboolean saturn_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
   saturn_menu(top_window);
@@ -512,7 +512,7 @@ void new_menu() {
     g_signal_connect (xvtr_b, "button-press-event", G_CALLBACK(xvtr_cb), NULL);
     gtk_grid_attach(GTK_GRID(grid), xvtr_b, col, row, 1, 1);
     row++;
-#ifdef SATURNTEST
+#ifdef SATURN
 
     if (have_saturn_xdma) { // only display on the xdma client
       GtkWidget *saturn_b = gtk_button_new_with_label("Saturn");

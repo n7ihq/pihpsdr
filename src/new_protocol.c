@@ -858,16 +858,23 @@ static void new_protocol_high_priority() {
     high_priority_buffer_to_radio[1401] = band->OCrx << 1;
   }
 
-  //
-  //  ANAN-7000/8000 and G2:
-  //                  route TXout to XvtrOut out when using XVTR input
-  //                  (this is the condition also implemented in old_protocol)
-  //                  Note: the firmware does a logical AND with the T/R bit
-  //                  such that upon RX, Xvtr port is input, and on TX, Xvrt port
-  //                  is output if the XVTR_OUT bit is set.
-  //
-  if ((device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) && receiver[0]->alex_antenna == 5) {
-    high_priority_buffer_to_radio[1400] |= ANAN7000_XVTR_OUT;
+  if (device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
+    if (receiver[0]->alex_antenna == 5) {
+      //
+      //                  route TXout to XvtrOut out when using XVTR input
+      //                  (this is the condition also implemented in old_protocol)
+      //                  Note: the firmware does a logical AND with the T/R bit
+      //                  such that upon RX, Xvtr port is input, and on TX, Xvrt port
+      //                  is output if the XVTR_OUT bit is set.
+      //
+      high_priority_buffer_to_radio[1400] |= ANAN7000_XVTR_OUT;
+    }
+    if (mute_spkr_amp) {
+      //
+      // Mute the amplifier of the built-in speakers
+       //
+      high_priority_buffer_to_radio[1400] |= ANAN7000_SPKR_MUTE;
+    }
   }
 
   //
@@ -928,14 +935,50 @@ static void new_protocol_high_priority() {
   case NEW_DEVICE_ORION2:
 
     //
-    //      new ANAN-7000/8000/G2 band-pass RX filters
+    // new ANAN-7000/8000/G2 band-pass RX filters for ADC0 and ADC1
     //
-    //      To support the ANAN-8000 we
-    //      should bypass BPFs while transmitting in PureSignal,
-    //      but this causes unnecessary "relay chatter" on ANAN-7000
-    //      So if it should be done, 20 lines below it is shown how.
+    // If both RX use different ADCs, we just *assume* that RX1 uses ADC0
+    // and RX2 uses ADC1. If both RX use the same ADC, the filters are set
+    // based on the frequency of the active receiver. In the DIVERSITY case
+    // however, RX1 must determine the filters of BOTH ADCs.
     //
-    if (rx1Frequency < 1500000LL) {
+    //
+    // To support the ANAN-8000 we
+    // should bypass BPFs while transmitting in PureSignal,
+    // but this causes unnecessary "relay chatter" on ANAN-7000
+    // So if it should be done, 20 lines below it is shown how.
+    //
+    //
+    // Note that while using DIVERSITY, the second RX filter settings must match
+    // those of the first RX
+    //
+
+    if (diversity_enabled) {
+      rx2Frequency = rx1Frequency;
+    }
+
+    if (receivers > 1) {
+      if (receiver[0]->adc == receiver[1]->adc) {
+        if (active_receiver->id == 1) {
+          //
+          // Dual RX mode and RX2 is active
+          //
+          rx1Frequency = rx2Frequency;
+        } else  {
+          //
+          // RX1 is active
+          //
+          rx2Frequency = rx1Frequency;
+        }
+      } else {
+        //
+        // Single receiver
+        //
+        rx2Frequency = rx1Frequency;
+      }
+    }    
+
+    if (rx1Frequency < 1500000LL || adc0_filter_bypass) {
       alex0 |= ALEX_ANAN7000_RX_BYPASS_BPF;
     } else if (rx1Frequency < 2100000LL) {
       alex0 |= ALEX_ANAN7000_RX_160_BPF;
@@ -952,17 +995,9 @@ static void new_protocol_high_priority() {
     }
 
     //
-    // Note that while using DIVERSITY, the second RX filter settings must match
-    // those of the first RX
-    //
-    if (diversity_enabled) {
-      rx2Frequency = rx1Frequency;
-    }
-
-    //
     //      new ANAN-7000/8000/G2 "Alex1" band-pass RX filters
     //
-    if (rx2Frequency < 1500000LL) {
+    if (rx2Frequency < 1500000LL || adc1_filter_bypass) {
       alex1 |= ALEX_ANAN7000_RX_BYPASS_BPF;
     } else if (rx2Frequency < 2100000LL) {
       alex1 |= ALEX_ANAN7000_RX_160_BPF;
@@ -1004,7 +1039,7 @@ static void new_protocol_high_priority() {
 
     i = 0; // flag used here for "filter bypass"
 
-    if (HPFfreq < 1800000L) { i = 1; }
+    if (HPFfreq < 1800000L || adc0_filter_bypass) { i = 1; }
 
     // Bypass HPFs if using EXT1 for PureSignal feedback!
     if (xmit && transmitter->puresignal && receiver[PS_RX_FEEDBACK]->alex_antenna == 6) { i = 1; }
@@ -1044,6 +1079,9 @@ static void new_protocol_high_priority() {
       if (receiver[1]->adc == 0 && rx2Frequency > rx1Frequency) {
         LPFfreq = rx2Frequency;
       }
+    }
+    if (adc0_filter_bypass) {
+      LPFfreq = 40000000LL;   // disable LPF
     }
   }
 

@@ -122,5 +122,6 @@
 // ANAN7000,8000 specific bits in byte 1400 of the high-priority packet
 //
 #define ANAN7000_XVTR_OUT               0x00000001   //  if PTT is set, Orion-II RF output is routed to the
-//  "XVTR Port" jack
+                                                     //  "XVTR Port" jack (1 = enabled)
+#define ANAN7000_SPKR_MUTE              0x00000002   //  Enable/mute audio (1 = mute)
 #endif

@@ -136,6 +136,7 @@ ACTION_TABLE ActionTable[] = {
   {IF_WIDTH_RX2,        "IF Width\nRX2",        "IFWIDTH2",     MIDI_WHEEL | CONTROLLER_ENCODER},
   {LINEIN_GAIN,         "Linein\nGain",         "LIGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {LOCK,                "Lock",                 "LOCKM",        MIDI_KEY   | CONTROLLER_SWITCH},
+  {MENU_MAIN,           "Main\nMenu",           "MAIN",         MIDI_KEY   | CONTROLLER_SWITCH},
   {MENU_MEMORY,         "Memory\nMenu",         "MEM",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MIC_GAIN,            "Mic Gain",             "MICGAIN",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {MODE_MINUS,          "Mode -",               "MD-",          MIDI_KEY   | CONTROLLER_SWITCH},
@@ -872,6 +873,13 @@ int process_action(void *data) {
   case MENU_FREQUENCY:
     if (a->mode == PRESSED) {
       start_vfo(active_receiver->id);
+    }
+
+    break;
+
+  case MENU_MAIN:
+    if (a->mode == PRESSED) {
+      new_menu();
     }
 
     break;

@@ -69,6 +69,7 @@ bool ThreadError = false;                   // true if a thread reports an error
 bool ServerActive = false;
 bool saturn_server_en = false;
 bool client_enable_tx = false;
+bool HW_Timer_Enable = true;
 
 #define VDISCOVERYSIZE 60                   // discovery packet
 #define VDISCOVERYREPLYSIZE 60              // reply packet
@@ -189,15 +190,15 @@ int MakeSocket(struct ThreadSocketData* Ptr, int DDCid) {
 
 //
 // this runs as its own thread to see if messages have stopped being received.
-// if nomessages in a second, goes back to "inactive" state.
+// if no messages in a second, goes back to "inactive" state.
 //
 void* CheckForActivity(void *arg) {
   while (1) {
-    sleep(1000);                               // wait for 1 second
-    bool PreviouslyActiveState = ServerActive;      // see if active on entry
+    sleep(1000);                                   // wait for 1 second
+    bool PreviouslyActiveState = ServerActive;     // see if active on entry
 
-    if (!NewMessageReceived) {              // if no messages received,
-      ServerActive = false;                    // set back to inactive
+    if (!NewMessageReceived && HW_Timer_Enable) {  // if no messages received,
+      ServerActive = false;                        // set back to inactive
       ReplyAddressSet = false;
       StartBitReceived = false;
 

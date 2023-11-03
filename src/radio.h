@@ -273,6 +273,10 @@ extern GMutex property_mutex;
 extern int hl2_audio_codec;
 extern int anan10E;
 
+extern int adc0_filter_bypass;   // Bypass ADC0 filters on receive
+extern int adc1_filter_bypass;   // Bypass ADC1 filters on receiver  (ANAN-7000/8000/G2)
+extern int mute_spkr_amp;        // Mute audio amplifier in radio    (ANAN-7000, G2)
+
 extern int VFO_WIDTH;
 extern int VFO_HEIGHT;
 extern int METER_WIDTH;

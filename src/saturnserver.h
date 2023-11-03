@@ -63,6 +63,8 @@
 #define VPORTWIDEBAND0 18
 #define VPORTWIDEBAND1 19
 
+extern bool HW_Timer_Enable;
+
 //
 // a type to hold data for each incoming or outgoing data thread
 //

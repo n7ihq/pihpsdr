@@ -73,6 +73,14 @@ static void tx_ant_cb(GtkToggleButton *widget, gpointer data) {
   set_alex_antennas();
 }
 
+static void adc0_filter_bypass_cb(GtkWidget *widget, gpointer data) {
+  adc0_filter_bypass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
+static void adc1_filter_bypass_cb(GtkWidget *widget, gpointer data) {
+  adc1_filter_bypass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 #ifdef SOAPYSDR
 static void adc0_antenna_cb(GtkComboBox *widget, gpointer data) {
   ADC *myadc = (ADC *)data;
@@ -160,6 +168,22 @@ static void show_hf() {
       g_signal_connect(txcombo, "changed", G_CALLBACK(tx_ant_cb), GINT_TO_POINTER(i));
       col++;
       col++;
+    }
+  }
+  row++;   
+
+  if (filter_board == ALEX) {
+    GtkWidget *adc0_filter_bypass_b = gtk_check_button_new_with_label("Bypass ADC0 RX filters");
+    gtk_widget_set_name(adc0_filter_bypass_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (adc0_filter_bypass_b), adc0_filter_bypass);
+    gtk_grid_attach(GTK_GRID(mygrid), adc0_filter_bypass_b, 0, row, 3, 1); 
+    g_signal_connect(adc0_filter_bypass_b, "toggled", G_CALLBACK(adc0_filter_bypass_cb), NULL);
+    if (device == DEVICE_ORION2 || device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
+      GtkWidget *adc1_filter_bypass_b = gtk_check_button_new_with_label("Bypass ADC1 RX filters");
+      gtk_widget_set_name(adc1_filter_bypass_b, "boldlabel");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (adc1_filter_bypass_b), adc1_filter_bypass);
+      gtk_grid_attach(GTK_GRID(mygrid), adc1_filter_bypass_b, 4, row, 3, 1); 
+      g_signal_connect(adc1_filter_bypass_b, "toggled", G_CALLBACK(adc1_filter_bypass_cb), NULL);
     }
   }
 

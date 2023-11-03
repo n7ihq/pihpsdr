@@ -1997,6 +1997,11 @@ void ozy_send_buffer() {
         }
       }
 
+      if (!isTransmitting() && adc0_filter_bypass) {
+          output_buffer[C2] |= 0x40; // Manual Filter Selection
+          output_buffer[C3] |= 0x20; // bypass all RX filters
+      }
+
       //
       // If using PureSignal and a feedback to EXT1, we have to manually activate the RX HPF/BPF
       // filters and select "bypass" since the feedback signal must arrive at the board
@@ -2241,6 +2246,14 @@ void ozy_send_buffer() {
 
       if (transmitter->puresignal) {
         output_buffer[C2] |= 0x40;       // Synchronize RX5 and TX frequency on transmit (ANAN-7000)
+      }
+
+      if (adc1_filter_bypass) {
+        //
+        // This becomes only effective if manual filter selection is enabled
+        // and this is only done if the adc0 filter bypass is also selected
+        //
+        output_buffer[C1] |= 0x20; // bypass filters
       }
 
       //
