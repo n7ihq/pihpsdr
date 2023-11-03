@@ -165,8 +165,8 @@ endif
 #
 ##############################################################################
 
-ifeq ($(EXTENDED_NN), ON)
-EXTNR_OPTIONS=-DEXTNR -DNEW_NR_ALGORITHMS
+ifeq ($(EXTENDED_NR), ON)
+EXTNR_OPTIONS=-DEXTNR
 endif
 
 ##############################################################################
