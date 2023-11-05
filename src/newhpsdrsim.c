@@ -706,6 +706,8 @@ void *highprio_thread(void *data) {
   int yes = 1;
   int rc;
   unsigned long freq;
+  uint32_t u32;
+
   int i;
   int alex0_mod, alex1_mod, hp_mod;
   sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -914,10 +916,10 @@ void *highprio_thread(void *data) {
 
     // Store Alex0 and Alex1 bits in separate ints
     alex0_mod = alex1_mod = 0;
-    freq = (buffer[1428] << 24) + (buffer[1429] << 16) + (buffer[1430] << 8) + buffer[1431];
+    u32 = (buffer[1428] << 24) + (buffer[1429] << 16) + (buffer[1430] << 8) + buffer[1431];
 
     for (i = 0; i < 32; i++) {
-      rc = (freq >> i) & 0x01;
+      rc = (u32 >> i) & 0x01;
 
       if (rc != alex1[i]) {
         alex1[i] = rc;
@@ -928,13 +930,13 @@ void *highprio_thread(void *data) {
     }
 
     if (alex1_mod) {
-      t_print("HP: ALEX1 bits=0x%08lx\n", freq);
+      t_print("HP: ALEX1 bits=0x%08lx\n", u32);
     }
 
-    freq = (buffer[1432] << 24) + (buffer[1433] << 16) + (buffer[1434] << 8) + buffer[1435];
+    u32 = (buffer[1432] << 24) + (buffer[1433] << 16) + (buffer[1434] << 8) + buffer[1435];
 
     for (i = 0; i < 32; i++) {
-      rc = (freq >> i) & 0x01;
+      rc = (u32 >> i) & 0x01;
 
       if (rc != alex0[i]) {
         alex0[i] = rc;
@@ -945,7 +947,7 @@ void *highprio_thread(void *data) {
     }
 
     if (alex0_mod) {
-      t_print("HP: ALEX0 bits=0x%08lx\n", freq);
+      t_print("HP: ALEX0 bits=0x%08lx\n", u32);
     }
 
     rc = buffer[1442];
