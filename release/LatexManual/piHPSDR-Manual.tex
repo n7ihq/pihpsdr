@@ -1059,6 +1059,11 @@ when using a mouse, it is a great helper when using a touch screen. Therefore th
 option is set by default, but you can uncheck it here if you prefer normal
 mouse operation. Note that this option becomes effective when the next menu is opened.
 
+\rett{Mute Spkr Amp} This box only appears on Anan-7000/8000 and G2 radios using protocol 2.
+If checked, the audio amplifier driving the speakers (either the speaker jacks in the
+back panel, or the built-in speakers) is disabled. This does not affect the audio signal
+at the headphone jack.
+
 \rett{Frequency Calibration} Here you can set a frequency offset (in Hz). This offset
 will be added to all frequencies sent to the radio. This means that if you discover that
 a reference signal occurs in your RX panel at 10001 kHz where it should occur at 10000
@@ -1702,13 +1707,31 @@ for some legacy HPSDR boards which had a switch-able RX preamp.
 \rett{Mute when not active}. If checked, the audio from this receiver is muted when
 it is not the active receiver.
 
-\rett{Mute audio}. If checked, the audio from this receiver is muted, no matter whether
+\rett{Mute Audio to Radio}. If checked, the audio from this receiver is muted, no matter whether
 it is active or not.
+
+\rett{Bypass ADC0 RX filters}. This box is only shown if the ALEX filter board
+is selected (see the \bltt{Radio} menu). If checked, the filters in the RF frontend for ADC0
+are by-passed during receive. This option will normally only used for radios that
+have band-pass filters in the front end, if one operates two receivers both running
+on ADC0 data on different bands. Without checking this option, only the signals for
+the band of the active receiver will pass. Older radios (up to ANAN-100/200)  have a
+combination of a low-pass and a high-pass filter in the RX path to ADC0. If these
+radios run two receivers, the low-pass filter is selected based on the higher
+of the two RX frequencies, and the high-pass filters is selected based on the
+lower one. This ensures that the signals for both receivers fall into  the filter
+pass band.
+
+\rett{Bypass ADC1 RX filters}. This box is only shown if the RF frontend for ADC1
+features a filter board (ANAN-7000/8000 and G2 radios),
+and if the ALEX filter board
+is selected (see the \bltt{Radio} menu). If checked, the filters in the RF frontend for ADC1
+are by-passed during receive.
 
 \rett{Local Audio Output:} If checked, the audio from this radio is sent to a local
 sound card (or virtual audio cable). The sound card itself is selected in the
-pop-down menu below this check box. One line below, one can select between
-\texttt{STEREO}, \texttt{LEFT} and \texttt{RIGHT}, and select whether the RX
+pop-down menu below this check box. One line further below, one can select between
+\texttt{Stereo}, \texttt{Left} and \texttt{Right}, and select whether the RX
 audio should be sent to both channels or to the left or right channel only.
 
 In the example shown, checking the Local Audio box would send the RX audio
