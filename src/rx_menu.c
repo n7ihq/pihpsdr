@@ -124,6 +124,16 @@ static void mute_radio_cb(GtkWidget *widget, gpointer data) {
   active_receiver->mute_radio = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
 }
 
+static void adc0_filter_bypass_cb(GtkWidget *widget, gpointer data) {
+  adc0_filter_bypass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_high_priority();
+}
+
+static void adc1_filter_bypass_cb(GtkWidget *widget, gpointer data) {
+  adc1_filter_bypass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_high_priority();
+}
+
 //
 // possible the device has been changed:
 // call audo_close_output with old device, audio_open_output with new one
@@ -330,6 +340,22 @@ void rx_menu(GtkWidget *parent) {
   gtk_widget_show(mute_radio_b);
   gtk_grid_attach(GTK_GRID(grid), mute_radio_b, 2, row, 1, 1);
   g_signal_connect(mute_radio_b, "toggled", G_CALLBACK(mute_radio_cb), NULL);
+  row++;
+
+  if (filter_board == ALEX) {
+    GtkWidget *adc0_filter_bypass_b = gtk_check_button_new_with_label("Bypass ADC0 RX filters");
+    gtk_widget_set_name(adc0_filter_bypass_b, "boldlabel");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (adc0_filter_bypass_b), adc0_filter_bypass);
+    gtk_grid_attach(GTK_GRID(grid), adc0_filter_bypass_b, 0, row, 2, 1);
+    g_signal_connect(adc0_filter_bypass_b, "toggled", G_CALLBACK(adc0_filter_bypass_cb), NULL);
+    if (device == DEVICE_ORION2 || device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
+      GtkWidget *adc1_filter_bypass_b = gtk_check_button_new_with_label("Bypass ADC1 RX filters");
+      gtk_widget_set_name(adc1_filter_bypass_b, "boldlabel");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (adc1_filter_bypass_b), adc1_filter_bypass);
+      gtk_grid_attach(GTK_GRID(grid), adc1_filter_bypass_b, 2, row, 1, 1);
+      g_signal_connect(adc1_filter_bypass_b, "toggled", G_CALLBACK(adc1_filter_bypass_cb), NULL);
+    }
+  }
 
   if (n_output_devices > 0) {
     local_audio_b = gtk_check_button_new_with_label("Local Audio Output:");

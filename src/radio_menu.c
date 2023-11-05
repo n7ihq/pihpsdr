@@ -141,6 +141,7 @@ static void touchscreen_cb(GtkWidget *widget, gpointer data) {
 
 static void mute_spkr_amp_cb(GtkWidget *widget, gpointer data) {
   mute_spkr_amp = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  schedule_high_priority();
 }
 
 static void hl2audio_cb(GtkWidget *widget, gpointer data) {
@@ -185,6 +186,7 @@ void setDuplex() {
 static void PA_enable_cb(GtkWidget *widget, gpointer data) {
   pa_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   schedule_general();
+  schedule_high_priority();
 }
 
 static void duplex_cb(GtkWidget *widget, gpointer data) {
