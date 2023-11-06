@@ -146,7 +146,6 @@ typedef struct __attribute__((__packed__)) _radio_data {
   uint16_t supported_receivers;
   uint16_t receivers;
   uint8_t can_transmit;
-  uint64_t step;
   uint8_t split;
   uint8_t sat_mode;
   uint8_t duplex;
@@ -226,6 +225,7 @@ typedef struct __attribute__((__packed__)) _vfo_data {
   uint64_t rit;
   uint64_t lo;
   uint64_t offset;
+  uint64_t step;
 } VFO_DATA;
 
 typedef struct __attribute__((__packed__)) _spectrum_data {

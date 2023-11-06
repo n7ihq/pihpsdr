@@ -65,9 +65,9 @@ static int my_height;
 static GtkWidget *vfo_panel;
 static cairo_surface_t *vfo_surface = NULL;
 
-int steps[] = {1, 10, 25, 50, 100, 250, 500, 1000, 5000, 9000, 10000, 100000, 250000, 500000, 1000000};
+int steps[] = {1, 10, 25, 50, 100, 250, 500, 1000, 5000, 6250, 9000, 10000, 12500, 100000, 250000, 500000, 1000000};
 char *step_labels[] = {"1Hz", "10Hz", "25Hz", "50Hz", "100Hz", "250Hz", "500Hz", "1kHz", 
-                       "5kHz", "9kHz", "10kHz", "100kHz", "250kHz", "500kHz", "1MHz"};
+                       "5kHz", "6.25k", "9kHz", "10kHz", "12.5k", "100kHz", "250kHz", "500kHz", "1MHz"};
 
 inline long long ROUND(long long freq, int nsteps, int step) {
   //

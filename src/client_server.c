@@ -273,7 +273,6 @@ void send_radio_data(const REMOTE_CLIENT *client) {
   radio_data.supported_receivers = htons(radio->supported_receivers);
   radio_data.receivers = htons(receivers);
   radio_data.can_transmit = can_transmit;
-  radio_data.step = htonll(step);
   radio_data.split = split;
   radio_data.sat_mode = sat_mode;
   radio_data.duplex = duplex;
@@ -385,6 +384,7 @@ void send_vfo_data(const REMOTE_CLIENT *client, int v) {
   vfo_data.rit = htonll(vfo[v].rit);
   vfo_data.lo = htonll(vfo[v].lo);
   vfo_data.offset = htonll(vfo[v].offset);
+  vfo_data.step   = htonll(vfo[v].step);
   int bytes_sent = send_bytes(client->socket, (char *)&vfo_data, sizeof(vfo_data));
 
   if (bytes_sent < 0) {
@@ -2060,7 +2060,6 @@ static void *client_thread(void* arg) {
       receivers = ntohs(radio_data.receivers);
       //can_transmit=radio_data.can_transmit;
       can_transmit = 0; // forced temporarily until Client/Server supports transmitters
-      step = ntohll(radio_data.step);
       split = radio_data.split;
       sat_mode = radio_data.sat_mode;
       duplex = radio_data.duplex;
@@ -2216,6 +2215,7 @@ static void *client_thread(void* arg) {
       vfo[v].rit = ntohll(vfo_data.rit);
       vfo[v].lo = ntohll(vfo_data.lo);
       vfo[v].offset = ntohll(vfo_data.offset);
+      vfo[v].step   = ntohll(vfo_data.step);
 
       // when VFO-B is initialized we can create the visual. start the MIDI interface and start the data flowing
       if (v == VFO_B && !remote_started) {

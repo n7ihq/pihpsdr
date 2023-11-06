@@ -95,7 +95,7 @@ struct _mode_settings {
 
 extern struct _mode_settings mode_settings[];
 
-#define STEPS 15
+#define STEPS 17
 extern char *step_labels[];
 
 extern GtkWidget* vfo_init(int width, int height);
