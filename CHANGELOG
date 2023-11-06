@@ -1,0 +1,169 @@
+LIST OF RECENT PIHPSDR CHANGES
+==============================
+
+November 2023:
+--------------
+
+- added 6.25k anhd 12.5 to the VFO step sizes
+
+- changed meaning of the "Mute Audio to Radio" button
+
+- added check-boxes for muting the speaker amp (RADIO menu)
+  and by-passing RF frontend filters (RX menu)
+
+- added a pushbutton action to open the main menu
+
+- included support for "full cycle" and "half cycle" encoders,
+  and take "half cycles" for the double-encoders in the V2
+  and G2 controllers
+
+October 2022:
+-------------
+
+- limit the "CW PTT delay" to 900/speed, to work around a
+  peculiarity of the FPGA keyers
+
+- show commit info in "About" menu, and mark versions with
+  changed files as "dirty"
+
+- moved "Display Zoom/Pan" and friends to the SCREEN menu,
+  "Frames per Second", "Filled" and "Gradient" in the RX
+  menu only affect that RX, and added "Frames per Second"
+  and "Filled" to the TX menu.
+
+- full buffering before and after WDSP, to reduce drop-outs
+
+- Makefile: Syntax of choosing compile-time options improved
+
+- renamed the "FFT" menu to "DSP", and added "Binaural" check boxes
+  to the receivers.
+
+- CAT commands which do not specify a VFO now operate on VFO A
+  (they used to operate on the VFO of the active receiver)
+  since this is the behaviour found e.g. in TS2000.
+
+September 2023:
+--------------
+
+- Added a "Defaults" button to the Encoder and Switch menus, as to
+  restore the default assignment.
+
+- Added U and D keyboard short cuts which move the VFO of the non-active
+  receiver by 10 VFO step sizes up or down
+
+- Show CTCSS frequency in the VFO bar, and store it in the memory slots
+  and band stack entries.
+
+- added further "Watt values", e.g. 5W for the HermesLite-II
+
+- added "Reset" button to the Watt meter calibration in the PA menu
+
+August 2023:
+------------
+
+- added "CW audio peak filter" box in the Filter menu (when doing CW).
+  Indicate the audio peak filter in the VFO bar by adding a "P" to the
+  filter width
+
+- re-organized most of the Menus
+
+- consistently use CSS. Allow for dark GTK themes
+
+- support for ANDROMEDA controller in the CAT handler (rigctl)
+
+- automatic installation procedures for LINUX and MacOS
+
+- in-depth (200 pages) manual now available and part ot
+  the piHPSDR source code tree.
+
+July 2023:
+----------
+
+- added Saturn/G2 support
+
+- a new SCREEN menu featuring dynamic window resizing and
+  a selectable VFO bar layout
+
+- PURESIGNAL now works with ANAN-10E and ANAN-100B
+
+- HermesLite-II "smooth drive slider" code
+
+- TX menu: max drive level for digi modes can now be specified
+
+June 2023:
+----------
+
+- changed the semantics of the "Hide" button (hide Toolbar, Slider
+  and Zoom/Pan area) and introduced a "Iconify" button in the main
+  menu
+
+- VFO frequency settings via rigcl "numpad" functions
+
+- Use new "voice sequelch" function (since WDSP 1.21) for SSB
+
+- touch-screen friendly pop-down menus (combo-boxes) are now the
+  default if a controller is used.
+
+March 2023:
+-----------
+
+- AF gain: changed from amplitude 0-100 to gain -40 - 0 dB
+
+- do not show PURESIGNAL status when doing CW, since WDSP
+  is by-passed anyway
+
+- changes to support both the light and dark GTK theme
+
+- if using two receivers on two different bands with ADC0,
+  adjust the HPF/LPF settings such that both bands fall
+  into the pass-band.
+
+- introduced file appearance.h defining all the colours and font
+  sizes in the panadapters
+
+Jan 2023:
+---------
+
+
+- TX menu: specify the tune drive level as an absolute number, not
+  relative to the current drive slider position
+
+
+August 2022
+-----------
+
+- New value for the "CW RF delay" (30 msec), based on measurement 
+  with my ANAN-7000 (with the new value, no "chopping" of the first
+  dot is observed any longer). 
+
+- Disable T/R relay if PA is disabled, this works around a but in the
+  FPGA firmware
+
+July 2022
+---------
+
+- Support for HermesLite-II with an audio codec
+
+- CW keying via GPIO/MIDI using an external keyer
+
+April 2022
+----------
+
+- introduced touch-screen friendly combo-boxes. Both popping up
+  and item selection now require a "button release" event.
+
+January 2022
+------------
+
+- added possibility to manually adjust the attenuation for PURESIGNAL
+  with a spin-button in the PS menu
+
+- fixes for legacy hardware (USB-OZY, METIS, Penelope, Janus)
+
+- "routed UDB" discovery possible
+
+- silenced first RX samples after a TX/RX transition since they contain
+  the own TX signal (from crosstalk at the T/R relay)
+
+
+
