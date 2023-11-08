@@ -4,6 +4,17 @@ LIST OF RECENT PIHPSDR CHANGES
 November 2023:
 --------------
 
+- re-worked the "analog input lines" from the radio.
+  The "Display Warnings" checkbox now applies to
+  sequence errors, TX fifo under/over-runs, and high SWR.
+  The "Display PA current" checkbox now applies to
+  the PA temperature (HL2 only), the PA current and the
+  PA supply voltage.
+
+- added PTTOUT and CWOUT to the "extra GPIO lines",
+  and wrote an Appendix G in the manual to cover
+  that subject.
+
 - added 6.25k anhd 12.5 to the VFO step sizes
 
 - changed meaning of the "Mute Audio to Radio" button
