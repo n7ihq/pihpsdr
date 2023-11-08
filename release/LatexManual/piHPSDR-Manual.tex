@@ -4632,8 +4632,138 @@ reduction facilities which are based on  \texttt{rnnnoise} and \texttt{libspecbl
  between the ,,distant'' radio and the ,,distant'' computer using a straight internet
  cable connection, while the user interface data is exchanged between the two copies of
  piHPSDR running on the two computers.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{GPIO Lines for Controllers, CW, PTT}
+\label{sec:gpio}
+This section is only for piHPSDR running on RaspberryPi or similar systems with a GPIO (general purpose
+input/output) header. piHPSDR uses \texttt{libgpiod} to access the GPIO, so this may also apply to
+other single-board computers with a GPIO.
+
+\begin{figure}[ht]
+\center
+\includegraphics[width=15cm]{GPIO.pdf}
+\caption{GPIO lines used with various controllers.}
+\label{fig:GPIO}
+\end{figure}
+
+Fig. \ref{fig:GPIO} lists which GPIO lines are used for which controller option. In the first column,
+the GPIO pin number (0--31) ist listed. The second column indicates the function often
+associated with this pin in the RaspberryPi community, and the third column states on which connector
+(P1 or P5) this pin can be found. P1 is the main 40-pin GPIO header of the RaspberryPI, while P5 is
+an auxiliary connector that carries pins one should normally not use (like those for a second I2C
+devices). The four last columns indicate the use of this GPIO pin in four different setups, namely
+with no controller, with the Controller1, with the Controller2 equipped with single encoders, and
+finally with the Controller2 equipped with double encoders. The last case is electrically identical to
+the G2 front panel. In red, with the string \texttt{do not use!}, GPIO pins are marked which one should
+not use from within piHPSDR for the case at hand. For the controllers, these are the pins associated
+with the I2C interface(s). If there is no controller, we could, in principle, use all GPIO pins at our
+discretion, but all those often used by other hardware are marked as not to use. This ensures that, 
+for example, piHPSDR even if compiled with the GPIO option will run smoothly together with additional
+hardware such as ,,audio hats''.
+
+The function of GPIO lines actually used by the controllers are indicated in black colour. No detailed
+explanation is needed since these are hard wired and one therefore should not change this assignment.
+
+Lines which are available but are not used by piHPSDR are marked as \texttt{available} in blue colour.
+Then there are up to four input lines (\texttt{CWL}, \texttt{CWR}, \texttt{CWKEY}, and \texttt{PTTIN})
+and two output lined (\texttt{PTTOUT}, \texttt{CWOUT}) which can be assigned to available (blue-coloured)
+GPIO lines. Shown in Fig. \ref{fig:GPIO} is the default assignment done in the program, but any of the
+six mentioned functions (to be explained below) can be mapped on any of the available (blue coloured)
+GPIO lines. Unfortunatedly, there is only a single available GPIO line for the Controller2 with double
+encoders and the G2 front panel, and only five available GPIO lines for Controller1, so it is not possible
+to assign all six possible functions to GPIO lines. The six additional functions are
+
+\rett{CWL} (Input with pullup, active low). This input triggers a "left paddle pressed/
+released" event for the
+iambic keyer built into piHPSDR. Note that to use the built-in iambic keyer, the checkbox 
+\bltt{CW handled in Radio} has to be unchecked. This input is typically connected to
+a Morse paddle key.
+
+\rett{CWR} (Input with pullup, active low). This input triggers a "right paddle pressed/
+released" event for the
+iambic keyer built into piHPSDR. Note that to use the built-in iambic keyer, the checkbox 
+\bltt{CW handled in Radio} has to be unchecked. This input is typically connected to
+a Morse paddle key.
 
 
+\rett{PTTIN} (Input with pullup, active low). This input triggers a "PTT on/off" signal.
+Not that it does not toggle the PTT state, but enforces PTT as long as the input is pulled low,
+and releases PTT when it goes high. This input is typically connected to the PTT button of
+a microphone or the PTT output of an external CW keyer.
+
+\rett{CWKEY} (Input with pullup, active low). This input triggers a "CW Key down" event. An
+RF pulse is emitted in CW mode as long as the input is pulled low and the radio in in TX state.
+This input is typically connected to the KEY output of an external CW keyer.  Note that  nothing
+happens if the radio is not put into TX mode beforehand. Therefore, to use an external CW keyer,
+one needs both a KEY and PTT connection to the keyer. To avoid chopping of the first Morse element
+(dot or dash), PTT should become active shortly before the first key-down event occurs (,,PTT
+lead-in time''). This lead-in time can normally be adjusted for external CW keyers, I mostly use
+150 msec to be on the safe side.
+
+\rett{PTTOUT} (Output, active high). This output indicates with a high level that piHPSDR is in the
+TX state. This output is typically used together with radios such as the Adalm Pluto to activate
+a RF amplifier, because there is no hardware output at the Adalm which indicates that the device
+transmits. The output can also be used to activate an external power amplifier if the radio has
+not PTT output.
+
+\rett{CWOUT} (Output, active high). This output monitors the state of the built-in iambic keyer
+(high = key down, low = key up), and can be used to drive external hardware with a tone generator
+that generates a low-latency side tone, mixes it with the RX audio output, and feeds the combined
+signal to the head phone.
+
+If you are not happy with the default assignment of the ,,extra'' GPIO lines, this can be changed
+but you have to modify the file \texttt{src/gpio.c} and recompile piHPSDR (there is no user interface
+for GPIO line assignment). To give an example, suppose you are using the Controller2 V2 (with double
+encoders) with an Adalm Pluto and need a hardware PTT out signal. This controller a single spare GPIO line
+(GPIO14) which by default is assigned to \rett{PTTIN}. Locate the function \texttt{gpio\_set\_defaults}
+in the source code file. It starts like this
+
+\begin{small}
+\begin{verbatim}
+void gpio_set_defaults(int ctrlr) {
+  t_print("%s: %d\n", __FUNCTION__, ctrlr);
+
+  switch (ctrlr) {
+  case CONTROLLER1:
+    //
+    // GPIO lines not used by controller: 9, 10, 11, 14, 15
+    //
+    CWL_LINE = 9;
+    CWR_LINE = 11;
+    CWKEY_LINE = 10; 
+    PTTIN_LINE = 14;
+    PTTOUT_LINE = 15;
+    CWOUT_LINE = -1;
+...    
+\end{verbatim}
+\end{small}
+
+You clearly see the default assignments for the Controller1 case (a negative value means ,,do not use'').
+If you scroll down, you will also find the assignments for the other cases (Controller2 V1, Controller 2 V2,
+G2 front panel, and ,,no controller''). The assignment for the Controller2 V2 (the version with double
+encoders) is only few lines below and reads
+\clearpage
+\begin{small}
+\begin{verbatim}
+  case CONTROLLER2_V2:
+    //
+    // GPIO lines not used by controller: 14. Assigned to PTTIN 
+    //
+    CWL_LINE = -1;
+    CWR_LINE = -1;
+    PTTIN_LINE = 14;
+    CWKEY_LINE = -1;
+    PTTOUT_LINE = -1;
+...
+\end{verbatim}
+\end{small}
+
+To use GPIO14 for \texttt{PTTOUT}, simply modify the assignment such that the variable
+ \texttt{PTTIN\_LINE} is assigned the
+value \texttt{-1} and \texttt{PTTOUT\_LINE} gets the value \texttt{14}.
+ That's all except that you have to recompile
+simply by typing in the command ,,make'' in the piHPSDR directory (see Appendix \ref{sec:installsources}).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[RaspPi: Activating I2C]{RaspPi: Activating the I2C interface}
