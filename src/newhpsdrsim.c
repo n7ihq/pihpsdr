@@ -997,6 +997,7 @@ void *highprio_thread(void *data) {
   watchdog = 0;
   highprio_thread_id = 0;
   close(sock);
+  highprio_thread_id = 0;
   return NULL;
 }
 
@@ -1481,7 +1482,16 @@ void *send_highprio_thread(void *data) {
     rc = (int) ((4095.0 / c1) * sqrt(maxpwr * txlevel * c2));
     *p++ = (rc >> 8) & 0xFF;
     *p++ = (rc     ) & 0xFF;
-    buffer[49] = 63; // about 13 volts supply
+    buffer[49] = 4; // SupplyVolts = 0
+    buffer[50] = 0;
+    buffer[51] = 0; // ADC3 = 0
+    buffer[52] = 0;
+    buffer[53] = 0; // ADC2 = 0
+    buffer[54] = 0;
+    buffer[55] = ptt ? 4 : 2; // ADC1 = 1024(TX), 512(RX)
+    buffer[56] = 0;
+    buffer[57] = ptt ? 3 : 2; // ADC0 = 768(TX), 512(RX)
+    buffer[58] = 0;
 
     if (sendto(sock, buffer, 60, 0, (struct sockaddr * )&addr_new, sizeof(addr_new)) < 0) {
       t_perror("***** ERROR: HP send thread sendto");
