@@ -1787,6 +1787,7 @@ static void rxtx(int state) {
       }
     }
   }
+  gpio_set_ptt(state);
 }
 
 void setMox(int state) {
