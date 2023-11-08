@@ -77,5 +77,6 @@ extern void gpioSaveActions(void);
 extern int gpio_init(void);
 extern void gpio_close(void);
 extern void gpio_set_ptt(int state);
+extern void gpio_set_cw(int state);
 
 #endif
