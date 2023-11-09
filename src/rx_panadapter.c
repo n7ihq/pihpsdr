@@ -110,7 +110,6 @@ void rx_panadapter_update(RECEIVER *rx) {
   int i;
   int x1, x2;
   float *samples;
-  char text[64];
   cairo_text_extents_t extents;
   long long f;
   long long divisor;
@@ -316,6 +315,7 @@ void rx_panadapter_update(RECEIVER *rx) {
 #ifdef CLIENT_SERVER
 
   if (clients != NULL) {
+    char text[64];
     cairo_select_font_face(cr, DISPLAY_FONT,
                            CAIRO_FONT_SLANT_NORMAL,
                            CAIRO_FONT_WEIGHT_NORMAL);
