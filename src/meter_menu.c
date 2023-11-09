@@ -106,7 +106,7 @@ void meter_menu (GtkWidget *parent) {
   gtk_widget_set_halign(w, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), w, 0, 1, 1, 1);
   w = gtk_combo_box_text_new();
-  gtk_grid_attach(GTK_GRID(grid), w, 1, 1, 1, 1);
+  my_combo_attach(GTK_GRID(grid), w, 1, 1, 1, 1);
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Digital");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Analog");
   gtk_combo_box_set_active(GTK_COMBO_BOX(w), analog_meter ? 1 : 0);
@@ -116,7 +116,7 @@ void meter_menu (GtkWidget *parent) {
   gtk_widget_set_halign(w, GTK_ALIGN_END);
   gtk_grid_attach(GTK_GRID(grid), w, 0, 2, 1, 1);
   w = gtk_combo_box_text_new();
-  gtk_grid_attach(GTK_GRID(grid), w, 1, 2, 1, 1);
+  my_combo_attach(GTK_GRID(grid), w, 1, 2, 1, 1);
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Peak");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Average");
 
@@ -138,7 +138,7 @@ void meter_menu (GtkWidget *parent) {
     gtk_widget_set_halign(w, GTK_ALIGN_END);
     gtk_grid_attach(GTK_GRID(grid), w, 0, 3, 1, 1);
     w = gtk_combo_box_text_new();
-    gtk_grid_attach(GTK_GRID(grid), w, 1, 3, 1, 1);
+    my_combo_attach(GTK_GRID(grid), w, 1, 3, 1, 1);
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Peak");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Average");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(w), NULL, "Gain");
