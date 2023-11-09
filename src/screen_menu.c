@@ -147,8 +147,12 @@ static void display_toolbar_cb(GtkWidget *widget, gpointer data) {
   schedule_apply();
 }
 
-static void display_sequence_errors_cb(GtkWidget *widget, gpointer data) {
-  display_sequence_errors = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+static void display_warnings_cb(GtkWidget *widget, gpointer data) {
+  display_warnings = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
+static void display_pacurr_cb(GtkWidget *widget, gpointer data) {
+  display_pacurr = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 void screen_menu(GtkWidget *parent) {
@@ -250,12 +254,20 @@ void screen_menu(GtkWidget *parent) {
   gtk_widget_show(b_display_toolbar);
   gtk_grid_attach(GTK_GRID(grid), b_display_toolbar, 2, row, 1, 1);
   g_signal_connect(b_display_toolbar, "toggled", G_CALLBACK(display_toolbar_cb), (gpointer)NULL);
-  GtkWidget *b_display_sequence_errors = gtk_check_button_new_with_label("Display Seq Errs");
-  gtk_widget_set_name (b_display_sequence_errors, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_sequence_errors), display_sequence_errors);
-  gtk_widget_show(b_display_sequence_errors);
-  gtk_grid_attach(GTK_GRID(grid), b_display_sequence_errors, 3, row, 1, 1);
-  g_signal_connect(b_display_sequence_errors, "toggled", G_CALLBACK(display_sequence_errors_cb), (gpointer)NULL);
+  row++;
+
+  GtkWidget *b_display_warnings = gtk_check_button_new_with_label("Display Warnings");
+  gtk_widget_set_name (b_display_warnings, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_warnings), display_warnings);
+  gtk_widget_show(b_display_warnings);
+  gtk_grid_attach(GTK_GRID(grid), b_display_warnings, 0, row, 1, 1);
+  g_signal_connect(b_display_warnings, "toggled", G_CALLBACK(display_warnings_cb), (gpointer)NULL);
+  GtkWidget *b_display_pacurr = gtk_check_button_new_with_label("Display PA current");
+  gtk_widget_set_name (b_display_pacurr, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_pacurr), display_pacurr);
+  gtk_widget_show(b_display_pacurr);
+  gtk_grid_attach(GTK_GRID(grid), b_display_pacurr, 1, row, 1, 1);
+  g_signal_connect(b_display_pacurr, "toggled", G_CALLBACK(display_pacurr_cb), (gpointer)NULL);
 
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;

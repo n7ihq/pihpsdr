@@ -219,26 +219,25 @@ int new_pa_board = 0; // Indicates Rev.24 PA board for HERMES/ANGELIA/ORION
 int ozy_software_version;
 int mercury_software_version;
 int penelope_software_version;
-int dot;
-int dash;
-int adc_overload;
-int pll_locked;
-unsigned int exciter_power;
-unsigned int average_temperature;
-unsigned int average_current;
-unsigned int tx_fifo_underrun;
-unsigned int tx_fifo_overrun;
-unsigned int alex_forward_power;
-unsigned int alex_reverse_power;
-unsigned int alex_forward_power_average = 0;
-unsigned int alex_reverse_power_average = 0;
-unsigned int AIN3;
-unsigned int AIN4;
-unsigned int AIN6;
-unsigned int IO1;
-unsigned int IO2;
-unsigned int IO3;
-int supply_volts;
+
+int adc0_overload = 0;
+int adc1_overload = 0;
+int tx_fifo_underrun = 0;
+int tx_fifo_overrun = 0;
+int sequence_errors = 0;
+int high_swr_seen = 0;
+
+unsigned int exciter_power_max = 0;
+unsigned int exciter_power_avg = 0;
+unsigned int alex_forward_power_max = 0;
+unsigned int alex_forward_power_avg = 0;
+unsigned int alex_reverse_power_max = 0;
+unsigned int alex_reverse_power_avg = 0;
+unsigned int ADC1_max = 0;
+unsigned int ADC1_avg = 0;
+unsigned int ADC0_max = 0;
+unsigned int ADC0_avg = 0;
+
 int ptt = 0;
 int mox = 0;
 int tune = 0;
@@ -302,9 +301,8 @@ gboolean mute_rx_while_transmitting = FALSE;
 double drive_max = 100.0;
 double drive_digi_max = 100.0; // maximum drive in DIGU/DIGL
 
-gboolean display_sequence_errors = TRUE;
-gboolean display_swr_protection = FALSE;
-gint sequence_errors = 0;
+gboolean display_warnings = TRUE;
+gboolean display_pacurr = TRUE;
 
 gint rx_height;
 
@@ -1407,11 +1405,6 @@ void start_radio() {
   display_sliders = 1;
   display_toolbar = 1;
 #endif
-  average_temperature = 0;
-  average_current = 0;
-  tx_fifo_underrun = 0;
-  tx_fifo_overrun = 0;
-  display_sequence_errors = TRUE;
   t_print("%s: setup RECEIVERS protocol=%d\n", __FUNCTION__, protocol);
 
   switch (protocol) {
@@ -2438,7 +2431,8 @@ void radioRestoreState() {
   GetPropI0("duplex",                                        duplex);
   GetPropI0("sat_mode",                                      sat_mode);
   GetPropI0("mute_rx_while_transmitting",                    mute_rx_while_transmitting);
-  GetPropI0("radio.display_sequence_errors",                 display_sequence_errors);
+  GetPropI0("radio.display_warnings",                        display_warnings);
+  GetPropI0("radio.display_pacurr",                          display_pacurr);
   GetPropI0("rigctl_enable",                                 rigctl_enable);
   GetPropI0("rigctl_port_base",                              rigctl_port_base);
   GetPropI0("mute_spkr_amp",                                 mute_spkr_amp);
@@ -2642,7 +2636,8 @@ void radioSaveState() {
   SetPropI0("duplex",                                        duplex);
   SetPropI0("sat_mode",                                      sat_mode);
   SetPropI0("mute_rx_while_transmitting",                    mute_rx_while_transmitting);
-  SetPropI0("radio.display_sequence_errors",                 display_sequence_errors);
+  SetPropI0("radio.display_warnings",                        display_warnings);
+  SetPropI0("radio.display_pacurr",                          display_pacurr);
   SetPropI0("rigctl_enable",                                 rigctl_enable);
   SetPropI0("rigctl_port_base",                              rigctl_port_base);
   SetPropI0("mute_spkr_amp",                                 mute_spkr_amp);

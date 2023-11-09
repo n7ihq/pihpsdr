@@ -48,7 +48,6 @@
 static gfloat filter_left;
 static gfloat filter_right;
 
-static gint sequence_error_count = 0;
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean
@@ -505,42 +504,8 @@ void rx_panadapter_update(RECEIVER *rx) {
   #endif
   */
 
-  //
-  // Sequence errors, PA temperature and PA current are only
-  // displayed on the local computer, and only on the RX1 interface
-  //
   if (rx->id == 0 && !radio_is_remote) {
-    if (display_sequence_errors) {
-      if (sequence_errors != 0) {
-        cairo_move_to(cr, 100.0, 50.0);
-        cairo_set_source_rgba(cr, COLOUR_ALARM);
-        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-        cairo_show_text(cr, "Sequence Error");
-        sequence_error_count++;
-
-        // show for 2 second
-        if (sequence_error_count == 2 * rx->fps) {
-          sequence_errors = 0;
-          sequence_error_count = 0;
-        }
-      }
-    }
-
-    if (device == DEVICE_HERMES_LITE2) {
-      cairo_set_source_rgba(cr, COLOUR_ATTN);
-      cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
-      double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
-      snprintf(text, 64, "%0.1fC", t);
-      cairo_move_to(cr, 100.0, 30.0);
-      cairo_show_text(cr, text);
-
-      if (isTransmitting()) {
-        double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
-        snprintf(text, 64, "%0.0fmA", c);
-        cairo_move_to(cr, 160.0, 30.0);
-        cairo_show_text(cr, text);
-      }
-    }
+    display_panadapter_messages(cr, rx->fps);
   }
 
   //
@@ -595,4 +560,147 @@ void rx_panadapter_init(RECEIVER *rx, int width, int height) {
                          | GDK_SCROLL_MASK
                          | GDK_POINTER_MOTION_MASK
                          | GDK_POINTER_MOTION_HINT_MASK);
+}
+
+void display_panadapter_messages(cairo_t *cr, int fps) {
+  static unsigned int swr_protection_count = 0;
+  static unsigned int tx_fifo_count        = 0;
+  static unsigned int sequence_error_count = 0;
+  static unsigned int adc_error_count = 0;
+
+  char text[64];
+
+  if (display_warnings) {
+    //
+    // Sequence errors
+    // ADC overloads
+    // TX FIFO under- and overruns
+    // high SWR warning
+    //
+    // Are shown on display for 2 seconds
+    //
+    cairo_set_source_rgba(cr, COLOUR_ALARM);
+    cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
+    if (sequence_errors != 0) {
+      cairo_move_to(cr, 100.0, 50.0);
+      cairo_show_text(cr, "Sequence Error");
+      sequence_error_count++;
+
+      if (sequence_error_count == 2 * fps) {
+        sequence_errors = 0;
+        sequence_error_count = 0;
+      }
+    }
+
+    if (adc0_overload || adc1_overload) {
+      cairo_move_to(cr, 100.0, 70.0);
+      cairo_show_text(cr, "ADC overload");
+      adc_error_count++;
+
+      if (adc_error_count > 2 * fps) {
+        adc_error_count = 0;
+        adc0_overload = 0;
+        adc1_overload = 0;
+      }
+    }
+
+    if (high_swr_seen) {
+      cairo_move_to(cr, 100.0, 90.0);
+      snprintf(text, 64, "! High SWR");
+      cairo_show_text(cr, text);
+      swr_protection_count++;
+
+      if (swr_protection_count >= 3 * fps) {
+        high_swr_seen = 0;
+        swr_protection_count = 0;
+      }
+    }
+
+    if (tx_fifo_underrun) {
+      cairo_move_to(cr, 100.0, 110.0);
+      cairo_show_text(cr, "TX Underrun");
+      tx_fifo_count++;
+    }
+
+    if (tx_fifo_overrun) {
+      cairo_move_to(cr, 100.0, 130.0);
+      cairo_show_text(cr, "TX Overrun"); 
+      tx_fifo_count++;
+    }
+                               
+    if (tx_fifo_count >= 2 * fps) {         
+      tx_fifo_underrun = 0;
+      tx_fifo_overrun = 0;
+      tx_fifo_count = 0;
+    }
+  }
+
+  if (display_pacurr && isTransmitting()) {
+    double v;  // value
+    int flag;  // 0: dont, 1: do
+      
+    cairo_set_source_rgba(cr, COLOUR_ATTN);
+    cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
+    
+    //
+    // Supply voltage or PA temperature
+    //
+    switch (device) {
+    case DEVICE_HERMES_LITE2:
+      // (3.26*(ExPwr/4096.0) - 0.5) /0.01
+      v = 0.0795898*exciter_power_avg - 50.0;
+      snprintf(text, 64, "%0.1fC", v);
+      flag = 1;
+      break;
+    case DEVICE_ORION2:
+    case NEW_DEVICE_ORION2:
+    case NEW_DEVICE_SATURN:
+      // 5 (ADC0_avg / 4095 )* VDiv, VDiv = (22.0 + 1.0) / 1.1
+      v = 0.02553*ADC0_avg;
+      snprintf(text, 64, "%0.1fV", v);
+      flag = 1;
+      break;
+    default:
+      flag = 0;
+      break;
+    }
+
+    if (flag) {
+      cairo_move_to(cr, 100.0, 30.0);
+      cairo_show_text(cr, text);
+    }
+
+    //
+    // PA current
+    //
+    switch (device) {
+    case DEVICE_HERMES_LITE2:
+      // 1000/1270 ((3.26f * (ADC0 / 4096)) / 50) / 0.04
+      v = 0.313346 * ADC0_avg;
+      snprintf(text, 64, "%0.0fmA", v);
+      flag = 1;
+      break;
+    case DEVICE_ORION2:
+    case NEW_DEVICE_ORION2:
+      // ((ADC1*5000)/4095 - Voff)/Sens, Voff = 360, Sens = 120
+      v = 0.0101750 * ADC1_avg - 3.0;
+      snprintf(text, 64, "%0.1fA", v);
+      flag = 1;
+      break;
+    case NEW_DEVICE_SATURN:
+      // ((ADC1*5000)/4095 - Voff)/Sens, Voff = 0, Sens = 66.23
+      v = 0.0184358 * ADC1_avg;
+      snprintf(text, 64, "%0.1fA", v);
+      flag = 1;
+      break;
+    default:
+      flag = 0;
+      break;
+    }
+
+    if (flag) {
+      cairo_move_to(cr, 160.0, 30.0);
+      cairo_show_text(cr, text);
+    }
+  }
 }

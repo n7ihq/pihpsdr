@@ -32,6 +32,7 @@
 #include "radio.h"
 #include "receiver.h"
 #include "transmitter.h"
+#include "rx_panadapter.h"
 #include "tx_panadapter.h"
 #include "vfo.h"
 #include "mode.h"
@@ -46,9 +47,6 @@
 static gdouble hz_per_pixel;
 static gdouble filter_left = 0.0;
 static gdouble filter_right = 0.0;
-
-static gint tx_fifo_count = 0;      // counter for FIFO underrun message
-static gint swr_protection_count = 0; // counter for SWR protection message
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean
@@ -399,61 +397,8 @@ void tx_panadapter_update(TRANSMITTER *tx) {
       cairo_show_text(cr, text);
     }
 
-    //
-    // If the SWR protection has been triggered, display message for three seconds
-    //
-    if (tx->dialog == NULL && display_swr_protection) {
-      char text[64];
-      cairo_set_source_rgba(cr, COLOUR_ALARM);
-      cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
-      cairo_move_to(cr, 260.0, 30.0);
-      snprintf(text, 64, "! High SWR > %2.1f", tx->swr_alarm);
-      cairo_show_text(cr, text);
-      cairo_move_to(cr, 260.0, 50.0);
-      cairo_show_text(cr, "! Drive set to zero");
-      swr_protection_count++;
-
-      if (swr_protection_count >= 3 * tx->fps) {
-        display_swr_protection = FALSE;
-        swr_protection_count = 0;
-      }
-    }
-
-    if (tx->dialog == NULL && device == DEVICE_HERMES_LITE2) {
-      char text[64];
-      cairo_set_source_rgba(cr, COLOUR_ATTN);
-      cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
-      double t = (3.26 * ((double)average_temperature / 4096.0) - 0.5) / 0.01;
-      snprintf(text, 64, "%0.1fC", t);
-      cairo_move_to(cr, 100.0, 30.0);
-      cairo_show_text(cr, text);
-      double c = (((3.26 * ((double)average_current / 4096.0)) / 50.0) / 0.04 * 1000 * 1270 / 1000);
-      snprintf(text, 64, "%0.0fmA", c);
-      cairo_move_to(cr, 160.0, 30.0);
-      cairo_show_text(cr, text);
-
-      if (tx_fifo_overrun || tx_fifo_underrun) {
-        cairo_set_source_rgba(cr, COLOUR_ALARM);
-
-        if (tx_fifo_underrun) {
-          cairo_move_to(cr, 220.0, 30.0);
-          cairo_show_text(cr, "Underrun");
-        }
-
-        if (tx_fifo_overrun) {
-          cairo_move_to(cr, 300.0, 30.0);
-          cairo_show_text(cr, "Overrun");
-        }
-
-        // display for 2 seconds
-        tx_fifo_count++;
-
-        if (tx_fifo_count >= 2 * tx->fps) {
-          tx_fifo_underrun = 0;
-          tx_fifo_overrun = 0;
-          tx_fifo_count = 0;
-        }
-      }
+    if (tx->dialog == NULL) {
+      display_panadapter_messages(cr, tx->fps);
     }
 
     cairo_destroy (cr);
@@ -479,3 +424,4 @@ void tx_panadapter_init(TRANSMITTER *tx, int width, int height) {
    */
   gtk_widget_set_events (tx->panadapter, gtk_widget_get_events (tx->panadapter) | GDK_BUTTON_PRESS_MASK);
 }
+

@@ -35,7 +35,6 @@ static int current_band = band20;
 int xvtr_band = BANDS;
 
 char* outOfBand = "Out of band";
-int info_band;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -556,7 +555,6 @@ char* getFrequencyInfo(long long frequency, int filter_low, int filter_high) {
   long long flow = frequency + (long long)filter_low;
   long long fhigh = frequency + (long long)filter_high;
   int b;
-  info_band = BANDS + XVTRS;
 
   for (b = 0; b < BANDS + XVTRS; b++) {
     BAND *band = band_get_band(b);
@@ -569,13 +567,11 @@ char* getFrequencyInfo(long long frequency, int filter_low, int filter_high) {
             long long hi_freq = band_channels_60m[i].frequency + (band_channels_60m[i].width / (long long)2);
 
             if (flow >= low_freq && fhigh <= hi_freq) {
-              info_band = b;
               result = band->title;
               break;
             }
           }
         } else {
-          info_band = b;
           result = band->title;
           break;
         }
@@ -606,13 +602,6 @@ int TransmitAllowed() {
 
   txvfo = get_tx_vfo();
   txb = vfo[txvfo].band;
-
-  //
-  // See if we have a band
-  //
-  if (info_band != bandGen && info_band != bandWWV && info_band != bandAIR) {
-    result = TRUE;
-  }
 
   if (txb == bandGen || txb  == bandWWV || txb  == bandAIR) { return 0; }
 
