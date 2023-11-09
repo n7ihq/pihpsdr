@@ -1255,19 +1255,30 @@ determined by the width and height chosen above.
  this then serves as an indication which function is associtated with each of
  the 8 push buttone immediately below the screen.
 
-\rett{Display Seq Errs} All data packets from the radio to the PC contain
-a sequence number that is increased  for each packet sent. piHPSDR
-checks for each incoming data packet whether the sequence number is
-exactly larger by 1 than the number of the previous packet. If this is not
-the case, this is a \textit{sequence error}. Sequence errors may be caused
-by loosing packets on the way from the radio to the computer, or
-(this is what is usually the reason) packets lost within the computer due
-to the computer being busy with something else (e.g. writing to disk).
- If the \rett{Display Seq Errs} is checked, a red
-,,Sequence error'' message appears in the panel of the active receiver for two seconds.
-Sequence errors during RX often cause cracks in the RX audio. Unless this
-happens regularly, it is no reason to worry.
+\rett{Display Warnings} There are several non-fatal conditions that can
+be displayed either on the panadapter of the first receiver or, in non-duplex
+mode, on the TX panadapter. Normally these warnings are no reason to worry
+if you see them  only occasionally. These conditions are
 
+\textbf{Sequence Error}. Packets from the radio arrive in the wrong order, or packets
+are missing. If this occurs frequently, check the connection between the radio and
+the host computer.
+
+\textbf{ADC overload}. The RF input level is too high for one of the analog-to-digital
+converters. If you see this, increase attenuation in the RF front end.
+
+\textbf{TX FIFO underrun/overrun} The TX IQ data packets sent to the radio while transmitting
+either arrive too fast or too slow, such that the first-in/first-out queue of TX samples
+inside the FPGA of the radio either overflows or drains.
+
+\textbf{High SWR} During TX, an SWR above the SWR threshold has been detected. If this occurs
+frequentyl, check your antenna. The SWR threshold (default: 3.0) can be set in the
+\bltt{TX} menu.
+
+\rett{Display PA current} If this is checked, the PA supply voltage and the PA current
+are shown while transmitting. This data is only available for Orion-II and SATURN boards
+(ANAN-7000/8000 and ANAN-G2 and the HermesLite-II).
+ For the HermesLite-II, the PA temperature and the PA current are shown.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Display} Menu}
 
@@ -1635,18 +1646,17 @@ and equalizer settings, and TX compressor settings
  to CWL/CWU where you will normally use different settings compared to both USB/LSB and DIGU.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\clearpage
 \section{The \texttt{Memory}  menu}
 
-The \bltt{Memory} menu gives you access to five memory slots. The menu is shown in Fig. \ref{fig:MemMenu}.
+The \bltt{Memory} menu gives you access to ten memory slots. The menu is shown in Fig. \ref{fig:MemMenu}.
 You can store the current
 operating frequency  of the active receiver in any of the five slots by clicking a
-button in the leftmost columns (e.g. "Store M2"), or you can restore
-data from any slot. Parameters stored in the memory slot are
-the frequency and the mode, the filter used, the deviation, and the CTCSS setting.
-The right column shows the frequency, the mode,
-and filter currently stored in the memory slot and clicking on of the five buttons there will restore
-the data. So if you have some often used frequencies (e.g. for a net), the
+button in the left column (e.g. "Store M2"), or you can restore
+data from any slot by clicking on one of the entries in the right column
+which shows the frequency, mode and filter width stored in that slot.
+In addition (not shown in the right column) the FM deviation and the CTCSS setting are stored
+in the memory slots.
+ So if you have some often used frequencies (e.g. for a net), the
 \bltt{Memory} menu allows you to become QRV there with only few mouse clicks.
 
  \begin{figure}[ht]
@@ -2137,6 +2147,10 @@ and looks like in Fig. \ref{fig:PAMenuWatt}.
 \caption{The PA menu, Watt meter calibration}
 \label{fig:PAMenuWatt}
 \end{figure}
+Note that for calibrating the Watt meter as well, 
+ \rett{Tune use Drive} in the \bltt{TX} menu must be checked
+ to allow for high RF output
+power while TUNEing.
 
 You have 10 Watt values from $\frac{1}{10}$ to the full nominal power. Initially,
 the values of the spin buttons beside the Watt ratings have the nominal value.
@@ -2148,7 +2162,8 @@ interpolation between two adjacent calibration values.
 
 Start with resetting the value by hitting the \rett{Reset} button. Then, move the
 drive slider to 100 (the unit of the drive slider is per cent, not Watt!) and hit
-TUNE. After the PA calibration described above, your (external) Watt meter should
+\texttt{TUNE} in the toolbar.
+ After the PA calibration described above, your (external) Watt meter should
 show the nominal PA output power (e.g. 100 Watt for an ANAN-7000). Now look at the
 forward power reported in the meter section (top right of the piHPSDR window).
 Suppose you read "250 W" there although your output is 200 Watt. Then simply
@@ -2163,16 +2178,18 @@ calibration value of the highest power. For example, if you have entered 250 in
 the 200W spin button, then the value in the 100W spin button will read 125. So in a
 single shot, you have roughly calibrated the Watt meter.
 
-A finer calibration only makes sense if you have a highly accurate Watt meter. If you do,
+A finer calibration only makes sense if you have a highly accurate Watt meter, since
+the (uncalibrated) reading in piHPSDR may actually be more accurate than your
+Watt meter. Using your highly accurate Watt meter,
 you can now move the drive slider until your Watt meter exactly reads one of the
 lower power values, and use the corresponding spin button to change the calibration
-until piHPSDR exactly reports the correct power.
-
-The procedures is the virtually the same if our nominal output power is different.
+until piHPSDR exactly reports the correct power. 
+The procedures is  virtually the same if our nominal output power is different.
 The only complication arises if your radio has a nominal power that is not in the menu,
 for example 150 Watt.
 
-In this case, choose 200W in the top line of the PA menu. TUNE and move the drive
+In this case, choose 200W (the next largest value)
+in the top line of the PA menu. TUNE and move the drive
 slider until your Watt meter reads the largest value possible that occurs
 in the Watt meter calibration menu (in this example, it is 140W). Adjust the
 140W spin button until piHPSDR reports 140 Watt. Then go to full power
@@ -2351,9 +2368,12 @@ Many radios have a connection for a paddle or at least for
 a straight key, and contain firmware to do CW. CW handling by
 the radio firmware is enabled by the \rett{CW handled in Radio}
 check box. If unchecked, CW (that is, generating and forming
-the RF pulses) is done by piHPSDR, which implies that
+the RF pulses) is done by piHPSDR. For most radios, you can
+still use the Morse paddle connected to the radio since the
+radio sends the dash/dot paddle press events to the host
+computer, but it is more versatile to connect
 a Morse paddle, straight key or an external keyer is connected
-to the host compute (see Appendix \ref{sec:ConnectCW}).
+to the host computer (see Appendix \ref{sec:ConnectCW}).
 
 \rett{CW Speed}. Here the speed (in wpm) can be chosen. If CW is
 handled in the Radio, the value is simply sent to the radio firmware,

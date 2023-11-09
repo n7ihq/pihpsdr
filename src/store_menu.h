@@ -15,5 +15,5 @@
 *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 */
-#define NUM_OF_MEMORYS 5
+#define NUM_OF_MEMORYS 10
 extern void store_menu(GtkWidget *parent);

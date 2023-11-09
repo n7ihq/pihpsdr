@@ -490,6 +490,8 @@ static gboolean update_display(gpointer data) {
 
     case SOAPYSDR_PROTOCOL:
     default:
+      fwd_average = 0;
+      rev_average = 0;
       tx->fwd = 0.0;
       tx->exciter = 0.0;
       tx->rev = 0.0;

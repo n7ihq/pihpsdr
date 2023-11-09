@@ -1786,7 +1786,6 @@ static void rxtx(int state) {
 void setMox(int state) {
   if (!can_transmit) { return; }
 
-  // SOAPY and no local mic: continue! e.g. for doing CW.
   vox_cancel();  // remove time-out
 
   if (mox != state) {

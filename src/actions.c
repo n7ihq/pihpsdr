@@ -293,10 +293,12 @@ void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
     // which take care of PTT themselves.
     //
     if (mode == PRESSED && (cw_keyer_internal == 0 || CAT_cw_is_active)) {
+      gpio_set_cw(1);
       cw_key_down = 960000; // max. 20 sec to protect hardware
       cw_key_up = 0;
       cw_key_hit = 1;
     } else {
+      gpio_set_cw(0);
       cw_key_down = 0;
       cw_key_up = 0;
     }
