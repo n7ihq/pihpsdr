@@ -98,7 +98,7 @@ void gpio_set_ptt(int state) {
 #ifdef GPIO
   if (pttout_line) {
     //t_print("%s: state=%d\n", __FUNCTION__, state);
-    if (gpiod_line_set_value(pttout_line, state) < 0) {
+    if (gpiod_line_set_value(pttout_line, NOT(state)) < 0) {
       t_print("%s failed: %s\n", __FUNCTION__, g_strerror(errno));
     }
   }
@@ -109,7 +109,7 @@ void gpio_set_cw(int state) {
 #ifdef GPIO
   if (cwout_line) {
     //t_print("%s: state=%d\n", __FUNCTION__, state);
-    if (gpiod_line_set_value(cwout_line, state) < 0) {
+    if (gpiod_line_set_value(cwout_line, NOT(state)) < 0) {
       t_print("%s failed: %s\n", __FUNCTION__, g_strerror(errno));
     }
   }
@@ -1316,13 +1316,13 @@ int gpio_init() {
   }
 
   if (PTTOUT_LINE >= 0) {
-    // active-high output line with initial value 0
-    pttout_line = setup_output_line(chip, PTTOUT_LINE, 0);
+    // active-high output line with initial value 1
+    pttout_line = setup_output_line(chip, PTTOUT_LINE, 1);
   }
 
   if (CWOUT_LINE >= 0) {
-    // active-high output line with initial value 0
-    cwout_line = setup_output_line(chip, CWOUT_LINE, 0);
+    // active-high output line with initial value 1
+    cwout_line = setup_output_line(chip, CWOUT_LINE, 1);
   }
 
   if (have_button || controller != NO_CONTROLLER) {

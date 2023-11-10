@@ -20,7 +20,7 @@
 
 #include <gtk/gtk.h>
 #ifdef PORTAUDIO
-  #include "portaudio.h"
+  #include <portaudio.h>
 #endif
 #ifdef ALSA
   #include <alsa/asoundlib.h>

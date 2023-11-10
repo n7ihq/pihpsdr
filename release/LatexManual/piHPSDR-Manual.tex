@@ -4721,16 +4721,24 @@ one needs both a KEY and PTT connection to the keyer. To avoid chopping of the f
 lead-in time''). This lead-in time can normally be adjusted for external CW keyers, I mostly use
 150 msec to be on the safe side.
 
-\rett{PTTOUT} (Output, active high). This output indicates with a high level that piHPSDR is in the
+\rett{PTTOUT} (Output, active low). This output indicates with a low level that piHPSDR is in the
 TX state. This output is typically used together with radios such as the Adalm Pluto to activate
 a RF amplifier, because there is no hardware output at the Adalm which indicates that the device
 transmits. The output can also be used to activate an external power amplifier if the radio has
 not PTT output.
 
-\rett{CWOUT} (Output, active high). This output monitors the state of the built-in iambic keyer
-(high = key down, low = key up), and can be used to drive external hardware with a tone generator
+\rett{CWOUT} (Output, active low). This output monitors the state of the built-in iambic keyer
+(low = key down, high = key up), and can be used to drive external hardware with a tone generator
 that generates a low-latency side tone, mixes it with the RX audio output, and feeds the combined
-signal to the head phone.
+signal to the head phone. For direct keying (using the CWKEY line or the \bltt{CW KEY (keyer)}
+action via MIDI) this output also
+follows the key-down/up state.
+
+The reason for choosing ,,active low'' for the output lines is that in the default setup,
+the GPIO lines are switched
+to ,,input with pull-up'' upon booting. An input line with a built-in pullup
+resistor is, however, 
+nearly indistinguishable from an output line with high level.
 
 If you are not happy with the default assignment of the ,,extra'' GPIO lines, this can be changed
 but you have to modify the file \texttt{src/gpio.c} and recompile piHPSDR (there is no user interface
@@ -4763,7 +4771,7 @@ You clearly see the default assignments for the Controller1 case (a negative val
 If you scroll down, you will also find the assignments for the other cases (Controller2 V1, Controller 2 V2,
 G2 front panel, and ,,no controller''). The assignment for the Controller2 V2 (the version with double
 encoders) is only few lines below and reads
-\clearpage
+
 \begin{small}
 \begin{verbatim}
   case CONTROLLER2_V2:

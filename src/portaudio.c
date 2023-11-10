@@ -36,11 +36,11 @@
 #include <pthread.h>
 #include <sched.h>
 #include <semaphore.h>
+#include <portaudio.h>
 
 #include "radio.h"
 #include "receiver.h"
 #include "mode.h"
-#include "portaudio.h"
 #include "audio.h"
 #include "message.h"
 #include "vfo.h"
