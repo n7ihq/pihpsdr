@@ -363,20 +363,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         //
         // Power values not available for SoapySDR
         //
-        if (transmitter->fwd < 0.0001 || band->disablePA || !pa_enabled) {
-          snprintf(text, 64, "FWD %0.3f W", transmitter->exciter);
-        } else {
-          static int max_count = 0;
-          static double max_level = 0.0;
-
-          if (transmitter->fwd > max_level || max_count == 10) {
-            max_level = transmitter->fwd;
-            max_count = 0;
-          }
-
-          max_count++;
-          snprintf(text, 64, "FWD %0.1f W", max_level);
-        }
+        snprintf(text, 64, "FWD %0.1f W", transmitter->fwd);
 
         row += 15;
         cairo_move_to(cr, 10, row);

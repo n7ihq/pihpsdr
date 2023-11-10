@@ -499,7 +499,7 @@ static gint update_display(gpointer data) {
         }
 
         rx->meter = level;
-        meter_update(rx, SMETER, rx->meter, 0.0, 0.0, 0.0, 0.0);
+        meter_update(rx, SMETER, rx->meter, 0.0, 0.0);
       }
 
       return TRUE;

@@ -2215,7 +2215,16 @@ static void process_high_priority() {
   int previous_dot;
   int previous_dash;
   unsigned int val;
-  static int count = 0;
+  //
+  // variable used to manage analog inputs. The accumulators
+  // record the value*16
+  // 
+  static unsigned int fwd_acc = 0;
+  static unsigned int rev_acc = 0;
+  static unsigned int ex_acc = 0;
+  static unsigned int adc0_acc = 0;
+  static unsigned int adc1_acc = 0;
+  
   const unsigned char *buffer = high_priority_buffer->buffer;
   sequence = ((buffer[0] & 0xFF) << 24) + ((buffer[1] & 0xFF) << 16) + ((buffer[2] & 0xFF) << 8) + (buffer[3] & 0xFF);
 
@@ -2238,33 +2247,31 @@ static void process_high_priority() {
   adc1_overload |= ((buffer[5] & 0x02) >> 1);
 
   //
-  // Calculate max and moving averages of these readings
+  // During RX, HighPrio packets arrive every 50 msec
+  // During TX, HighPrio packets arrive every    msec
   //
-  if (count++ > 100) {
-    exciter_power_max = 0;
-    alex_forward_power_max = 0;
-    alex_reverse_power_max = 0;
-    ADC0_max = 0;
-    ADC1_max = 0;
-    count = 0;
-  }
+  // Since the analog data is used during TX only, we
+  // can make a moving average with 16 values, and
+  // take a max value with 100 values.
+  //
 
   val = ((buffer[6] & 0xFF) << 8) | (buffer[7] & 0xFF);
-  exciter_power_avg = (7 * exciter_power_avg + val) >> 3;
-  if (val > exciter_power_max) { exciter_power_max = val; }
+  ex_acc = (15 * ex_acc) / 16  + val;
   val = ((buffer[14] & 0xFF) << 8) | (buffer[15] & 0xFF);
-  alex_forward_power_avg = (7 * alex_forward_power_avg + val) >> 3;
-  if (val > alex_forward_power_max) { alex_forward_power_max = val; }
+  fwd_acc = (15 *fwd_acc) / 16 + val;
   val = ((buffer[22] & 0xFF) << 8) | (buffer[23] & 0xFF);
-  alex_reverse_power_avg = (7 * alex_reverse_power_avg + val) >> 3;
-  if (val > alex_reverse_power_max) { alex_reverse_power_max = val; }
+  rev_acc = (15 *rev_acc) / 16 + val;
   val = ((buffer[55] & 0xFF) << 8) | (buffer[56] & 0xFF);
-  ADC1_avg = (7 * ADC1_avg + val) >> 3;
-  if (val > ADC1_max) { ADC1_max = val; }
+  adc1_acc = (15 *adc1_acc) / 16 + val;
   val = ((buffer[57] & 0xFF) << 8) | (buffer[58] & 0xFF);
-  ADC0_avg = (7 * ADC0_avg + val) >> 3;
-  if (val > ADC0_max) { ADC0_max = val; }
+  adc0_acc = (15 *adc0_acc) / 16 + val;
 
+  exciter_power = ex_acc / 16;
+  alex_forward_power = fwd_acc / 16;
+  alex_reverse_power = rev_acc / 16;
+  ADC0 = adc0_acc / 16;
+  ADC1 = adc1_acc / 16;
+     
   //
   // Stops CAT cw transmission if radio reports "CW action"
   //

@@ -106,7 +106,7 @@ GtkWidget* meter_init(int width, int height) {
   return meter;
 }
 
-void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, double exciter, double alc, double swr) {
+void meter_update(RECEIVER *rx, int meter_type, double value, double alc, double swr) {
   double rxlvl;   // only used for RX input level, clones "value"
   double pwr;     // only used for TX power, clones "value"
   char sf[32];
@@ -149,10 +149,6 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double reverse, do
   switch (meter_type) {
   case POWER:
     pwr = value;
-
-    if (pwr == 0.0 || band->disablePA || !pa_enabled) {
-      pwr = exciter;
-    }
 
     if (band->disablePA || !pa_enabled) {
       units = 0;  // x mW

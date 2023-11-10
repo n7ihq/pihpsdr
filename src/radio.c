@@ -227,16 +227,11 @@ int tx_fifo_overrun = 0;
 int sequence_errors = 0;
 int high_swr_seen = 0;
 
-unsigned int exciter_power_max = 0;
-unsigned int exciter_power_avg = 0;
-unsigned int alex_forward_power_max = 0;
-unsigned int alex_forward_power_avg = 0;
-unsigned int alex_reverse_power_max = 0;
-unsigned int alex_reverse_power_avg = 0;
-unsigned int ADC1_max = 0;
-unsigned int ADC1_avg = 0;
-unsigned int ADC0_max = 0;
-unsigned int ADC0_avg = 0;
+unsigned int exciter_power = 0;
+unsigned int alex_forward_power = 0;
+unsigned int alex_reverse_power = 0;
+unsigned int ADC1 = 0;
+unsigned int ADC0 = 0;
 
 int ptt = 0;
 int mox = 0;

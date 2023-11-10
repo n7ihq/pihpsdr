@@ -101,7 +101,6 @@ typedef struct _transmitter {
   double compressor_level;
 
   double fwd;
-  double exciter;
   double rev;
   double alc;
   double swr;

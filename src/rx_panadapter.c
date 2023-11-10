@@ -638,6 +638,14 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
   if (display_pacurr && isTransmitting()) {
     double v;  // value
     int flag;  // 0: dont, 1: do
+    static int count = 0;
+
+    //
+    // Display a maximum value twice per second
+    // to avoid flicker
+    //
+    static double max1=0.0;
+    static double max2=0.0;
       
     cairo_set_source_rgba(cr, COLOUR_ATTN);
     cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
@@ -648,16 +656,20 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
     switch (device) {
     case DEVICE_HERMES_LITE2:
       // (3.26*(ExPwr/4096.0) - 0.5) /0.01
-      v = 0.0795898*exciter_power_avg - 50.0;
-      snprintf(text, 64, "%0.1fC", v);
+      v = 0.0795898*exciter_power - 50.0;
+      if (v < 0) { v = 0; }
+      if (count == 0) { max1 = v; }
+      snprintf(text, 64, "%0.0f°C", max1);
       flag = 1;
       break;
     case DEVICE_ORION2:
     case NEW_DEVICE_ORION2:
     case NEW_DEVICE_SATURN:
       // 5 (ADC0_avg / 4095 )* VDiv, VDiv = (22.0 + 1.0) / 1.1
-      v = 0.02553*ADC0_avg;
-      snprintf(text, 64, "%0.1fV", v);
+      v = 0.02553*ADC0;
+      if (v < 0) { v = 0; }
+      if (count == 0) { max1 = v; }
+      snprintf(text, 64, "%0.1fV", max1);
       flag = 1;
       break;
     default:
@@ -675,22 +687,28 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
     //
     switch (device) {
     case DEVICE_HERMES_LITE2:
-      // 1000/1270 ((3.26f * (ADC0 / 4096)) / 50) / 0.04
-      v = 0.313346 * ADC0_avg;
-      snprintf(text, 64, "%0.0fmA", v);
+      // 1270 ((3.26f * (ADC0 / 4096)) / 50) / 0.04
+      v = 0.505396 * ADC0;
+      if (v < 0) { v = 0; }
+      if (count == 0) { max2 = v; }
+      snprintf(text, 64, "%0.0fmA", max2);
       flag = 1;
       break;
     case DEVICE_ORION2:
     case NEW_DEVICE_ORION2:
       // ((ADC1*5000)/4095 - Voff)/Sens, Voff = 360, Sens = 120
-      v = 0.0101750 * ADC1_avg - 3.0;
-      snprintf(text, 64, "%0.1fA", v);
+      v = 0.0101750 * ADC1 - 3.0;
+      if (v < 0) { v = 0; }
+      if (count == 0) { max2 = v; }
+      snprintf(text, 64, "%0.1fA", max2);
       flag = 1;
       break;
     case NEW_DEVICE_SATURN:
       // ((ADC1*5000)/4095 - Voff)/Sens, Voff = 0, Sens = 66.23
-      v = 0.0184358 * ADC1_avg;
-      snprintf(text, 64, "%0.1fA", v);
+      v = 0.0184358 * ADC1;
+      if (v < 0) { v = 0; }
+      if (count == 0) { max2 = v; }
+      snprintf(text, 64, "%0.1fA", max2);
       flag = 1;
       break;
     default:
@@ -702,5 +720,6 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
       cairo_move_to(cr, 160.0, 30.0);
       cairo_show_text(cr, text);
     }
+    if (++count >= fps/2) { count = 0; }
   }
 }

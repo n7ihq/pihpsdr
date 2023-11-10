@@ -1066,10 +1066,18 @@ static void process_control_bytes() {
   int previous_ptt;
   int previous_dot;
   int previous_dash;
-  static int count1 = 0;
-  static int count2 = 0;
-  static int count3 = 0;
   unsigned int val;
+
+  //
+  // variable used to manage analog inputs. The accumulators
+  // record the value*16.
+  // 
+  static unsigned int fwd_acc = 0; 
+  static unsigned int rev_acc = 0;
+  static unsigned int ex_acc = 0;
+  static unsigned int adc0_acc = 0;
+  static unsigned int adc1_acc = 0;
+
 
   // do not set ptt. In PureSignal, this would stop the
   // receiver sending samples to WDSP abruptly.
@@ -1157,45 +1165,32 @@ static void process_control_bytes() {
     break;
 
   case 1:
-    if (count1++ > 50) {
-      exciter_power_max = 0;
-      alex_forward_power_max = 0;
-      count1 = 0;
-    }
     // Note HL2 uses this for the temperature
     val = ((control_in[1] & 0xFF) << 8) | (control_in[2] & 0xFF); // HL2
-    exciter_power_avg = (7 * val + exciter_power_avg) >> 3;
-    if (val > exciter_power_max) { exciter_power_max = val; }
+    ex_acc = (15 * ex_acc) / 16  + val;
+    exciter_power = ex_acc / 16;
 
     val = ((control_in[3] & 0xFF) << 8) | (control_in[4] & 0xFF);
-    alex_forward_power_avg = (7 * alex_forward_power_avg  + val) >> 3;
-    if (val > alex_forward_power_max) { alex_forward_power_max = val; }
+    fwd_acc = (15 *fwd_acc) / 16 + val;
+    alex_forward_power = fwd_acc / 16;
+
     break;
 
   case 2:
-    if (count2++ > 50) {
-      alex_reverse_power_max = 0;
-      ADC0_max = 0;
-      count2 = 0;
-    }
     val = ((control_in[1] & 0xFF) << 8) | (control_in[2] & 0xFF);
-    alex_reverse_power_avg = (7*alex_reverse_power_avg + val) >> 3;
-    if (val > alex_reverse_power_max) { alex_reverse_power_max = val; }
+    rev_acc = (15 *rev_acc) / 16 + val;
+    alex_reverse_power = rev_acc / 16;
 
     val = ((control_in[3] & 0xFF) << 8) | (control_in[4] & 0xFF);
-    ADC0_avg = (7 * ADC0_avg + val) >> 3;
-    if (val > ADC0_max) { ADC0_max = val; }
+    adc0_acc = (15 *adc0_acc) / 16 + val;
+    ADC0 = adc0_acc / 16;
 
     break;
 
   case 3:
-    if (count3++ > 50) {
-      ADC1_max = 0;
-      count3 = 0;
-    }
     val  = ((control_in[1] & 0xFF) << 8) | (control_in[2] & 0xFF);
-    ADC1_avg = (7 * ADC1_avg + val) >> 3;
-    if (val > ADC1_max) { ADC1_max = val; }
+    adc1_acc = (15 *adc1_acc) / 16 + val;
+    ADC1 = adc1_acc / 16;
 
     break;
 

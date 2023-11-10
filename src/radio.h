@@ -202,16 +202,11 @@ extern int tx_fifo_overrun;
 extern int high_swr_seen;
 extern int sequence_errors;
 
-extern unsigned int exciter_power_max;
-extern unsigned int exciter_power_avg;
-extern unsigned int alex_forward_power_max;
-extern unsigned int alex_forward_power_avg;
-extern unsigned int alex_reverse_power_max;
-extern unsigned int alex_reverse_power_avg;
-extern unsigned int ADC1_max;
-extern unsigned int ADC1_avg;
-extern unsigned int ADC0_max;
-extern unsigned int ADC0_avg;
+extern unsigned int exciter_power;
+extern unsigned int alex_forward_power;
+extern unsigned int alex_reverse_power;
+extern unsigned int ADC1;
+extern unsigned int ADC0;
 
 extern int split;
 
