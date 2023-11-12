@@ -1014,14 +1014,28 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 
   if (cwmode) {
     //
-    // do not update VOX in CW mode in case we have just switched to CW
-    // and tx->mic_input_buffer is non-empty. WDSP (fexchange0) is not
-    // needed because we directly produce the I/Q samples (see below).
-    // What we do, however, is to create the iq_output_buffer for the
-    // sole purpose to display the spectrum of our CW signal. Then,
-    // the difference between poorly-shaped and well-shaped CW pulses
-    // also becomes visible on *our* TX spectrum display.
+    // clear VOX peak level in case is it non-zero.
     //
+
+    clear_vox();
+
+    //
+    // Note that WDSP is not needed, but we still call it (and discard the
+    // results) since this  may help in correct slew-up and slew-down
+    // of the TX engine. The mic input buffer is zeroed out in CW mode.
+    //
+    // The main reason why we do NOT constructe an artificial microphone
+    // signal to generate the RF pulse is that we do not want MicGain
+    // and equalizer settings to interfere.
+    //
+
+    fexchange0(tx->id, tx->mic_input_buffer, tx->iq_output_buffer, &error);
+
+    //
+    // Construct our CW TX signal in tx->iq_output_buffer for the sole
+    // purpose of displaying them in the TX panadapter
+    //
+
     dp = tx->iq_output_buffer;
 
     // These are the I/Q samples that describe our CW signal
@@ -1036,6 +1050,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
       break;
 
     case NEW_PROTOCOL:
+    case SOAPYSDR_PROTOCOL:
       for (j = 0; j < tx->output_samples; j++) {
         *dp++ = 0.0;
         *dp++ = cw_shape_buffer192[j];
