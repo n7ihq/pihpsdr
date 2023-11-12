@@ -983,9 +983,11 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   if (cwmode) {
 
     //
-    // do not update VOX in CW mode in case we have just switched to CW
-    // and tx->mic_input_buffer is non-empty. WDSP (fexchange0) is not
-    // needed because we directly produce the I/Q samples (see below).
+    // clear VOX peak level in case is it non-zero.
+    //
+
+    clear_vox();
+
     //
     // Note that WDSP is not needed, but we still call it (and discard the
     // results) since this  may help in correct slew-up and slew-down

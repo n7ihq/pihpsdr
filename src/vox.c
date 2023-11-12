@@ -45,6 +45,10 @@ double vox_get_peak() {
   return result;
 }
 
+void clear_vox() {
+  peak = 0.0;
+}
+
 void update_vox(TRANSMITTER *tx) {
   // calculate peak microphone input
   // assumes it is interleaved left and right channel with length samples
