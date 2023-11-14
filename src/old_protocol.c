@@ -388,6 +388,7 @@ void old_protocol_init(int rx, int pixels, int rate) {
 #ifdef USBOZY
     t_print("old_protocol_init: initialise ozy on USB\n");
     ozy_initialise();
+    running = 1;
     start_usb_receive_threads();
 #endif
   } else {
@@ -896,14 +897,6 @@ static int tx_feedback_channel() {
   return ret;
 }
 
-static int first_receiver_channel() {
-  return 0;
-}
-
-static int second_receiver_channel() {
-  return 1;
-}
-
 static long long channel_freq(int chan) {
   //
   // Return the frequency associated with the current HPSDR
@@ -1115,12 +1108,12 @@ static void process_control_bytes() {
       // C1 unused except the ADC overload bit
       // C2/C3 contains underflow/overflow and TX FIFO count
       //
-      if (mercury_software_version != control_in[2]) {
-        mercury_software_version = control_in[2];
+      if (mercury_software_version[0] != control_in[2]) {
+        mercury_software_version[0] = control_in[2];
         t_print("  Mercury Software version: %d (0x%0X)\n", mercury_software_version, mercury_software_version);
       }
 
-      if (penelope_software_version != control_in[3]) {
+      if (penelope_software_version != control_in[3] && control_in[3] != 0xFF) {
         penelope_software_version = control_in[3];
         t_print("  Penelope Software version: %d (0x%0X)\n", penelope_software_version, penelope_software_version);
       }
@@ -1197,6 +1190,16 @@ static void process_control_bytes() {
   case 4:
     adc0_overload |= control_in[1] & 0x01;
     adc1_overload |= control_in[2] & 0x01;
+    if (mercury_software_version[0] != control_in[1]>>1 && control_in[1]>>1 !=0x7F) {
+      mercury_software_version[0] = control_in[1]>>1;
+      t_print("  Mercury 1 Software version: %d.%d\n", mercury_software_version[0] / 10, mercury_software_version[0] % 10);
+    }
+    if (mercury_software_version[1] != control_in[2]>>1 && control_in[2]>>1 !=0x7F) {
+      mercury_software_version[1] = control_in[2]>>1;
+      t_print("  Mercury 2 Software version: %d.%d\n", mercury_software_version[1] / 10, mercury_software_version[1] % 10);
+      // Since we have two Mercury boards, we have two ADCs
+      n_adc = 2;
+    }
   }
 }
 
@@ -1208,8 +1211,6 @@ static void process_control_bytes() {
 static int st_num_hpsdr_receivers;
 static int st_rxfdbk;
 static int st_txfdbk;
-static int st_rx1channel;
-static int st_rx2channel;
 
 static void process_ozy_byte(int b) {
   switch (state) {
@@ -1314,22 +1315,17 @@ static void process_ozy_byte(int b) {
 
     if (!isTransmitting() && diversity_enabled) {
       //
-      // receiving with DIVERSITY. Get sample pairs and feed to diversity mixer
+      // receiving with DIVERSITY. Get sample pairs and feed to diversity mixer.
+      // If the second RX is running, feed aux samples to that receiver.
       //
-      if (nreceiver == st_rx1channel) {
+      if (nreceiver == 0) {
         left_sample_double_main = left_sample_double;
         right_sample_double_main = right_sample_double;
-      } else if (nreceiver == st_rx2channel) {
+      } else if (nreceiver == 1) {
         left_sample_double_aux = left_sample_double;
         right_sample_double_aux = right_sample_double;
-      }
-
-      // this is pure paranoia, it allows for st_rx2channel < st_rx1channel
-      if (nreceiver + 1 == st_num_hpsdr_receivers) {
         add_div_iq_samples(receiver[0], left_sample_double_main, right_sample_double_main, left_sample_double_aux,
                            right_sample_double_aux);
-
-        // if we have a second receiver, display "auxiliary" receiver as well
         if (receivers > 1) { add_iq_samples(receiver[1], left_sample_double_aux, right_sample_double_aux); }
       }
     }
@@ -1338,9 +1334,9 @@ static void process_ozy_byte(int b) {
       //
       // RX without DIVERSITY. Feed samples to RX1 and RX2
       //
-      if (nreceiver == st_rx1channel) {
+      if (nreceiver == 0) {
         add_iq_samples(receiver[0], left_sample_double, right_sample_double);
-      } else if (nreceiver == st_rx2channel && receivers > 1) {
+      } else if (nreceiver == 1 && receivers > 1) {
         add_iq_samples(receiver[1], left_sample_double, right_sample_double);
       }
     }
@@ -1460,8 +1456,6 @@ static gpointer process_ozy_input_buffer_thread(gpointer arg) {
     st_num_hpsdr_receivers = how_many_receivers();
     st_rxfdbk = rx_feedback_channel();
     st_txfdbk = tx_feedback_channel();
-    st_rx1channel = first_receiver_channel();
-    st_rx2channel = second_receiver_channel();
 
     for (int i = 0; i < 1024; i++) {
       process_ozy_byte(RXRINGBUF[rxring_outptr + i] & 0xFF);
@@ -1626,8 +1620,6 @@ void ozy_send_buffer() {
   const BAND *txband = band_get_band(vfo[txvfo].band);
   int power;
   int num_hpsdr_receivers = how_many_receivers();
-  int rx1channel = first_receiver_channel();
-  int rx2channel = second_receiver_channel();
   int rxfdbkchan = rx_feedback_channel();
   output_buffer[SYNC0] = SYNC;
   output_buffer[SYNC1] = SYNC;
@@ -1641,7 +1633,7 @@ void ozy_send_buffer() {
     output_buffer[C0] = 0x00;
     output_buffer[C1] = 0x00;
 
-    switch (active_receiver->sample_rate) {
+    switch (receiver[0]->sample_rate) {
     case 48000:
       output_buffer[C1] |= SPEED_48K;
       break;
@@ -1752,14 +1744,19 @@ void ozy_send_buffer() {
 
     output_buffer[C3] = (receiver[0]->alex_attenuation) & 0x03;  // do not set higher bits
 
-    if (active_receiver->random) {
-      output_buffer[C3] |= LT2208_RANDOM_ON;
-    }
+    //
+    // The protocol does not have different random/dither bits for different Mercury
+    // cards, therefore we OR the settings for all receivers no matter which ADC is assigned
+    //
+    for (int i=0; i<receivers; i++) {
+      if (receiver[i]->random) {
+        output_buffer[C3] |= LT2208_RANDOM_ON;
+      }
 
-    if (active_receiver->dither) {
-      output_buffer[C3] |= LT2208_DITHER_ON;
+      if (receiver[i]->dither) {
+        output_buffer[C3] |= LT2208_DITHER_ON;
+      }
     }
-
     //
     // Some  HL2 firmware variants (ab-) uses this bit for indicating an audio codec is present
     // We also  accept explicit use  of the "dither" box
@@ -1768,7 +1765,7 @@ void ozy_send_buffer() {
       output_buffer[C3] |= LT2208_DITHER_ON;
     }
 
-    if (filter_board == CHARLY25 && active_receiver->preamp) {
+    if (filter_board == CHARLY25 && receiver[0]->preamp) {
       output_buffer[C3] |= LT2208_GAIN_ON;
     }
 
@@ -2060,8 +2057,12 @@ void ozy_send_buffer() {
       output_buffer[C0] = 0x14;
 
       if (have_preamp) {
+        //
+        // For each receiver with the preamp bit set, activate the preamp
+        // of the ADC associated with that receiver
+        //
         for (i = 0; i < receivers; i++) {
-          output_buffer[C1] |= (receiver[i]->preamp << i);
+          output_buffer[C1] |= ((receiver[i]->preamp & 0x01)<< receiver[i]->adc);
         }
       }
 
@@ -2161,16 +2162,16 @@ void ozy_send_buffer() {
           // use ADC0 for RX1 and ADC1 for RX2 (fixed setting)
           output_buffer[C1] |= 0x04;
         } else {
-          output_buffer[C1] |= (receiver[0]->adc << (2 * rx1channel));
-          output_buffer[C1] |= (receiver[1]->adc << (2 * rx2channel));
+          output_buffer[C1] |= receiver[0]->adc & 0x03;
+          output_buffer[C1] |= (receiver[1]->adc & 0x03) << 2;
         }
 
         //
         // This is probably never needed. It allows to assign ADC1
-        // to the RX feedback channel
+        // to the RX feedback channel (this is currently not allowed in the GUI).
         //
-        if (rxfdbkchan > rx2channel && transmitter->puresignal) {
-          output_buffer[C1] |= (receiver[PS_RX_FEEDBACK]->adc << (2 * rxfdbkchan));
+        if (rxfdbkchan > 1 && rxfdbkchan < 4 && transmitter->puresignal) {
+          output_buffer[C1] |= ((receiver[PS_RX_FEEDBACK]->adc & 0x03) << (2 * rxfdbkchan));
         }
       }
 

@@ -79,8 +79,8 @@ extern int adc_overflow;
 void writepenny(unsigned char mode);
 static libusb_device_handle* ozy_handle;
 
-static char ozy_firmware[64] = {0};
-static char ozy_fpga[64] = {0};
+static char ozy_firmware[512] = {0};
+static char ozy_fpga[512] = {0};
 static unsigned char ozy_firmware_version[9];
 
 // variables accessed via ozy_i2c_readvars:
@@ -597,49 +597,59 @@ static int file_exists (const char * fileName) {
 }
 
 #if defined(__linux__) || defined(__APPLE__)
-int filePath (char *sOut, const char *sIn, size_t len) {
-  int rc = 0;
+//
+// The purpose of this function is to look for the file sIn in various
+// directories, and if found, return the name in *sOut with maximum
+// size len. We are looking (in that order) in the following directories
+// and return the first match:
+//
+// - current working directory
+// - directory "release" within the current working directory
+// - directory where the executable resides
+// - directory "release" in the directory where the executable resides
+// - /usr/share/pihpsdr
+// - /usr/local/share/pihpsdr
+//
+void filePath (char *sOut, const char *sIn, size_t len) {
+  int rc;
 
-  if ((rc = file_exists (sIn))) {
-    snprintf(sOut, len, "%s", sIn);
-    rc = 1;
-  } else {
-    char xPath [PATH_MAX] = {0};
-    rc = readlink ("/proc/self/exe", xPath, sizeof(xPath));
+  // a) cwd/sIn
+  snprintf(sOut, len, "%s", sIn);
+  if (file_exists(sOut)) { return; }
 
-    // try to detect the directory from which the executable has been loaded
-    if (rc >= 0) {
-      char s[PATH_MAX];
-      char *p;
+  // b) cwd/release/sIn
+  snprintf(sOut, len, "release/%s", sIn);
+  if (file_exists(sOut)) { return; }
 
-      if ( (p = strrchr (xPath, '/')) ) { *(p + 1) = '\0'; }
+  char xPath [PATH_MAX] = {0};
+  rc = readlink ("/proc/self/exe", xPath, sizeof(xPath));
 
-      t_print( "%d, Path of executable: [%s]\n", rc, xPath);
-      snprintf(s, PATH_MAX, "%s%s", xPath, sIn);
+  // try to detect the directory from which the executable has been loaded
+  if (rc >= 0) {
+    char *p;
 
-      if ((rc = file_exists (s))) {
-        // found in the same dir of executable
-        t_print( "File: [%s]\n", s);
-        snprintf(sOut, len, "%s", s);
-      } else {
-        char cwd[PATH_MAX];
+    if ( (p = strrchr (xPath, '/')) ) { *p = '\0'; }
 
-        if (getcwd(cwd, sizeof(cwd)) != NULL) {
-          t_print( "Current working dir: %s\n", cwd);
-          snprintf(s, PATH_MAX, "%s/%s", cwd, sIn);
+    t_print( "%d, Path of executable: %s\n", rc, xPath);
 
-          if ((rc = file_exists (s))) {
-            t_print( "File: [%s]\n", s);
-            snprintf(sOut, len, "%s", s);
-          }
-        }
-      }
-    } else {
-      t_print( "%d: %s\n", errno, strerror(errno));
-    }
+    // c) <exedir>/sIn
+    snprintf(sOut, len, "%s/%s", xPath, sIn);
+    if (file_exists(sOut)) { return; }
+
+    // d) <exedir>/release/sIn
+    snprintf(sOut, len, "%s/release/%s", xPath, sIn);
+    if (file_exists(sOut)) { return; }
   }
 
-  return rc;
+  // e) /usr/share/pihpsdr/sIn
+  snprintf(sOut, len, "/usr/share/pihpsdr/%s", sIn);
+  if (file_exists(sOut)) { return; }
+
+  // f) /usr/local/share/pihpsdr/sIn
+  snprintf(sOut, len, "/usr/local/share/pihpsdr/%s", sIn);
+  if (file_exists(sOut)) { return; }
+ 
+  t_print("File %s could not be found!\n", sIn);
 }
 #endif
 
