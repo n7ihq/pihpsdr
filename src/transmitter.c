@@ -213,6 +213,7 @@ void transmitterSaveState(const TRANSMITTER *tx) {
   SetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor_level);
   SetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
   SetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
+  SetPropI1("transmitter.%d.display_filled",    tx->id,               tx->display_filled);
 }
 
 static void transmitterRestoreState(TRANSMITTER *tx) {
@@ -252,6 +253,7 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
   GetPropF1("transmitter.%d.compressor_level",  tx->id,               tx->compressor_level);
   GetPropI1("transmitter.%d.dialog_x",          tx->id,               tx->dialog_x);
   GetPropI1("transmitter.%d.dialog_y",          tx->id,               tx->dialog_y);
+  GetPropI1("transmitter.%d.display_filled",    tx->id,               tx->display_filled);
 }
 
 static double compute_power(double p) {
