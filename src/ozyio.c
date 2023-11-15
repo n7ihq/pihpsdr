@@ -40,21 +40,21 @@
 
 #include <libusb-1.0/libusb.h>
 
-#include "ozyio.h"
 #include "message.h"
+
+//
+// Constants for USB
+//
 
 #define OZY_PID (0x0007)
 #define OZY_VID (0xfffe)
 
 #define VRQ_SDR1K_CTL 0x0d
 #define SDR1KCTRL_READ_VERSION  0x7
-#define VRT_VENDOR_IN 0xC0
 
 #define VENDOR_REQ_TYPE_IN 0xc0
 #define VENDOR_REQ_TYPE_OUT 0x40
 
-#define VRQ_I2C_WRITE (0x08)
-#define VRT_VENDOR_OUT (0x40)
 
 #define VENDOR_REQ_SET_LED 0x01
 #define VENDOR_REQ_FPGA_LOAD 0x02
@@ -72,25 +72,48 @@
 
 #define USB_TIMEOUT -7
 
-static int init = 0;
-extern unsigned char penny_fw, mercury_fw;
-extern unsigned short penny_fp, penny_rp, penny_alc;
-extern int adc_overflow;
-void writepenny(unsigned char mode);
+//
+// Constants used for I2C operations
+//
+
+#define I2C_MERC1_FW  0x10 // Mercury1 firmware version      (read 2 bytes)
+#define I2C_MERC2_FW  0x11 // Mercury2 firmware version      (read 2 bytes)
+#define I2C_MERC3_FW  0x12 // Mercury3 firmware version      (read 2 bytes)
+#define I2C_MERC4_FW  0x13 // Mercury4 firmware version      (read 2 bytes)
+
+#define I2C_MERC1_ADC_OFS 0x10 // adc1 overflow status       (read 2 bytes)
+#define I2C_MERC2_ADC_OFS 0x11 // adc2 overflow status       (read 2 bytes)
+#define I2C_MERC3_ADC_OFS 0x12 // adc3 overflow status       (read 2 bytes)
+#define I2C_MERC4_ADC_OFS 0x13 // adc4 overflow status       (read 2 bytes)
+
+#define I2C_PENNY_FW  0x15 // Penny firmware version         (read 2 bytes)
+#define I2C_PENNY_ALC 0x16 // Penny forward power            (read 2 bytes)
+#define I2C_PENNY_FWD 0x17 // Penny forward power from Alex  (read 2 bytes)
+#define I2C_PENNY_REV 0x18 // Penny reverse power from Alex  (read 2 bytes)
+#define I2C_PENNY_TLV320 0x1B // Penny TLV320 data           (eight times write 2 bytes)
+
+#define VRT_VENDOR_IN  0xC0
+#define VRQ_I2C_READ   0x81     // i2c address; length; how much to read
+#define VRT_VENDOR_OUT 0x40
+#define VRQ_I2C_WRITE  0x08
+
+static int init = 0;                         // flag indicating libusb_init has been executed
 static libusb_device_handle* ozy_handle;
 
-static char ozy_firmware[512] = {0};
-static char ozy_fpga[512] = {0};
-static unsigned char ozy_firmware_version[9];
+static char ozy_firmware[512] = {0};   // file name of OZY firmware file
+static char ozy_fpga[512] = {0};       // file name of OZY FPGA data
 
-// variables accessed via ozy_i2c_readvars:
-unsigned char penny_fw = 0, mercury_fw = 0;
+//
+// Global Variables
+//
 
-// variables accessed via ozy_i2c_readpwr
-unsigned short penny_fp = 0, penny_rp = 0, penny_alc = 0;
-int adc_overflow;
+unsigned int penny_fw = 0, mercury_fw[2] = {0, 0};
+unsigned int penny_fp = 0, penny_rp = 0, penny_alc = 0;
+unsigned int mercury_overload[2] = {0, 0};
+unsigned char ozy_firmware_version[9];
 
-int ozy_open() {
+
+static int ozy_open() {
   int rc;
 
   if (init == 0) {
@@ -127,7 +150,7 @@ int ozy_open() {
   return 0;
 }
 
-int ozy_close() {
+static int ozy_close() {
   int rc;
   rc = libusb_attach_kernel_driver(ozy_handle, 0);
 
@@ -139,7 +162,7 @@ int ozy_close() {
   return 0;
 }
 
-int ozy_get_firmware_string(unsigned char* buffer, int buffer_size) {
+static int ozy_get_firmware_string(unsigned char* buffer, int buffer_size) {
   int rc;
   rc = libusb_control_transfer(ozy_handle, VRT_VENDOR_IN, VRQ_SDR1K_CTL, SDR1KCTRL_READ_VERSION, 0, buffer, buffer_size,
                                OZY_IO_TIMEOUT);
@@ -180,7 +203,7 @@ int ozy_read(int ep, unsigned char* buffer, int buffer_size) {
   return rc;
 }
 
-int ozy_write_ram(int fx2_start_addr, unsigned char *bufp, int count) {
+static int ozy_write_ram(int fx2_start_addr, unsigned char *bufp, int count) {
   int pkt_size = MAX_EPO_PACKET_SIZE;
   int len = count;
   int bytes_written = 0;
@@ -203,7 +226,7 @@ int ozy_write_ram(int fx2_start_addr, unsigned char *bufp, int count) {
   return bytes_written;
 }
 
-int ozy_reset_cpu(int reset) {
+static int ozy_reset_cpu(int reset) {
   unsigned char write_buf;
 
   if ( reset ) { write_buf = 1; }
@@ -254,7 +277,7 @@ static int hexitsToUInt(char *p, int count) {
   return result;
 }
 
-int ozy_load_firmware(char *fnamep) {
+static int ozy_load_firmware(char *fnamep) {
   FILE *ifile;
   int linecount = 0;
   int length;
@@ -349,7 +372,7 @@ int ozy_load_firmware(char *fnamep) {
   return linecount;
 }
 
-int ozy_set_led(int which, int on) {
+static int ozy_set_led(int which, int on) {
   int rc;
   int val;
 
@@ -369,7 +392,7 @@ int ozy_set_led(int which, int on) {
   return 1;
 }
 
-int ozy_load_fpga(char *rbf_fnamep) {
+static int ozy_load_fpga(char *rbf_fnamep) {
   FILE *rbffile;
   unsigned char buf[MAX_EPO_PACKET_SIZE];
   int bytes_read;
@@ -420,7 +443,7 @@ int ozy_load_fpga(char *rbf_fnamep) {
   return 1;
 }
 
-int ozy_i2c_write(unsigned char* buffer, int buffer_size, unsigned char cmd) {
+static int ozy_i2c_write(unsigned char* buffer, int buffer_size, unsigned char cmd) {
   int rc;
   rc = libusb_control_transfer(ozy_handle, VRT_VENDOR_OUT, VRQ_I2C_WRITE, cmd, 0, buffer, buffer_size, OZY_IO_TIMEOUT);
 
@@ -432,15 +455,9 @@ int ozy_i2c_write(unsigned char* buffer, int buffer_size, unsigned char cmd) {
   return rc;
 }
 
-int ozy_i2c_read(unsigned char* buffer, int buffer_size, unsigned char cmd) {
+static int ozy_i2c_read(unsigned char* buffer, int buffer_size, unsigned char cmd) {
   int rc;
   rc = libusb_control_transfer(ozy_handle, VRT_VENDOR_IN, VRQ_I2C_READ, cmd, 0, buffer, buffer_size, OZY_IO_TIMEOUT);
-
-  if (rc < 0) {
-    t_print("ozy_i2c_read failed: %d\n", rc);
-    return rc;
-  }
-
   return rc;
 }
 
@@ -490,50 +507,30 @@ void ozy_i2c_readpwr(int addr) {
     }
 
     if (buffer[0] == 0) {       // its overloaded
-      adc_overflow = 2000;    // counts down to give hold time to client
+      mercury_overload[0] = 1;
     }
 
     break;
 
+  case I2C_MERC2_ADC_OFS:
+    // adc overload
+    rc = ozy_i2c_read(buffer, 2, I2C_MERC2_ADC_OFS); // adc1 overflow status
+
+    if (rc < 0) {
+      t_perror("ozy_i2c_readpwr adc: failed");
+    }
+
+    if (buffer[0] == 0) {       // its overloaded
+      mercury_overload[1] = 1;
+    }
+
+    break;
   default:
     break;
   }
 }
 
-void ozy_i2c_readvars() {
-  int rc = 0;
-  unsigned char buffer[8];
-  t_print("ozy_i2c_init: starting\n");
-  rc = ozy_i2c_read(buffer, 2, I2C_MERC1_FW);
-
-  if (rc < 0) {
-    t_perror("ozy_i2c_readvars MercFW: failed");
-    //
-    // quickly return: if this fails, probably the I2C jumpers are not set
-    // correctly and it is not worth to continue
-    //
-    return;
-  }
-
-  mercury_fw = buffer[1];
-  t_print("mercury firmware=%d\n", (int)buffer[1]);
-  rc = ozy_i2c_read(buffer, 2, I2C_PENNY_FW);
-
-  if (rc < 0) {
-    t_perror("ozy_i2c_readvars PennyFW: failed");
-    //
-    // If this fails, writing the TLV320 data to Penny
-    // need not be attempted
-    //
-    return;
-  }
-
-  penny_fw = buffer[1];
-  t_print("penny firmware=%d\n", (int)buffer[1]);
-  writepenny((unsigned char)1);
-}
-
-void writepenny(unsigned char mode) {
+static void writepenny(unsigned char mode) {
   unsigned char Penny_TLV320[2];
   unsigned char Penny_TLV320_data[] = { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x15, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 }; // 16 byte
   int x;
@@ -590,6 +587,53 @@ void writepenny(unsigned char mode) {
   t_print("write Penny done..\n");
 }
 
+void ozy_i2c_readvars() {
+  int rc = 0;
+  unsigned char buffer[8];
+  t_print("ozy_i2c_init: starting\n");
+  rc = ozy_i2c_read(buffer, 2, I2C_MERC1_FW);
+
+  if (rc < 0) {
+    t_perror("ozy_i2c_readvars Merc1FW: failed");
+    //
+    // quickly return: if this fails, probably the I2C jumpers are not set
+    // correctly and it is not worth to continue
+    //
+    return;
+  }
+
+  mercury_fw[0] = buffer[1];
+  t_print("mercury firmware 1=%d\n", (int)buffer[1]);
+
+  rc = ozy_i2c_read(buffer, 2, I2C_MERC2_FW);
+
+  if (rc < 0) {
+    // Ignore silently:
+    // The I2C jumpers are probably OK as it passed for the 1st mercury,
+    // most likely there simply is no 2nd mercury and then the failure
+    // is no reason to worry.
+    //
+  } else {
+    mercury_fw[1] = buffer[1];
+    t_print("mercury firmware 2=%d\n", (int)buffer[1]);
+  }
+
+  rc = ozy_i2c_read(buffer, 2, I2C_PENNY_FW);
+
+  if (rc < 0) {
+    t_perror("ozy_i2c_readvars PennyFW: failed");
+    //
+    // If this fails, writing the TLV320 data to Penny
+    // need not be attempted
+    //
+    return;
+  }
+
+  penny_fw = buffer[1];
+  t_print("penny firmware=%d\n", (int)buffer[1]);
+  writepenny((unsigned char)1);
+}
+
 static int file_exists (const char * fileName) {
   struct stat buf;
   int i = stat ( fileName, &buf );
@@ -605,12 +649,14 @@ static int file_exists (const char * fileName) {
 //
 // - current working directory
 // - directory "release" within the current working directory
+// - directory "release/pihpsdr" within the current working directory
 // - directory where the executable resides
 // - directory "release" in the directory where the executable resides
+// - directory "release/pihpsdr" in the directory where the executable resides
 // - /usr/share/pihpsdr
 // - /usr/local/share/pihpsdr
 //
-void filePath (char *sOut, const char *sIn, size_t len) {
+static void filePath (char *sOut, const char *sIn, size_t len) {
   int rc;
 
   // a) cwd/sIn
@@ -619,6 +665,10 @@ void filePath (char *sOut, const char *sIn, size_t len) {
 
   // b) cwd/release/sIn
   snprintf(sOut, len, "release/%s", sIn);
+  if (file_exists(sOut)) { return; }
+
+  // c) cwd/release/pihpsdr/sIn
+  snprintf(sOut, len, "release/pihpsdr/%s", sIn);
   if (file_exists(sOut)) { return; }
 
   char xPath [PATH_MAX] = {0};
@@ -632,20 +682,24 @@ void filePath (char *sOut, const char *sIn, size_t len) {
 
     t_print( "%d, Path of executable: %s\n", rc, xPath);
 
-    // c) <exedir>/sIn
+    // d) <exedir>/sIn
     snprintf(sOut, len, "%s/%s", xPath, sIn);
     if (file_exists(sOut)) { return; }
 
-    // d) <exedir>/release/sIn
+    // e) <exedir>/release/sIn
     snprintf(sOut, len, "%s/release/%s", xPath, sIn);
+    if (file_exists(sOut)) { return; }
+
+    // f) <exedir>/release/pihpsdr/sIn
+    snprintf(sOut, len, "%s/release/pihpsdr/%s", xPath, sIn);
     if (file_exists(sOut)) { return; }
   }
 
-  // e) /usr/share/pihpsdr/sIn
+  // g) /usr/share/pihpsdr/sIn
   snprintf(sOut, len, "/usr/share/pihpsdr/%s", sIn);
   if (file_exists(sOut)) { return; }
 
-  // f) /usr/local/share/pihpsdr/sIn
+  // h) /usr/local/share/pihpsdr/sIn
   snprintf(sOut, len, "/usr/local/share/pihpsdr/%s", sIn);
   if (file_exists(sOut)) { return; }
  

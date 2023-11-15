@@ -1110,7 +1110,7 @@ static void process_control_bytes() {
       //
       if (mercury_software_version[0] != control_in[2]) {
         mercury_software_version[0] = control_in[2];
-        t_print("  Mercury Software version: %d (0x%0X)\n", mercury_software_version, mercury_software_version);
+        t_print("  Mercury Software version: %d (0x%0X)\n", mercury_software_version[0], mercury_software_version[0]);
       }
 
       if (penelope_software_version != control_in[3] && control_in[3] != 0xFF) {
