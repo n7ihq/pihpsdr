@@ -40,6 +40,7 @@
 
 #include <libusb-1.0/libusb.h>
 
+#include "ozyio.h"
 #include "message.h"
 
 //
@@ -70,31 +71,6 @@
 #define MAX_EPO_PACKET_SIZE 64
 
 #define USB_TIMEOUT -7
-
-//
-// Constants used for I2C operations
-//
-
-#define I2C_MERC1_FW  0x10 // Mercury1 firmware version      (read 2 bytes)
-#define I2C_MERC2_FW  0x11 // Mercury2 firmware version      (read 2 bytes)
-#define I2C_MERC3_FW  0x12 // Mercury3 firmware version      (read 2 bytes)
-#define I2C_MERC4_FW  0x13 // Mercury4 firmware version      (read 2 bytes)
-
-#define I2C_MERC1_ADC_OFS 0x10 // adc1 overflow status       (read 2 bytes)
-#define I2C_MERC2_ADC_OFS 0x11 // adc2 overflow status       (read 2 bytes)
-#define I2C_MERC3_ADC_OFS 0x12 // adc3 overflow status       (read 2 bytes)
-#define I2C_MERC4_ADC_OFS 0x13 // adc4 overflow status       (read 2 bytes)
-
-#define I2C_PENNY_FW  0x15 // Penny firmware version         (read 2 bytes)
-#define I2C_PENNY_ALC 0x16 // Penny forward power            (read 2 bytes)
-#define I2C_PENNY_FWD 0x17 // Penny forward power from Alex  (read 2 bytes)
-#define I2C_PENNY_REV 0x18 // Penny reverse power from Alex  (read 2 bytes)
-#define I2C_PENNY_TLV320 0x1B // Penny TLV320 data           (eight times write 2 bytes)
-
-#define VRT_VENDOR_IN  0xC0
-#define VRQ_I2C_READ   0x81     // i2c address; length; how much to read
-#define VRT_VENDOR_OUT 0x40
-#define VRQ_I2C_WRITE  0x08
 
 static int init = 0;                         // flag indicating libusb_init has been executed
 static libusb_device_handle* ozy_handle;

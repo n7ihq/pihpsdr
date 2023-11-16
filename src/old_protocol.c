@@ -172,6 +172,7 @@ static int how_many_receivers(void);
   #include "ozyio.h"
 
   static gpointer ozy_ep6_rx_thread(gpointer arg);
+  static gpointer ozy_i2c_read_thread(gpointer arg);
   static void start_usb_receive_threads(void);
   static void ozyusb_write(unsigned char* buffer, int length);
   #define EP6_IN_ID   0x86                        // end point = 6, direction toward PC
@@ -322,14 +323,13 @@ void old_protocol_stop() {
   //
   // Mutex is needed since in the TCP case, sending TX IQ packets
   // must not occur while the "stop" packet is sent.
+  // For OZY, metis_start_stop is a no-op so quick return
   //
+  if (device == DEVICE_OZY) { return; }
+  
   pthread_mutex_lock(&send_ozy_mutex);
-
-  if (device != DEVICE_OZY) {
-    t_print("%s\n", __FUNCTION__);
-    metis_start_stop(0);
-  }
-
+  t_print("%s\n", __FUNCTION__);
+  metis_start_stop(0);
   pthread_mutex_unlock(&send_ozy_mutex);
 }
 
@@ -421,7 +421,42 @@ void old_protocol_init(int rx, int pixels, int rate) {
 //
 static void start_usb_receive_threads() {
   t_print("old_protocol starting USB receive thread\n");
-  g_thread_new( "OZY", ozy_ep6_rx_thread, NULL);
+  g_thread_new( "OZYEP6", ozy_ep6_rx_thread, NULL);
+  g_thread_new( "OZYI2C", ozy_i2c_read_thread, NULL);
+}
+
+static gpointer ozy_i2c_read_thread(gpointer arg) {
+  int cycle;
+  t_print( "old_protocol: OZY I2C read thread\n");
+  cycle = 0;
+  for (;;) {
+    if (running) {
+      switch (cycle) {
+      case 0:
+        ozy_i2c_readpwr(I2C_PENNY_ALC);
+        // This value is nowhere used
+        cycle = 1;
+        break;
+      case 1:
+        ozy_i2c_readpwr(I2C_PENNY_FWD);
+        ozy_i2c_readpwr(I2C_PENNY_REV);
+        // penny_fp and penny_rp are used in transmitter.c
+        cycle = 2;
+        break;
+      case 2:
+        ozy_i2c_readpwr(I2C_MERC1_ADC_OFS);
+        adc0_overload |= mercury_overload[0];
+        if (mercury_software_version[1]) {
+          ozy_i2c_readpwr(I2C_MERC2_ADC_OFS);
+          adc1_overload |= mercury_overload[1];
+        }
+        cycle = 0;
+        break;
+      }
+    }
+    usleep(50000);
+  }
+  return NULL;  /* NOTREACHED */
 }
 
 //
@@ -1183,13 +1218,13 @@ static void process_control_bytes() {
     if (mercury_software_version[0] != control_in[1] >> 1 && control_in[1] >> 1 != 0x7F) {
       mercury_software_version[0] = control_in[1] >> 1;
       t_print("  Mercury 1 Software version: %d.%d\n", mercury_software_version[0] / 10, mercury_software_version[0] % 10);
+      receiver[0]->adc = 0;
     }
 
     if (mercury_software_version[1] != control_in[2] >> 1 && control_in[2] >> 1 != 0x7F) {
       mercury_software_version[1] = control_in[2] >> 1;
       t_print("  Mercury 2 Software version: %d.%d\n", mercury_software_version[1] / 10, mercury_software_version[1] % 10);
-      // Since we have two Mercury boards, we have two ADCs
-      n_adc = 2;
+      if (receivers > 1) { receiver[1]->adc = 1; }
     }
   }
 }
@@ -2147,25 +2182,21 @@ void ozy_send_buffer() {
       // need to add tx attenuation and rx ADC selection
       output_buffer[C0] = 0x1C;
 
-      // if n_adc == 1, there is only a single ADC, so we can leave everything
-      // set to zero
-      if (n_adc  > 1) {
-        // set adc of the two RX associated with the two piHPSDR receivers
-        if (diversity_enabled) {
-          // use ADC0 for RX1 and ADC1 for RX2 (fixed setting)
-          output_buffer[C1] |= 0x04;
-        } else {
-          output_buffer[C1] |= receiver[0]->adc & 0x03;
-          output_buffer[C1] |= (receiver[1]->adc & 0x03) << 2;
-        }
+      // set adc of the two RX associated with the two piHPSDR receivers
+      if (diversity_enabled) {
+        // use ADC0 for RX1 and ADC1 for RX2 (fixed setting)
+        output_buffer[C1] |= 0x04;
+      } else {
+        output_buffer[C1] |= receiver[0]->adc & 0x03;
+        output_buffer[C1] |= (receiver[1]->adc & 0x03) << 2;
+      }
 
-        //
-        // This is probably never needed. It allows to assign ADC1
-        // to the RX feedback channel (this is currently not allowed in the GUI).
-        //
-        if (rxfdbkchan > 1 && rxfdbkchan < 4 && transmitter->puresignal) {
-          output_buffer[C1] |= ((receiver[PS_RX_FEEDBACK]->adc & 0x03) << (2 * rxfdbkchan));
-        }
+      //
+      // This is probably never needed. It allows to assign ADC1
+      // to the RX feedback channel (this is currently not allowed in the GUI).
+      //
+      if (rxfdbkchan > 1 && rxfdbkchan < 4 && transmitter->puresignal) {
+        output_buffer[C1] |= ((receiver[PS_RX_FEEDBACK]->adc & 0x03) << (2 * rxfdbkchan));
       }
 
       if (device == DEVICE_HERMES_LITE2) {

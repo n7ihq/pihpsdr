@@ -50,6 +50,7 @@
 #include "audio.h"
 #include "ext.h"
 #include "sliders.h"
+#include "ozyio.h"
 #include "sintab.h"
 #include "message.h"
 #include "mystring.h"
@@ -364,14 +365,32 @@ static gboolean update_display(gpointer data) {
     // taking the values from the Thetis
     // repository.
     //
+
+    fwd_power   = alex_forward_power;
+    rev_power   = alex_reverse_power;
+
     switch (device) {
     default:
-      // This includes SOAPY (where these numbers are not used)
+      //
+      // This is meant to lead to tx->fwd = 0 and tx->rev = 0
+      //
+      constant1 = 1.0;
+      constant2 = 1.0;
+      rconstant2 = 1.0;
+      rev_cal_offset = 0;
+      fwd_cal_offset = 0;
+      fwd_power = 0;
+      rev_power = 0;
+      break;
+
+    case DEVICE_METIS:
       constant1 = 3.3;
       constant2 = 0.09;
       rconstant2 = 0.09;
       rev_cal_offset = 3;
       fwd_cal_offset = 6;
+      fwd_power = penny_fp;
+      rev_power = penny_rp;
       break;
 
     case DEVICE_HERMES:
@@ -427,43 +446,29 @@ static gboolean update_display(gpointer data) {
       break;
     }
 
-    switch (protocol) {
-    case ORIGINAL_PROTOCOL:
-    case NEW_PROTOCOL:
-      fwd_power   = alex_forward_power;
-      rev_power   = alex_reverse_power;
-
-      //
-      // Special hook for HL2s with an incorrectly wound current
-      // sense transformer: Exchange fwd and rev readings
-      //
-      if (device == DEVICE_HERMES_LITE || device == DEVICE_HERMES_LITE2 ||
-          device == NEW_DEVICE_HERMES_LITE || device == NEW_DEVICE_HERMES_LITE2) {
-        if (rev_power > fwd_power) {
-          fwd_power   = alex_reverse_power;
-          rev_power   = alex_forward_power;
-        }
+    //
+    // Special hook for HL2s with an incorrectly wound current
+    // sense transformer: Exchange fwd and rev readings
+    //
+    if (device == DEVICE_HERMES_LITE || device == DEVICE_HERMES_LITE2 ||
+        device == NEW_DEVICE_HERMES_LITE || device == NEW_DEVICE_HERMES_LITE2) {
+      if (rev_power > fwd_power) {
+        fwd_power   = alex_reverse_power;
+        rev_power   = alex_forward_power;
       }
-
-      fwd_power = fwd_power - fwd_cal_offset;
-      rev_power = rev_power - rev_cal_offset;
-
-      if (fwd_power < 0) { fwd_power = 0; }
-
-      if (rev_power < 0) { rev_power = 0; }
-
-      v1 = ((double)fwd_power / 4095.0) * constant1;
-      tx->fwd = (v1 * v1) / constant2;
-      v1 = ((double)rev_power / 4095.0) * constant1;
-      tx->rev = (v1 * v1) / rconstant2;
-      break;
-
-    case SOAPYSDR_PROTOCOL:
-    default:
-      tx->rev = 0.0;
-      tx->fwd = 0.0;
-      break;
     }
+
+    fwd_power = fwd_power - fwd_cal_offset;
+    rev_power = rev_power - rev_cal_offset;
+
+    if (fwd_power < 0) { fwd_power = 0; }
+
+    if (rev_power < 0) { rev_power = 0; }
+
+    v1 = ((double)fwd_power / 4095.0) * constant1;
+    tx->fwd = (v1 * v1) / constant2;
+    v1 = ((double)rev_power / 4095.0) * constant1;
+    tx->rev = (v1 * v1) / rconstant2;
 
     //
     // compute_power does an interpolation is user-supplied pairs of
@@ -480,6 +485,7 @@ static gboolean update_display(gpointer data) {
     // The SWR is calculated from the (time-averaged) forward and reverse voltages.
     // Take care that no division by zero can happen, since otherwise the moving
     // exponential average cannot survive.
+    //
     //
     if (tx->fwd > 0.25) {
       //
