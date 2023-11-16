@@ -103,7 +103,7 @@ void saturn_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), client_enable_tx_b, 1, 1, 1, 1);
   g_signal_connect(client_enable_tx_b, "toggled", G_CALLBACK(client_enable_tx_cb), NULL);
 #else
-  GtkWidget *client_enable_tx_b = gtk_label_new(" *Client is RX Only*");
+  client_enable_tx_b = gtk_label_new(" *Client is RX Only*");
   gtk_widget_set_name(client_enable_tx_b, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), client_enable_tx_b, 1, 1, 1, 1);
 #endif
@@ -113,7 +113,9 @@ void saturn_menu(GtkWidget *parent) {
   // The client enable tx button will only be "sensitive" is the
   // saturn server is enabled
   //
+#ifdef SATURNTEST
   gtk_widget_set_sensitive(client_enable_tx_b, saturn_server_en);
+#endif
   gtk_widget_show_all(dialog);
 }
 

@@ -79,7 +79,6 @@ static void diversity_cb(GtkWidget *widget, gpointer data) {
 
   schedule_high_priority();
   schedule_receive_specific();
-
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -272,4 +271,3 @@ void diversity_menu(GtkWidget *parent) {
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }
-

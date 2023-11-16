@@ -234,7 +234,6 @@ typedef struct _receiver {
   guint txrxcount;
   guint txrxmax;
 
-
   int display_gradient;
   int display_filled;
   int display_detector_mode;
@@ -258,7 +257,6 @@ extern void set_mode(RECEIVER* rx, int m);
 extern void set_filter(RECEIVER *rx);
 extern void set_agc(RECEIVER *rx, int agc);
 extern void set_offset(RECEIVER *rx, long long offset);
-extern void set_deviation(RECEIVER *rx);
 
 extern void add_iq_samples(RECEIVER *rx, double i_sample, double q_sample);
 extern void add_div_iq_samples(RECEIVER *rx, double i0, double q0, double i1, double q1);

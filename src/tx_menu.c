@@ -522,7 +522,6 @@ void tx_menu(GtkWidget *parent) {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (filled_b), transmitter->display_filled);
   gtk_grid_attach(GTK_GRID(grid), filled_b, col, row, 1, 1);
   g_signal_connect(filled_b, "toggled", G_CALLBACK(filled_cb), NULL);
-
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

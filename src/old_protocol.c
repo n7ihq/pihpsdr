@@ -536,7 +536,6 @@ static void open_udp_socket() {
   }
 
   optlen = sizeof(optval);
-
 #ifdef IPTOS_DSCP_EF
   optval = IPTOS_DSCP_EF;
 #else
@@ -667,7 +666,6 @@ static void open_tcp_socket() {
   }
 
   optlen = sizeof(optval);
-
 #ifdef IPTOS_DSCP_EF
   optval = IPTOS_DSCP_EF;
 #else
@@ -955,7 +953,6 @@ static long long channel_freq(int chan) {
     if (vfo[vfonum].xit_enabled) {
       freq += vfo[vfonum].xit;
     }
-
   } else {
     //
     // determine RX frequency associated with VFO #vfonum
@@ -1060,18 +1057,15 @@ static void process_control_bytes() {
   int previous_dot;
   int previous_dash;
   unsigned int val;
-
   //
   // variable used to manage analog inputs. The accumulators
   // record the value*16.
-  // 
-  static unsigned int fwd_acc = 0; 
+  //
+  static unsigned int fwd_acc = 0;
   static unsigned int rev_acc = 0;
   static unsigned int ex_acc = 0;
   static unsigned int adc0_acc = 0;
   static unsigned int adc1_acc = 0;
-
-
   // do not set ptt. In PureSignal, this would stop the
   // receiver sending samples to WDSP abruptly.
   // Do the RX-TX change only via ext_mox_update.
@@ -1162,40 +1156,37 @@ static void process_control_bytes() {
     val = ((control_in[1] & 0xFF) << 8) | (control_in[2] & 0xFF); // HL2
     ex_acc = (15 * ex_acc) / 16  + val;
     exciter_power = ex_acc / 16;
-
     val = ((control_in[3] & 0xFF) << 8) | (control_in[4] & 0xFF);
-    fwd_acc = (15 *fwd_acc) / 16 + val;
+    fwd_acc = (15 * fwd_acc) / 16 + val;
     alex_forward_power = fwd_acc / 16;
-
     break;
 
   case 2:
     val = ((control_in[1] & 0xFF) << 8) | (control_in[2] & 0xFF);
-    rev_acc = (15 *rev_acc) / 16 + val;
+    rev_acc = (15 * rev_acc) / 16 + val;
     alex_reverse_power = rev_acc / 16;
-
     val = ((control_in[3] & 0xFF) << 8) | (control_in[4] & 0xFF);
-    adc0_acc = (15 *adc0_acc) / 16 + val;
+    adc0_acc = (15 * adc0_acc) / 16 + val;
     ADC0 = adc0_acc / 16;
-
     break;
 
   case 3:
     val  = ((control_in[1] & 0xFF) << 8) | (control_in[2] & 0xFF);
-    adc1_acc = (15 *adc1_acc) / 16 + val;
+    adc1_acc = (15 * adc1_acc) / 16 + val;
     ADC1 = adc1_acc / 16;
-
     break;
 
   case 4:
     adc0_overload |= control_in[1] & 0x01;
     adc1_overload |= control_in[2] & 0x01;
-    if (mercury_software_version[0] != control_in[1]>>1 && control_in[1]>>1 !=0x7F) {
-      mercury_software_version[0] = control_in[1]>>1;
+
+    if (mercury_software_version[0] != control_in[1] >> 1 && control_in[1] >> 1 != 0x7F) {
+      mercury_software_version[0] = control_in[1] >> 1;
       t_print("  Mercury 1 Software version: %d.%d\n", mercury_software_version[0] / 10, mercury_software_version[0] % 10);
     }
-    if (mercury_software_version[1] != control_in[2]>>1 && control_in[2]>>1 !=0x7F) {
-      mercury_software_version[1] = control_in[2]>>1;
+
+    if (mercury_software_version[1] != control_in[2] >> 1 && control_in[2] >> 1 != 0x7F) {
+      mercury_software_version[1] = control_in[2] >> 1;
       t_print("  Mercury 2 Software version: %d.%d\n", mercury_software_version[1] / 10, mercury_software_version[1] % 10);
       // Since we have two Mercury boards, we have two ADCs
       n_adc = 2;
@@ -1326,6 +1317,7 @@ static void process_ozy_byte(int b) {
         right_sample_double_aux = right_sample_double;
         add_div_iq_samples(receiver[0], left_sample_double_main, right_sample_double_main, left_sample_double_aux,
                            right_sample_double_aux);
+
         if (receivers > 1) { add_iq_samples(receiver[1], left_sample_double_aux, right_sample_double_aux); }
       }
     }
@@ -1748,7 +1740,7 @@ void ozy_send_buffer() {
     // The protocol does not have different random/dither bits for different Mercury
     // cards, therefore we OR the settings for all receivers no matter which ADC is assigned
     //
-    for (int i=0; i<receivers; i++) {
+    for (i = 0; i < receivers; i++) {
       if (receiver[i]->random) {
         output_buffer[C3] |= LT2208_RANDOM_ON;
       }
@@ -1757,6 +1749,7 @@ void ozy_send_buffer() {
         output_buffer[C3] |= LT2208_DITHER_ON;
       }
     }
+
     //
     // Some  HL2 firmware variants (ab-) uses this bit for indicating an audio codec is present
     // We also  accept explicit use  of the "dither" box
@@ -1995,8 +1988,8 @@ void ozy_send_buffer() {
       }
 
       if (!isTransmitting() && adc0_filter_bypass) {
-          output_buffer[C2] |= 0x40; // Manual Filter Selection
-          output_buffer[C3] |= 0x20; // bypass all RX filters
+        output_buffer[C2] |= 0x40; // Manual Filter Selection
+        output_buffer[C3] |= 0x20; // bypass all RX filters
       }
 
       //
@@ -2062,7 +2055,7 @@ void ozy_send_buffer() {
         // of the ADC associated with that receiver
         //
         for (i = 0; i < receivers; i++) {
-          output_buffer[C1] |= ((receiver[i]->preamp & 0x01)<< receiver[i]->adc);
+          output_buffer[C1] |= ((receiver[i]->preamp & 0x01) << receiver[i]->adc);
         }
       }
 
@@ -2205,7 +2198,7 @@ void ozy_send_buffer() {
       //
       uint8_t rfdelay = cw_keyer_ptt_delay;
       uint8_t rfmax = 900 / cw_keyer_speed;
-  
+
       if (rfdelay > rfmax) { rfdelay = rfmax; }
 
       output_buffer[C2] = cw_keyer_sidetone_volume;

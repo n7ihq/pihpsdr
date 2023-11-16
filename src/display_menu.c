@@ -352,7 +352,6 @@ void display_menu(GtkWidget *parent) {
   gtk_widget_show(b_display_waterfall);
   gtk_grid_attach(GTK_GRID(grid), b_display_waterfall, col, row, 1, 1);
   g_signal_connect(b_display_waterfall, "toggled", G_CALLBACK(display_waterfall_cb), (gpointer)NULL);
-
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
 

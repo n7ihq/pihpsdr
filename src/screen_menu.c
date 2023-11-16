@@ -255,7 +255,6 @@ void screen_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), b_display_toolbar, 2, row, 1, 1);
   g_signal_connect(b_display_toolbar, "toggled", G_CALLBACK(display_toolbar_cb), (gpointer)NULL);
   row++;
-
   GtkWidget *b_display_warnings = gtk_check_button_new_with_label("Display Warnings");
   gtk_widget_set_name (b_display_warnings, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_display_warnings), display_warnings);
@@ -268,7 +267,6 @@ void screen_menu(GtkWidget *parent) {
   gtk_widget_show(b_display_pacurr);
   gtk_grid_attach(GTK_GRID(grid), b_display_pacurr, 1, row, 1, 1);
   g_signal_connect(b_display_pacurr, "toggled", G_CALLBACK(display_pacurr_cb), (gpointer)NULL);
-
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);

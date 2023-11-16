@@ -55,7 +55,6 @@
 #define VENDOR_REQ_TYPE_IN 0xc0
 #define VENDOR_REQ_TYPE_OUT 0x40
 
-
 #define VENDOR_REQ_SET_LED 0x01
 #define VENDOR_REQ_FPGA_LOAD 0x02
 
@@ -111,7 +110,6 @@ unsigned int penny_fw = 0, mercury_fw[2] = {0, 0};
 unsigned int penny_fp = 0, penny_rp = 0, penny_alc = 0;
 unsigned int mercury_overload[2] = {0, 0};
 unsigned char ozy_firmware_version[9];
-
 
 static int ozy_open() {
   int rc;
@@ -525,6 +523,7 @@ void ozy_i2c_readpwr(int addr) {
     }
 
     break;
+
   default:
     break;
   }
@@ -604,7 +603,6 @@ void ozy_i2c_readvars() {
 
   mercury_fw[0] = buffer[1];
   t_print("mercury firmware 1=%d\n", (int)buffer[1]);
-
   rc = ozy_i2c_read(buffer, 2, I2C_MERC2_FW);
 
   if (rc < 0) {
@@ -658,17 +656,19 @@ static int file_exists (const char * fileName) {
 //
 static void filePath (char *sOut, const char *sIn, size_t len) {
   int rc;
-
   // a) cwd/sIn
   snprintf(sOut, len, "%s", sIn);
+
   if (file_exists(sOut)) { return; }
 
   // b) cwd/release/sIn
   snprintf(sOut, len, "release/%s", sIn);
+
   if (file_exists(sOut)) { return; }
 
   // c) cwd/release/pihpsdr/sIn
   snprintf(sOut, len, "release/pihpsdr/%s", sIn);
+
   if (file_exists(sOut)) { return; }
 
   char xPath [PATH_MAX] = {0};
@@ -681,28 +681,32 @@ static void filePath (char *sOut, const char *sIn, size_t len) {
     if ( (p = strrchr (xPath, '/')) ) { *p = '\0'; }
 
     t_print( "%d, Path of executable: %s\n", rc, xPath);
-
     // d) <exedir>/sIn
     snprintf(sOut, len, "%s/%s", xPath, sIn);
+
     if (file_exists(sOut)) { return; }
 
     // e) <exedir>/release/sIn
     snprintf(sOut, len, "%s/release/%s", xPath, sIn);
+
     if (file_exists(sOut)) { return; }
 
     // f) <exedir>/release/pihpsdr/sIn
     snprintf(sOut, len, "%s/release/pihpsdr/%s", xPath, sIn);
+
     if (file_exists(sOut)) { return; }
   }
 
   // g) /usr/share/pihpsdr/sIn
   snprintf(sOut, len, "/usr/share/pihpsdr/%s", sIn);
+
   if (file_exists(sOut)) { return; }
 
   // h) /usr/local/share/pihpsdr/sIn
   snprintf(sOut, len, "/usr/local/share/pihpsdr/%s", sIn);
+
   if (file_exists(sOut)) { return; }
- 
+
   t_print("File %s could not be found!\n", sIn);
 }
 #endif

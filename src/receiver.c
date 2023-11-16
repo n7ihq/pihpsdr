@@ -641,10 +641,6 @@ void set_filter(RECEIVER *rx) {
   set_agc(rx, rx->agc);
 }
 
-void set_deviation(RECEIVER *rx) {
-  SetRXAFMDeviation(rx->id, (double)rx->deviation);
-}
-
 void set_agc(RECEIVER *rx, int agc) {
   SetRXAAGCMode(rx->id, agc);
   //SetRXAAGCThresh(rx->id, agc_thresh_point, 4096.0, rx->sample_rate);

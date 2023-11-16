@@ -123,10 +123,6 @@ void transmitter_set_out_of_band(TRANSMITTER *tx) {
   tx->out_of_band_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE, 1000, update_out_of_band, tx, NULL);
 }
 
-void transmitter_set_deviation(TRANSMITTER *tx) {
-  SetTXAFMDeviation(tx->id, (double)tx->deviation);
-}
-
 void transmitter_set_am_carrier_level(TRANSMITTER *tx) {
   SetTXAAMCarrierLevel(tx->id, tx->am_carrier_level);
 }
@@ -277,7 +273,6 @@ static double compute_power(double p) {
 static gboolean update_display(gpointer data) {
   TRANSMITTER *tx = (TRANSMITTER *)data;
   int rc;
-  static int pre_high_swr = 0;
 
   //t_print("update_display: tx id=%d\n",tx->id);
   if (tx->displaying) {
@@ -448,21 +443,19 @@ static gboolean update_display(gpointer data) {
           fwd_power   = alex_reverse_power;
           rev_power   = alex_forward_power;
         }
-
       }
 
       fwd_power = fwd_power - fwd_cal_offset;
       rev_power = rev_power - rev_cal_offset;
 
       if (fwd_power < 0) { fwd_power = 0; }
+
       if (rev_power < 0) { rev_power = 0; }
 
       v1 = ((double)fwd_power / 4095.0) * constant1;
       tx->fwd = (v1 * v1) / constant2;
-
       v1 = ((double)rev_power / 4095.0) * constant1;
       tx->rev = (v1 * v1) / rconstant2;
-
       break;
 
     case SOAPYSDR_PROTOCOL:
@@ -493,8 +486,7 @@ static gboolean update_display(gpointer data) {
       // SWR means VSWR (voltage based) but we have the forward and
       // reflected power, so correct for that
       //
-
-      double gamma = sqrt(tx->rev/tx->fwd);
+      double gamma = sqrt(tx->rev / tx->fwd);
 
       //
       // this prevents SWR going to infinity, from which the
@@ -517,13 +509,17 @@ static gboolean update_display(gpointer data) {
     //  To be sure that we do not shut down upon an artifact,
     //  it is required high SWR is seen in to subsequent calls.
     //
+    static int pre_high_swr = 0;
+
     if (tx->swr >= tx->swr_alarm) {
       if (pre_high_swr) {
         if (tx->swr_protection && !getTune()) {
           set_drive(0.0);
         }
+
         high_swr_seen = 1;
       }
+
       pre_high_swr = 1;
     } else {
       pre_high_swr = 0;
@@ -983,13 +979,10 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   }
 
   if (cwmode) {
-
     //
     // clear VOX peak level in case is it non-zero.
     //
-
     clear_vox();
-
     //
     // Note that WDSP is not needed, but we still call it (and discard the
     // results) since this  may help in correct slew-up and slew-down
@@ -999,14 +992,11 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     // signal to generate the RF pulse is that we do not want MicGain
     // and equalizer settings to interfere.
     //
-
     fexchange0(tx->id, tx->mic_input_buffer, tx->iq_output_buffer, &error);
-
     //
     // Construct our CW TX signal in tx->iq_output_buffer for the sole
     // purpose of displaying them in the TX panadapter
     //
-
     dp = tx->iq_output_buffer;
 
     // These are the I/Q samples that describe our CW signal

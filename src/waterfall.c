@@ -85,8 +85,8 @@ waterfall_button_release_event_cb (GtkWidget      *widget,
 }
 
 static gboolean waterfall_motion_notify_event_cb (GtkWidget      *widget,
-  GdkEventMotion *event,
-  gpointer        data) {
+    GdkEventMotion *event,
+    gpointer        data) {
   return receiver_motion_notify_event(widget, event, data);
 }
 

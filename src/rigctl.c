@@ -585,7 +585,6 @@ static gpointer rigctl_cw_thread(gpointer data) {
       if (!mox) {
         CAT_cw_is_active = 0;
         schedule_transmit_specific();
-
         continue;
       }
     }
@@ -654,7 +653,6 @@ static gpointer rigctl_cw_thread(gpointer data) {
   if (CAT_cw_is_active) {
     CAT_cw_is_active = 0;
     schedule_transmit_specific();
-
     g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
   }
 

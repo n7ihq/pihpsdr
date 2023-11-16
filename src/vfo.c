@@ -66,8 +66,9 @@ static GtkWidget *vfo_panel;
 static cairo_surface_t *vfo_surface = NULL;
 
 int steps[] = {1, 10, 25, 50, 100, 250, 500, 1000, 5000, 6250, 9000, 10000, 12500, 100000, 250000, 500000, 1000000};
-char *step_labels[] = {"1Hz", "10Hz", "25Hz", "50Hz", "100Hz", "250Hz", "500Hz", "1kHz", 
-                       "5kHz", "6.25k", "9kHz", "10kHz", "12.5k", "100kHz", "250kHz", "500kHz", "1MHz"};
+char *step_labels[] = {"1Hz", "10Hz", "25Hz", "50Hz", "100Hz", "250Hz", "500Hz", "1kHz",
+                       "5kHz", "6.25k", "9kHz", "10kHz", "12.5k", "100kHz", "250kHz", "500kHz", "1MHz"
+                      };
 
 inline long long ROUND(long long freq, int nsteps, int step) {
   //
@@ -76,11 +77,9 @@ inline long long ROUND(long long freq, int nsteps, int step) {
   // If nsteps is zero, this is simply rounding.
   //
   long  long f;
-
-  f = (freq + step/2)/step;
+  f = (freq + step / 2) / step;
   f = f + nsteps;
   f = f * step;
-
   return f;
 }
 
@@ -321,7 +320,6 @@ void vfo_xvtr_changed() {
 
   schedule_general();        // for disablePA
   schedule_high_priority();  // for Frequencies
-
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -526,7 +524,6 @@ void vfo_id_mode_changed(int id, int m) {
   //
   schedule_high_priority();       // update frequencies
   schedule_transmit_specific();   // update "CW" flag
-
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -659,6 +656,7 @@ int vfo_get_stepindex(int id) {
 
 void vfo_set_step_from_index(int id, int index) {
   CLIENT_MISSING;
+
   //
   // Set VFO step size to steps[index], with range checking
   //
@@ -1837,9 +1835,7 @@ void vfo_xit_value(long long value ) {
   int id = get_tx_vfo();
   vfo[id].xit = value;
   vfo[id].xit_enabled = value ? 1 : 0;
-
   schedule_high_priority();
-
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -1847,9 +1843,7 @@ void vfo_xit_toggle() {
   CLIENT_MISSING;
   int id = get_tx_vfo();
   TOGGLE(vfo[id].xit_enabled);
-
   schedule_high_priority();
-
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -1891,9 +1885,7 @@ void vfo_xit_onoff(int enable) {
   CLIENT_MISSING;
   int id = get_tx_vfo();
   vfo[id].xit_enabled = SET(enable);
-
   schedule_high_priority();
-
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -1910,9 +1902,7 @@ void vfo_xit_incr(int incr) {
 
   vfo[id].xit = value;
   vfo[id].xit_enabled = (value != 0);
-
   schedule_high_priority();
-
   g_idle_add(ext_vfo_update, NULL);
 }
 

@@ -156,10 +156,10 @@ void new_protocol_general_packet(unsigned char *buffer) {
   if (seqnum != 0 && seqnum != seqold + 1 ) {
     t_print("GP: SEQ ERROR, old=%lu new=%lu\n", seqold, seqnum);
   }
+
 #ifdef PACKETLIST
   t_print("GP rcvd, seq=%lu\n", seqnum);
 #endif
-
   rc = (buffer[5] << 8) + buffer[6];
 
   if (rc == 0) { rc = 1025; }
@@ -425,7 +425,6 @@ void *ddc_specific_thread(void *data) {
 
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
-
 #ifdef PACKETLIST
     t_print("DDC SPEC rcvd seq=%lu\n", seqnum);
 #endif
@@ -488,7 +487,7 @@ void *ddc_specific_thread(void *data) {
 
       if (modified) {
         t_print("RX: DDC%d Enable=%d ADC%d Rate=%d SyncMap=%02x\n",
-               i, ddcenable[i], adcmap[i], rxrate[i], syncddc[i]);
+                i, ddcenable[i], adcmap[i], rxrate[i], syncddc[i]);
         rc = 0;
 
         for (j = 0; j < 8; j++) {
@@ -565,9 +564,8 @@ void *duc_specific_thread(void *data) {
 
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
-
 #ifdef PACKETLIST
-    t_print("DUC SPEC rcvd seq=%lu\n",seqnum);
+    t_print("DUC SPEC rcvd seq=%lu\n", seqnum);
 #endif
 
     if (seqnum != 0 && seqnum != seqold + 1 ) {
@@ -707,7 +705,6 @@ void *highprio_thread(void *data) {
   int rc;
   unsigned long freq;
   uint32_t u32;
-
   int i;
   int alex0_mod, alex1_mod, hp_mod;
   sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -757,7 +754,6 @@ void *highprio_thread(void *data) {
     hp_mod = 0;
     seqold = seqnum;
     seqnum = (buffer[0] >> 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
-
 #ifdef PACKETLIST
     t_print("HP rcvd seq=%lu\n", seqnum);
 #endif
@@ -983,16 +979,15 @@ void *highprio_thread(void *data) {
   run = 0;
   pthread_join(ddc_specific_thread_id, NULL);
   pthread_join(duc_specific_thread_id, NULL);
-        
+
   for (i = 0; i < NUMRECEIVERS; i++) {
     pthread_join(rx_thread_id[i], NULL);
   }
-        
+
   pthread_join(send_highprio_thread_id, NULL);
   pthread_join(tx_thread_id, NULL);
   pthread_join(mic_thread_id, NULL);
   pthread_join(audio_thread_id, NULL);
-
   t_print("HP thread terminating.\n");
   watchdog = 0;
   highprio_thread_id = 0;
@@ -1372,6 +1367,7 @@ void *tx_thread(void * data) {
 #ifdef PACKETLIST
     lsum = 0;
 #endif
+
     for (i = 0; i < 240; i++) {
       // process 240 TX iq samples
       sample  = (int)((signed char) (*p++)) << 16;
@@ -1468,10 +1464,12 @@ void *send_highprio_thread(void *data) {
     *p++ = (seqnum >> 16) & 0xFF;
     *p++ = (seqnum >>  8) & 0xFF;
     *p++ = (seqnum >>  0) & 0xFF;
-
     uc = 0;
+
     if (radio_ptt)  { uc |= 1; }
+
     if (radio_dot ) { uc |= 2; }
+
     if (radio_dash) { uc |= 4; }
 
     *p++ = uc;   // CW states
@@ -1568,7 +1566,6 @@ void *audio_thread(void *data) {
     }
 
     count = 0;
-
     seqold = seqnum;
     seqnum = (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 
@@ -1579,9 +1576,11 @@ void *audio_thread(void *data) {
     // just skip the audio samples
 #ifdef PACKETLIST
     lsum = 0;
-    for (int  i=4; i<260; i++) {
-      lsum = lsum + buffer[i]*buffer[i];
+
+    for (int  i = 4; i < 260; i++) {
+      lsum = lsum + buffer[i] * buffer[i];
     }
+
     t_print("AUDIO sum=%ld\n", lsum);
 #endif
   }

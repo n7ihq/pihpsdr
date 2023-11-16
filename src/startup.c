@@ -56,8 +56,8 @@
 #include <pwd.h>
 
 #ifdef __APPLE__
- #include <IOKit/IOKitLib.h>
- #include <IOKit/pwr_mgt/IOPMLib.h>
+  #include <IOKit/IOKitLib.h>
+  #include <IOKit/pwr_mgt/IOPMLib.h>
 #endif
 
 #include "message.h"
@@ -72,7 +72,6 @@ void startup(const char *path) {
   int rc;
   char *homedir;
   struct passwd *pwd;
-
 #ifdef __APPLE__
   static IOPMAssertionID keep_awake = 0;
   //
@@ -85,15 +84,14 @@ void startup(const char *path) {
   IOPMAssertionCreateWithName (kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn,
                                CFSTR ("piHPSDR"), &keep_awake);
 #endif
-
   writeable = 0;  // if zero, the current dir is not writeable
   found = 0;      // if nonzero, hpsdr.png or protocols.props found in current dir
-
   //
   // try to create a file with an unique file name
   //
   snprintf(filename, PATH_MAX, "piHPSDR.myFile.%ld", (long) getpid());
   rc = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0700);
+
   if (rc >= 0) {
     writeable = 1;
     close (rc);
@@ -103,7 +101,6 @@ void startup(const char *path) {
   //
   // Look for files hpsdr.png, protocols.props, and pihpsdr.sh
   //
-
   rc = stat("hpsdr.png", &statbuf);
 
   if (rc == 0 && (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode))) { found = 1; }
@@ -129,12 +126,15 @@ void startup(const char *path) {
   // Get home dir
   //
   homedir = getenv("HOME");
+
   if (homedir == NULL) {
     pwd = getpwuid(getuid());
+
     if (pwd != NULL) {
       homedir = pwd->pw_dir;
     }
   }
+
   if (homedir == NULL) {
     // non-recoverable error
     t_print("%s: home dir not found, working directory not changed.\n", __FUNCTION__);
@@ -143,28 +143,36 @@ void startup(const char *path) {
 
 #ifdef __APPLE__
   snprintf(workdir, PATH_MAX, "%s/Library/Application Support/piHPSDR", homedir);
+
   if (stat(workdir, &statbuf) < 0) {
     mkdir (workdir, 0700);
   }
+
   rc = stat(workdir, &statbuf);
+
   if (rc < 0 || !S_ISDIR(statbuf.st_mode)) {
     STRLCPY(workdir, homedir, PATH_MAX);
   }
+
 #else
   snprintf(workdir, PATH_MAX, "%s/.config", homedir);
-  if (stat(workdir, &statbuf) < 0) {
-    mkdir (workdir, 0700);
-  }
-  snprintf(workdir, PATH_MAX, "%s/.config/pihpsdr", homedir);
-  if (stat(workdir, &statbuf) < 0) {
-    mkdir (workdir, 0700);
-  }
-#endif
 
+  if (stat(workdir, &statbuf) < 0) {
+    mkdir (workdir, 0700);
+  }
+
+  snprintf(workdir, PATH_MAX, "%s/.config/pihpsdr", homedir);
+
+  if (stat(workdir, &statbuf) < 0) {
+    mkdir (workdir, 0700);
+  }
+
+#endif
   //
   // Check if workdir exists and is a directory, if not, take home dir
   //
   rc = stat(workdir, &statbuf);
+
   if (rc < 0 || !S_ISDIR(statbuf.st_mode)) {
     STRLCPY(workdir, homedir, PATH_MAX);
   }
@@ -185,9 +193,9 @@ void startup(const char *path) {
   //
   (void) freopen("pihpsdr.stdout", "w", stdout);
   (void) freopen("pihpsdr.stderr", "w", stderr);
-
   t_print("%s: working dir changed to %s\n", __FUNCTION__, workdir);
 #ifdef __APPLE__
+
   //
   // path is the name of the executable. Try to find hpsdr.png *relative* to that.
   // If found and this file is not (yet) there, copy to work dir
@@ -196,18 +204,17 @@ void startup(const char *path) {
     char *c;
     int fdin, fdout;
     char source[PATH_MAX];
-
     STRLCPY(source, path, PATH_MAX);
     c = rindex(source, '/');
 
     if (c) { *c = 0; }
 
     STRLCAT(source,  "/../Resources/hpsdr.png", PATH_MAX);
-
     //
     // Now copy the file from "source" to "workdir"
     //
     fdin = open(source, O_RDONLY);
+
     if (fdin >= 0) {
       fdout = open("hpsdr.png", O_WRONLY | O_CREAT | O_TRUNC, (mode_t) 0400);
     }
@@ -217,7 +224,6 @@ void startup(const char *path) {
       // Now do the copy, use "source" as I/O buffer
       //
       ssize_t bytesread;
-
       t_print("%s: copying hpsdr.png to working dir\n", __FUNCTION__);
 
       while ((bytesread = read(fdin, source, PATH_MAX)) > 0) { write (fdout, source, bytesread); }
@@ -226,7 +232,6 @@ void startup(const char *path) {
       close(fdout);
     }
   }
+
 #endif
 }
-
-

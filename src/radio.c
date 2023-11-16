@@ -160,9 +160,9 @@ int hl2_audio_codec = 0;
 //
 int anan10E = 0;
 
-int adc0_filter_bypass=0;   // Bypass ADC0 filters on receive
-int adc1_filter_bypass=0;   // Bypass ADC1 filters on receiver  (ANAN-7000/8000/G2)
-int mute_spkr_amp=0;        // Mute audio amplifier in radio    (ANAN-7000, G2)
+int adc0_filter_bypass = 0; // Bypass ADC0 filters on receive
+int adc1_filter_bypass = 0; // Bypass ADC1 filters on receiver  (ANAN-7000/8000/G2)
+int mute_spkr_amp = 0;      // Mute audio amplifier in radio    (ANAN-7000, G2)
 
 int classE = 0;
 
@@ -217,7 +217,7 @@ int protocol;
 int device;
 int new_pa_board = 0; // Indicates Rev.24 PA board for HERMES/ANGELIA/ORION
 int ozy_software_version;
-int mercury_software_version[2]= {0,0};
+int mercury_software_version[2] = {0, 0};
 int penelope_software_version;
 
 int adc0_overload = 0;
@@ -1452,7 +1452,6 @@ void start_radio() {
   }
 
   schedule_high_priority();
-
 #ifdef SOAPYSDR
 
   if (protocol == SOAPYSDR_PROTOCOL) {
@@ -1574,7 +1573,6 @@ void radio_change_receivers(int r) {
 
   if (!radio_is_remote) {
 #endif
-
     schedule_high_priority();
 
     if (protocol == ORIGINAL_PROTOCOL) {
@@ -1775,6 +1773,7 @@ static void rxtx(int state) {
       }
     }
   }
+
   gpio_set_ptt(state);
 }
 
@@ -1816,7 +1815,6 @@ void vox_changed(int state) {
   }
 
   vox = state;
-
   schedule_high_priority();
   schedule_receive_specific();
 }
@@ -2110,7 +2108,6 @@ void calcDriveLevel() {
   //} else {
   //  t_print("%s: Level=%d\n", __FUNCTION__, transmitter->drive_level);
   //}
-
   schedule_high_priority();
 }
 

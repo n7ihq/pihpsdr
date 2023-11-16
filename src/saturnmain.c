@@ -1136,17 +1136,17 @@ static gpointer saturn_rx_thread(gpointer arg) {
 #endif
       }
 
-      if(Depth > 4096) {
-          DMATransferSize = 32768;
-      } else if(Depth > 2048) {
-         DMATransferSize = 16384;
-      } else if(Depth > 1024) {
-          DMATransferSize = 8192;
+      if (Depth > 4096) {
+        DMATransferSize = 32768;
+      } else if (Depth > 2048) {
+        DMATransferSize = 16384;
+      } else if (Depth > 1024) {
+        DMATransferSize = 8192;
       } else {
-          DMATransferSize = 4096;
+        DMATransferSize = 4096;
       }
-      //            t_print("DDC DMA read %d bytes from destination to base\n", DMATransferSize);
 
+      //            t_print("DDC DMA read %d bytes from destination to base\n", DMATransferSize);
       DMAReadFromFPGA(IQReadfile_fd, DMAHeadPtr, DMATransferSize, VADDRDDCSTREAMREAD);
       DMAHeadPtr += DMATransferSize;
 
@@ -1337,7 +1337,7 @@ void saturn_handle_high_priority(bool FromNetwork, unsigned char *UDPInBuffer) {
   //
   Byte = (uint8_t)(UDPInBuffer[1400]);
   SetXvtrEnable((bool)(Byte & 1));
-  SetSpkrMute((bool)((Byte>>1)&1));
+  SetSpkrMute((bool)((Byte >> 1) & 1));
   Byte = (uint8_t)(UDPInBuffer[1401]);
   SetOpenCollectorOutputs(Byte);
   Byte = (uint8_t)(UDPInBuffer[1402]);
@@ -1401,8 +1401,8 @@ void saturn_handle_general_packet(bool FromNetwork, uint8_t *PacketBuffer) {
   Byte = *(uint8_t*)(PacketBuffer + 37);              // flag bits
   EnableTimeStamp((bool)(Byte & 1));
   EnableVITA49((bool)(Byte & 2));
-  Byte = *(uint8_t*)(PacketBuffer+38);                // enable timeout
-  HW_Timer_Enable = ((bool)(Byte&1));
+  Byte = *(uint8_t*)(PacketBuffer + 38);              // enable timeout
+  HW_Timer_Enable = ((bool)(Byte & 1));
   SetFreqPhaseWord((bool)(Byte & 8));
   Byte = *(uint8_t*)(PacketBuffer + 58);              // flag bits
   SetPAEnabled((bool)(Byte & 1));

@@ -77,8 +77,8 @@ static void tx_ant_cb(GtkToggleButton *widget, gpointer data) {
 static void adc0_antenna_cb(GtkComboBox *widget, gpointer data) {
   ADC *myadc = (ADC *)data;
   myadc->antenna = gtk_combo_box_get_active(widget);
-
   schedule_high_priority();
+
   if (device == SOAPYSDR_USB_DEVICE) {
     soapy_protocol_set_rx_antenna(receiver[0], adc[0].antenna);
   }
@@ -87,8 +87,8 @@ static void adc0_antenna_cb(GtkComboBox *widget, gpointer data) {
 static void dac0_antenna_cb(GtkComboBox *widget, gpointer data) {
   DAC *mydac = (DAC *)data;
   mydac->antenna = gtk_combo_box_get_active(widget);
-
   schedule_high_priority();
+
   if (device == SOAPYSDR_USB_DEVICE && can_transmit) {
     soapy_protocol_set_tx_antenna(transmitter, mydac->antenna);
   }
@@ -274,6 +274,7 @@ static void newpa_cb(GtkWidget *widget, gpointer data) {
   } else {
     new_pa_board = 0;
   }
+
   schedule_high_priority();
 }
 
@@ -373,4 +374,3 @@ void ant_menu(GtkWidget *parent) {
 
   if (xvtr_container != NULL) { gtk_widget_hide(xvtr_container); }
 }
-

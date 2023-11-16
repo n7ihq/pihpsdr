@@ -90,29 +90,33 @@ static int PTTOUT_LINE = -1;
 static int CWOUT_LINE = -1;
 
 #ifdef GPIO
-static struct gpiod_line *pttout_line = NULL;
-static struct gpiod_line *cwout_line = NULL;
+  static struct gpiod_line *pttout_line = NULL;
+  static struct gpiod_line *cwout_line = NULL;
 #endif
 
 void gpio_set_ptt(int state) {
 #ifdef GPIO
+
   if (pttout_line) {
     //t_print("%s: state=%d\n", __FUNCTION__, state);
     if (gpiod_line_set_value(pttout_line, NOT(state)) < 0) {
       t_print("%s failed: %s\n", __FUNCTION__, g_strerror(errno));
     }
   }
+
 #endif
 }
 
 void gpio_set_cw(int state) {
 #ifdef GPIO
+
   if (cwout_line) {
     //t_print("%s: state=%d\n", __FUNCTION__, state);
     if (gpiod_line_set_value(cwout_line, NOT(state)) < 0) {
       t_print("%s failed: %s\n", __FUNCTION__, g_strerror(errno));
     }
   }
+
 #endif
 }
 
@@ -891,7 +895,7 @@ void gpio_set_defaults(int ctrlr) {
 
   case CONTROLLER2_V1:
     //
-    // GPIO lines not used by controller: 5, 6, 7, 9, 10, 11, 12, 13, 14 
+    // GPIO lines not used by controller: 5, 6, 7, 9, 10, 11, 12, 13, 14
     //
     CWL_LINE = 9;
     CWR_LINE = 11;
@@ -1180,14 +1184,14 @@ static int setup_input_line(struct gpiod_chip *chip, int offset, gboolean pullup
 }
 
 static struct gpiod_line *setup_output_line(struct gpiod_chip *chip, int offset, int initialValue)  {
-  // 
+  //
   // Setup an active-high output line and return the "line"
   // (in case of failure: NULL).
   //
   struct gpiod_line_request_config config;
   t_print("%s: %d\n", __FUNCTION__, offset);
   struct gpiod_line *line = gpiod_chip_get_line(chip, offset);
-  
+
   if (!line) {
     t_print("%s: get_line failed for offset %d: %s\n", __FUNCTION__, offset, g_strerror(errno));
     return NULL;
@@ -1223,11 +1227,12 @@ int gpio_init() {
     goto err;
   }
 
-  if (controller == CONTROLLER1 || controller == CONTROLLER2_V1 || controller == CONTROLLER2_V2 || controller == G2_FRONTPANEL) {
+  if (controller == CONTROLLER1 || controller == CONTROLLER2_V1 || controller == CONTROLLER2_V2
+      || controller == G2_FRONTPANEL) {
     // setup encoders
     t_print("%s: setup encoders\n", __FUNCTION__);
 
-   for (int i = 0; i < MAX_ENCODERS; i++) {
+    for (int i = 0; i < MAX_ENCODERS; i++) {
       if (encoders[i].bottom_encoder_enabled) {
         if (setup_input_line(chip, encoders[i].bottom_encoder_address_a, encoders[i].bottom_encoder_pullup) < 0) {
           continue;
@@ -1284,7 +1289,7 @@ int gpio_init() {
   int have_button = 0;
 
   if (CWL_LINE >= 0) {
-    if ((ret = setup_input_line(chip, CWL_LINE, TRUE)) < 0) {
+    if (setup_input_line(chip, CWL_LINE, TRUE) < 0) {
       t_print("%s: CWL line setup failed\n", __FUNCTION__);
     } else {
       have_button = 1;
@@ -1292,7 +1297,7 @@ int gpio_init() {
   }
 
   if (CWR_LINE >= 0) {
-    if ((ret = setup_input_line(chip, CWR_LINE, TRUE)) < 0) {
+    if (setup_input_line(chip, CWR_LINE, TRUE) < 0) {
       t_print("%s: CWR line setup failed\n", __FUNCTION__);
     } else {
       have_button = 1;
@@ -1300,7 +1305,7 @@ int gpio_init() {
   }
 
   if (CWKEY_LINE >= 0) {
-    if ((ret = setup_input_line(chip, CWKEY_LINE, TRUE)) < 0) {
+    if (setup_input_line(chip, CWKEY_LINE, TRUE) < 0) {
       t_print("%s: CWKEY line setup failed\n", __FUNCTION__);
     } else {
       have_button = 1;
@@ -1308,7 +1313,7 @@ int gpio_init() {
   }
 
   if (PTTIN_LINE >= 0) {
-    if ((ret = setup_input_line(chip, PTTIN_LINE, TRUE)) < 0) {
+    if (setup_input_line(chip, PTTIN_LINE, TRUE) < 0) {
       t_print("%s: CWKEY line setup failed\n", __FUNCTION__);
     } else {
       have_button = 1;

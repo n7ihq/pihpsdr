@@ -565,7 +565,6 @@ void new_protocol_init(int pixels) {
     }
 
     optlen = sizeof(optval);
-
 #ifdef IPTOS_DSCP_EF
     optval = IPTOS_DSCP_EF;
 #else
@@ -707,7 +706,6 @@ static void new_protocol_high_priority() {
   int rxvfo    = active_receiver->id; // id of the active receiver
   int othervfo = 1 - rxvfo;           // id of the "other" receiver (only valid if receivers > 1)
   int txmode   = get_tx_mode();
-
   high_priority_buffer_to_radio[0] = high_priority_sequence >> 24;
   high_priority_buffer_to_radio[1] = high_priority_sequence >> 16;
   high_priority_buffer_to_radio[2] = high_priority_sequence >> 8;
@@ -869,10 +867,11 @@ static void new_protocol_high_priority() {
       //
       high_priority_buffer_to_radio[1400] |= ANAN7000_XVTR_OUT;
     }
+
     if (mute_spkr_amp) {
       //
       // Mute the amplifier of the built-in speakers
-       //
+      //
       high_priority_buffer_to_radio[1400] |= ANAN7000_SPKR_MUTE;
     }
   }
@@ -933,17 +932,14 @@ static void new_protocol_high_priority() {
   switch (device) {
   case NEW_DEVICE_SATURN:
   case NEW_DEVICE_ORION2:
-
     //
     // We have band-pass RX filters for ADC0 and ADC1. So if two
     // receivers use the same ADC, the active one determines the
     // bandpass frequency.
     //
-
     //
     // ADC0 band pass
     //
-
     BPFfreq = 0LL;
 
     if (receivers > 1) {
@@ -951,6 +947,7 @@ static void new_protocol_high_priority() {
         BPFfreq = rxFrequency[othervfo];   // Take frequency of non-active receiver
       }
     }
+
     if (receiver[rxvfo]->adc == 0) {
       BPFfreq = rxFrequency[rxvfo];       // Take (overwrite with) frequency of active receiver
     }
@@ -982,7 +979,6 @@ static void new_protocol_high_priority() {
     //
     // ADC1 band pass
     //
-
     BPFfreq = 0LL;
 
     if (receivers > 1) {
@@ -990,6 +986,7 @@ static void new_protocol_high_priority() {
         BPFfreq = rxFrequency[othervfo];   // Take frequency of non-active receiver
       }
     }
+
     if (receiver[rxvfo]->adc == 1) {
       BPFfreq = rxFrequency[rxvfo];       // Take (overwrite with) frequency of active receiver
     }
@@ -1088,11 +1085,13 @@ static void new_protocol_high_priority() {
     if (receiver[0]->adc == 0) {
       LPFfreq = rxFrequency[0];
     }
+
     if (receivers > 1) {
       if (receiver[1]->adc == 0 && rxFrequency[1] > rxFrequency[0]) {
         LPFfreq = rxFrequency[1];
       }
     }
+
     if (adc0_filter_bypass) {
       LPFfreq = 40000000LL;   // disable LPF
     }
@@ -1760,7 +1759,6 @@ static gpointer new_protocol_thread(gpointer data) {
     int bytesread;
     mybuffer *mybuf;
     unsigned char *buffer;
-
     mybuf = get_my_buffer();
     buffer = mybuf->buffer;
     bytesread = recvfrom(data_socket, buffer, NET_BUFFER_SIZE, 0, (struct sockaddr*)&addr, &length);
@@ -2218,13 +2216,12 @@ static void process_high_priority() {
   //
   // variable used to manage analog inputs. The accumulators
   // record the value*16
-  // 
+  //
   static unsigned int fwd_acc = 0;
   static unsigned int rev_acc = 0;
   static unsigned int ex_acc = 0;
   static unsigned int adc0_acc = 0;
   static unsigned int adc1_acc = 0;
-  
   const unsigned char *buffer = high_priority_buffer->buffer;
   sequence = ((buffer[0] & 0xFF) << 24) + ((buffer[1] & 0xFF) << 16) + ((buffer[2] & 0xFF) << 8) + (buffer[3] & 0xFF);
 
@@ -2245,7 +2242,6 @@ static void process_high_priority() {
   tx_fifo_underrun |= (buffer[4] & 0x20) >> 5;
   adc0_overload |= buffer[5] & 0x01;
   adc1_overload |= ((buffer[5] & 0x02) >> 1);
-
   //
   // During RX, HighPrio packets arrive every 50 msec
   // During TX, HighPrio packets arrive every    msec
@@ -2254,24 +2250,22 @@ static void process_high_priority() {
   // can make a moving average with 16 values, and
   // take a max value with 100 values.
   //
-
   val = ((buffer[6] & 0xFF) << 8) | (buffer[7] & 0xFF);
   ex_acc = (15 * ex_acc) / 16  + val;
   val = ((buffer[14] & 0xFF) << 8) | (buffer[15] & 0xFF);
-  fwd_acc = (15 *fwd_acc) / 16 + val;
+  fwd_acc = (15 * fwd_acc) / 16 + val;
   val = ((buffer[22] & 0xFF) << 8) | (buffer[23] & 0xFF);
-  rev_acc = (15 *rev_acc) / 16 + val;
+  rev_acc = (15 * rev_acc) / 16 + val;
   val = ((buffer[55] & 0xFF) << 8) | (buffer[56] & 0xFF);
-  adc1_acc = (15 *adc1_acc) / 16 + val;
+  adc1_acc = (15 * adc1_acc) / 16 + val;
   val = ((buffer[57] & 0xFF) << 8) | (buffer[58] & 0xFF);
-  adc0_acc = (15 *adc0_acc) / 16 + val;
-
+  adc0_acc = (15 * adc0_acc) / 16 + val;
   exciter_power = ex_acc / 16;
   alex_forward_power = fwd_acc / 16;
   alex_reverse_power = rev_acc / 16;
   ADC0 = adc0_acc / 16;
   ADC1 = adc1_acc / 16;
-     
+
   //
   // Stops CAT cw transmission if radio reports "CW action"
   //

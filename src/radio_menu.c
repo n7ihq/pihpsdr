@@ -120,6 +120,7 @@ static void ptt_ring_cb(GtkWidget *widget, gpointer data) {
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     mic_ptt_tip_bias_ring = 0;
   }
+
   schedule_transmit_specific();
 }
 
@@ -127,6 +128,7 @@ static void ptt_tip_cb(GtkWidget *widget, gpointer data) {
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
     mic_ptt_tip_bias_ring = 1;
   }
+
   schedule_transmit_specific();
 }
 
@@ -306,6 +308,7 @@ static void mic_input_cb(GtkWidget *widget, gpointer data) {
     mic_input_xlr = MICXLR;
     break;
   }
+
   schedule_transmit_specific();
 }
 static void sample_rate_cb(GtkToggleButton *widget, gpointer data) {
@@ -806,42 +809,41 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect(touchscreen_b, "toggled", G_CALLBACK(touchscreen_cb), NULL);
   col += 2;
 
-  switch(device) {
+  switch (device) {
   case NEW_DEVICE_ORION2:
-  case NEW_DEVICE_SATURN:
-    {
+  case NEW_DEVICE_SATURN: {
     GtkWidget *mute_spkr_amp_b = gtk_check_button_new_with_label("Mute Spkr Amp");
     gtk_widget_set_name(mute_spkr_amp_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mute_spkr_amp_b), mute_spkr_amp);
     gtk_grid_attach(GTK_GRID(grid), mute_spkr_amp_b, col, row, 1, 1);
     g_signal_connect(mute_spkr_amp_b, "toggled", G_CALLBACK(mute_spkr_amp_cb), NULL);
     col++;
-    }
-    break;
-  case DEVICE_HERMES_LITE2:
-    {
+  }
+  break;
+
+  case DEVICE_HERMES_LITE2: {
     GtkWidget *hl2audio_b = gtk_check_button_new_with_label("HL2 audio codec");
     gtk_widget_set_name(hl2audio_b, "boldlabel");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hl2audio_b), hl2_audio_codec);
     gtk_grid_attach(GTK_GRID(grid), hl2audio_b, col, row, 1, 1);
     g_signal_connect(hl2audio_b, "toggled", G_CALLBACK(hl2audio_cb), NULL);
     col++;
-    }
-    break;
+  }
+  break;
+
   case DEVICE_HERMES:
-  case NEW_DEVICE_HERMES:
-    {
+  case NEW_DEVICE_HERMES: {
     GtkWidget *anan10e_b = gtk_check_button_new_with_label("Anan-10E/100B");
     gtk_widget_set_name(anan10e_b, "boldlabel");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(anan10e_b), anan10E);
     gtk_grid_attach(GTK_GRID(grid), anan10e_b, col, row, 1, 1);
     g_signal_connect(anan10e_b, "toggled", G_CALLBACK(anan10e_cb), NULL);
     col++;
-    }
-    break;
+  }
+  break;
 #ifdef SOAPYSDR
-  case SOAPYSDR_USB_DEVICE:
-    {
+
+  case SOAPYSDR_USB_DEVICE: {
     GtkWidget *iqswap_b = gtk_check_button_new_with_label("Swap IQ");
     gtk_widget_set_name(iqswap_b, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (iqswap_b), iqswap);
@@ -857,8 +859,8 @@ void radio_menu(GtkWidget *parent) {
       g_signal_connect(agc, "toggled", G_CALLBACK(agc_changed_cb), &adc[0]);
       col++;
     }
-    }
-    break;
+  }
+  break;
 #endif
   }
 

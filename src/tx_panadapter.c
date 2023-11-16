@@ -171,7 +171,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     }
 
     double vfofreq = (double)my_width * 0.5;
-
     long long min_display = frequency - half;
     long long max_display = frequency + half;
 
@@ -364,7 +363,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
         // Power values not available for SoapySDR
         //
         snprintf(text, 64, "FWD %0.1f W", transmitter->fwd);
-
         row += 15;
         cairo_move_to(cr, 10, row);
         cairo_show_text(cr, text);
@@ -411,4 +409,3 @@ void tx_panadapter_init(TRANSMITTER *tx, int width, int height) {
    */
   gtk_widget_set_events (tx->panadapter, gtk_widget_get_events (tx->panadapter) | GDK_BUTTON_PRESS_MASK);
 }
-
