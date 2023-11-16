@@ -524,7 +524,7 @@ void receiver_remote_update_display(RECEIVER *rx) {
       }
 
       if (active_receiver == rx) {
-        meter_update(rx, SMETER, rx->meter, 0.0, 0.0, 0.0, 0.0);
+        meter_update(rx, SMETER, rx->meter, 0.0, 0.0);
       }
 
       g_mutex_unlock(&rx->display_mutex);
