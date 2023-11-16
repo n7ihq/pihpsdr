@@ -383,7 +383,7 @@ static gboolean update_display(gpointer data) {
       rev_power = 0;
       break;
 
-    case DEVICE_METIS:
+    case DEVICE_OZY:
       constant1 = 3.3;
       constant2 = 0.09;
       rconstant2 = 0.09;
@@ -393,6 +393,7 @@ static gboolean update_display(gpointer data) {
       rev_power = penny_rp;
       break;
 
+    case DEVICE_METIS:
     case DEVICE_HERMES:
     case DEVICE_ANGELIA:
     case NEW_DEVICE_HERMES2:
