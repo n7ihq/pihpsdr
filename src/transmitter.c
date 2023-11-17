@@ -398,8 +398,8 @@ static gboolean update_display(gpointer data) {
         rev_power = penny_rp;
       } else {
         constant1 = 3.3;
-        constant2 = 1.8;
-        rconstant2 = 1.8;
+        constant2 = 18.0;
+        rconstant2 = 18.0;
         rev_cal_offset = 0;
         fwd_cal_offset = 90;
         fwd_power = penny_alc;
