@@ -44,6 +44,9 @@
 #ifdef CLIENT_SERVER
   #include "client_server.h"
 #endif
+#ifdef USBOZY
+  #include "ozyio.h"
+#endif
 
 static gfloat filter_left;
 static gfloat filter_right;
@@ -598,6 +601,10 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
         adc_error_count = 0;
         adc0_overload = 0;
         adc1_overload = 0;
+#ifdef USBOZY
+        mercury_overload[0]=0;
+        mercury_overload[1]=0;
+#endif
       }
     }
 

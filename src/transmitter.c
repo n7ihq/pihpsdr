@@ -50,7 +50,9 @@
 #include "audio.h"
 #include "ext.h"
 #include "sliders.h"
-#include "ozyio.h"
+#ifdef USBOZY
+  #include "ozyio.h"
+#endif
 #include "sintab.h"
 #include "message.h"
 #include "mystring.h"
@@ -383,15 +385,28 @@ static gboolean update_display(gpointer data) {
       rev_power = 0;
       break;
 
+#ifdef USBOZY
     case DEVICE_OZY:
       constant1 = 3.3;
-      constant2 = 0.09;
-      rconstant2 = 0.09;
-      rev_cal_offset = 3;
-      fwd_cal_offset = 6;
-      fwd_power = penny_fp;
-      rev_power = penny_rp;
+      if (filter_board == ALEX) {
+        constant1 = 3.3;
+        constant2 = 0.09;
+        rconstant2 = 0.09;
+        rev_cal_offset = 3;
+        fwd_cal_offset = 6;
+        fwd_power = penny_fp;
+        rev_power = penny_rp;
+      } else {
+        constant1 = 3.3;
+        constant2 = 1.8;
+        rconstant2 = 1.8;
+        rev_cal_offset = 0;
+        fwd_cal_offset = 90;
+        fwd_power = penny_alc;
+        rev_power = 0;
+      }
       break;
+#endif
 
     case DEVICE_METIS:
     case DEVICE_HERMES:
