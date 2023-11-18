@@ -506,6 +506,16 @@ void ozy_i2c_readpwr(int addr) {
 }
 
 void writepenny(unsigned char mode) {
+  //
+  // Bits used in Mode:
+  //
+  // b0     : if set, use Mic Input with 20 dB boost
+  // b1     : if set, use Linein
+  // b2     : if set, use Mic Input without boost
+  // b[3:7] : if b1 is set, use this for LineIn gain
+  //
+  // If none of the bits b0, b1, b2 is set, use Mic Input without boost
+  //
   unsigned char Penny_TLV320[2];
   unsigned char Penny_TLV320_data[] = { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x15, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 }; // 16 byte
   int x;
@@ -532,12 +542,13 @@ void writepenny(unsigned char mode) {
   //
   // update mic gain on Penny or PennyLane TLV320
   //
-  if (mode == 0x01) {
-    Penny_TLV320_data[5]  = 0x15;  // mic in, mic boost 20db
-  } else if (mode & 2) {
-    Penny_TLV320_data[5]  = 0x10;  // line in
+  if (mode & 0x01) {
+    Penny_TLV320_data[ 5] = 0x15;  // mic in, mic boost 20db
+  } else if (mode & 0x02) {
+    Penny_TLV320_data[ 5] = 0x10;  // line in
+    Penny_TLV320_data[15] = (mode & 0xF8) >> 3;
   } else {
-    Penny_TLV320_data[5]  = 0x14;  // mic in, no mic boost
+    Penny_TLV320_data[ 5] = 0x14;  // mic in, no mic boost
   }
 
   //      // set the I2C interface speed to 400kHZ

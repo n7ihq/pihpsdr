@@ -440,9 +440,10 @@ static gpointer ozy_i2c_thread(gpointer arg) {
   int cycle;
   //
   // Possible values for "penny":
-  // 1 = Mic In with boost
-  // 2 = Line In
-  // 4 = Mic In, no boost
+  // bit 0 set : Mic In with boost
+  // bit 1 set : Line In
+  // bit 2 set : Mic In, no boost
+  // bit 3-7 : encodes linein gain, only used if bit2 is set
   //
   unsigned char penny;
   unsigned char last_penny = 0;  // unused value to init
@@ -473,12 +474,15 @@ static gpointer ozy_i2c_thread(gpointer arg) {
         break;
       case 3:
         if (mic_linein) {
-          penny = 2;
+          // map floating point LineInGain value (-34.0 ... 12)
+          // onto a value in the range 0-31 and put this is bits3-7
+          penny = (int)((linein_gain + 34.0) * 0.6739 + 0.5) << 3 | 2;
         } else {
           penny = mic_boost ? 1 : 4;
         }
         if (penny != last_penny) {
           writepenny(penny);
+          last_penny = penny;
         }
         cycle = 0;
         break;
