@@ -220,5 +220,5 @@ extern int process_action(void *data);
 extern void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val);
 extern void Action2String(const int id, char *str, size_t len);
 extern int  String2Action(const char *str);
-
+extern void GetMultifunctionString(char* str, size_t len);
 #endif

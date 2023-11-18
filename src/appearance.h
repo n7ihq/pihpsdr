@@ -161,6 +161,7 @@ struct _VFO_BAR_LAYOUT {
   int sat_x,   sat_y;
   int dup_x,   dup_y;
   int filter_x, filter_y;
+  int multifn_x, multifn_y;
 };
 
 typedef struct _VFO_BAR_LAYOUT VFO_BAR_LAYOUT;

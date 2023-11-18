@@ -228,13 +228,38 @@ static guint timer = 0;
 static gboolean timer_released;
 static gboolean multi_select_active;
 static unsigned int multi_action;
-#define VMAXMULTIACTION 3
+#define VMAXMULTIACTION 28
 
 enum ACTION multi_action_table[] =
 {
-  AF_GAIN_RX1, 
-  AGC_GAIN_RX1,
-  MIC_GAIN
+  AF_GAIN, 
+  AGC_GAIN,
+  ATTENUATION,
+  COMPRESSION,
+  CW_FREQUENCY,
+  CW_SPEED,
+  DIV_GAIN,
+  DIV_PHASE,
+  FILTER_CUT_LOW,
+  FILTER_CUT_HIGH,
+  IF_SHIFT,
+  IF_WIDTH,
+  LINEIN_GAIN,
+  MIC_GAIN,
+  PAN,
+  PANADAPTER_HIGH,
+  PANADAPTER_LOW,
+  PANADAPTER_STEP,
+  RF_GAIN,
+  RIT,
+  SQUELCH,
+  TUNE_DRIVE,
+  DRIVE,
+  VOXLEVEL,
+  WATERFALL_HIGH,
+  WATERFALL_LOW,
+  XIT,
+  ZOOM
 };
 
 PROCESS_ACTION *multifunction_action;           // used to implement assigned action from a multifunction encoder action
@@ -972,6 +997,7 @@ int process_action(void *data) {
   case MULTI_BUTTON:                  // swap multifunction from implementing an action, and choosing which action is assigned
     if (a->mode == PRESSED) {
 	    multi_select_active = !multi_select_active;
+      g_idle_add(ext_vfo_update, NULL);
     }
 
     break;    
@@ -980,6 +1006,7 @@ int process_action(void *data) {
   case MULTI_ENC:
     if(multi_select_active) {
       multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
+      g_idle_add(ext_vfo_update, NULL);
     }
     else {
       multifunction_action = g_new(PROCESS_ACTION, 1);
@@ -1652,4 +1679,16 @@ int String2Action(const char *str) {
   }
 
   return NO_ACTION;
+}
+
+//
+// function to get string for multifunction encoder
+//
+void GetMultifunctionString(char* str, size_t len)
+{
+  enum ACTION selected_action;
+
+  selected_action = multi_action_table[multi_action];
+  STRLCPY(str, "M=", len);
+  STRLCAT(str, ActionTable[(int)selected_action].button_str, len);
 }

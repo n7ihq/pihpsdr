@@ -1748,6 +1748,18 @@ void vfo_update() {
     cairo_show_text(cr, temp_text);
   }
 
+  // -----------------------------------------------------------
+  //
+  // Draw string indicating multifunction encoder status
+  //
+  // -----------------------------------------------------------
+  if (vfl->multifn_x != 0) {
+    cairo_set_source_rgba(cr, COLOUR_ATTN);
+    GetMultifunctionString(temp_text, 32);
+    cairo_move_to(cr, vfl->multifn_x, vfl->multifn_y);
+    cairo_show_text(cr, temp_text);
+  }
+
   cairo_destroy (cr);
   gtk_widget_queue_draw (vfo_panel);
 }
