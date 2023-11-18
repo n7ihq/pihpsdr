@@ -505,7 +505,7 @@ void ozy_i2c_readpwr(int addr) {
   }
 }
 
-static void writepenny(unsigned char mode) {
+void writepenny(unsigned char mode) {
   unsigned char Penny_TLV320[2];
   unsigned char Penny_TLV320_data[] = { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x15, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 }; // 16 byte
   int x;

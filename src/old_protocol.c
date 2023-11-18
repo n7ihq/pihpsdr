@@ -172,7 +172,7 @@ static int how_many_receivers(void);
   #include "ozyio.h"
 
   static gpointer ozy_ep6_rx_thread(gpointer arg);
-  static gpointer ozy_i2c_read_thread(gpointer arg);
+  static gpointer ozy_i2c_thread(gpointer arg);
   static void start_usb_receive_threads(void);
   static void ozyusb_write(unsigned char* buffer, int length);
   #define EP6_IN_ID   0x86                        // end point = 6, direction toward PC
@@ -422,11 +422,30 @@ void old_protocol_init(int rx, int pixels, int rate) {
 static void start_usb_receive_threads() {
   t_print("old_protocol starting USB receive thread\n");
   g_thread_new( "OZYEP6", ozy_ep6_rx_thread, NULL);
-  g_thread_new( "OZYI2C", ozy_i2c_read_thread, NULL);
+  g_thread_new( "OZYI2C", ozy_i2c_thread, NULL);
 }
 
-static gpointer ozy_i2c_read_thread(gpointer arg) {
+//
+// This thread reads/write OZY i2c data periodically.
+// In a round-robin fashion, every 50 msec one of
+// the following actions is taken:
+//
+// a) read Penelope Exciter Power
+// b) read Alex forward and reverse power
+// c) read overload condition from one or two Mercury boards
+// d) re-program the Penelope TVL320 if the choice for
+//    the microphone (LineIn, MicIn, MicIn+Bias) changes.
+//
+static gpointer ozy_i2c_thread(gpointer arg) {
   int cycle;
+  //
+  // Possible values for "penny":
+  // 1 = Mic In with boost
+  // 2 = Line In
+  // 4 = Mic In, no boost
+  //
+  unsigned char penny;
+  unsigned char last_penny = 0;  // unused value to init
   t_print( "old_protocol: OZY I2C read thread\n");
   cycle = 0;
   for (;;) {
@@ -449,6 +468,17 @@ static gpointer ozy_i2c_read_thread(gpointer arg) {
         if (mercury_software_version[1]) {
           ozy_i2c_readpwr(I2C_MERC2_ADC_OFS);
           adc1_overload |= mercury_overload[1];
+        }
+        cycle = 3;
+        break;
+      case 3:
+        if (mic_linein) {
+          penny = 2;
+        } else {
+          penny = mic_boost ? 1 : 4;
+        }
+        if (penny != last_penny) {
+          writepenny(penny);
         }
         cycle = 0;
         break;
