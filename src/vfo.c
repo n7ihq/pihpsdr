@@ -58,6 +58,7 @@
 #include "ext.h"
 #include "message.h"
 #include "filter.h"
+#include "actions.h"
 
 static int my_width;
 static int my_height;
