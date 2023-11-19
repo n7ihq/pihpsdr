@@ -61,7 +61,7 @@ extern unsigned char ozy_firmware_version[9]; // OZY firmware version
 extern int ozy_write(int ep, unsigned char* buffer, int buffer_size);
 extern int ozy_read(int ep, unsigned char* buffer, int buffer_size);
 
-extern void writepenny(unsigned char);   // Init TLV320 on Penelope board
+extern void writepenny(int reset, int mode);   // Init TLV320 on Penelope board
 extern int ozy_initialise(void);
 extern int ozy_discover(void);           // returns 1 if a device found on USB
 extern void ozy_i2c_readpwr(int addr);   // should be executed periodically

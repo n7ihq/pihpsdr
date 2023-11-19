@@ -445,8 +445,8 @@ static gpointer ozy_i2c_thread(gpointer arg) {
   // bit 2 set : Mic In, no boost
   // bit 3-7 : encodes linein gain, only used if bit2 is set
   //
-  unsigned char penny;
-  unsigned char last_penny = 0;  // unused value to init
+  int penny;
+  int last_penny = 0;  // unused value
   t_print( "old_protocol: OZY I2C read thread\n");
   cycle = 0;
   for (;;) {
@@ -481,7 +481,7 @@ static gpointer ozy_i2c_thread(gpointer arg) {
           penny = mic_boost ? 1 : 4;
         }
         if (penny != last_penny) {
-          writepenny(penny);
+          writepenny(0, penny);
           last_penny = penny;
         }
         cycle = 0;
