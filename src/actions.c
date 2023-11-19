@@ -143,6 +143,9 @@ ACTION_TABLE ActionTable[] = {
   {MODE_PLUS,           "Mode +",               "MD+",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MENU_MODE,           "Mode\nMenu",           "MODE",         MIDI_KEY   | CONTROLLER_SWITCH},
   {MOX,                 "MOX",                  "MOX",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {MULTI_ENC,           "Multi",                "MULTI",        MIDI_WHEEL | CONTROLLER_ENCODER},
+  {MULTI_SELECT,        "Multi Action\nSelect", "MULTISEL",     MIDI_WHEEL | CONTROLLER_ENCODER},
+  {MULTI_BUTTON,        "Multi Enc\nButton",    "MULTIBTN",     MIDI_KEY   | CONTROLLER_SWITCH},
   {MUTE,                "Mute",                 "MUTE",         MIDI_KEY   | CONTROLLER_SWITCH},
   {NB,                  "NB",                   "NB",           MIDI_KEY   | CONTROLLER_SWITCH},
   {NR,                  "NR",                   "NR",           MIDI_KEY   | CONTROLLER_SWITCH},
@@ -223,6 +226,45 @@ ACTION_TABLE ActionTable[] = {
 
 static guint timer = 0;
 static gboolean timer_released;
+static gboolean multi_select_active;
+static unsigned int multi_action;
+#define VMAXMULTIACTION 28
+
+enum ACTION multi_action_table[] =
+{
+  AF_GAIN, 
+  AGC_GAIN,
+  ATTENUATION,
+  COMPRESSION,
+  CW_FREQUENCY,
+  CW_SPEED,
+  DIV_GAIN,
+  DIV_PHASE,
+  FILTER_CUT_LOW,
+  FILTER_CUT_HIGH,
+  IF_SHIFT,
+  IF_WIDTH,
+  LINEIN_GAIN,
+  MIC_GAIN,
+  PAN,
+  PANADAPTER_HIGH,
+  PANADAPTER_LOW,
+  PANADAPTER_STEP,
+  RF_GAIN,
+  RIT,
+  SQUELCH,
+  TUNE_DRIVE,
+  DRIVE,
+  VOXLEVEL,
+  WATERFALL_HIGH,
+  WATERFALL_LOW,
+  XIT,
+  ZOOM
+};
+
+PROCESS_ACTION *multifunction_action;           // used to implement assigned action from a multifunction encoder action
+
+
 
 static int timeout_cb(gpointer data) {
   if (timer_released) {
@@ -947,9 +989,41 @@ int process_action(void *data) {
     if (a->mode == PRESSED) {
       int state = getMox();
       mox_update(!state);
+      t_print("mmox pressed; bool = %d\n", (int)!state);
     }
 
     break;
+
+  case MULTI_BUTTON:                  // swap multifunction from implementing an action, and choosing which action is assigned
+    if (a->mode == PRESSED) {
+	    multi_select_active = !multi_select_active;
+      g_idle_add(ext_vfo_update, NULL);
+    }
+
+    break;    
+
+// multifunction encoder. If multi_select_active, it edits the assigned action; else implements assigned action. 
+  case MULTI_ENC:
+    if(multi_select_active) {
+      multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
+      g_idle_add(ext_vfo_update, NULL);
+    }
+    else {
+      multifunction_action = g_new(PROCESS_ACTION, 1);
+      multifunction_action->mode = a->mode;
+      multifunction_action->val = a->val;
+      multifunction_action->action = multi_action_table[multi_action];
+      process_action((void*)multifunction_action);
+    }
+    break;
+
+
+  case MULTI_SELECT:                // know to choose the action for multifunction endcoder
+      multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
+      t_print("multi encoder action = %d\n", (int)multi_action);
+
+    break;    
+
 
   case MUTE:
     if (a->mode == PRESSED) {
@@ -1605,4 +1679,16 @@ int String2Action(const char *str) {
   }
 
   return NO_ACTION;
+}
+
+//
+// function to get string for multifunction encoder
+//
+void GetMultifunctionString(char* str, size_t len)
+{
+  enum ACTION selected_action;
+
+  selected_action = multi_action_table[multi_action];
+  STRLCPY(str, "M=", len);
+  STRLCAT(str, ActionTable[(int)selected_action].button_str, len);
 }
