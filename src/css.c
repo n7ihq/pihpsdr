@@ -149,17 +149,38 @@ char *css =
   "  headerbar { min-height: 0px; padding: 0px; margin: 0px; font-size: 15px; font-family: Sans; }\n"
   ;
 
+//
+// If CSS loading from a file named default.css is successful, take that
+// Otherwise load the default settings hard-coded above
+//
 void load_css() {
   GtkCssProvider *provider;
   GdkDisplay *display;
   GdkScreen *screen;
-  t_print("%s\n", __FUNCTION__);
+  GError *error;
+  int rc;
+
   provider = gtk_css_provider_new ();
   display = gdk_display_get_default ();
   screen = gdk_display_get_default_screen (display);
   gtk_style_context_add_provider_for_screen (screen,
       GTK_STYLE_PROVIDER(provider),
       GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-  gtk_css_provider_load_from_data(provider, css, -1, NULL);
+
+  error = NULL;
+  rc = gtk_css_provider_load_from_path (provider, "default.css", &error);
+  g_clear_error(&error);
+  if (rc) {
+    t_print("%s: CSS data loaded from file default.css\n", __FUNCTION__);
+  } else {
+    t_print("%s: failed to load CSS data from file default.css\n", __FUNCTION__);
+    rc=gtk_css_provider_load_from_data(provider, css, -1, &error);
+    g_clear_error(&error);
+    if (rc) {
+      t_print("%s: hard-wired CSS data successfully loaded\n", __FUNCTION__);
+    } else {
+      t_print("%s: failed to load hard-wired CSS data\n", __FUNCTION__);
+    }
+  }
   g_object_unref (provider);
 }
