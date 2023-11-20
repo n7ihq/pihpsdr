@@ -145,7 +145,7 @@ ACTION_TABLE ActionTable[] = {
   {MOX,                 "MOX",                  "MOX",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MULTI_ENC,           "Multi",                "MULTI",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {MULTI_SELECT,        "Multi Action\nSelect", "MULTISEL",     MIDI_WHEEL | CONTROLLER_ENCODER},
-  {MULTI_BUTTON,        "Multi Enc\nButton",    "MULTIBTN",     MIDI_KEY   | CONTROLLER_SWITCH},
+  {MULTI_BUTTON,        "Multi Toggle",         "MULTIBTN",     MIDI_KEY   | CONTROLLER_SWITCH},
   {MUTE,                "Mute",                 "MUTE",         MIDI_KEY   | CONTROLLER_SWITCH},
   {NB,                  "NB",                   "NB",           MIDI_KEY   | CONTROLLER_SWITCH},
   {NR,                  "NR",                   "NR",           MIDI_KEY   | CONTROLLER_SWITCH},

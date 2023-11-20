@@ -3528,6 +3528,20 @@ without re-adjusting these settings.}
 pressed and into RX when released, this button toggles the PTT state
 when pressed.}
 
+\action{Multi}{MULTI}{E}{This is the multi-function encoder. It executes the encoder action it is
+currently assigned to.}
+
+\action{Multi Select}{MULTISEL}{E}{With this encoder, one cycles through the list of actions
+assigned to the multi-function encoder. The currently active action is displayed in the VFO bar.
+For examples, if the \bltt{AFGAIN} action (change audio volume of the current receiver) is assigned
+to the multi-function encoder, it will change the AF gain. This action it used if one used two
+encoders to activate the multi-function encoder feature.}
+
+\action{Multi Toggle}{MULTIBTN}{B}{This button toggles the ,,multi-encoder select'' state. If this
+state is active, one can change the action assigned to the multi-function encoder using that encoder.
+This function is used if one uses one encoder and one push-button to activate the multi-function
+encoder feature.}
+
 \action{Mute}{MUTE}{B}{Toggles the ,,mute'' state of the active receiver. If a receiver is muted, it
 produces zero-amplitude audio output.}
 
@@ -3807,6 +3821,51 @@ already 1, this is a no-op.}
 
 \action{Zoom -}{ZOOM-}{B}{Increase the ZOOM value of the active receiver by one. If the ZOOM value was
 already 8, this is a no-op.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{The MULTI encoder}
+\label{sec:multiencoder}
+
+When using a GPIO or MIDI controller, one (and only one) of the encoders can be chosen as \textit{the}
+multi-function encoder by assigning the \bltt{Multi} action.
+ This means that an action (say, changing the AF volume, the TX drive or
+the step attenuator of the RF front-end) can be dynamically assigned to that encoder, making it very
+facile to use a single ,,knob'' for various purposes. One has to sacrifice either another encoder
+or a push-button to have an easy-to-use handle to change the action currently assigned with the 
+multi-function encoder. Two such setups are possible:
+
+In the first setup, one uses two encoders to implement the multi-function feature. Besides the multi-function
+encoder, one uses another encoder called the multi-selection encoder and assigns
+the \bltt{Multi Select} action to this encoder. With the latter one, one can 
+(alphabetically) cycle
+through the list of actions assigned to the multi-function encoder. Currently, one can choose between
+28 such actions, they are listed here by the long name (see Appendix \ref{sec:actionlist}):
+
+\begin{center}
+\begin{tabular}{llll}
+\bltt{AF Gain}         & \bltt{AGC Gain} & \bltt{Atten}       & \bltt{Cmpr Level}     \\
+\bltt{CW Frequency} & \bltt{CW Speed}        & \bltt{DIV Gain} & \bltt{DIV Phase}  \\
+\bltt{Filter Cut Low} & \bltt{Filter Cut High} & \bltt{IF Shift}        & \bltt{IF Width} \\
+\bltt{Linein Gain} & \bltt{Mic Gain}       & \bltt{PanZoom} & \bltt{Panadapter High} \\
+\bltt{Panadapter Low} & \bltt{Panadapter Step} & \bltt{RF Gain} & \bltt{RIT} \\
+\bltt{Squelch} & \bltt{Tune Drv} & \bltt{TX Drive} & \bltt{VOX Level}  \\
+\bltt{WFall High} & \bltt{WFall Low} & \bltt{XIT} & \bltt{Zoom}
+\end{tabular}
+\end{center}
+
+For those controllers with double encoders on a single shaft, one can preferably assign the encoder
+operated with the outer ring  to \bltt{Multi Select} and the encoder operated with the inner
+knob to \bltt{Multi}. Of course, one can equally well use two different encoders for this purpose.
+
+In the second setup, one only uses one encoder and a push button to implement the multi-function
+feature. The \bltt{Multi Toggle} action is assigned to the push button which is used to toggle
+between the ,,select'' and ,,action'' states. The normal state is the ,,action'' state, where
+turning the encoder exectutes the function it is assigned to. When in ,,select'' state, one can
+assign a new action to the multi-function encoder exactly as in the first setup, except that
+one now turns the multi-function encoder itself. Toggling between the
+two states with the \bltt{Multi Toggle} button
+thus eliminates the need for a second encoder to implement the multi-function feature.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{piHPSDR keyboard bindings}
