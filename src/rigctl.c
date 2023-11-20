@@ -4839,14 +4839,14 @@ int parse_cmd(void *data) {
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
         if (command[2] == '0') {
-          sat_mode = SAT_NONE;
+          radio_set_satmode(SAT_NONE);
         } else if (command[2] == '1') {
           if (command[6] == '0' && command[7] == '0') {
-            sat_mode = SAT_NONE;
+            radio_set_satmode(SAT_NONE);
           } else if (command[6] == '1' && command[7] == '0') {
-            sat_mode = SAT_MODE;
+            radio_set_satmode(SAT_MODE);
           } else if (command[6] == '0' && command[7] == '1') {
-            sat_mode = RSAT_MODE;
+            radio_set_satmode(RSAT_MODE);
           } else {
             implemented = FALSE;
           }

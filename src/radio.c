@@ -2203,6 +2203,19 @@ void setSquelch(RECEIVER *rx) {
   SetRXASSQLRun(rx->id, voice_squelch);
 }
 
+void radio_set_satmode(int mode) {
+#ifdef CLIENT_SERVER
+
+  if (radio_is_remote) {
+    send_sat(client_socket, mode);
+    return;
+  }
+
+#endif
+
+  sat_mode = mode;
+}
+
 void radio_set_rf_gain(RECEIVER *rx) {
 #ifdef SOAPYSDR
   soapy_protocol_set_gain_element(rx, radio->info.soapy.rx_gain[rx->adc], (int)adc[rx->adc].gain);

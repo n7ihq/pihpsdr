@@ -262,10 +262,6 @@ enum ACTION multi_action_table[] =
   ZOOM
 };
 
-PROCESS_ACTION *multifunction_action;           // used to implement assigned action from a multifunction encoder action
-
-
-
 static int timeout_cb(gpointer data) {
   if (timer_released) {
     g_free(data);
@@ -989,7 +985,7 @@ int process_action(void *data) {
     if (a->mode == PRESSED) {
       int state = getMox();
       mox_update(!state);
-      t_print("mmox pressed; bool = %d\n", (int)!state);
+      //t_print("MOX pressed; bool = %d\n", (int)!state);
     }
 
     break;
@@ -1009,6 +1005,7 @@ int process_action(void *data) {
       g_idle_add(ext_vfo_update, NULL);
     }
     else {
+      PROCESS_ACTION *multifunction_action;
       multifunction_action = g_new(PROCESS_ACTION, 1);
       multifunction_action->mode = a->mode;
       multifunction_action->val = a->val;
@@ -1020,7 +1017,8 @@ int process_action(void *data) {
 
   case MULTI_SELECT:                // know to choose the action for multifunction endcoder
       multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
-      t_print("multi encoder action = %d\n", (int)multi_action);
+      g_idle_add(ext_vfo_update, NULL);
+      //t_print("multi encoder action = %d\n", (int)multi_action);
 
     break;    
 
@@ -1339,13 +1337,7 @@ int process_action(void *data) {
 
   case RSAT:
     if (a->mode == PRESSED) {
-      if (sat_mode == RSAT_MODE) {
-        sat_mode = SAT_NONE;
-      } else {
-        sat_mode = RSAT_MODE;
-      }
-
-      t_print("%s: TODO: report sat mode change upstream\n", __FUNCTION__);
+      radio_set_satmode (sat_mode == RSAT_MODE ? SAT_NONE : RSAT_MODE);
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -1353,13 +1345,7 @@ int process_action(void *data) {
 
   case SAT:
     if (a->mode == PRESSED) {
-      if (sat_mode == SAT_MODE) {
-        sat_mode = SAT_NONE;
-      } else {
-        sat_mode = SAT_MODE;
-      }
-
-      t_print("%s: TODO: report sat mode change upstream\n", __FUNCTION__);
+      radio_set_satmode (sat_mode == SAT_MODE ? SAT_NONE : SAT_MODE);
       g_idle_add(ext_vfo_update, NULL);
     }
 
