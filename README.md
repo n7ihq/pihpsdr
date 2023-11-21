@@ -26,7 +26,7 @@ Full source code download using git:
 git clone https://github.com/dl1ycf/pihpsdr.git
 
 **Installation by compiling from the sources (see the Manual,
-Appendix I for Linux and Appendix J for MacOS) is highly recommended,
-since the binary-only installation (see the Manual, Appendix H)
+second-last Appendix for Linux and last Appendix for MacOS) is highly recommended,
+since the binary-only installation (see the Manual, third-last Appendix)
 is not much easier, and binaries may cease to work across OS upgrades.**
 
