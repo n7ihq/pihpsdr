@@ -3,6 +3,8 @@ LIST OF RECENT PIHPSDR CHANGES
 
 November 2023:
 --------------
+- added a "multi function encoder" feature
+  (a contribution from Laurence)
 
 - integrated the WDSP source code tree into piHPSDR,
   and do a static linking against WDSP. This way,
