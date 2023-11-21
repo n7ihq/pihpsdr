@@ -4,7 +4,7 @@ supporting both the old (P1) and new (P2) HPSDR protocols, as well as the SoapyS
 
 It runs on Linux (including RaspPi 3/4) and MacOS (using the "Homebrew" working environment).
 
-**Consult the Manual (Appendices H, I, J) on how-to install and or compile piHPSDR
+**Consult the Manual (last three Appendices) on how-to install and or compile piHPSDR
 on your machine (Raspberry PI binary installation, Raspberry PI compile from
 sources, and MacOS compile from sources).**
 
@@ -13,7 +13,7 @@ Latest features:
 - in-depth (about pages) manual (file release/piHPSDR-Manual.pdf)
 - automatic installation procedures, a binary-only installation for RaspPi only,
   and a "compile from sources" procedure for Linux (including RaspPi) and MacOS
-  (see Appendices H, I, J of the manual)
+  (see last three Appendices of the manual)
 - dynamic screen resizing in the "Screen" menu, including transitions
   between full-screen and window mode
 - PureSignal now works with Anan-10E/100B in P1
