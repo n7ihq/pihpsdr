@@ -1754,8 +1754,13 @@ void vfo_update() {
   // Draw string indicating multifunction encoder status
   //
   // -----------------------------------------------------------
-  if (vfl->multifn_x != 0) {
-    cairo_set_source_rgba(cr, COLOUR_ATTN);
+  int multi = GetMultifunctionStatus();
+  if (vfl->multifn_x != 0 && multi != 0) {
+    if (multi == 1) {
+      cairo_set_source_rgba(cr, COLOUR_ATTN);
+    } else {
+      cairo_set_source_rgba(cr, COLOUR_ALARM);
+    }
     GetMultifunctionString(temp_text, 32);
     cairo_move_to(cr, vfl->multifn_x, vfl->multifn_y);
     cairo_show_text(cr, temp_text);

@@ -3866,6 +3866,15 @@ assign a new action to the multi-function encoder exactly as in the first setup,
 one now turns the multi-function encoder itself. Toggling between the
 two states with the \bltt{Multi Toggle} button
 thus eliminates the need for a second encoder to implement the multi-function feature.
+
+The current \bltt{Multi} action is shown in the VFO bar at the bottom right, that is, below
+the VFO B frequency, using a short and (hopefully) descriptive text, since space there is
+scarce for the smaller VFO bars. The text is printed in yellow in the normal (,,action'') state and
+turns red in the ,,select'' state. This text is not shown until the first multi function action
+(\bltt{MULTI}, \bltt{Multi Select}, or \bltt{Multi Toggle}) is executed such that it is not
+shown as long as no multi function encoder is defined or used. The \bltt{Multi} action is not
+stored in the preferences file, the default action at program startup always is the first in the list,
+namely \bltt{AG gain}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{piHPSDR keyboard bindings}
