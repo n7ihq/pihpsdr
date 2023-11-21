@@ -252,9 +252,18 @@ int main(int argc, char *argv[]) {
   tios.c_lflag &= ~ICANON;
   tios.c_lflag &= ~ECHO;
   tcsetattr(0, TCSANOW, &tios);
+  radio_digi_changed=0;  // used  to trigger a highprio packet
   radio_ptt = 0;
   radio_dash = 0;
   radio_dot = 0;
+  radio_io1 = 0;
+  radio_io2 = 0;
+  radio_io3 = 0;
+  radio_io4 = 0;
+  radio_io5 = 0;
+  radio_io6 = 0;
+  radio_io7 = 0;
+  radio_io8 = 0;
   // seed value for random number generator
   seed = ((uintptr_t) &seed) & 0xffffff;
   tonearg = 0.0;
@@ -561,20 +570,50 @@ int main(int argc, char *argv[]) {
       int rc = read(0, &c, sizeof(c));
 
       if (rc > 0) {
+        radio_digi_changed=1;
         switch (c) {
+        case '1':
+          radio_io1 = !radio_io1;
+          break;
+
+        case '2':
+          radio_io2 = !radio_io2;
+          break;
+
+        case '3':
+          radio_io3 = !radio_io3;
+          break;
+
+        case '4':
+          radio_io4 = !radio_io4;
+          break;
+
+        case '5':
+          radio_io5 = !radio_io5;
+          break;
+
+        case '6':
+          radio_io6 = !radio_io6;
+          break;
+
+        case '7':
+          radio_io7 = !radio_io7;
+          break;
+
+        case '8':
+          radio_io8 = !radio_io8;
+          break;
+
         case 'l':
           radio_dot = !radio_dot;
-          t_print("RADIO DOT=%d\n", radio_dot);
           break;
 
         case 'r':
           radio_dash = !radio_dash;
-          t_print("RADIO DASH=%d\n", radio_dash);
           break;
 
         case 'p':
           radio_ptt = !radio_ptt;
-          t_print("RADIO PTT=%d\n", radio_ptt);
           break;
         }
       }
@@ -1499,7 +1538,6 @@ void *handler_ep6(void *arg) {
   int header_offset;
   uint32_t counter;
   uint8_t buffer[1032];
-  uint8_t C0;
   uint8_t *pointer;
   uint8_t id[4] = { 0xef, 0xfe, 1, 6 };
   uint8_t header[40] = {
@@ -1547,10 +1585,33 @@ void *handler_ep6(void *arg) {
     decimation = 32 >> rate;
 
     for (i = 0; i < 2; ++i) {
+      static uint8_t old_radio_ptt = 0;
+      static uint8_t old_radio_dash = 0;
+      static uint8_t old_radio_dot = 0;
+      static uint8_t old_radio_io1 = 0;
+      static uint8_t old_radio_io2 = 0;
+      static uint8_t old_radio_io3 = 0;
+      static uint8_t old_radio_io4 = 0;
       pointer = buffer + i * 516 - i % 2 * 4 + 8;
       memcpy(pointer, header + header_offset, 8);
       // C0, C1, C2, C3, C4 are *(pointer+3) ... *(pointer+7)
-      C0 = header_offset;
+      uint8_t C0 = header_offset;
+      uint8_t C1;
+
+      if (radio_ptt != old_radio_ptt) {
+        t_print("Radio PTT=%d\n", radio_ptt);
+        old_radio_ptt = radio_ptt;
+      }
+
+      if (radio_dash != old_radio_dash) {
+        t_print("Radio DASH=%d\n", radio_dash);
+        old_radio_dash = radio_dash;
+      }
+
+      if (radio_dot != old_radio_dot) {
+        t_print("Radio DOT=%d\n", radio_dot);
+        old_radio_dot = radio_dot;
+      }
 
       if (radio_ptt)  { C0 |= 1; }
 
@@ -1562,13 +1623,35 @@ void *handler_ep6(void *arg) {
 
       switch (header_offset) {
       case 0:
+        if (radio_io1 != old_radio_io1) {
+          t_print("Radio IO1=%d\n", radio_io1);
+          old_radio_io1 = radio_io1;
+        }
+        if (radio_io2 != old_radio_io2) {
+          t_print("Radio IO2=%d\n", radio_io2);
+          old_radio_io2 = radio_io2;
+        }
+        if (radio_io3 != old_radio_io3) {
+          t_print("Radio IO3=%d\n", radio_io3);
+          old_radio_io3 = radio_io3;
+        }
+        if (radio_io4 != old_radio_io4) {
+          t_print("Radio IO4=%d\n", radio_io4);
+          old_radio_io4 = radio_io4;
+        }
+        C1 = 0;
+        if (radio_io1) { C1 |=  2; }
+        if (radio_io2) { C1 |=  4; }
+        if (radio_io3) { C1 |=  8; }
+        if (radio_io4) { C1 |= 16; }
+        *(pointer + 4) = C1;
+
         if (OLDDEVICE == ODEV_HERMES_LITE2) {
           *(pointer + 4) = 0;
           // C2/C3 is TX FIFO count
           *(pointer + 5) = 0;
           *(pointer + 6) = 0;
         }
-
         header_offset = 8;
         break;
 
