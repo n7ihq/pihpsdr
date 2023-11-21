@@ -1862,8 +1862,23 @@ void ozy_send_buffer() {
 
     //
     //  Now we set the bits for Ant1/2/3 (RX and TX may be different)
+    //  ATTENTION:
+    //  When doing CW handled in radio, the radio may start TXing
+    //  before piHPSDR has slewn down the receivers, slewn up the
+    //  transmitter and goes TX. Then, if different Ant1/2/3
+    //  antennas are chosen for RX and TX, parts of the first
+    //  RF dot may arrive at the RX antenna and do bad things
+    //  there. While we cannot exclude this completely, we will
+    //  switch the Ant1/2/3 selection to TX as soon as we see
+    //  a PTT signal from the radio.
+    //  Measurements have shown that we can reduce the time
+    //  from when the radio send PTT to the time when the
+    //  radio receives the new Ant1/2/2 setup from about
+    //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds,
+    // and this should be
+    //  enough.
     //
-    if (isTransmitting()) {
+    if (isTransmitting() || local_ptt) {
       i = transmitter->alex_antenna;
 
       //
