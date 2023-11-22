@@ -134,10 +134,6 @@ static int current_rx = 0;
 static int mic_samples = 0;
 static int mic_sample_divisor = 1;
 
-static int local_ptt = 0;
-static int dash = 0;
-static int dot = 0;
-
 static unsigned char output_buffer[OZY_BUFFER_SIZE];
 
 static int command = 1;
@@ -1138,27 +1134,27 @@ static void process_control_bytes() {
   // do not set ptt. In PureSignal, this would stop the
   // receiver sending samples to WDSP abruptly.
   // Do the RX-TX change only via ext_mox_update.
-  previous_ptt = local_ptt;
-  previous_dot = dot;
-  previous_dash = dash;
-  local_ptt = (control_in[0] & 0x01) == 0x01;
-  dash = (control_in[0] & 0x02) == 0x02;
-  dot = (control_in[0] & 0x04) == 0x04;
+  previous_ptt = radio_ptt;
+  previous_dot = radio_dot;
+  previous_dash = radio_dash;
+  radio_ptt  = (control_in[0]     ) & 0x01;
+  radio_dash = (control_in[0] >> 1) & 0x01;
+  radio_dot  = (control_in[0] >> 2) & 0x01;
 
   // Stops CAT cw transmission if radio reports "CW action"
-  if (dash || dot) {
+  if (radio_dash || radio_dot) {
     cw_key_hit = 1;
     CAT_cw_is_active = 0;
   }
 
   if (!cw_keyer_internal) {
-    if (dash != previous_dash) { keyer_event(0, dash); }
+    if (radio_dash != previous_dash) { keyer_event(0, radio_dash); }
 
-    if (dot  != previous_dot ) { keyer_event(1, dot ); }
+    if (radio_dot  != previous_dot ) { keyer_event(1, radio_dot ); }
   }
 
-  if (previous_ptt != local_ptt) {
-    g_idle_add(ext_mox_update, (gpointer)(long)(local_ptt));
+  if (previous_ptt != radio_ptt) {
+    g_idle_add(ext_mox_update, GINT_TO_POINTER(radio_ptt));
   }
 
   switch ((control_in[0] >> 3) & 0x1F) {
@@ -1166,11 +1162,12 @@ static void process_control_bytes() {
     adc0_overload |= (control_in[1] & 0x01);
 
     if (device != DEVICE_HERMES_LITE2) {
-      //
-      // HL2 uses these bits of the protocol for a different purpose:
-      // C1 unused except the ADC overload bit
-      // C2/C3 contains underflow/overflow and TX FIFO count
-      //
+
+      radio_io1 = (control_in[1] >> 1) & 0x01;  // most radios: TX inhibit
+      radio_io2 = (control_in[2] >> 2) & 0x01;  // ANAN-7000:   TX inhibit
+      radio_io3 = (control_in[3] >> 3) & 0x01;
+      radio_io4 = (control_in[3] >> 4) & 0x01;  // ANAN-7000:   CW keyer input
+
       if (mercury_software_version[0] != control_in[2]) {
         mercury_software_version[0] = control_in[2];
         t_print("  Mercury Software version: %d (0x%0X)\n", mercury_software_version[0], mercury_software_version[0]);
@@ -1183,6 +1180,7 @@ static void process_control_bytes() {
     } else {
       //
       // HermesLite-II TX-FIFO overflow/underrun detection.
+      // C2/C3 contains underflow/overflow and TX FIFO count
       //
       // Measured on HL2 software version 7.2:
       // multiply FIFO value with 32 to get sample count
@@ -1423,7 +1421,7 @@ static void process_ozy_byte(int b) {
 
     if (mic_samples >= mic_sample_divisor) { // reduce to 48000
       //
-      // if local_ptt is set, this usually means the PTT at the microphone connected
+      // if radio_ptt is set, this usually means the PTT at the microphone connected
       // to the SDR is pressed. In this case, we take audio from BOTH sources
       // then we can use a "voice keyer" on some loop-back interface but at the same
       // time use our microphone.
@@ -1431,7 +1429,7 @@ static void process_ozy_byte(int b) {
       //
       float fsample;
 
-      if (local_ptt) {
+      if (radio_ptt) {
         fsample = (float) mic_sample * 0.00003051;
 
         if (transmitter->local_microphone) { fsample += audio_get_next_mic_sample(); }
@@ -1940,7 +1938,7 @@ void ozy_send_buffer() {
     // and this should be
     //  enough.
     //
-    if (isTransmitting() || local_ptt) {
+    if (isTransmitting() || radio_ptt) {
       i = transmitter->alex_antenna;
 
       //
@@ -2374,7 +2372,7 @@ void ozy_send_buffer() {
       //    However, if we are doing CAT CW, local CW or tuning/TwoTone,
       //    we must put the SDR into TX mode *here*.
       //
-      if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone) {
+      if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone || radio_ptt) {
         output_buffer[C0] |= 0x01;
       }
     } else {

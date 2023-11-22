@@ -55,19 +55,19 @@ enum {
 };
 
 typedef struct _adc {
-  gint filters;
-  gint hpf;
-  gint lpf;
-  gint antenna;
-  gboolean dither;
-  gboolean random;
-  gboolean preamp;
-  gint attenuation;
-  gboolean enable_step_attenuation;
-  gdouble gain;
-  gdouble min_gain;
-  gdouble max_gain;
-  gboolean agc;
+  int filters;
+  int hpf;
+  int lpf;
+  int antenna;
+  uint8_t dither;
+  uint8_t random;
+  uint8_t preamp;
+  int attenuation;
+  uint8_t enable_step_attenuation;
+  uint8_t agc;
+  double gain;
+  double min_gain;
+  double max_gain;
 } ADC;
 
 #endif

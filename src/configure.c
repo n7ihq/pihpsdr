@@ -40,7 +40,7 @@
 #ifdef GPIO
 
 static GtkWidget *i2c_sw_text[16];
-static void response_event(GtkWidget *dialog, gint id, gpointer user_data) {
+static void response_event(GtkWidget *dialog, int id, gpointer user_data) {
   t_print("%s: id=%d\n", __FUNCTION__, id);
 
   if (id == GTK_RESPONSE_ACCEPT) {
@@ -52,8 +52,8 @@ static void response_event(GtkWidget *dialog, gint id, gpointer user_data) {
 }
 
 void configure_gpio(GtkWidget *parent) {
-  gint row = 0;
-  gint col = 0;
+  int row = 0;
+  int col = 0;
   GtkWidget *widget;
   GtkWidget *grid;
   gpioRestoreState();
@@ -63,7 +63,7 @@ void configure_gpio(GtkWidget *parent) {
   GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *notebook = gtk_notebook_new();
   // Encoders
-  gint max_encoders = MAX_ENCODERS;
+  int max_encoders = MAX_ENCODERS;
 
   switch (controller) {
   case NO_CONTROLLER:
@@ -188,7 +188,7 @@ void configure_gpio(GtkWidget *parent) {
   }
 
   // switches
-  gint max_switches = MAX_SWITCHES;
+  int max_switches = MAX_SWITCHES;
 
   switch (controller) {
   case NO_CONTROLLER:

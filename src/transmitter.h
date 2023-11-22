@@ -19,101 +19,88 @@
 #ifndef _TRANSMITTER_H
 #define _TRANSMITTER_H
 
+#include <stdint.h>
 #include <gtk/gtk.h>
 
 #define CTCSS_FREQUENCIES 38
 extern double ctcss_frequencies[CTCSS_FREQUENCIES];
 
 typedef struct _transmitter {
-  int id;
-  int dac;
+  uint8_t id;
+  uint8_t dac;
+  uint8_t displaying;
+  uint8_t low_latency;
+  uint8_t display_panadapter;
+  uint8_t display_waterfall;
+  uint8_t use_rx_filter;
+  uint8_t out_of_band;
+  uint8_t twotone;
+  uint8_t puresignal;
+  uint8_t feedback;
+  uint8_t auto_on;
+  uint8_t ctcss_enabled;
+  uint8_t tune_use_drive;
+  uint8_t do_scale;      // apply TX iq scaling
+  uint8_t swr_protection;
+  uint8_t display_filled;
+  uint8_t local_microphone;
+  uint8_t compressor;
+  uint8_t alex_antenna;
+
   int fps;
-  int displaying;
   int mic_sample_rate;
   int mic_dsp_rate;
   int iq_output_rate;
   int buffer_size;
   int dsp_size;
   int fft_size;
-  int low_latency;
   int pixels;
   int samples;
   int output_samples;
-  double *mic_input_buffer;
-  double *iq_output_buffer;
-
-  float *pixel_samples;
-  int display_panadapter;
-  int display_waterfall;
-  guint update_timer_id;
-  GMutex display_mutex;
-
   int filter_low;
   int filter_high;
-  gboolean use_rx_filter;
-
-  int alex_antenna;
-
   int width;
   int height;
+  int panadapter_low;
+  int panadapter_high;
+  int panadapter_step;
+  int ctcss;
+  int deviation;
+  int attenuation;      // Attenuation in the RX ADC0 chain (!) if TX is active
+  int drive;            // value of the drive slider
+  int tune_drive;
+  int drive_level;      // amplitude (0-255) corresponding to "drive"
+  int x;
+  int y;
+  int dialog_x;
+  int dialog_y;
+
+  double *mic_input_buffer;
+  double *iq_output_buffer;
+  double am_carrier_level;
+  double drive_scale;   // additional TX iq scaling required
+  double drive_iscal;   // inverse of drive_scale
+  double compressor_level;
+  double fwd;
+  double rev;
+  double alc;
+  double swr;
+  double swr_alarm;
+
+  float *pixel_samples;
+  guint update_timer_id;
+  GMutex display_mutex;
 
   GtkWidget *dialog;
   GtkWidget *panel;
   GtkWidget *panadapter;
 
-  int panadapter_low;
-  int panadapter_high;
-  int panadapter_step;
 
   cairo_surface_t *panadapter_surface;
 
-  int local_microphone;
-  gchar microphone_name[128];
+  char microphone_name[128];
 
-  int out_of_band;
   guint out_of_band_timer_id;
-
-  int twotone;
-  int puresignal;
-  int feedback;
-  int auto_on;
-  int single_on;
-
-  gboolean ctcss_enabled;
-  int ctcss;
-
-  int deviation;
-
-  double am_carrier_level;
-
-  int attenuation;      // Attenuation in the RX ADC0 chain (!) if TX is active
-
-  int drive;            // value of the drive slider
-  int tune_use_drive;
-  int tune_drive;
-
-  int drive_level;      // amplitude (0-255) corresponding to "drive"
-  int    do_scale;      // apply TX iq scaling
-  double drive_scale;   // additional TX iq scaling required
-  double drive_iscal;   // inverse of drive_scale
-
-  int compressor;
-  double compressor_level;
-
-  double fwd;
-  double rev;
-  double alc;
-  double swr;
-  gboolean swr_protection;
-  double swr_alarm;
-
-  int x;
-  int y;
-
-  int dialog_x;
-  int dialog_y;
-
-  int display_filled;
 
 } TRANSMITTER;
 

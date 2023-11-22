@@ -32,13 +32,13 @@
 
 static GtkWidget *dialog;
 
-gboolean enable_protocol_1;
-gboolean enable_protocol_2;
-gboolean enable_soapy_protocol;
-gboolean enable_stemlab;
-gboolean enable_usbozy;
-gboolean enable_saturn_xdma;
-gboolean autostart;
+uint8_t enable_protocol_1;
+uint8_t enable_protocol_2;
+uint8_t enable_soapy_protocol;
+uint8_t enable_stemlab;
+uint8_t enable_usbozy;
+uint8_t enable_saturn_xdma;
+uint8_t autostart;
 
 static void protocolsSaveState() {
   char value[128];

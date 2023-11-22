@@ -16,13 +16,15 @@
 *
 */
 
-extern gboolean enable_protocol_1;
-extern gboolean enable_protocol_2;
-extern gboolean enable_saturn_xdma;
-extern gboolean enable_soapy_protocol;
-extern gboolean enable_stemlab;
-extern gboolean enable_usbozy;
-extern gboolean autostart;
+#include <stdint.h>
+
+extern uint8_t enable_protocol_1;
+extern uint8_t enable_protocol_2;
+extern uint8_t enable_saturn_xdma;
+extern uint8_t enable_soapy_protocol;
+extern uint8_t enable_stemlab;
+extern uint8_t enable_usbozy;
+extern uint8_t autostart;
 
 extern void protocolsRestoreState(void);
 extern void configure_protocols(GtkWidget *parent);

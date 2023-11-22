@@ -89,19 +89,19 @@
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
-int MENU_HEIGHT = 30;        // always set to VFO_HEIGHT/2
-int MENU_WIDTH = 65;         // nowhere changed
-int VFO_HEIGHT = 60;         // taken from the current VFO bar layout
-int VFO_WIDTH = 530;         // taken from the current VFO bar layout
-int METER_HEIGHT = 60;       // always set to  VFO_HEIGHT
-int METER_WIDTH = 200;       // nowhere changed
-int ZOOMPAN_HEIGHT = 50;     // nowhere changed
-int SLIDERS_HEIGHT = 100;    // nowhere changed
-int TOOLBAR_HEIGHT = 30;     // nowhere changed
+unsigned int MENU_HEIGHT = 30;        // always set to VFO_HEIGHT/2
+unsigned int MENU_WIDTH = 65;         // nowhere changed
+unsigned int VFO_HEIGHT = 60;         // taken from the current VFO bar layout
+unsigned int VFO_WIDTH = 530;         // taken from the current VFO bar layout
+unsigned int METER_HEIGHT = 60;       // always set to  VFO_HEIGHT
+unsigned int METER_WIDTH = 200;       // nowhere changed
+unsigned int ZOOMPAN_HEIGHT = 50;     // nowhere changed
+unsigned int SLIDERS_HEIGHT = 100;    // nowhere changed
+unsigned int TOOLBAR_HEIGHT = 30;     // nowhere changed
 
-int rx_stack_horizontal = 0;
+uint8_t rx_stack_horizontal = 0;
 
-gint controller = NO_CONTROLLER;
+int controller = NO_CONTROLLER;
 
 GtkWidget *fixed;
 static GtkWidget *hide_b;
@@ -115,15 +115,15 @@ static GtkWidget *toolbar;
 // RX and TX calibration
 long long frequency_calibration = 0LL;
 
-gint sat_mode;
+int sat_mode;
 
 int region = REGION_OTHER;
 
 int radio_sample_rate;   // alias for radio->info.soapy.sample_rate
-gboolean iqswap;
+uint8_t iqswap = 0;
 
 DISCOVERED *radio = NULL;
-gboolean radio_is_remote = FALSE;     // only used with CLIENT_SERVER
+uint8_t radio_is_remote = 0;     // only used with CLIENT_SERVER
 
 char property_path[128];
 GMutex property_mutex;
@@ -136,12 +136,12 @@ int RECEIVERS;
 int PS_TX_FEEDBACK;
 int PS_RX_FEEDBACK;
 
-int atlas_penelope = 0; // 0: no TX, 1: Penelope TX, 2: PennyLane TX
-int atlas_clock_source_10mhz = 0;
-int atlas_clock_source_128mhz = 0;
-int atlas_config = 0;
-int atlas_mic_source = 0;
-int atlas_janus = 0;
+uint8_t atlas_penelope = 0; // 0: no TX, 1: Penelope TX, 2: PennyLane TX
+uint8_t atlas_clock_source_10mhz = 0;
+uint8_t atlas_clock_source_128mhz = 0;
+uint8_t atlas_config = 0;
+uint8_t atlas_mic_source = 0;
+uint8_t atlas_janus = 0;
 
 //
 // if hl2_audio_codec is set,  audio data is included in the HPSDR
@@ -149,7 +149,7 @@ int atlas_janus = 0;
 // "compagnion board" and  a variant of the HL2 firmware
 // This bit can be set in the "RADIO" menu.
 //
-int hl2_audio_codec = 0;
+uint8_t hl2_audio_codec = 0;
 
 //
 // if anan10E is set, we have a limited-capacity HERMES board
@@ -158,74 +158,88 @@ int hl2_audio_codec = 0;
 // one must use RX0. This is the case for Anan-10E and Anan-100B
 // radios.
 //
-int anan10E = 0;
+uint8_t anan10E = 0;
 
-int adc0_filter_bypass = 0; // Bypass ADC0 filters on receive
-int adc1_filter_bypass = 0; // Bypass ADC1 filters on receiver  (ANAN-7000/8000/G2)
-int mute_spkr_amp = 0;      // Mute audio amplifier in radio    (ANAN-7000, G2)
+uint8_t adc0_filter_bypass = 0; // Bypass ADC0 filters on receive
+uint8_t adc1_filter_bypass = 0; // Bypass ADC1 filters on receiver  (ANAN-7000/8000/G2)
+uint8_t mute_spkr_amp = 0;      // Mute audio amplifier in radio    (ANAN-7000, G2)
 
-int classE = 0;
+uint8_t classE = 0;
 
-int tx_out_of_band = 0;
+uint8_t tx_out_of_band = 0;
 
 int alc = TXA_ALC_PK;
 
 int filter_board = ALEX;
-int pa_enabled = PA_ENABLED;
-int pa_power = 0;
+uint8_t pa_enabled = 0;
+int pa_power = PA_1W;
 const int pa_power_list[] = {1, 5, 10, 30, 50, 100, 200, 500, 1000};
 double pa_trim[11];
 
-int display_zoompan = 0;
-int display_sliders = 0;
-int display_toolbar = 0;
+uint8_t display_zoompan = 0;
+uint8_t display_sliders = 0;
+uint8_t display_toolbar = 0;
 
 double mic_gain = 0.0;
 
-int mic_linein = 0;        // Use microphone rather than linein in radio's audio codec
+uint8_t mic_linein = 0;        // Use microphone rather than linein in radio's audio codec
 double linein_gain = 0.0;  // -34.0 ... +12.5 in steps of 1.5 dB
-int mic_boost = 0;
-int mic_bias_enabled = 0;
-int mic_ptt_enabled = 0;
-int mic_ptt_tip_bias_ring = 0;
-int mic_input_xlr = 0;
+uint8_t mic_boost = 0;
+uint8_t mic_bias_enabled = 0;
+uint8_t mic_ptt_enabled = 0;
+uint8_t mic_ptt_tip_bias_ring = 0;
+uint8_t mic_input_xlr = 0;
+
+uint8_t radio_ptt  = 0;
+uint8_t radio_dash = 0;
+uint8_t radio_dot  = 0;
+uint8_t radio_io1  = 1;
+uint8_t radio_io2  = 1;
+uint8_t radio_io3  = 1;
+uint8_t radio_io4  = 1;
+uint8_t radio_io5  = 0;
+uint8_t radio_io6  = 1;
+uint8_t radio_io8  = 0;
 
 int receivers;
 
 ADC adc[2];
 DAC dac[2];                            // only first entry used
 
-int locked = 0;
+uint8_t locked = 0;
 
 int rit_increment = 10;
 
-int cw_keys_reversed = 0;              // 0=disabled 1=enabled
-int cw_keyer_speed = 16;               // 1-60 WPM
+uint8_t cw_keys_reversed = 0;              // 0=disabled 1=enabled
+uint8_t cw_keyer_speed = 16;               // 1-60 WPM
 int cw_keyer_mode = KEYER_MODE_A;      // Modes A/B and STRAIGHT
-int cw_keyer_weight = 50;              // 0-100
-int cw_keyer_spacing = 0;              // 0=on 1=off
-int cw_keyer_internal = 1;             // 0=external 1=internal
-int cw_keyer_sidetone_volume = 50;     // 0-127
-int cw_keyer_ptt_delay = 30;           // 0-255ms
-int cw_keyer_hang_time = 500;          // ms
-int cw_keyer_sidetone_frequency = 800; // Hz
-int cw_breakin = 1;                    // 0=disabled 1=enabled
+uint8_t cw_keyer_weight = 50;              // 0-100
+uint8_t cw_keyer_spacing = 0;              // 0=on 1=off
+uint8_t cw_keyer_internal = 1;             // 0=external 1=internal
+uint8_t cw_keyer_sidetone_volume = 50;     // 0-127
+uint8_t cw_keyer_ptt_delay = 30;           // 0-127
+unsigned int cw_keyer_hang_time = 500;          // ms
+unsigned int cw_keyer_sidetone_frequency = 800; // Hz
+uint8_t cw_breakin = 1;                    // 0=disabled 1=enabled
+
+uint8_t auto_tune_flag = 0;   // flag for auto-tune communication
+uint8_t auto_tune_end  = 0;   // flag for auto-tune communication
 
 int vfo_encoder_divisor = 15;
 
 int protocol;
 int device;
-int new_pa_board = 0; // Indicates Rev.24 PA board for HERMES/ANGELIA/ORION
-int ozy_software_version;
-int mercury_software_version[2] = {0, 0};
-int penelope_software_version;
+uint8_t new_pa_board = 0; // Indicates Rev.24 PA board for HERMES/ANGELIA/ORION
+uint8_t ozy_software_version;
+uint8_t mercury_software_version[2] = {0, 0};
+uint8_t penelope_software_version;
 
-int adc0_overload = 0;
-int adc1_overload = 0;
-int tx_fifo_underrun = 0;
-int tx_fifo_overrun = 0;
-int sequence_errors = 0;
-int high_swr_seen = 0;
+uint8_t adc0_overload = 0;
+uint8_t adc1_overload = 0;
+uint8_t tx_fifo_underrun = 0;
+uint8_t tx_fifo_overrun = 0;
+uint8_t sequence_errors = 0;
+uint8_t high_swr_seen = 0;
 
 unsigned int exciter_power = 0;
 unsigned int alex_forward_power = 0;
@@ -233,26 +247,26 @@ unsigned int alex_reverse_power = 0;
 unsigned int ADC1 = 0;
 unsigned int ADC0 = 0;
 
-int ptt = 0;
-int mox = 0;
-int tune = 0;
-int memory_tune = 0;
-int full_tune = 0;
-int have_rx_gain = 0;
-int have_rx_att = 0;
-int have_alex_att = 0;
-int have_preamp = 0;
-int have_saturn_xdma = 0;
+uint8_t ptt = 0;
+uint8_t mox = 0;
+uint8_t tune = 0;
+uint8_t memory_tune = 0;
+uint8_t full_tune = 0;
+uint8_t have_rx_gain = 0;
+uint8_t have_rx_att = 0;
+uint8_t have_alex_att = 0;
+uint8_t have_preamp = 0;
+uint8_t have_saturn_xdma = 0;
 int rx_gain_calibration = 0;
 
-int split = 0;
+uint8_t split = 0;
 
-unsigned char OCtune = 0;
-int OCfull_tune_time = 2800; // ms
-int OCmemory_tune_time = 550; // ms
+uint8_t OCtune = 0;
+unsigned int OCfull_tune_time = 2800; // ms
+unsigned int OCmemory_tune_time = 550; // ms
 long long tune_timeout;
 
-int analog_meter = 0;
+uint8_t analog_meter = 0;
 int smeter = RXA_S_AV;
 
 int eer_pwm_min = 100;
@@ -264,42 +278,41 @@ int tx_filter_high = 2850;
 static int pre_tune_mode;
 static int pre_tune_cw_internal;
 
-int enable_tx_equalizer = 0;
+uint8_t enable_tx_equalizer = 0;
 int tx_equalizer[4] = {0, 0, 0, 0};
 
-int enable_rx_equalizer = 0;
+uint8_t enable_rx_equalizer = 0;
 int rx_equalizer[4] = {0, 0, 0, 0};
 
-int pre_emphasize = 0;
+uint8_t pre_emphasize = 0;
 
-int vox_setting = 0;
-int vox_enabled = 0;
+uint8_t vox_enabled = 0;
 double vox_threshold = 0.001;
 double vox_hang = 250.0;
-int vox = 0;
-int CAT_cw_is_active = 0;
-int cw_key_hit = 0;
+uint8_t vox = 0;
+uint8_t CAT_cw_is_active = 0;
+uint8_t cw_key_hit = 0;
 int n_adc = 1;
 
-int diversity_enabled = 0;
+uint8_t diversity_enabled = 0;
 double div_cos = 1.0;      // I factor for diversity
 double div_sin = 1.0;      // Q factor for diversity
 double div_gain = 0.0;     // gain for diversity (in dB)
 double div_phase = 0.0;    // phase for diversity (in degrees, 0 ... 360)
 
-int can_transmit = 0;
-int optimize_for_touchscreen = 0;
+uint8_t can_transmit = 0;
+uint8_t optimize_for_touchscreen = 0;
 
-gboolean duplex = FALSE;
-gboolean mute_rx_while_transmitting = FALSE;
+uint8_t duplex = 0;
+uint8_t mute_rx_while_transmitting = 0;
 
 double drive_max = 100.0;
 double drive_digi_max = 100.0; // maximum drive in DIGU/DIGL
 
-gboolean display_warnings = TRUE;
-gboolean display_pacurr = TRUE;
+uint8_t display_warnings = 1;
+uint8_t display_pacurr = 1;
 
-gint rx_height;
+int rx_height;
 
 void radio_stop() {
   if (can_transmit) {
@@ -620,7 +633,7 @@ void reconfigure_radio() {
 //
 // used to regularly write props file, currently not active
 //
-static gint save_timer_id;
+static guint save_timer_id;
 static gboolean save_cb(gpointer data) {
   radioSaveState();
   return TRUE;
@@ -1295,7 +1308,7 @@ void start_radio() {
   if (device == SOAPYSDR_USB_DEVICE) {
     iqswap = 1;
     receivers = 1;
-    filter_board = NONE;
+    filter_board = NO_FILTER_BOARD;
   }
 
   if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2)  {
@@ -1481,7 +1494,7 @@ void start_radio() {
   }
 
 #endif
-  g_idle_add(ext_vfo_update, (gpointer)NULL);
+  g_idle_add(ext_vfo_update, NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_ARROW));
 #ifdef MIDI
 
@@ -2799,7 +2812,7 @@ int remote_start(void *data) {
   }
 
   reconfigure_radio();
-  g_idle_add(ext_vfo_update, (gpointer)NULL);
+  g_idle_add(ext_vfo_update, NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_ARROW));
 
   for (int i = 0; i < receivers; i++) {
@@ -2939,3 +2952,40 @@ void protocol_restart() {
   usleep(200000);
   protocol_run();
 }
+
+void *auto_tune_thread(void *data) {
+  //
+  // This routine is triggered when an "auto tune" event
+  // occurs, which usually is triggered by an input.
+  //
+  // Start TUNEing and keep TUNEing until the auto_tune_flag
+  // becomes zero. Abort TUNEing if it takes too long
+  //
+  // To avoid race conditions, there are two flags:
+  // auto_tune_flag is set while this thread is running
+  // auto_tune_end  signals that tune can stop
+  //
+  // The thread will not terminate until auto_tune_end is flagged,
+  // but  it may stop tuning before.
+  //
+  int count = 0;
+  tune_update(1);
+  for (;;) {
+    if (count >= 0) {
+      count++;
+    }
+    usleep(50000);
+    if (auto_tune_end) {
+      tune_update(0);
+      break;
+    }
+    if (count >= 200) {
+      tune_update(0);
+      count = -1;
+    } 
+  }
+  usleep(50000);       // debouncing
+  auto_tune_flag = 0;
+  return NULL;
+}
+

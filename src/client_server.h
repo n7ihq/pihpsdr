@@ -19,6 +19,8 @@
 #ifndef HPSDR_SERVER_H
 #define HPSDR_SERVER_H
 
+#include <stdint.h>
+
 #ifndef __APPLE__
   #define htonll htobe64
   #define ntohll be64toh
@@ -100,25 +102,25 @@ enum {
 #define REMOTE_SYNC (uint16_t)0xFAFA
 
 typedef struct _remote_rx {
-  gint receiver;
-  gboolean send_audio;
-  gint audio_format;
-  gint audio_port;
+  uint8_t receiver;
+  uint8_t send_audio;
+  uint8_t send_spectrum;
+  int audio_format;
+  int audio_port;
   struct sockaddr_in audio_address;
-  gboolean send_spectrum;
-  gint spectrum_fps;
-  gint spectrum_port;
+  int spectrum_fps;
+  int spectrum_port;
   struct sockaddr_in spectrum_address;
 } REMOTE_RX;
 
 typedef struct _remote_client {
-  gboolean running;
-  gint socket;
+  uint8_t running;
+  uint8_t receivers;
+  int socket;
   socklen_t address_length;
   struct sockaddr_in address;
   GThread *thread_id;
   CLIENT_STATE state;
-  gint receivers;
   guint spectrum_update_timer_id;
   REMOTE_RX receiver[8];
   void *next;
@@ -470,14 +472,14 @@ typedef struct __attribute__((__packed__)) _mute_rx {
 
 extern gboolean hpsdr_server;
 extern gboolean hpsdr_server;
-extern gint client_socket;
-extern gint start_spectrum(void *data);
+extern int client_socket;
+extern int start_spectrum(void *data);
 extern void start_vfo_timer(void);
 extern gboolean remote_started;
 
 extern REMOTE_CLIENT *clients;
 
-extern gint listen_port;
+extern int listen_port;
 
 extern int create_hpsdr_server(void);
 extern int destroy_hpsdr_server(void);

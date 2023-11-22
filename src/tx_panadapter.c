@@ -44,9 +44,9 @@
 #include "new_menu.h"
 #include "message.h"
 
-static gdouble hz_per_pixel;
-static gdouble filter_left = 0.0;
-static gdouble filter_right = 0.0;
+static double hz_per_pixel;
+static double filter_left = 0.0;
+static double filter_right = 0.0;
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean

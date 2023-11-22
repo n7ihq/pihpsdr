@@ -86,8 +86,8 @@ static gboolean encoder_switch_cb(GtkWidget *widget, GdkEvent *event, gpointer d
 }
 
 void encoder_menu(GtkWidget *parent) {
-  gint row = 0;
-  gint col = 0;
+  int row = 0;
+  int col = 0;
   GtkWidget *widget;
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));

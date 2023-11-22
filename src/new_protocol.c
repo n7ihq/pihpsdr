@@ -82,9 +82,6 @@ int data_socket = -1;
 
 static volatile int running;
 
-static int dash = 0;
-static int dot = 0;
-
 static struct sockaddr_in base_addr;
 static int base_addr_length;
 
@@ -248,8 +245,6 @@ static pthread_mutex_t rx_spec_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t tx_spec_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hi_prio_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t general_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-static int local_ptt = 0;
 
 static void new_protocol_start(void);
 static void new_protocol_high_priority(void);
@@ -719,9 +714,12 @@ static void new_protocol_high_priority() {
       // the MOX bit, everything is done in the FPGA.
       //
       // However, if we are doing CAT CW, local CW or tuning/TwoTone,
-      // we must put the SDR into TX mode
+      // we must put the SDR into TX mode. The same applies if the
+      // radio reports a PTT signal, since only then we can use
+      // a foot-switch to extend the TX time at will in a 
+      // rag-chew QSO
       //
-      if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone) {
+      if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone || radio_ptt) {
         high_priority_buffer_to_radio[4] |= 0x02;
       }
     } else {
@@ -1209,7 +1207,7 @@ static void new_protocol_high_priority() {
   //  enough.
   //
 
-  if (xmit || local_ptt) {
+  if (xmit || radio_ptt) {
     i = transmitter->alex_antenna;
 
     //
@@ -2229,6 +2227,7 @@ static void process_high_priority() {
   int previous_dot;
   int previous_dash;
   unsigned int val;
+  pthread_t tune_thread_id;
   //
   // variable used to manage analog inputs. The accumulators
   // record the value*16
@@ -2248,22 +2247,29 @@ static void process_high_priority() {
   }
 
   highprio_rcvd_sequence++;
-  previous_ptt = local_ptt;
-  previous_dot = dot;
-  previous_dash = dash;
-  local_ptt = buffer[4] & 0x01;
+  previous_ptt = radio_ptt;
+  previous_dot = radio_dot;
+  previous_dash = radio_dash;
+
+  radio_ptt  = (buffer[4]     ) & 0x01;
+  radio_dot  = (buffer[4] >> 1) & 0x01;
+  radio_dash = (buffer[4] >> 2) & 0x01;
 
   //
   // Do this as fast as possible in case of a RX/TX  transition
   // induced by the radio (in case different RX/TX settings
   // are valid for Ant1/2/3)
   //
-  if (previous_ptt == 0 && local_ptt == 1) {
+  if (previous_ptt == 0 && radio_ptt == 1) {
     new_protocol_high_priority();
   }
 
-  dot = (buffer[4] >> 1) & 0x01;
-  dash = (buffer[4] >> 2) & 0x01;
+  radio_io4 = (buffer[59]     ) & 0x01;  // 0 = active
+  radio_io5 = (buffer[59] >> 1) & 0x01;  // 0 = active, ANAN-7000: TX inhibit
+  radio_io6 = (buffer[59] >> 2) & 0x01;  // 0 = active
+  radio_io8 = (buffer[59] >> 3) & 0x01;  // ANAN-7000: CW keying input 1=active
+  radio_io2 = (buffer[59] >> 4) & 0x01;  // ANAN-7000: inverted
+  
   tx_fifo_overrun |= (buffer[4] & 0x40) >> 6;
   tx_fifo_underrun |= (buffer[4] & 0x20) >> 5;
   adc0_overload |= buffer[5] & 0x01;
@@ -2295,19 +2301,31 @@ static void process_high_priority() {
   //
   // Stops CAT cw transmission if radio reports "CW action"
   //
-  if (dash || dot) {
+  if (radio_dash || radio_dot) {
     CAT_cw_is_active = 0;
     cw_key_hit = 1;
   }
 
   if (!cw_keyer_internal) {
-    if (dash != previous_dash) { keyer_event(0, dash); }
+    if (radio_dash != previous_dash) { keyer_event(0, radio_dash); }
 
-    if (dot  != previous_dot ) { keyer_event(1, dot ); }
+    if (radio_dot  != previous_dot ) { keyer_event(1, radio_dot ); }
   }
 
-  if (previous_ptt != local_ptt) {
-    g_idle_add(ext_mox_update, GINT_TO_POINTER(local_ptt));
+  if (previous_ptt != radio_ptt) {
+    g_idle_add(ext_mox_update, GINT_TO_POINTER(radio_ptt));
+  }
+  //
+  // If IO6 is active, start TUNE thread if  it is not (yet) active
+  // it is not (yet) running
+  //
+  auto_tune_end = radio_io6;
+  if (radio_io6 == 0 && !auto_tune_flag) {
+    auto_tune_flag = 1;
+    auto_tune_end  = 0;
+    if (pthread_create(&tune_thread_id, NULL, auto_tune_thread, NULL) < 0) {
+      t_print("Failed spawning off the TUNE thread\n");
+    }
   }
 }
 
@@ -2334,7 +2352,7 @@ static void process_mic_data(const unsigned char *buffer) {
     // If PTT comes from the radio, possibly use audio from BOTH sources
     // we just add on since in most cases, only one souce will be "active"
     //
-    if (local_ptt) {
+    if (radio_ptt) {
       fsample = (float) sample * 0.00003051;
 
       if (transmitter->local_microphone) { fsample +=  audio_get_next_mic_sample(); }

@@ -113,7 +113,7 @@ static gboolean close_cb() {
   return TRUE;
 }
 
-static gint update_out_of_band(gpointer data) {
+static int update_out_of_band(gpointer data) {
   TRANSMITTER *tx = (TRANSMITTER *)data;
   tx->out_of_band = 0;
   g_idle_add(ext_vfo_update, NULL);
@@ -192,7 +192,6 @@ void transmitterSaveState(const TRANSMITTER *tx) {
   SetPropS1("transmitter.%d.microphone_name",   tx->id,               tx->microphone_name);
   SetPropI1("transmitter.%d.puresignal",        tx->id,               tx->puresignal);
   SetPropI1("transmitter.%d.auto_on",           tx->id,               tx->auto_on);
-  SetPropI1("transmitter.%d.single_on",         tx->id,               tx->single_on);
   SetPropI1("transmitter.%d.feedback",          tx->id,               tx->feedback);
   SetPropI1("transmitter.%d.attenuation",       tx->id,               tx->attenuation);
   SetPropI1("transmitter.%d.ctcss_enabled",     tx->id,               tx->ctcss_enabled);
@@ -232,7 +231,6 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
   GetPropS1("transmitter.%d.microphone_name",   tx->id,               tx->microphone_name);
   GetPropI1("transmitter.%d.puresignal",        tx->id,               tx->puresignal);
   GetPropI1("transmitter.%d.auto_on",           tx->id,               tx->auto_on);
-  GetPropI1("transmitter.%d.single_on",         tx->id,               tx->single_on);
   GetPropI1("transmitter.%d.feedback",          tx->id,               tx->feedback);
   GetPropI1("transmitter.%d.attenuation",       tx->id,               tx->attenuation);
   GetPropI1("transmitter.%d.ctcss_enabled",     tx->id,               tx->ctcss_enabled);
@@ -716,16 +714,15 @@ TRANSMITTER *create_transmitter(int id, int width, int height) {
           tx->width, tx->height);
   tx->filter_low = tx_filter_low;
   tx->filter_high = tx_filter_high;
-  tx->use_rx_filter = FALSE;
+  tx->use_rx_filter = 0;
   tx->out_of_band = 0;
   tx->twotone = 0;
   tx->puresignal = 0;
   tx->feedback = 0;
   tx->auto_on = 0;
-  tx->single_on = 0;
   tx->attenuation = 0;
   tx->ctcss = 11;
-  tx->ctcss_enabled = FALSE;
+  tx->ctcss_enabled = 0;
   tx->deviation = 2500;
   tx->am_carrier_level = 0.5;
   tx->drive = 50;
@@ -742,7 +739,7 @@ TRANSMITTER *create_transmitter(int id, int width, int height) {
   tx->dialog_x = -1;
   tx->dialog_y = -1;
   tx->swr = 1.0;
-  tx->swr_protection = FALSE;
+  tx->swr_protection = 0;
   tx->swr_alarm = 3.0;     // default value for SWR protection
   tx->alc = 0.0;
   transmitterRestoreState(tx);

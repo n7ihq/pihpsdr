@@ -1976,7 +1976,7 @@ void vfo_set_frequency(int v, long long f) {
       vfo[v].frequency = f;
 
       if (vfo[v].ctun) {
-        vfo[v].ctun = FALSE;
+        vfo[v].ctun = 0;
         vfo[v].offset = 0;
         vfo[v].ctun_frequency = vfo[v].frequency;
       }

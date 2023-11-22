@@ -19,44 +19,46 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 
+#include <stdint.h>
+
 #define MAX_ENCODERS 5
 #define MAX_SWITCHES 16
 #define MAX_FUNCTIONS 6
 
 typedef struct _encoder {
-  gboolean bottom_encoder_enabled;
-  gboolean bottom_encoder_pullup;
-  gint bottom_encoder_address_a;
-  gint bottom_encoder_a_value;
-  gint bottom_encoder_address_b;
-  gint bottom_encoder_b_value;
-  gint bottom_encoder_pos;
-  gint bottom_encoder_function;
-  guchar bottom_encoder_state;
-  gint top_encoder_enabled;
-  gboolean top_encoder_pullup;
-  gint top_encoder_address_a;
-  gint top_encoder_a_value;
-  gint top_encoder_address_b;
-  gint top_encoder_b_value;
-  gint top_encoder_pos;
-  gint top_encoder_function;
-  guchar top_encoder_state;
-  gboolean switch_enabled;
-  gboolean switch_pullup;
-  gint switch_address;
-  gint switch_function;
-  gulong switch_debounce;
+  uint8_t bottom_encoder_enabled;
+  uint8_t bottom_encoder_pullup;
+  uint8_t bottom_encoder_address_a;
+  int bottom_encoder_a_value;
+  uint8_t bottom_encoder_address_b;
+  int bottom_encoder_b_value;
+  int bottom_encoder_pos;
+  int bottom_encoder_function;
+  uint8_t bottom_encoder_state;
+  uint8_t top_encoder_enabled;
+  uint8_t top_encoder_pullup;
+  uint8_t top_encoder_address_a;
+  int top_encoder_a_value;
+  uint8_t top_encoder_address_b;
+  int top_encoder_b_value;
+  int top_encoder_pos;
+  int top_encoder_function;
+  uint8_t top_encoder_state;
+  uint8_t switch_enabled;
+  uint8_t switch_pullup;
+  uint8_t switch_address;
+  int switch_function;
+  unsigned long switch_debounce;
 } ENCODER;
 
 extern ENCODER *encoders;
 
 typedef struct _switch {
-  gboolean switch_enabled;
-  gboolean switch_pullup;
-  gint switch_address;
-  gint switch_function;
-  gulong switch_debounce;
+  uint8_t switch_enabled;
+  uint8_t switch_pullup;
+  uint8_t switch_address;
+  int switch_function;
+  unsigned long switch_debounce;
 } SWITCH;
 
 extern SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES];
