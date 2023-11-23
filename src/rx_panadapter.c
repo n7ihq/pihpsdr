@@ -48,9 +48,6 @@
   #include "ozyio.h"
 #endif
 
-static gfloat filter_left;
-static gfloat filter_right;
-
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean
 panadapter_configure_event_cb (GtkWidget         *widget,
@@ -189,8 +186,8 @@ void rx_panadapter_update(RECEIVER *rx) {
 
   // filter
   cairo_set_source_rgba (cr, COLOUR_PAN_FILTER);
-  filter_left = ((double)rx->pixels * 0.5) - (double)rx->pan + (((double)rx->filter_low + offset) / HzPerPixel);
-  filter_right = ((double)rx->pixels * 0.5) - (double)rx->pan + (((double)rx->filter_high + offset) / HzPerPixel);
+  double filter_left = ((double)rx->pixels * 0.5) - (double)rx->pan + (((double)rx->filter_low + offset) / HzPerPixel);
+  double filter_right = ((double)rx->pixels * 0.5) - (double)rx->pan + (((double)rx->filter_high + offset) / HzPerPixel);
   cairo_rectangle(cr, filter_left, 0.0, filter_right - filter_left, myheight);
   cairo_fill(cr);
 

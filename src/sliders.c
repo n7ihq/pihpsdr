@@ -36,7 +36,6 @@
   #include "soapy_protocol.h"
 #endif
 #include "vfo.h"
-#include "alex.h"
 #include "agc.h"
 #include "channel.h"
 #include "radio.h"

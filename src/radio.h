@@ -25,27 +25,7 @@
 #include "receiver.h"
 #include "transmitter.h"
 
-#define NEW_MIC_IN 0x00
-#define NEW_LINE_IN 0x01
-#define NEW_MIC_BOOST 0x02
-#define NEW_ORION_MIC_PTT_ENABLED 0x00
-#define NEW_ORION_MIC_PTT_DISABLED 0x04
-#define NEW_ORION_MIC_PTT_RING_BIAS_TIP 0x00
-#define NEW_ORION_MIC_PTT_TIP_BIAS_RING 0x08
-#define NEW_ORION_MIC_BIAS_DISABLED 0x00
-#define NEW_ORION_MIC_BIAS_ENABLED 0x10
-
-#define OLD_MIC_IN 0x00
-#define OLD_LINE_IN 0x02
-#define OLD_MIC_BOOST 0x01
-#define OLD_ORION_MIC_PTT_ENABLED 0x40
-#define OLD_ORION_MIC_PTT_DISABLED 0x00
-#define OLD_ORION_MIC_PTT_RING_BIAS_TIP 0x00
-#define OLD_ORION_MIC_PTT_TIP_BIAS_RING 0x08
-#define OLD_ORION_MIC_BIAS_DISABLED 0x00
-#define OLD_ORION_MIC_BIAS_ENABLED 0x20
-
-enum {
+enum _pa_power_enum {
   PA_1W = 0,
   PA_5W,
   PA_10W,
@@ -57,12 +37,17 @@ enum {
   PA_1KW
 };
 
-// TOGGLE takes a boolean expression and inverts it, using the numerical values 0 for FALSE and 1 for TRUE
-#define TOGGLE(a) a = (a) ? 0 : 1
-// NOT takes a boolean value and produces the inverse, using the numerical values 0 for FALSE and 1 for TRUE
-#define NOT(a) (a) ? 0 : 1
-// SET converts a boolean to an int, using the numerical values 0 for FALSE and 1 for TRUE
+//
+// BOOLEAN conversion macros
+//
+// SET    converts an int to a boolean (the result is 0 or 1)
+// NOT    converts an int to a boolean and inverts it
+// TOGGLE has an l-value as argument and inverts it,
+//        TOGGLE(a) is equivalent to a = NOT(a)
+
 #define SET(a) (a) ? 1 : 0
+#define NOT(a) (a) ? 0 : 1
+#define TOGGLE(a) a = (a) ? 0 : 1
 
 extern DISCOVERED *radio;
 extern gboolean radio_is_remote;
@@ -73,16 +58,19 @@ extern long long frequency_calibration;
 
 extern char property_path[];
 
-#define NONE 0
+enum _filter_board_enum {
+ NO_FILTER_BOARD=0,
+ ALEX,
+ APOLLO,
+ CHARLY25,
+ N2ADR
+};
 
-#define ALEX 1
-#define APOLLO 2
-#define CHARLY25 3
-#define N2ADR 4
-
-#define REGION_OTHER 0
-#define REGION_UK 1
-#define REGION_WRC15 2  // 60m band allocation for countries implementing WRC15
+enum _region_enum {
+  REGION_OTHER=0,
+  REGION_UK,
+  REGION_WRC15  // 60m band allocation for countries implementing WRC15
+};
 
 extern int region;
 
@@ -95,34 +83,27 @@ extern RECEIVER *active_receiver;
 
 extern TRANSMITTER *transmitter;
 
-enum {
-  PA_DISABLED = 0,
-  PA_ENABLED
-};
-
-enum {
+enum _cw_keyer_mode_enum {
   KEYER_STRAIGHT = 0,
   KEYER_MODE_A,
   KEYER_MODE_B
 };
 
-enum {
+enum _mic_input_xlr_enum {
   MIC3P55MM = 0,
   MICXLR
 };
 
-enum {
+enum _sat_mode_enum {
   SAT_NONE,
   SAT_MODE,
   RSAT_MODE
 };
 
-extern gint sat_mode;
+extern int sat_mode;
 
 extern int radio_sample_rate;
 extern gboolean iqswap;
-
-#define MAX_BUFFER_SIZE 2048
 
 extern int atlas_penelope;
 extern int atlas_clock_source_10mhz;
@@ -140,7 +121,6 @@ extern int pa_enabled;
 extern int pa_power;
 extern double pa_trim[11];
 extern const int pa_power_list[];
-extern int apollo_tuner;
 
 extern int display_zoompan;
 extern int display_sliders;
@@ -167,7 +147,7 @@ extern int rit_increment;
 
 extern gboolean duplex;
 extern gboolean mute_rx_while_transmitting;
-extern gint rx_height;
+extern int rx_height;
 
 extern int cw_keys_reversed;
 extern int cw_keyer_speed;
@@ -180,6 +160,9 @@ extern int cw_keyer_ptt_delay;
 extern int cw_keyer_hang_time;
 extern int cw_keyer_sidetone_frequency;
 extern int cw_breakin;
+
+extern int auto_tune_flag;
+extern int auto_tune_end;
 
 extern int vfo_encoder_divisor;
 
@@ -235,7 +218,6 @@ extern int rx_equalizer[4];
 
 extern int pre_emphasize;
 
-extern int vox_setting;
 extern int vox_enabled;
 extern double vox_threshold;
 extern double vox_hang;
@@ -313,6 +295,7 @@ extern void radioSaveState(void);
 extern void calculate_display_average(RECEIVER *rx);
 
 extern void radio_change_region(int region);
+extern void radio_set_satmode(int mode);
 
 extern void disable_rigctl(void);
 
@@ -327,6 +310,7 @@ extern void protocol_run(void);
 extern void protocol_stop(void);
 extern void protocol_restart(void);
 
+extern gpointer auto_tune_thread(gpointer data);
 //
 // Macro to flag an unimplemented client/server feature
 //

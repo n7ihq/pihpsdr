@@ -19,7 +19,7 @@
 #ifndef _AGC_H
 #define _AGC_H
 
-enum {
+enum _agc_enum {
   AGC_OFF = 0,
   AGC_LONG,
   AGC_SLOW,

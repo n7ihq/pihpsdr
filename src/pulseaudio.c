@@ -58,7 +58,7 @@ static pa_mainloop_api *main_loop_api;
 static pa_operation *op;
 static pa_context *pa_ctx;
 static pa_simple* microphone_stream;
-static gint local_microphone_buffer_offset;
+static int local_microphone_buffer_offset;
 static float *local_microphone_buffer = NULL;
 static GThread *mic_read_thread_id = 0;
 static gboolean running;
@@ -203,8 +203,8 @@ static void *mic_read_thread(gpointer arg) {
       running = FALSE;
       t_print("%s: simple_read returned %d error=%d (%s)\n", __FUNCTION__, rc, err, pa_strerror(err));
     } else {
-      for (gint i = 0; i < mic_buffer_size; i++) {
-        gfloat sample = local_microphone_buffer[i];
+      for (int i = 0; i < mic_buffer_size; i++) {
+        float sample = local_microphone_buffer[i];
         //
         // put sample into ring buffer
         //

@@ -58,6 +58,7 @@
 #include "ext.h"
 #include "message.h"
 #include "filter.h"
+#include "actions.h"
 
 static int my_width;
 static int my_height;
@@ -1753,8 +1754,13 @@ void vfo_update() {
   // Draw string indicating multifunction encoder status
   //
   // -----------------------------------------------------------
-  if (vfl->multifn_x != 0) {
-    cairo_set_source_rgba(cr, COLOUR_ATTN);
+  int multi = GetMultifunctionStatus();
+  if (vfl->multifn_x != 0 && multi != 0) {
+    if (multi == 1) {
+      cairo_set_source_rgba(cr, COLOUR_ATTN);
+    } else {
+      cairo_set_source_rgba(cr, COLOUR_ALARM);
+    }
     GetMultifunctionString(temp_text, 32);
     cairo_move_to(cr, vfl->multifn_x, vfl->multifn_y);
     cairo_show_text(cr, temp_text);
@@ -1970,7 +1976,7 @@ void vfo_set_frequency(int v, long long f) {
       vfo[v].frequency = f;
 
       if (vfo[v].ctun) {
-        vfo[v].ctun = FALSE;
+        vfo[v].ctun = 0;
         vfo[v].offset = 0;
         vfo[v].ctun_frequency = vfo[v].frequency;
       }

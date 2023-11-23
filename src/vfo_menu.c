@@ -37,11 +37,9 @@
 #include "ext.h"
 #include "radio_menu.h"
 
-static gint myvfo;  //  VFO the menu is referring to
+static int myvfo;  //  VFO the menu is referring to
 static GtkWidget *dialog = NULL;
 static GtkWidget *label;
-
-#define BUF_SIZE 88
 
 //
 // Note that the decimal point is hard-wired to a point,

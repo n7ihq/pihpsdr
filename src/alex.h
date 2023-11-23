@@ -20,6 +20,8 @@
 #define _ALEX_H
 
 //
+// Used in new_protocol.c only.
+//
 // This defines the "standard" ALEX0 bits. For some gear,
 // we need different definitions, but some bits are highly conserved
 // Note that in the standard case, RX signals from Ant1,2,3 go through

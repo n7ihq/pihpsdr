@@ -21,8 +21,8 @@ extern GtkWidget *main_menu;
 
 extern void new_menu(void);
 
-//extern void start_step(void);
 extern void start_meter(void);
+extern void start_step(void);
 extern void start_band(void);
 extern void start_bandstack(void);
 extern void start_mode(void);
@@ -44,12 +44,8 @@ extern void encoder_step(int encoder, int step);
 
 extern int menu_active_receiver_changed(void *data);
 
-enum {
+enum _active_menu {
   NO_MENU = 0,
-  E2_MENU,
-  E3_MENU,
-  E4_MENU,
-  E5_MENU,
   BAND_MENU,
   BANDSTACK_MENU,
   MODE_MENU,

@@ -24,12 +24,9 @@
 #include "band.h"
 #include "filter.h"
 #include "mode.h"
-#include "alex.h"
 #include "property.h"
 #include "radio.h"
 #include "vfo.h"
-
-#define LINESDR
 
 static int current_band = band20;
 int xvtr_band = BANDS;
@@ -221,30 +218,30 @@ BANDSTACK_ENTRY bandstack_entriesWWV[] = {
   {20000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0}
 };
 
-BANDSTACK bandstack160 = {3, 1, bandstack_entries160};
-BANDSTACK bandstack80 = {3, 1, bandstack_entries80};
-BANDSTACK bandstack60 = {5, 1, bandstack_entries60_OTHER};
-BANDSTACK bandstack40 = {3, 1, bandstack_entries40};
-BANDSTACK bandstack30 = {3, 1, bandstack_entries30};
-BANDSTACK bandstack20 = {4, 1, bandstack_entries20};
-BANDSTACK bandstack17 = {3, 1, bandstack_entries17};
-BANDSTACK bandstack15 = {3, 1, bandstack_entries15};
-BANDSTACK bandstack12 = {3, 1, bandstack_entries12};
-BANDSTACK bandstack10 = {3, 1, bandstack_entries10};
-BANDSTACK bandstack6 = {3, 1, bandstack_entries6};
-BANDSTACK bandstack70 = {3, 1, bandstack_entries70};
-BANDSTACK bandstack144 = {6, 1, bandstack_entries144};
-BANDSTACK bandstack220 = {3, 1, bandstack_entries220};
-BANDSTACK bandstack430 = {3, 1, bandstack_entries430};
-BANDSTACK bandstack902 = {3, 1, bandstack_entries902};
+BANDSTACK bandstack160  = {3, 1, bandstack_entries160};
+BANDSTACK bandstack80   = {3, 1, bandstack_entries80};
+BANDSTACK bandstack60   = {5, 1, bandstack_entries60_OTHER};
+BANDSTACK bandstack40   = {3, 1, bandstack_entries40};
+BANDSTACK bandstack30   = {3, 1, bandstack_entries30};
+BANDSTACK bandstack20   = {4, 1, bandstack_entries20};
+BANDSTACK bandstack17   = {3, 1, bandstack_entries17};
+BANDSTACK bandstack15   = {3, 1, bandstack_entries15};
+BANDSTACK bandstack12   = {3, 1, bandstack_entries12};
+BANDSTACK bandstack10   = {3, 1, bandstack_entries10};
+BANDSTACK bandstack6    = {3, 1, bandstack_entries6};
+BANDSTACK bandstack70   = {3, 1, bandstack_entries70};
+BANDSTACK bandstack144  = {6, 1, bandstack_entries144};
+BANDSTACK bandstack220  = {3, 1, bandstack_entries220};
+BANDSTACK bandstack430  = {3, 1, bandstack_entries430};
+BANDSTACK bandstack902  = {3, 1, bandstack_entries902};
 BANDSTACK bandstack1240 = {3, 1, bandstack_entries1240};
 BANDSTACK bandstack2300 = {3, 1, bandstack_entries2300};
 BANDSTACK bandstack3400 = {3, 1, bandstack_entries3400};
-BANDSTACK bandstackAIR = {6, 1, bandstack_entriesAIR};
-BANDSTACK bandstackGEN = {3, 1, bandstack_entriesGEN};
-BANDSTACK bandstackWWV = {5, 1, bandstack_entriesWWV};
-BANDSTACK bandstack136 = {2, 0, bandstack_entries136};
-BANDSTACK bandstack472 = {2, 0, bandstack_entries472};
+BANDSTACK bandstackAIR  = {6, 1, bandstack_entriesAIR};
+BANDSTACK bandstackGEN  = {3, 1, bandstack_entriesGEN};
+BANDSTACK bandstackWWV  = {5, 1, bandstack_entriesWWV};
+BANDSTACK bandstack136  = {2, 0, bandstack_entries136};
+BANDSTACK bandstack472  = {2, 0, bandstack_entries472};
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -303,39 +300,39 @@ BANDSTACK bandstack_xvtr_6 = {3, 0, bandstack_entries_xvtr_6};
 BANDSTACK bandstack_xvtr_7 = {3, 0, bandstack_entries_xvtr_7};
 
 BAND bands[BANDS + XVTRS] = {
-  {"136kHz", &bandstack136, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 135700LL, 137800LL, 0LL, 0LL, 0},
-  {"472kHz", &bandstack472, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 472000LL, 479000LL, 0LL, 0LL, 0},
-  {"160", &bandstack160, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 1800000LL, 2000000LL, 0LL, 0LL, 0},
-  {"80", &bandstack80, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 3500000LL, 4000000LL, 0LL, 0LL, 0},
-  {"60", &bandstack60, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 5250000LL, 5450000LL, 0LL, 0LL, 0},
-  {"40", &bandstack40, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 7000000LL, 7300000LL, 0LL, 0LL, 0},
-  {"30", &bandstack30, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 10100000LL, 10150000LL, 0LL, 0LL, 0},
-  {"20", &bandstack20, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 14000000LL, 14350000LL, 0LL, 0LL, 0},
-  {"17", &bandstack17, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 18068000LL, 18168000LL, 0LL, 0LL, 0},
-  {"15", &bandstack15, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 21000000LL, 21450000LL, 0LL, 0LL, 0},
-  {"12", &bandstack12, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 24890000LL, 24990000LL, 0LL, 0LL, 0},
-  {"10", &bandstack10, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 28000000LL, 29700000LL, 0LL, 0LL, 0},
-  {"6", &bandstack6, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 50000000LL, 54000000LL, 0LL, 0LL, 0},
-  {"4", &bandstack70, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 70000000LL, 70500000LL, 0LL, 0LL, 0},
-  {"144", &bandstack144, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 144000000LL, 148000000LL, 0LL, 0LL, 0},
-  {"220", &bandstack220, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 220000000LL, 224980000LL, 0LL, 0LL, 0},
-  {"430", &bandstack430, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 420000000LL, 450000000LL, 0LL, 0LL, 0},
-  {"902", &bandstack902, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 902000000LL, 928000000LL, 0LL, 0LL, 0},
-  {"1240", &bandstack1240, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 1240000000LL, 1300000000LL, 0LL, 0LL, 0},
-  {"2300", &bandstack2300, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 2300000000LL, 2450000000LL, 0LL, 0LL, 0},
-  {"3400", &bandstack3400, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 3400000000LL, 3410000000LL, 0LL, 0LL, 0},
-  {"AIR", &bandstackAIR, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 108000000LL, 137000000LL, 0LL, 0LL, 0},
-  {"WWV", &bandstackWWV, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 0},
-  {"GEN", &bandstackGEN, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 0},
+  {"136kHz", &bandstack136,     0, 0, 0, 0, 0, 0, 53.0,     135700LL,     137800LL, 0LL, 0LL, 0},
+  {"472kHz", &bandstack472,     0, 0, 0, 0, 0, 0, 53.0,     472000LL,     479000LL, 0LL, 0LL, 0},
+  {"160",    &bandstack160,     0, 0, 0, 0, 0, 0, 53.0,    1800000LL,    2000000LL, 0LL, 0LL, 0},
+  {"80",     &bandstack80,      0, 0, 0, 0, 0, 0, 53.0,    3500000LL,    4000000LL, 0LL, 0LL, 0},
+  {"60",     &bandstack60,      0, 0, 0, 0, 0, 0, 53.0,    5250000LL,    5450000LL, 0LL, 0LL, 0},
+  {"40",     &bandstack40,      0, 0, 0, 0, 0, 0, 53.0,    7000000LL,    7300000LL, 0LL, 0LL, 0},
+  {"30",     &bandstack30,      0, 0, 0, 0, 0, 0, 53.0,   10100000LL,   10150000LL, 0LL, 0LL, 0},
+  {"20",     &bandstack20,      0, 0, 0, 0, 0, 0, 53.0,   14000000LL,   14350000LL, 0LL, 0LL, 0},
+  {"17",     &bandstack17,      0, 0, 0, 0, 0, 0, 53.0,   18068000LL,   18168000LL, 0LL, 0LL, 0},
+  {"15",     &bandstack15,      0, 0, 0, 0, 0, 0, 53.0,   21000000LL,   21450000LL, 0LL, 0LL, 0},
+  {"12",     &bandstack12,      0, 0, 0, 0, 0, 0, 53.0,   24890000LL,   24990000LL, 0LL, 0LL, 0},
+  {"10",     &bandstack10,      0, 0, 0, 0, 0, 0, 53.0,   28000000LL,   29700000LL, 0LL, 0LL, 0},
+  {"6",      &bandstack6,       0, 0, 0, 0, 0, 0, 53.0,   50000000LL,   54000000LL, 0LL, 0LL, 0},
+  {"4",      &bandstack70,      0, 0, 0, 0, 0, 0, 53.0,   70000000LL,   70500000LL, 0LL, 0LL, 0},
+  {"144",    &bandstack144,     0, 0, 0, 0, 0, 0, 53.0,  144000000LL,  148000000LL, 0LL, 0LL, 0},
+  {"220",    &bandstack220,     0, 0, 0, 0, 0, 0, 53.0,  220000000LL,  224980000LL, 0LL, 0LL, 0},
+  {"430",    &bandstack430,     0, 0, 0, 0, 0, 0, 53.0,  420000000LL,  450000000LL, 0LL, 0LL, 0},
+  {"902",    &bandstack902,     0, 0, 0, 0, 0, 0, 53.0,  902000000LL,  928000000LL, 0LL, 0LL, 0},
+  {"1240",   &bandstack1240,    0, 0, 0, 0, 0, 0, 53.0, 1240000000LL, 1300000000LL, 0LL, 0LL, 0},
+  {"2300",   &bandstack2300,    0, 0, 0, 0, 0, 0, 53.0, 2300000000LL, 2450000000LL, 0LL, 0LL, 0},
+  {"3400",   &bandstack3400,    0, 0, 0, 0, 0, 0, 53.0, 3400000000LL, 3410000000LL, 0LL, 0LL, 0},
+  {"AIR",    &bandstackAIR,     0, 0, 0, 0, 0, 0, 53.0,  108000000LL,  137000000LL, 0LL, 0LL, 0},
+  {"WWV",    &bandstackWWV,     0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 0},
+  {"GEN",    &bandstackGEN,     0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 0},
   // XVTRS
-  {"", &bandstack_xvtr_0, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_1, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_2, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_3, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_4, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_5, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_6, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1},
-  {"", &bandstack_xvtr_7, 0, 0, 0, 0, 0, ALEX_ATTENUATION_0dB, 53.0, 0LL, 0LL, 0LL, 0LL, 1}
+  {"",       &bandstack_xvtr_0, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_1, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_2, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_3, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_4, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_5, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_6, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1},
+  {"",       &bandstack_xvtr_7, 0, 0, 0, 0, 0, 0, 53.0,          0LL,          0LL, 0LL, 0LL, 1}
 };
 
 CHANNEL band_channels_60m_UK[UK_CHANNEL_ENTRIES] = {

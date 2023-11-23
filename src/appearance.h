@@ -82,12 +82,7 @@
 // but need not be "alerting"
 // METER is a special colour for data/ticks in the "meter" surface
 //
-// MENU_BACKGND *was* used for all menus, the top window, the zoom/pan and slider area.
-// howewer, meanwhile this is de-activated since the background color must be compatible
-// with the GTK theme the user chose.
-//
 
-#define COLOUR_MENU_BACKGND  1.00, 1.00, 0.95, 1.00 // Default: 1.00, 1.00, 1.00, 1.00
 #define COLOUR_PAN_BACKGND   0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
 #define COLOUR_VFO_BACKGND   0.15, 0.15, 0.15, 1.00 // Default: 0.00, 0.00, 0.00, 1.00
 #define COLOUR_SHADE         0.70, 0.70, 0.70, 1.00 // Default: 0.70, 0.70, 0.70, 1.00
@@ -142,8 +137,8 @@ struct _VFO_BAR_LAYOUT {
   int mode_x,  mode_y;     // Mode/Filter/CW wpm string
   int zoom_x,  zoom_y;     // "Zoom x1"
   int ps_x,    ps_y;       // "PS"
-  int rit_x,   rit_y ;     // "RIT +9999Hz"
-  int xit_x,   xit_y;      // "XIT +9999Hz"
+  int rit_x,   rit_y ;     // "RIT -9999Hz"
+  int xit_x,   xit_y;      // "XIT -9999Hz"
   int nb_x,    nb_y;       // NB/NB2
   int nr_x,    nr_y;
   int anf_x,   anf_y;

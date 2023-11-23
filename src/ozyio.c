@@ -505,7 +505,7 @@ void ozy_i2c_readpwr(int addr) {
   }
 }
 
-void writepenny(unsigned char mode) {
+void writepenny(int reset, int mode) {
   //
   // Bits used in Mode:
   //
@@ -518,7 +518,7 @@ void writepenny(unsigned char mode) {
   //
   unsigned char Penny_TLV320[2];
   unsigned char Penny_TLV320_data[] = { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x15, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 }; // 16 byte
-  int x;
+
   // This is used to set the MicGain and Line in when Ozy/Magister is used
   // The I2C settings are as follows:
   //
@@ -537,7 +537,9 @@ void writepenny(unsigned char mode) {
   //    XX=0x15: Use Mic in, apply 20dB Mic boost
   //    XX=0x14: Use Mic in, no Mic boost
   //    XX=0x10: Use Line in
-  t_print("write Penny\n");
+  //
+  //    The first two pairs are only sent if "reset" is nonzero
+  //
 
   //
   // update mic gain on Penny or PennyLane TLV320
@@ -551,17 +553,11 @@ void writepenny(unsigned char mode) {
     Penny_TLV320_data[ 5] = 0x14;  // mic in, no mic boost
   }
 
-  //      // set the I2C interface speed to 400kHZ
-  //      if (!(OZY.Set_I2C_Speed(hdev, 1)))
-  //      {
-  //          t_print("Unable to set I2C speed to 400kHz", "System Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-  //          return;
-
   // send the configuration data to the TLV320 on Penelope or PennyLane
-  for (x = 0; x < 16; x += 2) {
+  for (int i = reset ? 0 : 4; i < 16; i += 2) {
     // copy two bytes to buffer and send via I2C
-    Penny_TLV320[0] = Penny_TLV320_data[x];
-    Penny_TLV320[1] = Penny_TLV320_data[x + 1];
+    Penny_TLV320[0] = Penny_TLV320_data[i];
+    Penny_TLV320[1] = Penny_TLV320_data[i + 1];
 
     if (ozy_i2c_write(Penny_TLV320, 2, I2C_PENNY_TLV320) < 0) {
       t_print("Unable to configure TLV320 on Penelope via I2C\n");
@@ -569,8 +565,6 @@ void writepenny(unsigned char mode) {
       break;
     }
   }
-
-  t_print("write Penny done..\n");
 }
 
 void ozy_i2c_readvars() {
@@ -616,7 +610,8 @@ void ozy_i2c_readvars() {
 
   penny_fw = buffer[1];
   t_print("penny firmware=%d\n", (int)buffer[1]);
-  writepenny((unsigned char)1);
+  writepenny(1, 1);
+  t_print("penny TLV320 initialized\n");
 }
 
 static int file_exists (const char * fileName) {

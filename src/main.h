@@ -22,7 +22,7 @@
 #include <sys/utsname.h>
 extern struct utsname unameData;
 
-enum {
+enum _controller_enum {
   NO_CONTROLLER = 0,
   CONTROLLER1,
   CONTROLLER2_V1,
@@ -30,16 +30,16 @@ enum {
   G2_FRONTPANEL
 };
 
-extern gint controller;
+extern int controller;
 
 extern GdkScreen *screen;
-extern gint display_width;
-extern gint display_height;
-extern gint screen_width;
-extern gint screen_height;
-extern gint this_monitor;
+extern int display_width;
+extern int display_height;
+extern int screen_width;
+extern int screen_height;
+extern int this_monitor;
 
-extern gint full_screen;
+extern int full_screen;
 extern GtkWidget *top_window;
 extern GtkWidget *topgrid;
 extern void status_text(const char *text);

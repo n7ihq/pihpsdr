@@ -24,7 +24,6 @@
 #include "band.h"
 #include "filter.h"
 #include "mode.h"
-#include "alex.h"
 #include "property.h"
 #include "store.h"
 #include "store_menu.h"

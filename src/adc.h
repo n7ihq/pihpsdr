@@ -21,12 +21,12 @@
 
 #include <gtk/gtk.h>
 
-enum {
+enum _filter_selection_enum {
   AUTOMATIC = 0,
   MANUAL
 };
 
-enum {
+enum _hpf_filter_enum {
   BYPASS = 0,
   HPF_1_5,
   HPF_6_5,
@@ -35,7 +35,7 @@ enum {
   HPF_20
 };
 
-enum {
+enum _lpf_filter_enum {
   LPF_160 = 0,
   LPF_80,
   LPF_60_40,
@@ -45,7 +45,7 @@ enum {
   LPF_6
 };
 
-enum {
+enum _antenna_select_enum {
   ANTENNA_1 = 0,
   ANTENNA_2,
   ANTENNA_3,
@@ -55,18 +55,18 @@ enum {
 };
 
 typedef struct _adc {
-  gint filters;
-  gint hpf;
-  gint lpf;
-  gint antenna;
+  int filters;
+  int hpf;
+  int lpf;
+  int antenna;
   gboolean dither;
   gboolean random;
   gboolean preamp;
-  gint attenuation;
+  int attenuation;
   gboolean enable_step_attenuation;
-  gdouble gain;
-  gdouble min_gain;
-  gdouble max_gain;
+  double gain;
+  double min_gain;
+  double max_gain;
   gboolean agc;
 } ADC;
 

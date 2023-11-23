@@ -134,9 +134,9 @@ static int current_rx = 0;
 static int mic_samples = 0;
 static int mic_sample_divisor = 1;
 
-static int local_ptt = 0;
-static int dash = 0;
-static int dot = 0;
+static int radio_ptt = 0;
+static int radio_dash = 0;
+static int radio_dot = 0;
 
 static unsigned char output_buffer[OZY_BUFFER_SIZE];
 
@@ -445,8 +445,8 @@ static gpointer ozy_i2c_thread(gpointer arg) {
   // bit 2 set : Mic In, no boost
   // bit 3-7 : encodes linein gain, only used if bit2 is set
   //
-  unsigned char penny;
-  unsigned char last_penny = 0;  // unused value to init
+  int penny;
+  int last_penny = 0;  // unused value
   t_print( "old_protocol: OZY I2C read thread\n");
   cycle = 0;
   for (;;) {
@@ -481,7 +481,7 @@ static gpointer ozy_i2c_thread(gpointer arg) {
           penny = mic_boost ? 1 : 4;
         }
         if (penny != last_penny) {
-          writepenny(penny);
+          writepenny(0, penny);
           last_penny = penny;
         }
         cycle = 0;
@@ -1138,27 +1138,28 @@ static void process_control_bytes() {
   // do not set ptt. In PureSignal, this would stop the
   // receiver sending samples to WDSP abruptly.
   // Do the RX-TX change only via ext_mox_update.
-  previous_ptt = local_ptt;
-  previous_dot = dot;
-  previous_dash = dash;
-  local_ptt = (control_in[0] & 0x01) == 0x01;
-  dash = (control_in[0] & 0x02) == 0x02;
-  dot = (control_in[0] & 0x04) == 0x04;
+  previous_ptt = radio_ptt;
+  previous_dot = radio_dot;
+  previous_dash = radio_dash;
+
+  radio_ptt  = (control_in[0]     ) & 0x01;
+  radio_dash = (control_in[0] >> 1) & 0x01;
+  radio_dot  = (control_in[0] >> 2) & 0x01;
 
   // Stops CAT cw transmission if radio reports "CW action"
-  if (dash || dot) {
+  if (radio_dash || radio_dot) {
     cw_key_hit = 1;
     CAT_cw_is_active = 0;
   }
 
   if (!cw_keyer_internal) {
-    if (dash != previous_dash) { keyer_event(0, dash); }
+    if (radio_dash != previous_dash) { keyer_event(0, radio_dash); }
 
-    if (dot  != previous_dot ) { keyer_event(1, dot ); }
+    if (radio_dot  != previous_dot ) { keyer_event(1, radio_dot ); }
   }
 
-  if (previous_ptt != local_ptt) {
-    g_idle_add(ext_mox_update, (gpointer)(long)(local_ptt));
+  if (previous_ptt != radio_ptt) {
+    g_idle_add(ext_mox_update, GINT_TO_POINTER(radio_ptt));
   }
 
   switch ((control_in[0] >> 3) & 0x1F) {
@@ -1167,9 +1168,7 @@ static void process_control_bytes() {
 
     if (device != DEVICE_HERMES_LITE2) {
       //
-      // HL2 uses these bits of the protocol for a different purpose:
-      // C1 unused except the ADC overload bit
-      // C2/C3 contains underflow/overflow and TX FIFO count
+      // There we could make use of the "digital user inputs"
       //
       if (mercury_software_version[0] != control_in[2]) {
         mercury_software_version[0] = control_in[2];
@@ -1183,6 +1182,7 @@ static void process_control_bytes() {
     } else {
       //
       // HermesLite-II TX-FIFO overflow/underrun detection.
+      // C2/C3 contains underflow/overflow and TX FIFO count
       //
       // Measured on HL2 software version 7.2:
       // multiply FIFO value with 32 to get sample count
@@ -1423,7 +1423,7 @@ static void process_ozy_byte(int b) {
 
     if (mic_samples >= mic_sample_divisor) { // reduce to 48000
       //
-      // if local_ptt is set, this usually means the PTT at the microphone connected
+      // if radio_ptt is set, this usually means the PTT at the microphone connected
       // to the SDR is pressed. In this case, we take audio from BOTH sources
       // then we can use a "voice keyer" on some loop-back interface but at the same
       // time use our microphone.
@@ -1431,7 +1431,7 @@ static void process_ozy_byte(int b) {
       //
       float fsample;
 
-      if (local_ptt) {
+      if (radio_ptt) {
         fsample = (float) mic_sample * 0.00003051;
 
         if (transmitter->local_microphone) { fsample += audio_get_next_mic_sample(); }
@@ -1924,8 +1924,23 @@ void ozy_send_buffer() {
 
     //
     //  Now we set the bits for Ant1/2/3 (RX and TX may be different)
+    //  ATTENTION:
+    //  When doing CW handled in radio, the radio may start TXing
+    //  before piHPSDR has slewn down the receivers, slewn up the
+    //  transmitter and goes TX. Then, if different Ant1/2/3
+    //  antennas are chosen for RX and TX, parts of the first
+    //  RF dot may arrive at the RX antenna and do bad things
+    //  there. While we cannot exclude this completely, we will
+    //  switch the Ant1/2/3 selection to TX as soon as we see
+    //  a PTT signal from the radio.
+    //  Measurements have shown that we can reduce the time
+    //  from when the radio send PTT to the time when the
+    //  radio receives the new Ant1/2/2 setup from about
+    //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds,
+    // and this should be
+    //  enough.
     //
-    if (isTransmitting()) {
+    if (isTransmitting() || radio_ptt) {
       i = transmitter->alex_antenna;
 
       //
@@ -2359,7 +2374,7 @@ void ozy_send_buffer() {
       //    However, if we are doing CAT CW, local CW or tuning/TwoTone,
       //    we must put the SDR into TX mode *here*.
       //
-      if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone) {
+      if (tune || CAT_cw_is_active || !cw_keyer_internal || transmitter->twotone || radio_ptt) {
         output_buffer[C0] |= 0x01;
       }
     } else {

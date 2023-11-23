@@ -59,7 +59,7 @@
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
-static gint last_x;
+static int last_x;
 static gboolean has_moved = FALSE;
 static gboolean pressed = FALSE;
 static gboolean making_active = FALSE;
@@ -460,7 +460,7 @@ void reconfigure_receiver(RECEIVER *rx, int height) {
   g_mutex_unlock(&rx->display_mutex);
 }
 
-static gint update_display(gpointer data) {
+static int update_display(gpointer data) {
   RECEIVER *rx = (RECEIVER *)data;
   int rc;
 
@@ -701,25 +701,43 @@ void set_offset(RECEIVER *rx, long long offset) {
 
 static void init_analyzer(RECEIVER *rx) {
   int flp[] = {0};
-  double keep_time = 0.1;
-  int n_pixout = 1;
-  int spur_elimination_ffts = 1;
-  int data_type = 1;
-  int afft_size = 8192;
-  int window_type = 4;
-  double kaiser_pi = 14.0;
-  int overlap = 2048;
-  int clip = 0;
-  double span_clip_l = 0;
-  double span_clip_h = 0;
-  int pixels = rx->pixels;
-  int stitches = 1;
-  int calibration_data_set = 0;
-  double span_min_freq = 0.0;
-  double span_max_freq = 0.0;
-  int max_w = afft_size + (int) min(keep_time * (double) rx->fps, keep_time * (double) afft_size * (double) rx->fps);
+  const double keep_time = 0.1;
+  const int n_pixout = 1;
+  const int spur_elimination_ffts = 1;
+  const int data_type = 1;
+  const double kaiser_pi = 14.0;
+  const double fscLin = 0;
+  const double fscHin = 0;
+  const int stitches = 1;
+  const int calibration_data_set = 0;
+  const double span_min_freq = 0.0;
+  const double span_max_freq = 0.0;
+
+  int window_type;
+  int afft_size;
+  int overlap;
+  int clip;
+  int pixels;
+
+  pixels = rx->pixels;
+  afft_size = 8192;
+  window_type = 4;
+
+  //
+  // This makes the display of the feedback signal
+  // during TX much less "nervous"
+  //
+  if (rx->id == PS_RX_FEEDBACK) {
+    window_type = 5;
+    if (rx->sample_rate > 100000) { afft_size = 16384; }
+    if (rx->sample_rate > 200000) { afft_size = 32768; }
+  }
+
+  clip = (int) floor(0.017 * afft_size);
+
+  int max_w = afft_size + (int) min(keep_time * (double) rx->sample_rate, keep_time * (double) afft_size * (double) rx->fps);
   overlap = (int)fmax(0.0, ceil(afft_size - (double)rx->sample_rate / (double)rx->fps));
-  //t_print("%s: RXid=%d buffer_size=%d overlap=%d\n",__FUNCTION__,rx->id,rx->buffer_size,overlap);
+
   SetAnalyzer(rx->id,
               n_pixout,
               spur_elimination_ffts,                // number of LO frequencies = number of ffts used in elimination
@@ -731,8 +749,8 @@ static void init_analyzer(RECEIVER *rx) {
               kaiser_pi,                            // PiAlpha parameter for Kaiser window
               overlap,                              // number of samples each fft (other than the first) is to re-use from the previous
               clip,                                 // number of fft output bins to be clipped from EACH side of each sub-span
-              span_clip_l,                          // number of bins to clip from low end of entire span
-              span_clip_h,                          // number of bins to clip from high end of entire span
+              fscLin,                               // number of bins to clip from low end of entire span
+              fscHin,                               // number of bins to clip from high end of entire span
               pixels,                               // number of pixel values to return.  may be either <= or > number of bins
               stitches,                             // number of sub-spans to concatenate to form a complete span
               calibration_data_set,                 // identifier of which set of calibration data to use
@@ -971,7 +989,7 @@ RECEIVER *create_receiver(int id, int pixels, int width, int height) {
   t_print("%s (after restore): id=%d local_audio=%d\n", __FUNCTION__, rx->id, rx->local_audio);
   int scale = rx->sample_rate / 48000;
   rx->output_samples = rx->buffer_size / scale;
-  rx->audio_output_buffer = g_new(gdouble, 2 * rx->output_samples);
+  rx->audio_output_buffer = g_new(double, 2 * rx->output_samples);
   t_print("%s: RXid=%d output_samples=%d audio_output_buffer=%p\n", __FUNCTION__, rx->id, rx->output_samples,
           rx->audio_output_buffer);
   rx->hz_per_pixel = (double)rx->sample_rate / (double)rx->pixels;
@@ -1154,7 +1172,7 @@ void receiver_change_sample_rate(RECEIVER *rx, int sample_rate) {
     g_free(rx->audio_output_buffer);
   }
 
-  rx->audio_output_buffer = g_new(gdouble, 2 * rx->output_samples);
+  rx->audio_output_buffer = g_new(double, 2 * rx->output_samples);
   SetChannelState(rx->id, 0, 1);
   init_analyzer(rx);
   SetInputSamplerate(rx->id, sample_rate);
@@ -1317,7 +1335,7 @@ void receiver_vfo_changed(RECEIVER *rx) {
 }
 
 static void process_rx_buffer(RECEIVER *rx) {
-  gdouble left_sample, right_sample;
+  double left_sample, right_sample;
   short left_audio_sample, right_audio_sample;
   int i;
 

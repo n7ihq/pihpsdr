@@ -75,7 +75,7 @@ int delayed_discovery(gpointer data);
   static char host_addr_buffer[128] = "";
   char *host_addr = &host_addr_buffer[0];
   GtkWidget *host_port_spinner;
-  gint host_port = 50000; // default listening port
+  int host_port = 50000; // default listening port
 #endif
 
 static gboolean close_cb() {

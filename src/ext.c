@@ -76,6 +76,11 @@ int ext_vfo_update(void *data) {
   return G_SOURCE_REMOVE;
 }
 
+int ext_tune_update(void *data) {
+  tune_update(GPOINTER_TO_INT(data));
+  return G_SOURCE_REMOVE;
+}
+
 int ext_mox_update(void *data) {
   mox_update(GPOINTER_TO_INT(data));
   return G_SOURCE_REMOVE;

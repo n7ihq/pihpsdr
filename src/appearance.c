@@ -105,7 +105,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .xit_y = 78,
     .filter_x = 630,
     .filter_y = 21,
-    .multifn_x = 650,
+    .multifn_x = 675,
     .multifn_y = 78
   },
   {
@@ -165,7 +165,8 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .xit_x = 465,
     .xit_y = 78,
     .filter_x = 0,
-    .multifn_x = 0
+    .multifn_x = 560,
+    .multifn_y = 78
   },
   {
     .description = "VFO bar for 800px windows",
@@ -226,7 +227,8 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .xit_x = 390,
     .xit_y = 63,
     .filter_x = 0,
-    .multifn_x = 0
+    .multifn_x = 470,
+    .multifn_y = 63
   },
 
   //
@@ -269,7 +271,7 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .eq_y = 68,
     .div_x = 35,
     .div_y = 68,
-    .step_x = 270,
+    .step_x = 210,
     .step_y = 82,
     .ctun_x = 210,
     .ctun_y = 68,
@@ -286,7 +288,8 @@ const VFO_BAR_LAYOUT vfo_layout_list[] = {
     .dup_x = 210,
     .dup_y = 54,
     .filter_x = 0,
-    .multifn_x = 0
+    .multifn_x = 310,
+    .multifn_y = 82
   },
   //
   // The last "layout" must have a negative width to

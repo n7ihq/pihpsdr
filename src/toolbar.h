@@ -20,7 +20,6 @@
 #define _TOOLBAR_H
 
 #include "gpio.h"
-#define MAX_FUNCTION 5
 
 extern int function;
 

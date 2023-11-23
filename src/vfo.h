@@ -21,7 +21,7 @@
 
 #include "mode.h"
 
-enum {
+enum _vfo_enum {
   VFO_A = 0,
   VFO_B,
   MAX_VFOS
@@ -131,7 +131,7 @@ extern long long get_tx_freq(void);
 
 extern void vfo_xvtr_changed(void);
 
-extern void vfo_xit_toggle();
+extern void vfo_xit_toggle(void);
 extern void vfo_xit_incr(int incr);
 extern void vfo_xit_onoff(int enable);
 extern void vfo_xit_value(long long value);

@@ -23,7 +23,6 @@
 
 #include <wdsp.h>
 
-#include "alex.h"
 #include "band.h"
 #include "bandstack.h"
 #include "channel.h"
@@ -113,7 +112,7 @@ static gboolean close_cb() {
   return TRUE;
 }
 
-static gint update_out_of_band(gpointer data) {
+static int update_out_of_band(gpointer data) {
   TRANSMITTER *tx = (TRANSMITTER *)data;
   tx->out_of_band = 0;
   g_idle_add(ext_vfo_update, NULL);
@@ -192,7 +191,6 @@ void transmitterSaveState(const TRANSMITTER *tx) {
   SetPropS1("transmitter.%d.microphone_name",   tx->id,               tx->microphone_name);
   SetPropI1("transmitter.%d.puresignal",        tx->id,               tx->puresignal);
   SetPropI1("transmitter.%d.auto_on",           tx->id,               tx->auto_on);
-  SetPropI1("transmitter.%d.single_on",         tx->id,               tx->single_on);
   SetPropI1("transmitter.%d.feedback",          tx->id,               tx->feedback);
   SetPropI1("transmitter.%d.attenuation",       tx->id,               tx->attenuation);
   SetPropI1("transmitter.%d.ctcss_enabled",     tx->id,               tx->ctcss_enabled);
@@ -232,7 +230,6 @@ static void transmitterRestoreState(TRANSMITTER *tx) {
   GetPropS1("transmitter.%d.microphone_name",   tx->id,               tx->microphone_name);
   GetPropI1("transmitter.%d.puresignal",        tx->id,               tx->puresignal);
   GetPropI1("transmitter.%d.auto_on",           tx->id,               tx->auto_on);
-  GetPropI1("transmitter.%d.single_on",         tx->id,               tx->single_on);
   GetPropI1("transmitter.%d.feedback",          tx->id,               tx->feedback);
   GetPropI1("transmitter.%d.attenuation",       tx->id,               tx->attenuation);
   GetPropI1("transmitter.%d.ctcss_enabled",     tx->id,               tx->ctcss_enabled);
@@ -387,7 +384,6 @@ static gboolean update_display(gpointer data) {
 
 #ifdef USBOZY
     case DEVICE_OZY:
-      constant1 = 3.3;
       if (filter_board == ALEX) {
         constant1 = 3.3;
         constant2 = 0.09;
@@ -559,44 +555,55 @@ static gboolean update_display(gpointer data) {
 
 static void init_analyzer(TRANSMITTER *tx) {
   int flp[] = {0};
-  double keep_time = 0.1;
-  int n_pixout = 1;
-  int spur_elimination_ffts = 1;
-  int data_type = 1;
-  int afft_size = 8192;
-  int window_type = 4;
-  double kaiser_pi = 14.0;
-  int overlap = 2048;
-  int clip = 0;
-  double span_clip_l = 0;
-  double span_clip_h = 0;
-  int pixels = tx->pixels;
-  int stitches = 1;
-  int calibration_data_set = 0;
-  double span_min_freq = 0.0;
-  double span_max_freq = 0.0;
-  int max_w = afft_size + (int) min(keep_time * (double) tx->fps, keep_time * (double) afft_size * (double) tx->fps);
-  overlap = (int)max(0.0, ceil(afft_size - (double)tx->mic_sample_rate / (double)tx->fps));
+  const double keep_time = 0.1;
+  const int n_pixout = 1;
+  const int spur_elimination_ffts = 1;
+  const int data_type = 1;
+  const int window_type = 5;
+  const double kaiser_pi = 14.0;
+  const double fscLin = 0;
+  const double fscHin = 0;
+  const int stitches = 1;
+  const int calibration_data_set = 0;
+  const double span_min_freq = 0.0;
+  const double span_max_freq = 0.0;
+
+  int afft_size;
+  int clip;
+  int overlap;
+  int pixels;
+
+  pixels = tx->pixels;
+  afft_size = 8192;
+
+  if (tx->iq_output_rate > 100000) { afft_size = 16384; }
+  if (tx->iq_output_rate > 200000) { afft_size = 32768; }
+
+  clip = (int) floor(0.017 * afft_size);
+
+  int max_w = afft_size + (int) min(keep_time * (double) tx->iq_output_rate, keep_time * (double) afft_size * (double) tx->fps);
+  overlap = (int)max(0.0, ceil(afft_size - (double)tx->iq_output_rate / (double)tx->fps));
   t_print("SetAnalyzer id=%d buffer_size=%d overlap=%d pixels=%d\n", tx->id, tx->output_samples, overlap, tx->pixels);
-  SetAnalyzer(tx->id,
-              n_pixout,
-              spur_elimination_ffts, // number of LO frequencies = number of ffts used in elimination
-              data_type,             // 0 for real input data (I only); 1 for complex input data (I & Q)
+
+  SetAnalyzer(tx->id,                // id of the TXA channel
+              n_pixout,              // 1 = "use same data for scope and waterfall"
+              spur_elimination_ffts, // 1 = "no spur elimination"
+              data_type,             // 1 = complex input data (I & Q)
               flp,                   // vector with one elt for each LO frequency, 1 if high-side LO, 0 otherwise
               afft_size,             // size of the fft, i.e., number of input samples
               tx->output_samples,    // number of samples transferred for each OpenBuffer()/CloseBuffer()
-              window_type,           // integer specifying which window function to use
+              window_type,           // 4 = Hamming
               kaiser_pi,             // PiAlpha parameter for Kaiser window
               overlap,               // number of samples each fft (other than the first) is to re-use from the previous
               clip,                  // number of fft output bins to be clipped from EACH side of each sub-span
-              span_clip_l,           // number of bins to clip from low end of entire span
-              span_clip_h,           // number of bins to clip from high end of entire span
+              fscLin,                // number of bins to clip from low end of entire span
+              fscHin,                // number of bins to clip from high end of entire span
               pixels,                // number of pixel values to return.  may be either <= or > number of bins
               stitches,              // number of sub-spans to concatenate to form a complete span
               calibration_data_set,  // identifier of which set of calibration data to use
               span_min_freq,         // frequency at first pixel value8192
               span_max_freq,         // frequency at last pixel value
-              max_w                  //max samples to hold in input ring buffers
+              max_w                  // max samples to hold in input ring buffers
              );
   //
   // This cannot be changed for the TX panel,
@@ -722,7 +729,6 @@ TRANSMITTER *create_transmitter(int id, int width, int height) {
   tx->puresignal = 0;
   tx->feedback = 0;
   tx->auto_on = 0;
-  tx->single_on = 0;
   tx->attenuation = 0;
   tx->ctcss = 11;
   tx->ctcss_enabled = FALSE;

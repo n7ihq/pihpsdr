@@ -101,7 +101,7 @@ int TOOLBAR_HEIGHT = 30;     // nowhere changed
 
 int rx_stack_horizontal = 0;
 
-gint controller = NO_CONTROLLER;
+int controller = NO_CONTROLLER;
 
 GtkWidget *fixed;
 static GtkWidget *hide_b;
@@ -115,7 +115,7 @@ static GtkWidget *toolbar;
 // RX and TX calibration
 long long frequency_calibration = 0LL;
 
-gint sat_mode;
+int sat_mode;
 
 int region = REGION_OTHER;
 
@@ -171,8 +171,8 @@ int tx_out_of_band = 0;
 int alc = TXA_ALC_PK;
 
 int filter_board = ALEX;
-int pa_enabled = PA_ENABLED;
-int pa_power = 0;
+int pa_enabled = 1;
+int pa_power = PA_1W;
 const int pa_power_list[] = {1, 5, 10, 30, 50, 100, 200, 500, 1000};
 double pa_trim[11];
 
@@ -210,6 +210,9 @@ int cw_keyer_ptt_delay = 30;           // 0-255ms
 int cw_keyer_hang_time = 500;          // ms
 int cw_keyer_sidetone_frequency = 800; // Hz
 int cw_breakin = 1;                    // 0=disabled 1=enabled
+
+int auto_tune_flag = 0;
+int auto_tune_end = 0;
 
 int vfo_encoder_divisor = 15;
 
@@ -272,7 +275,6 @@ int rx_equalizer[4] = {0, 0, 0, 0};
 
 int pre_emphasize = 0;
 
-int vox_setting = 0;
 int vox_enabled = 0;
 double vox_threshold = 0.001;
 double vox_hang = 250.0;
@@ -299,7 +301,7 @@ double drive_digi_max = 100.0; // maximum drive in DIGU/DIGL
 gboolean display_warnings = TRUE;
 gboolean display_pacurr = TRUE;
 
-gint rx_height;
+int rx_height;
 
 void radio_stop() {
   if (can_transmit) {
@@ -620,7 +622,7 @@ void reconfigure_radio() {
 //
 // used to regularly write props file, currently not active
 //
-static gint save_timer_id;
+static guint save_timer_id;
 static gboolean save_cb(gpointer data) {
   radioSaveState();
   return TRUE;
@@ -1295,7 +1297,7 @@ void start_radio() {
   if (device == SOAPYSDR_USB_DEVICE) {
     iqswap = 1;
     receivers = 1;
-    filter_board = NONE;
+    filter_board = NO_FILTER_BOARD;
   }
 
   if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2)  {
@@ -1481,7 +1483,7 @@ void start_radio() {
   }
 
 #endif
-  g_idle_add(ext_vfo_update, (gpointer)NULL);
+  g_idle_add(ext_vfo_update, NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_ARROW));
 #ifdef MIDI
 
@@ -2203,6 +2205,19 @@ void setSquelch(RECEIVER *rx) {
   SetRXASSQLRun(rx->id, voice_squelch);
 }
 
+void radio_set_satmode(int mode) {
+#ifdef CLIENT_SERVER
+
+  if (radio_is_remote) {
+    send_sat(client_socket, mode);
+    return;
+  }
+
+#endif
+
+  sat_mode = mode;
+}
+
 void radio_set_rf_gain(RECEIVER *rx) {
 #ifdef SOAPYSDR
   soapy_protocol_set_gain_element(rx, radio->info.soapy.rx_gain[rx->adc], (int)adc[rx->adc].gain);
@@ -2786,7 +2801,7 @@ int remote_start(void *data) {
   }
 
   reconfigure_radio();
-  g_idle_add(ext_vfo_update, (gpointer)NULL);
+  g_idle_add(ext_vfo_update, NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_ARROW));
 
   for (int i = 0; i < receivers; i++) {
@@ -2925,4 +2940,40 @@ void protocol_restart() {
   protocol_stop();
   usleep(200000);
   protocol_run();
+}
+
+gpointer auto_tune_thread(gpointer data) {
+  //
+  // This routine is triggered when an "auto tune" event
+  // occurs, which usually is triggered by an input.
+  //
+  // Start TUNEing and keep TUNEing until the auto_tune_flag
+  // becomes zero. Abort TUNEing if it takes too long
+  //
+  // To avoid race conditions, there are two flags:
+  // auto_tune_flag is set while this thread is running
+  // auto_tune_end  signals that tune can stop
+  //
+  // The thread will not terminate until auto_tune_end is flagged,
+  // but  it may stop tuning before.
+  //
+  int count = 0;
+  g_idle_add(ext_tune_update, GINT_TO_POINTER(1));
+  for (;;) {
+    if (count >= 0) {
+      count++;
+    }
+    usleep(50000);
+    if (auto_tune_end) {
+      g_idle_add(ext_tune_update, GINT_TO_POINTER(0));
+      break;
+    }
+    if (count >= 200) {
+      g_idle_add(ext_tune_update, GINT_TO_POINTER(0));
+      count = -1;
+    }
+  }
+  usleep(50000);       // debouncing
+  auto_tune_flag = 0;
+  return NULL;
 }

@@ -25,30 +25,30 @@
 #define MAX_DDC 4
 
 // port definitions from host
-#define GENERAL_REGISTERS_FROM_HOST_PORT 1024
-#define PROGRAMMING_FROM_HOST_PORT 1024
-#define RECEIVER_SPECIFIC_REGISTERS_FROM_HOST_PORT 1025
+#define GENERAL_REGISTERS_FROM_HOST_PORT              1024
+#define PROGRAMMING_FROM_HOST_PORT                    1024
+#define RECEIVER_SPECIFIC_REGISTERS_FROM_HOST_PORT    1025
 #define TRANSMITTER_SPECIFIC_REGISTERS_FROM_HOST_PORT 1026
-#define HIGH_PRIORITY_FROM_HOST_PORT 1027
-#define AUDIO_FROM_HOST_PORT 1028
-#define TX_IQ_FROM_HOST_PORT 1029
+#define HIGH_PRIORITY_FROM_HOST_PORT                  1027
+#define AUDIO_FROM_HOST_PORT                          1028
+#define TX_IQ_FROM_HOST_PORT                          1029
 
 // port definitions to host
-#define COMMAND_RESPONSE_TO_HOST_PORT 1024
-#define HIGH_PRIORITY_TO_HOST_PORT 1025
-#define MIC_LINE_TO_HOST_PORT 1026
-#define WIDE_BAND_TO_HOST_PORT 1027
-#define RX_IQ_TO_HOST_PORT_0 1035
-#define RX_IQ_TO_HOST_PORT_1 1036
-#define RX_IQ_TO_HOST_PORT_2 1037
-#define RX_IQ_TO_HOST_PORT_3 1038
-#define RX_IQ_TO_HOST_PORT_4 1039
-#define RX_IQ_TO_HOST_PORT_5 1040
-#define RX_IQ_TO_HOST_PORT_6 1041
-#define RX_IQ_TO_HOST_PORT_7 1042
+#define COMMAND_RESPONSE_TO_HOST_PORT                 1024
+#define HIGH_PRIORITY_TO_HOST_PORT                    1025
+#define MIC_LINE_TO_HOST_PORT                         1026
+#define WIDE_BAND_TO_HOST_PORT                        1027
+#define RX_IQ_TO_HOST_PORT_0                          1035
+#define RX_IQ_TO_HOST_PORT_1                          1036
+#define RX_IQ_TO_HOST_PORT_2                          1037
+#define RX_IQ_TO_HOST_PORT_3                          1038
+#define RX_IQ_TO_HOST_PORT_4                          1039
+#define RX_IQ_TO_HOST_PORT_5                          1040
+#define RX_IQ_TO_HOST_PORT_6                          1041
+#define RX_IQ_TO_HOST_PORT_7                          1042
 
 // Network buffers
-// Maximum length is 1444 so the value used before (2048) is far too big
+// Maximum length is 1444 
 
 #define NET_BUFFER_SIZE  1500
 

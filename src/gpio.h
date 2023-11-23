@@ -26,26 +26,26 @@
 typedef struct _encoder {
   gboolean bottom_encoder_enabled;
   gboolean bottom_encoder_pullup;
-  gint bottom_encoder_address_a;
-  gint bottom_encoder_a_value;
-  gint bottom_encoder_address_b;
-  gint bottom_encoder_b_value;
-  gint bottom_encoder_pos;
-  gint bottom_encoder_function;
+  int bottom_encoder_address_a;
+  int bottom_encoder_a_value;
+  int bottom_encoder_address_b;
+  int bottom_encoder_b_value;
+  int bottom_encoder_pos;
+  int bottom_encoder_function;
   guchar bottom_encoder_state;
-  gint top_encoder_enabled;
+  int top_encoder_enabled;
   gboolean top_encoder_pullup;
-  gint top_encoder_address_a;
-  gint top_encoder_a_value;
-  gint top_encoder_address_b;
-  gint top_encoder_b_value;
-  gint top_encoder_pos;
-  gint top_encoder_function;
+  int top_encoder_address_a;
+  int top_encoder_a_value;
+  int top_encoder_address_b;
+  int top_encoder_b_value;
+  int top_encoder_pos;
+  int top_encoder_function;
   guchar top_encoder_state;
   gboolean switch_enabled;
   gboolean switch_pullup;
-  gint switch_address;
-  gint switch_function;
+  int switch_address;
+  int switch_function;
   gulong switch_debounce;
 } ENCODER;
 
@@ -54,8 +54,8 @@ extern ENCODER *encoders;
 typedef struct _switch {
   gboolean switch_enabled;
   gboolean switch_pullup;
-  gint switch_address;
-  gint switch_function;
+  int switch_address;
+  int switch_function;
   gulong switch_debounce;
 } SWITCH;
 

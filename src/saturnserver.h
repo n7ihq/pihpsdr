@@ -97,8 +97,8 @@ extern bool ThreadError;                            // set true if a thread repo
 //
 extern uint16_t DefaultPorts[];
 
-void start_saturn_server();
-void shutdown_saturn_server();
+void start_saturn_server(void);
+void shutdown_saturn_server(void);
 void* saturn_server(void *arg);
 
 //

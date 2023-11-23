@@ -73,7 +73,7 @@ void toolbar_menu(GtkWidget *parent) {
   gtk_widget_set_name(close_b, "close_button");
   g_signal_connect (close_b, "button-press-event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid), close_b, 0, 0, 3, 1);
-  gint lfunction = 0;
+  int lfunction = 0;
   const int max_switches = 8;
 
   for (lfunction = 0; lfunction < MAX_FUNCTIONS; lfunction++) {

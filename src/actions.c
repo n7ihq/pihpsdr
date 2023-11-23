@@ -145,7 +145,7 @@ ACTION_TABLE ActionTable[] = {
   {MOX,                 "MOX",                  "MOX",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MULTI_ENC,           "Multi",                "MULTI",        MIDI_WHEEL | CONTROLLER_ENCODER},
   {MULTI_SELECT,        "Multi Action\nSelect", "MULTISEL",     MIDI_WHEEL | CONTROLLER_ENCODER},
-  {MULTI_BUTTON,        "Multi Enc\nButton",    "MULTIBTN",     MIDI_KEY   | CONTROLLER_SWITCH},
+  {MULTI_BUTTON,        "Multi Toggle",         "MULTIBTN",     MIDI_KEY   | CONTROLLER_SWITCH},
   {MUTE,                "Mute",                 "MUTE",         MIDI_KEY   | CONTROLLER_SWITCH},
   {NB,                  "NB",                   "NB",           MIDI_KEY   | CONTROLLER_SWITCH},
   {NR,                  "NR",                   "NR",           MIDI_KEY   | CONTROLLER_SWITCH},
@@ -227,44 +227,44 @@ ACTION_TABLE ActionTable[] = {
 static guint timer = 0;
 static gboolean timer_released;
 static gboolean multi_select_active;
-static unsigned int multi_action;
+static gboolean multi_first = TRUE;
+static unsigned int multi_action = 0;
 #define VMAXMULTIACTION 28
 
-enum ACTION multi_action_table[] =
-{
-  AF_GAIN, 
-  AGC_GAIN,
-  ATTENUATION,
-  COMPRESSION,
-  CW_FREQUENCY,
-  CW_SPEED,
-  DIV_GAIN,
-  DIV_PHASE,
-  FILTER_CUT_LOW,
-  FILTER_CUT_HIGH,
-  IF_SHIFT,
-  IF_WIDTH,
-  LINEIN_GAIN,
-  MIC_GAIN,
-  PAN,
-  PANADAPTER_HIGH,
-  PANADAPTER_LOW,
-  PANADAPTER_STEP,
-  RF_GAIN,
-  RIT,
-  SQUELCH,
-  TUNE_DRIVE,
-  DRIVE,
-  VOXLEVEL,
-  WATERFALL_HIGH,
-  WATERFALL_LOW,
-  XIT,
-  ZOOM
+//
+// The strings in the following table are chosen
+// as to occupy minimum space in the VFO bar
+//
+MULTI_TABLE multi_action_table[] = {
+  {AF_GAIN,          "AFgain"},
+  {AGC_GAIN,         "AGC"},
+  {ATTENUATION,      "Att"},
+  {COMPRESSION,      "Cmpr"},
+  {CW_FREQUENCY,     "CWfrq"},
+  {CW_SPEED,         "CWspd"},
+  {DIV_GAIN,         "DivG"},
+  {DIV_PHASE,        "DivP"},
+  {FILTER_CUT_LOW,   "FCutL"},
+  {FILTER_CUT_HIGH,  "FCutH"},
+  {IF_SHIFT,         "IFshft"},
+  {IF_WIDTH,         "IFwid"},
+  {LINEIN_GAIN,      "LineIn"},
+  {MIC_GAIN,         "Mic"},
+  {PAN,              "Pan"},
+  {PANADAPTER_HIGH,  "PanH"},
+  {PANADAPTER_LOW,   "PanL"},
+  {PANADAPTER_STEP,  "PanStp"},
+  {RF_GAIN,          "RFgain"},
+  {RIT,              "RIT"},
+  {SQUELCH,          "Sqlch"},
+  {TUNE_DRIVE,       "TunDrv"},
+  {DRIVE,            "Drive"},
+  {VOXLEVEL,         "VOX"},
+  {WATERFALL_HIGH,   "WfallH"},
+  {WATERFALL_LOW,    "WFallL"},
+  {XIT,              "XIT"},
+  {ZOOM,             "Zoom"}
 };
-
-PROCESS_ACTION *multifunction_action;           // used to implement assigned action from a multifunction encoder action
-
-
 
 static int timeout_cb(gpointer data) {
   if (timer_released) {
@@ -317,7 +317,7 @@ static inline double KnobOrWheel(const PROCESS_ACTION *a, double oldval, double 
 // This interface puts an "action" into the GTK idle queue,
 // but "CW key" actions are processed immediately
 //
-void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
+void schedule_action(enum ACTION action, enum ACTION_MODE mode, int val) {
   PROCESS_ACTION *a;
 
   switch (action) {
@@ -989,14 +989,15 @@ int process_action(void *data) {
     if (a->mode == PRESSED) {
       int state = getMox();
       mox_update(!state);
-      t_print("mmox pressed; bool = %d\n", (int)!state);
+      //t_print("MOX pressed; bool = %d\n", (int)!state);
     }
 
     break;
 
   case MULTI_BUTTON:                  // swap multifunction from implementing an action, and choosing which action is assigned
     if (a->mode == PRESSED) {
-	    multi_select_active = !multi_select_active;
+      multi_first = FALSE;
+      multi_select_active = !multi_select_active;
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -1004,24 +1005,27 @@ int process_action(void *data) {
 
 // multifunction encoder. If multi_select_active, it edits the assigned action; else implements assigned action. 
   case MULTI_ENC:
+    multi_first = FALSE;
     if(multi_select_active) {
       multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
       g_idle_add(ext_vfo_update, NULL);
     }
     else {
+      PROCESS_ACTION *multifunction_action;
       multifunction_action = g_new(PROCESS_ACTION, 1);
       multifunction_action->mode = a->mode;
       multifunction_action->val = a->val;
-      multifunction_action->action = multi_action_table[multi_action];
+      multifunction_action->action = multi_action_table[multi_action].action;
       process_action((void*)multifunction_action);
     }
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
 
   case MULTI_SELECT:                // know to choose the action for multifunction endcoder
-      multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
-      t_print("multi encoder action = %d\n", (int)multi_action);
-
+    multi_first = FALSE;
+    multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
+    g_idle_add(ext_vfo_update, NULL);
     break;    
 
 
@@ -1339,13 +1343,7 @@ int process_action(void *data) {
 
   case RSAT:
     if (a->mode == PRESSED) {
-      if (sat_mode == RSAT_MODE) {
-        sat_mode = SAT_NONE;
-      } else {
-        sat_mode = RSAT_MODE;
-      }
-
-      t_print("%s: TODO: report sat mode change upstream\n", __FUNCTION__);
+      radio_set_satmode (sat_mode == RSAT_MODE ? SAT_NONE : RSAT_MODE);
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -1353,13 +1351,7 @@ int process_action(void *data) {
 
   case SAT:
     if (a->mode == PRESSED) {
-      if (sat_mode == SAT_MODE) {
-        sat_mode = SAT_NONE;
-      } else {
-        sat_mode = SAT_MODE;
-      }
-
-      t_print("%s: TODO: report sat mode change upstream\n", __FUNCTION__);
+      radio_set_satmode (sat_mode == SAT_MODE ? SAT_NONE : SAT_MODE);
       g_idle_add(ext_vfo_update, NULL);
     }
 
@@ -1682,13 +1674,22 @@ int String2Action(const char *str) {
 }
 
 //
+// function to get status for multifunction encoder
+// status = 0: no multifunction encoder in use (no status)
+// status = 1: "active" (normal) state (status in yellow)
+// status = 2: "select" state (status in red)
+//
+int  GetMultifunctionStatus() {
+  if (multi_first) {
+    return 0;
+  }
+  return multi_select_active ? 2 : 1;
+}
+
+//
 // function to get string for multifunction encoder
 //
-void GetMultifunctionString(char* str, size_t len)
-{
-  enum ACTION selected_action;
-
-  selected_action = multi_action_table[multi_action];
+void GetMultifunctionString(char* str, size_t len) {
   STRLCPY(str, "M=", len);
-  STRLCAT(str, ActionTable[(int)selected_action].button_str, len);
+  STRLCAT(str, multi_action_table[multi_action].descr, len);
 }

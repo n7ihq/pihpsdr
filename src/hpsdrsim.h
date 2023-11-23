@@ -136,11 +136,12 @@ extern int clock_nanosleep(clockid_t __clock_id, int __flags,
 #define IM3b  0.20
 
 //
-// State variables, reported to the SDR program
+// Digital Inputs, reported to the SDR program
 //
-EXTERN int radio_ptt;
-EXTERN int radio_dash;
-EXTERN int radio_dot;
+EXTERN uint8_t radio_digi_changed;
+EXTERN uint8_t radio_ptt, radio_dash, radio_dot;
+EXTERN uint8_t radio_io1, radio_io2, radio_io3, radio_io4;
+EXTERN uint8_t radio_io5, radio_io6, radio_io8;
 
 //
 // message printing
