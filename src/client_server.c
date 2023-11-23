@@ -2223,7 +2223,7 @@ static void *client_thread(void* arg) {
         g_idle_add(remote_start, (gpointer)server);
       } else if (remote_started) {
         t_print("g_idle_add: ext_vfo_update\n");
-        g_idle_add(ext_vfo_update, (gpointer)NULL);
+        g_idle_add(ext_vfo_update, NULL);
       }
     }
     break;
@@ -2268,7 +2268,7 @@ static void *client_thread(void* arg) {
         vfo[VFO_B].ctun_frequency = ctun_frequency_b;
         vfo[VFO_A].offset = offset_a;
         vfo[VFO_B].offset = offset_b;
-        g_idle_add(ext_vfo_update, (gpointer)NULL);
+        g_idle_add(ext_vfo_update, NULL);
       }
 
       g_idle_add(ext_receiver_remote_update_display, receiver[r]);
@@ -2379,7 +2379,7 @@ static void *client_thread(void* arg) {
       short a = ntohs(agc_cmd.agc);
       t_print("AGC_COMMAND: rx=%d agc=%d\n", rx, a);
       receiver[rx]->agc = (int)a;
-      g_idle_add(ext_vfo_update, (gpointer)NULL);
+      g_idle_add(ext_vfo_update, NULL);
     }
     break;
 
@@ -2464,7 +2464,7 @@ static void *client_thread(void* arg) {
       mode_settings[vfo[rx->id].mode].snb = rx->snb;
       rx->anf = noise_command.anf;
       mode_settings[vfo[rx->id].mode].anf = rx->anf;
-      g_idle_add(ext_vfo_update, (gpointer)NULL);
+      g_idle_add(ext_vfo_update, NULL);
     }
     break;
 
@@ -2483,7 +2483,7 @@ static void *client_thread(void* arg) {
       int rx = mode_cmd.id;
       short m = ntohs(mode_cmd.mode);
       vfo[rx].mode = m;
-      g_idle_add(ext_vfo_update, (gpointer)NULL);
+      g_idle_add(ext_vfo_update, NULL);
     }
     break;
 
@@ -2504,7 +2504,7 @@ static void *client_thread(void* arg) {
       short high = ntohs(filter_cmd.filter_high);
       receiver[rx]->filter_low = (int)low;
       receiver[rx]->filter_high = (int)high;
-      g_idle_add(ext_vfo_update, (gpointer)NULL);
+      g_idle_add(ext_vfo_update, NULL);
     }
     break;
 
@@ -2523,7 +2523,7 @@ static void *client_thread(void* arg) {
       split = split_cmd.split;
     }
 
-    g_idle_add(ext_vfo_update, (gpointer)NULL);
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
     case CMD_RESP_SAT: {
@@ -2541,7 +2541,7 @@ static void *client_thread(void* arg) {
       sat_mode = sat_cmd.sat;
     }
 
-    g_idle_add(ext_vfo_update, (gpointer)NULL);
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
     case CMD_RESP_DUP: {
@@ -2559,7 +2559,7 @@ static void *client_thread(void* arg) {
       duplex = dup_cmd.dup;
     }
 
-    g_idle_add(ext_vfo_update, (gpointer)NULL);
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
     case CMD_RESP_LOCK: {
@@ -2577,7 +2577,7 @@ static void *client_thread(void* arg) {
       locked = lock_cmd.lock;
     }
 
-    g_idle_add(ext_vfo_update, (gpointer)NULL);
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
     case CMD_RESP_RX_FPS: {
@@ -2597,7 +2597,7 @@ static void *client_thread(void* arg) {
       receiver[rx]->fps = (int)fps_cmd.fps;
     }
 
-    g_idle_add(ext_vfo_update, (gpointer)NULL);
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
     case CMD_RESP_RX_SELECT: {
@@ -2616,7 +2616,7 @@ static void *client_thread(void* arg) {
       receiver_set_active(receiver[rx]);
     }
 
-    g_idle_add(ext_vfo_update, (gpointer)NULL);
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
     case CMD_RESP_SAMPLE_RATE: {

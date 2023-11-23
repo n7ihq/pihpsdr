@@ -355,7 +355,7 @@ static void* keyer_thread(void *arg) {
     cwvox = 0; // if not using CW break-in this will stay at zero
 
     if (cw_breakin && (txmode == modeCWU || txmode == modeCWL)) {
-      g_idle_add(ext_mox_update, (gpointer)(long) 1);
+      g_idle_add(ext_mox_update, GINT_TO_POINTER(1));
       //
       // Wait for mox, that is, wait for WDSP shutting down the RX and
       // firing up the TX. This induces a small delay when hitting the key for
@@ -393,7 +393,7 @@ static void* keyer_thread(void *arg) {
         if (cwvox == 0) {
           // we have just reduced cwvox from 1 to 0.
           if (!moxbefore) {
-            g_idle_add(ext_mox_update, (gpointer)(long) 0);
+            g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
             // Wait for MOX really gone. This is necessary since otherwise we may
             // still "see" PTT active upon the next key stroke and therefore fail
             // to go into CW-vox mode. However, only wait up to 250 msec

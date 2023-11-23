@@ -1481,7 +1481,7 @@ void start_radio() {
   }
 
 #endif
-  g_idle_add(ext_vfo_update, (gpointer)NULL);
+  g_idle_add(ext_vfo_update, NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_ARROW));
 #ifdef MIDI
 
@@ -2799,7 +2799,7 @@ int remote_start(void *data) {
   }
 
   reconfigure_radio();
-  g_idle_add(ext_vfo_update, (gpointer)NULL);
+  g_idle_add(ext_vfo_update, NULL);
   gdk_window_set_cursor(gtk_widget_get_window(top_window), gdk_cursor_new(GDK_ARROW));
 
   for (int i = 0; i < receivers; i++) {

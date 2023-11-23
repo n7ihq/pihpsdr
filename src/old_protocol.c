@@ -1158,7 +1158,7 @@ static void process_control_bytes() {
   }
 
   if (previous_ptt != radio_ptt) {
-    g_idle_add(ext_mox_update, (gpointer)(long)(radio_ptt));
+    g_idle_add(ext_mox_update, GINT_TO_POINTER(radio_ptt));
   }
 
   switch ((control_in[0] >> 3) & 0x1F) {

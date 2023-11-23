@@ -386,7 +386,6 @@ static gboolean update_display(gpointer data) {
 
 #ifdef USBOZY
     case DEVICE_OZY:
-      constant1 = 3.3;
       if (filter_board == ALEX) {
         constant1 = 3.3;
         constant2 = 0.09;
