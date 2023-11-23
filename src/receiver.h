@@ -18,8 +18,6 @@
 #ifndef _RECEIVER_H
 #define _RECEIVER_H
 
-#include <stdint.h>
-
 #include <gtk/gtk.h>
 #ifdef PORTAUDIO
   #include <portaudio.h>
@@ -41,44 +39,47 @@ enum _audio_t {
 typedef enum _audio_t audio_t;
 
 typedef struct _receiver {
-  uint8_t id;
-  uint8_t adc;
-  uint8_t displaying;
-  uint8_t display_panadapter;
-  uint8_t display_waterfall;
-  uint8_t dither;
-  uint8_t random;
-  uint8_t preamp;
+  gint id;
+  GMutex mutex;
+  GMutex display_mutex;
+
+  gint ddc;
+  gint adc;
+
+  gdouble volume;  // in dB
 
   int dsp_size;
   int buffer_size;
   int fft_size;
   int low_latency;
-  int agc;
-  int fps;
+
+  gint agc;
+  gdouble agc_gain;
+  gdouble agc_slope;
+  gdouble agc_hang_threshold;
+  gdouble agc_hang;
+  gdouble agc_thresh;
+  gint fps;
+  gint displaying;
   audio_t audio_channel;
-  int sample_rate;
-  int pixels;
-  int samples;
-  int output_samples;
-
-  GMutex mutex;
-  GMutex display_mutex;
-
-  double volume;  // in dB
-  double agc_gain;
-  double agc_slope;
-  double agc_hang_threshold;
-  double agc_hang;
-  double agc_thresh;
-
-  double *iq_input_buffer;
-  double *audio_output_buffer;
-  float *pixel_samples;
+  gint sample_rate;
+  gint pixels;
+  gint samples;
+  gint output_samples;
+  gdouble *iq_input_buffer;
+  gdouble *audio_output_buffer;
+  gint audio_index;
+  gfloat *pixel_samples;
+  gint display_panadapter;
+  gint display_waterfall;
   guint update_timer_id;
-  double meter;
+  gdouble meter;
 
-  double hz_per_pixel;
+  gdouble hz_per_pixel;
+
+  gint dither;
+  gint random;
+  gint preamp;
 
   //
   // Encodings for "QRM fighters"
@@ -96,17 +97,17 @@ typedef struct _receiver {
   // anf= 0/1:       Automatic notch filter off/on
   // snb= 0/1:       Spectral noise blanker off/on
   //
-  uint8_t nb;
-  uint8_t nr;
-  uint8_t anf;
-  uint8_t snb;
+  gint nb;
+  gint nr;
+  gint anf;
+  gint snb;
 
   //
   // NR/NR2/ANF: position
   // 0: execute NR/NR2/ANF before AGC
   // 1: execute NR/NR2/ANF after AGC
   //
-  uint8_t nr_agc;
+  int nr_agc;
 
   //
   // Noise reduction parameters for "NR2"
@@ -116,9 +117,9 @@ typedef struct _receiver {
   //  NPE  method: 0=OSMS, 1=MMSE
   //  AE         : Artifact elimination filter on(1)/off(0)
   //
-  uint8_t nr2_gain_method;
-  uint8_t nr2_npe_method;
-  uint8_t nr2_ae;
+  int nr2_gain_method;
+  int nr2_npe_method;
+  int nr2_ae;
 
   //
   // Noise blanker parameters. These parameters have
@@ -132,11 +133,11 @@ typedef struct _receiver {
   // The comments indicate the names of the parameters in the Thetis menu
   // as well as the internal name used in Thetis.
   //
-  double  nb_tau;       // "Slew",                         NBTransision
-  double  nb_advtime;   // "Lead",                         NBLead
-  double  nb_hang;      // "Lag",                          NBLag
-  double  nb_thresh;    // "Threshold",                    NBThreshold
-  uint8_t nb2_mode;     // NB mode, only NB2
+  gdouble nb_tau;       // "Slew",                         NBTransision
+  gdouble nb_advtime;   // "Lead",                         NBLead
+  gdouble nb_hang;      // "Lag",                          NBLag
+  gdouble nb_thresh;    // "Threshold",                    NBThreshold
+  gint    nb2_mode;     // NB mode, only NB2
   //
   // nb2_mode = 0:  zero mode
   // nb2_mode = 1:  sample-hold
@@ -148,43 +149,43 @@ typedef struct _receiver {
   //
   // NR4 parameters
   //
-  double nr4_reduction_amount;
-  double nr4_smoothing_factor;
-  double nr4_whitening_factor;
-  double nr4_noise_rescale;
-  double nr4_post_filter_threshold;
+  gdouble nr4_reduction_amount;
+  gdouble nr4_smoothing_factor;
+  gdouble nr4_whitening_factor;
+  gdouble nr4_noise_rescale;
+  gdouble nr4_post_filter_threshold;
 #endif
 
-  uint8_t alex_antenna;
-  uint8_t alex_attenuation;
+  gint alex_antenna;
+  gint alex_attenuation;
 
-  int filter_low;
-  int filter_high;
+  gint filter_low;
+  gint filter_high;
 
-  int width;
-  int height;
+  gint width;
+  gint height;
 
   GtkWidget *panel;
   GtkWidget *panadapter;
   GtkWidget *waterfall;
 
-  int panadapter_low;
-  int panadapter_high;
-  int panadapter_step;
+  gint panadapter_low;
+  gint panadapter_high;
+  gint panadapter_step;
 
-  int waterfall_low;
-  int waterfall_high;
-  int waterfall_automatic;
+  gint waterfall_low;
+  gint waterfall_high;
+  gint waterfall_automatic;
   cairo_surface_t *panadapter_surface;
   GdkPixbuf *pixbuf;
-  uint8_t local_audio;
-  uint8_t mute_when_not_active;
-  int audio_device;
-  char audio_name[128];
+  gint local_audio;
+  gint mute_when_not_active;
+  gint audio_device;
+  gchar audio_name[128];
 #ifdef PORTAUDIO
   PaStream *playstream;
-  volatile int local_audio_buffer_inpt;    // pointer in audio ring-buffer
-  volatile int local_audio_buffer_outpt;   // pointer in audio ring-buffer
+  volatile gint local_audio_buffer_inpt;    // pointer in audio ring-buffer
+  volatile gint local_audio_buffer_outpt;   // pointer in audio ring-buffer
   float *local_audio_buffer;
 #endif
 #ifdef ALSA
@@ -194,47 +195,47 @@ typedef struct _receiver {
 #endif
 #ifdef PULSEAUDIO
   pa_simple *playstream;
-  uint8_t output_started;
+  gboolean output_started;
   float *local_audio_buffer;
 #endif
-  int local_audio_buffer_offset;
+  gint local_audio_buffer_offset;
   GMutex local_audio_mutex;
 
-  uint8_t squelch_enable;
-  double squelch;
+  gint squelch_enable;
+  gdouble squelch;
 
-  uint8_t binaural;
+  gint binaural;
 
-  int deviation;
+  gint deviation;
 
-  long long waterfall_frequency;
-  int waterfall_sample_rate;
-  int waterfall_pan;
-  int waterfall_zoom;
+  gint64 waterfall_frequency;
+  gint waterfall_sample_rate;
+  gint waterfall_pan;
+  gint waterfall_zoom;
 
-  uint8_t mute_radio;
+  gint mute_radio;
 
-  double *buffer;
+  gdouble *buffer;
   void *resampler;
-  double *resample_buffer;
-  int resample_buffer_size;
+  gdouble *resample_buffer;
+  gint resample_buffer_size;
 
-  int zoom;
-  int pan;
+  gint zoom;
+  gint pan;
 
-  int x;
-  int y;
+  gint x;
+  gint y;
 
   // two variables that implement the new
   // "mute first RX IQ samples after TX/RX transition"
   // feature that is relevant for HermesLite-II and STEMlab
   // (and possibly some other radios)
   //
-  unsigned int txrxcount;
-  unsigned int txrxmax;
+  guint txrxcount;
+  guint txrxmax;
 
-  uint8_t display_gradient;
-  uint8_t display_filled;
+  int display_gradient;
+  int display_filled;
   int display_detector_mode;
   int display_average_mode;
   double display_average_time;

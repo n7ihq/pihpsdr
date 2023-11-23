@@ -37,7 +37,7 @@
 #include "ext.h"
 #include "radio_menu.h"
 
-static int myvfo;  //  VFO the menu is referring to
+static gint myvfo;  //  VFO the menu is referring to
 static GtkWidget *dialog = NULL;
 static GtkWidget *label;
 

@@ -30,16 +30,16 @@ enum {
   G2_FRONTPANEL
 };
 
-extern int controller;
+extern gint controller;
 
 extern GdkScreen *screen;
-extern int display_width;
-extern int display_height;
-extern int screen_width;
-extern int screen_height;
-extern int this_monitor;
+extern gint display_width;
+extern gint display_height;
+extern gint screen_width;
+extern gint screen_height;
+extern gint this_monitor;
 
-extern int full_screen;
+extern gint full_screen;
 extern GtkWidget *top_window;
 extern GtkWidget *topgrid;
 extern void status_text(const char *text);

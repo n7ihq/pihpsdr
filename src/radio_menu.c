@@ -252,7 +252,7 @@ void load_filters() {
     set_alex_antennas();
     break;
 
-  case NO_FILTER_BOARD:
+  case NONE:
     break;
 
   default:
@@ -272,7 +272,7 @@ static void filter_cb(GtkWidget *widget, gpointer data) {
   switch (val) {
   case 0:
   default:
-    filter_board = NO_FILTER_BOARD;
+    filter_board = NONE;
     break;
 
   case 1:
@@ -590,7 +590,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(filter_combo), NULL, "N2ADR");
 
     switch (filter_board) {
-    case NO_FILTER_BOARD:
+    case NONE:
       gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo), 0);
       break;
 

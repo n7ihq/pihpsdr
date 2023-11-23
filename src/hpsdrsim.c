@@ -256,12 +256,13 @@ int main(int argc, char *argv[]) {
   radio_ptt = 0;
   radio_dash = 0;
   radio_dot = 0;
-  radio_io1 = 1;
-  radio_io2 = 1;
-  radio_io3 = 1;
-  radio_io4 = 1;
-  radio_io5 = 1;
-  radio_io6 = 1;
+  radio_io1 = 0;
+  radio_io2 = 0;
+  radio_io3 = 0;
+  radio_io4 = 0;
+  radio_io5 = 0;
+  radio_io6 = 0;
+  radio_io7 = 0;
   radio_io8 = 0;
   // seed value for random number generator
   seed = ((uintptr_t) &seed) & 0xffffff;
@@ -593,6 +594,10 @@ int main(int argc, char *argv[]) {
 
         case '6':
           radio_io6 = !radio_io6;
+          break;
+
+        case '7':
+          radio_io7 = !radio_io7;
           break;
 
         case '8':

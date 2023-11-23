@@ -84,6 +84,8 @@ int parse_cmd (void *data);
 
 int cat_control;
 
+extern int enable_tx_equalizer;
+
 typedef struct {GMutex m; } GT_MUTEX;
 
 GT_MUTEX * mutex_a;

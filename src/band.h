@@ -59,18 +59,18 @@ enum {
 struct _BAND {
   char title[16];
   BANDSTACK *bandstack;
-  uint8_t OCrx;
-  uint8_t OCtx;
-  uint8_t preamp;
-  uint8_t alexRxAntenna;
-  uint8_t alexTxAntenna;
-  uint8_t alexAttenuation;
-  uint8_t disablePA;
+  unsigned char OCrx;
+  unsigned char OCtx;
+  int preamp;
+  int alexRxAntenna;
+  int alexTxAntenna;
+  int alexAttenuation;
   double pa_calibration;
   long long frequencyMin;
   long long frequencyMax;
   long long frequencyLO;
   long long errorLO;
+  int disablePA;
 };
 
 typedef struct _BAND BAND;

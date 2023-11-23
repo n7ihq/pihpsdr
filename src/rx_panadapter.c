@@ -48,8 +48,8 @@
   #include "ozyio.h"
 #endif
 
-static float filter_left;
-static float filter_right;
+static gfloat filter_left;
+static gfloat filter_right;
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean

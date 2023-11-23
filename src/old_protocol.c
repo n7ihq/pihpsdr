@@ -134,6 +134,10 @@ static int current_rx = 0;
 static int mic_samples = 0;
 static int mic_sample_divisor = 1;
 
+static int radio_ptt = 0;
+static int radio_dash = 0;
+static int radio_dot = 0;
+
 static unsigned char output_buffer[OZY_BUFFER_SIZE];
 
 static int command = 1;
@@ -1137,9 +1141,9 @@ static void process_control_bytes() {
   previous_ptt = radio_ptt;
   previous_dot = radio_dot;
   previous_dash = radio_dash;
-  radio_ptt  = (control_in[0]     ) & 0x01;
-  radio_dash = (control_in[0] >> 1) & 0x01;
-  radio_dot  = (control_in[0] >> 2) & 0x01;
+  radio_ptt = (control_in[0] & 0x01) == 0x01;
+  radio_dash = (control_in[0] & 0x02) == 0x02;
+  radio_dot = (control_in[0] & 0x04) == 0x04;
 
   // Stops CAT cw transmission if radio reports "CW action"
   if (radio_dash || radio_dot) {
@@ -1154,7 +1158,7 @@ static void process_control_bytes() {
   }
 
   if (previous_ptt != radio_ptt) {
-    g_idle_add(ext_mox_update, GINT_TO_POINTER(radio_ptt));
+    g_idle_add(ext_mox_update, (gpointer)(long)(radio_ptt));
   }
 
   switch ((control_in[0] >> 3) & 0x1F) {
@@ -1162,12 +1166,11 @@ static void process_control_bytes() {
     adc0_overload |= (control_in[1] & 0x01);
 
     if (device != DEVICE_HERMES_LITE2) {
-
-      radio_io1 = (control_in[1] >> 1) & 0x01;  // most radios: TX inhibit
-      radio_io2 = (control_in[2] >> 2) & 0x01;  // ANAN-7000:   TX inhibit
-      radio_io3 = (control_in[3] >> 3) & 0x01;
-      radio_io4 = (control_in[3] >> 4) & 0x01;  // ANAN-7000:   CW keyer input
-
+      //
+      // HL2 uses these bits of the protocol for a different purpose:
+      // C1 unused except the ADC overload bit
+      // C2/C3 contains underflow/overflow and TX FIFO count
+      //
       if (mercury_software_version[0] != control_in[2]) {
         mercury_software_version[0] = control_in[2];
         t_print("  Mercury Software version: %d (0x%0X)\n", mercury_software_version[0], mercury_software_version[0]);
@@ -1180,7 +1183,6 @@ static void process_control_bytes() {
     } else {
       //
       // HermesLite-II TX-FIFO overflow/underrun detection.
-      // C2/C3 contains underflow/overflow and TX FIFO count
       //
       // Measured on HL2 software version 7.2:
       // multiply FIFO value with 32 to get sample count

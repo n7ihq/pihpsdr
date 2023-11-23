@@ -261,11 +261,11 @@ static ENCODER encoders_no_controller[MAX_ENCODERS] = {
 };
 
 static const ENCODER encoders_controller1[MAX_ENCODERS] = {
-  {TRUE, TRUE, 20, 1, 26, 1, 0, AF_GAIN,   R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 25, MENU_BAND,       0L},
-  {TRUE, TRUE, 16, 1, 19, 1, 0, AGC_GAIN,  R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  8, MENU_BANDSTACK,  0L},
-  {TRUE, TRUE,  4, 1, 21, 1, 0, DRIVE,     R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  7, MENU_MODE,       0L},
-  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,       R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,       0L},
-  {FALSE, TRUE, 0, 1,  0, 0, 1, NO_ACTION, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,       0L},
+  {TRUE, TRUE, 20, 1, 26, 1, 0, AF_GAIN,  R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 25, MENU_BAND,       0L},
+  {TRUE, TRUE, 16, 1, 19, 1, 0, AGC_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  8, MENU_BANDSTACK,  0L},
+  {TRUE, TRUE,  4, 1, 21, 1, 0, DRIVE,    R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  7, MENU_MODE,       0L},
+  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NONE,            0L},
+  {FALSE, TRUE, 0, 1,  0, 0, 1, NONE,     R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NONE,            0L},
 };
 
 static const ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
@@ -273,7 +273,7 @@ static const ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
   {TRUE, TRUE,  4, 1, 21, 1, 0, AGC_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 27, MENU_BANDSTACK, 0L},
   {TRUE, TRUE, 16, 1, 19, 1, 0, IF_WIDTH, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 23, MENU_MODE,      0L},
   {TRUE, TRUE, 25, 1,  8, 1, 0, RIT,      R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L},
-  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,      0L},
+  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NONE,           0L},
 };
 
 static const ENCODER encoders_controller2_v2[MAX_ENCODERS] = {
@@ -281,7 +281,7 @@ static const ENCODER encoders_controller2_v2[MAX_ENCODERS] = {
   {TRUE, TRUE,  9, 1,  7, 1, 0, AGC_GAIN_RX2, R_START1, TRUE,  TRUE, 21, 1,  4, 1, 0, AF_GAIN_RX2, R_START1, TRUE,  TRUE, 27, RX2,            0L}, //ENC3
   {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN,     R_START1, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE,   R_START1, TRUE,  TRUE, 23, DIV,            0L}, //ENC4
   {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,          R_START1, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,         R_START1, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
-  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,          R_START, FALSE,  TRUE,  0, 0,  0, 0, 0, NO_ACTION,   R_START, FALSE,   TRUE, 0, NO_ACTION,      0L}, //ENC1/VFO
+  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,          R_START, FALSE, TRUE,  0, 0,  0, 0, 0, NONE,        R_START, FALSE, TRUE,  0, NONE,           0L}, //ENC1/VFO
 };
 
 static const ENCODER encoders_g2_frontpanel[MAX_ENCODERS] = {
@@ -289,7 +289,7 @@ static const ENCODER encoders_g2_frontpanel[MAX_ENCODERS] = {
   {TRUE, TRUE,  9, 1,  7, 1, 0, AGC_GAIN, R_START1, TRUE,  TRUE, 21, 1,  4, 1, 0, AF_GAIN,   R_START1, TRUE,  TRUE, 27, MUTE,           0L}, //ENC3
   {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN, R_START1, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE, R_START1, TRUE,  TRUE, 23, DIV,            0L}, //ENC7
   {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,      R_START1, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,       R_START1, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
-  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE,  TRUE,  0, 0,  0, 0, 0, 0,         R_START, FALSE,  TRUE,  0, NO_ACTION,      0L}, //VFO
+  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE,  0, 0,  0, 0, 0, 0,         R_START, FALSE, TRUE,  0, NONE,           0L}, //VFO
 };
 
 SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES] = {
@@ -484,7 +484,7 @@ static gpointer rotary_encoder_thread(gpointer data) {
   int i;
   enum ACTION action;
   enum ACTION_MODE mode;
-  int val;
+  gint val;
   usleep(250000);
   t_print("%s\n", __FUNCTION__);
 
@@ -653,7 +653,7 @@ static void process_encoder(int e, int l, int addr, int val) {
 }
 
 static void process_edge(int offset, int value) {
-  int i;
+  gint i;
   unsigned int t;
   gboolean found;
   //t_print("%s: offset=%d value=%d\n",__FUNCTION__,offset,value);

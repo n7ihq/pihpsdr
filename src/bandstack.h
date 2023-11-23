@@ -19,8 +19,6 @@
 #ifndef _BANDSTACK_H
 #define _BANDSTACK_H
 
-#include <stdint.h>
-
 /* --------------------------------------------------------------------------*/
 /**
 * @brief Bandstack definition
@@ -34,13 +32,13 @@
 //
 struct _BANDSTACK_ENTRY {
   long long frequency;
+  int ctun;
   long long ctun_frequency;
   int mode;
   int filter;
   int deviation;
+  int ctcss_enabled;
   int ctcss;
-  uint8_t ctcss_enabled;
-  uint8_t ctun;
 };
 
 typedef struct _BANDSTACK_ENTRY BANDSTACK_ENTRY;

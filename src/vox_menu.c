@@ -45,7 +45,7 @@ static GdkRGBA led_green = {COLOUR_OK};
 static GThread *level_thread_id;
 static int run_level = 0;
 static double peak = 0.0;
-static int vox_timeout;
+static gint vox_timeout;
 static int hold = 0;
 
 static int vox_timeout_cb(gpointer data) {
@@ -120,6 +120,7 @@ static void start_level_thread() {
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {
   run_level = 0;
+  vox_setting = 0;
 }
 
 static void vox_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -192,6 +193,10 @@ void vox_menu(GtkWidget *parent) {
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
+
+  if (!vox_enabled) {
+    vox_setting = 1;
+  }
 
   start_level_thread();
 }
