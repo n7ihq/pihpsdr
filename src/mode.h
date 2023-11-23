@@ -19,7 +19,7 @@
 #ifndef _MODE_H
 #define _MODE_H
 
-enum {
+enum _mode_enum {
   modeLSB = 0,
   modeUSB,
   modeDSB,

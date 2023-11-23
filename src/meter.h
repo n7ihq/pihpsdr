@@ -21,8 +21,10 @@
 
 #include <gtk/gtk.h>
 
-#define SMETER 0
-#define POWER 1
+enum _meter_type_enum {
+  SMETER = 0,
+  POWER
+};
 
 extern GtkWidget* meter_init(int width, int height);
 extern void meter_update(RECEIVER *rx, int meter_type, double value, double alc, double swr);

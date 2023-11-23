@@ -21,12 +21,12 @@
 
 #include <gtk/gtk.h>
 
-enum {
+enum _filter_selection_enum {
   AUTOMATIC = 0,
   MANUAL
 };
 
-enum {
+enum _hpf_filter_enum {
   BYPASS = 0,
   HPF_1_5,
   HPF_6_5,
@@ -35,7 +35,7 @@ enum {
   HPF_20
 };
 
-enum {
+enum _lpf_filter_enum {
   LPF_160 = 0,
   LPF_80,
   LPF_60_40,
@@ -45,7 +45,7 @@ enum {
   LPF_6
 };
 
-enum {
+enum _antenna_select_enum {
   ANTENNA_1 = 0,
   ANTENNA_2,
   ANTENNA_3,

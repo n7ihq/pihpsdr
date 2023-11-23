@@ -19,8 +19,6 @@
 #ifndef _SOAPY_PROTOCOL_H
 #define _SOAPY_PROTOCOL_H
 
-#define BUFFER_SIZE 1024
-
 SoapySDRDevice *get_soapy_device(void);
 
 void soapy_protocol_create_receiver(RECEIVER *rx);

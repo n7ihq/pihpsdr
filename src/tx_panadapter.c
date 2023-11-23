@@ -44,10 +44,6 @@
 #include "new_menu.h"
 #include "message.h"
 
-static double hz_per_pixel;
-static double filter_left = 0.0;
-static double filter_right = 0.0;
-
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean
 tx_panadapter_configure_event_cb (GtkWidget         *widget,
@@ -113,8 +109,10 @@ void tx_panadapter_update(TRANSMITTER *tx) {
     int my_height = gtk_widget_get_allocated_height (tx->panadapter);
     int txvfo = get_tx_vfo();
     int txmode = get_tx_mode();
+    double filter_left = 0.5 * my_width;
+    double filter_right = 0.5 * my_width;
     float *samples = tx->pixel_samples;
-    hz_per_pixel = (double)tx->iq_output_rate / (double)tx->pixels;
+    double hz_per_pixel = (double)tx->iq_output_rate / (double)tx->pixels;
     cairo_t *cr;
     cr = cairo_create (tx->panadapter_surface);
     cairo_set_source_rgba(cr, COLOUR_PAN_BACKGND);

@@ -23,8 +23,6 @@
 
 #define MAX_AUDIO_DEVICES 64
 
-#define AUDIO_BUFFER_SIZE 480
-
 typedef struct _audio_devices {
   char *name;
   int index;

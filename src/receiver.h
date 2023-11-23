@@ -30,13 +30,11 @@
   #include <pulse/simple.h>
 #endif
 
-enum _audio_t {
+enum _audio_channel_enum {
   STEREO = 0,
   LEFT,
   RIGHT
 };
-
-typedef enum _audio_t audio_t;
 
 typedef struct _receiver {
   int id;
@@ -61,7 +59,7 @@ typedef struct _receiver {
   double agc_thresh;
   int fps;
   int displaying;
-  audio_t audio_channel;
+  int audio_channel; // STEREO or LEFT or RIGHT
   int sample_rate;
   int pixels;
   int samples;

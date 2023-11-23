@@ -65,7 +65,7 @@ extern void writepenny(int reset, int mode);   // Init TLV320 on Penelope board
 extern int ozy_initialise(void);
 extern int ozy_discover(void);           // returns 1 if a device found on USB
 extern void ozy_i2c_readpwr(int addr);   // should be executed periodically
-extern void ozy_i2c_readvars();          // should be executed once
+extern void ozy_i2c_readvars(void);      // should be executed once
 
 //
 // Constants used for I2C operations

@@ -19,6 +19,8 @@
 #ifndef HPSDR_SERVER_H
 #define HPSDR_SERVER_H
 
+#include <stdint.h>
+
 #ifndef __APPLE__
   #define htonll htobe64
   #define ntohll be64toh
@@ -33,10 +35,11 @@
 #define ntohd(X) 0.01*ntohs(X)-200.0
 
 typedef enum {
-  RECEIVER_DETACHED, RECEIVER_ATTACHED
+  RECEIVER_DETACHED,
+  RECEIVER_ATTACHED
 } CLIENT_STATE;
 
-enum {
+enum _header_type_enum {
   INFO_RADIO,
   INFO_ADC,
   INFO_RECEIVER,
@@ -86,7 +89,7 @@ enum {
   CMD_RESP_MUTE_RX,
 };
 
-enum {
+enum _vfo_action_enum {
   VFO_A_TO_B,
   VFO_B_TO_A,
   VFO_A_SWAP_B,

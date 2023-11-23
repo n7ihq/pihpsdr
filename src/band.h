@@ -22,7 +22,7 @@
 #include <gtk/gtk.h>
 #include "bandstack.h"
 
-enum {
+enum _band_enum {
   band136 = 0,
   band472,
   band160,

@@ -22,7 +22,7 @@
 #include <sys/utsname.h>
 extern struct utsname unameData;
 
-enum {
+enum _controller_enum {
   NO_CONTROLLER = 0,
   CONTROLLER1,
   CONTROLLER2_V1,

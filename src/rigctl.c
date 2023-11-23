@@ -65,8 +65,6 @@
 
 #include <math.h>
 
-#define NEW_PARSER
-
 // IP stuff below
 #include <sys/socket.h>
 #include <arpa/inet.h> //inet_addr
