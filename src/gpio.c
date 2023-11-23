@@ -252,7 +252,7 @@ long settle_time = 50; // ms
 // The controller1 switches are hard-wired to the toolbar buttons
 //
 
-static ENCODER encoders_no_controller[MAX_ENCODERS] = {
+static const ENCODER encoders_no_controller[MAX_ENCODERS] = {
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
   {FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE, 0, 0, 0L},
@@ -290,6 +290,25 @@ static const ENCODER encoders_g2_frontpanel[MAX_ENCODERS] = {
   {TRUE, TRUE, 11, 1, 10, 1, 0, DIV_GAIN, R_START1, TRUE,  TRUE, 19, 1, 16, 1, 0, DIV_PHASE, R_START1, TRUE,  TRUE, 23, DIV,            0L}, //ENC7
   {TRUE, TRUE, 13, 1, 12, 1, 0, XIT,      R_START1, TRUE,  TRUE,  8, 1, 25, 1, 0, RIT,       R_START1, TRUE,  TRUE, 24, MENU_FREQUENCY, 0L}, //ENC5
   {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START,  FALSE, TRUE,  0, 0,  0, 0, 0, 0,         R_START, FALSE,  TRUE,  0, NO_ACTION,      0L}, //VFO
+};
+
+static const SWITCH switches_no_controller[MAX_SWITCHES] = {
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L},
+  {FALSE, FALSE, 0, NO_ACTION, 0L}
 };
 
 SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES] = {
@@ -836,7 +855,6 @@ void gpio_default_switch_actions(int ctrlr) {
   case CONTROLLER1:
   default:
     default_switches = NULL;
-    // my_switches remains 'empty', since the toolbar table is used
     break;
 
   case CONTROLLER2_V1:
@@ -951,8 +969,10 @@ void gpio_set_defaults(int ctrlr) {
     PTTIN_LINE = 16;
     PTTOUT_LINE = 22;
     CWOUT_LINE = 23;
-    encoders = encoders_no_controller;
-    switches = switches_controller1[0];
+    memcpy(my_encoders, encoders_no_controller, sizeof(my_encoders));
+    memcpy(my_switches, switches_no_controller, sizeof(my_switches));
+    encoders = my_encoders;
+    switches = my_switches;
     break;
   }
 }
