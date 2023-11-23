@@ -667,12 +667,16 @@ clean:
 #
 # "make release" is for maintainers and not for end-users.
 # If this results in an error for end users, this is a feature not a bug.
+# Remove pihpsdr and libwdsp.so from release/pihpsdr since these might
+# be left-overs.
 #
 #############################################################################
 
 .PHONY:	release
 release: $(PROGRAM)
 	make -C release/LatexManual release
+	rm -f release/pihpsdr/pihpsdr
+	rm -f release/pihpsdr/libwdsp.so
 	cp $(PROGRAM) release/pihpsdr
 	cd release; tar cvf pihpsdr.tar pihpsdr
 	cd release; tar cvf pihpsdr-$(GIT_VERSION).tar pihpsdr
