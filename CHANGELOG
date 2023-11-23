@@ -3,8 +3,24 @@ LIST OF RECENT PIHPSDR CHANGES
 
 November 2023:
 --------------
+
+- made TX panadapters "less nervous" for high
+  sample rates. This especially applies to
+  PureSignal feedback spectra in P1 with
+  384k, but also improves the "normal" P2
+  TX scopes.
+
+- added support for automatic antenna tuners
+  for P2: the IO6 digital input can trigger
+  a TUNE state.
+
 - added a "multi function encoder" feature
   (a contribution from Laurence)
+
+- if the radio goes TX (e.g. when doing CW),
+  the antenna Ant1/2/3 relays are now switched
+  as fast as possible, to minimize TX RF going
+  to an RX antenna.
 
 - integrated the WDSP source code tree into piHPSDR,
   and do a static linking against WDSP. This way,
