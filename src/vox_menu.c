@@ -120,7 +120,6 @@ static void start_level_thread() {
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {
   run_level = 0;
-  vox_setting = 0;
 }
 
 static void vox_value_changed_cb(GtkWidget *widget, gpointer data) {
@@ -193,10 +192,6 @@ void vox_menu(GtkWidget *parent) {
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
-
-  if (!vox_enabled) {
-    vox_setting = 1;
-  }
 
   start_level_thread();
 }

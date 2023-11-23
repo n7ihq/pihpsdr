@@ -77,7 +77,6 @@ typedef struct _transmitter {
   int puresignal;
   int feedback;
   int auto_on;
-  int single_on;
 
   gboolean ctcss_enabled;
   int ctcss;

@@ -1141,9 +1141,10 @@ static void process_control_bytes() {
   previous_ptt = radio_ptt;
   previous_dot = radio_dot;
   previous_dash = radio_dash;
-  radio_ptt = (control_in[0] & 0x01) == 0x01;
-  radio_dash = (control_in[0] & 0x02) == 0x02;
-  radio_dot = (control_in[0] & 0x04) == 0x04;
+
+  radio_ptt  = (control_in[0]     ) & 0x01;
+  radio_dash = (control_in[0] >> 1) & 0x01;
+  radio_dot  = (control_in[0] >> 2) & 0x01;
 
   // Stops CAT cw transmission if radio reports "CW action"
   if (radio_dash || radio_dot) {
@@ -1167,9 +1168,7 @@ static void process_control_bytes() {
 
     if (device != DEVICE_HERMES_LITE2) {
       //
-      // HL2 uses these bits of the protocol for a different purpose:
-      // C1 unused except the ADC overload bit
-      // C2/C3 contains underflow/overflow and TX FIFO count
+      // There we could make use of the "digital user inputs"
       //
       if (mercury_software_version[0] != control_in[2]) {
         mercury_software_version[0] = control_in[2];
@@ -1183,6 +1182,7 @@ static void process_control_bytes() {
     } else {
       //
       // HermesLite-II TX-FIFO overflow/underrun detection.
+      // C2/C3 contains underflow/overflow and TX FIFO count
       //
       // Measured on HL2 software version 7.2:
       // multiply FIFO value with 32 to get sample count

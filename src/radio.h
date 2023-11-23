@@ -73,16 +73,19 @@ extern long long frequency_calibration;
 
 extern char property_path[];
 
-#define NONE 0
+enum {
+ NO_FILTER_BOARD=0,
+ ALEX,
+ APOLLO,
+ CHARLY25,
+ N2ADR
+};
 
-#define ALEX 1
-#define APOLLO 2
-#define CHARLY25 3
-#define N2ADR 4
-
-#define REGION_OTHER 0
-#define REGION_UK 1
-#define REGION_WRC15 2  // 60m band allocation for countries implementing WRC15
+enum {
+  REGION_OTHER=0,
+  REGION_UK,
+  REGION_WRC15  // 60m band allocation for countries implementing WRC15
+};
 
 extern int region;
 
@@ -94,11 +97,6 @@ extern RECEIVER *receiver[];
 extern RECEIVER *active_receiver;
 
 extern TRANSMITTER *transmitter;
-
-enum {
-  PA_DISABLED = 0,
-  PA_ENABLED
-};
 
 enum {
   KEYER_STRAIGHT = 0,
@@ -140,7 +138,6 @@ extern int pa_enabled;
 extern int pa_power;
 extern double pa_trim[11];
 extern const int pa_power_list[];
-extern int apollo_tuner;
 
 extern int display_zoompan;
 extern int display_sliders;
@@ -180,6 +177,9 @@ extern int cw_keyer_ptt_delay;
 extern int cw_keyer_hang_time;
 extern int cw_keyer_sidetone_frequency;
 extern int cw_breakin;
+
+extern int auto_tune_flag;
+extern int auto_tune_end;
 
 extern int vfo_encoder_divisor;
 
@@ -235,7 +235,6 @@ extern int rx_equalizer[4];
 
 extern int pre_emphasize;
 
-extern int vox_setting;
 extern int vox_enabled;
 extern double vox_threshold;
 extern double vox_hang;
@@ -328,6 +327,7 @@ extern void protocol_run(void);
 extern void protocol_stop(void);
 extern void protocol_restart(void);
 
+extern gpointer auto_tune_thread(gpointer data);
 //
 // Macro to flag an unimplemented client/server feature
 //

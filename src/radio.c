@@ -171,8 +171,8 @@ int tx_out_of_band = 0;
 int alc = TXA_ALC_PK;
 
 int filter_board = ALEX;
-int pa_enabled = PA_ENABLED;
-int pa_power = 0;
+int pa_enabled = 1;
+int pa_power = PA_1W;
 const int pa_power_list[] = {1, 5, 10, 30, 50, 100, 200, 500, 1000};
 double pa_trim[11];
 
@@ -210,6 +210,9 @@ int cw_keyer_ptt_delay = 30;           // 0-255ms
 int cw_keyer_hang_time = 500;          // ms
 int cw_keyer_sidetone_frequency = 800; // Hz
 int cw_breakin = 1;                    // 0=disabled 1=enabled
+
+int auto_tune_flag = 0;
+int auto_tune_end = 0;
 
 int vfo_encoder_divisor = 15;
 
@@ -272,7 +275,6 @@ int rx_equalizer[4] = {0, 0, 0, 0};
 
 int pre_emphasize = 0;
 
-int vox_setting = 0;
 int vox_enabled = 0;
 double vox_threshold = 0.001;
 double vox_hang = 250.0;
@@ -1295,7 +1297,7 @@ void start_radio() {
   if (device == SOAPYSDR_USB_DEVICE) {
     iqswap = 1;
     receivers = 1;
-    filter_board = NONE;
+    filter_board = NO_FILTER_BOARD;
   }
 
   if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2)  {
@@ -2938,4 +2940,40 @@ void protocol_restart() {
   protocol_stop();
   usleep(200000);
   protocol_run();
+}
+
+gpointer auto_tune_thread(gpointer data) {
+  //
+  // This routine is triggered when an "auto tune" event
+  // occurs, which usually is triggered by an input.
+  //
+  // Start TUNEing and keep TUNEing until the auto_tune_flag
+  // becomes zero. Abort TUNEing if it takes too long
+  //
+  // To avoid race conditions, there are two flags:
+  // auto_tune_flag is set while this thread is running
+  // auto_tune_end  signals that tune can stop
+  //
+  // The thread will not terminate until auto_tune_end is flagged,
+  // but  it may stop tuning before.
+  //
+  int count = 0;
+  g_idle_add(ext_tune_update, GINT_TO_POINTER(1));
+  for (;;) {
+    if (count >= 0) {
+      count++;
+    }
+    usleep(50000);
+    if (auto_tune_end) {
+      g_idle_add(ext_tune_update, GINT_TO_POINTER(0));
+      break;
+    }
+    if (count >= 200) {
+      g_idle_add(ext_tune_update, GINT_TO_POINTER(0));
+      count = -1;
+    }
+  }
+  usleep(50000);       // debouncing
+  auto_tune_flag = 0;
+  return NULL;
 }
