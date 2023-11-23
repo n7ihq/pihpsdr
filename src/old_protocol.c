@@ -2212,7 +2212,7 @@ void ozy_send_buffer() {
       //
       uint8_t rfdelay = cw_keyer_ptt_delay;
       uint8_t rfmax = 900 / cw_keyer_speed;
-  
+
       if (rfdelay > rfmax) { rfdelay = rfmax; }
 
       output_buffer[C2] = cw_keyer_sidetone_volume;

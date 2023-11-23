@@ -1152,7 +1152,7 @@ static void new_protocol_high_priority() {
   //  Measurements have shown that we can reduce the time
   //  from when the radio send PTT to the time when the
   //  radio receives the new Ant1/2/2 setup from about
-  //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds, 
+  //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds,
   // and this should be
   //  enough.
   //
