@@ -39,47 +39,47 @@ enum _audio_t {
 typedef enum _audio_t audio_t;
 
 typedef struct _receiver {
-  gint id;
+  int id;
   GMutex mutex;
   GMutex display_mutex;
 
-  gint ddc;
-  gint adc;
+  int ddc;
+  int adc;
 
-  gdouble volume;  // in dB
+  double volume;  // in dB
 
   int dsp_size;
   int buffer_size;
   int fft_size;
   int low_latency;
 
-  gint agc;
-  gdouble agc_gain;
-  gdouble agc_slope;
-  gdouble agc_hang_threshold;
-  gdouble agc_hang;
-  gdouble agc_thresh;
-  gint fps;
-  gint displaying;
+  int agc;
+  double agc_gain;
+  double agc_slope;
+  double agc_hang_threshold;
+  double agc_hang;
+  double agc_thresh;
+  int fps;
+  int displaying;
   audio_t audio_channel;
-  gint sample_rate;
-  gint pixels;
-  gint samples;
-  gint output_samples;
-  gdouble *iq_input_buffer;
-  gdouble *audio_output_buffer;
-  gint audio_index;
-  gfloat *pixel_samples;
-  gint display_panadapter;
-  gint display_waterfall;
+  int sample_rate;
+  int pixels;
+  int samples;
+  int output_samples;
+  double *iq_input_buffer;
+  double *audio_output_buffer;
+  int audio_index;
+  float *pixel_samples;
+  int display_panadapter;
+  int display_waterfall;
   guint update_timer_id;
-  gdouble meter;
+  double meter;
 
-  gdouble hz_per_pixel;
+  double hz_per_pixel;
 
-  gint dither;
-  gint random;
-  gint preamp;
+  int dither;
+  int random;
+  int preamp;
 
   //
   // Encodings for "QRM fighters"
@@ -97,10 +97,10 @@ typedef struct _receiver {
   // anf= 0/1:       Automatic notch filter off/on
   // snb= 0/1:       Spectral noise blanker off/on
   //
-  gint nb;
-  gint nr;
-  gint anf;
-  gint snb;
+  int nb;
+  int nr;
+  int anf;
+  int snb;
 
   //
   // NR/NR2/ANF: position
@@ -133,11 +133,11 @@ typedef struct _receiver {
   // The comments indicate the names of the parameters in the Thetis menu
   // as well as the internal name used in Thetis.
   //
-  gdouble nb_tau;       // "Slew",                         NBTransision
-  gdouble nb_advtime;   // "Lead",                         NBLead
-  gdouble nb_hang;      // "Lag",                          NBLag
-  gdouble nb_thresh;    // "Threshold",                    NBThreshold
-  gint    nb2_mode;     // NB mode, only NB2
+  double nb_tau;       // "Slew",                         NBTransision
+  double nb_advtime;   // "Lead",                         NBLead
+  double nb_hang;      // "Lag",                          NBLag
+  double nb_thresh;    // "Threshold",                    NBThreshold
+  int    nb2_mode;     // NB mode, only NB2
   //
   // nb2_mode = 0:  zero mode
   // nb2_mode = 1:  sample-hold
@@ -149,43 +149,43 @@ typedef struct _receiver {
   //
   // NR4 parameters
   //
-  gdouble nr4_reduction_amount;
-  gdouble nr4_smoothing_factor;
-  gdouble nr4_whitening_factor;
-  gdouble nr4_noise_rescale;
-  gdouble nr4_post_filter_threshold;
+  double nr4_reduction_amount;
+  double nr4_smoothing_factor;
+  double nr4_whitening_factor;
+  double nr4_noise_rescale;
+  double nr4_post_filter_threshold;
 #endif
 
-  gint alex_antenna;
-  gint alex_attenuation;
+  int alex_antenna;
+  int alex_attenuation;
 
-  gint filter_low;
-  gint filter_high;
+  int filter_low;
+  int filter_high;
 
-  gint width;
-  gint height;
+  int width;
+  int height;
 
   GtkWidget *panel;
   GtkWidget *panadapter;
   GtkWidget *waterfall;
 
-  gint panadapter_low;
-  gint panadapter_high;
-  gint panadapter_step;
+  int panadapter_low;
+  int panadapter_high;
+  int panadapter_step;
 
-  gint waterfall_low;
-  gint waterfall_high;
-  gint waterfall_automatic;
+  int waterfall_low;
+  int waterfall_high;
+  int waterfall_automatic;
   cairo_surface_t *panadapter_surface;
   GdkPixbuf *pixbuf;
-  gint local_audio;
-  gint mute_when_not_active;
-  gint audio_device;
+  int local_audio;
+  int mute_when_not_active;
+  int audio_device;
   gchar audio_name[128];
 #ifdef PORTAUDIO
   PaStream *playstream;
-  volatile gint local_audio_buffer_inpt;    // pointer in audio ring-buffer
-  volatile gint local_audio_buffer_outpt;   // pointer in audio ring-buffer
+  volatile int local_audio_buffer_inpt;    // pointer in audio ring-buffer
+  volatile int local_audio_buffer_outpt;   // pointer in audio ring-buffer
   float *local_audio_buffer;
 #endif
 #ifdef ALSA
@@ -198,33 +198,33 @@ typedef struct _receiver {
   gboolean output_started;
   float *local_audio_buffer;
 #endif
-  gint local_audio_buffer_offset;
+  int local_audio_buffer_offset;
   GMutex local_audio_mutex;
 
-  gint squelch_enable;
-  gdouble squelch;
+  int squelch_enable;
+  double squelch;
 
-  gint binaural;
+  int binaural;
 
-  gint deviation;
+  int deviation;
 
-  gint64 waterfall_frequency;
-  gint waterfall_sample_rate;
-  gint waterfall_pan;
-  gint waterfall_zoom;
+  long long waterfall_frequency;
+  int waterfall_sample_rate;
+  int waterfall_pan;
+  int waterfall_zoom;
 
-  gint mute_radio;
+  int mute_radio;
 
-  gdouble *buffer;
+  double *buffer;
   void *resampler;
-  gdouble *resample_buffer;
-  gint resample_buffer_size;
+  double *resample_buffer;
+  int resample_buffer_size;
 
-  gint zoom;
-  gint pan;
+  int zoom;
+  int pan;
 
-  gint x;
-  gint y;
+  int x;
+  int y;
 
   // two variables that implement the new
   // "mute first RX IQ samples after TX/RX transition"

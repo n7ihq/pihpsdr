@@ -117,7 +117,7 @@ enum {
   RSAT_MODE
 };
 
-extern gint sat_mode;
+extern int sat_mode;
 
 extern int radio_sample_rate;
 extern gboolean iqswap;
@@ -167,7 +167,7 @@ extern int rit_increment;
 
 extern gboolean duplex;
 extern gboolean mute_rx_while_transmitting;
-extern gint rx_height;
+extern int rx_height;
 
 extern int cw_keys_reversed;
 extern int cw_keyer_speed;

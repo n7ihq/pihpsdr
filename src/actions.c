@@ -317,7 +317,7 @@ static inline double KnobOrWheel(const PROCESS_ACTION *a, double oldval, double 
 // This interface puts an "action" into the GTK idle queue,
 // but "CW key" actions are processed immediately
 //
-void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
+void schedule_action(enum ACTION action, enum ACTION_MODE mode, int val) {
   PROCESS_ACTION *a;
 
   switch (action) {

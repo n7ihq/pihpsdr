@@ -38,6 +38,7 @@ static const int cw_low_water  =  896;                // low water mark for CW
 static const int cw_high_water = 1152;                // high water mark for CW
 
 #include <gtk/gtk.h>
+#include <stdint.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,18 +158,18 @@ int audio_open_output(RECEIVER *rx) {
 
   switch (rx->local_audio_format) {
   case SND_PCM_FORMAT_S16_LE:
-    t_print("%s: local_audio_buffer: size=%d sample=%ld\n", __FUNCTION__, out_buffer_size, sizeof(gint16));
-    rx->local_audio_buffer = g_new(gint16, 2 * out_buffer_size);
+    t_print("%s: local_audio_buffer: size=%d sample=%ld\n", __FUNCTION__, out_buffer_size, sizeof(int16_t));
+    rx->local_audio_buffer = g_new(int16_t, 2 * out_buffer_size);
     break;
 
   case SND_PCM_FORMAT_S32_LE:
-    t_print("%s: local_audio_buffer: size=%d sample=%ld\n", __FUNCTION__, out_buffer_size, sizeof(gint32));
-    rx->local_audio_buffer = g_new(gint32, 2 * out_buffer_size);
+    t_print("%s: local_audio_buffer: size=%d sample=%ld\n", __FUNCTION__, out_buffer_size, sizeof(int32_t));
+    rx->local_audio_buffer = g_new(int32_t, 2 * out_buffer_size);
     break;
 
   case SND_PCM_FORMAT_FLOAT_LE:
-    t_print("%s: local_audio_buffer: size=%d sample=%ld\n", __FUNCTION__, out_buffer_size, sizeof(gfloat));
-    rx->local_audio_buffer = g_new(gfloat, 2 * out_buffer_size);
+    t_print("%s: local_audio_buffer: size=%d sample=%ld\n", __FUNCTION__, out_buffer_size, sizeof(float));
+    rx->local_audio_buffer = g_new(float, 2 * out_buffer_size);
     break;
 
   default:
@@ -250,20 +251,20 @@ int audio_open_input() {
   switch (record_audio_format) {
   case SND_PCM_FORMAT_S16_LE:
     t_print("%s: mic_buffer: size=%d channels=%d sample=%ld bytes\n", __FUNCTION__, mic_buffer_size, channels,
-            sizeof(gint16));
-    mic_buffer = g_new(gint16, mic_buffer_size);
+            sizeof(int16_t));
+    mic_buffer = g_new(int16_t, mic_buffer_size);
     break;
 
   case SND_PCM_FORMAT_S32_LE:
     t_print("%s: mic_buffer: size=%d channels=%d sample=%ld bytes\n", __FUNCTION__, mic_buffer_size, channels,
-            sizeof(gint32));
-    mic_buffer = g_new(gint32, mic_buffer_size);
+            sizeof(int32_t));
+    mic_buffer = g_new(int32_t, mic_buffer_size);
     break;
 
   case SND_PCM_FORMAT_FLOAT_LE:
     t_print("%s: mic_buffer: size=%d channels=%d sample=%ld bytes\n", __FUNCTION__, mic_buffer_size, channels,
-            sizeof(gfloat));
-    mic_buffer = g_new(gfloat, mic_buffer_size);
+            sizeof(float));
+    mic_buffer = g_new(float, mic_buffer_size);
     break;
 
   default:
@@ -375,21 +376,21 @@ int cw_audio_write(RECEIVER *rx, float sample) {
     //
     switch (rx->local_audio_format) {
     case SND_PCM_FORMAT_S16_LE: {
-      gint16 *short_buffer = (gint16 *)rx->local_audio_buffer;
-      short_buffer[rx->local_audio_buffer_offset * 2] = (gint16)(sample * 32767.0F);
-      short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (gint16)(sample * 32767.0F);
+      int16_t *short_buffer = (int16_t *)rx->local_audio_buffer;
+      short_buffer[rx->local_audio_buffer_offset * 2] = (int16_t)(sample * 32767.0F);
+      short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (int16_t)(sample * 32767.0F);
     }
     break;
 
     case SND_PCM_FORMAT_S32_LE: {
-      gint32 *long_buffer = (gint32 *)rx->local_audio_buffer;
-      long_buffer[rx->local_audio_buffer_offset * 2] = (gint32)(sample * 4294967295.0F);
-      long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (gint32)(sample * 4294967295.0F);
+      int32_t *long_buffer = (int32_t *)rx->local_audio_buffer;
+      long_buffer[rx->local_audio_buffer_offset * 2] = (int32_t)(sample * 4294967295.0F);
+      long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (int32_t)(sample * 4294967295.0F);
     }
     break;
 
     case SND_PCM_FORMAT_FLOAT_LE: {
-      gfloat *float_buffer = (float *)rx->local_audio_buffer;
+      float *float_buffer = (float *)rx->local_audio_buffer;
       float_buffer[rx->local_audio_buffer_offset * 2] = sample;
       float_buffer[(rx->local_audio_buffer_offset * 2) + 1] =  sample;
     }
@@ -423,21 +424,21 @@ int cw_audio_write(RECEIVER *rx, float sample) {
           // insert another zero sample
           switch (rx->local_audio_format) {
           case SND_PCM_FORMAT_S16_LE: {
-            gint16 *short_buffer = (gint16 *)rx->local_audio_buffer;
+            int16_t *short_buffer = (int16_t *)rx->local_audio_buffer;
             short_buffer[rx->local_audio_buffer_offset * 2] = 0;
             short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = 0;
           }
           break;
 
           case SND_PCM_FORMAT_S32_LE: {
-            gint32* long_buffer = (gint32 *)rx->local_audio_buffer;
+            int32_t* long_buffer = (int32_t *)rx->local_audio_buffer;
             long_buffer[rx->local_audio_buffer_offset * 2] = 0;
             long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = 0;
           }
           break;
 
           case SND_PCM_FORMAT_FLOAT_LE: {
-            gfloat *float_buffer = (float *)rx->local_audio_buffer;
+            float *float_buffer = (float *)rx->local_audio_buffer;
             float_buffer[rx->local_audio_buffer_offset * 2] = 0.0;
             float_buffer[(rx->local_audio_buffer_offset * 2) + 1] = 0.0;
           }
@@ -515,21 +516,21 @@ int audio_write(RECEIVER *rx, float left_sample, float right_sample) {
   if (rx->playback_handle != NULL && rx->local_audio_buffer != NULL) {
     switch (rx->local_audio_format) {
     case SND_PCM_FORMAT_S16_LE: {
-      gint16 *short_buffer = (gint16 *)rx->local_audio_buffer;
-      short_buffer[rx->local_audio_buffer_offset * 2] = (gint16)(left_sample * 32767.0F);
-      short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (gint16)(right_sample * 32767.0F);
+      int16_t *short_buffer = (int16_t *)rx->local_audio_buffer;
+      short_buffer[rx->local_audio_buffer_offset * 2] = (int16_t)(left_sample * 32767.0F);
+      short_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (int16_t)(right_sample * 32767.0F);
     }
     break;
 
     case SND_PCM_FORMAT_S32_LE: {
-      gint32 *long_buffer = (gint32 *)rx->local_audio_buffer;
-      long_buffer[rx->local_audio_buffer_offset * 2] = (gint32)(left_sample * 4294967295.0F);
-      long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (gint32)(right_sample * 4294967295.0F);
+      int32_t *long_buffer = (int32_t *)rx->local_audio_buffer;
+      long_buffer[rx->local_audio_buffer_offset * 2] = (int32_t)(left_sample * 4294967295.0F);
+      long_buffer[(rx->local_audio_buffer_offset * 2) + 1] = (int32_t)(right_sample * 4294967295.0F);
     }
     break;
 
     case SND_PCM_FORMAT_FLOAT_LE: {
-      gfloat *float_buffer = (float *)rx->local_audio_buffer;
+      float *float_buffer = (float *)rx->local_audio_buffer;
       float_buffer[rx->local_audio_buffer_offset * 2] = left_sample;
       float_buffer[(rx->local_audio_buffer_offset * 2) + 1] = right_sample;
     }
@@ -559,13 +560,13 @@ int audio_write(RECEIVER *rx, float left_sample, float right_sample) {
 
           switch (rx->local_audio_format) {
           case SND_PCM_FORMAT_S16_LE:
-            silence = g_new(gint16, 2 * num);
-            len = 2 * num * sizeof(gint16);
+            silence = g_new(int16_t, 2 * num);
+            len = 2 * num * sizeof(int16_t);
             break;
 
           case SND_PCM_FORMAT_S32_LE:
-            silence = g_new(gint32, 2 * num);
-            len = 2 * num * sizeof(gint32);
+            silence = g_new(int32_t, 2 * num);
+            len = 2 * num * sizeof(int32_t);
             break;
 
           case SND_PCM_FORMAT_FLOAT_LE:
@@ -623,10 +624,10 @@ int audio_write(RECEIVER *rx, float left_sample, float right_sample) {
 
 static void *mic_read_thread(gpointer arg) {
   int rc;
-  gfloat *float_buffer;
-  gint32 *long_buffer;
-  gint16 *short_buffer;
-  gfloat sample;
+  float *float_buffer;
+  int32_t *long_buffer;
+  int16_t *short_buffer;
+  float sample;
   int i;
   t_print("%s: mic_buffer_size=%d\n", __FUNCTION__, mic_buffer_size);
   t_print("%s: snd_pcm_start\n", __FUNCTION__);
@@ -659,17 +660,17 @@ static void *mic_read_thread(gpointer arg) {
       for (i = 0; i < mic_buffer_size; i++) {
         switch (record_audio_format) {
         case SND_PCM_FORMAT_S16_LE:
-          short_buffer = (gint16 *)mic_buffer;
-          sample = (gfloat)short_buffer[i] / 32767.0f;
+          short_buffer = (int16_t *)mic_buffer;
+          sample = (float)short_buffer[i] / 32767.0f;
           break;
 
         case SND_PCM_FORMAT_S32_LE:
-          long_buffer = (gint32 *)mic_buffer;
-          sample = (gfloat)long_buffer[i] / 4294967295.0f;
+          long_buffer = (int32_t *)mic_buffer;
+          sample = (float)long_buffer[i] / 4294967295.0f;
           break;
 
         case SND_PCM_FORMAT_FLOAT_LE:
-          float_buffer = (gfloat *)mic_buffer;
+          float_buffer = (float *)mic_buffer;
           sample = float_buffer[i];
           break;
 

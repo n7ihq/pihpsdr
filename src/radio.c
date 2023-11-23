@@ -101,7 +101,7 @@ int TOOLBAR_HEIGHT = 30;     // nowhere changed
 
 int rx_stack_horizontal = 0;
 
-gint controller = NO_CONTROLLER;
+int controller = NO_CONTROLLER;
 
 GtkWidget *fixed;
 static GtkWidget *hide_b;
@@ -115,7 +115,7 @@ static GtkWidget *toolbar;
 // RX and TX calibration
 long long frequency_calibration = 0LL;
 
-gint sat_mode;
+int sat_mode;
 
 int region = REGION_OTHER;
 
@@ -299,7 +299,7 @@ double drive_digi_max = 100.0; // maximum drive in DIGU/DIGL
 gboolean display_warnings = TRUE;
 gboolean display_pacurr = TRUE;
 
-gint rx_height;
+int rx_height;
 
 void radio_stop() {
   if (can_transmit) {
@@ -620,7 +620,7 @@ void reconfigure_radio() {
 //
 // used to regularly write props file, currently not active
 //
-static gint save_timer_id;
+static guint save_timer_id;
 static gboolean save_cb(gpointer data) {
   radioSaveState();
   return TRUE;

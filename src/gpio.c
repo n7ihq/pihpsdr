@@ -484,7 +484,7 @@ static gpointer rotary_encoder_thread(gpointer data) {
   int i;
   enum ACTION action;
   enum ACTION_MODE mode;
-  gint val;
+  int val;
   usleep(250000);
   t_print("%s\n", __FUNCTION__);
 
@@ -653,7 +653,7 @@ static void process_encoder(int e, int l, int addr, int val) {
 }
 
 static void process_edge(int offset, int value) {
-  gint i;
+  int i;
   unsigned int t;
   gboolean found;
   //t_print("%s: offset=%d value=%d\n",__FUNCTION__,offset,value);

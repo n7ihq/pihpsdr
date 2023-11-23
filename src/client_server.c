@@ -57,7 +57,7 @@
 #define DISCOVERY_PORT 4992
 #define LISTEN_PORT 50000
 
-gint listen_port = LISTEN_PORT;
+int listen_port = LISTEN_PORT;
 
 REMOTE_CLIENT *clients = NULL;
 
@@ -69,14 +69,14 @@ static char title[128];
 
 gboolean hpsdr_server = FALSE;
 
-gint client_socket = -1;
+int client_socket = -1;
 GThread *client_thread_id;
-gint start_spectrum(void *data);
+int start_spectrum(void *data);
 gboolean remote_started = FALSE;
 
 static GThread *listen_thread_id;
 static gboolean running;
-static gint listen_socket;
+static int listen_socket;
 
 static int audio_buffer_index = 0;
 AUDIO_DATA audio_data;
@@ -201,12 +201,12 @@ void remote_audio(const RECEIVER *rx, short left_sample, short right_sample) {
   }
 }
 
-static gint send_spectrum(void *arg) {
+static int send_spectrum(void *arg) {
   REMOTE_CLIENT *client = (REMOTE_CLIENT *)arg;
   float *samples;
   short s;
   SPECTRUM_DATA spectrum_data;
-  gint result;
+  int result;
   result = TRUE;
 
   if (!(client->receiver[0].send_spectrum || client->receiver[1].send_spectrum) || !client->running) {
@@ -1964,7 +1964,7 @@ int destroy_hpsdr_server() {
 
 // CLIENT Code
 
-static gint check_vfo(void *arg) {
+static int check_vfo(void *arg) {
   if (!running) { return FALSE; }
 
   g_mutex_lock(&accumulated_mutex);
@@ -1987,7 +1987,7 @@ static gint check_vfo(void *arg) {
 static char server_host[128];
 static int delay = 0;
 
-gint start_spectrum(void *data) {
+int start_spectrum(void *data) {
   const RECEIVER *rx = (RECEIVER *)data;
 
   if (delay != 3) {
@@ -2007,7 +2007,7 @@ void start_vfo_timer() {
 }
 
 static void *client_thread(void* arg) {
-  gint bytes_read;
+  int bytes_read;
   HEADER header;
   char *server = (char *)arg;
   running = TRUE;
@@ -2743,7 +2743,7 @@ static void *client_thread(void* arg) {
 
 int radio_connect_remote(char *host, int port) {
   struct sockaddr_in server_address;
-  gint on = 1;
+  int on = 1;
   t_print("radio_connect_remote: %s:%d\n", host, port);
   client_socket = socket(AF_INET, SOCK_STREAM, 0);
 

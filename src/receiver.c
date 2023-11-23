@@ -59,7 +59,7 @@
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
-static gint last_x;
+static int last_x;
 static gboolean has_moved = FALSE;
 static gboolean pressed = FALSE;
 static gboolean making_active = FALSE;
@@ -460,7 +460,7 @@ void reconfigure_receiver(RECEIVER *rx, int height) {
   g_mutex_unlock(&rx->display_mutex);
 }
 
-static gint update_display(gpointer data) {
+static int update_display(gpointer data) {
   RECEIVER *rx = (RECEIVER *)data;
   int rc;
 
@@ -971,7 +971,7 @@ RECEIVER *create_receiver(int id, int pixels, int width, int height) {
   t_print("%s (after restore): id=%d local_audio=%d\n", __FUNCTION__, rx->id, rx->local_audio);
   int scale = rx->sample_rate / 48000;
   rx->output_samples = rx->buffer_size / scale;
-  rx->audio_output_buffer = g_new(gdouble, 2 * rx->output_samples);
+  rx->audio_output_buffer = g_new(double, 2 * rx->output_samples);
   t_print("%s: RXid=%d output_samples=%d audio_output_buffer=%p\n", __FUNCTION__, rx->id, rx->output_samples,
           rx->audio_output_buffer);
   rx->hz_per_pixel = (double)rx->sample_rate / (double)rx->pixels;
@@ -1154,7 +1154,7 @@ void receiver_change_sample_rate(RECEIVER *rx, int sample_rate) {
     g_free(rx->audio_output_buffer);
   }
 
-  rx->audio_output_buffer = g_new(gdouble, 2 * rx->output_samples);
+  rx->audio_output_buffer = g_new(double, 2 * rx->output_samples);
   SetChannelState(rx->id, 0, 1);
   init_analyzer(rx);
   SetInputSamplerate(rx->id, sample_rate);
@@ -1317,7 +1317,7 @@ void receiver_vfo_changed(RECEIVER *rx) {
 }
 
 static void process_rx_buffer(RECEIVER *rx) {
-  gdouble left_sample, right_sample;
+  double left_sample, right_sample;
   short left_audio_sample, right_audio_sample;
   int i;
 

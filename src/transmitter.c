@@ -112,7 +112,7 @@ static gboolean close_cb() {
   return TRUE;
 }
 
-static gint update_out_of_band(gpointer data) {
+static int update_out_of_band(gpointer data) {
   TRANSMITTER *tx = (TRANSMITTER *)data;
   tx->out_of_band = 0;
   g_idle_add(ext_vfo_update, NULL);

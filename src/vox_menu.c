@@ -45,7 +45,7 @@ static GdkRGBA led_green = {COLOUR_OK};
 static GThread *level_thread_id;
 static int run_level = 0;
 static double peak = 0.0;
-static gint vox_timeout;
+static guint vox_timeout;
 static int hold = 0;
 
 static int vox_timeout_cb(gpointer data) {

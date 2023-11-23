@@ -60,12 +60,12 @@
 struct utsname unameData;
 
 GdkScreen *screen;
-gint display_width;
-gint display_height;
-gint screen_height;
-gint screen_width;
-gint full_screen;
-gint this_monitor;
+int display_width;
+int display_height;
+int screen_height;
+int screen_width;
+int full_screen;
+int this_monitor;
 
 static GdkCursor *cursor_arrow;
 static GdkCursor *cursor_watch;
@@ -324,7 +324,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   // Get the position of the top window, and then determine
   // to which monitor this position belongs.
   //
-  gint x, y;
+  int x, y;
   gtk_window_get_position(GTK_WINDOW(top_window), &x, &y);
   this_monitor = gdk_screen_get_monitor_at_point(screen, x, y);
   t_print("Monitor Number within Screen=%d\n", this_monitor);

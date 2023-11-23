@@ -380,7 +380,7 @@ static void save_cb(GtkWidget *widget, gpointer user_data) {
   GtkWidget *save_dialog;
   GtkFileChooser *chooser;
   GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
-  gint res;
+  int res;
   save_dialog = gtk_file_chooser_dialog_new ("Save File",
                 GTK_WINDOW(dialog),
                 action,
@@ -409,7 +409,7 @@ static void load_cb(GtkWidget *widget, gpointer user_data) {
   GtkWidget *load_dialog;
   GtkFileChooser *chooser;
   GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-  gint res;
+  int res;
   load_dialog = gtk_file_chooser_dialog_new ("Open MIDI File",
                 GTK_WINDOW(dialog),
                 action,
@@ -438,7 +438,7 @@ static void load_original_cb(GtkWidget *widget, gpointer user_data) {
   GtkWidget *load_dialog;
   GtkFileChooser *chooser;
   GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-  gint res;
+  int res;
   load_dialog = gtk_file_chooser_dialog_new ("Open ORIGINAL MIDI File",
                 GTK_WINDOW(dialog),
                 action,
@@ -1133,9 +1133,9 @@ int ProcessNewMidiConfigureEvent(void * data) {
       gtk_tree_model_get(model, &iter, BSTR_COLUMN, &str_action, -1);
 
       if (str_event != NULL && str_channel != NULL && str_note != NULL && str_type != NULL && str_action != NULL) {
-        gint tree_event;
-        gint tree_channel;
-        gint tree_note;
+        int tree_event;
+        int tree_channel;
+        int tree_note;
         tree_event = String2Event(str_event);
         tree_channel = atoi(str_channel);
         tree_note = atoi(str_note);
@@ -1191,7 +1191,7 @@ void midiSaveState() {
   char name[128];
   char value[128];
   struct desc *cmd;
-  gint entry;
+  int entry;
   int i;
   entry = 0;
 
@@ -1249,16 +1249,16 @@ void midiRestoreState() {
   char name[128];
   char str[128];
   char *value;
-  gint channel;
-  gint event;
-  gint type;
-  gint action;
-  gint vfl1, vfl2;
-  gint fl1, fl2;
-  gint lft1, lft2;
-  gint rgt1, rgt2;
-  gint fr1, fr2;
-  gint vfr1, vfr2;
+  int channel;
+  int event;
+  int type;
+  int action;
+  int vfl1, vfl2;
+  int fl1, fl2;
+  int lft1, lft2;
+  int rgt1, rgt2;
+  int fr1, fr2;
+  int vfr1, vfr2;
   int i, j;
   get_midi_devices();
   MidiReleaseCommands();
