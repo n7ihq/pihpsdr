@@ -706,11 +706,11 @@ static void init_analyzer(RECEIVER *rx) {
   const int calibration_data_set = 0;
   const double span_min_freq = 0.0;
   const double span_max_freq = 0.0;
+  const int clip = 0;
 
   int window_type;
   int afft_size;
   int overlap;
-  int clip;
   int pixels;
 
   pixels = rx->pixels;
@@ -726,8 +726,6 @@ static void init_analyzer(RECEIVER *rx) {
     if (rx->sample_rate > 100000) { afft_size = 16384; }
     if (rx->sample_rate > 200000) { afft_size = 32768; }
   }
-
-  clip = (int) floor(0.017 * afft_size);
 
   int max_w = afft_size + (int) min(keep_time * (double) rx->sample_rate, keep_time * (double) afft_size * (double) rx->fps);
   overlap = (int)fmax(0.0, ceil(afft_size - (double)rx->sample_rate / (double)rx->fps));
