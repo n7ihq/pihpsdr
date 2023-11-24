@@ -1259,16 +1259,22 @@ void start_radio() {
   // Determine number of ADCs in the device
   //
   switch (device) {
-  case DEVICE_METIS: // No support for multiple MERCURY cards on a single ATLAS bus.
-  case DEVICE_OZY:    // No support for multiple MERCURY cards on a single ATLAS bus.
+  case DEVICE_METIS:
+  case DEVICE_OZY:
   case DEVICE_HERMES:
   case DEVICE_HERMES_LITE:
   case DEVICE_HERMES_LITE2:
-  case NEW_DEVICE_ATLAS: // No support for multiple MERCURY cards on a single ATLAS bus.
+  case NEW_DEVICE_ATLAS:
   case NEW_DEVICE_HERMES:
   case NEW_DEVICE_HERMES2:
   case NEW_DEVICE_HERMES_LITE:
   case NEW_DEVICE_HERMES_LITE2:
+    //
+    // If there are two MERCURY cards on the ATLAS bus, this is detected
+    // in old_protocol.c, But, n_adc can keep the value of 1 since the
+    // ADC assignment is fixed in that case (RX1: first mercury card,
+    // RX2: second mercury card).
+    //
     n_adc = 1;
     break;
 
@@ -1290,8 +1296,8 @@ void start_radio() {
   //
   // In most cases, ALEX is the best default choice for the filter board.
   // here we set filter_board to a different default value for some
-  // "special" hardware. The choice made here only applies if the filter_board
-  // is not specified in the props fil
+  // "special" hardware. The choice made here will possibly overwritten
+  // with data from the props file.
   //
 
   if (device == SOAPYSDR_USB_DEVICE) {
@@ -1327,7 +1333,9 @@ void start_radio() {
 
   if (have_rx_gain && (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL)) {
     //
-    // This is the setting valid for HERMES_LITE and some other radios such as RADIOBERRY
+    // The "magic values" here are for the AD98656 chip that is used in radios
+    // such as the HermesLite and the RadioBerry. This is a best estimate and
+    // will be overwritten with data from the props file.
     //
     adc[0].min_gain = -12.0;
     adc[0].max_gain = +48.0;

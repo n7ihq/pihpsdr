@@ -17,10 +17,11 @@ November 2023:
 - added a "multi function encoder" feature
   (a contribution from Laurence)
 
-- if the radio goes TX (e.g. when doing CW),
+- if the *radio* goes TX (e.g. when doing CW
+  handled in the FPGA),
   the antenna Ant1/2/3 relays are now switched
   as fast as possible, to minimize TX RF going
-  to an RX antenna.
+  to an antenna jack intended for RX only.
 
 - integrated the WDSP source code tree into piHPSDR,
   and do a static linking against WDSP. This way,
