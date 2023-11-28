@@ -1001,9 +1001,9 @@ int process_action(void *data) {
       g_idle_add(ext_vfo_update, NULL);
     }
 
-    break;    
+    break;
 
-// multifunction encoder. If multi_select_active, it edits the assigned action; else implements assigned action. 
+// multifunction encoder. If multi_select_active, it edits the assigned action; else implements assigned action.
   case MULTI_ENC:
     multi_first = FALSE;
     if(multi_select_active) {
@@ -1026,7 +1026,7 @@ int process_action(void *data) {
     multi_first = FALSE;
     multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
     g_idle_add(ext_vfo_update, NULL);
-    break;    
+    break;
 
 
   case MUTE:

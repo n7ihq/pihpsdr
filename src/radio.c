@@ -214,6 +214,8 @@ int cw_breakin = 1;                    // 0=disabled 1=enabled
 int auto_tune_flag = 0;
 int auto_tune_end = 0;
 
+int TxInhibit = 0;
+
 int vfo_encoder_divisor = 15;
 
 int protocol;
@@ -1790,6 +1792,8 @@ static void rxtx(int state) {
 void setMox(int state) {
   if (!can_transmit) { return; }
 
+  if (state && TxInhibit) { return; }
+
   vox_cancel();  // remove time-out
 
   if (mox != state) {
@@ -1820,6 +1824,10 @@ int getMox() {
 }
 
 void vox_changed(int state) {
+  if (!can_transmit) { return; }
+
+  if (state && TxInhibit) { return; }
+
   if (vox != state && !tune && !mox) {
     rxtx(state);
   }
@@ -1831,6 +1839,8 @@ void vox_changed(int state) {
 
 void setTune(int state) {
   if (!can_transmit) { return; }
+
+  if (state && TxInhibit) { return; }
 
   // if state==tune, this function is a no-op
 

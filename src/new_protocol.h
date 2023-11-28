@@ -48,7 +48,7 @@
 #define RX_IQ_TO_HOST_PORT_7                          1042
 
 // Network buffers
-// Maximum length is 1444 
+// Maximum length is 1444
 
 #define NET_BUFFER_SIZE  1500
 

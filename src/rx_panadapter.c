@@ -639,7 +639,14 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
     }
   }
 
-  if (display_pacurr && isTransmitting()) {
+  if (TxInhibit) {
+    cairo_set_source_rgba(cr, COLOUR_ALARM);
+    cairo_set_font_size(cr, DISPLAY_FONT_SIZE3);
+    cairo_move_to(cr, 100.0, 30.0);
+    cairo_show_text(cr, "TX Inhibit");
+  }
+
+  if (display_pacurr && isTransmitting() && !TxInhibit) {
     double v;  // value
     int flag;  // 0: dont, 1: do
     static int count = 0;

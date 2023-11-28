@@ -164,6 +164,8 @@ extern int cw_breakin;
 extern int auto_tune_flag;
 extern int auto_tune_end;
 
+extern int TxInhibit;
+
 extern int vfo_encoder_divisor;
 
 extern int protocol;

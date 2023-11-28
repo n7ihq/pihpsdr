@@ -326,7 +326,7 @@ void old_protocol_stop() {
   // For OZY, metis_start_stop is a no-op so quick return
   //
   if (device == DEVICE_OZY) { return; }
-  
+
   pthread_mutex_lock(&send_ozy_mutex);
   t_print("%s\n", __FUNCTION__);
   metis_start_stop(0);
@@ -1125,6 +1125,7 @@ static void process_control_bytes() {
   int previous_ptt;
   int previous_dot;
   int previous_dash;
+  int data;
   unsigned int val;
   //
   // variable used to manage analog inputs. The accumulators
@@ -1166,10 +1167,23 @@ static void process_control_bytes() {
   case 0:
     adc0_overload |= (control_in[1] & 0x01);
 
+    //
+    // Hermes IOx inputs (x=1,2,3,4)
+    // Here: TxInhibit which is normally HermesIO1 but
+    //       on ANAN it is HermesIO2
+    //
+    if (device == DEVICE_ORION2) {
+      data = (control_in[1] >> 2) & 0x01;
+    } else {
+      data = (control_in[1] >> 1) & 0x01;
+    }
+    if (!TxInhibit && data == 0) {
+      TxInhibit = 1;
+      g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
+    }
+    if (data == 1) { TxInhibit = 0; }
+
     if (device != DEVICE_HERMES_LITE2) {
-      //
-      // There we could make use of the "digital user inputs"
-      //
       if (mercury_software_version[0] != control_in[2]) {
         mercury_software_version[0] = control_in[2];
         t_print("  Mercury Software version: %d (0x%0X)\n", mercury_software_version[0], mercury_software_version[0]);

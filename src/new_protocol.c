@@ -249,7 +249,6 @@ static pthread_mutex_t general_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int radio_ptt = 0;
 static int radio_dash = 0;
 static int radio_dot = 0;
-static int radio_io6 = 1;
 
 static void new_protocol_start(void);
 static void new_protocol_high_priority(void);
@@ -1206,7 +1205,7 @@ static void new_protocol_high_priority() {
   //  Measurements have shown that we can reduce the time
   //  from when the radio send PTT to the time when the
   //  radio receives the new Ant1/2/2 setup from about
-  //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds, 
+  //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds,
   // and this should be
   //  enough.
   //
@@ -2231,6 +2230,7 @@ static void process_high_priority() {
   int previous_dot;
   int previous_dash;
   unsigned int val;
+  int data;
   static GThread *tune_thread_id = NULL;
   //
   // variable used to manage analog inputs. The accumulators
@@ -2268,7 +2268,7 @@ static void process_high_priority() {
     new_protocol_high_priority();
   }
 
-  radio_io6 = (buffer[59] >> 2) & 0x01;  // 0 = active
+  data = (buffer[59] >> 2) & 0x01;  // 0 = active
   tx_fifo_overrun |= (buffer[4] & 0x40) >> 6;
   tx_fifo_underrun |= (buffer[4] & 0x20) >> 5;
   adc0_overload |= buffer[5] & 0x01;
@@ -2318,8 +2318,9 @@ static void process_high_priority() {
   // If IO6 is active, start TUNE thread if  it is not (yet) active
   // it is not (yet) running
   //
-  auto_tune_end = radio_io6;
-  if (radio_io6 == 0 && !auto_tune_flag) {
+  data = (buffer[59] >> 2) & 0x01;  // 0 = active
+  auto_tune_end = data;
+  if (data == 0 && !auto_tune_flag) {
     auto_tune_flag = 1;
     auto_tune_end  = 0;
     if (tune_thread_id) {
@@ -2327,6 +2328,19 @@ static void process_high_priority() {
     }
     tune_thread_id = g_thread_new("TUNE", auto_tune_thread, NULL);
   }
+  //
+  // TxInhibit. 0 = active
+  //
+  if (device == NEW_DEVICE_ORION2  || device == NEW_DEVICE_SATURN) {
+    data = (buffer[59] >> 1) & 0x01;     // IO5 for Anan7000 etc.
+  } else {
+    data = buffer[59] & 0x01;            // IO4 for all others
+  }
+  if (!TxInhibit && data == 0) {
+    TxInhibit = 1;
+    g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
+  }
+  if (data == 1) { TxInhibit = 0; }
 }
 
 static void process_mic_data(const unsigned char *buffer) {

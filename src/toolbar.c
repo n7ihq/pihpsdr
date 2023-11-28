@@ -102,7 +102,7 @@ void mox_update(int state) {
   }
 
   if (state) {
-    if (TransmitAllowed() || tx_out_of_band) {
+    if (TransmitAllowed()) {
       setMox(state);
     } else {
       transmitter_set_out_of_band(transmitter);
