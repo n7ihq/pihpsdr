@@ -161,9 +161,11 @@ extern int cw_keyer_hang_time;
 extern int cw_keyer_sidetone_frequency;
 extern int cw_breakin;
 
+extern int enable_auto_tune;
 extern int auto_tune_flag;
 extern int auto_tune_end;
 
+extern int enable_tx_inhibit;
 extern int TxInhibit;
 
 extern int vfo_encoder_divisor;

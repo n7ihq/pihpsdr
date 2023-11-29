@@ -1064,6 +1064,34 @@ If checked, the audio amplifier driving the speakers (either the speaker jacks i
 back panel, or the built-in speakers) is disabled. This does not affect the audio signal
 at the headphone jack.
 
+\rett{Enable TxInhibit Input} This box only appears for HPSDR (and not for SoapySDR)
+radios.  
+For  protocol 1, TxInhibit is signalled for most radios by the Hermes IO1 bit being
+cleared (the Hermes IO2 bit is used for Anan-7000/8000). For protocol 2, for most
+radios the IO4 bit is used (Anan-7000/8000/G2 use the IO5 bit). 
+If the \rett{Enable TxInhibit Input} box is checked, ,,TX Inhibit'' will be drawn
+in the top left corner of the RX1 panadapter if signalled. If TxInhibit is signalled
+while piHPSDR is transmitting, it will induce a TX/RX transition, and any RX/TX
+transition is suppressed while TxInhibit is active. Some radios (e.g. Anan-7000) have
+a RCA jack with an active-low input, and the TxInhibit bit follows that input.
+Note that for effective hardware protection, processing the TxInhibit bit must
+take place in the FPGA of the radio. This checkbox simply enables piHPSDR to tell
+the user about such an event.
+
+\rett{Enable AutoTune  input} his box only appears for HPSDR (and not for SoapySDR)
+radios. The AutoTune state is signalled for protocol 1 by the input bit IO3,
+and for protocol 2 by the user input bit IO6 (the active state is represented
+by the bit being cleared).
+If \rett{Enable AutoTune  input} checked, piHPSDR will initiate \bltt{TUNE}-ing if the
+input bit becomes active, and stop \bltt{TUNE}-ing if it later on becomes inactive.
+For the Anan-7000, there is no RCA jack connected with the IO3/IO6 bit, but the
+input is available on the spread-out board (between the Orion-II and the PA board) and one
+can easily solder a wire there to have this user input. The AutoTune input is meant to
+be pulled down if e.g. a "Tune" button on an external automatic tuner is pressed.
+For such a setup, it is usually recommended to use a reduced RF output level while
+\bltt{TUNE}-ing  (see the \bltt{TX} menu, chapter \ref{sec:txmenu}). 
+
+
 \rett{Frequency Calibration} Here you can set a frequency offset (in Hz). This offset
 will be added to all frequencies sent to the radio. This means that if you discover that
 a reference signal occurs in your RX panel at 10001 kHz where it should occur at 10000

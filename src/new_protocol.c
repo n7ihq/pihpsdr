@@ -2268,7 +2268,6 @@ static void process_high_priority() {
     new_protocol_high_priority();
   }
 
-  data = (buffer[59] >> 2) & 0x01;  // 0 = active
   tx_fifo_overrun |= (buffer[4] & 0x40) >> 6;
   tx_fifo_underrun |= (buffer[4] & 0x20) >> 5;
   adc0_overload |= buffer[5] & 0x01;
@@ -2314,33 +2313,36 @@ static void process_high_priority() {
   if (previous_ptt != radio_ptt) {
     g_idle_add(ext_mox_update, GINT_TO_POINTER(radio_ptt));
   }
-  //
-  // If IO6 is active, start TUNE thread if  it is not (yet) active
-  // it is not (yet) running
-  //
-  data = (buffer[59] >> 2) & 0x01;  // 0 = active
-  auto_tune_end = data;
-  if (data == 0 && !auto_tune_flag) {
-    auto_tune_flag = 1;
-    auto_tune_end  = 0;
-    if (tune_thread_id) {
-      g_thread_join(tune_thread_id);
+
+  if (enable_tx_inhibit) {
+    if (device == NEW_DEVICE_ORION2  || device == NEW_DEVICE_SATURN) {
+      data = (buffer[59] >> 1) & 0x01;   // use IO5 (active=0) on Anan-7000/8000/G2
+    } else {
+      data = buffer[59] & 0x01;          // use IO4 (active=0) on all other gear
     }
-    tune_thread_id = g_thread_new("TUNE", auto_tune_thread, NULL);
-  }
-  //
-  // TxInhibit. 0 = active
-  //
-  if (device == NEW_DEVICE_ORION2  || device == NEW_DEVICE_SATURN) {
-    data = (buffer[59] >> 1) & 0x01;     // IO5 for Anan7000 etc.
+    if (!TxInhibit && data == 0) {
+      TxInhibit = 1;
+      g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
+    }
+    if (data == 1) { TxInhibit = 0; }
   } else {
-    data = buffer[59] & 0x01;            // IO4 for all others
+   TxInhibit = 0;
   }
-  if (!TxInhibit && data == 0) {
-    TxInhibit = 1;
-    g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
+
+  if (enable_auto_tune) {
+    data = (buffer[59] >> 2) & 0x01;  // use IO6 (active=0)
+    auto_tune_end = data;
+    if (data == 0 && !auto_tune_flag) {
+      auto_tune_flag = 1;
+      auto_tune_end  = 0;
+      if (tune_thread_id) {
+        g_thread_join(tune_thread_id);
+      }
+      tune_thread_id = g_thread_new("TUNE", auto_tune_thread, NULL);
+    }
+  } else {
+    auto_tune_end = 1;
   }
-  if (data == 1) { TxInhibit = 0; }
 }
 
 static void process_mic_data(const unsigned char *buffer) {
