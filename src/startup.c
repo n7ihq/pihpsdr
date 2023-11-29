@@ -99,19 +99,15 @@ void startup(const char *path) {
   }
 
   //
-  // Look for files hpsdr.png, protocols.props, and pihpsdr.sh
+  // Look whether file pihpsdr.sh or directory release/pihpsdr exists
   //
-  rc = stat("hpsdr.png", &statbuf);
-
-  if (rc == 0 && (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode))) { found = 1; }
-
-  rc = stat("protocols.props", &statbuf);
-
-  if (rc == 0 && (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode))) { found = 1;}
-
   rc = stat("pihpsdr.sh", &statbuf);
 
   if (rc == 0 && (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode))) { found = 1;}
+
+  rc = stat("release/pihpsdr", &statbuf);
+
+  if (rc == 0 && S_ISDIR(statbuf.st_mode)) { found = 1;}
 
   //
   // Most likely, piHPDSR is expected to run in the current working directory
