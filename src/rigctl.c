@@ -657,6 +657,15 @@ static gpointer rigctl_cw_thread(gpointer data) {
 }
 
 void send_resp (int fd, char * msg) {
+  if (fd == -1) {
+    //
+    // This means the client fd has been explicitly closed
+    // in the mean time. Silently give up and do not
+    // emit an error message.
+    //
+    return;
+  }
+
   if (rigctl_debug) { t_print("RIGCTL: RESP=%s\n", msg); }
 
   int length = strlen(msg);
@@ -795,7 +804,7 @@ static gpointer rigctl_client (gpointer data) {
   g_mutex_lock(&mutex_a->m);
   cat_control++;
 
-  if (rigctl_debug) { t_print("RIGCTL: CTLA INC cat_contro=%d\n", cat_control); }
+  if (rigctl_debug) { t_print("RIGCTL: CTLA INC cat_control=%d\n", cat_control); }
 
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update, NULL);
