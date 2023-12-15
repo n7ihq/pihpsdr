@@ -450,11 +450,15 @@ static gboolean update_display(gpointer data) {
     case DEVICE_HERMES_LITE2:
     case NEW_DEVICE_HERMES_LITE:
     case NEW_DEVICE_HERMES_LITE2:
+      //
+      // These values are a fit to the "HL2FilterE3" data in Quisk.
+      // No difference in the Fwd and Rev formula.
+      //
       constant1 = 3.3;
-      constant2 = 1.5;
-      rconstant2 = 1.8;
-      rev_cal_offset = 3;
-      fwd_cal_offset = 6;
+      constant2 = 1.52;
+      rconstant2 = 1.52;
+      rev_cal_offset = -34;
+      fwd_cal_offset = -34;
       break;
     }
 

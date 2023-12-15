@@ -1144,6 +1144,13 @@ static void process_control_bytes() {
   previous_dot = radio_dot;
   previous_dash = radio_dash;
 
+  //
+  // Note HL2 I/O board
+  // If bit 7 of control_in[0] is set, then
+  // control_in[1:4] contain four bytes of I2C data from the I/O board
+  // which serves various functions.
+  // This is not (yet) implemented in piHPSDR
+  //
   radio_ptt  = (control_in[0]     ) & 0x01;
   radio_dash = (control_in[0] >> 1) & 0x01;
   radio_dot  = (control_in[0] >> 2) & 0x01;
@@ -2016,6 +2023,12 @@ void ozy_send_buffer() {
 
     // end of "C0=0" packet
   } else {
+    //
+    // Note HL2 I/O board:
+    // If there is a HermesLite-II I/O board and i2c data to be
+    // sent, then we need an additional packet with
+    // C0 = x111 10y0b where the MOX bit is *not* set.
+    // This is not (yet) implemented in piHPSDR.
     //
     // metis_offset !=8: send the other C&C packets in round-robin
     // RX frequency commands are repeated for each RX
