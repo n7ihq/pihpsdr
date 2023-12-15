@@ -86,8 +86,8 @@ int ext_mox_update(void *data) {
   return G_SOURCE_REMOVE;
 }
 
-int ext_vox_changed(void *data) {
-  vox_changed(GPOINTER_TO_INT(data));
+int ext_set_vox(void *data) {
+  setVox(GPOINTER_TO_INT(data));
   return G_SOURCE_REMOVE;
 }
 

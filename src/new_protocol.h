@@ -86,11 +86,6 @@ extern void filter_board_changed(void);
 extern void pa_changed(void);
 extern void tuner_changed(void);
 
-extern void setMox(int state);
-extern int getMox(void);
-extern void setTune(int state);
-extern int getTune(void);
-
 extern void new_protocol_audio_samples(RECEIVER *rx, short left_audio_sample, short right_audio_sample);
 extern void new_protocol_iq_samples(int isample, int qsample);
 extern void new_protocol_flush_iq_samples(void);

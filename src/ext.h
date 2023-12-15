@@ -39,7 +39,7 @@ extern int ext_start_vfo(void *data);
 extern int ext_start_band(void *data);
 extern int ext_update_noise(void *data);
 extern int ext_update_eq(void *data);
-extern int ext_vox_changed(void *data);     // is this necessary?
+extern int ext_set_vox(void *data);
 extern int ext_set_duplex(void *data);      // is this necessary?
 
 ///////////////////////////////////////////////////////////

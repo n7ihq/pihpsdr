@@ -94,22 +94,13 @@ void update_toolbar_labels() {
 //
 
 void mox_update(int state) {
-  //t_print("mox_update: state=%d\n",state);
   if (!can_transmit) { return; }
 
-  if (getTune() == 1) {
-    setTune(0);
+  if (state && !TransmitAllowed()) {
+    state=0;
+    transmitter_set_out_of_band(transmitter);
   }
-
-  if (state) {
-    if (TransmitAllowed()) {
-      setMox(state);
-    } else {
-      transmitter_set_out_of_band(transmitter);
-    }
-  } else {
-    setMox(state);
-  }
+  setMox(state);
 
   g_idle_add(ext_vfo_update, NULL);
 }
@@ -117,21 +108,13 @@ void mox_update(int state) {
 void tune_update(int state) {
   if (!can_transmit) { return; }
 
-  if (getMox() == 1) {
-    setMox(0);
-  }
+  setMox(0);  // This will also cancel VOX and TUNE
 
-  if (state) {
-    setTune(0);
-
-    if (TransmitAllowed()) {
-      setTune(1);
-    } else {
-      transmitter_set_out_of_band(transmitter);
-    }
-  } else {
-    setTune(state);
+  if (state && !TransmitAllowed()) {
+    state=0;
+    transmitter_set_out_of_band(transmitter);
   }
+  setTune(state);
 
   g_idle_add(ext_vfo_update, NULL);
 }

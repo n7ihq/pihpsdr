@@ -35,7 +35,7 @@ static int vox_timeout_cb(gpointer data) {
   // then, remove VOX and update display
   //
   vox_cancel();
-  g_idle_add(ext_vox_changed, GINT_TO_POINTER(0));
+  g_idle_add(ext_set_vox, GINT_TO_POINTER(0));
   g_idle_add(ext_vfo_update, NULL);
   return FALSE;
 }
@@ -66,7 +66,7 @@ void update_vox(TRANSMITTER *tx) {
     }
   }
 
-  if (vox_enabled) {
+  if (vox_enabled && !mox && !tune && !TxInhibit) {
     if (peak > vox_threshold) {
       // we use the value of vox_timeout to determine whether
       // the time-out is "hanging". We cannot use the value of vox
@@ -80,7 +80,7 @@ void update_vox(TRANSMITTER *tx) {
         //
         // no hanging time-out, assume that we just fired VOX
         //
-        g_idle_add(ext_vox_changed, GINT_TO_POINTER(1));
+        g_idle_add(ext_set_vox, GINT_TO_POINTER(1));
         g_idle_add(ext_vfo_update, NULL);
       }
 

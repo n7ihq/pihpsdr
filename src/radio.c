@@ -1792,23 +1792,34 @@ static void rxtx(int state) {
 }
 
 void setMox(int state) {
+  t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
   if (!can_transmit) { return; }
 
   if (state && TxInhibit) { return; }
 
+  //
+  // - setting MOX (no matter in which direction) stops TUNEing
+  // - setting MOX (no matter in which direction) ends a pending VOX
+  // - activating MOX while VOX is pending continues transmission
+  // - deactivating MOX while VOX is pending makes a TX/RX transition
+  //
+  if (tune) {
+    setTune(0);
+  }
   vox_cancel();  // remove time-out
 
-  if (mox != state) {
-    if (state && vox) {
-      // Suppress RX-TX transition if VOX was already active
-    } else {
-      rxtx(state);
-    }
-
-    mox = state;
+  //
+  // If MOX is activated while VOX is already pending,
+  // then switch from VOX to MOX mode but no RX/TX
+  // transition is necessary.
+  //
+  if (state != isTransmitting()) {
+    rxtx(state);
   }
 
-  vox = 0;
+  mox  = state;
+  tune = 0;
+  vox  = 0;
 
   switch (protocol) {
   case NEW_PROTOCOL:
@@ -1825,12 +1836,14 @@ int getMox() {
   return mox;
 }
 
-void vox_changed(int state) {
+void setVox(int state) {
+  t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
   if (!can_transmit) { return; }
 
+  if (mox || tune) { return; }
   if (state && TxInhibit) { return; }
 
-  if (vox != state && !tune && !mox) {
+  if (vox != state) {
     rxtx(state);
   }
 
@@ -1840,6 +1853,7 @@ void vox_changed(int state) {
 }
 
 void setTune(int state) {
+  t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
   if (!can_transmit) { return; }
 
   if (state && TxInhibit) { return; }
