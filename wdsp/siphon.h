@@ -18,41 +18,41 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-The author can be reached by email at  
+The author can be reached by email at
 
 warren@wpratt.com
 
 */
 
 // 'siphon' collects samples in a buffer.  These samples can then be PULLED from the buffer
-//	in either raw or FFT'd form.
+//  in either raw or FFT'd form.
 
 #ifndef _siphon_h
 #define _siphon_h
 
 typedef struct _siphon
 {
-	int run;
-	int position;
-	int mode;
-	int disp;
-	int insize;
-	double* in;
-	int sipsize;	// NOTE:  sipsize MUST BE A POWER OF TWO!!
-	double* sipbuff;
-	int outsize;
-	int idx;
-	double* sipout;
-	int fftsize;
-	double* specout;
-	volatile long specmode;
-	fftw_plan sipplan;
-	double* window;
-	CRITICAL_SECTION update;
+    int run;
+    int position;
+    int mode;
+    int disp;
+    int insize;
+    double* in;
+    int sipsize;    // NOTE:  sipsize MUST BE A POWER OF TWO!!
+    double* sipbuff;
+    int outsize;
+    int idx;
+    double* sipout;
+    int fftsize;
+    double* specout;
+    volatile long specmode;
+    fftw_plan sipplan;
+    double* window;
+    CRITICAL_SECTION update;
 } siphon, *SIPHON;
 
-extern SIPHON create_siphon (int run, int position, int mode, int disp, int insize, double* in, int sipsize, 
-	int fftsize, int specmode);
+extern SIPHON create_siphon (int run, int position, int mode, int disp, int insize, double* in, int sipsize,
+    int fftsize, int specmode);
 
 extern void destroy_siphon (SIPHON a);
 

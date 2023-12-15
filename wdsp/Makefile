@@ -22,7 +22,6 @@ cblock.c\
 cfcomp.c\
 cfir.c\
 channel.c\
-comm.c\
 compress.c\
 delay.c\
 dexp.c\
@@ -144,7 +143,6 @@ cblock.o\
 cfcomp.o\
 cfir.o\
 channel.o\
-comm.o\
 compress.o\
 delay.o\
 dexp.o\

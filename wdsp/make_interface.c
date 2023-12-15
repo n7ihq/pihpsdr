@@ -74,7 +74,7 @@ int main(int argc, char **argv)
               printf("\n%s", line);
             }
           }
-        }          
+        }
       }
       fclose(infile);
     }

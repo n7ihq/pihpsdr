@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-The author can be reached by email at  
+The author can be reached by email at
 
 warren@wpratt.com
 john.d.melton@googlemail.com
@@ -31,168 +31,175 @@ john.d.melton@googlemail.com
 #include "comm.h"
 
 /********************************************************************************************************
-*													*
-*	Linux Port Utilities										*
-*													*
+*                                                                                                       *
+*   Linux Port Utilities                                                                                *
+*                                                                                                       *
 ********************************************************************************************************/
 
 #if defined(linux) || defined(__APPLE__)
 
 void QueueUserWorkItem(void *function,void *context,int flags) {
-	pthread_t t;
-	pthread_create(&t, NULL, function, context);
-	pthread_join(t, NULL);
+    pthread_t t;
+    pthread_create(&t, NULL, function, context);
+    pthread_join(t, NULL);
 }
 
 void InitializeCriticalSectionAndSpinCount(pthread_mutex_t *mutex,int count) {
-	pthread_mutexattr_t mAttr;
-	pthread_mutexattr_init(&mAttr);
+    pthread_mutexattr_t mAttr;
+    pthread_mutexattr_init(&mAttr);
 #ifdef __APPLE__
-	// DL1YCF: MacOS X does not have PTHREAD_MUTEX_RECURSIVE_NP
-	pthread_mutexattr_settype(&mAttr,PTHREAD_MUTEX_RECURSIVE);
+    // DL1YCF: MacOS X does not have PTHREAD_MUTEX_RECURSIVE_NP
+    pthread_mutexattr_settype(&mAttr,PTHREAD_MUTEX_RECURSIVE);
 #else
-	pthread_mutexattr_settype(&mAttr,PTHREAD_MUTEX_RECURSIVE_NP);
+    pthread_mutexattr_settype(&mAttr,PTHREAD_MUTEX_RECURSIVE_NP);
 #endif
-	pthread_mutex_init(mutex,&mAttr);
-	pthread_mutexattr_destroy(&mAttr);
-	// ignore count
+    pthread_mutex_init(mutex,&mAttr);
+    pthread_mutexattr_destroy(&mAttr);
+    // ignore count
 }
 
 void EnterCriticalSection(pthread_mutex_t *mutex) {
-	pthread_mutex_lock(mutex);
+    pthread_mutex_lock(mutex);
 }
 
 void LeaveCriticalSection(pthread_mutex_t *mutex) {
-	pthread_mutex_unlock(mutex);
+    pthread_mutex_unlock(mutex);
 }
 
 void DeleteCriticalSection(pthread_mutex_t *mutex) {
-	pthread_mutex_destroy(mutex);
+    pthread_mutex_destroy(mutex);
 }
 
 int LinuxWaitForSingleObject(sem_t *sem,int ms) {
-	int result=0;
-	if(ms==INFINITE) {
-		// wait for the lock
-		result=sem_wait(sem);
-	} else {
-		// try to get the lock
-		result=sem_trywait(sem);
-		if(result!=0) {
-			// didn't get the lock
-			if(ms!=0) {
-				// sleep if ms not zero
-				Sleep(ms);
-				// try to get the lock again
-				result=sem_trywait(sem);
-			}
-		}
-	}
-	
-	return result;
+    int result=0;
+    if(ms==INFINITE) {
+        // wait for the lock
+        result=sem_wait(sem);
+    } else {
+        for (int i = 0; i < ms; i++) {
+          result=sem_trywait(sem);
+          if (result == 0) break;
+          Sleep(1);
+        }
+    }
+
+    return result;
 }
 
 sem_t *LinuxCreateSemaphore(int attributes,int initial_count,int maximum_count,char *name) {
         sem_t *sem;
 #ifdef __APPLE__
-        //
-        // DL1YCF
-	// This routine is usually invoked with name=NULL, so we have to make
-	// a unique name of tpye WDSPxxxxxxxx for each invocation, since MacOS only
-        // supports named semaphores. We shall unlink in due course, but first we
-        // need to check whether the name is possibly already in use, e.g. by
-        // another SDR program running on the same machine.
-        //
-	static long semcount=0;
-	char sname[20];
+    //
+    // DL1YCF
+    // This routine is usually invoked with name=NULL, so we have to make
+    // a unique name of tpye WDSPxxxxxxxx for each invocation, since MacOS only
+    // supports named semaphores. We shall unlink in due course, but first we
+    // need to check whether the name is possibly already in use, e.g. by
+    // another SDR program running on the same machine.
+    //
+    static long semcount=0;
+    char sname[20];
         for (;;) {
           sprintf(sname,"WDSP%08ld",semcount++);
           sem=sem_open(sname, O_CREAT | O_EXCL, 0700, initial_count);
           if (sem == SEM_FAILED && errno == EEXIST) continue;
           break;
         }
-	if (sem == SEM_FAILED) {
-	  perror("WDSP:CreateSemaphore");
-	}
-        //
-        // we can unlink the semaphore NOW. It will remain functional
-        // until sem_close() has been called by all threads using that
-        // semaphore.
-        //
-	sem_unlink(sname);
+    if (sem == SEM_FAILED) {
+      perror("WDSP:CreateSemaphore");
+    }
+    //
+    // we can unlink the semaphore NOW. It will remain functional
+    // until sem_close() has been called by all threads using that
+    // semaphore.
+    //
+    sem_unlink(sname);
 #else
-        sem=malloc0(sizeof(sem_t));
-	int result;
-        // DL1YCF: added correct initial count
-	result=sem_init(sem, 0, initial_count);
-        if (result < 0) {
-	  perror("WDSP:CreateSemaphore");
-        }
+    sem=malloc0(sizeof(sem_t));
+    int result;
+    // DL1YCF: added correct initial count
+    result=sem_init(sem, 0, initial_count);
+    if (result < 0) {
+      perror("WDSP:CreateSemaphore");
+    }
 #endif
-	return sem;
+    return sem;
 }
 
 void LinuxReleaseSemaphore(sem_t* sem,int release_count, int* previous_count) {
-	//
-	// Note WDSP always calls this with previous_count==NULL
-        // so we do not bother about obtaining the previous value and 
-        // storing it in *previous_count.
-        //
-	while(release_count>0) {
-		sem_post(sem);
-		release_count--;
-	}
+    //
+    // Note WDSP always calls this with previous_count==NULL
+    // so we do not bother about obtaining the previous value and
+    // storing it in *previous_count.
+    //
+    while(release_count>0) {
+        sem_post(sem);
+        release_count--;
+    }
 }
 
 sem_t *CreateEvent(void* security_attributes,int bManualReset,int bInitialState,char* name) {
-	//
-	// From within WDSP, this is always called with bManualReset = bInitialState = FALSE
-	//
-        sem_t *sem;
-	sem=LinuxCreateSemaphore(0,0,0,0);
-	return sem;
+    //
+    // This is always called with bManualReset = bInitialState = FALSE
+    //
+    sem_t *sem;
+    sem=LinuxCreateSemaphore(0,0,0,0);
+    return sem;
 }
 
 void LinuxSetEvent(sem_t* sem) {
-	sem_post(sem);
+    //
+    // WDSP uses this to set the semaphore (event) to
+    // a "releasing" state.
+    // we simulate this by posting
+    sem_post(sem);
+}
+
+void LinuxResetEvent(sem_t* sem) {
+    //
+    // WDSP uses this to set the semaphore (event) to
+    // a blocking state.
+    // We mimic this by calling sem_trywait as long as it succeeds
+    //
+    while (sem_trywait(sem) == 0) ;
 }
 
 HANDLE _beginthread( void( __cdecl *start_address )( void * ), unsigned stack_size, void *arglist) {
-	pthread_t threadid;
-	pthread_attr_t  attr;
+    pthread_t threadid;
+    pthread_attr_t  attr;
 
-	if (pthread_attr_init(&attr)) {
- 	    return (HANDLE)-1;
-	}
-      
-	if(stack_size!=0) {
-	    if (pthread_attr_setstacksize(&attr, stack_size)) {
-	        return (HANDLE)-1;
-	    }
-	}
+    if (pthread_attr_init(&attr)) {
+        return (HANDLE)-1;
+    }
 
-        if(pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED)) {
+    if(stack_size!=0) {
+        if (pthread_attr_setstacksize(&attr, stack_size)) {
             return (HANDLE)-1;
         }
-     
-	if (pthread_create(&threadid, &attr, (void*(*)(void*))start_address, arglist)) {
-	     return (HANDLE)-1;
-	}
+    }
 
-        //pthread_attr_destroy(&attr);
+    if(pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED)) {
+        return (HANDLE)-1;
+    }
+
+    if (pthread_create(&threadid, &attr, (void*(*)(void*))start_address, arglist)) {
+         return (HANDLE)-1;
+    }
+
+    //pthread_attr_destroy(&attr);
 #ifndef __APPLE__
-	// DL1YCF: this function does not exist on MacOS. You can only name the
-        //         current thread.
-       //          If this call should fail, continue anyway.
-        (void) pthread_setname_np(threadid, "WDSP");
+    // DL1YCF: this function does not exist on MacOS. You can only name the
+    //         current thread.
+    //         If this call should fail, continue anyway.
+    (void) pthread_setname_np(threadid, "WDSP");
 #endif
 
-	return (HANDLE)threadid;
+    return (HANDLE)threadid;
 
 }
 
 void _endthread() {
-	pthread_exit(NULL);
+    pthread_exit(NULL);
 }
 
 void SetThreadPriority(HANDLE thread, int priority)  {
@@ -202,12 +209,12 @@ void SetThreadPriority(HANDLE thread, int priority)  {
 // is basically a no-op here.
 //
 /*
-	int policy;
-	struct sched_param param;
+    int policy;
+    struct sched_param param;
 
-	pthread_getschedparam(thread, &policy, &param);
-	param.sched_priority = sched_get_priority_max(policy);
-	pthread_setschedparam(thread, policy, &param);
+    pthread_getschedparam(thread, &policy, &param);
+    param.sched_priority = sched_get_priority_max(policy);
+    pthread_setschedparam(thread, policy, &param);
 */
 }
 
@@ -256,11 +263,11 @@ return;
 //
 // furthermore, my_free will complain (and terminate the program) if its argument
 // does not point to an active memory block allocated with my_malloc.
-// 
+//
 // P.S.1: Using "valgrind" with such time-critical programs is not a good idea,
 //        so here is a solution.
 //
-// P.S.2: Further extensions are possible, e.g. include __FUNCTION__ and __LINE__ 
+// P.S.2: Further extensions are possible, e.g. include __FUNCTION__ and __LINE__
 //        in the argument list of my_malloc(), store this in MEM_LIST, and report
 //        upon failure.
 //
@@ -284,7 +291,7 @@ struct _MEM_LIST {
 
 typedef struct _MEM_LIST MEM_LIST;
 
-#define MEM_LIST_SIZE 8192
+#define MEM_LIST_SIZE 32768
 
 MEM_LIST malloc_slot[MEM_LIST_SIZE] = {0};
 
@@ -319,7 +326,7 @@ void *my_malloc(size_t size) {
   malloc_slot[slot].baseptr = baseptr;
   malloc_slot[slot].freeptr = freeptr;
   malloc_slot[slot].size    = size;
-  
+
   //
   // Create a "fence" around the allocated area
   //
@@ -393,8 +400,8 @@ void my_free(void *ptr) {
   }
   free(malloc_slot[slot].baseptr);
   malloc_slot[slot].in_use=0;
-  
+
   pthread_mutex_unlock(&malloc_mutex);
 }
-  
+
 #endif

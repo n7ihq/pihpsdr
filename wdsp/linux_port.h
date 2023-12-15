@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-The author can be reached by email at  
+The author can be reached by email at
 
 warren@wpratt.com
 john.d.melton@googlemail.com
@@ -81,6 +81,7 @@ void my_free(void *p);
 #define WaitForSingleObject(x, y) LinuxWaitForSingleObject(x, y)
 #define ReleaseSemaphore(x,y,z) LinuxReleaseSemaphore(x,y,z)
 #define SetEvent(x) LinuxSetEvent(x)
+#define ResetEvent(x) LinuxResetEvent(x)
 
 #define INFINITE -1
 
@@ -104,6 +105,7 @@ void LinuxReleaseSemaphore(sem_t *sem,int release_count, int* previous_count);
 sem_t *CreateEvent(void* security_attributes,int bManualReset,int bInitialState,char* name);
 
 void LinuxSetEvent(sem_t* sem);
+void LinuxResetEvent(sem_t* sem);
 
 HANDLE _beginthread( void( __cdecl *start_address )( void * ), unsigned stack_size, void *arglist);
 

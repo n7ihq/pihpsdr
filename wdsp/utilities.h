@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-The author can be reached by email at  
+The author can be reached by email at
 
 warren@wpratt.com
 
@@ -55,7 +55,7 @@ extern void print_anb_parms (const char* filename, ANB a);
 extern void WriteAudioWDSP(double seconds, int rate, int size, double* indata, int mode, double gain);
 
 extern void WriteScaledAudio (
-	double seconds,			// number of seconds of audio to record
-	int rate,				// sample rate
-	int size,				// incoming buffer size
-	double* indata );		// pointer to incoming data buffer
+    double seconds,         // number of seconds of audio to record
+    int rate,               // sample rate
+    int size,               // incoming buffer size
+    double* indata );       // pointer to incoming data buffer
