@@ -1420,7 +1420,7 @@ static void new_protocol_transmit_specific() {
   transmit_specific_buffer[59] = adc[0].attenuation;
   transmit_specific_buffer[58] = diversity_enabled ? adc[0].attenuation : adc[1].attenuation;
 
-  if (local_pa_enabled) {
+  if (local_pa_enable) {
     transmit_specific_buffer[58] = 31;   // ADC1
     transmit_specific_buffer[59] = 31;   // ADC0
   }
