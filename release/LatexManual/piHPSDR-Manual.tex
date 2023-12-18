@@ -2345,6 +2345,9 @@ between 0 and 31, other radios such as the HermesLite have an extended range fro
 -29 to 31. If the feedback level is too strong, this value must be increased, if it
 is too strong, it must be decreased. It is, however, recommended to enable \rett{Auto Attenuate}.
 In this case, the \rett{TX ATT} just shows the current attenuation.
+Note that this attenuation value is only effective if \texttt{PURESIGNAL} is enabled.
+If not, the RF input attenuators are set to maximum attenution while transmitting, if the
+PA is enabled.
 
 \rett{SetPk} This field shows the currently assumed value of the peak value of the TX DAC
 feedback signal. piHPSDR chooses is automatically. It should match the value reported
@@ -2360,25 +2363,29 @@ HPSDR board with modified TX DAC filters, but this should normally not happen.
 \end{figure}
 
 To demonstrate what happens, I show an example. Checking both \rett{Enable PS} and
-\rett{Auto Attenuation}, and hitting the \rett{Two Tone} button, it need few
-seconds to stabilize and then Fig. \ref{fig:PSnomon} resulted, where the TX
+\rett{Auto Attenuation}, and hitting the \rett{Two Tone} button, it needs only few
+seconds to stabilize and then Fig. \ref{fig:PSnomon} results, where the TX
 spectrum scope and the PS menu window have been arranged such that they do
 not cover each other. Although both the PS menu and the spectrum scope state
-that PS is working and correcting, the signal does not look as a good two-tone
-signal which would only have two peaks! The reason is, that the TX spectrum scope
+that PS is working and correcting, the signal does not look good: a two-tone
+signal should only have two peaks! The reason is, that the TX spectrum scope
 normally shows the signal that is sent to the PA, so we see a distorted signal.
 However this distortion is magically exactly such that the PA makes a nice signal
-out of this. If one wants to see what one is actually transmitting, one must
-push the \rett{MON} button such that it is highlighted. Then one sees that
-the feedback signal that shows what is going on at the antenna (Fig. \ref{fig:PSmon}):
-
-
-
-Here one sees that the antenna emits a clean two-tone signal (no satellites can be seen,
+out of this (\textit{adaptive predistortion}) . If one wants to see what the antenna
+ is actually transmitting, one must
+push the \rett{MON} button such that it is highlighted. 
+This is shown in Fig. \ref{fig:PSmon}, where one sees the
+feedback signal, that is, what the PA sends to the antenna.
+This is a rather clean two-tone signal (no satellites can be seen,
 the IM3 value is better than 50 dBc). To demonstrate how effective the PS algorithm is,
 I have pushed the \rett{OFF} button which stops the PureSignal calibration, the result
-is shown in Fig. \ref{fig:PSoff}. Here we see two satellites with an IM3 value of
-about 30 dBc, which reflects the non-linearity of the PA.
+is shown in Fig. \ref{fig:PSoff}. After hitting that button, IM3 satellites immediately
+grow out of the dust and rise to
+about 30 dBc, which reflects the non-linearity of the PA. Note that this is quite a typical
+values. Unless you have a class-A amplifier, your PA probably won't be much better.
+This shows that adaptive predistortion is a mechanism that allows you to produce a clean
+signal with a quality that would be impossible (or \textit{very} difficult) to achieve
+with traditional hardware.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{CW} Menu}

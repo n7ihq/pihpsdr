@@ -145,6 +145,9 @@ static long audio_sequence = 0;
 static struct sockaddr_in addr;
 static socklen_t length = sizeof(addr);
 
+// Use this to track whether the PA is currently enabled
+static int local_pa_enable = 0;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Ring buffer for outgoing samples.
@@ -642,8 +645,10 @@ static void new_protocol_general() {
   general_buffer[38] = 0x01; //  enable hardware timer
 
   if (!pa_enabled || band->disablePA) {
+    local_pa_enable = 0;
     general_buffer[58] = 0x00;
   } else {
+    local_pa_enable = 1;
     general_buffer[58] = 0x01; // enable PA
   }
 
@@ -917,7 +922,9 @@ static void new_protocol_high_priority() {
     //    (meanwhile it works: thanks to Rick N1GP)
     //    But we have to keep this "safety belt" for some time.
     //
+    local_pa_enable = 0;
     if (!band->disablePA  && pa_enabled) {
+      local_pa_enable = 1;
       alex0 |= ALEX_TX_RELAY;
     }
 
@@ -1259,22 +1266,33 @@ static void new_protocol_high_priority() {
   }
 
   //
-  //  Upon transmitting, set the attenuator of ADC0 to the "transmitter attenuation"
-  //  (used in PureSignal signal strength adjustment) and the attenuator of ADC1
-  //  to the maximum value (to protect RX2 in DIVERSITY setups).
+  // ADC step attenuator of ADC0 and ADC1
+  //
+  high_priority_buffer_to_radio[1443] = adc[0].attenuation;
+
+  if (diversity_enabled) {
+    high_priority_buffer_to_radio[1442] = adc[0].attenuation; // DIVERSITY: ADC0 att value for ADC1 as well
+  } else {
+    high_priority_buffer_to_radio[1442] = adc[1].attenuation;
+  }
+
+  //
+  //  Upon transmitting with PA enabled, set the attenuators to maximum attenuation
+  //  Exception: use value of transmitter->attenuation if transmitting with PURESIGNAL.
+  //
+  //  NOTE: this has no effect according to the latest protocol definition, where
+  //        bytes 58 and 59 of the TXspecific packet determine the attenuator settings
+  //        during transmit (the code below is essentially duplicated there)
+  //         BUT, there might be old firmware around that does not fully implement this.
   //
 
-  if (xmit) {
-    high_priority_buffer_to_radio[1443] = transmitter->attenuation;
+  if (xmit && local_pa_enable) {
     high_priority_buffer_to_radio[1442] = 31;
-  } else {
-    high_priority_buffer_to_radio[1443] = adc[0].attenuation;
+    high_priority_buffer_to_radio[1443] = 31;
+  }
 
-    if (diversity_enabled) {
-      high_priority_buffer_to_radio[1442] = adc[0].attenuation; // DIVERSITY: ADC0 att value for ADC1 as well
-    } else {
-      high_priority_buffer_to_radio[1442] = adc[1].attenuation;
-    }
+  if (xmit && transmitter->puresignal) {
+    high_priority_buffer_to_radio[1442] = transmitter->attenuation;
   }
 
   //
@@ -1390,10 +1408,26 @@ static void new_protocol_transmit_specific() {
     transmit_specific_buffer[50] |= 0x20;
   }
 
-  // 0..31
+  //
+  // A value of 0..31 represents a LineIn gain of -12.0 .. 34.5 in 1.5 dB steps
+  //
   transmit_specific_buffer[51] = (int)((linein_gain + 34.0) * 0.6739 + 0.5);
-  // Attenuator for ADC0 upon TX
-  transmit_specific_buffer[59] = transmitter->attenuation;
+
+  //
+  // Setting of the ADC0/ADC1 step attenuators while transmitting
+  //
+
+  transmit_specific_buffer[59] = adc[0].attenuation;
+  transmit_specific_buffer[58] = diversity_enabled ? adc[0].attenuation : adc[1].attenuation;
+
+  if (local_pa_enabled) {
+    transmit_specific_buffer[58] = 31;   // ADC1
+    transmit_specific_buffer[59] = 31;   // ADC0
+  }
+
+  if (transmitter->puresignal) {
+    transmit_specific_buffer[59] = transmitter->attenuation;
+  }
 
   //t_print("new_protocol_transmit_specific: %s:%d\n",inet_ntoa(transmitter_addr.sin_addr),ntohs(transmitter_addr.sin_port));
 
