@@ -1,6 +1,12 @@
 LIST OF RECENT PIHPSDR CHANGES
 ==============================
 
+December 2023:
+--------------
+
+- automatic switch to RX if the TxInhibit
+  input is activated.
+
 November 2023:
 --------------
 

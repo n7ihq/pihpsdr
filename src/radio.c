@@ -1792,7 +1792,7 @@ static void rxtx(int state) {
 }
 
 void setMox(int state) {
-  t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
+  //t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
   if (!can_transmit) { return; }
 
   if (state && TxInhibit) { return; }
@@ -1837,7 +1837,7 @@ int getMox() {
 }
 
 void setVox(int state) {
-  t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
+  //t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
   if (!can_transmit) { return; }
 
   if (mox || tune) { return; }
@@ -1853,7 +1853,7 @@ void setVox(int state) {
 }
 
 void setTune(int state) {
-  t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
+  //t_print("%s: mox=%d vox=%d tune=%d NewState=%d\n", __FUNCTION__, mox,vox,tune,state);
   if (!can_transmit) { return; }
 
   if (state && TxInhibit) { return; }
