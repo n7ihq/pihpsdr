@@ -1745,8 +1745,10 @@ for some legacy HPSDR boards which had a switch-able RX preamp.
 \rett{Mute when not active}. If checked, the audio from this receiver is muted when
 it is not the active receiver.
 
-\rett{Mute Audio to Radio}. If checked, the audio from this receiver is muted, no matter whether
-it is active or not.
+\rett{Mute Audio to Radio}. If checked, the audio in the HPSDR data stream from this receiver is muted.
+This has only an effect for P1 and P2 (not for SoapySDR), and only affects headphones/speakers
+connected to the radio. Local audio is not affected. The main use of this checkbox is
+to mute a radio-connected headphone while doing digimode via local RX output.
 
 \rett{Bypass ADC0 RX filters}. This box is only shown if the ALEX filter board
 is selected (see the \bltt{Radio} menu). If checked, the filters in the RF frontend for ADC0
