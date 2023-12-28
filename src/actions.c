@@ -47,6 +47,7 @@
 #include "gpio.h"
 #include "toolbar.h"
 #include "iambic.h"
+#include "store.h"
 #include "message.h"
 #include "mystring.h"
 
@@ -176,6 +177,11 @@ ACTION_TABLE ActionTable[] = {
   {PS,                  "PS On/Off",            "PST",          MIDI_KEY   | CONTROLLER_SWITCH},
   {MENU_PS,             "PS Menu",              "PS",           MIDI_KEY   | CONTROLLER_SWITCH},
   {PTT,                 "PTT",                  "PTT",          MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL0,                "Rcl 0",                "RCL0",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL1,                "Rcl 1",                "RCL1",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL2,                "Rcl 2",                "RCL2",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL3,                "Rcl 3",                "RCL3",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL4,                "Rcl 4",                "RCL4",         MIDI_KEY   | CONTROLLER_SWITCH},
   {RF_GAIN,             "RF Gain",              "RFGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {RF_GAIN_RX1,         "RF Gain\nRX1",         "RFGAIN1",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {RF_GAIN_RX2,         "RF Gain\nRX2",         "RFGAIN2",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -1230,6 +1236,17 @@ int process_action(void *data) {
   case PTT:
     if (a->mode == PRESSED || a->mode == RELEASED) {
       mox_update(a->mode == PRESSED);
+    }
+
+    break;
+
+  case RCL0:
+  case RCL1:
+  case RCL2:
+  case RCL3:
+  case RCL4:
+    if (a->mode == PRESSED) {
+      recall_memory_slot(a->action - RCL0);
     }
 
     break;

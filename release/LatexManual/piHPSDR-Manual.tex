@@ -1675,6 +1675,7 @@ and equalizer settings, and TX compressor settings
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{Memory}  menu}
+\label{sec:memmenu}
 
 The \bltt{Memory} menu gives you access to ten memory slots. The menu is shown in Fig. \ref{fig:MemMenu}.
 You can store the current
@@ -3539,7 +3540,7 @@ are still possible, though. The command is intended to guard against accidentall
 
 \action{Main Menu}{MAIN}{B}{Open the main menu.}
 
-\action{Memory Menu}{MEM}{B}{Open the \texttt{MEM} (Memory) menu.}
+\action{Memory Menu}{MEM}{B}{Open the \texttt{MEM} (Memory) menu (see Chapter \ref{sec:memmenu}).}
 
 \action{Mic Gain}{MICGAIN}{PE}{Change the mic gain (from -12 to 50 dB). The amplification of the microphone
 audio data is done in software, and applies to the TX audio
@@ -3679,6 +3680,16 @@ a microphone to
 a GPIO line for this purpose, take care of proper debouncine, since piHPSDR is not good at debouncing
 switches where both
 the press and release events are significant.}
+
+\action{Rcl 0}{RCL0}{B}{Recall (restore) data from the memory slot 0 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
+
+\action{Rcl 1}{RCL1}{B}{Recall (restore) data from the memory slot 1 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
+
+\action{Rcl 2}{RCL2}{B}{Recall (restore) data from the memory slot 2 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
+
+\action{Rcl 3}{RCL3}{B}{Recall (restore) data from the memory slot 3 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
+
+\action{Rcl 4}{RCL4}{B}{Recall (restore) data from the memory slot 4 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
 
 \action{RF Gain}{RFGAIN}{PE}{Set the gain of the RF front end of the active receiver. Only effective for
 radios that have such a
