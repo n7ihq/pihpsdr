@@ -1683,10 +1683,25 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
       TXRINGBUF[iptr++] = side;
     }
 
-    TXRINGBUF[iptr++] = isample >> 8;
-    TXRINGBUF[iptr++] = isample;
-    TXRINGBUF[iptr++] = qsample >> 8;
-    TXRINGBUF[iptr++] = qsample;
+    if (device == DEVICE_HERMES_LITE2) {
+      //
+      // The "CWX" method in the HL2 firmware behaves erroneously
+      // if the CW input from the KEY/PTT jack is activated.
+      // To make piHPSDR immune to this problem, the least significant
+      // bit of the I (and Q) samples are cleared.
+      // The resolution of the IQ samples is thus reduced from 16 to 15 bits,
+      // but since the HL2 DAC is 12-bit this is no problem.
+      //
+      TXRINGBUF[iptr++] = isample >> 8;
+      TXRINGBUF[iptr++] = isample & 0xFE;
+      TXRINGBUF[iptr++] = qsample >> 8;
+      TXRINGBUF[iptr++] = qsample & 0xFE;
+    } else {
+      TXRINGBUF[iptr++] = isample >> 8;
+      TXRINGBUF[iptr++] = isample;
+      TXRINGBUF[iptr++] = qsample >> 8;
+      TXRINGBUF[iptr++] = qsample;
+    }
     txring_count++;
 
     if (txring_count >= 126) {
