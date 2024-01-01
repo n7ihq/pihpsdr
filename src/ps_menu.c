@@ -45,32 +45,8 @@ static int tx_att_min, tx_att_max;
 static double pk_val;
 static char   pk_text[16];
 
-/*
- * PureSignal 2.0 parameters and declarations
- */
-
-static double ampdelay  = 150e-9;   // 150 nsec
-static int    ints      = 16;
-static int    spi       = 256;     // ints=16/spi=256 corresponds to "TINT=0.5 dB"
-static int    stbl      = 0;       // "Stbl" un-checked
-static int    map       = 1;       // "Map"  checked
-static int    pin       = 1;       // "Pin"  checked
-static double ptol      = 0.8;     // "Relax Tolerance" un-checked
-static double moxdelay  = 0.2;     // "MOX Wait" 0.2 sec
-static double loopdelay = 0.0;     // "CAL Wait" 0.0 sec
-
 //
-// The following declarations are missing in wdsp.h
-// We put them here because sooner or later there will be
-// a corrected version of WDSP where this is contained
-//
-extern void SetPSIntsAndSpi (int channel, int ints, int spi);
-extern void SetPSStabilize (int channel, int stbl);
-extern void SetPSMapMode (int channel, int map);
-extern void SetPSPinMode (int channel, int pin);
-
-//
-// Todo: create buttons to change these values
+// Todo: create buttons to change PS 2.0 values
 //
 
 static int running = 0;
@@ -140,7 +116,7 @@ static int info_thread(gpointer arg) {
   int info[INFO_SIZE];
   int newcal, newcorr;
   gchar label[20];
-  static int old5 = 0; // used to detect a new calibration attempt
+  static int old5 = 0;  // used to detect a new calibration attempt
   static int old14 = 0; // used to detect change of "Correcting" status
 
   if (!running) {
@@ -271,6 +247,7 @@ static int info_thread(gpointer arg) {
           // Note the value is limited to about 300-350 due to ADC clipping/IQ overflow,
           // so the feedback level might be much stronger than indicated here
           delta_att = 15;
+          if (transmitter->attenuation < -15) { delta_att += 15; }
         } else if (info[4] < 25) {
           // If signal is very weak, decrease attenuation by 15 dB
           delta_att = -15;
@@ -360,6 +337,17 @@ static void enable_cb(GtkWidget *widget, gpointer data) {
       gtk_widget_hide(tx_att);
     }
   }
+}
+
+static void tol_cb(GtkWidget *widget, gpointer data) {
+  int tol = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  transmitter->ps_ptol = tol ? 0.4 : 0.8;
+  SetPSPtol(transmitter->id, transmitter->ps_ptol);
+}
+
+static void map_cb(GtkWidget *widget, gpointer data) {
+  transmitter->ps_map = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  SetPSMapMode(transmitter->id, transmitter->ps_map);
 }
 
 static void auto_cb(GtkWidget *widget, gpointer data) {
@@ -529,6 +517,21 @@ void ps_menu(GtkWidget *parent) {
 
   my_combo_attach(GTK_GRID(grid), ps_ant_combo, col, row, 1, 1);
   g_signal_connect(ps_ant_combo, "changed", G_CALLBACK(ps_ant_cb), NULL);
+
+  col++;
+  GtkWidget *map_b = gtk_check_button_new_with_label("PS MAP");
+  gtk_widget_set_name(map_b, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (map_b), transmitter->ps_map);
+  gtk_grid_attach(GTK_GRID(grid), map_b, col, row, 1, 1);
+  g_signal_connect(map_b, "toggled", G_CALLBACK(map_cb), NULL);
+
+  col++;
+  GtkWidget *tol_b = gtk_check_button_new_with_label("PS Relax Tolerance");
+  gtk_widget_set_name(tol_b, "boldlabel");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tol_b), (transmitter->ps_ptol < 0.6));
+  gtk_grid_attach(GTK_GRID(grid), tol_b, col, row, 2, 1);
+  g_signal_connect(tol_b, "toggled", G_CALLBACK(tol_cb), NULL);
+
   row++;
   col = 0;
   feedback_l = gtk_label_new("Feedback Lvl");
@@ -628,14 +631,6 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect(tx_att_spin, "value-changed", G_CALLBACK(att_spin_cb), NULL);
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
-  SetPSIntsAndSpi(transmitter->id, ints, spi);
-  SetPSStabilize(transmitter->id, stbl);
-  SetPSMapMode(transmitter->id, map);
-  SetPSPinMode(transmitter->id, pin);
-  SetPSPtol(transmitter->id, ptol);
-  SetPSMoxDelay(transmitter->id, moxdelay);
-  SetPSTXDelay(transmitter->id, ampdelay);
-  SetPSLoopDelay(transmitter->id, loopdelay);
   running = 1;
   info_timer = g_timeout_add((guint) 100, info_thread, NULL);
   gtk_widget_show_all(dialog);

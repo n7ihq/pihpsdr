@@ -1468,8 +1468,18 @@ void process_ep2(uint8_t *frame) {
     chk_data((frame[2] & 0x03) >> 0, rx_adc[4], "RX5 ADC");
     chk_data((frame[2] & 0x0C) >> 2, rx_adc[5], "RX6 ADC");
     chk_data((frame[2] & 0x30) >> 4, rx_adc[6], "RX7 ADC");
-    chk_data((frame[3] & 0x1f), txatt, "TX ATT");
-    txatt_dbl = pow(10.0, -0.05 * (double) txatt);
+    //
+    // The HL2 enables/disables TXATT with bit7, and with bit6 it is
+    // indicated that a "full-range" value is used, where values
+    // from 0 to 60 correspond to TXATT values from 31 ... -29
+    //
+    if (frame[3] & 0x40) {
+      chk_data((frame[3] & 0x3f), txatt, "HL2 TX ATT");
+      txatt_dbl = pow(10.0, -0.05 * (double) (31-txatt));
+    } else {
+      chk_data((frame[3] & 0x1f), txatt, "TX ATT");
+      txatt_dbl = pow(10.0, -0.05 * (double) txatt);
+    }
     break;
 
   case 30:

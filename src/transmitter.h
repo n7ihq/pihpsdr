@@ -78,6 +78,17 @@ typedef struct _transmitter {
   int feedback;
   int auto_on;
 
+  // PS 2.0 parameters
+  double ps_ampdelay;
+  int ps_ints;
+  int ps_spi;
+  int ps_stbl;
+  int ps_map;
+  int ps_pin;
+  double ps_ptol;
+  double ps_moxdelay;
+  double ps_loopdelay;
+
   gboolean ctcss_enabled;
   int ctcss;
 
