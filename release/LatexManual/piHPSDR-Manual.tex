@@ -2318,6 +2318,17 @@ PS feedback signal. It can be \rett{Internal} which means internal feedback
 TX/RX relay), or it can be \rett{Ext1} or \rett{ByPass} which refers to the
 auxiliary antenna jacks.
 
+\rett{PS MAP} This box controls the PURESIGNAL ,,Map mode'' and is normally checked. 
+According to the WDSP manual, changing the Map mode allows easier calibration in
+situations where a very poor PA is driven into heavy gain compression. This box has
+no effect if there is no compression.
+
+\rett{PS Relax Tolerance} This box is normally unchecked which means that the default
+value 0.8 is used for the PURESIGNAL calibration tolerance. If checked, this tolerance
+is reduced to 0.4. According to the WDSP manual, relaxing the tolerance my be helpful
+for PAs with a very poor load regulation in the power supply such that there are
+severe and slow memory effects.
+ 
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{PSnomon.png}
@@ -2353,7 +2364,12 @@ If not, the RF input attenuators are set to maximum attenution while transmittin
 PA is enabled.
 
 \rett{SetPk} This field shows the currently assumed value of the peak value of the TX DAC
-feedback signal. piHPSDR chooses is automatically. It should match the value reported
+feedback signal. piHPSDR chooses is automatically, depending on the radio hardware.
+The standard value for P1 and P2 radios are 0.407 and 0.290. Notable exceptions are
+the HermesLite-II running P1 (SetPK=0.240) and the Anan-G2 running P2 (SetPK=0.612).
+The SetPK value is determined by the FPGA firmware of the radio can can experimentally
+be determined by comparing the outgoing TX and the incoming TX feedback signal.
+ It should match the value reported
 by the calibration algorithm in the GetPk field. The  value
 chosen by piHPSDR can be incorrect if you use a highly experimental firmware on your
 HPSDR board with modified TX DAC filters, but this should normally not happen.
@@ -2365,27 +2381,32 @@ HPSDR board with modified TX DAC filters, but this should normally not happen.
 \label{fig:PSoff}
 \end{figure}
 
-To demonstrate what happens, I show an example. Checking both \rett{Enable PS} and
+To demonstrate what happens, I show an example performed with a HermesLite-II
+radio running P1. Checking both \rett{Enable PS} and
 \rett{Auto Attenuation}, and hitting the \rett{Two Tone} button, it needs only few
 seconds to stabilize and then Fig. \ref{fig:PSnomon} results, where the TX
 spectrum scope and the PS menu window have been arranged such that they do
 not cover each other. Although both the PS menu and the spectrum scope state
 that PS is working and correcting, the signal does not look good: a two-tone
-signal should only have two peaks! The reason is, that the TX spectrum scope
+signal should only have two peaks, but here one sees the two main peaks at $-6$ dBm
+and two IM3 satellites at about $-42$ dBm.
+The reason is, that the TX spectrum scope
 normally shows the signal that is sent to the PA, so we see a distorted signal.
 However this distortion is magically exactly such that the PA makes a nice signal
-out of this (\textit{adaptive predistortion}) . If one wants to see what the antenna
+out of this (\textit{adaptive predistortion}). If one wants to see what the antenna
  is actually transmitting, one must
 push the \rett{MON} button such that it is highlighted. 
 This is shown in Fig. \ref{fig:PSmon}, where one sees the
 feedback signal, that is, what the PA sends to the antenna.
-This is a rather clean two-tone signal (no satellites can be seen,
-the IM3 value is better than 50 dBc). To demonstrate how effective the PS algorithm is,
+This is a much cleaner two-tone signal (the first satellites are at $-56$ dBm,
+the IM3 value is about $-50$ dBc). To demonstrate how effective the PS algorithm is,
 I have pushed the \rett{OFF} button which stops the PureSignal calibration, the result
 is shown in Fig. \ref{fig:PSoff}. After hitting that button, IM3 satellites immediately
-grow out of the dust and rise to
-about 30 dBc, which reflects the non-linearity of the PA. Note that this is quite a typical
-values. Unless you have a class-A amplifier, your PA probably won't be much better.
+grow and rise to about $-40$ dbM (which means IM3
+about $-34$ dBc), which is s reflects the intrinsic
+non-linearity of the PA.
+ Note that this is a very good value,
+unless you have a class-A amplifier, your PA probably won't be much better.
 This shows that adaptive predistortion is a mechanism that allows you to produce a clean
 signal with a quality that would be impossible (or \textit{very} difficult) to achieve
 with traditional hardware.
@@ -3592,32 +3613,8 @@ produces zero-amplitude audio output.}
 \action{NumPad 0}{0}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
 button ,,0'' in the \texttt{VFO} (VFO) menu.}
 
-\action{NumPad 1}{1}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,1'' in the \texttt{VFO} menu.}
-
-\action{NumPad 2}{2}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,2'' in the \texttt{VFO} menu.}
-
-\action{NumPad 3}{3}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,3'' in the \texttt{VFO} menu.}
-
-\action{NumPad 4}{4}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,4'' in the \texttt{VFO} menu.}
-
-\action{NumPad 5}{5}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,5'' in the \texttt{VFO} menu.}
-
-\action{NumPad 6}{6}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,6'' in the \texttt{VFO} menu.}
-
-\action{NumPad 7}{7}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,7'' in the \texttt{VFO} menu.}
-
-\action{NumPad 8}{8}{B}{(Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,8'' in the \texttt{VFO}  menu.}
-
-\action{NumPad 9}{9}{B}{Used for direct frequency entry. This is the same as hitting the corresponding
-button ,,9'' in the \texttt{VFO}  menu.}
+\action{NumPad 1$\ldots$NumPad 9}{1$\ldots$9}{B}{The same as \bltt{NumPad 0}, except that digits
+(button)  ,,1'' through ,,9'' are referred to.}
 
 \action{NumPad BS}{BS}{B}{Used for direct frequency entry (BS = backstep). This is the same as hitting the
 corresponding button  in the \texttt{VFO} menu. It cancels the last-entered digit.}
@@ -3683,13 +3680,8 @@ the press and release events are significant.}
 
 \action{Rcl 0}{RCL0}{B}{Recall (restore) data from the memory slot 0 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
 
-\action{Rcl 1}{RCL1}{B}{Recall (restore) data from the memory slot 1 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
-
-\action{Rcl 2}{RCL2}{B}{Recall (restore) data from the memory slot 2 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
-
-\action{Rcl 3}{RCL3}{B}{Recall (restore) data from the memory slot 3 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
-
-\action{Rcl 4}{RCL4}{B}{Recall (restore) data from the memory slot 4 (see the \bltt{Memory} menu, Chapter \ref{sec:memmenu}).}
+\action{Rcl 1$\ldots$Rcl 9}{RCL1$\ldots$RCL9}{B}{The same as \bltt{Rcl 0}, except that memory slots 1 through 9
+are referred to.}
 
 \action{RF Gain}{RFGAIN}{PE}{Set the gain of the RF front end of the active receiver. Only effective for
 radios that have such a
