@@ -3,7 +3,7 @@
 This file is part of a program that implements a Spectrum Analyzer
 used in conjunction with software-defined-radio hardware.
 
-Copyright (C) 2012, 2013, 2014, 2016 Warren Pratt, NR0V
+Copyright (C) 2012, 2013, 2014, 2016, 2023 Warren Pratt, NR0V
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -184,12 +184,12 @@ void SnapSpectrum(  int disp,
                     int LO,
                     double *snap_buff);
 
-extern __declspec(dllexport)
-void SnapSpectrumTimeout(int disp,
-    int ss,
-    int LO,
-    double* snap_buff,
-    DWORD timeout,
-    int* flag);
+extern __declspec( dllexport )
+void SnapSpectrumTimeout (int disp,
+                          int ss,
+                          int LO,
+                          double* snap_buff,
+                          DWORD timeout,
+                          int* flag);
 
 #endif

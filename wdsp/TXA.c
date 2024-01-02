@@ -2,7 +2,7 @@
 
 This file is part of a program that implements a Software-Defined Radio.
 
-Copyright (C) 2013, 2014, 2016, 2017, 2021 Warren Pratt, NR0V
+Copyright (C) 2013, 2014, 2016, 2017, 2021, 2023 Warren Pratt, NR0V
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -484,7 +484,7 @@ void destroy_txa (int channel)
     destroy_meter (txa[channel].outmeter.p);
     destroy_resample (txa[channel].rsmpout.p);
     destroy_cfir(txa[channel].cfir.p);
-    destroy_calcc(txa[channel].calcc.p);
+    destroy_calcc (txa[channel].calcc.p);
     destroy_iqc (txa[channel].iqc.p0);
     destroy_siphon (txa[channel].sip1.p);
     destroy_meter (txa[channel].alcmeter.p);
