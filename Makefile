@@ -678,7 +678,6 @@ release: $(PROGRAM)
 	rm -f release/pihpsdr/pihpsdr
 	rm -f release/pihpsdr/libwdsp.so
 	cp $(PROGRAM) release/pihpsdr
-	cd release; tar cvf pihpsdr.tar pihpsdr
 	cd release; tar cvf pihpsdr-$(GIT_VERSION).tar pihpsdr
 
 #############################################################################
