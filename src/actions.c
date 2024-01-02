@@ -182,6 +182,11 @@ ACTION_TABLE ActionTable[] = {
   {RCL2,                "Rcl 2",                "RCL2",         MIDI_KEY   | CONTROLLER_SWITCH},
   {RCL3,                "Rcl 3",                "RCL3",         MIDI_KEY   | CONTROLLER_SWITCH},
   {RCL4,                "Rcl 4",                "RCL4",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL5,                "Rcl 5",                "RCL5",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL6,                "Rcl 6",                "RCL6",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL7,                "Rcl 7",                "RCL7",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL8,                "Rcl 8",                "RCL8",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {RCL9,                "Rcl 9",                "RCL9",         MIDI_KEY   | CONTROLLER_SWITCH},
   {RF_GAIN,             "RF Gain",              "RFGAIN",       MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {RF_GAIN_RX1,         "RF Gain\nRX1",         "RFGAIN1",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
   {RF_GAIN_RX2,         "RF Gain\nRX2",         "RFGAIN2",      MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -1245,6 +1250,11 @@ int process_action(void *data) {
   case RCL2:
   case RCL3:
   case RCL4:
+  case RCL5:
+  case RCL6:
+  case RCL7:
+  case RCL8:
+  case RCL9:
     if (a->mode == PRESSED) {
       recall_memory_slot(a->action - RCL0);
     }
