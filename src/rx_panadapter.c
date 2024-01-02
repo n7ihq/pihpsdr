@@ -591,7 +591,15 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
     if (adc0_overload || adc1_overload) {
       static unsigned int adc_error_count = 0;
       cairo_move_to(cr, 100.0, 70.0);
-      cairo_show_text(cr, "ADC overload");
+      if (adc0_overload && !adc1_overload) {
+        cairo_show_text(cr, "ADC0 overload");
+      }
+      if (adc1_overload && !adc0_overload) {
+        cairo_show_text(cr, "ADC1 overload");
+      }
+      if (adc0_overload && adc1_overload) {
+        cairo_show_text(cr, "ADC0+1 overload");
+      }
       adc_error_count++;
 
       if (adc_error_count > 2 * fps) {
