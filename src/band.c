@@ -574,9 +574,19 @@ int get_band_from_frequency(long long f) {
   }
 
   //
-  // If the frequency is out of range, use bandGen
+  // If the frequency is out of range:
+  //  - use bandWWV if the frequency is 2.5, 5.0, 10.0, 15.0, or 20.0 MHz
+  //  - use bandGEN in all other cases
   //
-  if (found < 0) { found = bandGen; }
+  if (found < 0) {
+    found = bandGen;
+    if (llabs(f -  2500000LL) <= 1000) { found = bandWWV; }
+    if (llabs(f -  5000000LL) <= 1000) { found = bandWWV; }
+    if (llabs(f - 10000000LL) <= 1000) { found = bandWWV; }
+    if (llabs(f - 15000000LL) <= 1000) { found = bandWWV; }
+    if (llabs(f - 20000000LL) <= 1000) { found = bandWWV; }
+    if (llabs(f - 25000000LL) <= 1000) { found = bandWWV; }
+  }
 
   return found;
 }
