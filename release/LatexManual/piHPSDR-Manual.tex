@@ -25,7 +25,6 @@ Christoph van W\"ullen, DL1YCF \\
 email: \texttt{dl1ycf@darc.de}
 }
 
-%
 \maketitle
 \textbf{Copyright Notice:}
 
@@ -1421,16 +1420,6 @@ For RX-only radios, the TX ALC setting will not be shown in the menu.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The \texttt{XVTR} (Transverter) Menu}
 
-The \bltt{XVTR} menu lets you define additional bands
-that you can work on using transverters. The bands
-should normally be beyond the standard frequency range of
-the radio, otherwise the calculation of a band from
-a given frequency will sometimes not work. To give an example,
-suppose you have a transverter which you can drive with frequencies
-between 28 and 30 MHz and which will convert them to the frequency
-range 144 to 146 MHz, and which will receive frequencies in that
-range and mix them down to the 10m band. The data you have to enter
-in the \bltt{XVTR} menu (use the first free entry) are as follows:
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{XVTRMenu.png}
@@ -1438,28 +1427,56 @@ in the \bltt{XVTR} menu (use the first free entry) are as follows:
 \label{fig:XVTRMenu}
 \end{figure}
 
-
+The \bltt{XVTR} menu lets you define additional bands
+that you can work on using transverters. The bands
+should normally be beyond the standard frequency range of
+the radio, otherwise the calculation of a band from
+a given frequency will sometimes not work. 
+Fig. \ref{fig:XVTRMenu} shows the \bltt{XVTR} menu with data
+for an example for a transverter which you can drive with frequencies
+between 28 and 30 MHz and which will convert them to the frequency
+range 144 to 146 MHz, and which will receive frequencies in that
+range and mix them down to the 10m band. The data you have to enter
+in the \bltt{XVTR} menu (use the first free entry) are as follows:
 
 \rett{Title} In this column, enter a name for your band. You can choose
 whatever name you want, this is the one that will be displayed in the
 \bltt{Band} menu. In the present example, use "144" or "144 MHz" or "2m".
+If the title string is empty, all transverter data for this band will
+be cleared.
 
-\rett{Min Freq} Enter the lowest frequency of the transverter band in MHz,
+\rett{Min Frq} Enter the lowest frequency of the transverter band in MHz,
 in the present case, 144.
 
-\rett{Max Freq} Enter the highest frequency of the transverter band in MHz,
+\rett{Max Frq} Enter the highest frequency of the transverter band in MHz,
 in the present case, 146.
 
-\rett{LO Freq} This is the frequency offset (in MHz) between the radio frequency and
+\rett{LO Frq} This is the frequency offset (in MHz) between the radio frequency and
 the operating frequency. In this case, use 116. From this offset, radio frequencies
 between 28 and 30 MHz will be used for operating frequencies between 144 and 146 MHz.
 
 \rett{LO Err} This entry can be used for a fine calibration of the frequency. The value
 (in Hz) is added to the local oscillator (LO) freq in MHz.
 
-\rett{Disable PA} This checkbox indicates that the PA of the radio should be disabled
+\rett{Gain} For each transverter band, the RX gain of the transverter can be specified here.
+If the transverter has a positive gain, the signal will appear too strong in the
+meter and the panadapter, so 
+entering a positive number here will \textit{reduce} the dBm reading in the meter area.
+This setting affects the meter reading, and the RX panadapter and waterfall.
+
+\rett{Disable PA} This checkbox is only present for HPSDR (P1 and P2) radios and
+indicates that the PA of the radio should be disabled
 when using the transverter band. This implies that the radio has some sort of
 low-power output that is used to drive the transverter.
+
+\rett{Update} When entering data in the text fields, it does not become effective
+immediately. The data is stored if you leave the menu, but also if you push the
+\rett{Update} button. After pressing this button, the text fields will be re-generated,
+so if you have typed in, for example, "144" as the minimum frequency, this text field
+will change to "144.000". Consistency checks are performed as well: the minimum and maximum
+frequencies are recalculated from the local oscillator frequency and the frequency range
+of the radio, if something does not fit. It is therefore recommended to push
+\rett{Update} and review the text fields before leaving the \bltt{XVTR} menu.
 
 \begin{figure}[h!]
 \center
@@ -1474,13 +1491,8 @@ The Pluto is
 operated via the SoapySDR interface. For receiving in the 10 GHz band, one uses a so-called
 LNB (low noise block) in the focus of the parabol antenna which converts the 10 GHz signal down
 to about 740 MHz. The setup for defining the "QO100" transverter band is shown in Fig.
-\ref{fig:QO100-XVTR}.
-
-The LO (local oscillator) frequency is always chosen such that it is below the RX frequency,
-and the difference between the RX frequency and the LO frequency is the frequency the radio
-is operating on. The name (here: QO100) can be chosen as one likes, but it cannot be left
-empty. Once the transverter band has been defined, it shows up in the \bltt{BAND} menu
-(see Chapter \ref{sec:bandmenu}), as shown in Fig. \ref{fig:QO100-BandMenu}.
+\ref{fig:QO100-XVTR}. Since the Adalm Pluto is operated via the SoapySDR interface, there are no check boxes
+for disabling the PA.
 
 \begin{figure}[ht]
 \center
@@ -1488,6 +1500,12 @@ empty. Once the transverter band has been defined, it shows up in the \bltt{BAND
 \caption{The \bltt{Band} menu after defining the QO100 band.}
 \label{fig:QO100-BandMenu}
 \end{figure}
+
+The LO (local oscillator) frequency is always chosen such that it is below the RX frequency,
+and the difference between the RX frequency and the LO frequency is the frequency the radio
+is operating on. The name (here: QO100) can be chosen as one likes, but it cannot be left
+empty. Once the transverter band has been defined, it shows up in the \bltt{BAND} menu
+(see Chapter \ref{sec:bandmenu}), as shown in Fig. \ref{fig:QO100-BandMenu}.
 
 To make QO-100 Operation easy, the working frequencies, the CTUN mode etc. should be
 stored in the first bandstack entry of the QO100 and the 13 cm band. To this end,
@@ -1500,18 +1518,22 @@ swap the VFOs again. SAT mode will now ensure the 10.489 GHz Receive
  the bands. The complicated swapping was necessary since band stack entries will
  only be stored from VFO-A.
 
-Fig. \ref{fig:QO100-Waterfall} gives an impression of how this actually works. Note that the
-default setup
-is working Split, Duplex and SAT. Split mode implies that VFO-B is used for transmitting.
-Duplex mode implies that the receiver continues to work while transmitting so you can watch
-and hear your own signal.
-The TX spectrum scope then appears during transmitting in a small separate window.
 \begin{figure}[ht]
 \center
 \includegraphics[width=12cm]{QO100-Waterfall.png}
 \caption{Working QO100 with piHPSDR and the Pluto.}
 \label{fig:QO100-Waterfall}
 \end{figure}
+
+Fig. \ref{fig:QO100-Waterfall} (a contribution from a ham using the Adalm Pluto for QO-100
+operation) gives an impression of how this actually works. 
+Note that the
+default setup
+is working Split, Duplex and SAT. Split mode implies that VFO-B is used for transmitting.
+Duplex mode implies that the receiver continues to work while transmitting so you can watch
+and hear your own signal.
+The TX spectrum scope then appears during transmitting in a small separate window.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The Main Menu: VFO-related menus}
