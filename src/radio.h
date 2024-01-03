@@ -298,7 +298,6 @@ extern void radioSaveState(void);
 
 extern void calculate_display_average(RECEIVER *rx);
 
-extern void radio_change_region(int region);
 extern void radio_set_satmode(int mode);
 
 extern void disable_rigctl(void);

@@ -57,21 +57,29 @@ enum _band_enum {
 * @brief Band definition
 */
 struct _BAND {
-  char title[16];
-  BANDSTACK *bandstack;
-  unsigned char OCrx;
-  unsigned char OCtx;
-  int preamp;
-  int alexRxAntenna;
-  int alexTxAntenna;
-  int alexAttenuation;
-  double pa_calibration;
-  long long frequencyMin;
-  long long frequencyMax;
-  long long frequencyLO;
-  long long errorLO;
-  int disablePA;
+  char title[16];                 // band title
+  BANDSTACK *bandstack;           // pointer to band stack
+  unsigned char OCrx;             // OC bit pattern for RX
+  unsigned char OCtx;             // OC bit pattern for TX
+  int gain;                       // band dependent RX gain offset
+  int alexRxAntenna;              // if ALEX: RX antenna
+  int alexTxAntenna;              // if ALEX: TX antenna
+  int alexAttenuation;            // if ALEX: attenuator (0/1/2/3 for 0/10/20/30 dB)
+  double pa_calibration;          // PA calibration value for this band
+  long long frequencyMin;         // lower band edge
+  long long frequencyMax;         // upper band edge
+  long long frequencyLO;          // frequency offset
+  long long errorLO;              // band dependent LO frequency correction
+  int disablePA;                  // if 1, PA is disabled for this band
 };
+
+//
+// Note that several entries are compile-time constants for non-XVTR bands,
+// that is, there is no GUI to change then, and they are not read from the
+// props file:
+//
+// title, frequencyMin, frequencyMax, frequencyLO, errorLO, disablePA, gain
+//
 
 typedef struct _BAND BAND;
 
@@ -89,14 +97,9 @@ typedef struct _CHANNEL CHANNEL;
 extern int channel_entries;
 extern CHANNEL *band_channels_60m;
 
-extern CHANNEL band_channels_60m_UK[UK_CHANNEL_ENTRIES];
-extern CHANNEL band_channels_60m_OTHER[OTHER_CHANNEL_ENTRIES];
-extern CHANNEL band_channels_60m_WRC15[WRC15_CHANNEL_ENTRIES];
-
-extern BANDSTACK bandstack60;
-extern BANDSTACK_ENTRY bandstack_entries60_OTHER[];
-extern BANDSTACK_ENTRY bandstack_entries60_WRC15[];
-extern BANDSTACK_ENTRY bandstack_entries60_UK[];
+//extern CHANNEL band_channels_60m_UK[UK_CHANNEL_ENTRIES];
+//extern CHANNEL band_channels_60m_OTHER[OTHER_CHANNEL_ENTRIES];
+//extern CHANNEL band_channels_60m_WRC15[WRC15_CHANNEL_ENTRIES];
 
 extern int band_get_current(void);
 extern BAND *band_get_current_band(void);
@@ -105,6 +108,8 @@ extern BAND *band_set_current(int b);
 extern int get_band_from_frequency(long long f);
 
 extern BANDSTACK *bandstack_get_bandstack(int band);
+
+extern void radio_change_region(int region);
 
 extern void bandSaveState(void);
 extern void bandRestoreState(void);

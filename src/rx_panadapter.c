@@ -132,7 +132,10 @@ void rx_panadapter_update(RECEIVER *rx) {
   // Perhaps some adjustment is necessary for those old radios which have
   // switchable preamps.
   //
-  soffset = (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
+  const BAND *band = band_get_band(vfoband);
+  int calib = rx_gain_calibration - band->gain;
+
+  soffset = (double) calib + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
 
   if (filter_board == ALEX && rx->adc == 0) {
     soffset += (double)(10 * rx->alex_attenuation - 20 * rx->preamp);
@@ -149,7 +152,6 @@ void rx_panadapter_update(RECEIVER *rx) {
     mode = vfo[0].mode;
   }
 
-  const BAND *band = band_get_band(vfoband);
   long long half = (long long)rx->sample_rate / 2LL;
   double vfofreq = ((double) rx->pixels * 0.5) - (double)rx->pan;
 

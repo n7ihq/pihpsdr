@@ -487,8 +487,13 @@ static int update_display(gpointer data) {
         // the value obtained from WDSP is best corrected HERE for
         // possible gain and attenuation
         //
+        int id = rx->id;
+        int b  = vfo[id].band;
+        const BAND *band = band_get_band(b);
+        int calib = rx_gain_calibration - band->gain;
+
         double level = GetRXAMeter(rx->id, smeter);
-        level += (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
+        level += (double)calib + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
 
         if (filter_board == CHARLY25 && rx->adc == 0) {
           level += (double)(12 * rx->alex_attenuation - 18 * rx->preamp - 18 * rx->dither);
