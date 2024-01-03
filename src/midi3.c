@@ -45,7 +45,7 @@ VFO_TIMER vfob_timer = {VFOB, 0, 0};
 
 static int vfo_timeout_cb(gpointer data) {
   VFO_TIMER *timer = (VFO_TIMER *)data;
-  t_print("%s: action=%d val=%d\n",__FUNCTION__, timer->action, timer->val);
+  t_print("%s: action=%d val=%d\n", __FUNCTION__, timer->action, timer->val);
   schedule_action(timer->action, RELATIVE, timer->val);
   timer->timeout = 0;
   timer->val = 0;
@@ -55,16 +55,17 @@ static int vfo_timeout_cb(gpointer data) {
 void DoTheMidi(int action, enum ACTIONtype type, int val) {
   switch (type) {
   case MIDI_KEY:
-    t_print("%s: action=%d val=%d\n",__FUNCTION__,action,val);
+    t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
     schedule_action(action, val ? PRESSED : RELEASED, 0);
     break;
 
   case MIDI_KNOB:
-    t_print("%s: action=%d val=%d\n",__FUNCTION__,action,val);
+    t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
     schedule_action(action, ABSOLUTE, val);
     break;
 
   case MIDI_WHEEL:
+
     //
     // There are "big wheels" at various MIDI consoles that can produce MIDI events
     // with rather high frequency, and these are usually used for VFO, VFOA, VFOB
@@ -75,26 +76,36 @@ void DoTheMidi(int action, enum ACTIONtype type, int val) {
     switch (action) {
     case VFOA:
       vfoa_timer.val += val;
+
       if (vfoa_timer.timeout == 0) {
         vfoa_timer.timeout = g_timeout_add(100, vfo_timeout_cb, &vfoa_timer);
       }
+
       break;
+
     case VFOB:
       vfob_timer.val += val;
+
       if (vfob_timer.timeout == 0) {
         vfob_timer.timeout = g_timeout_add(100, vfo_timeout_cb, &vfob_timer);
       }
+
       break;
+
     case VFO:
       vfo_timer.val += val;
+
       if (vfo_timer.timeout == 0) {
         vfo_timer.timeout = g_timeout_add(100, vfo_timeout_cb, &vfo_timer);
       }
+
       break;
+
     default:
-      t_print("%s: action=%d val=%d\n",__FUNCTION__,action,val);
+      t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
       schedule_action(action, RELATIVE, val);
     }
+
     break;
 
   default:

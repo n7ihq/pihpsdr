@@ -247,6 +247,7 @@ static int info_thread(gpointer arg) {
           // Note the value is limited to about 300-350 due to ADC clipping/IQ overflow,
           // so the feedback level might be much stronger than indicated here
           delta_att = 15;
+
           if (transmitter->attenuation < -15) { delta_att += 15; }
         } else if (info[4] < 25) {
           // If signal is very weak, decrease attenuation by 15 dB
@@ -517,21 +518,18 @@ void ps_menu(GtkWidget *parent) {
 
   my_combo_attach(GTK_GRID(grid), ps_ant_combo, col, row, 1, 1);
   g_signal_connect(ps_ant_combo, "changed", G_CALLBACK(ps_ant_cb), NULL);
-
   col++;
   GtkWidget *map_b = gtk_check_button_new_with_label("PS MAP");
   gtk_widget_set_name(map_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (map_b), transmitter->ps_map);
   gtk_grid_attach(GTK_GRID(grid), map_b, col, row, 1, 1);
   g_signal_connect(map_b, "toggled", G_CALLBACK(map_cb), NULL);
-
   col++;
   GtkWidget *tol_b = gtk_check_button_new_with_label("PS Relax Tolerance");
   gtk_widget_set_name(tol_b, "boldlabel");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tol_b), (transmitter->ps_ptol < 0.6));
   gtk_grid_attach(GTK_GRID(grid), tol_b, col, row, 2, 1);
   g_signal_connect(tol_b, "toggled", G_CALLBACK(tol_cb), NULL);
-
   row++;
   col = 0;
   feedback_l = gtk_label_new("Feedback Lvl");

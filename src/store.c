@@ -35,9 +35,6 @@
 MEM mem[NUM_OF_MEMORYS];  // This makes it a compile time option
 
 void memSaveState() {
-  char name[128];
-  char value[128];
-
   for (int b = 0; b < NUM_OF_MEMORYS; b++) {
     SetPropI1("mem.%d.freqA", b,           mem[b].frequency);
     SetPropI1("mem.%d.mode", b,            mem[b].mode);
@@ -49,9 +46,6 @@ void memSaveState() {
 }
 
 void memRestoreState() {
-  char name[128];
-  char *value;
-
   for (int b = 0; b < NUM_OF_MEMORYS; b++) {
     //
     // Set defaults
@@ -125,4 +119,3 @@ void store_memory_slot(int index) {
 
   //memSaveState();
 }
-

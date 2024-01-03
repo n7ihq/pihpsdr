@@ -104,9 +104,6 @@ static void vfoSaveBandstack() {
 }
 
 static void modesettingsSaveState() {
-  char name[128];
-  char value[128];
-
   for (int i = 0; i < MODES; i++) {
     SetPropI1("modeset.%d.filter", i,                mode_settings[i].filter);
     SetPropI1("modeset.%d.nr", i,                    mode_settings[i].nr);
@@ -128,9 +125,6 @@ static void modesettingsSaveState() {
 }
 
 static void modesettingsRestoreState() {
-  char name[128];
-  char *value;
-
   for (int i = 0; i < MODES; i++) {
     //
     // set defaults: everything off, and the default
@@ -201,8 +195,6 @@ static void modesettingsRestoreState() {
 }
 
 void vfoSaveState() {
-  char name[128];
-  char value[128];
   vfoSaveBandstack();
 
   for (int i = 0; i < MAX_VFOS; i++) {
@@ -227,9 +219,6 @@ void vfoSaveState() {
 }
 
 void vfoRestoreState() {
-  char name[128];
-  char *value;
-
   for (int i = 0; i < MAX_VFOS; i++) {
     //
     // Set defaults, using a simple heuristics to get a
@@ -1755,12 +1744,14 @@ void vfo_update() {
   //
   // -----------------------------------------------------------
   int multi = GetMultifunctionStatus();
+
   if (vfl->multifn_x != 0 && multi != 0) {
     if (multi == 1) {
       cairo_set_source_rgba(cr, COLOUR_ATTN);
     } else {
       cairo_set_source_rgba(cr, COLOUR_ALARM);
     }
+
     GetMultifunctionString(temp_text, 32);
     cairo_move_to(cr, vfl->multifn_x, vfl->multifn_y);
     cairo_show_text(cr, temp_text);

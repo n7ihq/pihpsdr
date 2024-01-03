@@ -218,8 +218,6 @@ gboolean receiver_scroll_event(GtkWidget *widget, const GdkEventScroll *event, g
 }
 
 void receiverSaveState(RECEIVER *rx) {
-  char name[128];
-  char value[128];
   t_print("%s: RX=%d\n", __FUNCTION__, rx->id);
   SetPropI1("receiver.%d.alex_antenna", rx->id,                 rx->alex_antenna);
   SetPropI1("receiver.%d.adc", rx->id,                          rx->adc);
@@ -306,8 +304,6 @@ void receiverSaveState(RECEIVER *rx) {
 }
 
 void receiverRestoreState(RECEIVER *rx) {
-  char name[128];
-  char *value;
   t_print("%s: id=%d\n", __FUNCTION__, rx->id);
   GetPropI1("receiver.%d.alex_antenna", rx->id,                 rx->alex_antenna);
   GetPropI1("receiver.%d.adc", rx->id,                          rx->adc);
@@ -491,7 +487,6 @@ static int update_display(gpointer data) {
         int b  = vfo[id].band;
         const BAND *band = band_get_band(b);
         int calib = rx_gain_calibration - band->gain;
-
         double level = GetRXAMeter(rx->id, smeter);
         level += (double)calib + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
 
@@ -718,12 +713,10 @@ static void init_analyzer(RECEIVER *rx) {
   const double span_min_freq = 0.0;
   const double span_max_freq = 0.0;
   const int clip = 0;
-
   int window_type;
   int afft_size;
   int overlap;
   int pixels;
-
   pixels = rx->pixels;
   afft_size = 8192;
   window_type = 4;
@@ -734,13 +727,15 @@ static void init_analyzer(RECEIVER *rx) {
   //
   if (rx->id == PS_RX_FEEDBACK) {
     window_type = 5;
+
     if (rx->sample_rate > 100000) { afft_size = 16384; }
+
     if (rx->sample_rate > 200000) { afft_size = 32768; }
   }
 
-  int max_w = afft_size + (int) min(keep_time * (double) rx->sample_rate, keep_time * (double) afft_size * (double) rx->fps);
+  int max_w = afft_size + (int) min(keep_time * (double) rx->sample_rate,
+                                    keep_time * (double) afft_size * (double) rx->fps);
   overlap = (int)fmax(0.0, ceil(afft_size - (double)rx->sample_rate / (double)rx->fps));
-
   SetAnalyzer(rx->id,
               n_pixout,
               spur_elimination_ffts,                // number of LO frequencies = number of ffts used in elimination

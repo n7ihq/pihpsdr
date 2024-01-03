@@ -630,7 +630,7 @@ void new_protocol_init(int pixels) {
 }
 
 static void new_protocol_general() {
-  BAND *band;
+  const BAND *band;
   int rc;
   pthread_mutex_lock(&general_mutex);
   int txvfo = get_tx_vfo();
@@ -691,7 +691,7 @@ static void new_protocol_general() {
 
 static void new_protocol_high_priority() {
   int i;
-  BAND *band;
+  const BAND *band;
   long long rxFrequency[2];
   long long txFrequency;
   long long HPFfreq;  // frequency determining the HPF filters
@@ -923,6 +923,7 @@ static void new_protocol_high_priority() {
     //    But we have to keep this "safety belt" for some time.
     //
     local_pa_enable = 0;
+
     if (!band->disablePA  && pa_enabled) {
       local_pa_enable = 1;
       alex0 |= ALEX_TX_RELAY;
@@ -1412,11 +1413,9 @@ static void new_protocol_transmit_specific() {
   // A value of 0..31 represents a LineIn gain of -12.0 .. 34.5 in 1.5 dB steps
   //
   transmit_specific_buffer[51] = (int)((linein_gain + 34.0) * 0.6739 + 0.5);
-
   //
   // Setting of the ADC0/ADC1 step attenuators while transmitting
   //
-
   transmit_specific_buffer[59] = adc[0].attenuation;
   transmit_specific_buffer[58] = diversity_enabled ? adc[0].attenuation : adc[1].attenuation;
 
@@ -2288,7 +2287,6 @@ static void process_high_priority() {
   previous_ptt = radio_ptt;
   previous_dot = radio_dot;
   previous_dash = radio_dash;
-
   radio_ptt  = (buffer[4]     ) & 0x01;
   radio_dot  = (buffer[4] >> 1) & 0x01;
   radio_dash = (buffer[4] >> 2) & 0x01;
@@ -2354,24 +2352,29 @@ static void process_high_priority() {
     } else {
       data = buffer[59] & 0x01;          // use IO4 (active=0) on all other gear
     }
+
     if (!TxInhibit && data == 0) {
       TxInhibit = 1;
       g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
     }
+
     if (data == 1) { TxInhibit = 0; }
   } else {
-   TxInhibit = 0;
+    TxInhibit = 0;
   }
 
   if (enable_auto_tune) {
     data = (buffer[59] >> 2) & 0x01;  // use IO6 (active=0)
     auto_tune_end = data;
+
     if (data == 0 && !auto_tune_flag) {
       auto_tune_flag = 1;
       auto_tune_end  = 0;
+
       if (tune_thread_id) {
         g_thread_join(tune_thread_id);
       }
+
       tune_thread_id = g_thread_new("TUNE", auto_tune_thread, NULL);
     }
   } else {

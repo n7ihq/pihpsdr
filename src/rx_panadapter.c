@@ -134,7 +134,6 @@ void rx_panadapter_update(RECEIVER *rx) {
   //
   const BAND *band = band_get_band(vfoband);
   int calib = rx_gain_calibration - band->gain;
-
   soffset = (double) calib + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
 
   if (filter_board == ALEX && rx->adc == 0) {
@@ -593,15 +592,19 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
     if (adc0_overload || adc1_overload) {
       static unsigned int adc_error_count = 0;
       cairo_move_to(cr, 100.0, 70.0);
+
       if (adc0_overload && !adc1_overload) {
         cairo_show_text(cr, "ADC0 overload");
       }
+
       if (adc1_overload && !adc0_overload) {
         cairo_show_text(cr, "ADC1 overload");
       }
+
       if (adc0_overload && adc1_overload) {
         cairo_show_text(cr, "ADC0+1 overload");
       }
+
       adc_error_count++;
 
       if (adc_error_count > 2 * fps) {
@@ -609,8 +612,8 @@ void display_panadapter_messages(cairo_t *cr, int fps) {
         adc0_overload = 0;
         adc1_overload = 0;
 #ifdef USBOZY
-        mercury_overload[0]=0;
-        mercury_overload[1]=0;
+        mercury_overload[0] = 0;
+        mercury_overload[1] = 0;
 #endif
       }
     }

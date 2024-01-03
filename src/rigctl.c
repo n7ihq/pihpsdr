@@ -2139,7 +2139,7 @@ gboolean parse_extended_cmd (const char *command, const CLIENT *client) {
       // read Filter Names and indexes
       if (command[6] == ';') {
         int mode = atoi(&command[4]) - 1;
-        FILTER *f = filters[mode];
+        const FILTER *f = filters[mode];
         snprintf(reply, 256, "ZZMN");
         char temp[32];
 

@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
   tios.c_lflag &= ~ICANON;
   tios.c_lflag &= ~ECHO;
   tcsetattr(0, TCSANOW, &tios);
-  radio_digi_changed=0;  // used  to trigger a highprio packet
+  radio_digi_changed = 0; // used  to trigger a highprio packet
   radio_ptt = 0;
   radio_dash = 0;
   radio_dot = 0;
@@ -569,7 +569,8 @@ int main(int argc, char *argv[]) {
       int rc = read(0, &c, sizeof(c));
 
       if (rc > 0) {
-        radio_digi_changed=1;
+        radio_digi_changed = 1;
+
         switch (c) {
         case '1':
           radio_io1 = !radio_io1;
@@ -1468,6 +1469,7 @@ void process_ep2(uint8_t *frame) {
     chk_data((frame[2] & 0x03) >> 0, rx_adc[4], "RX5 ADC");
     chk_data((frame[2] & 0x0C) >> 2, rx_adc[5], "RX6 ADC");
     chk_data((frame[2] & 0x30) >> 4, rx_adc[6], "RX7 ADC");
+
     //
     // The HL2 enables/disables TXATT with bit7, and with bit6 it is
     // indicated that a "full-range" value is used, where values
@@ -1475,11 +1477,12 @@ void process_ep2(uint8_t *frame) {
     //
     if (frame[3] & 0x40) {
       chk_data((frame[3] & 0x3f), txatt, "HL2 TX ATT");
-      txatt_dbl = pow(10.0, -0.05 * (double) (31-txatt));
+      txatt_dbl = pow(10.0, -0.05 * (double) (31 - txatt));
     } else {
       chk_data((frame[3] & 0x1f), txatt, "TX ATT");
       txatt_dbl = pow(10.0, -0.05 * (double) txatt);
     }
+
     break;
 
   case 30:
@@ -1632,23 +1635,32 @@ void *handler_ep6(void *arg) {
           t_print("Radio IO1=%d\n", radio_io1);
           old_radio_io1 = radio_io1;
         }
+
         if (radio_io2 != old_radio_io2) {
           t_print("Radio IO2=%d\n", radio_io2);
           old_radio_io2 = radio_io2;
         }
+
         if (radio_io3 != old_radio_io3) {
           t_print("Radio IO3=%d\n", radio_io3);
           old_radio_io3 = radio_io3;
         }
+
         if (radio_io4 != old_radio_io4) {
           t_print("Radio IO4=%d\n", radio_io4);
           old_radio_io4 = radio_io4;
         }
+
         C1 = 0;
+
         if (radio_io1) { C1 |=  2; }
+
         if (radio_io2) { C1 |=  4; }
+
         if (radio_io3) { C1 |=  8; }
+
         if (radio_io4) { C1 |= 16; }
+
         *(pointer + 4) = C1;
 
         if (OLDDEVICE == ODEV_HERMES_LITE2) {
@@ -1657,6 +1669,7 @@ void *handler_ep6(void *arg) {
           *(pointer + 5) = 0;
           *(pointer + 6) = 0;
         }
+
         header_offset = 8;
         break;
 

@@ -70,8 +70,8 @@ void startup(const char *path) {
   int writeable;
   int found;
   int rc;
-  char *homedir;
-  struct passwd *pwd;
+  const char *homedir;
+  const struct passwd *pwd;
 #ifdef __APPLE__
   static IOPMAssertionID keep_awake = 0;
   //

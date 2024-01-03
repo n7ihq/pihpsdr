@@ -363,7 +363,6 @@ const int var2_default_high[MODES] = {
 };
 
 void filterSaveState() {
-  char value[128];
   // save the Var1 and Var2 settings
   SetPropI0("filter.lsb.var1.low",            filterLSB[filterVar1].low);
   SetPropI0("filter.lsb.var1.high",           filterLSB[filterVar1].high);
@@ -404,7 +403,6 @@ void filterSaveState() {
 }
 
 void filterRestoreState() {
-  char* value;
   GetPropI0("filter.lsb.var1.low",            filterLSB[filterVar1].low);
   GetPropI0("filter.lsb.var1.high",           filterLSB[filterVar1].high);
   GetPropI0("filter.lsb.var2.low",            filterLSB[filterVar2].low);

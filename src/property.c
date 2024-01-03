@@ -56,8 +56,8 @@ void loadProperties(const char* filename) {
   clearProperties();
 
   if (f) {
-    char* value;
-    char* name;
+    const char* value;
+    const char* name;
     char string[256];
 
     while (fgets(string, sizeof(string), f)) {

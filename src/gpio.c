@@ -261,11 +261,11 @@ static const ENCODER encoders_no_controller[MAX_ENCODERS] = {
 };
 
 static const ENCODER encoders_controller1[MAX_ENCODERS] = {
-  {TRUE, TRUE, 20, 1, 26, 1, 0, AF_GAIN,  R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 25, MENU_BAND,       0L},
-  {TRUE, TRUE, 16, 1, 19, 1, 0, AGC_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  8, MENU_BANDSTACK,  0L},
-  {TRUE, TRUE,  4, 1, 21, 1, 0, DRIVE,    R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  7, MENU_MODE,       0L},
-  {TRUE, TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,       0L},
-  {FALSE, TRUE, 0, 1,  0, 0, 1, NO_ACTION,R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,       0L},
+  {TRUE,  TRUE, 20, 1, 26, 1, 0, AF_GAIN,  R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE, 25, MENU_BAND,       0L},
+  {TRUE,  TRUE, 16, 1, 19, 1, 0, AGC_GAIN, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  8, MENU_BANDSTACK,  0L},
+  {TRUE,  TRUE,  4, 1, 21, 1, 0, DRIVE,    R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, TRUE,  TRUE,  7, MENU_MODE,       0L},
+  {TRUE,  TRUE, 18, 1, 17, 1, 0, VFO,      R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,       0L},
+  {FALSE, TRUE, 0, 1,  0, 0, 1, NO_ACTION, R_START, FALSE, TRUE, 0, 0, 0, 0, 0, 0, R_START, FALSE, TRUE,  0, NO_ACTION,       0L},
 };
 
 static const ENCODER encoders_controller2_v1[MAX_ENCODERS] = {
@@ -978,8 +978,6 @@ void gpio_set_defaults(int ctrlr) {
 }
 
 void gpioRestoreState() {
-  char* value;
-  char name[80];
   loadProperties("gpio.props");
   GetPropI0("controller",                                         controller);
   gpio_set_defaults(controller);
@@ -1016,8 +1014,6 @@ void gpioRestoreState() {
 }
 
 void gpioSaveState() {
-  char value[128];
-  char name[128];
   clearProperties();
   SetPropI0("controller",                                         controller);
 
@@ -1055,8 +1051,6 @@ void gpioSaveState() {
 }
 
 void gpioRestoreActions() {
-  char name[128];
-  char *value;
   int props_controller = NO_CONTROLLER;
   gpio_set_defaults(controller);
   //
@@ -1091,8 +1085,8 @@ void gpioRestoreActions() {
 }
 
 void gpioSaveActions() {
-  char value[128];
   char name[128];
+  char value[128];
   //
   //  "toolbar" functions
   //
@@ -1123,21 +1117,21 @@ void gpioSaveActions() {
     }
   }
 
-  snprintf(value, 128, "%d", function);
+  snprintf(value, sizeof(value), "%d", function);
   setProperty("switches.function", value);
 
   for (int f = 0; f < MAX_FUNCTIONS; f++) {
     for (int i = 0; i < MAX_SWITCHES; i++) {
-      snprintf(name, 128, "switches[%d,%d].switch_function", f, i);
-      Action2String(switches_controller1[f][i].switch_function, value, 128);
+      snprintf(name, sizeof(name), "switches[%d,%d].switch_function", f, i);
+      Action2String(switches_controller1[f][i].switch_function, value, sizeof(value));
       setProperty(name, value);
     }
   }
 
   if (controller == CONTROLLER2_V1 || controller == CONTROLLER2_V2 || controller == G2_FRONTPANEL) {
     for (int i = 0; i < MAX_SWITCHES; i++) {
-      snprintf(name, 128, "switches[%d].switch_function", i);
-      Action2String(switches[i].switch_function, value, 128);
+      snprintf(name, sizeof(name), "switches[%d].switch_function", i);
+      Action2String(switches[i].switch_function, value, sizeof(value));
       setProperty(name, value);
     }
   }

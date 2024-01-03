@@ -837,7 +837,6 @@ void radio_menu(GtkWidget *parent) {
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ChkBtn), enable_tx_inhibit);
     gtk_grid_attach(GTK_GRID(grid), ChkBtn, 0, row, 2, 1);
     g_signal_connect(ChkBtn, "toggled", G_CALLBACK(toggle_cb), &enable_tx_inhibit);
-
     ChkBtn = gtk_check_button_new_with_label("Enable AutoTune Input");
     gtk_widget_set_name(ChkBtn, "boldlabel");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ChkBtn), enable_auto_tune);

@@ -449,6 +449,7 @@ static gpointer ozy_i2c_thread(gpointer arg) {
   int last_penny = 0;  // unused value
   t_print( "old_protocol: OZY I2C read thread\n");
   cycle = 0;
+
   for (;;) {
     if (running) {
       switch (cycle) {
@@ -457,21 +458,26 @@ static gpointer ozy_i2c_thread(gpointer arg) {
         // This value is nowhere used
         cycle = 1;
         break;
+
       case 1:
         ozy_i2c_readpwr(I2C_PENNY_FWD);
         ozy_i2c_readpwr(I2C_PENNY_REV);
         // penny_fp and penny_rp are used in transmitter.c
         cycle = 2;
         break;
+
       case 2:
         ozy_i2c_readpwr(I2C_MERC1_ADC_OFS);
         adc0_overload |= mercury_overload[0];
+
         if (mercury_software_version[1]) {
           ozy_i2c_readpwr(I2C_MERC2_ADC_OFS);
           adc1_overload |= mercury_overload[1];
         }
+
         cycle = 3;
         break;
+
       case 3:
         if (mic_linein) {
           // map floating point LineInGain value (-34.0 ... 12)
@@ -480,16 +486,20 @@ static gpointer ozy_i2c_thread(gpointer arg) {
         } else {
           penny = mic_boost ? 1 : 4;
         }
+
         if (penny != last_penny) {
           writepenny(0, penny);
           last_penny = penny;
         }
+
         cycle = 0;
         break;
       }
     }
+
     usleep(50000);
   }
+
   return NULL;  /* NOTREACHED */
 }
 
@@ -1143,7 +1153,6 @@ static void process_control_bytes() {
   previous_ptt = radio_ptt;
   previous_dot = radio_dot;
   previous_dash = radio_dash;
-
   //
   // Note HL2 I/O board
   // If bit 7 of control_in[0] is set, then
@@ -1185,10 +1194,12 @@ static void process_control_bytes() {
       } else {
         data = (control_in[1] >> 1) & 0x01;  // Use IO1 (active=0) on all other gear
       }
+
       if (!TxInhibit && data == 0) {
         TxInhibit = 1;
         g_idle_add(ext_mox_update, GINT_TO_POINTER(0));
       }
+
       if (data == 1) { TxInhibit = 0; }
     } else {
       TxInhibit = 0;
@@ -1196,13 +1207,16 @@ static void process_control_bytes() {
 
     if (enable_auto_tune) {
       data = (control_in[1] >> 3) & 0x01;   // Use IO3 (active=0)
-      auto_tune_end=data;
+      auto_tune_end = data;
+
       if (data == 0 && !auto_tune_flag) {
         auto_tune_flag = 1;
         auto_tune_end  = 0;
+
         if (tune_thread_id) {
           g_thread_join(tune_thread_id);
         }
+
         tune_thread_id = g_thread_new("TUNE", auto_tune_thread, NULL);
       }
     } else {
@@ -1298,6 +1312,7 @@ static void process_control_bytes() {
     if (mercury_software_version[1] != control_in[2] >> 1 && control_in[2] >> 1 != 0x7F) {
       mercury_software_version[1] = control_in[2] >> 1;
       t_print("  Mercury 2 Software version: %d.%d\n", mercury_software_version[1] / 10, mercury_software_version[1] % 10);
+
       if (receivers > 1) { receiver[1]->adc = 1; }
     }
   }
@@ -1702,6 +1717,7 @@ void old_protocol_iq_samples(int isample, int qsample, int side) {
       TXRINGBUF[iptr++] = qsample >> 8;
       TXRINGBUF[iptr++] = qsample;
     }
+
     txring_count++;
 
     if (txring_count >= 126) {
@@ -2240,6 +2256,7 @@ void ozy_send_buffer() {
           // -29 to +31 which is then mapped to 60 ... 0
           //
           if (pa_enabled && !txband->disablePA) { rxgain = 0; }
+
           if (transmitter->puresignal) { rxgain = 31 - transmitter->attenuation; }
         }
 
@@ -2253,10 +2270,12 @@ void ozy_send_buffer() {
         // Standard HPSDR ADC0 attenuator
         //
         output_buffer[C4] = 0x20 | (adc[0].attenuation & 0x1F);
+
         if (isTransmitting()) {
           if (pa_enabled && !txband->disablePA) {
             output_buffer[C4] = 0x3F;
           }
+
           if (transmitter->puresignal) {
             output_buffer[C4] = 0x20 | (transmitter->attenuation & 0x1F);
           }
@@ -2280,6 +2299,7 @@ void ozy_send_buffer() {
         } else {
           output_buffer[C1] = 0x20 | (adc[1].attenuation & 0x1F);
         }
+
         if (isTransmitting() && pa_enabled && !txband->disablePA) {
           output_buffer[C1] = 0x3F;
         }
@@ -2321,7 +2341,9 @@ void ozy_send_buffer() {
       if (device == DEVICE_HERMES_LITE2) {
         // bit7: enable TX att, bit6: enable 6-bit value, bit5:0 value
         int rxgain;
+
         if (pa_enabled && !txband->disablePA)  { rxgain = 0; }
+
         if (transmitter->puresignal) { rxgain = 31 - transmitter->attenuation; }
 
         if (rxgain <  0) { rxgain = 0; }
@@ -2333,6 +2355,7 @@ void ozy_send_buffer() {
         if (pa_enabled && !txband->disablePA)  {
           output_buffer[C3] = 0x1F;
         }
+
         if (transmitter->puresignal) {
           output_buffer[C3] = transmitter->attenuation & 0x1F;
         }

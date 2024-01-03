@@ -59,15 +59,15 @@ extern long long frequency_calibration;
 extern char property_path[];
 
 enum _filter_board_enum {
- NO_FILTER_BOARD=0,
- ALEX,
- APOLLO,
- CHARLY25,
- N2ADR
+  NO_FILTER_BOARD = 0,
+  ALEX,
+  APOLLO,
+  CHARLY25,
+  N2ADR
 };
 
 enum _region_enum {
-  REGION_OTHER=0,
+  REGION_OTHER = 0,
   REGION_UK,
   REGION_WRC15  // 60m band allocation for countries implementing WRC15
 };

@@ -100,7 +100,7 @@ waterfall_scroll_event_cb (GtkWidget      *widget,
 
 void waterfall_update(RECEIVER *rx) {
   int i;
-  float *samples;
+  const float *samples;
   long long vfofreq = vfo[rx->id].frequency; // access only once to be thread-safe
   int  freq_changed = 0;                    // flag whether we have just "rotated"
   int pan = rx->pan;

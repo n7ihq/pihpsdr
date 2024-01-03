@@ -1795,12 +1795,11 @@ unsigned int GetADCOverflow(void) {
 // return the user input bits
 // returns IO4 in LSB, IO5 in bit 1, ATU bit in bit 2 & IO8 in bit 3
 //
-unsigned int GetUserIOBits(void)
-{
-    unsigned int Result = 0;
-    Result = ((GStatusRegister >> VUSERIO4) & 0b1011);                       // get usder input 4/5/-/8
-    Result |= ((GStatusRegister >> 7) & 0b0100);                             // get ATU bit into IO6 location
-    return Result;
+unsigned int GetUserIOBits(void) {
+  unsigned int Result = 0;
+  Result = ((GStatusRegister >> VUSERIO4) & 0b1011);                       // get usder input 4/5/-/8
+  Result |= ((GStatusRegister >> 7) & 0b0100);                             // get ATU bit into IO6 location
+  return Result;
 }
 
 //

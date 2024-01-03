@@ -190,7 +190,6 @@ static gboolean radio_ip_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
 #ifdef CLIENT_SERVER
 static gboolean connect_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   // connect to remote host running piHPSDR
-  char value[128];  // props file
   strncpy(host_addr, gtk_entry_get_text(GTK_ENTRY(host_addr_entry)), 30);
   host_port = gtk_spin_button_get_value(GTK_SPIN_BUTTON(host_port_spinner));
   t_print("connect_cb: %s:%d\n", host_addr, host_port);
@@ -495,7 +494,6 @@ void discovery() {
 
 #ifdef CLIENT_SERVER
   loadProperties("remote.props");
-  char *value;
   GetPropS0("host",   host_addr_buffer);
   GetPropI0("port",   host_port);
   GtkWidget *connect_b = gtk_button_new_with_label("Connect to Server");

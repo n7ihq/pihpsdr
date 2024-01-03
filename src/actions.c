@@ -1014,14 +1014,14 @@ int process_action(void *data) {
 
     break;
 
-// multifunction encoder. If multi_select_active, it edits the assigned action; else implements assigned action.
+  // multifunction encoder. If multi_select_active, it edits the assigned action; else implements assigned action.
   case MULTI_ENC:
     multi_first = FALSE;
-    if(multi_select_active) {
-      multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
+
+    if (multi_select_active) {
+      multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION - 1, 1);
       g_idle_add(ext_vfo_update, NULL);
-    }
-    else {
+    } else {
       PROCESS_ACTION *multifunction_action;
       multifunction_action = g_new(PROCESS_ACTION, 1);
       multifunction_action->mode = a->mode;
@@ -1029,16 +1029,15 @@ int process_action(void *data) {
       multifunction_action->action = multi_action_table[multi_action].action;
       process_action((void*)multifunction_action);
     }
+
     g_idle_add(ext_vfo_update, NULL);
     break;
-
 
   case MULTI_SELECT:                // know to choose the action for multifunction endcoder
     multi_first = FALSE;
-    multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION-1, 1);
+    multi_action = KnobOrWheel(a, multi_action, 0, VMAXMULTIACTION - 1, 1);
     g_idle_add(ext_vfo_update, NULL);
     break;
-
 
   case MUTE:
     if (a->mode == PRESSED) {
@@ -1710,6 +1709,7 @@ int  GetMultifunctionStatus() {
   if (multi_first) {
     return 0;
   }
+
   return multi_select_active ? 2 : 1;
 }
 

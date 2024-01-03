@@ -35,7 +35,7 @@ static void get_info(char *driver) {
          tx_antennas_length, rx_bandwidth_length, tx_bandwidth_length;
   SoapySDRKwargs args = {};
   int software_version = 0;
-  char *address = NULL;
+  const char *address = NULL;
   int rtlsdr_val = 0;
   int sdrplay_val = 0;
   char fw_version[16];

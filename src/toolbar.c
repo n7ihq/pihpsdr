@@ -97,11 +97,11 @@ void mox_update(int state) {
   if (!can_transmit) { return; }
 
   if (state && !TransmitAllowed()) {
-    state=0;
+    state = 0;
     transmitter_set_out_of_band(transmitter);
   }
-  setMox(state);
 
+  setMox(state);
   g_idle_add(ext_vfo_update, NULL);
 }
 
@@ -111,11 +111,11 @@ void tune_update(int state) {
   setMox(0);  // This will also cancel VOX and TUNE
 
   if (state && !TransmitAllowed()) {
-    state=0;
+    state = 0;
     transmitter_set_out_of_band(transmitter);
   }
-  setTune(state);
 
+  setTune(state);
   g_idle_add(ext_vfo_update, NULL);
 }
 

@@ -1806,6 +1806,7 @@ void setMox(int state) {
   if (tune) {
     setTune(0);
   }
+
   vox_cancel();  // remove time-out
 
   //
@@ -1841,6 +1842,7 @@ void setVox(int state) {
   if (!can_transmit) { return; }
 
   if (mox || tune) { return; }
+
   if (state && TxInhibit) { return; }
 
   if (vox != state) {
@@ -2248,7 +2250,6 @@ void radio_set_satmode(int mode) {
   }
 
 #endif
-
   sat_mode = mode;
 }
 
@@ -2282,7 +2283,7 @@ void set_alex_antennas() {
   // This function also takes care of updating the PA dis/enable
   // status for P2.
   //
-  BAND *band;
+  const BAND *band;
 
   if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
     band = band_get_band(vfo[VFO_A].band);
@@ -2361,8 +2362,6 @@ void radio_set_split(int val) {
 }
 
 void radioRestoreState() {
-  char name[128];
-  char *value;
   t_print("radioRestoreState: %s\n", property_path);
   g_mutex_lock(&property_mutex);
   loadProperties(property_path);
@@ -2563,8 +2562,6 @@ void radioRestoreState() {
 }
 
 void radioSaveState() {
-  char value[128];
-  char name[128];
   t_print("radioSaveState: %s\n", property_path);
   g_mutex_lock(&property_mutex);
   clearProperties();
@@ -2967,20 +2964,25 @@ gpointer auto_tune_thread(gpointer data) {
   //
   int count = 0;
   g_idle_add(ext_tune_update, GINT_TO_POINTER(1));
+
   for (;;) {
     if (count >= 0) {
       count++;
     }
+
     usleep(50000);
+
     if (auto_tune_end) {
       g_idle_add(ext_tune_update, GINT_TO_POINTER(0));
       break;
     }
+
     if (count >= 200) {
       g_idle_add(ext_tune_update, GINT_TO_POINTER(0));
       count = -1;
     }
   }
+
   usleep(50000);       // debouncing
   auto_tune_flag = 0;
   return NULL;

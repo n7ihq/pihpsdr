@@ -41,7 +41,6 @@ gboolean enable_saturn_xdma;
 gboolean autostart;
 
 static void protocolsSaveState() {
-  char value[128];
   clearProperties();
   SetPropI0("enable_protocol_1",     enable_protocol_1);
   SetPropI0("enable_protocol_2",     enable_protocol_2);
@@ -54,7 +53,6 @@ static void protocolsSaveState() {
 }
 
 void protocolsRestoreState() {
-  char *value;
   loadProperties("protocols.props");
   //
   // Set defauls

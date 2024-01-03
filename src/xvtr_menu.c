@@ -42,10 +42,9 @@ static GtkWidget *gain[BANDS + XVTRS];
 static GtkWidget *disable_pa[BANDS + XVTRS];
 
 static void save_xvtr () {
-  const char *txt;
-  char f[16];
-
   for (int i = BANDS; i < BANDS + XVTRS; i++) {
+    const char *txt;
+    char f[16];
     BAND *xvtr = band_get_band(i);
     BANDSTACK *bandstack = xvtr->bandstack;
     txt = gtk_entry_get_text(GTK_ENTRY(title[i]));
@@ -62,6 +61,7 @@ static void save_xvtr () {
       xvtr->errorLO = atoll(txt);
       txt = gtk_entry_get_text(GTK_ENTRY(gain[i]));
       xvtr->gain = atoi(txt);
+
       if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
         xvtr->disablePA = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(disable_pa[i]));
       }
@@ -93,6 +93,7 @@ static void save_xvtr () {
       //
       for (int b = 0; b < bandstack->entries; b++) {
         BANDSTACK_ENTRY *entry = &bandstack->entry[b];
+
         if (entry->frequency < xvtr->frequencyMin || entry->frequency > xvtr->frequencyMax) {
           entry->frequency = xvtr->frequencyMin + ((xvtr->frequencyMax - xvtr->frequencyMin) / 2);
           entry->mode = modeUSB;
@@ -106,6 +107,7 @@ static void save_xvtr () {
       xvtr->errorLO = 0;
       xvtr->disablePA = 1;
     }
+
     //
     // Update all the text fields
     //
@@ -120,9 +122,10 @@ static void save_xvtr () {
     gtk_entry_set_text(GTK_ENTRY(lo_error[i]), f);
     snprintf(f, 16, "%d", xvtr->gain);
     gtk_entry_set_text(GTK_ENTRY(gain[i]), f);
+
     if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disable_pa[i]), xvtr->disablePA);
-    } 
+    }
   }
 
   vfo_xvtr_changed();
@@ -196,6 +199,7 @@ void xvtr_menu(GtkWidget *parent) {
   label = gtk_label_new("Gain (dB)");
   gtk_widget_set_name(label, "boldlabel");
   gtk_grid_attach(GTK_GRID(grid), label, 5, 1, 1, 1);
+
   if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
     label = gtk_label_new("Disable PA");
     gtk_widget_set_name(label, "boldlabel");
@@ -239,6 +243,7 @@ void xvtr_menu(GtkWidget *parent) {
     snprintf(f, 16, "%d", xvtr->gain);
     gtk_entry_set_text(GTK_ENTRY(gain[i]), f);
     gtk_grid_attach(GTK_GRID(grid), gain[i], 5, i + 2, 1, 1);
+
     if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
       disable_pa[i] = gtk_check_button_new();
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disable_pa[i]), xvtr->disablePA);
@@ -252,4 +257,3 @@ void xvtr_menu(GtkWidget *parent) {
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
 }
-

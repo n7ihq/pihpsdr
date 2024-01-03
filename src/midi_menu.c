@@ -1246,9 +1246,7 @@ void midiSaveState() {
 }
 
 void midiRestoreState() {
-  char name[128];
   char str[128];
-  char *value;
   int channel;
   int event;
   int type;

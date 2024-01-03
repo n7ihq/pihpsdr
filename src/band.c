@@ -425,8 +425,6 @@ void radio_change_region(int r) {
 }
 
 void bandSaveState() {
-  char name[128];
-  char value[128];
   SetPropI0("band",                 current_band);
 
   for (int b = 0; b < BANDS + XVTRS; b++) {
@@ -444,6 +442,7 @@ void bandSaveState() {
       SetPropI1("band.%d.disablePA", b,          bands[b].disablePA);
       SetPropI1("band.%d.gain", b,               bands[b].gain);
     }
+
     SetPropI1("band.%d.current", b,            bands[b].bandstack->current_entry);
     SetPropI1("band.%d.alexRxAntenna", b,      bands[b].alexRxAntenna);
     SetPropI1("band.%d.alexTxAntenna", b,      bands[b].alexTxAntenna);
@@ -468,8 +467,6 @@ void bandSaveState() {
 }
 
 void bandRestoreState() {
-  char name[128];
-  char* value;
   GetPropI0("band",                 current_band);
 
   for (int b = 0; b < BANDS + XVTRS; b++) {
@@ -580,11 +577,17 @@ int get_band_from_frequency(long long f) {
   //
   if (found < 0) {
     found = bandGen;
+
     if (llabs(f -  2500000LL) <= 1000) { found = bandWWV; }
+
     if (llabs(f -  5000000LL) <= 1000) { found = bandWWV; }
+
     if (llabs(f - 10000000LL) <= 1000) { found = bandWWV; }
+
     if (llabs(f - 15000000LL) <= 1000) { found = bandWWV; }
+
     if (llabs(f - 20000000LL) <= 1000) { found = bandWWV; }
+
     if (llabs(f - 25000000LL) <= 1000) { found = bandWWV; }
   }
 
@@ -631,7 +634,7 @@ int TransmitAllowed() {
   int result;
   long long txfreq, flow, fhigh;
   int txb, txvfo, txmode;
-  BAND *txband;
+  const BAND *txband;
 
   //
   // If there is no transmitter, we cannot transmit
@@ -708,7 +711,7 @@ void band_plus(int id) {
   int found = 0;
 
   while (!found) {
-    BAND *band;
+    const BAND *band;
     b++;
 
     if (b >= BANDS + XVTRS) { b = 0; }
@@ -737,7 +740,7 @@ void band_minus(int id) {
   int found = 0;
 
   while (!found) {
-    BAND *band;
+    const BAND *band;
     b--;
 
     if (b < 0) { b = BANDS + XVTRS - 1; }
@@ -756,4 +759,3 @@ void band_minus(int id) {
     }
   }
 }
-

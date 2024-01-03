@@ -192,7 +192,5 @@ void vox_menu(GtkWidget *parent) {
   gtk_container_add(GTK_CONTAINER(content), grid);
   sub_menu = dialog;
   gtk_widget_show_all(dialog);
-
   start_level_thread();
 }
-
