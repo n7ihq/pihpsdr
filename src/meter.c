@@ -282,9 +282,16 @@ void meter_update(RECEIVER *rx, int meter_type, double value, double alc, double
       cairo_set_source_rgba(cr, COLOUR_METER);
       angle = fmax(-127.0, max_rxlvl) + 127.0 + offset;
 
-      // if frequency > 30MHz then -93 is S9
       if (vfo[active_receiver->id].frequency > 30000000LL) {
-        angle = angle + 20;
+        //
+        // VHF/UHF (beyond 30 Mhz): -147 dBm is S0
+        //
+        angle = fmax(-147.0, max_rxlvl) + 147.0 + offset;
+      } else {
+        //
+        // HF (up to 30 Mhz): -127 dBm is S0
+        //
+        angle = fmax(-127.0, max_rxlvl) + 127.0 + offset;
       }
 
       radians = angle * M_PI / 180.0;
