@@ -51,7 +51,6 @@ static gboolean close_cb () {
 
 static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   int ind = GPOINTER_TO_INT(data);
-  t_print("STORE BUTTON PUSHED=%d\n", ind);
   char label_str[40];
   store_memory_slot(ind);
   int mode = mem[ind].mode;
@@ -59,12 +58,12 @@ static gboolean store_select_cb (GtkWidget *widget, GdkEventButton *event, gpoin
 
   if (mode == modeFMN) {
     snprintf(label_str, 40, "M%d=%8.3f MHz (%s, %s)", ind,
-             (double) mem[ind].frequency * 1E-6,
+             mem[ind].ctun ? (double) mem[ind].ctun_frequency * 1E-6 : (double) mem[ind].frequency * 1E-6,
              mode_string[mode],
              mem[ind].deviation == 2500 ? "11k" : "16k");
   } else {
     snprintf(label_str, 40, "M%d=%8.3f MHz (%s, %s)", ind,
-             (double) mem[ind].frequency * 1E-6,
+             mem[ind].ctun ? (double) mem[ind].ctun_frequency * 1E-6 : (double) mem[ind].frequency * 1E-6,
              mode_string[mode],
              filters[mode][filter].title);
   }
@@ -111,12 +110,12 @@ void store_menu(GtkWidget *parent) {
 
     if (mode == modeFMN) {
       snprintf(label_str, 50, "M%d=%8.3f MHz (%s, %s)", ind,
-               (double) mem[ind].frequency * 1E-6,
+               mem[ind].ctun ? (double) mem[ind].ctun_frequency * 1E-6 : (double) mem[ind].frequency * 1E-6,
                mode_string[mode],
                mem[ind].deviation == 2500 ? "11k" : "16k");
     } else {
       snprintf(label_str, 50, "M%d=%8.3f MHz (%s, %s)", ind,
-               (double) mem[ind].frequency * 1E-6,
+               mem[ind].ctun ? (double) mem[ind].ctun_frequency * 1E-6 : (double) mem[ind].frequency * 1E-6,
                mode_string[mode],
                filters[mode][filter].title);
     }

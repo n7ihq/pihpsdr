@@ -28,11 +28,14 @@
 */
 struct _MEM_STORE {
   long long frequency;
+  long long ctun_frequency;
+  int ctun;
   int mode;
   int filter;
   int deviation;
   int ctcss_enabled;
   int ctcss;
+  int bd;
 };
 
 typedef struct _MEM_STORE MEM;
