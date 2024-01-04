@@ -352,7 +352,6 @@ void vfo_apply_mode_settings(RECEIVER *rx) {
 }
 
 void vfo_band_changed(int id, int b) {
-  BANDSTACK *bandstack;
 #ifdef CLIENT_SERVER
 
   if (radio_is_remote) {
@@ -362,6 +361,9 @@ void vfo_band_changed(int id, int b) {
 
 #endif
 
+  const BAND *band;
+  BANDSTACK *bandstack;
+  int   oldmode = vfo[id].mode;
   //
   // If the band is not equal to the current band, look at the frequency of the
   // new bandstack entry.
@@ -369,7 +371,7 @@ void vfo_band_changed(int id, int b) {
   // Note the LO frequency of the *new* band must be subtracted here
   //
   if (b != vfo[id].band) {
-    const BAND *band = band_get_band(b);
+    band = band_get_band(b);
     bandstack = bandstack_get_bandstack(b);
     long long f = bandstack->entry[bandstack->current_entry].frequency;
     f -= (band->frequencyLO + band->errorLO);
@@ -397,8 +399,8 @@ void vfo_band_changed(int id, int b) {
     vfo[id].bandstack = bandstack->current_entry;
   }
 
-  const BAND *band = band_set_current(b);
-  const BANDSTACK_ENTRY *entry = &bandstack->entry[vfo[id].bandstack];
+  band = band_set_current(b);
+  BANDSTACK_ENTRY *entry = &bandstack->entry[vfo[id].bandstack];
   vfo[id].band = b;
   vfo[id].frequency = entry->frequency;
   vfo[id].ctun = entry->ctun;
@@ -421,34 +423,17 @@ void vfo_band_changed(int id, int b) {
     bandstack->current_entry = vfo[id].bandstack;
   }
 
-  if (id < receivers) {
-    //
-    // This VFO controls a receiver
-    //
+  if (id < receivers && oldmode != vfo[id].mode) {
     vfo_apply_mode_settings(receiver[id]);
-    receiver_vfo_changed(receiver[id]);
   }
 
-  tx_vfo_changed();
-  set_alex_antennas();  // This includes scheduling hiprio and general packets
-#ifdef SOAPYSDR
-
-  //
-  // This is strange, since it already done via receiver_vfo_changed()
-  // correctly and the present code seems to be wrong if
-  // (receivers == 1 && id == 1) or (receivers == 2 && id == 0)
-  //
-  if (protocol == SOAPYSDR_PROTOCOL) {
-    soapy_protocol_set_rx_frequency(active_receiver, id);
-  }
-
-#endif
-  g_idle_add(ext_vfo_update, NULL);
+  vfos_changed();
 }
 
 void vfo_bandstack_changed(int b) {
   CLIENT_MISSING;
   int id = active_receiver->id;
+  int oldmode = vfo[id].mode;
 
   if (id == 0) {
     vfoSaveBandstack();
@@ -472,14 +457,11 @@ void vfo_bandstack_changed(int b) {
     bandstack->current_entry = vfo[id].bandstack;
   }
 
-  if (id < receivers) {
+  if (id < receivers && oldmode != vfo[id].mode) {
     vfo_apply_mode_settings(receiver[id]);
-    receiver_vfo_changed(receiver[id]);
   }
 
-  tx_vfo_changed();
-  set_alex_antennas();  // This includes scheduling hiprio and general packets
-  g_idle_add(ext_vfo_update, NULL);
+  vfos_changed();
 }
 
 void vfo_mode_changed(int m) {
@@ -568,26 +550,40 @@ void vfo_id_filter_changed(int id, int f) {
   g_idle_add(ext_vfo_update, NULL);
 }
 
-void vfo_a_to_b() {
-  CLIENT_MISSING;
-  vfo[VFO_B] = vfo[VFO_A];
+void vfos_changed() {
+  //
+  // Use this when there are large changes in the VFOs.
+  // Apply the new data
+  //
+  receiver_vfo_changed(receiver[0]);
 
   if (receivers == 2) {
     receiver_vfo_changed(receiver[1]);
   }
 
   tx_vfo_changed();
-  set_alex_antennas();  // This includes scheduling hiprio and general packets
+  set_alex_antennas();
+  //
+  // set_alex_antennas already scheduled a HighPrio and General packet,
+  // but if the mode changed to/from CW, we also need a DUCspecific packet
+  //
+  schedule_transmit_specific();
+
   g_idle_add(ext_vfo_update, NULL);
+}
+
+void vfo_a_to_b() {
+  CLIENT_MISSING;
+  vfo[VFO_B] = vfo[VFO_A];
+
+  vfos_changed();
 }
 
 void vfo_b_to_a() {
   CLIENT_MISSING;
   vfo[VFO_A] = vfo[VFO_B];
-  receiver_vfo_changed(receiver[0]);
-  tx_vfo_changed();
-  set_alex_antennas();  // This includes scheduling hiprio and general packets
-  g_idle_add(ext_vfo_update, NULL);
+
+  vfos_changed();
 }
 
 void vfo_a_swap_b() {
@@ -595,15 +591,8 @@ void vfo_a_swap_b() {
   struct  _vfo temp = vfo[VFO_A];
   vfo[VFO_A]        = vfo[VFO_B];
   vfo[VFO_B]        = temp;
-  receiver_vfo_changed(receiver[0]);
 
-  if (receivers == 2) {
-    receiver_vfo_changed(receiver[1]);
-  }
-
-  tx_vfo_changed();
-  set_alex_antennas();  // This includes scheduling hiprio and general packets
-  g_idle_add(ext_vfo_update, NULL);
+  vfos_changed();
 }
 
 //

@@ -144,6 +144,8 @@ extern void vfo_rit_value(int rx, long long value);
 extern void vfo_set_frequency(int vfo, long long f);
 
 extern void vfo_ctun_update(int id, int state);
+extern void vfo_apply_mode_settings(RECEIVER *rx);
+extern void vfos_changed(void);
 
 extern void num_pad(int val, int vfo);
 
