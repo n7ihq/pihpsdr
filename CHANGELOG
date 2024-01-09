@@ -1,13 +1,27 @@
 LIST OF RECENT PIHPSDR CHANGES
 ==============================
 
-December 2023:
---------------
+January 2024:
+-------------
+
+- new P2 definition for the upper 16 alex
+  bits.
+
+- Included CTUN and Band data in the 
+  memory slots.
+
+- XVTR menu now allows to specify the RX gain
+  of the transverter band-by-band.
+  
+- WDSP updated to version 1.24
 
 - PureSignal changes: included two check-boxes
   in PS menu to cope with "difficult" amplifiers
 
-- new actions RCL0 - RCL5, for recalling
+December 2023:
+--------------
+
+- new actions RCL0 - RCL9, for recalling
   memory slots (for GPIO or MIDI push buttons).
 
 - automatic switch to RX if the TxInhibit

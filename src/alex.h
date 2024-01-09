@@ -67,9 +67,9 @@
 #define ALEX_60_40_LPF         0x00200000               // activate 60/40m TX LPF (bit 21)
 #define ALEX_80_LPF            0x00400000               // activate 80m    TX LPF (bit 22)
 #define ALEX_160_LPF           0x00800000               // activate 160m   TX LPF (bit 23)
-#define ALEX_6_BYPASS_LPF      0x20000000               // activate 6m     TX LPF (bit 30)
-#define ALEX_12_10_LPF         0x40000000               // activate 12/10m TX LPF (bit 31)
-#define ALEX_17_15_LPF         0x80000000               // activate 17/15m TX LPF (bit 32)
+#define ALEX_6_BYPASS_LPF      0x20000000               // activate 6m     TX LPF (bit 29)
+#define ALEX_12_10_LPF         0x40000000               // activate 12/10m TX LPF (bit 30)
+#define ALEX_17_15_LPF         0x80000000               // activate 17/15m TX LPF (bit 31)
 
 //
 // ALEX RX high-pass filters (Valid for ANAN-100/200 first ADC)

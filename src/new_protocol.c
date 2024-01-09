@@ -1201,21 +1201,6 @@ static void new_protocol_high_priority() {
 
   //
   //  Now we set the bits for Ant1/2/3 (RX and TX may be different)
-  //  ATTENTION:
-  //  When doing CW handled in radio, the radio may start TXing
-  //  before piHPSDR has slewn down the receivers, slewn up the
-  //  transmitter and goes TX. Then, if different Ant1/2/3
-  //  antennas are chosen for RX and TX, parts of the first
-  //  RF dot may arrive at the RX antenna and do bad things
-  //  there. While we cannot exclude this completely, we will
-  //  switch the Ant1/2/3 selection to TX as soon as we see
-  //  a PTT signal from the radio.
-  //  Measurements have shown that we can reduce the time
-  //  from when the radio send PTT to the time when the
-  //  radio receives the new Ant1/2/2 setup from about
-  //  40 (2 RX active) or 20 (1 RX active) to 4 milli seconds,
-  // and this should be
-  //  enough.
   //
 
   if (xmit || radio_ptt) {
@@ -1253,6 +1238,32 @@ static void new_protocol_high_priority() {
     break;
   }
 
+  //
+  // Latest Change in the New Protocol:
+  // - make the upper 16 bits of alex1 a copy of the upper 16
+  //   bits of alex0, except that the three TXANT bits
+  //   refer to the TX state
+  //
+  // This lets the firmware automatically switch to the correct
+  // TX antenna when it goes TX e.g. because of hitting a CW key.
+  //
+  // This implies that the alex1 word must be included in the HighPrio
+  // buffer in all cases (not only for OrionII and G2!)
+  //
+  alex1 |= alex0 & 0xFFFF0000;
+  alex1 &= ~(ALEX_TX_ANTENNA_1 | ALEX_TX_ANTENNA_2 | ALEX_TX_ANTENNA_3);
+  switch (transmitter->alex_antenna) {
+  case 0: // ANT1
+    alex1 |= ALEX_TX_ANTENNA_1;
+    break;
+  case 1: // ANT2
+    alex1 |= ALEX_TX_ANTENNA_2;
+    break;
+  case 2: // ANT3
+    alex1 |= ALEX_TX_ANTENNA_3;
+    break;
+  }
+
   high_priority_buffer_to_radio[1432] = (alex0 >> 24) & 0xFF;
   high_priority_buffer_to_radio[1433] = (alex0 >> 16) & 0xFF;
   high_priority_buffer_to_radio[1434] = (alex0 >> 8) & 0xFF;
@@ -1260,11 +1271,11 @@ static void new_protocol_high_priority() {
 
   //t_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1432],high_priority_buffer_to_radio[1433],high_priority_buffer_to_radio[1434],high_priority_buffer_to_radio[1435],rxFrequency,txFrequency);
 
-  if (device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
-    high_priority_buffer_to_radio[1430] = (alex1 >> 8) & 0xFF;
-    high_priority_buffer_to_radio[1431] = alex1 & 0xFF;
-    //t_print("ALEX1 bits: rx1: %02X %02X for rx=%lld\n",high_priority_buffer_to_radio[1430],high_priority_buffer_to_radio[1431],rxFrequency);
-  }
+  high_priority_buffer_to_radio[1428] = (alex1 >> 24) & 0xFF;
+  high_priority_buffer_to_radio[1429] = (alex1 >> 16) & 0xFF;
+  high_priority_buffer_to_radio[1430] = (alex1 >> 8) & 0xFF;
+  high_priority_buffer_to_radio[1431] = alex1 & 0xFF;
+  //t_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1428],high_priority_buffer_to_radio[1429],high_priority_buffer_to_radio[1430],high_priority_buffer_to_radio[1431],rxFrequency,txFrequency);
 
   //
   // ADC step attenuator of ADC0 and ADC1
