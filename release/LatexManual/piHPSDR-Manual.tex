@@ -3999,7 +3999,7 @@ set, which can easily be found on the internet (see the Appendix of the Kenwood 
 and will not be reproduced here
 for copyright reasons. So if you want to connect a logbook
 or contest logging program to piHPSDR, you will normally tell this program that it has to control a Kenwood
-TS-2000.
+TS-2000. See the last section of this Appendix for some special CW features.
 
 \begin{center}
 \fbox{
@@ -4050,6 +4050,40 @@ changes (active receiver,  diversity status, PTT status, TUNE mode, PS status, C
 status, and LOCK status),
 such that the ANDROMEDA controller can update the corresponding LEDs.
 
+\section{Special characters in CAT CW}
+
+CW can be sent via the Kenwood CAT command \texttt{KY} as usual. The opening and closing brackets, \texttt{[} and
+\texttt{]}, which are not normally used in CW, have been given a special meaning. This is an extension
+of the Kenwood protocol. Currently implemented is
+a possibility to temporarily change the CW speed for certain characters, and to send characters without
+inter-character separation. An opening bracket starts the ,,special mode'' and a closing bracket ends it.
+Any special mode automatically ends if the radio goes RX after the message has been sent, or if a
+Morse key has been hit and CAT CW is terminated.
+
+\textbf{Speed change.} The two-character sequence \texttt{[+} temporarily increases the speed by 25\%,
+ while the sequence 
+\texttt{[-} temporarily reduces the speed by 25\%. For example, if the CW speed is 24 wpm and the text
+
+
+\texttt{DL0AAA [+ENN] [-123]}
+
+is sent via CAT CW, then the call sign will be sent at nominal (24 wpm) speed, while the report (enn) will be sent
+at 30 wpm and the serial number (123) will be sent at 18 wpm. The inter-word separations are those of
+the nominal speed (24 wpm) since they are outside of the brackets.
+Such speed changes are often used in contests,
+where the report is largely redundant and one wants to be nice to stations which have difficulties
+with the normal contest speed. From this example, it is clear that
+such in-line speed changes are primarily used if piHPSDR is keyed by a contest logger through CAT CW
+messages. The nominal speed can be changed either via the CAT command \texttt{KS} or via
+the \bltt{CW} menu. The nominal speed change becomes effective immedeately, which can be in the middle
+of an on-going CW transmission. This will not change the speed if it is made temporarily faster or slower,
+since once one goes ,,slow'' or ,,fast'' this speed is fixed until a closing bracket or the end of the
+transmission is seen. 
+
+\textbf{Character joining.} The two-character sequence \texttt{[.}  leads to a suppression of inter-character spacing until
+a closing bracket is met or the radio goes RX at the end of the transmission.
+For example, the string \texttt{[.ar]} is transmitted exactly as if it were a plus sign. Another example
+for a joined character is \texttt{[.sk]} which is sometimes used to mark the end of a transmission.    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter[Connect a Morse Key]{How to connect a Morse key or paddle}

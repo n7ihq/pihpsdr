@@ -251,6 +251,11 @@ void send_space(int len) {
   cw_key_up = len * dotsamples;
 }
 
+//
+// This stores the "buffered join character" status
+//
+static int join_cw_characters = 0;
+
 void rigctl_send_cw_char(char cw_char) {
   char pattern[9],*ptr;
   ptr = &pattern[0];
@@ -519,7 +524,7 @@ void rigctl_send_cw_char(char cw_char) {
   if (cw_char == ' ') {
     send_space(6);  // produce inter-word space of 7 dotlens
   } else {
-    send_space(2);  // produce inter-character space of 3 dotlens
+    if (!join_cw_characters) send_space(2);  // produce inter-character space of 3 dotlens
   }
 }
 
@@ -530,10 +535,13 @@ void rigctl_send_cw_char(char cw_char) {
 static gpointer rigctl_cw_thread(gpointer data) {
   int i;
   char cwchar;
+  int  buffered_speed = 0;
+  int  bracket_command = 0;
 
   while (server_running) {
     // wait for CW data (periodically look every 100 msec)
     if (cw_buf_in == cw_buf_out) {
+      cw_key_hit = 0;
       usleep(100000L);
       continue;
     }
@@ -557,12 +565,54 @@ static gpointer rigctl_cw_thread(gpointer data) {
     if (i >= CW_BUF_SIZE) { i = 0; }
 
     cw_buf_out = i;
-    cw_key_hit = 0;
+
+    //
+    // Special character sequences or characters:
+    //
+    //  [+         Increase speed by 25 %
+    //  [-         Decrease speed by 25 %
+    //  [          Join Characters
+    //  ]          End speed change or joining
+    //
+    if (bracket_command)  {
+      switch (cwchar) {
+      case '+':
+        buffered_speed = (5 * cw_keyer_speed) / 4;
+        cwchar=0;
+        break;
+      case '-':
+        buffered_speed = (3 * cw_keyer_speed) / 4;
+        cwchar=0;
+        break;
+      case '.':
+        join_cw_characters = 1;
+        cwchar=0;
+        break;
+      }
+      bracket_command=0;
+    }
+
+    if (cwchar == '[') {
+      bracket_command = 1;
+      cwchar=0;
+    } 
+
+    if (cwchar == ']') {
+      buffered_speed = 0;
+      join_cw_characters = 0;
+      cwchar=0;
+    } 
+      
     // The dot and dash length may have changed, so recompute them here
     // This means that we can change the speed (KS command) while
     // the buffer is being sent
-    dotsamples = 57600 / cw_keyer_speed;
-    dashsamples = (3456 * cw_keyer_weight) / cw_keyer_speed;
+    if (buffered_speed > 0) {
+      dotsamples = 57600 / buffered_speed;
+      dashsamples = (3456 * cw_keyer_weight) / buffered_speed;
+    } else {
+      dotsamples = 57600 / cw_keyer_speed;
+      dashsamples = (3456 * cw_keyer_weight) / cw_keyer_speed;
+    }
     CAT_cw_is_active = 1;
     schedule_transmit_specific();
 
@@ -592,6 +642,7 @@ static gpointer rigctl_cw_thread(gpointer data) {
       // removing MOX, changing the mode to non-CW, or because a CW key has been hit.
       // Do not remove PTT in the latter case
       CAT_cw_is_active = 0;
+      buffered_speed = 0;
       schedule_transmit_specific();
 
       // If a CW key has been hit, we continue in TX mode.
@@ -608,7 +659,7 @@ static gpointer rigctl_cw_thread(gpointer data) {
       usleep(500000L);
       cw_buf_out = cw_buf_in;
     } else {
-      rigctl_send_cw_char(cwchar);
+      if (cwchar) { rigctl_send_cw_char(cwchar); }
 
       //
       // Character has been sent, so continue.
@@ -636,6 +687,7 @@ static gpointer rigctl_cw_thread(gpointer data) {
         i = 10;
 
         while (mox && (i--) > 0) { usleep(50000L); }
+        buffered_speed = 0;
       }
     }
 
