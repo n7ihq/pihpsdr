@@ -690,7 +690,7 @@ static void new_protocol_general() {
 }
 
 static void new_protocol_high_priority() {
-  int i;
+  int rxant, txant;
   const BAND *band;
   long long rxFrequency[2];
   long long txFrequency;
@@ -705,7 +705,12 @@ static void new_protocol_high_priority() {
 
   pthread_mutex_lock(&hi_prio_mutex);
   memset(high_priority_buffer_to_radio, 0, sizeof(high_priority_buffer_to_radio));
-  int xmit     = isTransmitting();
+  //
+  // If piHPSDR is not (yet) transmitting, but a PTT signal came from the
+  // radio, set HighPrio data accoring to the TX state as early as possible.
+  // To this end, isTransmitting() is ORed with radio_ptt.
+  //
+  int xmit     = isTransmitting() | radio_ptt;
   int txvfo    = get_tx_vfo();        // VFO governing the TX frequency
   int rxvfo    = active_receiver->id; // id of the active receiver
   int othervfo = 1 - rxvfo;           // id of the "other" receiver (only valid if receivers > 1)
@@ -883,7 +888,24 @@ static void new_protocol_high_priority() {
   }
 
   //
-  //  ALEX bits
+  //  ALEX bits. Note the "Jan 2023 protocol update":
+  //  - the upper 16 bits of alex0 reflect the upper 16
+  //    bits of alex1 for the "TX case". So if transmitting,
+  //    these are the same, but if receiving, these bits
+  //    have the state they would have during transmit.
+  //    This applies to
+  //    ALEX_TX_ANTENNA_1
+  //    ALEX_TX_ANTENNA_2
+  //    ALEX_TX_ANTENNA_3
+  //    ALEX_30_20_LPF
+  //    ALEX_60_40_LPF
+  //    ALEX_80_LPF
+  //    ALEX_160_LPF
+  //    ALEX_6_BYPASS_LPF
+  //    ALEX_12_10_LPF
+  //    ALEX_17_15_LPF
+  //    ALEX_TX_RELAY
+  //    ALEX_PS_BIT
   //
   unsigned long alex0 = 0x00000000;
   unsigned long alex1 = 0x00000000;
@@ -914,24 +936,24 @@ static void new_protocol_high_priority() {
   //
   // T/R relay and PS bit
   //
-  if (xmit) {
-    //
-    //    Do not switch TR relay to "TX" if PA is disabled.
-    //    This is necessary because the "PA enable flag" in the GeneralPacket
-    //    had no effect in the Orion-II firmware up to 2.1.18
-    //    (meanwhile it works: thanks to Rick N1GP)
-    //    But we have to keep this "safety belt" for some time.
-    //
-    local_pa_enable = 0;
+  //
+  //    Do not switch TR relay to "TX" if PA is disabled.
+  //    This is necessary because the "PA enable flag" in the GeneralPacket
+  //    had no effect in the Orion-II firmware up to 2.1.18
+  //    (meanwhile it works: thanks to Rick N1GP)
+  //    But we have to keep this "safety belt" for some time.
+  //
+  local_pa_enable = 0;
 
-    if (!band->disablePA  && pa_enabled) {
-      local_pa_enable = 1;
-      alex0 |= ALEX_TX_RELAY;
-    }
+  if (!band->disablePA  && pa_enabled) {
+    local_pa_enable = 1;
+    if (xmit) { alex0 |= ALEX_TX_RELAY; }
+    alex1 |= ALEX_TX_RELAY;
+  }
 
-    if (transmitter->puresignal) {
-      alex0 |= ALEX_PS_BIT;            // Bit 18
-    }
+  if (transmitter->puresignal) {
+    if (xmit) {alex0 |= ALEX_PS_BIT; }
+    alex1 |= ALEX_PS_BIT;
   }
 
   //
@@ -1123,6 +1145,25 @@ static void new_protocol_high_priority() {
   }
 
   //
+  // Set LPF in alex1 word according to TX frequency
+  //
+  if (txFrequency > 35600000LL) {
+    alex1 |= ALEX_6_BYPASS_LPF;
+  } else if (txFrequency > 24000000LL) {
+    alex1 |= ALEX_12_10_LPF;
+  } else if (txFrequency > 16500000LL) {
+    alex1 |= ALEX_17_15_LPF;
+  } else if (txFrequency > 8000000LL) {
+    alex1 |= ALEX_30_20_LPF;
+  } else if (txFrequency > 5000000LL) {
+    alex1 |= ALEX_60_40_LPF;
+  } else if (txFrequency > 2500000LL) {
+    alex1 |= ALEX_80_LPF;
+  } else {
+    alex1 |= ALEX_160_LPF;
+  }
+
+  //
   //  Set bits that route Ext1/Ext2/XVRTin to the RX
   //
   //  If transmitting with PureSignal, we must use the alex_antenna
@@ -1131,17 +1172,17 @@ static void new_protocol_high_priority() {
   //  ANAN-7000 routes signals differently (these bits have no function on ANAN-80000)
   //            and uses ALEX0(14) to connnect Ext/XvrtIn to the RX.
   //
-  i = receiver[0]->alex_antenna;                      // 0,1,2  or 3,4,5
+  rxant = receiver[0]->alex_antenna;                      // 0,1,2  or 3,4,5
 
   if (xmit && transmitter->puresignal) {
-    i = receiver[PS_RX_FEEDBACK]->alex_antenna;     // 0, 6, or 7
+    rxant = receiver[PS_RX_FEEDBACK]->alex_antenna;     // 0, 6, or 7
   }
 
   if (device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
-    i += 100;
+    rxant += 100;
   } else if (new_pa_board) {
     // New-PA setting invalid on ANAN-7000,8000
-    i += 1000;
+    rxant += 1000;
   }
 
   //
@@ -1152,7 +1193,7 @@ static void new_protocol_high_priority() {
   // As a result, the "New PA board" setting is overriden for PureSignal
   // feedback: EXT1 assumes old PA board and ByPass assumes new PA board.
   //
-  switch (i) {
+  switch (rxant) {
   case 3:           // EXT1 with old pa board
   case 6:           // EXT1-on-TX: assume old pa board
   case 1006:
@@ -1200,31 +1241,36 @@ static void new_protocol_high_priority() {
   }
 
   //
-  //  Now we set the bits for Ant1/2/3 (RX and TX may be different)
+  //  Now we set the bits for Ant1/2/3 (RX and TX may be different).
+  //  If receiving, let alex0 reflect the ANT1/2/3 setting for RX
+  //  and alex1 that for TX. If transmitting, both reflect TX.
   //
 
-  if (xmit || radio_ptt) {
-    i = transmitter->alex_antenna;
+  txant = transmitter->alex_antenna;
+  // ASSUMPTION: receiver[0] is associated with the first ADC
+  rxant = receiver[0]->alex_antenna;
 
-    //
-    // TX antenna outside allowd range: this cannot happen.
-    // Out of paranoia: print warning and choose ANT1
-    //
-    if (i < 0 || i > 2) {
-      t_print("WARNING: illegal TX antenna chosen, using ANT1\n");
-      transmitter->alex_antenna = 0;
-      i = 0;
-    }
-  } else {
-    i = receiver[0]->alex_antenna;
-
-    //
-    // Not using ANT1,2,3: can leave relais in TX state unless using new PA board
-    //
-    if (i > 2 && !new_pa_board) { i = transmitter->alex_antenna; }
+  //
+  // PARANOIA:
+  // TX antenna outside allowed range: this cannot happen.
+  // But we want to make *absolutely* sure that one of ANT1/2/2
+  // is actually switched. So in the "impossible" case of an
+  // illegal value for transmitter->alex_antenna, set it to ANT1.
+  //
+  if (txant < 0 || txant > 2) {
+    t_print("WARNING: illegal TX antenna chosen, using ANT1\n");
+    transmitter->alex_antenna = 0;
+    txant = 0;
   }
 
-  switch (i) {
+  //
+  // If *not* using ANT1,2,3 for RX: we can reduce "relay chatter"
+  // and leave the ANT1/2/2 setting in the TX state. If transmitting,
+  // use TX setting for alex0 anyway.
+  //
+  if (rxant > 2 || xmit) { rxant = txant; }
+
+  switch (rxant) {
   case 0:  // ANT 1
     alex0 |= ALEX_TX_ANTENNA_1;
     break;
@@ -1238,32 +1284,20 @@ static void new_protocol_high_priority() {
     break;
   }
 
-  //
-  // Latest Change in the New Protocol:
-  // - make the upper 16 bits of alex1 a copy of the upper 16
-  //   bits of alex0, except that the three TXANT bits
-  //   refer to the TX state
-  //
-  // This lets the firmware automatically switch to the correct
-  // TX antenna when it goes TX e.g. because of hitting a CW key.
-  //
-  // This implies that the alex1 word must be included in the HighPrio
-  // buffer in all cases (not only for OrionII and G2!)
-  //
-  alex1 |= alex0 & 0xFFFF0000;
-  alex1 &= ~(ALEX_TX_ANTENNA_1 | ALEX_TX_ANTENNA_2 | ALEX_TX_ANTENNA_3);
-  switch (transmitter->alex_antenna) {
-  case 0: // ANT1
+  switch (txant) {
+  case 0:  // ANT 1
     alex1 |= ALEX_TX_ANTENNA_1;
     break;
-  case 1: // ANT2
+
+  case 1:  // ANT 2
     alex1 |= ALEX_TX_ANTENNA_2;
     break;
-  case 2: // ANT3
+
+  case 2:  // ANT 3
     alex1 |= ALEX_TX_ANTENNA_3;
     break;
   }
-
+ 
   high_priority_buffer_to_radio[1432] = (alex0 >> 24) & 0xFF;
   high_priority_buffer_to_radio[1433] = (alex0 >> 16) & 0xFF;
   high_priority_buffer_to_radio[1434] = (alex0 >> 8) & 0xFF;
@@ -2305,7 +2339,10 @@ static void process_high_priority() {
   //
   // Do this as fast as possible in case of a RX/TX  transition
   // induced by the radio (in case different RX/TX settings
-  // are valid for Ant1/2/3)
+  // are valid for Ant1/2/3). With the latest (Jan. 2024) protocol
+  // and firmware update, there is a 'real' solution to this problem,
+  // the this mechanism is kept for all those radios which do not yet
+  // have an updated firmware.
   //
   if (previous_ptt == 0 && radio_ptt == 1) {
     new_protocol_high_priority();
