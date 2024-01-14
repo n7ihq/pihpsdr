@@ -43,6 +43,7 @@
 #include "transmitter.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
+#include "ps_menu.h"
 #ifdef SOAPYSDR
   #include "soapy_protocol.h"
 #endif
@@ -112,7 +113,7 @@ static gboolean close_cb() {
   return TRUE;
 }
 
-static int update_out_of_band(gpointer data) {
+static int clear_out_of_band(gpointer data) {
   TRANSMITTER *tx = (TRANSMITTER *)data;
   tx->out_of_band = 0;
   g_idle_add(ext_vfo_update, NULL);
@@ -122,7 +123,7 @@ static int update_out_of_band(gpointer data) {
 void transmitter_set_out_of_band(TRANSMITTER *tx) {
   tx->out_of_band = 1;
   g_idle_add(ext_vfo_update, NULL);
-  tx->out_of_band_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE, 1000, update_out_of_band, tx, NULL);
+  tx->out_of_band_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE, 1000, clear_out_of_band, tx, NULL);
 }
 
 void transmitter_set_am_carrier_level(TRANSMITTER *tx) {
@@ -1627,8 +1628,17 @@ void tx_set_ps(TRANSMITTER *tx, int state) {
 }
 
 void tx_set_twotone(TRANSMITTER *tx, int state) {
-  tx->twotone = state;
+  static guint timer = 0;
 
+  if (state == tx->twotone) { return; }
+
+  tx->twotone = state;
+  //
+  // During a two-tone experiment, call a function periodically
+  // (every 100 msec) that calibrates the TX attenuation value
+  // if PureSignal is running with AutoCalibration. The timer will
+  // automatically be removed
+  //
   if (state) {
     // set frequencies and levels
     switch (get_tx_mode()) {
@@ -1646,9 +1656,11 @@ void tx_set_twotone(TRANSMITTER *tx, int state) {
     SetTXAPostGenTTMag (tx->id, 0.49999, 0.49999);
     SetTXAPostGenMode(tx->id, 1);
     SetTXAPostGenRun(tx->id, 1);
+    if (timer == 0) {
+      timer = g_timeout_add((guint) 100, ps_calibration_timer, &timer);
+    }
   } else {
     SetTXAPostGenRun(tx->id, 0);
-
     //
     // These radios show "tails" of the TX signal after a TX/RX transition,
     // so wait after the TwoTone signal has been removed, before

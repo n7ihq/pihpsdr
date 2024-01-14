@@ -17,3 +17,4 @@
 */
 
 extern void ps_menu(GtkWidget *parent);
+extern int  ps_calibration_timer(gpointer arg);
