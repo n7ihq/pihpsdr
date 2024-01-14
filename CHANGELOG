@@ -4,6 +4,12 @@ LIST OF RECENT PIHPSDR CHANGES
 January 2024:
 -------------
 
+- TwoTone: now automatically calibrates
+  PURESIGNAL (if PS is enabled with auto calibration)
+
+- escape characters for CAT CW (buffered
+  speed change, character merging)
+
 - new P2 definition for the upper 16 alex
   bits.
 
