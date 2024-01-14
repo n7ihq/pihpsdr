@@ -2101,20 +2101,7 @@ void ozy_send_buffer() {
       break;
 
     case 3:
-      power = 0;
-
-      //
-      // Some HPSDR apps for the RedPitaya generate CW inside the FPGA, but while
-      // doing this, DriveLevel changes are processed by the server, but do not become effective.
-      // If the CW paddle is hit, the new PTT state is sent to piHPSDR, then the TX drive
-      // is sent the next time "command 3" is performed, but this often is too late and
-      // CW is generated with zero DriveLevel.
-      // Therefore, when in CW mode, send the TX drive level also when receiving.
-      // (it would be sufficient to do so only with internal CW).
-      //
-      if (isTransmitting() || (txmode == modeCWU) || (txmode == modeCWL)) {
-        power = transmitter->drive_level;
-      }
+      power = TransmitAllowed() ? transmitter->drive_level : 0;
 
       output_buffer[C0] = 0x12;
       output_buffer[C1] = power & 0xFF;

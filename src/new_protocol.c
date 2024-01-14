@@ -836,7 +836,7 @@ static void new_protocol_high_priority() {
   high_priority_buffer_to_radio[330] = phase >> 16;
   high_priority_buffer_to_radio[331] = phase >> 8;
   high_priority_buffer_to_radio[332] = phase;
-  int power = transmitter->drive_level;
+  int power = TransmitAllowed() ? transmitter->drive_level : 0;
   high_priority_buffer_to_radio[345] = power & 0xFF;
 
   //
