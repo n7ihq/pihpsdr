@@ -289,9 +289,9 @@ int main(int argc, char *argv[]) {
 
     if (!strncmp(argv[i], "-metis",        6))  {OLDDEVICE = ODEV_METIS;        NEWDEVICE = NDEV_ATLAS;         MAC5 = 0x12;             continue;}
 
-    if (!strncmp(argv[i], "-hermeslite2", 12))  {OLDDEVICE = ODEV_HERMES_LITE2; NEWDEVICE = NDEV_HERMES_LITE2;  MAC5 = 0x13;             continue;}
+    if (!strncmp(argv[i], "-hermeslite2", 12))  {OLDDEVICE = ODEV_HERMES_LITE2; NEWDEVICE = NDEV_HERMES_LITE2;  MAC5 = 0x13; oldnew = 1; continue;}
 
-    if (!strncmp(argv[i], "-hermeslite",  11))  {OLDDEVICE = ODEV_HERMES_LITE;  NEWDEVICE = NDEV_HERMES_LITE;   MAC5 = 0x14;             continue;}
+    if (!strncmp(argv[i], "-hermeslite",  11))  {OLDDEVICE = ODEV_HERMES_LITE;  NEWDEVICE = NDEV_HERMES_LITE;   MAC5 = 0x14; oldnew = 1; continue;}
 
     if (!strncmp(argv[i], "-hermes",       7))  {OLDDEVICE = ODEV_HERMES;       NEWDEVICE = NDEV_HERMES;        MAC5 = 0x15;             continue;}
 
