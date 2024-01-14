@@ -110,7 +110,6 @@ static gboolean panadapter_scroll_event_cb(GtkWidget *widget, GdkEventScroll *ev
 
 void rx_panadapter_update(RECEIVER *rx) {
   int i;
-  int x1, x2;
   float *samples;
   char text[64];
   cairo_text_extents_t extents;
@@ -187,8 +186,8 @@ void rx_panadapter_update(RECEIVER *rx) {
     for (i = 0; i < channel_entries; i++) {
       long long low_freq = band_channels_60m[i].frequency - (band_channels_60m[i].width / (long long)2);
       long long hi_freq = band_channels_60m[i].frequency + (band_channels_60m[i].width / (long long)2);
-      x1 = (low_freq - min_display) / (long long)HzPerPixel;
-      x2 = (hi_freq - min_display) / (long long)HzPerPixel;
+      double x1 = (double) (low_freq - min_display) / HzPerPixel;
+      double x2 = (double) (hi_freq - min_display) / HzPerPixel;
       cairo_set_source_rgba(cr, COLOUR_PAN_60M);
       cairo_rectangle(cr, x1, 0.0, x2 - x1, myheight);
       cairo_fill(cr);
@@ -323,17 +322,17 @@ void rx_panadapter_update(RECEIVER *rx) {
       cairo_set_line_width(cr, PAN_LINE_THICK);
 
       if ((min_display < band->frequencyMin) && (max_display > band->frequencyMin)) {
-        i = (band->frequencyMin - min_display) / (long long)HzPerPixel;
-        cairo_move_to(cr, i, 0);
-        cairo_line_to(cr, i, myheight);
+        double x = (double)(band->frequencyMin - min_display) / HzPerPixel;
+        cairo_move_to(cr, x, 0);
+        cairo_line_to(cr, x, myheight);
         cairo_set_line_width(cr, PAN_LINE_EXTRA);
         cairo_stroke(cr);
       }
 
       if ((min_display < band->frequencyMax) && (max_display > band->frequencyMax)) {
-        i = (band->frequencyMax - min_display) / (long long)HzPerPixel;
-        cairo_move_to(cr, i, 0);
-        cairo_line_to(cr, i, myheight);
+        double x = (double) (band->frequencyMax - min_display) / HzPerPixel;
+        cairo_move_to(cr, x, 0);
+        cairo_line_to(cr, x, myheight);
         cairo_set_line_width(cr, PAN_LINE_THICK);
         cairo_stroke(cr);
       }
