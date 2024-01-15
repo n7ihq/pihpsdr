@@ -2342,14 +2342,17 @@ auxiliary antenna jacks.
 
 \rett{PS MAP} This box controls the PURESIGNAL ,,Map mode'' and is normally checked. 
 According to the WDSP manual, changing the Map mode allows easier calibration in
-situations where a very poor PA is driven into heavy gain compression. This box has
-no effect if there is no compression.
+situations where a very poor PA is driven into heavy gain compression. The state
+of this box has
+no effect if there is no compression. \textit{PS is stopped and re-started if
+this box is changed.}
 
 \rett{PS Relax Tolerance} This box is normally unchecked which means that the default
 value 0.8 is used for the PURESIGNAL calibration tolerance. If checked, this tolerance
 is reduced to 0.4. According to the WDSP manual, relaxing the tolerance my be helpful
 for PAs with a very poor load regulation in the power supply such that there are
-severe and slow memory effects.
+severe and slow memory effects. \textit{PS is stopped and re-started if
+this box is changed.}
  
 \begin{figure}[ht]
 \center
@@ -2395,6 +2398,20 @@ be determined by comparing the outgoing TX and the incoming TX feedback signal.
 by the calibration algorithm in the GetPk field. The  value
 chosen by piHPSDR can be incorrect if you use a highly experimental firmware on your
 HPSDR board with modified TX DAC filters, but this should normally not happen.
+
+If you want to use PURESIGNAL, it is required to enable PURESIGNAL by checking the
+\rett{Enable PS} box, and it is recommended to use auto calibration (check the
+\rett{Auto Attenuate} box). PURESIGNAL is then activated and calibrated by
+performing a two-tone experiment. This can, but need not be, done by hitting
+the \rett{Two Tone} button. PURESIGNAL restarting and calibration is also done
+if a two-tone experiment is started via a GPIO/MIDI or toolbar button.
+It is necessary to repeat such a two-tone experiment each time you change the
+RF output power, since most likely a new TX attenuation value is needed. I also
+recommend to repeat a two-tone experiment after each band change. If monitoring
+the feedback signal (\rett{MON} button, this setting remains after closing the
+PS menu) is enabled, a two-tone experiment also quickly shows how effective 
+the adaptive predistortion is. If everything works well, you only should see
+two peaks on the TX panadapter during the two-tone experiment.
 
 \begin{figure}[t!]
 \center
@@ -3814,8 +3831,9 @@ OC menu).}
 \action{TX Drive}{TXDRV}{PE}{Set the TX drive level (0-100).}
 
 \action{Two-Tone}{2TONE}{B}{Toggle (on/off) the two-tone state of the transmitter. If the two-tone state is
-engaged, the radio will go
-TX and emit a two-tone signal.}
+engaged, the radio will go TX and emit a two-tone signal. If PURESIGNAL is enabled with auto calibration,
+then the PURESIGNAL engine will be restarted and the attenuation of the feedback
+signal re-adjusted while the two-tone signal is being sent.}
 
 \action{VFO}{VFO}{E}{This is  the VFO frequency control of the active receiver.}
 
