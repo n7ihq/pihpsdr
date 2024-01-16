@@ -146,12 +146,16 @@ int main(int argc, char **argv) {
   rbffile = NULL;
   i = 0;
 
+  if (argc <2) {
+    printf("Usage: bootloader [-i <iface>]  [-s <addr>] [-f <file>r] \n");
+    printf("<iface> is ethernet adapter to use\n");
+    printf("<addr>  is ethernet addr to burn into the radio\n");
+    printf("<file>  is *.rbf firmware file to load into the radio\n\n");
+    printf("The -i, -s, -f options need administrator (root) privileges\n");
+    printf("If no arguments are given, the adapters in the system are listed.\n\n");
+  }
+
   while (++i < argc) {
-    if (!strcmp(argv[i], "-d")) {
-      do_display = 1;
-      do_lookup = 0;
-      continue;
-    }
 
     if (!strcmp(argv[i], "-i") && i + 1 < argc) {
       dev = argv[++i];
