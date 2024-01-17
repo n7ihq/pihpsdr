@@ -69,7 +69,7 @@ static void pa_value_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void tx_out_of_band_cb(GtkWidget *widget, gpointer data) {
-  tx_out_of_band = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  tx_out_of_band_allowed = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
 static void trim_changed_cb(GtkWidget *widget, gpointer data) {
@@ -244,7 +244,7 @@ void pa_menu(GtkWidget *parent) {
   g_signal_connect(max_power_b, "changed", G_CALLBACK(max_power_changed_cb), NULL);
   GtkWidget *tx_out_of_band_b = gtk_check_button_new_with_label("Transmit out of band");
   gtk_widget_set_name(tx_out_of_band_b, "boldlabel");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx_out_of_band_b), tx_out_of_band);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tx_out_of_band_b), tx_out_of_band_allowed);
   gtk_widget_show(tx_out_of_band_b);
   gtk_grid_attach(GTK_GRID(grid0), tx_out_of_band_b, 3, 0, 1, 1);
   g_signal_connect(tx_out_of_band_b, "toggled", G_CALLBACK(tx_out_of_band_cb), NULL);

@@ -114,7 +114,7 @@ extern int atlas_janus;
 
 extern int classE;
 
-extern int tx_out_of_band;
+extern int tx_out_of_band_allowed;
 
 extern int filter_board;
 extern int pa_enabled;

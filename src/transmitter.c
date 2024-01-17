@@ -113,7 +113,11 @@ static gboolean close_cb() {
   return TRUE;
 }
 
-static int clear_out_of_band(gpointer data) {
+static int clear_out_of_band_warning(gpointer data) {
+  //
+  // One-shot timer for clearing the "Out of band" message
+  // in the VFO bar
+  //
   TRANSMITTER *tx = (TRANSMITTER *)data;
   tx->out_of_band = 0;
   g_idle_add(ext_vfo_update, NULL);
@@ -121,9 +125,14 @@ static int clear_out_of_band(gpointer data) {
 }
 
 void transmitter_set_out_of_band(TRANSMITTER *tx) {
+  //
+  // Print "Out of band" warning message in the VFO bar
+  // and clear it after 1 second.
+  //
   tx->out_of_band = 1;
   g_idle_add(ext_vfo_update, NULL);
-  tx->out_of_band_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE, 1000, clear_out_of_band, tx, NULL);
+  tx->out_of_band_timer_id = gdk_threads_add_timeout_full(G_PRIORITY_HIGH_IDLE, 1000,
+                           clear_out_of_band_warning, tx, NULL);
 }
 
 void transmitter_set_am_carrier_level(TRANSMITTER *tx) {

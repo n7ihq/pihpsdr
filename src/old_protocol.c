@@ -976,24 +976,15 @@ static int tx_feedback_channel() {
 
 static long long channel_freq(int chan) {
   //
-  // Return the frequency associated with the current HPSDR
-  // RX channel (0 <= chan <= 4).
-  //
-  // This function returns the TX frequency if chan is
-  // outside the allowed range, and thus can be used
-  // to set the TX frequency.
-  //
-  // If transmitting with PureSignal, the frequencies of
-  // the feedback and TX DAC channels are set to the TX freq.
-  //
-  // This subroutine is the ONLY place here where the VFO
-  // frequencies are looked at.
+  // Return the DDC frequency associated with the current HPSDR
+  // RX channel
   //
   int vfonum;
   long long freq;
 
   // RX1 and RX2 are normally used for the first and second receiver.
-  // all other channels are used for PureSignal and get the TX frequency
+  // all other channels are used for PureSignal and get the DUC frequency
+  // use channel_freq(-1) to determine the DUC freq
   switch (chan) {
   case 0:
     vfonum = receiver[0]->id;
@@ -1013,7 +1004,7 @@ static long long channel_freq(int chan) {
     break;
   }
 
-  // Radios with small FPGAs use RX1/RX2 for feedback while transmitting,
+  // Radios (especially with small FPGAs) may use RX1/RX2 for feedback while transmitting,
   //
   if (isTransmitting() && transmitter->puresignal && (chan == rx_feedback_channel() || chan == tx_feedback_channel())) {
     vfonum = -1;
@@ -1029,9 +1020,8 @@ static long long channel_freq(int chan) {
 
     if (vfo[vfonum].ctun) { freq += vfo[vfonum].offset; }
 
-    if (vfo[vfonum].xit_enabled) {
-      freq += vfo[vfonum].xit;
-    }
+    if (vfo[vfonum].xit_enabled) { freq += vfo[vfonum].xit; }
+
   } else {
     //
     // determine RX frequency associated with VFO #vfonum
@@ -1039,9 +1029,7 @@ static long long channel_freq(int chan) {
     //
     freq = vfo[vfonum].frequency - vfo[vfonum].lo;
 
-    if (vfo[vfonum].rit_enabled) {
-      freq += vfo[vfonum].rit;
-    }
+    if (vfo[vfonum].rit_enabled) { freq += vfo[vfonum].rit; }
 
     if (vfo[vfonum].mode == modeCWU) {
       freq -= (long long)cw_keyer_sidetone_frequency;
@@ -1076,8 +1064,8 @@ static int how_many_receivers() {
 
   // for PureSignal, the number of receivers needed is hard-coded below.
   // we need at least 2, and up to 5 for Orion2 boards. This is so because
-  // the TX DAC is hard-wired to RX for limited-capacity FPGAS, to
-  // RX4 for HERMES, STEMLAB and to RX5 for ANGELIA
+  // the TX DAC is hard-wired to RX2 for limited-capacity FPGAS, to
+  // RX4 for HERMES, STEMLAB, HERMESlite, and to RX5 for ANGELIA
   // and beyond.
   if (transmitter->puresignal) {
     switch (device) {
@@ -1748,9 +1736,10 @@ void ozy_send_buffer() {
   int txvfo = get_tx_vfo();
   int rxvfo = active_receiver->id;
   int i;
-  const BAND *rxband = band_get_band(vfo[rxvfo].band);
-  const BAND *txband = band_get_band(vfo[txvfo].band);
-  int power;
+  int rxb = vfo[rxvfo].band;
+  int txb = vfo[txvfo].band;
+  const BAND *rxband = band_get_band(rxb);
+  const BAND *txband = band_get_band(txb);
   int num_hpsdr_receivers = how_many_receivers();
   int rxfdbkchan = rx_feedback_channel();
   output_buffer[SYNC0] = SYNC;
@@ -2071,11 +2060,11 @@ void ozy_send_buffer() {
     switch (command) {
     case 1: { // tx frequency
       output_buffer[C0] = 0x02;
-      long long txFrequency = channel_freq(-1);
-      output_buffer[C1] = txFrequency >> 24;
-      output_buffer[C2] = txFrequency >> 16;
-      output_buffer[C3] = txFrequency >> 8;
-      output_buffer[C4] = txFrequency;
+      long long DUCfrequency = channel_freq(-1);
+      output_buffer[C1] = DUCfrequency >> 24;
+      output_buffer[C2] = DUCfrequency >> 16;
+      output_buffer[C3] = DUCfrequency >> 8;
+      output_buffer[C4] = DUCfrequency;
       command = 2;
     }
     break;
@@ -2083,11 +2072,11 @@ void ozy_send_buffer() {
     case 2: // rx frequency
       if (current_rx < num_hpsdr_receivers) {
         output_buffer[C0] = 0x04 + (current_rx * 2);
-        long long rxFrequency = channel_freq(current_rx);
-        output_buffer[C1] = rxFrequency >> 24;
-        output_buffer[C2] = rxFrequency >> 16;
-        output_buffer[C3] = rxFrequency >> 8;
-        output_buffer[C4] = rxFrequency;
+        long long DDCfrequency = channel_freq(current_rx);
+        output_buffer[C1] = DDCfrequency >> 24;
+        output_buffer[C2] = DDCfrequency >> 16;
+        output_buffer[C3] = DDCfrequency >> 8;
+        output_buffer[C4] = DDCfrequency;
         current_rx++;
       }
 
@@ -2100,31 +2089,38 @@ void ozy_send_buffer() {
 
       break;
 
-    case 3:
-      power = TransmitAllowed() ? transmitter->drive_level : 0;
+    case 3: { // TX drive level, filters, etc.
+      
+      int power = 0;
+      //
+      //  Set DUC frequency.
+      //  txfreq is the "on the air" frequency for out-of-band checking
+      //
+      long long DUCfrequency = channel_freq(-1);
+      long long txfreq = DUCfrequency + vfo[txvfo].lo - frequency_calibration;
+      //
+      // Fast "out-of-band" check. If out-of-band, set TX drive to zero.
+      // This already happens during RX and is effective if the
+      // radio firmware makes a RX->TX transition (e.g. because a
+      // Morse key has been hit).
+      //
+      if ((txfreq >= txband->frequencyMin && txfreq <= txband->frequencyMax) || tx_out_of_band_allowed) {
+        power = transmitter->drive_level;
+      }
 
       output_buffer[C0] = 0x12;
       output_buffer[C1] = power & 0xFF;
 
-      if (mic_boost) {
-        output_buffer[C2] |= 0x01;
-      }
+      if (mic_boost) { output_buffer[C2] |= 0x01; }
 
-      if (mic_linein) {
-        output_buffer[C2] |= 0x02;
-      }
+      if (mic_linein) { output_buffer[C2] |= 0x02; }
 
-      if (filter_board == APOLLO) {
-        output_buffer[C2] |= 0x2C;
-      }
+      if (filter_board == APOLLO) { output_buffer[C2] |= 0x2C; }
 
-      if ((filter_board == APOLLO) && tune) {
-        output_buffer[C2] |= 0x10;
-      }
+      if ((filter_board == APOLLO) && tune) { output_buffer[C2] |= 0x10; }
 
-      if (band_get_current() == band6) {
-        output_buffer[C3] = output_buffer[C3] | 0x40; // Alex 6M low noise amplifier
-      }
+      // Alex 6M low noise amplifier
+      if (rxb == band6) { output_buffer[C3] = output_buffer[C3] | 0x40; }
 
       if (txband->disablePA || !pa_enabled) {
         output_buffer[C3] |= 0x80; // disable Alex T/R relay
@@ -2158,21 +2154,20 @@ void ozy_send_buffer() {
         // Even more odd, HERMES routes 15m through the 10/12 LPF, while
         // Angelia routes 12m through the 17/15m LPF.
         //
-        long long txFrequency = channel_freq(-1);
 
-        if (txFrequency > 35600000L) {            // > 10m so use 6m LPF
+        if (DUCfrequency > 35600000L) {            // > 10m so use 6m LPF
           output_buffer[C4] = 0x10;
-        } else if (txFrequency > 24000000L)  {    // > 15m so use 10/12m LPF
+        } else if (DUCfrequency > 24000000L)  {    // > 15m so use 10/12m LPF
           output_buffer[C4] = 0x20;
-        } else if (txFrequency > 16500000L) {             // > 20m so use 17/15m LPF
+        } else if (DUCfrequency > 16500000L) {     // > 20m so use 17/15m LPF
           output_buffer[C4] = 0x40;
-        } else if (txFrequency >  8000000L) {             // > 40m so use 30/20m LPF
+        } else if (DUCfrequency >  8000000L) {     // > 40m so use 30/20m LPF
           output_buffer[C4] = 0x01;
-        } else if (txFrequency >  5000000L) {             // > 80m so use 60/40m LPF
+        } else if (DUCfrequency >  5000000L) {     // > 80m so use 60/40m LPF
           output_buffer[C4] = 0x02;
-        } else if (txFrequency >  2500000L) {             // > 160m so use 80m LPF
+        } else if (DUCfrequency >  2500000L) {     // > 160m so use 80m LPF
           output_buffer[C4] = 0x04;
-        } else {                                  // < 2.5 MHz use 160m LPF
+        } else {                                   // < 2.5 MHz use 160m LPF
           output_buffer[C4] = 0x08;
         }
       }
@@ -2192,6 +2187,7 @@ void ozy_send_buffer() {
       }
 
       command = 4;
+      }
       break;
 
     case 4:

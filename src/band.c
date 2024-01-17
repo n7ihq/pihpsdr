@@ -28,7 +28,6 @@
 #include "radio.h"
 #include "vfo.h"
 
-static int current_band = band20;
 int xvtr_band = BANDS;
 
 char* outOfBand = "Out of band";
@@ -375,23 +374,10 @@ BANDSTACK *bandstack_get_bandstack(int band) {
   return bands[band].bandstack;
 }
 
-int band_get_current() {
-  return current_band;
-}
-
-BAND *band_get_current_band() {
-  BAND *b = &bands[current_band];
-  return b;
-}
 
 BAND *band_get_band(int b) {
   BAND *band = &bands[b];
   return band;
-}
-
-BAND *band_set_current(int b) {
-  current_band = b;
-  return &bands[b];
 }
 
 void radio_change_region(int r) {
@@ -425,7 +411,6 @@ void radio_change_region(int r) {
 }
 
 void bandSaveState() {
-  SetPropI0("band",                 current_band);
 
   for (int b = 0; b < BANDS + XVTRS; b++) {
     //
@@ -467,7 +452,6 @@ void bandSaveState() {
 }
 
 void bandRestoreState() {
-  GetPropI0("band",                 current_band);
 
   for (int b = 0; b < BANDS + XVTRS; b++) {
     //
@@ -506,11 +490,6 @@ void bandRestoreState() {
       GetPropI2("band.%d.stack.%d.ctcss", b, stack,          entry->ctcss);
     }
   }
-
-  //
-  // Sanity checks
-  //
-  if (current_band >= BANDS + XVTRS) { current_band = band20; }
 
   for (int b = 0; b < BANDS + XVTRS; b++) {
     //
@@ -644,7 +623,7 @@ int TransmitAllowed() {
   //
   // quick return if out-of-band TX is enabled
   //
-  if (tx_out_of_band) { return 1; }
+  if (tx_out_of_band_allowed) { return 1; }
 
   txvfo = get_tx_vfo();
   txb = vfo[txvfo].band;

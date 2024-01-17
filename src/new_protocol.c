@@ -691,12 +691,12 @@ static void new_protocol_general() {
 
 static void new_protocol_high_priority() {
   int rxant, txant;
-  const BAND *band;
-  long long rxFrequency[2];
-  long long txFrequency;
-  long long HPFfreq;  // frequency determining the HPF filters
-  long long LPFfreq;  // frequency determining the LPF filters
-  long long BPFfreq;  // frequency determining the BPF filters
+  long long DDCfrequency[2];  // DDC frequencies of the radio
+  long long DUCfrequency;     // DUC frequency of the radio
+  long long txfreq;           // frequency used for out-of-band detection
+  long long HPFfreq;          // frequency determining the HPF filters
+  long long LPFfreq;          // frequency determining the LPF filters
+  long long BPFfreq;          // frequency determining the BPF filters
   unsigned long phase;
 
   if (data_socket == -1 && !have_saturn_xdma) {
@@ -715,6 +715,9 @@ static void new_protocol_high_priority() {
   int rxvfo    = active_receiver->id; // id of the active receiver
   int othervfo = 1 - rxvfo;           // id of the "other" receiver (only valid if receivers > 1)
   int txmode   = get_tx_mode();
+  const BAND *txband = band_get_band(vfo[txvfo].band);
+  const BAND *rxband = band_get_band(vfo[rxvfo].band);
+
   high_priority_buffer_to_radio[0] = high_priority_sequence >> 24;
   high_priority_buffer_to_radio[1] = high_priority_sequence >> 16;
   high_priority_buffer_to_radio[2] = high_priority_sequence >> 8;
@@ -745,19 +748,19 @@ static void new_protocol_high_priority() {
   //  Set DDC frequencies for RX1 and RX0
   //
   for (int id = 0; id < 2; id++) {
-    rxFrequency[id] = vfo[id].frequency - vfo[id].lo;
+    DDCfrequency[id] = vfo[id].frequency - vfo[id].lo;
 
     if (vfo[id].rit_enabled) {
-      rxFrequency[id] += vfo[id].rit;
+      DDCfrequency[id] += vfo[id].rit;
     }
 
     if (vfo[id].mode == modeCWU) {
-      rxFrequency[id] -= (long long)cw_keyer_sidetone_frequency;
+      DDCfrequency[id] -= (long long)cw_keyer_sidetone_frequency;
     } else if (vfo[id].mode == modeCWL) {
-      rxFrequency[id] += (long long)cw_keyer_sidetone_frequency;
+      DDCfrequency[id] += (long long)cw_keyer_sidetone_frequency;
     }
 
-    rxFrequency[id] += frequency_calibration;
+    DDCfrequency[id] += frequency_calibration;
   }
 
   if (diversity_enabled && !xmit) {
@@ -766,7 +769,7 @@ static void new_protocol_high_priority() {
     // This is overridden later if we do PureSignal TX
     // The "obscure" constant 34.952533333333333333333333333333 is 4294967296/122880000
     //
-    phase = (unsigned long)(((double)rxFrequency[0]) * 34.952533333333333333333333333333);
+    phase = (unsigned long)(((double)DDCfrequency[0]) * 34.952533333333333333333333333333);
     high_priority_buffer_to_radio[9] = phase >> 24;
     high_priority_buffer_to_radio[10] = phase >> 16;
     high_priority_buffer_to_radio[11] = phase >> 8;
@@ -786,14 +789,14 @@ static void new_protocol_high_priority() {
     if (device == NEW_DEVICE_ANGELIA  || device == NEW_DEVICE_ORION ||
         device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) { ddc = 2; }
 
-    phase = (unsigned long)(((double)rxFrequency[0]) * 34.952533333333333333333333333333);
+    phase = (unsigned long)(((double)DDCfrequency[0]) * 34.952533333333333333333333333333);
     high_priority_buffer_to_radio[9 + (ddc * 4)] = phase >> 24;
     high_priority_buffer_to_radio[10 + (ddc * 4)] = phase >> 16;
     high_priority_buffer_to_radio[11 + (ddc * 4)] = phase >> 8;
     high_priority_buffer_to_radio[12 + (ddc * 4)] = phase;
 
     if (receivers > 1) {
-      phase = (unsigned long)(((double)rxFrequency[1]) * 34.952533333333333333333333333333);
+      phase = (unsigned long)(((double)DDCfrequency[1]) * 34.952533333333333333333333333333);
       high_priority_buffer_to_radio[13 + (ddc * 4)] = phase >> 24;
       high_priority_buffer_to_radio[14 + (ddc * 4)] = phase >> 16;
       high_priority_buffer_to_radio[15 + (ddc * 4)] = phase >> 8;
@@ -802,18 +805,18 @@ static void new_protocol_high_priority() {
   }
 
   //
-  //  Set DUC frequency
+  //  Set DUC frequency.
+  //  txfreq is the "on the air" frequency for out-of-band checking
   //
-  txFrequency = vfo[txvfo].frequency - vfo[txvfo].lo;
+  txfreq = vfo[txvfo].frequency;
 
-  if (vfo[txvfo].ctun) { txFrequency += vfo[txvfo].offset; }
+  if (vfo[txvfo].ctun) { txfreq += vfo[txvfo].offset; }
 
-  if (vfo[txvfo].xit_enabled) {
-    txFrequency += vfo[txvfo].xit;
-  }
+  if (vfo[txvfo].xit_enabled) { txfreq += vfo[txvfo].xit; }
 
-  txFrequency += frequency_calibration;
-  phase = (unsigned long)(((double)txFrequency) * 34.952533333333333333333333333333);
+  DUCfrequency = txfreq - vfo[txvfo].lo + frequency_calibration;
+
+  phase = (unsigned long)(((double)DUCfrequency) * 34.952533333333333333333333333333);
 
   if (xmit && transmitter->puresignal) {
     //
@@ -836,15 +839,23 @@ static void new_protocol_high_priority() {
   high_priority_buffer_to_radio[330] = phase >> 16;
   high_priority_buffer_to_radio[331] = phase >> 8;
   high_priority_buffer_to_radio[332] = phase;
-  int power = TransmitAllowed() ? transmitter->drive_level : 0;
+  int power = 0;
+  //
+  // Fast "out-of-band" check. If out-of-band, set TX drive to zero.
+  // This already happens during RX and is effective if the
+  // radio firmware makes a RX->TX transition (e.g. because a
+  // Morse key has been hit).
+  //
+  if ((txfreq >= txband->frequencyMin && txfreq <= txband->frequencyMax) || tx_out_of_band_allowed) {
+    power = transmitter->drive_level;
+  }
   high_priority_buffer_to_radio[345] = power & 0xFF;
 
   //
-  // OpenCollector outputs
+  // band specific OpenCollector outputs
   //
   if (xmit) {
-    band = band_get_band(vfo[txvfo].band);
-    high_priority_buffer_to_radio[1401] = band->OCtx << 1;
+    high_priority_buffer_to_radio[1401] = txband->OCtx << 1;
 
     if (tune) {
       if (OCmemory_tune_time != 0) {
@@ -860,8 +871,7 @@ static void new_protocol_high_priority() {
       }
     }
   } else {
-    band = band_get_band(vfo[rxvfo].band);
-    high_priority_buffer_to_radio[1401] = band->OCrx << 1;
+    high_priority_buffer_to_radio[1401] = rxband->OCrx << 1;
   }
 
   //
@@ -945,7 +955,7 @@ static void new_protocol_high_priority() {
   //
   local_pa_enable = 0;
 
-  if (!band->disablePA  && pa_enabled) {
+  if (!txband->disablePA  && pa_enabled) {
     local_pa_enable = 1;
     if (xmit) { alex0 |= ALEX_TX_RELAY; }
     alex1 |= ALEX_TX_RELAY;
@@ -975,16 +985,16 @@ static void new_protocol_high_priority() {
 
     if (receivers > 1) {
       if (receiver[othervfo]->adc == 0) {
-        BPFfreq = rxFrequency[othervfo];   // Take frequency of non-active receiver
+        BPFfreq = DDCfrequency[othervfo];   // Take frequency of non-active receiver
       }
     }
 
     if (receiver[rxvfo]->adc == 0) {
-      BPFfreq = rxFrequency[rxvfo];       // Take (overwrite with) frequency of active receiver
+      BPFfreq = DDCfrequency[rxvfo];       // Take (overwrite with) frequency of active receiver
     }
 
     if (diversity_enabled) {
-      BPFfreq = rxFrequency[0];
+      BPFfreq = DDCfrequency[0];
     }
 
     if (adc0_filter_bypass) {
@@ -1014,16 +1024,16 @@ static void new_protocol_high_priority() {
 
     if (receivers > 1) {
       if (receiver[othervfo]->adc == 1) {
-        BPFfreq = rxFrequency[othervfo];   // Take frequency of non-active receiver
+        BPFfreq = DDCfrequency[othervfo];   // Take frequency of non-active receiver
       }
     }
 
     if (receiver[rxvfo]->adc == 1) {
-      BPFfreq = rxFrequency[rxvfo];       // Take (overwrite with) frequency of active receiver
+      BPFfreq = DDCfrequency[rxvfo];       // Take (overwrite with) frequency of active receiver
     }
 
     if (diversity_enabled) {
-      BPFfreq = rxFrequency[0];
+      BPFfreq = DDCfrequency[0];
     }
 
     if (adc1_filter_bypass) {
@@ -1066,12 +1076,12 @@ static void new_protocol_high_priority() {
     HPFfreq = 0LL;
 
     if (receiver[0]->adc == 0) {
-      HPFfreq = rxFrequency[0];
+      HPFfreq = DDCfrequency[0];
     }
 
     if (receivers > 1) {
-      if (receiver[1]->adc == 0 && rxFrequency[1] < rxFrequency[0]) {
-        HPFfreq = rxFrequency[1];
+      if (receiver[1]->adc == 0 && DDCfrequency[1] < DDCfrequency[0]) {
+        HPFfreq = DDCfrequency[1];
       }
     }
 
@@ -1108,18 +1118,18 @@ static void new_protocol_high_priority() {
   //                      of rx1freq and rx2freq. If TXing, the TX freq governs the LPF
   //                      in either case.
   //
-  LPFfreq = txFrequency;
+  LPFfreq = DUCfrequency;
 
   if (!xmit && (device != NEW_DEVICE_ORION2 && device != NEW_DEVICE_SATURN) && receiver[0]->alex_antenna < 3) {
     LPFfreq = 40000000LL;  // disable the LPF
 
     if (receiver[0]->adc == 0) {
-      LPFfreq = rxFrequency[0];
+      LPFfreq = DDCfrequency[0];
     }
 
     if (receivers > 1) {
-      if (receiver[1]->adc == 0 && rxFrequency[1] > rxFrequency[0]) {
-        LPFfreq = rxFrequency[1];
+      if (receiver[1]->adc == 0 && DDCfrequency[1] > DDCfrequency[0]) {
+        LPFfreq = DDCfrequency[1];
       }
     }
 
@@ -1145,19 +1155,19 @@ static void new_protocol_high_priority() {
   }
 
   //
-  // Set LPF in alex1 word according to TX frequency
+  // Set LPF in alex1 word according to DUC frequency
   //
-  if (txFrequency > 35600000LL) {
+  if (DUCfrequency > 35600000LL) {
     alex1 |= ALEX_6_BYPASS_LPF;
-  } else if (txFrequency > 24000000LL) {
+  } else if (DUCfrequency > 24000000LL) {
     alex1 |= ALEX_12_10_LPF;
-  } else if (txFrequency > 16500000LL) {
+  } else if (DUCfrequency > 16500000LL) {
     alex1 |= ALEX_17_15_LPF;
-  } else if (txFrequency > 8000000LL) {
+  } else if (DUCfrequency > 8000000LL) {
     alex1 |= ALEX_30_20_LPF;
-  } else if (txFrequency > 5000000LL) {
+  } else if (DUCfrequency > 5000000LL) {
     alex1 |= ALEX_60_40_LPF;
-  } else if (txFrequency > 2500000LL) {
+  } else if (DUCfrequency > 2500000LL) {
     alex1 |= ALEX_80_LPF;
   } else {
     alex1 |= ALEX_160_LPF;
@@ -1303,13 +1313,13 @@ static void new_protocol_high_priority() {
   high_priority_buffer_to_radio[1434] = (alex0 >> 8) & 0xFF;
   high_priority_buffer_to_radio[1435] = alex0 & 0xFF;
 
-  //t_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1432],high_priority_buffer_to_radio[1433],high_priority_buffer_to_radio[1434],high_priority_buffer_to_radio[1435],rxFrequency,txFrequency);
+  //t_print("ALEX0 bits:  %02X %02X %02X %02X\n",high_priority_buffer_to_radio[1432],high_priority_buffer_to_radio[1433],high_priority_buffer_to_radio[1434],high_priority_buffer_to_radio[1435]);
 
   high_priority_buffer_to_radio[1428] = (alex1 >> 24) & 0xFF;
   high_priority_buffer_to_radio[1429] = (alex1 >> 16) & 0xFF;
   high_priority_buffer_to_radio[1430] = (alex1 >> 8) & 0xFF;
   high_priority_buffer_to_radio[1431] = alex1 & 0xFF;
-  //t_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1428],high_priority_buffer_to_radio[1429],high_priority_buffer_to_radio[1430],high_priority_buffer_to_radio[1431],rxFrequency,txFrequency);
+  //t_print("ALEX0 bits:  %02X %02X %02X %02X\n",high_priority_buffer_to_radio[1428],high_priority_buffer_to_radio[1429],high_priority_buffer_to_radio[1430],high_priority_buffer_to_radio[1431]);
 
   //
   // ADC step attenuator of ADC0 and ADC1

@@ -101,10 +101,7 @@ extern CHANNEL *band_channels_60m;
 //extern CHANNEL band_channels_60m_OTHER[OTHER_CHANNEL_ENTRIES];
 //extern CHANNEL band_channels_60m_WRC15[WRC15_CHANNEL_ENTRIES];
 
-extern int band_get_current(void);
-extern BAND *band_get_current_band(void);
 extern BAND *band_get_band(int b);
-extern BAND *band_set_current(int b);
 extern int get_band_from_frequency(long long f);
 
 extern BANDSTACK *bandstack_get_bandstack(int band);

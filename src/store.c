@@ -86,7 +86,7 @@ void recall_memory_slot(int index) {
   int b       = mem[index].bd;
   int oldmode = vfo[id].mode;
 
-  const BAND *band = band_set_current(b);
+  const BAND *band = band_get_band(b);
   const BANDSTACK *bandstack = bandstack_get_bandstack(b);
 
   vfo[id].band           = b;

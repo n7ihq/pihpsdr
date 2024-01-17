@@ -166,7 +166,7 @@ int mute_spkr_amp = 0;      // Mute audio amplifier in radio    (ANAN-7000, G2)
 
 int classE = 0;
 
-int tx_out_of_band = 0;
+int tx_out_of_band_allowed = 0;
 
 int alc = TXA_ALC_PK;
 
@@ -1176,9 +1176,9 @@ void start_radio() {
 
   case SOAPYSDR_PROTOCOL:
     STRLCPY(p, "SoapySDR", 32);
-    snprintf(version, 32, "%s v%d.%d.%d",
+    snprintf(version, 32, "%4.22s v%d.%d.%d",
              radio->info.soapy.driver_key,
-             radio->software_version / 100,
+             (radio->software_version % 10000)/ 100,
              (radio->software_version % 100) / 10,
              radio->software_version % 10);
     break;
@@ -2416,7 +2416,7 @@ void radioRestoreState() {
   GetPropI0("atlas_janus",                                   atlas_janus);
   GetPropI0("hl2_audio_codec",                               hl2_audio_codec);
   GetPropI0("anan10E",                                       anan10E);
-  GetPropI0("tx_out_of_band",                                tx_out_of_band);
+  GetPropI0("tx_out_of_band",                                tx_out_of_band_allowed);
   GetPropI0("filter_board",                                  filter_board);
   GetPropI0("pa_enabled",                                    pa_enabled);
   GetPropI0("pa_power",                                      pa_power);
@@ -2629,7 +2629,7 @@ void radioSaveState() {
   SetPropI0("atlas_janus",                                   atlas_janus);
   SetPropI0("hl2_audio_codec",                               hl2_audio_codec);
   SetPropI0("anan10E",                                       anan10E);
-  SetPropI0("tx_out_of_band",                                tx_out_of_band);
+  SetPropI0("tx_out_of_band",                                tx_out_of_band_allowed);
   SetPropI0("filter_board",                                  filter_board);
   SetPropI0("pa_enabled",                                    pa_enabled);
   SetPropI0("pa_power",                                      pa_power);

@@ -4,6 +4,14 @@ LIST OF RECENT PIHPSDR CHANGES
 January 2024:
 -------------
 
+- set the TX drive level (as sent to the radio)  to
+  zero when out-of-band. This can (of course) be
+  overriden by checking "TX out of band" in the PA
+  menu.
+
+- re-worked the automatic band switching when changing
+  the frequency.
+
 - TwoTone: now automatically calibrates
   PURESIGNAL (if PS is enabled with auto calibration)
 
