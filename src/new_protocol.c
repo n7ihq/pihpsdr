@@ -2319,6 +2319,7 @@ static void process_high_priority() {
   int previous_dash;
   unsigned int val;
   int data;
+  int radio_cw;
   static GThread *tune_thread_id = NULL;
   //
   // variable used to manage analog inputs. The accumulators
@@ -2389,7 +2390,14 @@ static void process_high_priority() {
   //
   // Stops CAT cw transmission if radio reports "CW action"
   //
-  if (radio_dash || radio_dot) {
+  radio_cw = 0;
+  if (device == NEW_DEVICE_ORION2 || device == NEW_DEVICE_SATURN) {
+    //
+    // These devices reflect a "keyer CW input" in bit 3 of byte59
+    // and this is active-high (!)
+    radio_cw = buffer[59] & 0x08;
+  }
+  if (radio_dash || radio_dot || radio_cw) {
     CAT_cw_is_active = 0;
     cw_key_hit = 1;
   }

@@ -666,10 +666,8 @@ void ps_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid), tx_att, col, row, 1, 1);
   gtk_entry_set_width_chars(GTK_ENTRY(tx_att), 10);
   if (device == DEVICE_HERMES_LITE2 || device == NEW_DEVICE_HERMES_LITE2) {
-    t_print("ATT RANGE -29 -> 31\n");
     tx_att_spin = gtk_spin_button_new_with_range(-29.0, 31.0, 1.0);
   } else {
-    t_print("ATT RANGE 0 -> 31\n");
     tx_att_spin = gtk_spin_button_new_with_range(  0.0, 31.0, 1.0);
   }
   gtk_spin_button_set_value(GTK_SPIN_BUTTON(tx_att_spin), (double) transmitter->attenuation);

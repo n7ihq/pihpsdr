@@ -1176,7 +1176,7 @@ void start_radio() {
 
   case SOAPYSDR_PROTOCOL:
     STRLCPY(p, "SoapySDR", 32);
-    snprintf(version, 32, "%4.22s v%d.%d.%d",
+    snprintf(version, 32, "%4.20s v%d.%d.%d",
              radio->info.soapy.driver_key,
              (radio->software_version % 10000)/ 100,
              (radio->software_version % 100) / 10,
