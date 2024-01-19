@@ -96,7 +96,6 @@ gboolean band_select_cb (GtkWidget *widget, gpointer data) {
     // and all others turned off.
     //
     //
-    g_print("BM: choice=%d band=%d\n", vfo[id].band, choice->info);
     choice = first;
     current = NULL;
 

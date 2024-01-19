@@ -89,6 +89,7 @@ struct _mode_settings mode_settings[MODES];
 
 static void vfoSaveBandstack() {
   BANDSTACK *bandstack = bandstack_get_bandstack(vfo[0].band);
+  bandstack->current_entry = vfo[0].bandstack;
   BANDSTACK_ENTRY *entry = &bandstack->entry[vfo[0].bandstack];
   entry->frequency = vfo[0].frequency;
   entry->mode = vfo[0].mode;
@@ -399,8 +400,9 @@ void vfo_band_changed(int id, int b) {
   // new bandstack entry.
   // Return quickly if the frequency is not compatible with the radio.
   // Note the LO frequency of the *new* band must be subtracted here
+  // Suppress this check for the "General" band.
   //
-  if (b != vfo[id].band) {
+  if (b != vfo[id].band && b != bandGen) {
     band = band_get_band(b);
     bandstack = bandstack_get_bandstack(b);
     long long f = bandstack->entry[bandstack->current_entry].frequency;
@@ -423,6 +425,7 @@ void vfo_band_changed(int id, int b) {
     if (vfo[id].bandstack >= bandstack->entries) {
       vfo[id].bandstack = 0;
     }
+    if (id == 0) { bandstack->current_entry = vfo[id].bandstack; }
   } else {
     // new band - get band stack entry
     bandstack = bandstack_get_bandstack(b);
@@ -439,6 +442,11 @@ void vfo_band_changed(int id, int b) {
   vfo[id].lo = band->frequencyLO + band->errorLO;
   vfo[id].filter = entry->filter;
   vfo[id].deviation = entry->deviation;
+  //
+  // Paranoia:
+  // There should be no out-of-band frequencies in the
+  // bandstack. But better check twice.
+  //
   if (vfo[id].ctun) {
     vfo_adjust_band(id, vfo[id].ctun_frequency);
   } else {
@@ -454,10 +462,6 @@ void vfo_band_changed(int id, int b) {
   // during vfos_changed ==> receiver_vfo_changed ==> receiver_frequency_changed
   //
 
-  if (id == 0) {
-    bandstack->current_entry = vfo[id].bandstack;
-  }
-
   if (id < receivers && oldmode != vfo[id].mode) {
     vfo_apply_mode_settings(receiver[id]);
   }
@@ -469,14 +473,15 @@ void vfo_bandstack_changed(int b) {
   CLIENT_MISSING;
   int id = active_receiver->id;
   int oldmode = vfo[id].mode;
+  BANDSTACK *bandstack = bandstack_get_bandstack(vfo[id].band);
 
   if (id == 0) {
     vfoSaveBandstack();
+    bandstack->current_entry = b;
   }
 
   vfo[id].bandstack = b;
-  BANDSTACK *bandstack = bandstack_get_bandstack(vfo[id].band);
-  const BANDSTACK_ENTRY *entry = &bandstack->entry[vfo[id].bandstack];
+  const BANDSTACK_ENTRY *entry = &bandstack->entry[b];
   vfo[id].frequency = entry->frequency;
   vfo[id].ctun_frequency = entry->ctun_frequency;
   vfo[id].ctun = entry->ctun;
@@ -491,10 +496,6 @@ void vfo_bandstack_changed(int b) {
 
   if (can_transmit) {
     transmitter_set_ctcss(transmitter, entry->ctcss_enabled, entry->ctcss);
-  }
-
-  if (id == 0) {
-    bandstack->current_entry = vfo[id].bandstack;
   }
 
   if (id < receivers && oldmode != vfo[id].mode) {
