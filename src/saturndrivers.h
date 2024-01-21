@@ -112,4 +112,9 @@ void SetTXAmplitudeEER(bool EEREnabled);
 //
 uint32_t AnalyseDDCHeader(uint32_t Header, uint32_t* DDCCounts);
 
+//
+// function call to get firmware ID and version
+//
+unsigned int GetFirmwareVersion(ESoftwareID* ID);
+
 #endif

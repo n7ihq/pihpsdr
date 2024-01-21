@@ -1265,8 +1265,13 @@ void saturn_handle_high_priority(bool FromNetwork, unsigned char *UDPInBuffer) {
   uint32_t LongWord;
   uint16_t Word;
   int i;                                                // counter
+  ESoftwareID FPGASWID;                                 // preprod/release etc
+  unsigned int FPGAVersion;                             // firmware version
+  bool PAEnable;
   int DDCLoop = (FromNetwork) ? 6 : 4;
   int DDCOffset = (FromNetwork) ? 0 : 6;
+
+  FPGAVersion = GetFirmwareVersion(&FPGASWID); // get version of FPGA code
 
   //t_print("high priority %sbuffer received\n", (FromNetwork)?"network ":"");
 
@@ -1333,6 +1338,12 @@ void saturn_handle_high_priority(bool FromNetwork, unsigned char *UDPInBuffer) {
   Byte = (uint8_t)(UDPInBuffer[345]);
   SetTXDriveLevel(Byte);
   //
+  // CAT port (if set)
+  //
+  Word = ntohs(*(uint16_t *)(UDPInBuffer+1398));
+  //t_print("CAT over TCP port = %x\n", Word);
+
+  //
   // transverter, speaker mute, open collector, user outputs
   //
   Byte = (uint8_t)(UDPInBuffer[1400]);
@@ -1344,11 +1355,46 @@ void saturn_handle_high_priority(bool FromNetwork, unsigned char *UDPInBuffer) {
   SetUserOutputBits(Byte);
   //
   // Alex
-  //
+  // behaviour needs to be FPGA version specific: at V12, separate register added for Alex TX antennas
+  // if new FPGA version: we write the word with TX ANT (byte 1428) to a new register, and the "old" word to original register
+  // if we don't have a new TX ant bit set, just write "old" word data (byte 1432) to both registers
+  // this is to allow safe operation with legacy client apps
+  // 1st read bytes and see if a TX ant bit is set
+  Word = ntohs(*(uint16_t *)(UDPInBuffer+1428));
+  Word = (Word >> 8) & 0x0007;                          // new data TX ant bits. if not set, must be legacy client app
+
+  if((FPGAVersion >= 12) && (Word != 0))                // if new firmware && client app supports it
+  {
+    //t_print("new FPGA code, new client data\n");
+    Word = ntohs(*(uint16_t *)(UDPInBuffer+1428));      // copy word with TX ant settings to filt/TXant register
+    PAEnable = (bool)((Word >> 11)&1);
+    //t_print("new FPGA code, legacy client data, PA enable = %d\n", (int)PAEnable);
+    AlexManualTXFilters(Word, true);
+    Word = ntohs(*(uint16_t *)(UDPInBuffer+1432));      // copy word with RX ant settings to filt/RXant register
+    AlexManualTXFilters(Word, false);
+  }
+  else if(FPGAVersion >= 12)                            // new hardware but no client app support
+  {
+    //t_print("new FPGA code, new client data\n");
+    Word = ntohs(*(uint16_t *)(UDPInBuffer+1432));      // copy word with TX/RX ant settings to both registers
+    PAEnable = (bool)((Word >> 11)&1);
+    //t_print("new FPGA code, legacy client data, PA enable = %d\n", (int)PAEnable);
+    AlexManualTXFilters(Word, true);
+    AlexManualTXFilters(Word, false);
+  }
+  else                                                  // old FPGA hardware
+  {
+    //t_print("old FPGA code\n");
+    Word = ntohs(*(uint16_t *)(UDPInBuffer+1432));      // copy word with TX/RX ant settings to original register
+    PAEnable = (bool)((Word >> 11)&1);
+    //t_print("new FPGA code, legacy client data, PA enable = %d\n", (int)PAEnable);
+    AlexManualTXFilters(Word, false);
+  }
+  SetPAEnabled(PAEnable); // activate PA if client app wants it
+
+  // RX filters
   Word = ntohs(*(uint16_t *)(UDPInBuffer + 1430));
   AlexManualRXFilters(Word, 2);
-  Word = ntohs(*(uint16_t *)(UDPInBuffer + 1432));
-  AlexManualTXFilters(Word);
   Word = ntohs(*(uint16_t *)(UDPInBuffer + 1434));
   AlexManualRXFilters(Word, 0);
   //
