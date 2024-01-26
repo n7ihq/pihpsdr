@@ -214,7 +214,8 @@ static BANDSTACK_ENTRY bandstack_entriesWWV[] = {
   {5000000LL,   0, 0LL, modeSAM, filterF3, 2500, 0, 0},
   {10000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0},
   {15000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0},
-  {20000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0}
+  {20000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0},
+  {25000000LL,  0, 0LL, modeSAM, filterF3, 2500, 0, 0}
 };
 
 static BANDSTACK bandstack160  = {3, 1, bandstack_entries160};
@@ -238,7 +239,7 @@ static BANDSTACK bandstack2300 = {3, 1, bandstack_entries2300};
 static BANDSTACK bandstack3400 = {3, 1, bandstack_entries3400};
 static BANDSTACK bandstackAIR  = {6, 1, bandstack_entriesAIR};
 static BANDSTACK bandstackGEN  = {3, 1, bandstack_entriesGEN};
-static BANDSTACK bandstackWWV  = {5, 1, bandstack_entriesWWV};
+static BANDSTACK bandstackWWV  = {6, 1, bandstack_entriesWWV};
 static BANDSTACK bandstack136  = {2, 0, bandstack_entries136};
 static BANDSTACK bandstack472  = {2, 0, bandstack_entries472};
 
@@ -535,7 +536,7 @@ int get_band_from_frequency(long long f) {
   }
 
   //
-  // start a new search on the xvtr bands such that if a xvtr
+  // start a new search on the xvtr bands such that if an xvtr
   // band produces a match, it will take precedence
   //
   for (b = BANDS; b < BANDS + XVTRS; b++) {
@@ -550,9 +551,13 @@ int get_band_from_frequency(long long f) {
   }
 
   //
-  // If the frequency is out of range:
-  //  - use bandWWV if the frequency is 2.5, 5.0, 10.0, 15.0, or 20.0 MHz
-  //  - use bandGEN in all other cases
+  // If no band has been found:
+  //  - use bandWWV if the frequency is (close to) 2.5, 5.0, 10.0, 15.0, 20.0, or 25.0 MHz
+  //    (WWV broadcasts on 25 MHz on an experimental basis)
+  //
+  //  - use bandGEN if anything else does not give a match.
+  //    Note that frequencies in the 6m band result in bandGEN
+  //    if the radio does not support frequencies > 30 MHz.
   //
   if (found < 0) {
     found = bandGen;
@@ -568,6 +573,7 @@ int get_band_from_frequency(long long f) {
     if (llabs(f - 20000000LL) <= 1000) { found = bandWWV; }
 
     if (llabs(f - 25000000LL) <= 1000) { found = bandWWV; }
+
   }
 
   return found;

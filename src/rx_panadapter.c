@@ -305,7 +305,7 @@ void rx_panadapter_update(RECEIVER *rx) {
         double x = (double) (band->frequencyMax - min_display) / HzPerPixel;
         cairo_move_to(cr, x, 0);
         cairo_line_to(cr, x, myheight);
-        cairo_set_line_width(cr, PAN_LINE_THICK);
+        cairo_set_line_width(cr, PAN_LINE_EXTRA);
         cairo_stroke(cr);
       }
     }

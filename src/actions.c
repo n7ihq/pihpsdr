@@ -110,8 +110,9 @@ ACTION_TABLE ActionTable[] = {
   {CW_LEFT,             "CW Left",              "CWL",          MIDI_KEY   | CONTROLLER_SWITCH},
   {CW_RIGHT,            "CW Right",             "CWR",          MIDI_KEY   | CONTROLLER_SWITCH},
   {CW_SPEED,            "CW Speed",             "CWSPD",        MIDI_KNOB  | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {CW_KEYER_KEYDOWN,    "CW Key\n(keyer)",      "CWKy",         MIDI_KEY   | CONTROLLER_SWITCH},
-  {CW_KEYER_PTT,        "PTT\n(CW keyer)",      "CWKyPTT",      MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_KEYER_KEYDOWN,    "CW Key\n(Keyer)",      "CWKy",         MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_KEYER_PTT,        "PTT\n(CW Keyer)",      "CWKyPTT",      MIDI_KEY   | CONTROLLER_SWITCH},
+  {CW_KEYER_SPEED,      "Speed\n(Keyer)",       "CWKySpd",      MIDI_KNOB},
   {DIV,                 "DIV On/Off",           "DIVT",         MIDI_KEY   | CONTROLLER_SWITCH},
   {DIV_GAIN,            "DIV Gain",             "DIVG",         MIDI_WHEEL | CONTROLLER_ENCODER},
   {DIV_GAIN_COARSE,     "DIV Gain\nCoarse",     "DIVGC",        MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -304,7 +305,8 @@ static inline double KnobOrWheel(const PROCESS_ACTION *a, double oldval, double 
     break;
 
   case ABSOLUTE:
-    oldval = minval + a->val * (maxval - minval) * 0.01;
+    // The magic floating point  constant is 1/127
+    oldval = minval + a->val * (maxval - minval) * 0.00787401574803150;
     break;
 
   default:
@@ -1650,6 +1652,17 @@ int process_action(void *data) {
       break;
     }
 
+    break;
+
+  case CW_KEYER_SPEED:
+    //
+    // This is a MIDI message from a CW keyer. The MIDI controller
+    // value maps 1:1 to the speed, but we keep it within limits.
+    //
+    i = a->val;
+    if (i >= 1 && i <= 60) { cw_keyer_speed = i; }
+    keyer_update();
+    g_idle_add(ext_vfo_update, NULL);
     break;
 
   case NO_ACTION:

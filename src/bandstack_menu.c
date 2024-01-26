@@ -158,7 +158,7 @@ void bandstack_menu(GtkWidget *parent) {
     choice->signal = g_signal_connect(w, "toggled", G_CALLBACK(bandstack_select_cb), choice);
     col++;
 
-    if (col >= 5) {
+    if (col >= 4) {
       col = 0;
       row++;
     }

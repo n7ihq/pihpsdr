@@ -55,12 +55,12 @@ static int vfo_timeout_cb(gpointer data) {
 void DoTheMidi(int action, enum ACTIONtype type, int val) {
   switch (type) {
   case MIDI_KEY:
-    t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
+    //t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
     schedule_action(action, val ? PRESSED : RELEASED, 0);
     break;
 
   case MIDI_KNOB:
-    t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
+    //t_print("%s: action=%d val=%d\n", __FUNCTION__, action, val);
     schedule_action(action, ABSOLUTE, val);
     break;
 

@@ -56,9 +56,9 @@
   #include "client_server.h"
 #endif
 #include "ext.h"
-#include "message.h"
 #include "filter.h"
 #include "actions.h"
+#include "message.h"
 
 static int my_width;
 static int my_height;
@@ -286,16 +286,42 @@ static inline void vfo_adjust_band(int v, long long f) {
   // Do not save any bandstack since this is an implicit
   // band change.
   //
+  // Allow a small margin (25 kHz) to both sides of the band,
+  // otherwise "leaving" an XVTR band (and thus switching
+  // to the GEN band with zero LO frequency) will lead
+  // to a frequency not supported by the radio. This margin
+  // does not affect the "out of band" detection but it does
+  // affect the OC settings.
+  // As a result, you can "listen" to signals just beyond the band
+  // boundaries without doing a band switching.
+  //
+  int   b = vfo[v].band;
   const BAND *band;
   const BANDSTACK *bandstack;
 
 
-  band = band_get_band(vfo[v].band);
+  band = band_get_band(b);
 
-  if (f >= band->frequencyMin && f <= band->frequencyMax) {
+  if ((f + 25000LL) >= band->frequencyMin && (f - 25000LL) <= band->frequencyMax) {
+    //
+    // This "quick return" will occur in >99 percent of the cases
+    //
     return;
   }
 
+  //
+  // Either we are in bandGen or bandAir, or
+  // the VFO frequency has left the band, so
+  // determine and set new band. This is involved
+  // since one cycles through ALL bands.
+  // bandAir is changed to bandGen if we move away from
+  // one of the six WWV frequencies,
+  // bandGen is changed to another band if we enter
+  // the frequency range of the latter.
+  //
+  // NOTE: you loose the LO offset when moving > 25kHz
+  //       out of a transverter band!
+  //
   vfo[v].band = get_band_from_frequency(f);
   bandstack = bandstack_get_bandstack(vfo[v].band);
   vfo[v].bandstack = bandstack->current_entry;
@@ -400,9 +426,8 @@ void vfo_band_changed(int id, int b) {
   // new bandstack entry.
   // Return quickly if the frequency is not compatible with the radio.
   // Note the LO frequency of the *new* band must be subtracted here
-  // Suppress this check for the "General" band.
   //
-  if (b != vfo[id].band && b != bandGen) {
+  if (b != vfo[id].band) {
     band = band_get_band(b);
     bandstack = bandstack_get_bandstack(b);
     long long f = bandstack->entry[bandstack->current_entry].frequency;
